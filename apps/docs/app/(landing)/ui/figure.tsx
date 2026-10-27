@@ -42,9 +42,7 @@ function Mark({ className }: { className: string }) {
 interface FigureHeaderProps extends Omit<ComponentProps<'div'>, 'title'> {
   /** the opening of the title, set in the orange pixel type */
   lead: ReactNode;
-  /** the rest of the title */
   title: ReactNode;
-  /** one or two sentences under the title */
   description?: ReactNode;
 }
 

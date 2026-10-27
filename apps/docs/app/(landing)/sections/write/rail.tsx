@@ -1,5 +1,5 @@
 import type { ComponentProps } from 'react';
-import { BED } from './arm';
+import { BED } from './scene';
 
 const PART = 'fill-lp-paper stroke-lp-ink-2';
 
@@ -7,13 +7,10 @@ const PART = 'fill-lp-paper stroke-lp-ink-2';
 const LINKS =
   'border-y border-lp-ink-2 bg-[repeating-linear-gradient(to_right,var(--lp-ink-2)_0_2px,transparent_2px_28px),repeating-linear-gradient(to_right,var(--lp-ink-2)_0_1px,transparent_1px_7px),radial-gradient(circle_at_4px_50%,var(--lp-ink-2)_0_1px,transparent_1.5px)] bg-size-[28px_100%,7px_100%,7px_100%]';
 
-/** the band is the bed's width: a bracket at every twelfth of it, so one stands under each plate's
- * seam and two in each plate; in the 2x2 bed, every other one */
+/** a bracket every twelfth of the band: one under each plate's seam, two in each plate */
 const BRACKETS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
 
-/** where the carriage stops for each plate, about: by the seam before or after it, on the 4-plate
- * bed and the 2x2 one, the boom's pivot off the line her pencil runs down. The engine sets each to
- * the stop it computes */
+/** about where the carriage stops for each plate, till the engine sets the stop it computes */
 const STOPS = [
   'md:left-[calc(50%-14px)] xl:left-[calc(25%-16px)]',
   'md:left-[calc(50%-23px)] xl:left-[calc(25%-27px)]',
@@ -21,7 +18,6 @@ const STOPS = [
   'md:left-[calc(50%-15px)] xl:left-[calc(75%-27px)]',
 ];
 
-/** a hex bolt head, its centre at (x, y) */
 function Bolt({ x, y }: { x: number; y: number }) {
   return (
     <path
@@ -32,7 +28,6 @@ function Bolt({ x, y }: { x: number; y: number }) {
   );
 }
 
-/** a bracket from the extrusion down to the frame, a bolt into its T-slot and one through its foot */
 function Bracket({ at }: { at: number }) {
   return (
     <svg
@@ -48,7 +43,7 @@ function Bracket({ at }: { at: number }) {
   );
 }
 
-/** a detent the carriage stops on, its notch toward the rail, bolted to the extrusion */
+/** a detent the carriage stops on */
 function Station({ className, ...props }: ComponentProps<'svg'>) {
   return (
     <svg
@@ -63,22 +58,7 @@ function Station({ className, ...props }: ComponentProps<'svg'>) {
   );
 }
 
-/** a limit switch the carriage trips at an end of its travel: its body, lever and roller */
-function LimitSwitch({ className }: { className: string }) {
-  return (
-    <svg className={`absolute top-[22px] h-[11px] w-[14px] ${className}`} viewBox="0 0 14 11">
-      <rect x="0.5" y="0.5" width="8" height="6" className={PART} />
-      <path d="M8.5 3.5L12.5 8.5" className="stroke-lp-ink-2" />
-      <circle cx="12.5" cy="8.5" r="1.8" className={PART} />
-    </svg>
-  );
-}
-
-/**
- * The rail band at the bed's foot, drawn on the server: an extrusion bolted to the frame by
- * brackets, the rail and its rack between end stops, and the drag chain the carriage pulls, its
- * fixed run anchored near the right end. The engine moves the chain's bend and pulled run.
- */
+/** the rail band at the bed's foot; the engine moves the drag chain's bend and pulled run */
 export function RailBed() {
   return (
     <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
@@ -90,16 +70,19 @@ export function RailBed() {
       {/* the rack, the rail and its groove */}
       <span className="absolute top-[32px] right-0 left-[20px] h-[3px] bg-[repeating-linear-gradient(to_right,var(--lp-ink-2)_0_1px,transparent_1px_3px)]" />
       <span className="absolute top-[35px] right-0 left-[20px] h-[6px] bg-[linear-gradient(to_bottom,var(--lp-ink-2)_2px,var(--lp-paper)_2px_4px,var(--lp-ink-2)_4px)]" />
-      {/* the stations it stops on: home, where it parks, and one for each plate; its travel ends at
-          the last, against the frame */}
+      {/* home, then a station for each plate */}
       <Station style={{ left: BED.start - 8 }} />
       {STOPS.map((at) => (
         <Station key={at} data-station className={at} />
       ))}
-      {/* the limit switch it trips at home, and the end stop behind it, a hazard face toward it */}
-      <LimitSwitch className="left-[22px]" />
+      {/* the limit switch it trips at home, and the end stop behind it */}
+      <svg className="absolute top-[22px] h-[11px] w-[14px] left-[22px]" viewBox="0 0 14 11">
+        <rect x="0.5" y="0.5" width="8" height="6" className={PART} />
+        <path d="M8.5 3.5L12.5 8.5" className="stroke-lp-ink-2" />
+        <circle cx="12.5" cy="8.5" r="1.8" className={PART} />
+      </svg>
       <span className="absolute top-[26px] left-[10px] h-[24px] w-[10px] border border-lp-ink-2 bg-[repeating-linear-gradient(-45deg,var(--lp-ink-2)_0_2px,var(--lp-paper)_2px_4px)]" />
-      {/* the drag chain: the fixed run, the run the carriage pulls, the bend between them */}
+      {/* the drag chain: its fixed run, the run the carriage pulls, the bend between them */}
       <span
         data-chain="fixed"
         className={`absolute top-[8px] left-0 h-[6px] ${LINKS}`}
@@ -123,7 +106,7 @@ export function RailBed() {
         <path d="M9 0.5A7.5 7.5 0 0 0 9 15.5V10.5A2.5 2.5 0 0 1 9 5.5Z" className={PART} />
         <path d="M6.5 8H1.5M7.2 6.2L3.7 2.7M7.2 9.8L3.7 13.3" className="stroke-lp-ink-2" />
       </svg>
-      {/* its anchor bolted to the bed, and the cable out through the frame */}
+      {/* its anchor, and the cable out through the frame */}
       <span
         className="absolute top-[10px] h-[2px] bg-lp-ink-2"
         style={{ right: 0, width: BED.anchor - 4 }}
@@ -141,8 +124,7 @@ export function RailBed() {
   );
 }
 
-/** the rail up a phone's column, down its middle, bolted to the window's frame by brackets to its
- * left */
+/** the rail down the middle of a phone's column, bracketed to the window's frame on its left */
 export function RailColumn() {
   return (
     <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">

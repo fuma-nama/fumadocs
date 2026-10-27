@@ -1,38 +1,56 @@
-import { clamp } from '../lib/math';
-import { BEAT } from '../lib/motion';
+import { BEAT, clamp } from '../lib/motion';
 import { isDark } from '../lib/theme';
 import { level, print, printDots, show } from '../ui/site-tile';
-import {
-  DANCER,
-  DRIVER,
-  DRIVER_PULLEY,
-  DRUMS,
-  framesAt,
-  GAUGE,
-  MOTOR,
-  NEEDLE_REST,
-  NEEDLE_SWEEP,
-  PITCH,
-  PULLEY,
-  reels,
-  restAt,
-  ROLLER,
-  ROLLERS,
-  TRACK_LEFT,
-  TRACK_RIGHT,
-  WHEEL,
-} from './film';
 
-/**
- * A turn of the driver, one frame: its pin winds up for 3/8 of it, pulls the strip for the middle
- * quarter, and swings back to rest for the last 3/8.
- */
+/** the deck in its own units, y down from the viewer's bottom edge; it scales with its column */
+export const W = 640;
+export const H = 164;
+/** the strip's centre line and band, a frame, and the pitch from frame to frame (4 perforations) */
+export const STRIP_Y = 78;
+export const BAND = 48;
+export const FRAME_W = 63;
+export const FRAME_H = 33;
+export const PITCH = 72;
+export const LEADER = 3;
+/** where the strip shows, between the drums' light traps; the gate holds the frame in its middle */
+export const TRACK_LEFT = 136;
+export const TRACK_RIGHT = 504;
+export const GATE = (TRACK_LEFT + TRACK_RIGHT) / 2;
+
+/** the drums the reels turn in, and the radius of film wound on a reel: empty to full */
+export const DRUM_R = 56;
+export const DRUMS = { take: [68, STRIP_Y], feed: [572, STRIP_Y] } as const;
+const HUB = 12;
+export const FULL = 44;
+
+/** the Geneva drive under the gate: its wheel, the driver beside it, their centre distance */
+export const GENEVA_C = 30;
+/** the crank's radius, the slots' reach: for 4 slots, both are the centre distance over √2 */
+export const CRANK = GENEVA_C / Math.SQRT2;
+export const LOCK = 14;
+export const WHEEL = [GATE - 26, 136] as const;
+export const DRIVER = [WHEEL[0] + GENEVA_C, WHEEL[1]] as const;
+
+export const MOTOR = [GATE + 72, 138] as const;
+export const PULLEY = 5;
+export const DRIVER_PULLEY = 7.5;
+export const GAUGE = [MOTOR[0] + 39, MOTOR[1] - 13.5] as const;
+/** the needle's angle from upright when the motor stands, and its sweep to flat out */
+export const NEEDLE_REST = -70;
+export const NEEDLE_SWEEP = 140;
+
+export const ROLLER = 8;
+export const ROLLERS = [
+  [TRACK_LEFT + 22, STRIP_Y + BAND / 2 + ROLLER],
+  [TRACK_RIGHT - 22, STRIP_Y + BAND / 2 + ROLLER],
+] as const;
+
+export const DANCER = { pivot: [TRACK_LEFT + 30, 34] as const, length: 34, rest: 24, roller: 6 };
+
+/** a turn of the driver, one frame: its pin winds up for 3/8 of it and pulls for the middle quarter */
 const TURN = 1200;
 const WIND = (TURN * 3) / 8;
-/**
- * The screen develops the new frame in this long once it locks, 8 steps; the pull and the develop
- * end a frame after the longest status line ("showing constatic-docs.vercel.app") has resolved.
- */
+/** the screen's develop, 8 steps, ends a frame after "showing constatic-docs.vercel.app" resolves */
 export const DEVELOP = 312;
 /** the frame shows in colour this long before the next pull darkens it */
 const HOLD = 3000;
@@ -54,47 +72,54 @@ const DAMP = 0.012;
 const NEEDLE_STIFF = 0.0016;
 const NEEDLE_DAMP = 0.05;
 
-interface ProjectorEvents {
-  /** the strip leaves frame `from` for frame `to` */
-  leave: (from: number, to: number) => void;
-  /** frame `index` locked in the gate */
-  arrive: (index: number) => void;
-}
-
-export interface ProjectorEngine {
-  /** run the strip to frame `index` */
-  seek: (index: number) => void;
-  /** the run switch: the reel plays on, or stops at the frame it stands on */
-  power: (on: boolean) => void;
-  /** the strip has printed in: start the reel */
-  boot: () => void;
-  destroy: () => void;
-}
-
 /** the drums' centres, the take-up reel's first like the radii of `reels()` */
 const CENTRES = [DRUMS.take, DRUMS.feed];
+
+/**
+ * Where the strip stands for a total driver angle, in frames. The driver rests with its pin away
+ * from the wheel, at -π + 2πn with frame n in the gate; its pin turns the wheel a quarter from -45°
+ * to 45°, and the rest of the turn its locking disc holds the wheel still.
+ */
+function framesAt(alpha: number): number {
+  const turn = Math.round(alpha / (2 * Math.PI));
+  const angle = alpha - turn * 2 * Math.PI;
+  if (angle <= -Math.PI / 4) return turn;
+  if (angle >= Math.PI / 4) return turn + 1;
+  const slot = Math.atan2(-CRANK * Math.sin(angle), GENEVA_C - CRANK * Math.cos(angle));
+  return turn + (Math.PI / 4 - slot) / (Math.PI / 2);
+}
+
+function restAt(n: number): number {
+  return -Math.PI + n * 2 * Math.PI;
+}
+
+/** the radius of film on a reel holding `share` of the reel, the area of film kept */
+function wound(share: number): number {
+  return Math.sqrt(HUB * HUB + clamp(share) * (FULL * FULL - HUB * HUB));
+}
+
+export function reels(position: number, count: number): [take: number, feed: number] {
+  const taken = (position + LEADER) / (count + LEADER * 2);
+  return [wound(taken), wound(1 - taken)];
+}
 
 function rotate(deg: number, [x, y]: readonly [number, number]) {
   return `rotate(${deg.toFixed(2)} ${x} ${y})`;
 }
 
-/** the symmetric settle of a straight run */
-function ease(t: number) {
-  return t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2;
-}
+export type ProjectorEngine = ReturnType<typeof createProjector>;
 
 /**
- * The projector's loop. Between frames everything stands still. For a frame, a clutch couples the
- * driver to the motor for one turn: its pin turns the Geneva wheel a quarter, the wheel pulls the
- * strip one frame through the gate and locks it there. The reels, the rollers and the belt follow;
- * the dancer arm lifts as the strip jumps and its spring brings it back; the gauge reads the motor.
+ * The projector's loop: still between frames; for a frame, the driver turns once and its pin turns
+ * the Geneva wheel a quarter, which pulls the strip a frame and locks it. The reels, rollers, belt,
+ * dancer arm and gauge follow.
  */
 export function createProjector(
   root: HTMLElement,
   count: number,
   reduced: boolean,
-  events: ProjectorEvents,
-): ProjectorEngine {
+  events: { leave: (from: number, to: number) => void; arrive: (index: number) => void },
+) {
   const part = (name: string) => root.querySelector<SVGElement>(`[data-part="${name}"]`)!;
   const reel = root.querySelector<HTMLElement>('[data-reel]')!;
   const track = reel.parentElement!;
@@ -133,7 +158,6 @@ export function createProjector(
   let last = 0;
   let pitch = 0;
 
-  /** how far each reel has turned, in radians, the rollers, the motor */
   const turned = [0, 0];
   let roll = 0;
   let motor = 0;
@@ -171,22 +195,17 @@ export function createProjector(
     return on && booted && !held && visible && !document.hidden && !reduced;
   }
 
-  /** the next frame comes when the one standing has shown for its hold */
   function schedule() {
     clearTimeout(timer);
     if (mode !== 'rest' || !playing()) return;
     // the rewind runs straight away, with no wind-up of the driver: it waits that much longer
     const rewind = Math.round(position) >= count - 1;
     timer = window.setTimeout(
-      () => {
-        if (mode !== 'rest' || !playing()) return;
-        start(rewind ? 0 : Math.round(position) + 1, TURN);
-      },
+      () => start(rewind ? 0 : Math.round(position) + 1, TURN),
       Math.max(0, due + (rewind ? WIND : 0) - performance.now()),
     );
   }
 
-  /** run the strip to `to`: driver turns for a near frame, a straight run for a far one */
   function start(to: number, turn: number) {
     goal = to;
     if (Math.abs(to - position) > FAR) {
@@ -233,7 +252,8 @@ export function createProjector(
       target = Math.abs(rate) * (DRIVER_PULLEY / PULLEY);
     } else if (mode === 'run') {
       const t = Math.min(1, (now - runStart) / RUN);
-      position = runFrom + (goal - runFrom) * ease(t);
+      // a straight run settles symmetrically
+      position = runFrom + (goal - runFrom) * (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2);
       target = MOTOR_MAX;
     }
 
@@ -313,6 +333,7 @@ export function createProjector(
     schedule();
   });
   const resize = new ResizeObserver(measure);
+  const listeners = new AbortController();
   const hold = () => {
     held = true;
     schedule();
@@ -325,16 +346,16 @@ export function createProjector(
 
   view.observe(root);
   resize.observe(track);
-  root.addEventListener('pointerenter', hold);
-  root.addEventListener('pointerleave', release);
-  root.addEventListener('focusin', hold);
-  root.addEventListener('focusout', release);
-  document.addEventListener('visibilitychange', schedule);
+  root.addEventListener('pointerenter', hold, { signal: listeners.signal });
+  root.addEventListener('pointerleave', release, { signal: listeners.signal });
+  root.addEventListener('focusin', hold, { signal: listeners.signal });
+  root.addEventListener('focusout', release, { signal: listeners.signal });
+  document.addEventListener('visibilitychange', schedule, { signal: listeners.signal });
   measure();
 
   return {
     seek,
-    power(value) {
+    power(value: boolean) {
       on = value;
       due = Math.max(due, performance.now() + BEAT);
       schedule();
@@ -342,25 +363,23 @@ export function createProjector(
     boot() {
       booted = true;
       due = performance.now() + HOLD - WIND - BEAT * 2;
-      if (queued !== null) rest();
-      else schedule();
+      rest();
     },
     destroy() {
       clearTimeout(timer);
       cancelAnimationFrame(raf);
       view.disconnect();
       resize.disconnect();
-      root.removeEventListener('pointerenter', hold);
-      root.removeEventListener('pointerleave', release);
-      root.removeEventListener('focusin', hold);
-      root.removeEventListener('focusout', release);
-      document.removeEventListener('visibilitychange', schedule);
+      listeners.abort();
     },
   };
 }
 
-/** a frame of the strip: the screenshot as a 1-bit print in the theme's ink and paper, 1px dots */
-export function printFrame(canvas: HTMLCanvasElement, image: HTMLImageElement) {
+/** a frame of the strip: its screenshot as a 1-bit print in 1px dots */
+export function printFrame(frame: Element | null) {
+  const canvas = frame?.querySelector('canvas');
+  const image = frame?.querySelector('img');
+  if (!canvas || !image) return;
   const width = canvas.clientWidth;
   const height = canvas.clientHeight;
   if (width === 0 || !image.complete || image.naturalWidth === 0) return;
@@ -369,56 +388,47 @@ export function printFrame(canvas: HTMLCanvasElement, image: HTMLImageElement) {
   printDots(canvas, image);
 }
 
-const runs = new Map<HTMLCanvasElement, number>();
+const runs = new WeakMap<HTMLCanvasElement, number>();
 /** the size and theme each screen print was made for */
 const made = new WeakMap<HTMLCanvasElement, string>();
 
-/** the screen's print of a screenshot, made once per size and theme; false until it decodes */
-function prepare(canvas: HTMLCanvasElement, image: HTMLImageElement): boolean {
-  if (!image.complete || image.naturalWidth === 0) return false;
-  const box = canvas.parentElement!;
-  const key = `${box.clientWidth}x${box.clientHeight} ${isDark()}`;
-  if (made.get(canvas) !== key) {
-    print(canvas, image);
-    made.set(canvas, key);
-  }
-  return true;
-}
-
 /**
- * Dither: crossfades the screen's 1-bit print over the screenshot from `from` to `to` of 16
+ * Dither: crossfades a screen layer's 1-bit print over its screenshot from `from` to `to` of 16
  * levels, in steps: 16 is the full print, 0 the screenshot in colour, the print hidden again.
  */
 export function dither(
-  canvas: HTMLCanvasElement,
-  image: HTMLImageElement,
+  layer: Element | null | undefined,
   from: number,
   to: number,
   duration: number,
 ) {
+  const canvas = layer?.querySelector('canvas');
+  const image = layer?.querySelector('img');
+  if (!layer || !canvas || !image) return;
   cancelAnimationFrame(runs.get(canvas) ?? 0);
-  runs.delete(canvas);
-  if (!prepare(canvas, image)) return;
+  // the print is made once per size and theme, once the screenshot decodes
+  if (!image.complete || image.naturalWidth === 0) return;
+  const key = `${layer.clientWidth}x${layer.clientHeight} ${isDark()}`;
+  if (made.get(canvas) !== key) {
+    print(canvas, image);
+    made.set(canvas, key);
+  }
   show(canvas, from);
   canvas.style.visibility = 'visible';
   const start = performance.now();
   const tick = (now: number) => {
     const t = now - start;
     show(canvas, from + ((to - from) * level(t, duration)) / 16);
-    if (t < duration) {
-      runs.set(canvas, requestAnimationFrame(tick));
-      return;
-    }
-    runs.delete(canvas);
-    if (to === 0) canvas.style.visibility = '';
+    if (t < duration) runs.set(canvas, requestAnimationFrame(tick));
+    else if (to === 0) canvas.style.visibility = '';
   };
   runs.set(canvas, requestAnimationFrame(tick));
 }
 
-/** the screenshot back in colour at once */
-export function hidePrint(canvas: HTMLCanvasElement) {
+export function hidePrint(layer: Element) {
+  const canvas = layer.querySelector('canvas');
+  if (!canvas) return;
   cancelAnimationFrame(runs.get(canvas) ?? 0);
-  runs.delete(canvas);
   show(canvas, 0);
   canvas.style.visibility = '';
 }

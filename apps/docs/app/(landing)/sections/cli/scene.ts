@@ -1,11 +1,9 @@
-import { bayer8 } from '../../lib/glsl';
+import { bayer8 } from '../../lib/dither';
 
 /**
- * The machine, raymarched in stage px: x right, y down, z out of the wall toward the viewer. The
- * camera looks straight at the wall (z = 0), where the windows hang at their own size, so flat
- * things stay frontal and only the solids show their sides. Groups, each drawn only inside its
- * screen box: 0 crate, 1 riser with its drive unit, 2 hopper, 3 reels and sockets. The cables are
- * tubes in screen space along their routes.
+ * The machine, raymarched in stage px with z toward the viewer. The camera looks straight at the
+ * wall, so flat things stay frontal. Each group draws only inside its screen box: 0 the crate,
+ * 1 the riser, 2 the hopper, 3 the reels and sockets.
  */
 const GROUPS = 4;
 export const ROPE_POINTS = 32;
@@ -15,62 +13,32 @@ export const fragment = `#version 300 es
 precision highp float;
 precision highp int;
 
-uniform vec2 uResolution;
-uniform float uDpr;
-uniform vec3 uEye;
-uniform vec3 uLight;
-uniform vec3 uLit;
-uniform vec3 uShade;
-uniform vec3 uPen;
-uniform vec3 uLine;
-uniform vec3 uAccent;
-uniform float uCell;
-uniform vec2 uFloor;
-uniform vec4 uBox[${GROUPS}];
-uniform vec2 uFrame;
-uniform vec4 uWindow[4];
+uniform vec2 uResolution, uFloor, uFrame;
+uniform float uDpr, uCell;
+uniform vec3 uEye, uLight, uLit, uShade, uPen, uLine, uAccent;
+uniform vec4 uBox[${GROUPS}], uWindow[3];
 
-uniform vec3 uCrate;
-uniform vec3 uCrateSize;
-uniform float uLidT;
-uniform float uLid;
+uniform vec3 uCrate, uCrateSize, uLabelC, uLabelB, uSocket[2];
+uniform float uLidT, uLid;
 uniform vec2 uLatch;
 uniform vec4 uLabel;
-uniform vec3 uLabelC;
-uniform vec3 uLabelB;
-uniform vec3 uSocket[2];
 
-uniform vec4 uChain;
-uniform vec2 uChainLength;
-uniform vec2 uChainSide;
-uniform vec3 uDriveGear;
-uniform float uPitch;
-uniform float uJaw;
-uniform vec2 uJawBox;
-uniform float uPhase;
-uniform float uSpin;
-uniform vec3 uDriveC;
-uniform vec3 uDriveB;
-uniform vec4 uPlate;
+uniform vec4 uChain, uDrive;
+uniform vec2 uChainLength, uChainSide, uJawBox;
+uniform vec3 uDriveGear, uDriveC, uDriveB;
+uniform float uPitch, uJaw, uPhase, uSpin;
 
-uniform vec3 uHopper;
-uniform vec4 uHopperSize;
-uniform vec4 uCounter;
-uniform vec3 uCounterC;
-uniform vec3 uCounterB;
+uniform vec3 uHopper, uCounterC, uCounterB;
+uniform vec4 uHopperSize, uCounter;
 
-uniform vec3 uReel[2];
-uniform vec2 uReelSpin;
-uniform vec3 uJack[2];
-uniform vec2 uJackOn;
+uniform vec3 uReel[2], uJack[2];
+uniform vec2 uReelSpin, uJackOn;
 
 uniform vec4 uRope[${ROPE_POINTS * 2}];
-uniform float uRopeCount[2];
 uniform vec2 uRopeBox[4];
-uniform float uCables;
+uniform float uRopeCount[2], uCables;
 
-uniform vec4 uCard[${CARDS}];
-uniform vec4 uCardZ[${CARDS / 4}];
+uniform vec4 uCard[${CARDS}], uCardZ[${CARDS / 4}];
 uniform float uCards;
 
 out vec4 color;
@@ -94,54 +62,34 @@ float sdCapsule(vec3 p, vec3 a, vec3 b, float r) {
   return length(pa - ba * h) - r;
 }
 
-/** a disc facing the viewer: radius r, half depth h */
+float extrude(float d, float axis, float h) {
+  vec2 w = vec2(d, abs(axis) - h);
+  return min(max(w.x, w.y), 0.0) + length(max(w, 0.0));
+}
+
 float sdDisc(vec3 p, float r, float h) {
-  vec2 d = vec2(length(p.xy) - r, abs(p.z) - h);
-  return min(max(d.x, d.y), 0.0) + length(max(d, 0.0));
+  return extrude(length(p.xy) - r, p.z, h);
 }
 
-/** a rod along x */
-float sdRodX(vec3 p, float r, float h) {
-  vec2 d = vec2(length(p.yz) - r, abs(p.x) - h);
-  return min(max(d.x, d.y), 0.0) + length(max(d, 0.0));
-}
-
-/** a gear facing the viewer, turned by a */
 float sdGear(vec3 p, float r, float teeth, float a, float h) {
   float angle = atan(p.y, p.x) + a;
   float tooth = clamp(cos(angle * teeth) * 2.2, -1.0, 1.0) * 0.5 + 0.5;
   float d2 = (length(p.xy) - r - tooth * 3.5) * 0.75;
-  float hole = 4.0 - length(p.xy);
-  vec2 d = vec2(max(d2, hole), abs(p.z) - h);
-  return min(max(d.x, d.y), 0.0) + length(max(d, 0.0));
+  return extrude(max(d2, 4.0 - length(p.xy)), p.z, h);
 }
 
 vec2 opU(vec2 a, vec2 b) { return a.x < b.x ? a : b; }
 
-// materials
-const float BODY = 0.0;
-const float ACCENT = 2.0;
-const float DARK = 3.0;
-
-/** a point in the lid's frame: x, along its depth from the hinge, up through its thickness */
-vec3 lidFrame(vec3 p) {
-  vec3 hinge = vec3(uCrate.x, uCrate.y - uCrateSize.y, uCrate.z - uCrateSize.z);
-  vec3 d = p - hinge;
-  float s = sin(uLid);
-  float c = cos(uLid);
-  return vec3(d.x, -d.y * s + d.z * c, -d.y * c - d.z * s);
-}
+const float BODY = 0.0, ACCENT = 2.0, DARK = 3.0;
 
 vec2 crate(vec3 p) {
   vec3 b = uCrateSize;
   vec3 q = p - uCrate;
   float cavity = sdBox(q - vec3(0.0, -10.0, 0.0), vec3(b.x - 9.0, b.y, b.z - 9.0));
   vec2 r = vec2(max(sdRoundBox(q, b, 1.5), -cavity), BODY);
-  // the rim band and the corner caps
   r = opU(r, vec2(max(sdRoundBox(q - vec3(0.0, 9.0 - b.y, 0.0), vec3(b.x + 2.0, 9.0, b.z + 2.0), 1.0), -cavity), BODY));
   vec3 cq = vec3(abs(q.x) - b.x + 11.0, q.y - b.y + 11.0, abs(q.z) - b.z + 11.0);
   r = opU(r, vec2(sdRoundBox(cq, vec3(13.0), 1.5), DARK));
-  // the label's plate, the sockets for the cables
   r = opU(r, vec2(sdRoundBox(p - uLabelC, uLabelB, 1.0), BODY));
   for (int i = 0; i < 2; i++) {
     if (float(i) >= uCables) break;
@@ -151,16 +99,18 @@ vec2 crate(vec3 p) {
     r = opU(r, vec2(ring, DARK));
   }
 
-  // the lid, a shallow tray upside down on its hinge
+  // the lid, a tray upside down on its hinge; in its frame y runs along its depth, z up through it
   float T = uLidT;
-  vec3 l = lidFrame(p);
+  float s = sin(uLid);
+  float c = cos(uLid);
+  vec3 d = p - vec3(uCrate.x, uCrate.y - b.y, uCrate.z - b.z);
+  vec3 l = vec3(d.x, -d.y * s + d.z * c, -d.y * c - d.z * s);
   float recess = sdBox(l - vec3(0.0, b.z, (T - 8.0) * 0.5 - 6.0), vec3(b.x - 9.0, b.z - 9.0, (T - 8.0) * 0.5 + 6.0));
   float lid = max(sdRoundBox(l - vec3(0.0, b.z, T * 0.5), vec3(b.x + 2.0, b.z + 2.0, T * 0.5), 1.5), -recess);
   r = opU(r, vec2(lid, BODY));
   vec3 lc = vec3(abs(l.x) - b.x + 11.0, abs(l.y - b.z) - b.z + 11.0, l.z - T + 11.0);
   r = opU(r, vec2(sdRoundBox(lc, vec3(13.0), 1.5), DARK));
 
-  // butterfly latches: a lever on the body hooks a catch on the lid, shorter on a small crate
   float reach = min(17.0, b.y * 0.22);
   for (int i = 0; i < 2; i++) {
     float x = (i == 0 ? -0.55 : 0.55) * b.x;
@@ -176,11 +126,8 @@ vec2 crate(vec3 p) {
     r = opU(r, vec2(sdBox(lever, vec3(9.0, reach, 2.5)), ACCENT));
   }
 
-  // the gas ram on the right side, from the body to the lid
   float side = uCrate.x + b.x + 8.0;
   vec3 p1 = vec3(side, uCrate.y + b.y - 30.0, uCrate.z + b.z - 30.0);
-  float s = sin(uLid);
-  float c = cos(uLid);
   vec3 hinge = vec3(side, uCrate.y - b.y, uCrate.z - b.z);
   vec3 p2 = hinge + vec3(0.0, -s, c) * (2.0 * b.z - 30.0) + vec3(0.0, -c, -s) * (T * 0.5);
   vec3 dir = normalize(p2 - p1);
@@ -193,23 +140,13 @@ vec2 crate(vec3 p) {
   return r;
 }
 
-/** distance to the zigzag of a truss face in its plane: chords at u = ±h, a node every pitch */
-float zigzag(vec2 q, float h, float pitch) {
-  float s = mod(q.x, 2.0 * pitch);
-  vec2 a = vec2(0.0, -h);
-  vec2 b = vec2(pitch, h);
-  vec2 c = vec2(2.0 * pitch, -h);
-  vec2 x = vec2(s, q.y);
-  vec2 pa = x - a;
+float segment(vec2 p, vec2 a, vec2 b, out float h) {
+  vec2 pa = p - a;
   vec2 ba = b - a;
-  float d1 = length(pa - ba * clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0));
-  vec2 pb = x - b;
-  vec2 cb = c - b;
-  float d2 = length(pb - cb * clamp(dot(pb, cb) / dot(cb, cb), 0.0, 1.0));
-  return min(d1, d2);
+  h = clamp(dot(pa, ba) / max(dot(ba, ba), 1e-6), 0.0, 1.0);
+  return length(pa - ba * h);
 }
 
-/** a lattice boom from a to b at depth z: four chords, a zigzag on its front and back faces */
 vec2 boom(vec3 p, vec2 a, vec2 b, float z) {
   vec2 ab = b - a;
   float len = length(ab);
@@ -226,18 +163,15 @@ vec2 boom(vec3 p, vec2 a, vec2 b, float z) {
     chords = min(chords, length(vec3(s - sc, u - at.x, v - at.y)) - 3.2);
   }
   vec2 r = vec2(chords, BODY);
-  float outside = max(-s, s - len);
-  float zz = zigzag(vec2(s, u), 11.0, 12.0);
-  r = opU(r, vec2(max(length(vec2(zz, abs(v) - 8.0)) - 1.8, outside), DARK));
+  vec2 x = vec2(mod(s, 24.0), u);
+  float h;
+  float zz = segment(x, vec2(0.0, -11.0), vec2(12.0, 11.0), h);
+  zz = min(zz, segment(x, vec2(12.0, 11.0), vec2(24.0, -11.0), h));
+  r = opU(r, vec2(max(length(vec2(zz, abs(v) - 8.0)) - 1.8, max(-s, s - len)), DARK));
   return r;
 }
 
-/**
- * The chain from its tail uChain.xy along uChain.zw, uChainLength.x long at depth uChainLength.y:
- * a riser going up on a desktop, a beam going right on a phone. Its grippers hold the files on the
- * side away from uChainSide, its boom stands on that side, the drive unit with the registry's plate
- * turns a sprocket through the gear at uDriveGear.
- */
+/** the chain from uChain.xy along uChain.zw, uChainLength.x long, uChainLength.y deep */
 vec2 riser(vec3 p) {
   vec2 tail = uChain.xy;
   vec2 dir = uChain.zw;
@@ -251,21 +185,17 @@ vec2 riser(vec3 p) {
   for (int j = 0; j < 2; j++) {
     float at = uPhase + (k + float(j)) * uPitch;
     if (at < 6.0 || at > len - 6.0) continue;
-    // an arm off the chain, its jaw clamping the file's edge along the chain
     vec3 g = p - vec3(tail + dir * at, z);
     vec2 across = vec2(dot(g.xy, -side), dot(g.xy, dir));
     r = opU(r, vec2(sdCapsule(vec3(across, g.z), vec3(0.0), vec3(uJaw - 2.0, 0.0, 0.0), 2.2), DARK));
-    // the jaw lies along the edge it clamps: a file's top under a beam, its right side on a riser
     r = opU(r, vec2(sdBox(g - vec3(-side * uJaw, 0.0), vec3(uJawBox, 3.5)), ACCENT));
   }
-  // sprockets at both ends on brackets to the wall
   for (int i = 0; i < 2; i++) {
     vec3 w = p - vec3(i == 0 ? tail : head, z);
     r = opU(r, vec2(sdGear(w - vec3(0.0, 0.0, 12.0), 12.0, 10.0, uSpin, 3.0), BODY));
     r = opU(r, vec2(sdDisc(w - vec3(0.0, 0.0, 16.0), 3.8, 2.5), ACCENT));
     r = opU(r, vec2(sdBox(vec3(w.xy - side * 15.0, p.z - z * 0.5 + 4.0), vec3(8.0, 8.0, z * 0.5 - 4.0)), DARK));
   }
-  // the drive unit, its gear meshing with a sprocket
   r = opU(r, vec2(sdRoundBox(p - uDriveC, uDriveB, 2.0), BODY));
   vec3 g = p - uDriveGear;
   r = opU(r, vec2(sdGear(g - vec3(0.0, 0.0, 3.0), 8.0, 8.0, -uSpin * 1.5, 3.0), DARK));
@@ -273,7 +203,7 @@ vec2 riser(vec3 p) {
   return r;
 }
 
-/** a funnel under the mouth at uHopper: half widths at the top and bottom, height, half depth */
+/** a funnel: half widths at the top and bottom, height, half depth */
 vec2 hopper(vec3 p) {
   vec4 H = uHopperSize;
   vec3 q = p - uHopper - vec3(0.0, H.z * 0.5, 0.0);
@@ -284,13 +214,11 @@ vec2 hopper(vec3 p) {
   float outer = max(max((abs(q.x) - hw) * k, abs(q.y) - H.z * 0.5), abs(q.z) - H.w);
   float inner = max(max((abs(q.x) - hw + 6.0) * k, abs(q.y + 8.0) - H.z * 0.5), abs(q.z) - H.w + 6.0);
   vec2 r = vec2(max(outer, -inner), BODY);
-  // a lip around the mouth, the counter's frame on its front
   r = opU(r, vec2(max(sdBox(q + vec3(0.0, H.z * 0.5 - 3.0, 0.0), vec3(H.x + 3.0, 3.0, H.w + 3.0)), -inner), DARK));
   r = opU(r, vec2(sdRoundBox(p - uCounterC, uCounterB, 1.0), BODY));
   return r;
 }
 
-/** the reels on the editor's edge, the sockets on your folders */
 vec2 jacks(vec3 p) {
   vec2 r = vec2(1e9, BODY);
   for (int i = 0; i < 2; i++) {
@@ -305,8 +233,8 @@ vec2 jacks(vec3 p) {
     r = opU(r, vec2(sdBox(j - vec3(6.0, 0.0, -1.0), vec3(5.0, 2.5, 2.0)), DARK));
     if ((i == 0 ? uJackOn.x : uJackOn.y) > 0.5) {
       vec3 s = p - uJack[i];
-      float body = sdRodX(s, 6.5, 6.0);
-      body = max(body, -sdRodX(s - vec3(4.0, 0.0, 0.0), 3.2, 4.0));
+      float body = extrude(length(s.yz) - 6.5, s.x, 6.0);
+      body = max(body, -extrude(length(s.yz) - 3.2, s.x - 4.0, 4.0));
       r = opU(r, vec2(body, DARK));
     }
   }
@@ -330,7 +258,7 @@ vec3 normalAt(vec3 p, float e) {
   );
 }
 
-/** how sharply the surface bends within w of p: creases and corners */
+/** how sharply the surface bends within w of p */
 float bend(vec3 p, vec3 n, float w) {
   vec3 t1 = normalize(cross(n, abs(n.y) < 0.9 ? vec3(0.0, 1.0, 0.0) : vec3(1.0, 0.0, 0.0)));
   vec3 t2 = cross(n, t1);
@@ -350,13 +278,6 @@ float lit(vec3 p, float reach) {
     if (t > reach) break;
   }
   return 1.0;
-}
-
-float segment(vec2 p, vec2 a, vec2 b, out float h) {
-  vec2 pa = p - a;
-  vec2 ba = b - a;
-  h = clamp(dot(pa, ba) / max(dot(ba, ba), 1e-6), 0.0, 1.0);
-  return length(pa - ba * h);
 }
 
 bool inside(vec2 px, vec4 b) {
@@ -387,11 +308,9 @@ void main() {
   vec3 ro = uEye;
   vec3 rd = normalize(vec3(px - uEye.xy, -uEye.z));
   float pixel = 1.0 / uEye.z;
-  // the wall and the floor in front of it
   float tWall = uEye.z / -rd.z;
   float tFloor = rd.y > 0.0 ? (uFloor.x - ro.y) / rd.y : 1e9;
-  // the floor the crate stands on, from its back to its front and just past its sides: the wall
-  // shows above and behind it, a phone's hopper hangs below its level beside it
+  // the floor ends just past the crate: a phone's hopper hangs below its level beside it
   vec3 f = ro + rd * tFloor;
   bool onFloor = tFloor < tWall && f.z <= uFloor.y && f.z >= uCrate.z - uCrateSize.z - 10.0 && abs(f.x - uCrate.x) < uCrateSize.x + 24.0;
   float tBack = onFloor ? tFloor : tWall;
@@ -408,6 +327,7 @@ void main() {
     for (int i = 0; i < 96; i++) {
       float d = map(ro + rd * t).x;
       if (d < 0.25 * t * pixel) { hit = t; break; }
+      // a ray grazing a silhouette: an outline at its nearest approach
       if (d > d1 && d1 < d0 && d1 < 3.0 * t1 * pixel) {
         float a = t0;
         float b = t;
@@ -457,18 +377,16 @@ void main() {
     col = vec4(c, 1.0);
     // windows cut into front faces show the page's text under them
     bool front = abs(n.z) > 0.9;
-    if (front && (inside(px, uLabel) || inside(px, uCounter) || inside(px, uPlate))) col = vec4(0.0);
+    if (front && (inside(px, uLabel) || inside(px, uCounter) || inside(px, uDrive))) col = vec4(0.0);
   } else if (gMask != 0) {
-    // the wall or the floor: a light, sparse contact shadow close to the machine, windows stay clean
     bool clean = false;
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < 3; i++) {
       if (inside(px, uWindow[i])) clean = true;
     }
     vec3 p = ro + rd * tBack;
     if (!clean && threshold < 0.16 && lit(p + vec3(0.0, onFloor ? -0.5 : 0.0, onFloor ? 0.0 : 0.5), 64.0) < 0.5) col = vec4(uLine, 1.0);
   }
 
-  // cables, tubes in screen space along their routes
   if (rope) {
     for (int k = 0; k < 2; k++) {
       if (float(k) >= uCables || !inside(px, vec4(uRopeBox[k * 2], uRopeBox[k * 2 + 1]))) continue;
@@ -498,7 +416,6 @@ void main() {
       float across = dot(px - mix(a.xy, b.xy, h), across2) / r;
       vec3 n = normalize(vec3(across2 * across, sqrt(max(1.0 - across * across, 0.0))));
       float tone = clamp((dot(n, uLight) - 0.1) / 0.35, 0.0, 1.0);
-      // black rubber; the plug's sleeve at the end in the accent
       bool plug = at >= count - 2;
       vec3 c = tone * (plug ? 1.0 : 0.16) > threshold ? (plug ? uAccent : uLit) : uShade;
       if (abs(across) > 0.78) c = uPen;
@@ -507,17 +424,14 @@ void main() {
     }
   }
 
-  // files carried in front of the machine: the page shows through
+  // the outlines of what is behind a carried file stay behind it
   for (int i = 0; i < ${CARDS}; i++) {
     if (float(i) >= uCards) break;
-    if (inside(px, uCard[i])) {
-      float z = uCardZ[i / 4][i % 4];
-      float t = (uEye.z - z) / -rd.z;
-      // the outlines of what is behind it stay behind it too
-      if (t < depth) {
-        col = vec4(0.0);
-        depth = t;
-      }
+    if (!inside(px, uCard[i])) continue;
+    float t = (uEye.z - uCardZ[i / 4][i % 4]) / -rd.z;
+    if (t < depth) {
+      col = vec4(0.0);
+      depth = t;
     }
   }
 
@@ -526,3 +440,124 @@ void main() {
   color = vec4(col.rgb * col.a, col.a);
 }
 `;
+
+export type Vec3 = [number, number, number];
+
+/** a cable's path, sampled: points and the arc length at each */
+export interface Route {
+  points: Vec3[];
+  at: number[];
+  length: number;
+}
+
+/** a cable's radius, and its plug's length */
+export const RADIUS = 3.5;
+export const PLUG = 18;
+const BEND = 12;
+const SAMPLES = 4;
+
+export function bezier(a: number, b: number, c: number, t: number) {
+  const s = 1 - t;
+  return s * s * a + 2 * s * t * b + t * t * c;
+}
+
+function route(corners: Vec3[]): Route {
+  const points: Vec3[] = [corners[0]];
+  for (let i = 1; i < corners.length - 1; i++) {
+    const p = corners[i];
+    const a = direction(corners[i - 1], p);
+    const b = direction(p, corners[i + 1]);
+    const r = Math.min(BEND, distance(corners[i - 1], p) / 2, distance(p, corners[i + 1]) / 2);
+    const from: Vec3 = [p[0] - a[0] * r, p[1] - a[1] * r, p[2] - a[2] * r];
+    const to: Vec3 = [p[0] + b[0] * r, p[1] + b[1] * r, p[2] + b[2] * r];
+    for (let k = 0; k <= SAMPLES; k++) {
+      const t = k / SAMPLES;
+      points.push([
+        bezier(from[0], p[0], to[0], t),
+        bezier(from[1], p[1], to[1], t),
+        bezier(from[2], p[2], to[2], t),
+      ]);
+    }
+  }
+  points.push(corners[corners.length - 1]);
+  const at = [0];
+  for (let i = 1; i < points.length; i++) at.push(at[i - 1] + distance(points[i - 1], points[i]));
+  return { points, at, length: at[at.length - 1] };
+}
+
+export function pointAt(r: Route, s: number, out: Vec3): Vec3 {
+  if (s <= 0) return Object.assign(out, r.points[0]);
+  if (s >= r.length) return Object.assign(out, r.points[r.points.length - 1]);
+  let i = 1;
+  while (r.at[i] < s) i++;
+  const a = r.points[i - 1];
+  const b = r.points[i];
+  const t = (s - r.at[i - 1]) / (r.at[i] - r.at[i - 1] || 1);
+  out[0] = a[0] + (b[0] - a[0]) * t;
+  out[1] = a[1] + (b[1] - a[1]) * t;
+  out[2] = a[2] + (b[2] - a[2]) * t;
+  return out;
+}
+
+function locate(r: Route, p: Vec3): number {
+  let best = Infinity;
+  let at = 0;
+  for (let i = 1; i < r.points.length; i++) {
+    const a = r.points[i - 1];
+    const b = r.points[i];
+    const ab: Vec3 = [b[0] - a[0], b[1] - a[1], b[2] - a[2]];
+    const l = ab[0] * ab[0] + ab[1] * ab[1] + ab[2] * ab[2] || 1;
+    const t = Math.min(
+      1,
+      Math.max(0, ((p[0] - a[0]) * ab[0] + (p[1] - a[1]) * ab[1] + (p[2] - a[2]) * ab[2]) / l),
+    );
+    const d = distance([a[0] + ab[0] * t, a[1] + ab[1] * t, a[2] + ab[2] * t], p);
+    if (d < best) {
+      best = d;
+      at = r.at[i - 1] + t * (r.at[i] - r.at[i - 1]);
+    }
+  }
+  return at;
+}
+
+export type Cable = ReturnType<typeof routes>;
+
+/**
+ * A cable plugged into the crate, and plugged into your folder; both share their start up to where
+ * the gutter reaches your folder's row, `branch` along the first, `turn` along the second. Its run
+ * toward the viewer meets the front at `forward`, so the perspective can't swing it onto a window.
+ */
+export function routes(c: {
+  reel: Vec3;
+  lane: number;
+  wall: number;
+  floor: number;
+  front: number;
+  forward: number;
+  socket: Vec3;
+  target: Vec3;
+}) {
+  const y = c.floor - RADIUS;
+  const sealed = route([
+    c.reel,
+    [c.lane, c.reel[1], c.wall],
+    [c.lane, y, c.wall],
+    [c.forward, y, c.front],
+    [c.socket[0], y, c.front],
+    [c.socket[0], c.socket[1], c.front],
+    c.socket,
+  ]);
+  const corner: Vec3 = [c.lane, c.target[1], c.wall];
+  const plug: Vec3 = [c.target[0] + PLUG, c.target[1], c.target[2]];
+  const done = route([c.reel, [c.lane, c.reel[1], c.wall], corner, plug, c.target]);
+  return { sealed, done, branch: locate(sealed, corner), turn: locate(done, corner) };
+}
+
+function direction(a: Vec3, b: Vec3): Vec3 {
+  const d = distance(a, b) || 1;
+  return [(b[0] - a[0]) / d, (b[1] - a[1]) / d, (b[2] - a[2]) / d];
+}
+
+function distance(a: Vec3, b: Vec3): number {
+  return Math.hypot(b[0] - a[0], b[1] - a[1], b[2] - a[2]);
+}

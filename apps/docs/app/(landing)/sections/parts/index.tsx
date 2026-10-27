@@ -1,21 +1,12 @@
 import type { ReactNode } from 'react';
-import {
-  CodeBlockTab,
-  CodeBlockTabs,
-  CodeBlockTabsList,
-  CodeBlockTabsTrigger,
-} from 'fumadocs-ui/components/codeblock';
 import type { CodeBlockProps } from 'fumadocs-ui/components/codeblock';
 import { ServerCodeBlock } from '@/components/server-codeblock';
 import { Figure, Lead } from '../../ui/figure';
 import { copy } from '../../content';
-import { install, OPTIONS, STATUS, SWAPS } from './data';
+import { OPTIONS, SWAPS } from './data';
 import type { Snippets } from './panel';
 import { DocsPreview, HeadlessPreview } from './preview';
 import { Stage } from './stage';
-
-/** the page's own code block, nothing on the landing scrolls but the page */
-const still: CodeBlockProps = { viewportProps: { className: 'overflow-hidden' } };
 
 /** an option's setup, without a frame of its own: it sits in one of our windows */
 const framed: CodeBlockProps = {
@@ -24,36 +15,20 @@ const framed: CodeBlockProps = {
   viewportProps: { className: 'py-3 text-[12px]/[16px] overflow-hidden' },
 };
 
-function highlight(lang: string, code: string): ReactNode {
+function highlight(file: string, code: string): ReactNode {
+  const lang = file.slice(file.lastIndexOf('.') + 1);
   return <ServerCodeBlock key={code} lang={lang} code={code} codeblock={framed} />;
 }
 
 export function Parts() {
-  const code = (
-    <CodeBlockTabs defaultValue="npm">
-      <CodeBlockTabsList>
-        {install.map((tab) => (
-          <CodeBlockTabsTrigger key={tab.value} value={tab.value}>
-            {tab.value}
-          </CodeBlockTabsTrigger>
-        ))}
-      </CodeBlockTabsList>
-      {install.map((tab) => (
-        <CodeBlockTab key={tab.value} value={tab.value}>
-          <ServerCodeBlock lang="bash" code={tab.code} codeblock={still} />
-        </CodeBlockTab>
-      ))}
-    </CodeBlockTabs>
-  );
-
   const snippets: Snippets = { ui: [], content: [], framework: [], core: [] };
   for (const layer of SWAPS) {
-    for (const option of OPTIONS[layer]) snippets[layer].push(highlight(option.lang, option.code));
+    for (const option of OPTIONS[layer]) snippets[layer].push(highlight(option.file, option.code));
   }
-  for (const option of OPTIONS.framework) snippets.core.push(highlight(option.lang, option.core));
+  for (const option of OPTIONS.framework) snippets.core.push(highlight(option.file, option.core));
 
   return (
-    <Figure id="parts" aria-label="Parts" status={STATUS}>
+    <Figure id="parts" aria-label="Parts" status="4 layers">
       <Stage
         header={
           // split like the stage's columns only when it spans the stage
@@ -71,7 +46,7 @@ export function Parts() {
             </p>
           </div>
         }
-        page={<DocsPreview code={code} />}
+        page={<DocsPreview />}
         headless={<HeadlessPreview />}
         snippets={snippets}
       />

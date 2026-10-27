@@ -1,44 +1,24 @@
-type Uniform =
-  | number
-  | readonly [number, number]
-  | readonly [number, number, number]
-  | readonly [number, number, number, number];
-
-interface ShaderCanvasOptions {
-  /**
-   * GLSL ES 3.00 fragment shader. Provided uniforms: `vec2 uResolution` (device px),
-   * `float uDpr`, `float uTime` (seconds since creation). Write to `out vec4 color`.
-   */
-  fragment: string;
-  /** redraw every frame while on screen, otherwise only after `invalidate()` */
-  loop?: boolean;
-  /** runs before each draw, set animated uniforms here */
-  onFrame?: (time: number) => void;
-}
-
-interface ShaderCanvas {
-  set: (name: string, value: Uniform) => void;
-  /** upload (or re-upload after drawing to it) an image or canvas to a `sampler2D` uniform */
-  texture: (name: string, source: TexImageSource) => void;
-  invalidate: () => void;
-  /** draw right away instead of in the next frame, for a change this frame shows, e.g. from a ResizeObserver */
-  draw: () => void;
-  destroy: () => void;
-}
+type Uniform = number | readonly number[];
 
 const VERTEX = `#version 300 es
 in vec2 p;
 void main() { gl_Position = vec4(p, 0.0, 1.0); }`;
 
 /**
- * A full-canvas fragment shader that only renders while the canvas is on screen. Making one never
- * waits for the GPU: it compiles while the page goes on, and the first frame drawn reads the link,
- * so a canvas made off screen is ready by the time it shows.
+ * A full-canvas GLSL ES 3.00 fragment shader that only renders while the canvas is on screen: after
+ * `invalidate()`, or every frame with `loop`. It gets `vec2 uResolution` (device px), `float uDpr`
+ * and `float uTime` (seconds since creation), writes `out vec4 color`, and `onFrame` sets animated
+ * uniforms before each draw. Making one never waits for the GPU: it compiles while the page goes on,
+ * and the first frame drawn reads the link, so a canvas made off screen is ready when it shows.
  */
 export function createShaderCanvas(
   canvas: HTMLCanvasElement,
-  { fragment, loop = false, onFrame }: ShaderCanvasOptions,
-): ShaderCanvas | null {
+  {
+    fragment,
+    loop = false,
+    onFrame,
+  }: { fragment: string; loop?: boolean; onFrame?: (time: number) => void },
+) {
   const gl = canvas.getContext('webgl2', { antialias: false, premultipliedAlpha: true });
   if (!gl) return null;
   const program = gl.createProgram();
@@ -68,9 +48,9 @@ export function createShaderCanvas(
   let linked: boolean | null = null;
   const locations = new Map<string, WebGLUniformLocation | null>();
   /** uniforms set before that, written then */
-  const pending = new Map<string, number | number[]>();
+  const pending = new Map<string, Uniform>();
 
-  function write(name: string, value: number | readonly number[]) {
+  function write(name: string, value: Uniform) {
     let location = locations.get(name);
     if (location === undefined) {
       location = gl!.getUniformLocation(program, name);
@@ -90,15 +70,13 @@ export function createShaderCanvas(
   }
 
   const textures = new Map<string, { tex: WebGLTexture; unit: number }>();
+  /** uploads an image or canvas to a `sampler2D` uniform, again after drawing to it */
   function texture(name: string, source: TexImageSource) {
-    let entry = textures.get(name);
-    if (entry) {
-      gl!.activeTexture(gl!.TEXTURE0 + entry.unit);
-      gl!.bindTexture(gl!.TEXTURE_2D, entry.tex);
-    } else {
-      entry = { tex: gl!.createTexture(), unit: textures.size };
-      gl!.activeTexture(gl!.TEXTURE0 + entry.unit);
-      gl!.bindTexture(gl!.TEXTURE_2D, entry.tex);
+    const known = textures.get(name);
+    const entry = known ?? { tex: gl!.createTexture(), unit: textures.size };
+    gl!.activeTexture(gl!.TEXTURE0 + entry.unit);
+    gl!.bindTexture(gl!.TEXTURE_2D, entry.tex);
+    if (!known) {
       gl!.texParameteri(gl!.TEXTURE_2D, gl!.TEXTURE_MIN_FILTER, gl!.LINEAR);
       gl!.texParameteri(gl!.TEXTURE_2D, gl!.TEXTURE_MAG_FILTER, gl!.LINEAR);
       gl!.texParameteri(gl!.TEXTURE_2D, gl!.TEXTURE_WRAP_S, gl!.CLAMP_TO_EDGE);
@@ -158,6 +136,7 @@ export function createShaderCanvas(
     if (raf === 0 && onScreen && !document.hidden) raf = requestAnimationFrame(frame);
   }
 
+  /** draws right away instead of in the next frame, for a change this frame shows */
   function draw() {
     if (!onScreen || document.hidden) return;
     cancelAnimationFrame(raf);

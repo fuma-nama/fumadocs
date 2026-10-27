@@ -1,106 +1,116 @@
 'use client';
 import { type KeyboardEvent, useEffect, useMemo } from 'react';
 import { cn } from '@/lib/cn';
-import { ditherPath } from '../../lib/bayer';
-import { createIntent } from './intent';
+import { copy } from '../../content';
+import { ditherPath } from '../../lib/dither';
+import { TABS, type TabId } from './data';
 import { Hazard, Led, Screw } from './parts';
 
-export interface SwitchItem<T extends string> {
-  id: T;
-  label: string;
+/** ms the pointer rests on a switch, or lingers on it while still moving, before it counts */
+const REST = 120;
+const LINGER = 320;
+
+/** a switch counts once the pointer rests or lingers on it; a sweep across the row counts none */
+function createIntent(commit: (id: TabId) => void) {
+  let current: TabId | null = null;
+  let counted = false;
+  let rest = 0;
+  let linger = 0;
+
+  function fire() {
+    clearTimeout(rest);
+    clearTimeout(linger);
+    counted = true;
+    if (current) commit(current);
+  }
+
+  return {
+    move(id: TabId) {
+      if (id !== current) {
+        clearTimeout(linger);
+        current = id;
+        counted = false;
+        linger = window.setTimeout(fire, LINGER);
+      }
+      clearTimeout(rest);
+      if (!counted) rest = window.setTimeout(fire, REST);
+    },
+    cancel() {
+      clearTimeout(rest);
+      clearTimeout(linger);
+      current = null;
+    },
+  };
 }
 
-interface SwitchesProps<T extends string> {
-  items: SwitchItem<T>[];
-  value: T;
-  onChange: (id: T) => void;
-  /** the pointer rests on a switch, or the focus came to it: it may be flipped next */
-  onIntent: (id: T) => void;
-  /** ids of the tabs and their panel */
-  idPrefix: string;
-  className?: string;
-}
-
-/** the hex nut of a toggle, flat on top, around its pivot at (18, 24) */
-const NUT = 'M28 24l-5 8.66H13L8 24l5-8.66h10z';
-/** the bat handle pointing up from the pivot with its rounded tip, and its shaded side */
-const BAT = 'M15.6 24L14 7.5a4 4 0 0 1 8 0L20.4 24z';
-const SIDE = 'M15.6 24L14 7.5a4 4 0 0 1 4-4V24z';
-
-/** a bat-handle toggle from the front: up is on; `side` names the dither of the bat's side */
-function Toggle({ on, side }: { on: boolean; side: string }) {
+/** a bat-handle toggle from the front, its hex nut around the pivot at (18, 24); up is on */
+function Toggle({ on }: { on: boolean }) {
   return (
-    <svg aria-hidden viewBox="0 0 36 48" className="h-12 w-9 overflow-visible">
-      <path d={NUT} className="fill-lp-paper stroke-lp-ink" />
-      <circle
-        cx="18"
-        cy="24"
-        r="6.5"
-        strokeDasharray="1.4 1.4"
-        className="fill-lp-paper stroke-lp-ink"
-      />
+    <svg
+      aria-hidden
+      viewBox="0 0 36 48"
+      className="h-12 w-9 overflow-visible fill-lp-paper stroke-lp-ink"
+    >
+      <path d="M28 24l-5 8.66H13L8 24l5-8.66h10z" />
+      <circle cx="18" cy="24" r="6.5" strokeDasharray="1.4 1.4" />
       <g
         className="transition-[scale] duration-[120ms] ease-[steps(2,end)] [transform-origin:18px_24px] motion-reduce:transition-none"
         style={{ scale: on ? '1 1' : '1 -1' }}
       >
-        <path d={BAT} className="fill-lp-paper stroke-lp-ink" />
-        <path d={SIDE} fill={`url(#${side})`} />
-        <ellipse cx="18" cy="7.5" rx="4" ry="1.6" className="fill-lp-paper stroke-lp-ink" />
+        <path d="M15.6 24L14 7.5a4 4 0 0 1 8 0L20.4 24z" />
+        <path d="M15.6 24L14 7.5a4 4 0 0 1 4-4V24z" fill="url(#style-side)" stroke="none" />
+        <ellipse cx="18" cy="7.5" rx="4" ry="1.6" />
       </g>
-      <circle cx="18" cy="24" r="1.8" className="fill-lp-ink" />
+      <circle cx="18" cy="24" r="1.8" className="fill-lp-ink stroke-none" />
     </svg>
   );
 }
 
-/**
- * The tabs as a row of toggle switches on the desk, one up at a time: flipping one drops the one
- * that was up. Each has its pilot lamp and its name.
- */
-export function Switches<T extends string>({
-  items,
-  value,
-  onChange,
-  onIntent,
-  idPrefix,
-  className,
-}: SwitchesProps<T>) {
-  // a sweep across the row counts none of them
+interface SwitchesProps {
+  value: TabId;
+  onChange: (id: TabId) => void;
+  /** the pointer rests on a switch, or the focus came to it: it may be flipped next */
+  onIntent: (id: TabId) => void;
+  className: string;
+}
+
+export function Switches({ value, onChange, onIntent, className }: SwitchesProps) {
   const intent = useMemo(() => createIntent(onIntent), [onIntent]);
   useEffect(() => intent.cancel, [intent]);
 
   function onKeyDown(event: KeyboardEvent<HTMLDivElement>) {
-    const from = items.findIndex((item) => item.id === value);
+    const from = TABS.indexOf(value);
     let to = from;
-    if (event.key === 'ArrowRight') to = (from + 1) % items.length;
-    else if (event.key === 'ArrowLeft') to = (from - 1 + items.length) % items.length;
+    if (event.key === 'ArrowRight') to = (from + 1) % TABS.length;
+    else if (event.key === 'ArrowLeft') to = (from - 1 + TABS.length) % TABS.length;
     else if (event.key === 'Home') to = 0;
-    else if (event.key === 'End') to = items.length - 1;
+    else if (event.key === 'End') to = TABS.length - 1;
     else return;
     event.preventDefault();
-    onChange(items[to].id);
-    document.getElementById(`${idPrefix}-tab-${items[to].id}`)?.focus();
+    onChange(TABS[to]);
+    document.getElementById(`style-tab-${TABS[to]}`)?.focus();
   }
 
   const switches = [];
-  for (const item of items) {
-    const on = item.id === value;
+  for (const id of TABS) {
+    const on = id === value;
     switches.push(
       <button
-        key={item.id}
+        key={id}
         type="button"
         role="tab"
-        id={`${idPrefix}-tab-${item.id}`}
+        id={`style-tab-${id}`}
         aria-selected={on}
-        aria-controls={`${idPrefix}-panel`}
+        aria-controls="style-panel"
         tabIndex={on ? 0 : -1}
-        onClick={() => onChange(item.id)}
-        onPointerMove={() => intent.move(item.id)}
+        onClick={() => onChange(id)}
+        onPointerMove={() => intent.move(id)}
         onPointerLeave={intent.cancel}
-        onFocus={() => onIntent(item.id)}
+        onFocus={() => onIntent(id)}
         className="group/switch relative flex min-w-0 flex-1 cursor-pointer scroll-mt-[calc(var(--lp-menu-h)+16px)] flex-col items-center pt-2 pb-2.5 outline-none"
       >
         <span className="relative">
-          <Toggle on={on} side={`${idPrefix}-side`} />
+          <Toggle on={on} />
           <Led on={on} className="top-1/2 left-[calc(100%+2px)] size-2" />
         </span>
         <span
@@ -112,7 +122,7 @@ export function Switches<T extends string>({
             'group-focus-visible/switch:outline group-focus-visible/switch:outline-offset-2 group-focus-visible/switch:outline-lp-ink',
           )}
         >
-          {item.label}
+          {copy.style.tabs[id].label}
         </span>
       </button>,
     );
@@ -122,7 +132,7 @@ export function Switches<T extends string>({
     // a narrow row, on a phone or beside the monitor, gets screws for stripes and smaller names
     <div className={cn('@container relative border border-lp-ink bg-lp-paper', className)}>
       <svg aria-hidden className="absolute size-0">
-        <pattern id={`${idPrefix}-side`} width="4" height="4" patternUnits="userSpaceOnUse">
+        <pattern id="style-side" width="4" height="4" patternUnits="userSpaceOnUse">
           <path d={ditherPath(6)} className="fill-lp-ink" />
         </pattern>
       </svg>

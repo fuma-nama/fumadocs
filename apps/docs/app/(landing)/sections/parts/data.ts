@@ -1,5 +1,5 @@
 import type { TOCItemType } from 'fumadocs-core/toc';
-import type { Layer } from '../../ui/spec';
+import type { Layer } from '../../ui/chip';
 
 /** headings of fumadocs.dev's Quick Start */
 export const toc: TOCItemType[] = [
@@ -19,13 +19,9 @@ export const install = [
   { value: 'bun', code: 'bunx create-fumadocs-app' },
 ];
 
-/** the figure's status line at rest; a swap reports its layer and option */
-export const STATUS = '4 layers';
-
 /** the layers top down, the page is the top of the first */
 export const LAYERS: Layer[] = ['ui', 'core', 'content', 'framework'];
 
-/** the layers that swap; the core is the one every other plugs into */
 export type SwapLayer = Exclude<Layer, 'core'>;
 
 /** the swaps in the order of the trays */
@@ -36,9 +32,8 @@ export interface Option {
   title: string;
   /** the module, on the layer's nameplate */
   name: string;
-  /** title of the code window */
+  /** the code window's title; its extension is the code's language */
   file: string;
-  lang: string;
   code: string;
   /** a command that produced the file */
   command?: string;
@@ -50,13 +45,7 @@ interface Framework extends Option {
 }
 
 /** the core never swaps: every other layer plugs into it */
-export const CORE: Option = {
-  title: 'Fumadocs Core',
-  name: 'fumadocs-core',
-  file: '',
-  lang: 'ts',
-  code: '',
-};
+export const CORE = { title: 'Fumadocs Core', name: 'fumadocs-core' };
 
 // examples/waku/src/pages/docs/_layout.tsx, with its import as `npx @fumadocs/cli customize`
 // rewrites it (packages/cli/src/commands/customise.ts)
@@ -80,7 +69,6 @@ const ui: Option[] = [
     title: 'Fumadocs UI',
     name: 'fumadocs-ui',
     file: 'layout.tsx',
-    lang: 'tsx',
     code: layout('fumadocs-ui/layouts/docs'),
   },
   // content/docs/headless/components/toc-example.tsx
@@ -88,7 +76,6 @@ const ui: Option[] = [
     title: 'Headless',
     name: 'fumadocs-core/toc',
     file: 'components/toc.tsx',
-    lang: 'tsx',
     code: `import { AnchorProvider, ScrollProvider, TOCItem, type TOCItemType } from 'fumadocs-core/toc';
 import { type ReactNode, useRef } from 'react';
 
@@ -115,11 +102,13 @@ export function Page({ items, children }: { items: TOCItemType[]; children: Reac
     title: 'Your copy',
     name: '@/layouts/docs',
     file: 'layout.tsx',
-    lang: 'tsx',
     command: 'npx @fumadocs/cli customize',
     code: layout('@/layouts/docs'),
   },
 ];
+
+/** the UI option with no UI package: the framework's provider comes from the core */
+export const HEADLESS = 1;
 
 // examples/next-min and examples/content-collections, then integrations/content/*.mdx without
 // their optional options and comments
@@ -128,7 +117,6 @@ const content: Option[] = [
     title: 'Fumadocs MDX',
     name: 'fumadocs-mdx',
     file: 'lib/source.ts',
-    lang: 'ts',
     code: `import { loader } from 'fumadocs-core/source';
 import { defineDocs } from 'fumadocs-mdx/macro';
 
@@ -145,7 +133,6 @@ export const source = loader({
     title: 'Content Collections',
     name: '@fumadocs/content-collections',
     file: 'lib/source.ts',
-    lang: 'ts',
     code: `import { allDocs, allMetas } from 'content-collections';
 import { loader } from 'fumadocs-core/source';
 import { createMDXSource } from '@fumadocs/content-collections';
@@ -159,7 +146,6 @@ export const source = loader({
     title: 'Local Markdown',
     name: '@fumadocs/local-md',
     file: 'lib/source.ts',
-    lang: 'ts',
     code: `import { dynamicLoader } from 'fumadocs-core/source';
 import { localMd } from '@fumadocs/local-md';
 
@@ -179,7 +165,6 @@ export async function getSource() {
     title: 'Notion',
     name: '@fumadocs/notion',
     file: 'lib/source.ts',
-    lang: 'ts',
     code: `import { dynamicLoader } from 'fumadocs-core/source';
 import { notion } from '@/lib/notion';
 
@@ -195,7 +180,6 @@ export async function getSource() {
     title: 'Obsidian',
     name: 'fumadocs-obsidian',
     file: 'lib/source.ts',
-    lang: 'ts',
     code: `import { dynamicLoader } from 'fumadocs-core/source';
 import { obsidian } from 'fumadocs-obsidian';
 
@@ -220,7 +204,6 @@ export function getSource() {
     title: 'Sanity',
     name: '@fumadocs/sanity',
     file: 'lib/source.ts',
-    lang: 'ts',
     code: `import { dynamicLoader } from 'fumadocs-core/source';
 import { createSanitySource } from '@fumadocs/sanity';
 import { client } from '@/sanity/lib/client';
@@ -242,22 +225,17 @@ export async function getSource() {
   },
 ];
 
-/** the provider a root file wraps the app in: Fumadocs UI's, or the core's on a headless UI */
-interface Provider {
-  name: string;
-  from: string;
-}
-
+/** a root file, written with the provider it wraps the app in: Fumadocs UI's, or the core's */
 function frameworkOf(
   option: Omit<Framework, 'code' | 'core'>,
   path: string,
   core: string,
-  write: (provider: Provider) => string,
+  write: (provider: string, from: string) => string,
 ): Framework {
   return {
     ...option,
-    code: write({ name: 'RootProvider', from: `fumadocs-ui/provider/${path}` }),
-    core: write({ name: core, from: `fumadocs-core/framework/${path}` }),
+    code: write('RootProvider', `fumadocs-ui/provider/${path}`),
+    core: write(core, `fumadocs-core/framework/${path}`),
   };
 }
 
@@ -267,15 +245,10 @@ function frameworkOf(
 // headless/index.mdx, whose providers stand in on a headless UI
 const framework: Framework[] = [
   frameworkOf(
-    {
-      title: 'Next.js',
-      name: 'next',
-      file: 'app/layout.tsx',
-      lang: 'tsx',
-    },
+    { title: 'Next.js', name: 'next', file: 'app/layout.tsx' },
     'next',
     'NextProvider',
-    ({ name, from }) => `import { ${name} } from '${from}';
+    (name, from) => `import { ${name} } from '${from}';
 import './global.css';
 
 export default function Layout({ children }: LayoutProps<'/'>) {
@@ -289,15 +262,10 @@ export default function Layout({ children }: LayoutProps<'/'>) {
 }`,
   ),
   frameworkOf(
-    {
-      title: 'React Router',
-      name: 'react-router',
-      file: 'app/root.tsx',
-      lang: 'tsx',
-    },
+    { title: 'React Router', name: 'react-router', file: 'app/root.tsx' },
     'react-router',
     'ReactRouterProvider',
-    ({ name, from }) => `import { Links, Meta, Scripts, ScrollRestoration } from 'react-router';
+    (name, from) => `import { Links, Meta, Scripts, ScrollRestoration } from 'react-router';
 import { ${name} } from '${from}';
 import './app.css';
 
@@ -320,18 +288,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }`,
   ),
   frameworkOf(
-    {
-      title: 'TanStack Start',
-      name: '@tanstack/react-start',
-      file: 'src/routes/__root.tsx',
-      lang: 'tsx',
-    },
+    { title: 'TanStack Start', name: '@tanstack/react-start', file: 'src/routes/__root.tsx' },
     'tanstack',
     'TanstackProvider',
-    ({
+    (
       name,
       from,
-    }) => `import { createRootRoute, HeadContent, Outlet, Scripts } from '@tanstack/react-router';
+    ) => `import { createRootRoute, HeadContent, Outlet, Scripts } from '@tanstack/react-router';
 import { ${name} } from '${from}';
 import appCss from '@/styles/app.css?url';
 
@@ -357,15 +320,10 @@ function RootComponent() {
 }`,
   ),
   frameworkOf(
-    {
-      title: 'Waku',
-      name: 'waku',
-      file: 'src/components/provider.tsx',
-      lang: 'tsx',
-    },
+    { title: 'Waku', name: 'waku', file: 'src/components/provider.tsx' },
     'waku',
     'WakuProvider',
-    ({ name, from }) => `'use client';
+    (name, from) => `'use client';
 import type { ReactNode } from 'react';
 import { ${name} } from '${from}';
 
@@ -374,15 +332,10 @@ export function Provider({ children }: { children: ReactNode }) {
 }`,
   ),
   frameworkOf(
-    {
-      title: 'Astro',
-      name: 'astro',
-      file: 'src/components/docs.tsx',
-      lang: 'tsx',
-    },
+    { title: 'Astro', name: 'astro', file: 'src/components/docs.tsx' },
     'astro',
     'AstroProvider',
-    ({ name, from }) => {
+    (name, from) => {
       const ui = name === 'RootProvider';
       return `import type { ReactNode } from 'react';
 ${ui ? "import { navigate } from 'astro:transitions/client';\n" : ''}import { ${name} } from '${from}';

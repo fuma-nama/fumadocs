@@ -1,10 +1,11 @@
 'use client';
 import { type ReactNode, useCallback, useId, useRef, useState } from 'react';
 import { cn } from '@/lib/cn';
-import { ditherPath } from '../../lib/bayer';
+import { ditherPath } from '../../lib/dither';
+import { clamp } from '../../lib/motion';
 import { paint, THEME_NAMES, THEMES, type ThemeId } from './data';
+import { createSprings, due, settleSprings, stepSprings } from './engine';
 import type { InkTable } from './presets';
-import { createSprings, due, settleSprings, STEP, stepSprings } from './spring';
 
 /** the dial's box in px, the axle's place in it: the names on the left run a little longer */
 const W = 320;
@@ -24,9 +25,8 @@ const SWEEP = 330;
 const START = -SWEEP / 2;
 const DEG = SWEEP / (THEMES.length - 1);
 const LAST = THEMES.length - 1;
-/** the radius inside which a drag turns the knob by its height, not around the axle */
+/** inside this radius a drag turns the knob by its height, the angle jumps about near the axle */
 const NEAR = 16;
-
 function angleOf(index: number) {
   return START + index * DEG;
 }
@@ -34,6 +34,10 @@ function angleOf(index: number) {
 function polar(r: number, deg: number): [x: number, y: number] {
   const a = (deg * Math.PI) / 180;
   return [CX + r * Math.sin(a), CY - r * Math.cos(a)];
+}
+
+function rotate(deg: number) {
+  return `rotate(${deg.toFixed(2)} ${CX} ${CY})`;
 }
 
 /** the pointer of a chicken-head knob pointing up from the axle */
@@ -51,25 +55,12 @@ const SCALE = (() => {
   return `M${x1.toFixed(2)} ${y1.toFixed(2)}A${CHIP} ${CHIP} 0 1 1 ${x2.toFixed(2)} ${y2.toFixed(2)}`;
 })();
 
-function rotate(deg: number) {
-  return `rotate(${deg.toFixed(2)} ${CX} ${CY})`;
-}
-
-interface Engine {
-  turnTo: (index: number) => void;
-  destroy: () => void;
-}
-
-/**
- * The knob as a physical thing. Dragged, it follows the pointer around its axle with a pull toward
- * the nearest detent, and the preset changes as it crosses one; let go, it snaps onto the detent.
- * A name clicked turns it there on a spring.
- */
+/** dragged, the knob follows the pointer with a pull toward the nearest detent and snaps onto it */
 function createKnob(
   root: HTMLElement,
   initial: number,
   onChange: (index: number, turning: boolean) => void,
-): Engine {
+) {
   const face = root.querySelector<SVGGElement>('[data-face]')!;
   const side = root.querySelector<SVGGElement>('[data-side]')!;
   const handle = root.querySelector<HTMLElement>('[role="slider"]')!;
@@ -88,7 +79,7 @@ function createKnob(
   function frame(now: number) {
     raf = 0;
     let energy = Infinity;
-    for (let i = due(clock, now); i > 0; i--) energy = stepSprings(turn, STEP, 320, 24);
+    for (let i = due(clock, now); i > 0; i--) energy = stepSprings(turn, 320, 24);
     draw();
     if (energy > 0.01 && !drag) raf = requestAnimationFrame(frame);
     else clock.last = clock.acc = 0;
@@ -103,10 +94,9 @@ function createKnob(
   }
 
   function set(index: number, turning: boolean) {
-    if (index !== value) {
-      value = index;
-      onChange(index, turning);
-    }
+    if (index === value) return;
+    value = index;
+    onChange(index, turning);
   }
 
   /** the pointer around the axle: its angle (0 up, clockwise) and distance */
@@ -135,13 +125,12 @@ function createKnob(
     let delta = deg - drag.prev;
     if (delta > 180) delta -= 360;
     if (delta < -180) delta += 360;
-    // near the axle the angle jumps about, the knob turns by the height of the drag instead
     if (r < NEAR) delta = (drag.y - event.clientY) * 1.5;
     drag.prev = deg;
     drag.y = event.clientY;
     // past a stop it gives a little, then holds
-    drag.raw = Math.min(angleOf(LAST) + 12, Math.max(angleOf(0) - 12, drag.raw + delta));
-    const index = Math.min(LAST, Math.max(0, Math.round((drag.raw - START) / DEG)));
+    drag.raw = clamp(drag.raw + delta, angleOf(0) - 12, angleOf(LAST) + 12);
+    const index = clamp(Math.round((drag.raw - START) / DEG), 0, LAST);
     turn.value[0] = turn.target[0] = drag.raw + (angleOf(index) - drag.raw) * 0.35;
     draw();
     set(index, true);
@@ -168,29 +157,27 @@ function createKnob(
     const next = keys[event.key];
     if (next === undefined) return;
     event.preventDefault();
-    set(Math.min(LAST, Math.max(0, next)), false);
+    set(clamp(next, 0, LAST), false);
     settle();
   }
 
-  handle.addEventListener('pointerdown', onDown);
-  handle.addEventListener('pointermove', onMove);
-  handle.addEventListener('pointerup', onUp);
-  handle.addEventListener('pointercancel', onUp);
-  handle.addEventListener('keydown', onKey);
+  const listening = new AbortController();
+  const { signal } = listening;
+  handle.addEventListener('pointerdown', onDown, { signal });
+  handle.addEventListener('pointermove', onMove, { signal });
+  handle.addEventListener('pointerup', onUp, { signal });
+  handle.addEventListener('pointercancel', onUp, { signal });
+  handle.addEventListener('keydown', onKey, { signal });
 
   return {
-    turnTo(index) {
+    turnTo(index: number) {
       if (drag || index === value) return;
       value = index;
       settle();
     },
     destroy() {
       cancelAnimationFrame(raf);
-      handle.removeEventListener('pointerdown', onDown);
-      handle.removeEventListener('pointermove', onMove);
-      handle.removeEventListener('pointerup', onUp);
-      handle.removeEventListener('pointercancel', onUp);
-      handle.removeEventListener('keydown', onKey);
+      listening.abort();
     },
   };
 }
@@ -202,13 +189,9 @@ interface DialProps {
   onChange: (theme: ThemeId, turning: boolean) => void;
 }
 
-/**
- * The 12 presets on a rotary selector: a knob over a ring of their colours with their names
- * around it. Turn the knob, click a name, or use the keys.
- */
 export function Dial({ table, value, onChange }: DialProps) {
   const id = useId();
-  const engine = useRef<Engine | null>(null);
+  const engine = useRef<ReturnType<typeof createKnob> | null>(null);
   const index = THEMES.indexOf(value);
   // the server draws the knob where it starts; from then on the engine turns it
   const [start] = useState(index);

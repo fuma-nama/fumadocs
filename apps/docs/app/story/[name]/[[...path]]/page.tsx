@@ -2,7 +2,7 @@ import '../../frame.css';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import * as stories from '@/content/docs/ui/layouts/layouts.story';
-import { StoryLinks, StoryNavigation } from './navigation';
+import { StoryNavigation } from './navigation';
 
 export const metadata: Metadata = {
   robots: { index: false },
@@ -14,12 +14,9 @@ export default async function Page(props: PageProps<'/story/[name]/[[...path]]'>
   const { Frame } = stories[name as keyof typeof stories];
 
   return (
-    <>
-      <StoryLinks>
-        <Frame />
-      </StoryLinks>
-      <StoryNavigation />
-    </>
+    <StoryNavigation>
+      <Frame />
+    </StoryNavigation>
   );
 }
 

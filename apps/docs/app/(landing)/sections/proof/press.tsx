@@ -1,13 +1,5 @@
 'use client';
-import {
-  memo,
-  type ReactNode,
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from 'react';
+import { memo, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useReducedMotion } from 'motion/react';
 import { cn } from '@/lib/cn';
 import type { ShowcaseObject } from '@/lib/showcases';
@@ -16,15 +8,12 @@ import { TICK } from '../../lib/motion';
 import { report } from '../../lib/status';
 import { onTheme } from '../../lib/theme';
 import { useIsClient } from '../../lib/use-is-client';
-import { Roller } from '../../ui/roller';
-import { level, print, show, SiteTile } from '../../ui/site-tile';
+import { fit, level, print, show, SiteTile } from '../../ui/site-tile';
+import { Roller } from '../../ui/text';
 
 /** tiles on phones, the rest are on desktop only */
 const PHONE_TILES = 12;
-/**
- * the plate prints in over two ticks and rests one, then the head develops the wall in six ticks
- * whatever its rows: one row per tick on both the 5 and the 2 column wall
- */
+/** the plate prints in over 2 ticks and rests 1, then the head develops any wall in 6, a row a tick */
 const PLATE = TICK * 2;
 const SWEEP = PLATE + TICK;
 const HEAD = TICK * 6;
@@ -56,16 +45,6 @@ function rowsOf(list: HTMLUListElement): Row[] {
     row.to = ++index;
   }
   return rows;
-}
-
-/**
- * the narrowest title bar (five columns at 768px) fits about 17 characters of the pixel type;
- * longer names end on a word
- */
-function fit(name: string): string {
-  if (name.length <= 17) return name;
-  const end = name.lastIndexOf(' ', 16);
-  return `${name.slice(0, end > 0 ? end : 16)}…`;
 }
 
 interface TileProps {
@@ -106,7 +85,8 @@ const Tile = memo(function Tile({ site, index, played, printable, printed, onPee
             <span aria-hidden>
               <Roller
                 key={played ? 'print' : 'rest'}
-                value={printed ? fit(site.name) : ''}
+                // the narrowest title bar, 5 columns at 768px, fits about 17 characters
+                value={printed ? fit(site.name, 17) : ''}
                 step={TICK / 4}
                 stagger={TICK / 16}
               />
@@ -127,15 +107,9 @@ const Tile = memo(function Tile({ site, index, played, printable, printed, onPee
 
 /**
  * The press: a wall of real sites in colour. When it comes into view, it is printed once in 1-bit
- * and a print head walks down it, developing one row per beat. `children` go under the wall.
+ * and a print head walks down it, developing one row per beat.
  */
-export function Press({
-  sites,
-  children,
-}: {
-  sites: Required<ShowcaseObject>[];
-  children: ReactNode;
-}) {
+export function Press({ sites }: { sites: Required<ShowcaseObject>[] }) {
   const isClient = useIsClient();
   const reduced = useReducedMotion();
   const live = isClient && !reduced;
@@ -210,10 +184,7 @@ export function Press({
       };
       const stopView = whenSeen(
         list,
-        () => {
-          const fallback = new Promise((resolve) => setTimeout(resolve, 3000));
-          void Promise.race([ready, fallback]).then(run);
-        },
+        () => void Promise.race([ready, new Promise((done) => setTimeout(done, 3000))]).then(run),
         { threshold: 0.4 },
       );
       return () => {
@@ -278,34 +249,29 @@ export function Press({
   }, [running]);
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="relative">
-        <ul
-          ref={wall}
-          className="grid grid-cols-2 gap-px border border-lp-line-strong bg-lp-line-strong md:grid-cols-5"
-        >
-          {sites.map((site, i) => (
-            <Tile
-              key={site.url}
-              site={site}
-              index={i}
-              played={live && phase !== 'rest'}
-              printable={printing}
-              printed={!running || i < developed || i >= total || peek === i}
-              onPeek={setPeek}
-            />
-          ))}
-        </ul>
-        {running && (
-          <div aria-hidden className="pointer-events-none absolute inset-px">
-            <div ref={head} className="absolute inset-x-0 top-0">
-              {/* across the wall, frame to frame: the sheet's gutters stay clear */}
-              <div className="absolute -inset-x-px -top-px border-y border-t-lp-ink border-b-lp-paper" />
-            </div>
-          </div>
-        )}
-      </div>
-      {children}
+    <div className="relative">
+      <ul
+        ref={wall}
+        className="grid grid-cols-2 gap-px border border-lp-line-strong bg-lp-line-strong md:grid-cols-5"
+      >
+        {sites.map((site, i) => (
+          <Tile
+            key={site.url}
+            site={site}
+            index={i}
+            played={live && phase !== 'rest'}
+            printable={printing}
+            printed={!running || i < developed || i >= total || peek === i}
+            onPeek={setPeek}
+          />
+        ))}
+      </ul>
+      {running && (
+        <div ref={head} aria-hidden className="pointer-events-none absolute inset-x-px top-px">
+          {/* across the wall, frame to frame: the sheet's gutters stay clear */}
+          <div className="absolute -inset-x-px -top-px border-y border-t-lp-ink border-b-lp-paper" />
+        </div>
+      )}
     </div>
   );
 }

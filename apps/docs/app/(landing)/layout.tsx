@@ -1,13 +1,13 @@
 import type { ReactNode } from 'react';
-import localFont from 'next/font/local';
+import { Geist_Pixel } from 'next/font/google';
 import { cn } from '@/lib/cn';
 import { SiteHomeLayout } from '@/components/layouts/home';
-import { StatusBar } from './status-bar';
+import { StatusBar } from './ui/status-bar';
 import './landing.css';
 
-// Geist Pixel, the variable build with its pixel-shape axis (`ELSH`), latin subset
-const pixel = localFont({
-  src: './fonts/GeistPixel.woff2',
+const pixel = Geist_Pixel({
+  subsets: ['latin'],
+  axes: ['ELSH'],
   variable: '--font-geist-pixel',
   // no metrics exist to size a fallback for it
   adjustFontFallback: false,

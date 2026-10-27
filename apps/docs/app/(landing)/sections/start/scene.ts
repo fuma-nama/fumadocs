@@ -1,7 +1,12 @@
-import { bayer8 } from '../../lib/glsl';
-import { mix, type Rect } from '../../lib/math';
-import { ATLAS_COLUMNS } from './atlas';
-import { COLS, ROWS } from './session';
+import { bayer8 } from '../../lib/dither';
+import { mix, type Rect } from '../../lib/motion';
+import { COLS, type Frame, ROWS } from './data';
+
+/** clack's symbols, drawn by hand: the Google Fonts build of JetBrains Mono has no box drawing or geometric shapes */
+const SYMBOLS = '│└┌◆◇●○◒◐◓◑█↑↓•';
+const ASCII = 95;
+const GLYPHS = ASCII + SYMBOLS.length;
+const ATLAS_COLUMNS = 16;
 
 /** world units, the terminal stands on y = 0 and faces +z */
 const SCREEN = { c: [0, 2.2, 1.3], b: [1.89, 1.08] } as const;
@@ -16,27 +21,12 @@ export const fragment = `#version 300 es
 precision highp float;
 precision highp int;
 
-uniform vec2 uResolution;
-uniform float uDpr;
-uniform vec3 uEye;
-uniform float uYaw;
-uniform float uFocal;
-uniform vec2 uShift;
-uniform vec3 uLight;
-uniform vec3 uLit;
-uniform vec3 uShade;
-uniform vec3 uAccent;
-uniform float uNight;
-uniform vec4 uMoon;
-uniform float uSpin;
-uniform vec2 uHorizon;
-// the call to action's left and right edges and its foot (stage px), and how far the valley under it is open
-uniform vec4 uClear;
-uniform float uOpen;
-uniform float uCell;
-uniform sampler2D uAtlas;
-uniform sampler2D uChars;
-uniform vec4 uGlyph;
+uniform vec2 uResolution, uShift, uHorizon;
+uniform float uDpr, uYaw, uFocal, uNight, uSpin, uOpen;
+uniform vec3 uEye, uLight, uLit, uShade, uAccent;
+// uClear: the call to action's edges and foot (stage px), and how far the valley under it is open
+uniform vec4 uMoon, uClear, uGlyph;
+uniform sampler2D uAtlas, uChars;
 out vec4 color;
 ${bayer8}
 const vec3 BODY_C = vec3(0.0, 2.05, 0.0);
@@ -180,17 +170,14 @@ float noise3(vec3 x) {
   );
 }
 
-/** height of ridge k at angle theta around the terminal */
 float ridge(int k, float theta) {
   float x = theta * RIDGE_F[k] + float(k) * 19.7;
   float n = 0.6 * noise(x) + 0.28 * noise(x * 2.3 + 4.1) + 0.12 * noise(x * 5.9 + 9.3);
   return RIDGE_H[k] * (0.08 + 0.92 * n * n * (1.6 - 0.6 * n));
 }
 
-/**
- * Ridge k's height \`h\` at \`depth\` under stage column x, lowered under the call to action: a
- * valley a little wider than it, whose hills stay 16px under its foot.
- */
+// ridge k's height h at this depth under stage column x, lowered into a valley a little wider
+// than the call to action, whose hills stay 16px under its foot
 float valley(int k, float h, float depth, float x, float cy) {
   float side = smoothstep(uClear.x - 160.0, uClear.x, x) * (1.0 - smoothstep(uClear.y, uClear.y + 160.0, x));
   // the height whose top meets the foot on screen at this depth
@@ -219,7 +206,7 @@ void main() {
   vec3 ro = uEye;
   vec3 rd = normalize(fwd * uFocal + right * (px.x - centre.x) + vec3(0.0, centre.y - px.y, 0.0));
   float pixel = 1.0 / uFocal;
-  float threshold = bayer8(floor(px / uCell));
+  float threshold = bayer8(floor(px / 2.0));
   vec3 paper = uNight > 0.5 ? uShade : uLit;
   vec3 pen = uNight > 0.5 ? uLit : uShade;
 
@@ -406,39 +393,21 @@ export function insideView(width: number, height: number): View {
   return { eye: [0, SCREEN.c[1], z], yaw: 0, focal, shift: [0, 0] };
 }
 
-/** a world point in stage CSS px, with its distance along the view direction */
-function project(
-  view: View,
-  width: number,
-  height: number,
-  p: readonly number[],
-): [x: number, y: number, depth: number] {
-  const s = Math.sin(view.yaw);
-  const c = Math.cos(view.yaw);
-  const vx = p[0] - view.eye[0];
-  const vy = p[1] - view.eye[1];
-  const vz = p[2] - view.eye[2];
-  const x = vx * c - vz * s;
-  const z = -vx * s - vz * c;
-  return [
-    width / 2 + view.shift[0] + (x / z) * view.focal,
-    height / 2 + view.shift[1] - (vy / z) * view.focal,
-    z,
-  ];
-}
-
 /** projected bounds of the terminal in stage CSS px */
 export function terminalRect(view: View, width: number, height: number): Rect {
+  const s = Math.sin(view.yaw);
+  const c = Math.cos(view.yaw);
   let minX = Infinity;
   let minY = Infinity;
   let maxX = -Infinity;
   let maxY = -Infinity;
   for (let i = 0; i < 8; i++) {
-    const [x, y] = project(view, width, height, [
-      i & 1 ? BOUNDS.max[0] : BOUNDS.min[0],
-      i & 2 ? BOUNDS.max[1] : BOUNDS.min[1],
-      i & 4 ? BOUNDS.max[2] : BOUNDS.min[2],
-    ]);
+    const vx = (i & 1 ? BOUNDS.max[0] : BOUNDS.min[0]) - view.eye[0];
+    const vy = (i & 2 ? BOUNDS.max[1] : BOUNDS.min[1]) - view.eye[1];
+    const vz = (i & 4 ? BOUNDS.max[2] : BOUNDS.min[2]) - view.eye[2];
+    const z = -vx * s - vz * c;
+    const x = width / 2 + view.shift[0] + ((vx * c - vz * s) / z) * view.focal;
+    const y = height / 2 + view.shift[1] - (vy / z) * view.focal;
     minX = Math.min(minX, x);
     minY = Math.min(minY, y);
     maxX = Math.max(maxX, x);
@@ -507,4 +476,152 @@ export function viewAt(from: View, to: View, dolly: number, swing: number): View
     focal: to.focal,
     shift: [mix(0, to.shift[0], swing), mix(0, to.shift[1], swing)],
   };
+}
+
+function glyphOf(char: string): number {
+  const code = char.charCodeAt(0);
+  if (code >= 32 && code < 127) return code - 32;
+  const i = SYMBOLS.indexOf(char);
+  return i === -1 ? 0 : ASCII + i;
+}
+
+/**
+ * Terminal cells of `family` (a monospaced font with a 0.6em advance) at 1.25 line height for
+ * `uAtlas`: white glyphs on black, one cell per glyph; with each glyph's ink coverage (0 to 255),
+ * and the cell pitch and glyph box in texels for `uGlyph`.
+ */
+export function createAtlas(family: string) {
+  const size = 56;
+  const w = size * 0.6;
+  const h = Math.round(size * 1.25);
+  const pitchW = Math.ceil(w) + 2;
+  const pitchH = h + 2;
+  const canvas = document.createElement('canvas');
+  canvas.width = ATLAS_COLUMNS * pitchW;
+  canvas.height = Math.ceil(GLYPHS / ATLAS_COLUMNS) * pitchH;
+  const ctx = canvas.getContext('2d', { willReadFrequently: true })!;
+  ctx.fillStyle = '#000';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = '#fff';
+  ctx.strokeStyle = '#fff';
+  ctx.font = `${size}px ${family}`;
+  const metrics = ctx.measureText('M');
+  const ascent = metrics.fontBoundingBoxAscent;
+  const baseline = (h - ascent - metrics.fontBoundingBoxDescent) / 2 + ascent;
+  const stroke = size * 0.085;
+  const half = stroke / 2;
+  ctx.lineWidth = stroke;
+
+  /** `axis`: the vertical centre of symbols, on the math axis */
+  function symbol(char: string, x: number, y: number, axis: number) {
+    const cx = x + w / 2;
+    const cy = y + h / 2;
+    switch (char) {
+      case '│':
+        ctx.fillRect(cx - half, y, stroke, h);
+        return;
+      case '└':
+      case '┌':
+        ctx.fillRect(cx - half, char === '└' ? y : cy - half, stroke, h / 2 + half);
+        ctx.fillRect(cx - half, cy - half, x + w - cx + half, stroke);
+        return;
+      case '◆':
+      case '◇': {
+        const r = size * 0.32;
+        ctx.beginPath();
+        ctx.moveTo(cx, axis - r);
+        ctx.lineTo(cx + r, axis);
+        ctx.lineTo(cx, axis + r);
+        ctx.lineTo(cx - r, axis);
+        ctx.closePath();
+        if (char === '◆') ctx.fill();
+        else {
+          ctx.lineJoin = 'miter';
+          ctx.stroke();
+        }
+        return;
+      }
+      case '█':
+        ctx.fillRect(x, y, w, h);
+        return;
+      case '•':
+        ctx.beginPath();
+        ctx.arc(cx, axis, size * 0.1, 0, Math.PI * 2);
+        ctx.fill();
+        return;
+      case '↑':
+      case '↓': {
+        const dir = char === '↑' ? -1 : 1;
+        const r = size * 0.3;
+        ctx.fillRect(cx - half, axis - r, stroke, r * 2);
+        ctx.beginPath();
+        ctx.moveTo(cx - r * 0.75, axis + dir * (r - r * 0.75));
+        ctx.lineTo(cx, axis + dir * r);
+        ctx.lineTo(cx + r * 0.75, axis + dir * (r - r * 0.75));
+        ctx.stroke();
+        return;
+      }
+    }
+
+    // circles: ● ○ and the spinner's half-filled ◒ ◐ ◓ ◑
+    const r = size * 0.27;
+    ctx.beginPath();
+    ctx.arc(cx, axis, r - (char === '●' ? 0 : half), 0, Math.PI * 2);
+    if (char === '●') {
+      ctx.fill();
+      return;
+    }
+    ctx.stroke();
+    if (char === '○') return;
+    const start = { '◒': 0, '◐': Math.PI / 2, '◓': Math.PI, '◑': -Math.PI / 2 }[char] ?? 0;
+    ctx.beginPath();
+    ctx.arc(cx, axis, r, start, start + Math.PI);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  for (let i = 0; i < GLYPHS; i++) {
+    const x = (i % ATLAS_COLUMNS) * pitchW + 1;
+    const y = Math.floor(i / ATLAS_COLUMNS) * pitchH + 1;
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(x, y, w, h);
+    ctx.clip();
+    if (i < ASCII) ctx.fillText(String.fromCharCode(32 + i), x, y + baseline);
+    else symbol(SYMBOLS[i - ASCII], x, y, y + baseline - size * 0.34);
+    ctx.restore();
+  }
+
+  const pixels = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+  const density = new Uint8Array(GLYPHS);
+  for (let i = 0; i < GLYPHS; i++) {
+    const x0 = (i % ATLAS_COLUMNS) * pitchW + 1;
+    const y0 = Math.floor(i / ATLAS_COLUMNS) * pitchH + 1;
+    let sum = 0;
+    for (let y = y0; y < y0 + h; y++) {
+      for (let x = x0; x < x0 + Math.floor(w); x++) sum += pixels[(y * canvas.width + x) * 4];
+    }
+    density[i] = Math.round(sum / (h * Math.floor(w)));
+  }
+  return { canvas, density, metrics: [pitchW, pitchH, w, h] as const };
+}
+
+/** writes the rows `frame` shows into the cell buffer of `uChars`: glyph, style, glyph ink */
+export function paint(frame: Frame, data: Uint8ClampedArray, density: Uint8Array) {
+  for (let r = 0; r < ROWS; r++) {
+    let o = r * COLS * 4;
+    const end = o + COLS * 4;
+    for (const [text, style] of frame.lines[frame.top + r] ?? []) {
+      for (let i = 0; i < text.length && o < end; i++, o += 4) write(o, glyphOf(text[i]), style);
+    }
+    // glyph 0 is the space
+    for (; o < end; o += 4) write(o, 0, 0);
+  }
+
+  function write(o: number, glyph: number, style: number) {
+    data[o] = glyph;
+    data[o + 1] = style;
+    data[o + 2] = density[glyph];
+    data[o + 3] = 255;
+  }
 }

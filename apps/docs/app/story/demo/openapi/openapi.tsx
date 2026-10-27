@@ -1,11 +1,10 @@
 'use client';
 import { preload } from 'react-dom';
-import { createOpenAPIPage, type OpenAPIPageProps } from 'fumadocs-openapi/ui';
+import { createOpenAPIPage } from 'fumadocs-openapi/ui';
 import { apiHighlighter } from '@/lib/highlighter';
-import { Screen, type ScreenProps } from '../screen';
 
 /** the docs' API page, laid out to fit one screen: the response lives in the playground */
-const OpenAPIPage = createOpenAPIPage({
+export const OpenAPIPage = createOpenAPIPage({
   highlighter: apiHighlighter,
   async loadDocument(id) {
     if (typeof window === 'undefined') {
@@ -29,11 +28,3 @@ const OpenAPIPage = createOpenAPIPage({
     renderAPIExampleLayout: (slots) => slots.usageTabs,
   },
 });
-
-export function OpenAPIScreen({ title, docs, ...props }: OpenAPIPageProps & ScreenProps) {
-  return (
-    <Screen title={title} docs={docs}>
-      <OpenAPIPage {...props} />
-    </Screen>
-  );
-}

@@ -1,11 +1,10 @@
 'use client';
 import { preload } from 'react-dom';
-import { type AsyncAPIPageProps, createAsyncAPIPage } from '@fumadocs/asyncapi/ui';
+import { createAsyncAPIPage } from '@fumadocs/asyncapi/ui';
 import { apiHighlighter } from '@/lib/highlighter';
-import { Screen, type ScreenProps } from '../screen';
 
 /** the docs' AsyncAPI page, laid out to fit one screen */
-const AsyncAPIPage = createAsyncAPIPage({
+export const AsyncAPIPage = createAsyncAPIPage({
   highlighter: apiHighlighter,
   async loadDocument(id) {
     if (typeof window === 'undefined') {
@@ -28,11 +27,3 @@ const AsyncAPIPage = createAsyncAPIPage({
     ),
   },
 });
-
-export function AsyncAPIScreen({ title, docs, ...props }: AsyncAPIPageProps & ScreenProps) {
-  return (
-    <Screen title={title} docs={docs}>
-      <AsyncAPIPage {...props} />
-    </Screen>
-  );
-}

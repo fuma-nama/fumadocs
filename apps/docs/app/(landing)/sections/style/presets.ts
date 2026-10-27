@@ -1,17 +1,28 @@
 import { readFile } from 'node:fs/promises';
-import { THEMES, type Ink, type ThemeId } from './data';
+import { THEMES, type ThemeId } from './data';
 
 const DIR = './node_modules/fumadocs-ui/css';
+const PREFIX = '--color-fd-';
 
-interface Parsed {
+interface Tokens {
   light: Record<string, string>;
   dark: Record<string, string>;
   rules: string[];
 }
 
-/** top-level `selector { body }` blocks of a stylesheet */
-function blocks(css: string): { selector: string; body: string }[] {
-  const out: { selector: string; body: string }[] = [];
+function tokens(body: string, into: Record<string, string>) {
+  for (const decl of body.split(';')) {
+    const colon = decl.indexOf(':');
+    const name = decl.slice(0, colon).trim();
+    if (colon !== -1 && name.startsWith(PREFIX))
+      into[name.slice(PREFIX.length)] = decl.slice(colon + 1).trim();
+  }
+}
+
+/** a preset's tokens from its top-level `selector { body }` blocks */
+function parse(source: string): Tokens {
+  const parsed: Tokens = { light: {}, dark: {}, rules: [] };
+  const css = source.replace(/\/\*[\s\S]*?\*\//g, '');
   let i = 0;
   while (i < css.length) {
     const open = css.indexOf('{', i);
@@ -29,24 +40,9 @@ function blocks(css: string): { selector: string; body: string }[] {
       else if (css[j] === '}') depth--;
       j++;
     }
-    out.push({ selector: css.slice(i, open).trim(), body: css.slice(open + 1, j - 1).trim() });
+    const selector = css.slice(i, open).trim();
+    const body = css.slice(open + 1, j - 1).trim();
     i = j;
-  }
-  return out;
-}
-
-function tokens(body: string, into: Record<string, string>) {
-  for (const decl of body.split(';')) {
-    const colon = decl.indexOf(':');
-    const name = decl.slice(0, colon).trim();
-    if (colon !== -1 && name.startsWith('--color-fd-'))
-      into[name.slice('--color-fd-'.length)] = decl.slice(colon + 1).trim();
-  }
-}
-
-function parse(css: string): Parsed {
-  const parsed: Parsed = { light: {}, dark: {}, rules: [] };
-  for (const { selector, body } of blocks(css.replace(/\/\*[\s\S]*?\*\//g, ''))) {
     const target = selector.replace(/\s+/g, ' ');
     if (target === '@theme') tokens(body, parsed.light);
     else if (target === '.dark') tokens(body, parsed.dark);
@@ -61,8 +57,16 @@ function parse(css: string): Parsed {
   return parsed;
 }
 
+/** a preset's values, in the order of `InkTable.tokens` */
+export interface Ink {
+  light: string[];
+  dark: string[];
+  /** other plain rules of the preset file */
+  rules: string;
+}
+
 export interface InkTable {
-  /** `--color-fd-*` names without the prefix, the order of every `Ink` value list */
+  /** `--color-fd-*` names without the prefix */
   tokens: string[];
   inks: Record<ThemeId, Ink>;
 }
@@ -135,6 +139,11 @@ export function wire(values: string[]): Wiring {
 
 type RGBA = [r: number, g: number, b: number, a: number];
 
+function channel(s: string | undefined, scale: number) {
+  if (s === undefined) return 1;
+  return Number.parseFloat(s) / (s.endsWith('%') ? 100 : scale);
+}
+
 /** sRGB channels (0-1) of `#hex`, `rgb()` and `hsl()` colours */
 function rgba(value: string): RGBA | null {
   const v = value.trim().toLowerCase();
@@ -146,19 +155,12 @@ function rgba(value: string): RGBA | null {
   const match = /^(rgba?|hsla?)\(([^)]*)\)$/.exec(v);
   if (!match) return null;
   const args = match[2].split(/[\s,/]+/).filter(Boolean);
-  const num = (s: string | undefined, scale: number) =>
-    s === undefined
-      ? 1
-      : s.endsWith('%')
-        ? Number.parseFloat(s) / 100
-        : Number.parseFloat(s) / scale;
-  const alpha = num(args[3], 1);
+  const alpha = channel(args[3], 1);
   if (match[1].startsWith('rgb'))
-    return [num(args[0], 255), num(args[1], 255), num(args[2], 255), alpha];
-
+    return [channel(args[0], 255), channel(args[1], 255), channel(args[2], 255), alpha];
   const h = Number.parseFloat(args[0]);
-  const s = num(args[1], 100);
-  const l = num(args[2], 100);
+  const s = channel(args[1], 100);
+  const l = channel(args[2], 100);
   const k = (n: number) => (n + h / 30) % 12;
   const f = (n: number) =>
     l - s * Math.min(l, 1 - l) * Math.max(-1, Math.min(k(n) - 3, 9 - k(n), 1));

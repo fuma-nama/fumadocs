@@ -4,7 +4,6 @@ import { Check, Clipboard } from 'lucide-react';
 import { useCopyButton } from 'fumadocs-ui/utils/use-copy-button';
 import { cn } from '@/lib/cn';
 import { setStatus } from '../lib/status';
-import { Caret } from './text';
 
 interface CommandProps extends ComponentProps<'div'> {
   command: string;
@@ -32,7 +31,12 @@ export function Command({ command, caret = false, className, ...props }: Command
           $
         </span>
         <span className="truncate">{command}</span>
-        {caret && <Caret className="-ms-1.5" />}
+        {caret && (
+          <span
+            aria-hidden
+            className="lp-caret -ms-1.5 inline-block h-[1.1em] w-[0.55em] translate-y-[0.15em] bg-current"
+          />
+        )}
       </code>
       <button
         type="button"

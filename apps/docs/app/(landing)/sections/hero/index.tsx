@@ -1,19 +1,18 @@
 import Link from 'next/link';
 import { ArrowUpRight } from 'lucide-react';
-import { Figure, Lead } from '../../ui/figure';
-import { Glitch } from './beats';
-import { Command } from '../../ui/command';
-import { MoonStage } from './moon';
 import { command, copy, frameworks } from '../../content';
+import { Command } from '../../ui/command';
+import { Figure, Lead } from '../../ui/figure';
+import { Glitch } from './glitch';
+import { Stage } from './stage';
 
 const invert =
   'transition-none hover:bg-lp-ink hover:text-lp-paper focus-visible:bg-lp-ink focus-visible:text-lp-paper focus-visible:outline-none';
 
 /**
- * Moon geometry: `--d` diameter, `--cut` part below the horizon, `--cx` centre from the left,
- * `--h` horizon height above the figure's bottom edge (the status bar overlays it on md+). The
- * drawing, the outer ring with its prisms, is 1.46 diameters wide and stays inside the gutters
- * (`cqw`: the figure's width between them); on xl it takes the room right of the 607px CTA row.
+ * The moon: `--d` diameter, `--cut` its part below the horizon, `--cx` its centre, over `--h`, the
+ * horizon's height (the status bar overlays it on md+). The drawing, 1.46 diameters wide, stays in
+ * the gutters (`cqw`); on xl it takes the room right of the 607px CTA row.
  */
 const geometry =
   '[--h:calc(var(--lp-status-h)+40px)] [--d:min(260px,calc(100cqw/1.46))] sm:[--d:320px] lg:[--d:360px] xl:[--d:min(480px,calc((100cqw-640px)/1.46))] [--cut:calc(var(--d)*0.12)] [--cx:50%] lg:[--cx:calc(100%-var(--d)*0.78)] xl:[--cx:calc(100%-var(--lp-gutter)-var(--d)*0.73)] [--moon-lit:var(--lp-sun)] dark:[--moon-lit:var(--lp-yellow)]';
@@ -68,21 +67,15 @@ export function Hero() {
         </p>
       </div>
       <div aria-hidden className="h-[calc(var(--d)-var(--cut)+4.5rem)] lg:hidden" />
-      <MoonStage />
-      <Ruler />
+      <Stage />
+      {/* the horizon: a hairline ruler, a tick every 24px and a longer one every 240px from the gutter */}
+      <div
+        aria-hidden
+        className="absolute inset-x-0 bottom-(--lp-status-h) z-10 h-10 border-t border-lp-line-strong"
+      >
+        <div className="h-1.5 bg-[repeating-linear-gradient(to_right,var(--lp-line-strong)_0_1px,transparent_1px_24px)] bg-position-[var(--lp-gutter)_0]" />
+        <div className="absolute inset-x-0 top-0 h-2.5 bg-[repeating-linear-gradient(to_right,var(--lp-line-strong)_0_1px,transparent_1px_240px)] bg-position-[var(--lp-gutter)_0]" />
+      </div>
     </Figure>
-  );
-}
-
-/** the horizon: a hairline ruler with a tick every 24px and a longer one every 240px, from the gutter */
-function Ruler() {
-  return (
-    <div
-      aria-hidden
-      className="absolute inset-x-0 bottom-(--lp-status-h) z-10 h-10 border-t border-lp-line-strong"
-    >
-      <div className="h-1.5 bg-[repeating-linear-gradient(to_right,var(--lp-line-strong)_0_1px,transparent_1px_24px)] bg-position-[var(--lp-gutter)_0]" />
-      <div className="absolute inset-x-0 top-0 h-2.5 bg-[repeating-linear-gradient(to_right,var(--lp-line-strong)_0_1px,transparent_1px_240px)] bg-position-[var(--lp-gutter)_0]" />
-    </div>
   );
 }

@@ -1,48 +1,47 @@
 import { cubicBezier } from 'motion/react';
 import { createShaderCanvas, cssRgb } from '../../lib/gl';
-import { clamp, rectIn, smoothstep } from '../../lib/math';
-import { camera, settleCss, TICK } from '../../lib/motion';
+import { camera, clamp, rectIn, settleCss, smoothstep, TICK } from '../../lib/motion';
 import { report } from '../../lib/status';
 import { isDark, onTheme } from '../../lib/theme';
-import { createAtlas } from './atlas';
+import { COLS, createSession, type Frame, ROWS } from './data';
 import {
   type Vec3,
   type View,
+  createAtlas,
   fragment,
   framedView,
   insideView,
+  paint,
   terminalRect,
   unproject,
   viewAt,
 } from './scene';
-import { COLS, createSession, type Frame, paint, ROWS } from './session';
 
 const cameraEase = cubicBezier(...camera);
 /** CRT power on: the raster opens from a line, one step per half tick, while the session starts */
 const OPEN = [0.002, 0.08, 0.4, 1];
 const LIGHT = { azimuth: 0.85, elevation: 0.62 };
 
-interface StartElements {
-  /** the tall element the stage is pinned in */
-  pin: HTMLElement;
-  stage: HTMLElement;
-  canvas: HTMLCanvasElement;
+/**
+ * The figure's scene in `pin`, the tall element its stage is pinned in: camera on scroll, the
+ * session on a timer, both only while on screen.
+ */
+export function createStart(pin: HTMLElement): () => void {
+  const stage = pin.querySelector<HTMLElement>('[data-stage]')!;
   /** where the terminal stands in the final composition */
-  slot: HTMLElement;
-  cta: HTMLElement;
-}
-
-/** the figure's scene: camera on scroll, the session on a timer, both only while on screen */
-export function createStart(el: StartElements): () => void {
-  const shader = createShaderCanvas(el.canvas, { fragment, onFrame });
+  const slot = pin.querySelector<HTMLElement>('[data-slot]')!;
+  const cta = pin.querySelector<HTMLElement>('[data-cta]')!;
+  const shader = createShaderCanvas(pin.querySelector('canvas')!, { fragment, onFrame });
   if (!shader) return () => {};
 
   const root = document.documentElement;
   const wide = matchMedia('(min-width: 768px)');
   const reduce = matchMedia('(prefers-reduced-motion: reduce)');
+  const listeners = new AbortController();
+  const { signal } = listeners;
   const session = createSession();
   const chars = new ImageData(COLS, ROWS);
-  const items = el.cta.querySelectorAll<HTMLElement>('[data-rise-group] > *, [data-rise]');
+  const items = cta.querySelectorAll<HTMLElement>('[data-rise-group] > *, [data-rise]');
 
   let width = 0;
   let height = 0;
@@ -89,42 +88,40 @@ export function createStart(el: StartElements): () => void {
   }
 
   function layout() {
-    width = el.stage.clientWidth;
-    height = el.stage.clientHeight;
+    width = stage.clientWidth;
+    height = stage.clientHeight;
     if (width === 0 || height === 0) return;
-    const stage = el.stage.getBoundingClientRect();
-    const slot = rectIn(el.slot, stage);
+    const stageBox = stage.getBoundingClientRect();
+    const slotBox = rectIn(slot, stageBox);
     pinned = wide.matches && !reduce.matches;
     beside = wide.matches;
-    const cta = el.cta.getBoundingClientRect();
+    const ctaBox = cta.getBoundingClientRect();
     const foot = items[items.length - 1];
-    clear[0] = cta.left - stage.left;
-    clear[1] = cta.right - stage.left;
-    clear[2] = cta.top - stage.top + foot.offsetTop + foot.offsetHeight + 16;
+    clear[0] = ctaBox.left - stageBox.left;
+    clear[1] = ctaBox.right - stageBox.left;
+    clear[2] = ctaBox.top - stageBox.top + foot.offsetTop + foot.offsetHeight + 16;
     // the terminal takes the slot's left part, the moon rises in the rest
-    final = framedView(width, height, { ...slot, w: slot.w * 0.8 });
+    final = framedView(width, height, { ...slotBox, w: slotBox.w * 0.8 });
     inside = insideView(width, height);
     const t = terminalRect(final, width, height);
-    const radius = Math.min(slot.w * 0.11, t.h * 0.28);
+    const radius = Math.min(slotBox.w * 0.11, t.h * 0.28);
     const distance = 420;
     moon = unproject(
       final,
       width,
       height,
-      slot.x + slot.w - radius * 1.5,
+      slotBox.x + slotBox.w - radius * 1.5,
       t.y + t.h - radius * 0.75,
       distance,
     );
     moonRadius = (radius * distance) / final.focal;
     horizonX = t.x + t.w / 2;
-    const pin = el.pin.getBoundingClientRect();
-    pinTop = pin.top + window.scrollY;
-    stickyTop = Number.parseFloat(getComputedStyle(el.stage).top) || 0;
-    range = Math.max(1, pin.height - height);
-    shader!.set('uCell', 2);
+    const pinBox = pin.getBoundingClientRect();
+    pinTop = pinBox.top + window.scrollY;
+    stickyTop = Number.parseFloat(getComputedStyle(stage).top) || 0;
+    range = Math.max(1, pinBox.height - height);
     scroll();
     progress = target;
-    shader!.invalidate();
   }
 
   function scroll() {
@@ -187,25 +184,22 @@ export function createStart(el: StartElements): () => void {
     if (moving) shader!.invalidate();
   }
 
-  function reveal(next: boolean, instant = false) {
+  function reveal(next: boolean) {
     if (shown === next) return;
     shown = next;
-    el.cta.style.pointerEvents = next ? '' : 'none';
+    cta.style.pointerEvents = next ? '' : 'none';
     for (let i = 0; i < items.length; i++) {
       const item = items[i];
       for (const animation of item.getAnimations()) animation.cancel();
-      const from = { transform: 'translateY(24px)', clipPath: 'inset(0 0 24px 0)' };
-      const to = { transform: 'none', clipPath: 'inset(0 0 0 0)' };
       // no transform or clip-path stays filled: a hidden item is see-through, and a rise ends
       // at the item's own style (filled ones in the sticky, clipped stage crash Chromium 156)
-      if (instant || !next) {
-        item.animate([{ opacity: next ? 1 : 0 }, { opacity: next ? 1 : 0 }], {
-          duration: instant ? 1 : 120,
-          fill: 'forwards',
-        });
+      if (!next) {
+        item.animate({ opacity: 0 }, { fill: 'forwards' });
         continue;
       }
       const delay = i * TICK;
+      const from = { transform: 'translateY(24px)', clipPath: 'inset(0 0 24px 0)' };
+      const to = { transform: 'none', clipPath: 'inset(0 0 0 0)' };
       item.animate([from, to], { duration: 700, delay, easing: settleCss, fill: 'backwards' });
       item.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 120, delay, fill: 'both' });
       if (i === 0) {
@@ -221,7 +215,7 @@ export function createStart(el: StartElements): () => void {
     if (!density) return;
     paint(frame, chars.data, density);
     shader!.texture('uChars', chars);
-    if (frame.status) report(el.pin, frame.status);
+    if (frame.status) report(pin, frame.status);
   }
 
   function play() {
@@ -233,9 +227,8 @@ export function createStart(el: StartElements): () => void {
       return;
     }
     openAt = performance.now();
-    current = 0;
-    render(session.frames[0]);
-    timer = window.setTimeout(next, session.frames[1].at);
+    current = -1;
+    next();
   }
 
   function next() {
@@ -268,7 +261,7 @@ export function createStart(el: StartElements): () => void {
   // the camera follows the page's scroll only while the stage is on screen
   const follow = new IntersectionObserver(([entry]) => {
     if (entry.isIntersecting) {
-      window.addEventListener('scroll', scroll, { passive: true });
+      window.addEventListener('scroll', scroll, { passive: true, signal });
       scroll();
     } else window.removeEventListener('scroll', scroll);
   });
@@ -282,7 +275,7 @@ export function createStart(el: StartElements): () => void {
 
   function onPointer(event: PointerEvent) {
     if (event.pointerType !== 'mouse' || reduce.matches) return;
-    const box = el.stage.getBoundingClientRect();
+    const box = stage.getBoundingClientRect();
     lightTarget.azimuth = ((event.clientX - box.left) / box.width - 0.5) * 2.4;
     lightTarget.elevation = 0.2 + (1 - (event.clientY - box.top) / box.height) * 0.9;
     shader!.invalidate();
@@ -306,21 +299,21 @@ export function createStart(el: StartElements): () => void {
 
   const resize = new ResizeObserver(layout);
   const stopTheme = onTheme(colours);
-  resize.observe(el.stage);
-  resize.observe(el.pin);
+  resize.observe(stage);
+  resize.observe(pin);
   resize.observe(root);
   // the title and description rewrap as fonts load, moving the call to action's foot
   resize.observe(items[0].parentElement!);
-  visibility.observe(el.stage);
-  follow.observe(el.stage);
-  wide.addEventListener('change', onPreference);
-  reduce.addEventListener('change', onPreference);
-  el.stage.addEventListener('pointermove', onPointer);
-  el.stage.addEventListener('pointerleave', onLeave);
-  el.cta.addEventListener('focusin', onFocus);
+  visibility.observe(stage);
+  follow.observe(stage);
+  wide.addEventListener('change', onPreference, { signal });
+  reduce.addEventListener('change', onPreference, { signal });
+  stage.addEventListener('pointermove', onPointer, { signal });
+  stage.addEventListener('pointerleave', onLeave, { signal });
+  cta.addEventListener('focusin', onFocus, { signal });
   colours();
   layout();
-  if (pinned && target < 0.6) reveal(false, true);
+  if (pinned && target < 0.6) reveal(false);
 
   const family = getComputedStyle(root).getPropertyValue('--font-mono').trim() || 'monospace';
   void document.fonts
@@ -343,12 +336,7 @@ export function createStart(el: StartElements): () => void {
     stopTheme();
     visibility.disconnect();
     follow.disconnect();
-    window.removeEventListener('scroll', scroll);
-    wide.removeEventListener('change', onPreference);
-    reduce.removeEventListener('change', onPreference);
-    el.stage.removeEventListener('pointermove', onPointer);
-    el.stage.removeEventListener('pointerleave', onLeave);
-    el.cta.removeEventListener('focusin', onFocus);
+    listeners.abort();
     shader.destroy();
   };
 }

@@ -38,16 +38,12 @@ const Link: Framework['Link'] = ({ href, ...props }) => (
   <NextLink {...props} href={href ?? '#'} prefetch={false} />
 );
 
-export function StoryLinks({ children }: { children: ReactNode }) {
-  return <NextProvider Link={Link}>{children}</NextProvider>;
-}
-
 /**
  * Lets the page of this site that frames a story move it to another story without a reload,
  * `{ type: 'fumadocs-story:navigate', href }`, or load one ahead, `{ type: 'fumadocs-story:prefetch', href }`.
  * Inert when the story isn't framed.
  */
-export function StoryNavigation() {
+export function StoryNavigation({ children }: { children: ReactNode }) {
   const router = useRouter();
 
   useEffect(() => {
@@ -70,5 +66,5 @@ export function StoryNavigation() {
     return () => window.removeEventListener('message', onMessage);
   }, [router]);
 
-  return null;
+  return <NextProvider Link={Link}>{children}</NextProvider>;
 }

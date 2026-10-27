@@ -1,11 +1,14 @@
 import { notFound } from 'next/navigation';
 import { source } from '@/lib/source';
-import { AsyncAPIScreen } from './asyncapi';
+import { Screen } from '../screen';
+import { AsyncAPIPage } from './asyncapi';
 
 export default function Page() {
   const page = source.getPage(['asyncapi', 'planets', 'subscribeToPlanetEvents']);
   if (page?.type !== 'asyncapi') notFound();
   return (
-    <AsyncAPIScreen title={page.data.title} docs={page.url} {...page.data.getAsyncAPIPageProps()} />
+    <Screen title={page.data.title} docs={page.url}>
+      <AsyncAPIPage {...page.data.getAsyncAPIPageProps()} />
+    </Screen>
   );
 }

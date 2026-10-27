@@ -25,11 +25,12 @@ import {
   STRIP_Y,
   W,
   WHEEL,
-} from './film';
+} from './engine';
 
-/** strokes stay 1px at any size */
-const LINE = { vectorEffect: 'non-scaling-stroke' } as const;
-const PART = 'fill-lp-paper stroke-lp-ink-2';
+/** hairlines: 1px at any size */
+const INK = 'stroke-lp-ink-2 [vector-effect:non-scaling-stroke]';
+const PART = `fill-lp-paper ${INK}`;
+const FRAME = 'fill-lp-paper stroke-lp-line-strong [vector-effect:non-scaling-stroke]';
 
 type Point = readonly [number, number];
 
@@ -45,19 +46,14 @@ function p([x, y]: Point) {
   return `${n(x)} ${n(y)}`;
 }
 
-/** a slotted screw head */
 function Screw({ x, y, r = 2.4, angle }: { x: number; y: number; r?: number; angle: number }) {
   const a = (angle * Math.PI) / 180;
   const dx = Math.cos(a) * r * 0.6;
   const dy = Math.sin(a) * r * 0.6;
   return (
     <>
-      <circle cx={n(x)} cy={n(y)} r={r} className={PART} style={LINE} />
-      <path
-        d={`M${n(x - dx)} ${n(y - dy)}L${n(x + dx)} ${n(y + dy)}`}
-        className="stroke-lp-ink-2"
-        style={LINE}
-      />
+      <circle cx={n(x)} cy={n(y)} r={r} className={PART} />
+      <path d={`M${n(x - dx)} ${n(y - dy)}L${n(x + dx)} ${n(y + dy)}`} className={INK} />
     </>
   );
 }
@@ -113,14 +109,12 @@ function beltPath(): string {
   return `M${p(at(MOTOR, PULLEY, base + off))}L${p(at(DRIVER, DRIVER_PULLEY, base + off))}M${p(at(MOTOR, PULLEY, base - off))}L${p(at(DRIVER, DRIVER_PULLEY, base - off))}`;
 }
 
-/** an annular sector of a drum's door, the sight window onto the wound film's edge */
 function sector(c: Point, from: number, to: number, inner: number, outer: number): string {
   const a = (from * Math.PI) / 180;
   const b = (to * Math.PI) / 180;
   return `M${p(at(c, inner, a))}L${p(at(c, outer, a))}A${outer} ${outer} 0 0 1 ${p(at(c, outer, b))}L${p(at(c, inner, b))}A${inner} ${inner} 0 0 0 ${p(at(c, inner, a))}Z`;
 }
 
-/** a drum, the magazine its reel turns in: housing, door, sight window, spindle, foot, light trap */
 function Drum({ id, side, wound }: { id: keyof typeof DRUMS; side: -1 | 1; wound: number }) {
   const c = DRUMS[id];
   const sight =
@@ -147,19 +141,9 @@ function Drum({ id, side, wound }: { id: keyof typeof DRUMS; side: -1 | 1; wound
 
   return (
     <g>
-      <path
-        d={`M${c[0] - 14.5} ${foot}h29l7 ${H - foot - 0.5}h-43z`}
-        className={PART}
-        style={LINE}
-      />
-      <circle
-        cx={c[0]}
-        cy={c[1]}
-        r={DRUM_R}
-        className="fill-lp-paper stroke-lp-line-strong"
-        style={LINE}
-      />
-      <circle cx={c[0]} cy={c[1]} r={DRUM_R - 6} className="stroke-lp-ink-2" style={LINE} />
+      <path d={`M${c[0] - 14.5} ${foot}h29l7 ${H - foot - 0.5}h-43z`} className={PART} />
+      <circle cx={c[0]} cy={c[1]} r={DRUM_R} className={FRAME} />
+      <circle cx={c[0]} cy={c[1]} r={DRUM_R - 6} className={INK} />
       {screws}
       <clipPath id={`sight-${id}`}>
         <path d={sight} />
@@ -167,16 +151,16 @@ function Drum({ id, side, wound }: { id: keyof typeof DRUMS; side: -1 | 1; wound
       <clipPath id={`wound-${id}`}>
         <circle data-part={`wound-${id}`} cx={c[0]} cy={c[1]} r={n(wound)} />
       </clipPath>
-      <path d={sight} className={PART} style={LINE} />
+      <path d={sight} className={PART} />
       {/* through the window: the reel's spokes, and over them the film wound on it so far */}
       <g clipPath={`url(#sight-${id})`}>
-        <path data-spin={id} d={spokes} className={PART} style={LINE} />
+        <path data-spin={id} d={spokes} className={PART} />
         <g clipPath={`url(#wound-${id})`}>
           <circle cx={c[0]} cy={c[1]} r={FULL} className="fill-lp-paper-2" />
-          <path d={rings} className="stroke-lp-ink-2" style={LINE} />
+          <path d={rings} className={INK} />
         </g>
       </g>
-      <circle cx={c[0]} cy={c[1]} r={10} className={PART} style={LINE} />
+      <circle cx={c[0]} cy={c[1]} r={10} className={PART} />
       <g data-spin={id}>
         <path d={`M${c[0] - 6.5} ${c[1] - 1.5}h13v3h-13z`} className="fill-lp-ink-2" />
         <circle cx={c[0]} cy={c[1] + 7.2} r={0.9} className="fill-lp-ink-2" />
@@ -184,7 +168,6 @@ function Drum({ id, side, wound }: { id: keyof typeof DRUMS; side: -1 | 1; wound
       <path
         d={`M${mouth + 0.5} ${STRIP_Y - BAND / 2 - 7.5}h17v${BAND + 15}h-17z`}
         className={PART}
-        style={LINE}
       />
       <path
         d={`M${mouth + (side < 0 ? 17 : 1)} ${STRIP_Y - BAND / 2}v${BAND}`}
@@ -198,7 +181,6 @@ function Drum({ id, side, wound }: { id: keyof typeof DRUMS; side: -1 | 1; wound
   );
 }
 
-/** an idler roller under the strip, holes to show it turn */
 function Roller({ c, index }: { c: Point; index: number }) {
   const holes: ReactNode[] = [];
   for (let k = 0; k < 3; k++) {
@@ -207,27 +189,15 @@ function Roller({ c, index }: { c: Point; index: number }) {
   }
   return (
     <g>
-      <circle cx={c[0]} cy={c[1]} r={ROLLER} className={PART} style={LINE} />
+      <circle cx={c[0]} cy={c[1]} r={ROLLER} className={PART} />
       <g data-part={`roller-${index}`}>{holes}</g>
     </g>
   );
 }
 
-/** the speed gauge's ticks, from stopped to flat out */
-function gaugeTicks(): string {
-  let d = '';
-  for (let i = 0; i <= 6; i++) {
-    const a = ((NEEDLE_REST + (i * NEEDLE_SWEEP) / 6 - 90) * Math.PI) / 180;
-    d += `M${p(at(GAUGE, 6.4, a))}L${p(at(GAUGE, 8.4, a))}`;
-  }
-  return d;
-}
-
-/** the top of the gauge's scale, where a rewind pins the needle */
-function gaugeRed(): string {
-  const a = ((NEEDLE_REST + NEEDLE_SWEEP * 0.75 - 90) * Math.PI) / 180;
-  const b = ((NEEDLE_REST + NEEDLE_SWEEP - 90) * Math.PI) / 180;
-  return `M${p(at(GAUGE, 7.6, a))}A7.6 7.6 0 0 1 ${p(at(GAUGE, 7.6, b))}`;
+/** the needle's angle, in radians from the x axis, at `sixths` of its sweep */
+function needleAt(sixths: number) {
+  return ((NEEDLE_REST + (sixths * NEEDLE_SWEEP) / 6 - 90) * Math.PI) / 180;
 }
 
 /** under the strip: the drums, the motor, the Geneva drive, the rollers; the reel at its start */
@@ -236,6 +206,12 @@ export function DeckBack({ count }: { count: number }) {
   const [take, feed] = reels(0, count);
   let fins = '';
   for (let x = MOTOR[0] + 12; x <= MOTOR[0] + 47; x += 3.5) fins += `M${n(x)} ${MOTOR[1] - 9}v18`;
+  // the gauge's scale from stopped to flat out, red at the top where a rewind pins the needle
+  let ticks = '';
+  for (let i = 0; i <= 6; i++) {
+    ticks += `M${p(at(GAUGE, 6.4, needleAt(i)))}L${p(at(GAUGE, 8.4, needleAt(i)))}`;
+  }
+  const red = `M${p(at(GAUGE, 7.6, needleAt(4.5)))}A7.6 7.6 0 0 1 ${p(at(GAUGE, 7.6, needleAt(6)))}`;
 
   return (
     <svg
@@ -247,20 +223,18 @@ export function DeckBack({ count }: { count: number }) {
       <Drum id="take" side={-1} wound={take} />
       <Drum id="feed" side={1} wound={feed} />
       {/* the motor, belted to the driver: its start capacitor, the gauge of its speed, its cable */}
-      <path d={`M${MOTOR[0] + 3} ${MOTOR[1] - 1.5}h5v3h-5z`} className={PART} style={LINE} />
-      <path d={`M${MOTOR[0] + 7.5} ${MOTOR[1] - 13.5}h44v27h-44z`} className={PART} style={LINE} />
-      <path d={fins} className="stroke-lp-ink-2" style={LINE} />
+      <path d={`M${MOTOR[0] + 3} ${MOTOR[1] - 1.5}h5v3h-5z`} className={PART} />
+      <path d={`M${MOTOR[0] + 7.5} ${MOTOR[1] - 13.5}h44v27h-44z`} className={PART} />
+      <path d={fins} className={INK} />
       <path
         d={`M${MOTOR[0] + 17.5} ${MOTOR[1] + 13.5}h24v${H - MOTOR[1] - 14}h-24z`}
         className={PART}
-        style={LINE}
       />
       <Screw x={MOTOR[0] + 22} y={MOTOR[1] + 18.5} r={1.7} angle={30} />
       <Screw x={MOTOR[0] + 37} y={MOTOR[1] + 18.5} r={1.7} angle={-50} />
       <path
         d={`M${MOTOR[0] + 14} ${MOTOR[1] - 14}v-2M${MOTOR[0] + 20} ${MOTOR[1] - 14}v-2`}
-        className="stroke-lp-ink-2"
-        style={LINE}
+        className={INK}
       />
       <rect
         x={MOTOR[0] + 11.5}
@@ -269,20 +243,14 @@ export function DeckBack({ count }: { count: number }) {
         height={7}
         rx={3.5}
         className={PART}
-        style={LINE}
       />
       <path
         d={`M${MOTOR[0] + 15} ${MOTOR[1] - 22.5}v7M${MOTOR[0] + 17} ${MOTOR[1] - 22.5}v7`}
-        className="stroke-lp-ink-2"
-        style={LINE}
+        className={INK}
       />
-      <path
-        d={`M${GAUGE[0] - 9.5} ${GAUGE[1]}a9.5 9.5 0 0 1 19 0z`}
-        className={PART}
-        style={LINE}
-      />
-      <path d={gaugeTicks()} className="stroke-lp-ink-2" style={LINE} />
-      <path d={gaugeRed()} strokeWidth={2} className="stroke-lp-sun" />
+      <path d={`M${GAUGE[0] - 9.5} ${GAUGE[1]}a9.5 9.5 0 0 1 19 0z`} className={PART} />
+      <path d={ticks} className={INK} />
+      <path d={red} strokeWidth={2} className="stroke-lp-sun" />
       <g data-part="needle" transform={`rotate(${NEEDLE_REST} ${GAUGE[0]} ${GAUGE[1]})`}>
         <path d={`M${GAUGE[0]} ${GAUGE[1]}v-7.5`} strokeWidth={1.2} className="stroke-lp-ink" />
       </g>
@@ -301,20 +269,20 @@ export function DeckBack({ count }: { count: number }) {
         strokeDasharray="3 2"
         className="stroke-lp-ink-2"
       />
-      <circle cx={MOTOR[0]} cy={MOTOR[1]} r={PULLEY} className={PART} style={LINE} />
+      <circle cx={MOTOR[0]} cy={MOTOR[1]} r={PULLEY} className={PART} />
       <g data-part="pulley">
         <circle cx={MOTOR[0] + 2.6} cy={MOTOR[1]} r={1.1} className="fill-lp-ink-2" />
       </g>
       {/* the Geneva drive: the wheel turns the gate's sprocket, the driver's pin turns the wheel */}
-      <circle cx={DRIVER[0]} cy={DRIVER[1]} r={DRIVER_PULLEY} className={PART} style={LINE} />
+      <circle cx={DRIVER[0]} cy={DRIVER[1]} r={DRIVER_PULLEY} className={PART} />
       <g data-part="wheel">
-        <path d={wheelPath()} className={PART} style={LINE} />
-        <circle cx={WHEEL[0]} cy={WHEEL[1]} r={5.5} className={PART} style={LINE} />
+        <path d={wheelPath()} className={PART} />
+        <circle cx={WHEEL[0]} cy={WHEEL[1]} r={5.5} className={PART} />
         <circle cx={WHEEL[0]} cy={WHEEL[1]} r={1.6} className="fill-lp-ink-2" />
       </g>
       <g data-part="driver" transform={`rotate(-180 ${DRIVER[0]} ${DRIVER[1]})`}>
-        <path d={driver.disc} className={PART} style={LINE} />
-        <path d={driver.crank} className={PART} style={LINE} />
+        <path d={driver.disc} className={PART} />
+        <path d={driver.crank} className={PART} />
         <circle cx={n(driver.pin[0])} cy={n(driver.pin[1])} r={2} className="fill-lp-ink-2" />
         <circle cx={DRIVER[0]} cy={DRIVER[1]} r={1.6} className="fill-lp-ink-2" />
       </g>
@@ -351,38 +319,32 @@ export function DeckFront() {
       <path
         fillRule="evenodd"
         d={`M${GATE - 41.5} ${top + 0.5}h83v63h-83zM${GATE - FRAME_W / 2 - 1.5} ${STRIP_Y - FRAME_H / 2 - 1.5}h${FRAME_W + 3}v${FRAME_H + 3}h${-FRAME_W - 3}z`}
-        className="fill-lp-paper stroke-lp-line-strong"
-        style={LINE}
+        className={FRAME}
       />
       <Screw x={GATE - 37} y={top + 5} angle={30} />
       <Screw x={GATE + 37} y={top + 5} angle={-20} />
       <Screw x={GATE - 37} y={top + 59} angle={70} />
       <Screw x={GATE + 37} y={top + 59} angle={10} />
-      <path d={spring} className="stroke-lp-ink-2" style={LINE} />
-      <path d={`M${GATE - 20.5} ${top - 19.5}h41v6h-41z`} className={PART} style={LINE} />
+      <path d={spring} className={INK} />
+      <path d={`M${GATE - 20.5} ${top - 19.5}h41v6h-41z`} className={PART} />
       <Screw x={GATE - 15} y={top - 16.5} r={1.8} angle={0} />
       <Screw x={GATE + 15} y={top - 16.5} r={1.8} angle={60} />
-      <path
-        d={`M${GATE - 2} ${top - 20}V4M${GATE + 2} ${top - 20}V4`}
-        className="stroke-lp-ink-2"
-        style={LINE}
-      />
+      <path d={`M${GATE - 2} ${top - 20}V4M${GATE + 2} ${top - 20}V4`} className={INK} />
       <path d={`M${GATE - 4.5} -1.5h9v6h-9z`} className="fill-lp-ink-2" />
       {/* the dancer: a spring holds its roller down on the strip, it gives when the strip jumps */}
-      <path d={coil} className="stroke-lp-ink-2" style={LINE} />
-      <path d={`M${n(mid[0] - 9.5)} ${n(mid[1] - 29.5)}h19v6h-19z`} className={PART} style={LINE} />
+      <path d={coil} className={INK} />
+      <path d={`M${n(mid[0] - 9.5)} ${n(mid[1] - 29.5)}h19v6h-19z`} className={PART} />
       <Screw x={mid[0] - 5} y={mid[1] - 26.5} r={1.6} angle={40} />
       <Screw x={mid[0] + 5} y={mid[1] - 26.5} r={1.6} angle={-30} />
       <g data-part="dancer">
         <path
           d={`M${p(at(pivot, arm, a - Math.PI / 2))}L${p(at(end, arm, a - Math.PI / 2))}L${p(at(end, arm, a + Math.PI / 2))}L${p(at(pivot, arm, a + Math.PI / 2))}Z`}
           className={PART}
-          style={LINE}
         />
-        <circle cx={n(end[0])} cy={n(end[1])} r={roller} className={PART} style={LINE} />
+        <circle cx={n(end[0])} cy={n(end[1])} r={roller} className={PART} />
         <circle cx={n(end[0])} cy={n(end[1])} r={1.5} className="fill-lp-ink-2" />
       </g>
-      <circle cx={pivot[0]} cy={pivot[1]} r={3.4} className={PART} style={LINE} />
+      <circle cx={pivot[0]} cy={pivot[1]} r={3.4} className={PART} />
       <circle cx={pivot[0]} cy={pivot[1]} r={1.1} className="fill-lp-ink-2" />
     </svg>
   );

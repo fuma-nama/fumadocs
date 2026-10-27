@@ -17,40 +17,32 @@ import { useCopyButton } from 'fumadocs-ui/utils/use-copy-button';
 import { TICK } from '../../lib/motion';
 import { report, restore, setStatus } from '../../lib/status';
 import { useIsClient } from '../../lib/use-is-client';
-import { Roller } from '../../ui/roller';
-import { Scramble } from '../../ui/text';
+import { Roller, Scramble } from '../../ui/text';
 import { Window } from '../../ui/window';
-import type { ModuleInfo } from './modules';
-
-export interface Module extends ModuleInfo {
-  /** a `<Stage>`, its `--bt-dur` sets how long the cell stays active */
-  mechanism: ReactNode;
-}
+import type { Module } from './data';
 
 /** the docs pages already prefetched, each once */
 const prefetched = new Set<string>();
 
-/** the board's columns and the delay before its first cell, read from its CSS */
-interface Layout {
-  cols: number;
-  lead: number;
-  /** under three columns the cells boot as they scroll in, the wave runs row by row */
-  stacked: boolean;
-}
-
-/** diagonal of a cell: the wave runs corner to corner on wide boards, row by row when stacked */
-function diagonal(i: number, { cols, stacked }: Layout) {
-  return stacked ? i % cols : (i % cols) + Math.floor(i / cols);
+/**
+ * the tick of cell `i`'s inverted frame after power-on: the wave runs corner to corner on wide
+ * boards, row by row under three columns
+ */
+function wave(i: number, cols: number): number {
+  return cols < 3 ? 2 + (i % cols) : 4 + (i % cols) + Math.floor(i / cols);
 }
 
 export function Board({
   header,
   modules,
+  mechanisms,
   loaded,
   children,
 }: {
   header: ReactNode;
   modules: Module[];
+  /** each module's `<Stage>` by its title, its `--bt-dur` sets how long the cell stays active */
+  mechanisms: Record<string, ReactNode>;
   /** the figure's line once the board is up */
   loaded: string;
   /** the marquee row under the board */
@@ -64,11 +56,12 @@ export function Board({
   const [powered, setPowered] = useState<number | null>(null);
   // `null` on the server: the board runs until it knows it is off screen
   const [visible, setVisible] = useState<boolean | null>(null);
-  const [layout, setLayout] = useState<Layout | null>(null);
+  // the board's columns, read from its CSS as it powers up
+  const [cols, setCols] = useState<number | null>(null);
   const [waveDone, setWaveDone] = useState(false);
   // wide boards scan on a timer once the wave is done, stacked ones follow the cell in the
   // middle of the viewport
-  const stacked = layout !== null && layout.stacked;
+  const stacked = cols !== null && cols < 3;
   const scanning = reduced === true || waveDone || (stacked && powered !== 0);
   const [active, setActive] = useState(0);
   const [hovered, setHovered] = useState<number | null>(null);
@@ -98,14 +91,11 @@ export function Board({
     (board: HTMLDivElement | null) => {
       boardElement.current = board;
       if (!board || reduced !== false) return;
+      const columns = Number(getComputedStyle(board).getPropertyValue('--cols'));
+      const isStacked = columns < 3;
       setPowered(0);
-      const cells = board.querySelectorAll<HTMLElement>('[data-i]');
-      const style = getComputedStyle(board);
-      const cols = Number(style.getPropertyValue('--cols'));
-      const lead = parseFloat(style.getPropertyValue('--bt-lead'));
-      const isStacked = cols < 3;
-      setLayout({ cols, lead, stacked: isStacked });
-      let wave = 0;
+      setCols(columns);
+      let timer = 0;
       const power = new IntersectionObserver(
         (entries) => {
           let bits = 0;
@@ -122,9 +112,8 @@ export function Board({
           // a wide board powers every cell at once; the wave ends on the last cell's inverted
           // frame, then one more tick
           report(board, 'powering on');
-          const end =
-            lead + (diagonal(cells.length - 1, { cols, lead, stacked: false }) + 2) * TICK;
-          wave = window.setTimeout(() => {
+          const end = (wave(modules.length - 1, columns) + 2) * TICK;
+          timer = window.setTimeout(() => {
             report(board, loaded);
             setWaveDone(true);
           }, end);
@@ -141,7 +130,7 @@ export function Board({
         { rootMargin: '-45% 0px -45% 0px' },
       );
       if (isStacked) {
-        for (const cell of cells) {
+        for (const cell of board.querySelectorAll('[data-i]')) {
           power.observe(cell);
           middle.observe(cell);
         }
@@ -149,12 +138,12 @@ export function Board({
         power.observe(board);
       }
       return () => {
-        clearTimeout(wave);
+        clearTimeout(timer);
         power.disconnect();
         middle.disconnect();
       };
     },
-    [reduced, all, loaded],
+    [reduced, all, loaded, modules.length],
   );
 
   useEffect(() => {
@@ -180,47 +169,78 @@ export function Board({
 
   const cells = [];
   for (let i = 0; i < modules.length; i++) {
+    const module = modules[i];
     const on = powered === null || (powered & (1 << i)) !== 0;
+    // the tick of the cell's inverted frame while it boots, its readout decodes a tick later
+    const at = powered !== null && on && cols !== null ? wave(i, cols) * TICK : undefined;
+    const readout = (text: string) =>
+      at === undefined ? text : <Scramble text={text} delay={at + TICK} />;
+    const props = {
+      'data-i': i,
+      'data-on': on ? '' : undefined,
+      'data-active': i === shown ? '' : undefined,
+      style: at === undefined ? undefined : ({ '--bt-at': `${at}ms` } as CSSProperties),
+      className:
+        'bt-cell group relative flex flex-col p-(--lp-gutter) text-start text-lp-ink transition-none',
+      onPointerEnter: () => enter(i),
+      onPointerLeave: leave,
+      onFocus: () => enter(i),
+      onBlur: leave,
+    };
+    const content = (
+      <>
+        {/* as wide as the mechanism, so the hotkeys end on its right edge */}
+        <span className="flex max-w-(--bt-stage) items-start justify-between gap-4">
+          <span className="bt-num -ms-[3px] px-[3px] font-pixel text-[28px] leading-none text-lp-orange group-data-active:bg-lp-yellow group-data-active:text-[#121210]">
+            {module.title}
+          </span>
+          {!module.href && (
+            <span className="flex gap-1 font-pixel text-xs max-md:hidden">
+              {search.hotKey.map((key, k) => (
+                <kbd key={k} className="border border-current px-1.5 leading-5">
+                  {key.display}
+                </kbd>
+              ))}
+            </span>
+          )}
+        </span>
+        {/* the command takes the package's place where the install window is hidden */}
+        <span className="mt-1.5 font-mono text-xs text-lp-ink-2 group-hover:text-lp-paper/60 group-focus-visible:text-lp-paper/60">
+          <span className="lg:hidden">{readout(module.install)}</span>
+          <span className="max-lg:hidden">{readout(module.pkg)}</span>
+        </span>
+        <span className="mt-4 block">{mechanisms[module.title]}</span>
+        <span className="mt-auto pt-4 text-sm leading-snug text-pretty text-lp-ink-2 group-hover:text-lp-paper/60 group-focus-visible:text-lp-paper/60">
+          {module.line}
+        </span>
+      </>
+    );
     cells.push(
-      <Cell
-        key={modules[i].title}
-        module={modules[i]}
-        index={i}
-        search={search}
-        on={on}
-        // the readout decodes after the cell's inverted frame
-        boot={
-          powered !== null && on && layout !== null
-            ? layout.lead + (diagonal(i, layout) + 1) * TICK
-            : undefined
-        }
-        active={i === shown}
-        onEnter={() => enter(i)}
-        onLeave={leave}
-      />,
+      module.href ? (
+        <Link key={module.title} href={module.href} prefetch={false} {...props}>
+          {content}
+        </Link>
+      ) : (
+        <button
+          key={module.title}
+          type="button"
+          onClick={() => search.setOpenSearch(true)}
+          {...props}
+        >
+          {content}
+        </button>
+      ),
     );
   }
 
   const seams = [];
   for (let k = 0; k < modules.length; k++) {
-    seams.push(
-      <i
-        key={`h${k}`}
-        aria-hidden
-        className="bt-seam-h"
-        style={{ gridRowStart: k + 1, '--k': k } as CSSProperties}
-      />,
-    );
+    const style = { gridRowStart: k + 1, '--k': k } as CSSProperties;
+    seams.push(<i key={`h${k}`} aria-hidden className="bt-seam-h" style={style} />);
   }
   for (let k = 1; k < 4; k++) {
-    seams.push(
-      <i
-        key={`v${k}`}
-        aria-hidden
-        className="bt-seam-v"
-        style={{ gridColumnStart: k + 1, '--k': k } as CSSProperties}
-      />,
-    );
+    const style = { gridColumnStart: k + 1, '--k': k } as CSSProperties;
+    seams.push(<i key={`v${k}`} aria-hidden className="bt-seam-v" style={style} />);
   }
 
   return (
@@ -228,7 +248,7 @@ export function Board({
       ref={rootRef}
       data-run={visible === null ? undefined : visible ? 'on' : 'off'}
       onPointerMove={prefetch}
-      className="flex flex-col"
+      className="flex flex-col [--bt-stage:288px] [--cols:1] sm:[--cols:2] lg:[--cols:3] xl:[--cols:4]"
     >
       <div className="flex flex-col gap-10 p-(--lp-gutter) pt-16 pb-12 lg:flex-row lg:items-end lg:justify-between">
         {header}
@@ -237,7 +257,7 @@ export function Board({
       <div
         ref={boardRef}
         data-power={powered === null ? undefined : powered === 0 ? 'off' : 'on'}
-        className="bt-board relative grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+        className="bt-board relative grid"
       >
         {cells}
         {seams}
@@ -268,77 +288,5 @@ function Install({ command }: { command: string }) {
         </button>
       </div>
     </Window>
-  );
-}
-
-interface CellProps {
-  module: Module;
-  index: number;
-  /** the dialog the cell without a docs page opens */
-  search: ReturnType<typeof useSearchContext>;
-  on: boolean;
-  /** ms after power-on when the readout decodes, while the cell boots */
-  boot?: number;
-  active: boolean;
-  onEnter: () => void;
-  onLeave: () => void;
-}
-
-function Cell({ module, index, search, on, boot, active, onEnter, onLeave }: CellProps) {
-  const props = {
-    'data-i': index,
-    'data-on': on ? '' : undefined,
-    'data-active': active ? '' : undefined,
-    style: { '--i': index } as CSSProperties,
-    className:
-      'bt-cell group relative flex flex-col p-(--lp-gutter) text-start text-lp-ink transition-none',
-    onPointerEnter: onEnter,
-    onPointerLeave: onLeave,
-    onFocus: onEnter,
-    onBlur: onLeave,
-  };
-  const readout = (text: string) =>
-    boot === undefined ? text : <Scramble text={text} delay={boot} />;
-  const content = (
-    <>
-      {/* as wide as the mechanism, so the hotkeys end on its right edge */}
-      <span className="flex max-w-(--bt-stage) items-start justify-between gap-4">
-        <span className="bt-num -ms-[3px] px-[3px] font-pixel text-[28px] leading-none text-lp-orange">
-          {module.title}
-        </span>
-        {!module.href && (
-          <span className="flex gap-1 font-pixel text-xs max-md:hidden">
-            {search.hotKey.map((key, i) => (
-              <kbd key={i} className="border border-current px-1.5 leading-5">
-                {key.display}
-              </kbd>
-            ))}
-          </span>
-        )}
-      </span>
-      {/* the command takes the package's place where the install window is hidden */}
-      <span className="mt-1.5 font-mono text-xs text-lp-ink-2 group-hover:text-lp-paper/60 group-focus-visible:text-lp-paper/60">
-        <span className="lg:hidden">{readout(module.install)}</span>
-        <span className="max-lg:hidden">{readout(module.pkg)}</span>
-      </span>
-      <span className="mt-4 block">{module.mechanism}</span>
-      <span className="mt-auto pt-4 text-sm leading-snug text-pretty text-lp-ink-2 group-hover:text-lp-paper/60 group-focus-visible:text-lp-paper/60">
-        {module.line}
-      </span>
-    </>
-  );
-
-  if (module.href) {
-    return (
-      <Link href={module.href} prefetch={false} {...props}>
-        {content}
-      </Link>
-    );
-  }
-
-  return (
-    <button type="button" onClick={() => search.setOpenSearch(true)} {...props}>
-      {content}
-    </button>
   );
 }

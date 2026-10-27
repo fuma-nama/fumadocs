@@ -2,7 +2,8 @@ import type { ComponentProps, ReactNode, Ref } from 'react';
 import Image from 'next/image';
 import { cn } from '@/lib/cn';
 import type { ShowcaseObject } from '@/lib/showcases';
-import { BAYER4 } from '../lib/bayer';
+import { BAYER4 } from '../lib/dither';
+import { cssRgb } from '../lib/gl';
 import { isDark } from '../lib/theme';
 
 /** size of a printed dot in CSS px */
@@ -12,12 +13,9 @@ const STEPS = 8;
 
 /**
  * Prints the screenshot on the canvas at its size, a dot a pixel: object-cover and centred like the
- * <img>, an ordered 4x4 dither in the theme's ink and paper.
+ * <img>, an ordered 4x4 dither in the theme's ink and paper. Returns the pixels it put.
  */
-export function printDots(
-  canvas: HTMLCanvasElement,
-  image: HTMLImageElement,
-): CanvasRenderingContext2D {
+export function printDots(canvas: HTMLCanvasElement, image: HTMLImageElement): ImageData {
   const cols = canvas.width;
   const rows = canvas.height;
   const ctx = canvas.getContext('2d', { willReadFrequently: true })!;
@@ -28,42 +26,33 @@ export function printDots(
   const height = image.naturalHeight * scale;
   ctx.imageSmoothingQuality = 'high';
   ctx.drawImage(image, (cols - width) / 2, (rows - height) / 2, width, height);
+  // dark dots take the darker theme colour, the rest the lighter one, so dark mode keeps tones
+  const style = getComputedStyle(canvas);
+  const ink = cssRgb(style.getPropertyValue('--lp-ink'));
+  const paper = cssRgb(style.getPropertyValue('--lp-paper'));
+  const [dot, ground] = isDark() ? [paper, ink] : [ink, paper];
   const pixels = ctx.getImageData(0, 0, cols, rows);
   const data = pixels.data;
   for (let y = 0; y < rows; y++) {
     for (let x = 0; x < cols; x++) {
       const i = (y * cols + x) * 4;
       const light = (0.2126 * data[i] + 0.7152 * data[i + 1] + 0.0722 * data[i + 2]) / 255;
-      data[i + 3] = light > (BAYER4[(y % 4) * 4 + (x % 4)] + 0.5) / 16 ? 0 : 255;
+      const color = light > (BAYER4[(y % 4) * 4 + (x % 4)] + 0.5) / 16 ? ground : dot;
+      data[i] = color[0] * 255;
+      data[i + 1] = color[1] * 255;
+      data[i + 2] = color[2] * 255;
+      data[i + 3] = 255;
     }
   }
   ctx.putImageData(pixels, 0, 0);
-
-  // dark dots take the darker theme colour, the rest the lighter one, so dark mode keeps tones
-  const style = getComputedStyle(canvas);
-  const ink = style.getPropertyValue('--lp-ink').trim();
-  const paper = style.getPropertyValue('--lp-paper').trim();
-  const dark = isDark();
-  ctx.globalCompositeOperation = 'source-in';
-  ctx.fillStyle = dark ? paper : ink;
-  ctx.fillRect(0, 0, cols, rows);
-  ctx.globalCompositeOperation = 'destination-over';
-  ctx.fillStyle = dark ? ink : paper;
-  ctx.fillRect(0, 0, cols, rows);
-  ctx.globalCompositeOperation = 'source-over';
-  return ctx;
+  return pixels;
 }
 
-interface Print {
-  /** the 1-bit print in the theme's ink and paper */
-  full: ImageData;
-  /** what the canvas shows: the print where the Bayer threshold is under `level` */
-  shown: ImageData;
-  /** 0 to 16 */
-  level: number;
-}
-
-const prints = new WeakMap<HTMLCanvasElement, Print>();
+/** a canvas's whole print, what it shows of it, and at what level of 16 */
+const prints = new WeakMap<
+  HTMLCanvasElement,
+  { full: ImageData; shown: ImageData; level: number }
+>();
 
 /** prints the screenshot in 2px dots over the box it covers, once */
 export function print(canvas: HTMLCanvasElement, image: HTMLImageElement) {
@@ -77,8 +66,7 @@ export function print(canvas: HTMLCanvasElement, image: HTMLImageElement) {
   canvas.style.width = `${cols * DOT}px`;
   canvas.style.height = `${rows * DOT}px`;
 
-  const ctx = printDots(canvas, image);
-  const full = ctx.getImageData(0, 0, cols, rows);
+  const full = printDots(canvas, image);
   const shown = new ImageData(new Uint8ClampedArray(full.data), cols, rows);
   const level = prints.get(canvas)?.level ?? 16;
   prints.set(canvas, { full, shown, level: 16 });
@@ -112,6 +100,13 @@ export function level(t: number, duration: number): number {
 export function address(url: string): string {
   const { host, pathname } = new URL(url);
   return host + pathname.replace(/\/$/, '');
+}
+
+/** `name` cut to `budget` characters, ending on a word */
+export function fit(name: string, budget: number): string {
+  if (name.length <= budget) return name;
+  const end = name.lastIndexOf(' ', budget - 1);
+  return `${name.slice(0, end > 0 ? end : budget - 1)}…`;
 }
 
 interface SiteTileProps extends Omit<ComponentProps<'a'>, 'href' | 'children'> {

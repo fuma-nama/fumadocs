@@ -13,13 +13,7 @@ import { baseOptions, linkItems } from '@/components/layouts/shared';
 import Preview from '@/public/banner.png';
 
 /** the home layout shared by the landing page, blog, showcase and changelog */
-export function SiteHomeLayout({
-  className,
-  children,
-}: {
-  className?: string;
-  children: ReactNode;
-}) {
+export function SiteHomeLayout(props: { className?: string; children: ReactNode }) {
   return (
     <HomeLayout
       {...baseOptions()}
@@ -123,9 +117,7 @@ export function SiteHomeLayout({
         },
         ...linkItems,
       ]}
-      className={className}
-    >
-      {children}
-    </HomeLayout>
+      {...props}
+    />
   );
 }

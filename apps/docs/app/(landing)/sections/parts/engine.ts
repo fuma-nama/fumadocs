@@ -1,7 +1,6 @@
 import { cubicBezier } from 'motion/react';
 import { createShaderCanvas, cssRgb } from '../../lib/gl';
-import { clamp, type Rect, rectIn } from '../../lib/math';
-import { camera, settleCss, TICK } from '../../lib/motion';
+import { camera, clamp, type Rect, rectIn, settleCss, TICK } from '../../lib/motion';
 import { isDark, onTheme } from '../../lib/theme';
 import { LAYERS, SWAPS, type SwapLayer } from './data';
 import {
@@ -34,13 +33,7 @@ const STILL = 150;
 const UNIFORM_MIN = ['uMin[0]', 'uMin[1]', 'uMin[2]', 'uMin[3]'];
 const UNIFORM_MAX = ['uMax[0]', 'uMax[1]', 'uMax[2]', 'uMax[3]'];
 
-/**
- * How the figure lays out, from its CSS:
- * - `stage`: the whole stage pins, the header and the panel come in on it once the camera clears them;
- * - `column`: the canvas pins across the sheet, the header and the panel pass over its right part;
- * - `band`: the canvas pins as a band on top, the header and the panel pass beneath it;
- * - `still`: reduced motion, no pin, the stack at rest.
- */
+/** the layouts of `parts.css`; `still` is reduced motion: no pin, the stack at rest */
 type Mode = 'stage' | 'column' | 'band' | 'still';
 
 interface Tray {
@@ -54,11 +47,6 @@ interface Tray {
   hold: number;
 }
 
-interface StackOptions {
-  /** a pick lands in its tray */
-  onLand: (layer: SwapLayer, option: number) => void;
-}
-
 export interface StackEngine {
   /** the reader picked an option: its tray unlatches, slides out, takes it and goes back in */
   want: (layer: SwapLayer, option: number) => void;
@@ -66,16 +54,18 @@ export interface StackEngine {
 }
 
 /**
- * The stack's scene, one frame loop for all of it. The camera follows the scroll over the run the
- * figure pins for: the page straight on, the camera lifting off it and orbiting down, the layers
- * parting, the stack at rest. The real page and the layers' fronts are DOM, laid on their faces by
- * the same camera. Each pick unlatches its tray, slides it out, lands and slides it back.
+ * The stack's scene in one frame loop: the camera follows the scroll over the run the figure pins
+ * for and lays the real page and the layers' fronts, which are DOM, on their faces.
  */
-export function createStack(root: HTMLElement, { onLand }: StackOptions): StackEngine {
+export function createStack(
+  root: HTMLElement,
+  onLand: (layer: SwapLayer, option: number) => void,
+): StackEngine {
   const find = (name: string) => root.querySelector<HTMLElement>(`[data-${name}]`)!;
   const cell = find('cell');
   const page = find('page');
   const fronts = root.querySelectorAll<HTMLElement>('[data-front]');
+  const faces = [page, ...fronts];
   const head = find('head');
   const panel = find('panel');
   const slot = find('slot');
@@ -134,6 +124,7 @@ export function createStack(root: HTMLElement, { onLand }: StackOptions): StackE
   let panelLeft = 0;
   let runFrom = 0;
   let runTo = 1;
+  /** the page straight on, and the stack at rest */
   const from: View = {
     target: [0, 0, 0],
     dist: 1,
@@ -145,17 +136,16 @@ export function createStack(root: HTMLElement, { onLand }: StackOptions): StackE
   let to = from;
   const view: View = { target: [0, 0, 0], dist: 1, elev: 0, yaw: 0, focal: 1, shift: [0, 0] };
   const cam = createCamera();
-  const point = [0, 0, 0];
+  const point = [0, 0];
   const quad = [0, 0, 0, 0, 0, 0, 0, 0];
   const lo: Vec3 = [0, 0, 0];
   const hi: Vec3 = [0, 0, 0];
-  const centre: [number, number] = [0, 0];
   const grid: Vec3 = [0, 0, 0];
   const length = Math.hypot(LIGHT[0], LIGHT[1], LIGHT[2]);
-  /** what each face was last given: the page's transform, then each front's, its z-index, whether it shows */
+  /** what each face was last given: its transform, and for a front whether it shows and is raised */
   const written: string[] = ['', '', '', '', ''];
-  const raised: boolean[] = [false, false, false, false];
   const facing: boolean[] = [false, false, false, false];
+  const raised: boolean[] = [false, false, false, false];
 
   let target = 0;
   let progress = 0;
@@ -197,9 +187,8 @@ export function createStack(root: HTMLElement, { onLand }: StackOptions): StackE
     const origin = cell.getBoundingClientRect();
     const scroll = window.scrollY;
     const headBox = rectIn(head, origin);
-    const panelBox = rectIn(panel, origin);
     headFoot = headBox.y + headBox.h;
-    panelLeft = panelBox.x;
+    panelLeft = rectIn(panel, origin).x;
 
     let rest: Rect;
     if (mode === 'stage') rest = rectIn(slot, origin);
@@ -219,12 +208,7 @@ export function createStack(root: HTMLElement, { onLand }: StackOptions): StackE
     from.shift[1] = pageY + D / 2 - height / 2;
     const top = 4 * T + 3 * GAP * T;
     const band = mode === 'band';
-    lo[0] = -W / 2;
-    lo[1] = 0;
-    lo[2] = -D / 2;
-    hi[0] = W / 2;
-    hi[1] = top;
-    hi[2] = D / 2 + pull;
+    box(0, top, -D / 2, D / 2 + pull);
     to = fitView(
       {
         target: [0, top / 2, pull / 2],
@@ -244,12 +228,12 @@ export function createStack(root: HTMLElement, { onLand }: StackOptions): StackE
     runFrom = root.getBoundingClientRect().top + scroll - menu;
     if (mode === 'stage') runTo = runFrom + spacer.offsetHeight;
     else if (mode === 'column') {
-      // the header and the panel scroll in over the canvas' right part after their spacer: the run is
-      // as long as makes them arrive just as the stack has left that part, so they never cross it
+      // as long as makes the header and the panel arrive over the canvas' right part just as the
+      // stack has left it, so they never cross it
       let clear = 0;
       for (let i = 100; i >= 0 && clear === 0; i--) {
-        const box = stackBox(aimAt(i / 100));
-        if (panelLeft - (box.x + box.w) < 24) clear = Math.min(1, (i + 1) / 100);
+        const stack = stackBox(aimAt(i / 100));
+        if (panelLeft - (stack.x + stack.w) < 24) clear = Math.min(1, (i + 1) / 100);
       }
       runTo = runFrom + spacer.offsetHeight / Math.max(clear, 0.3);
     } else runTo = code.getBoundingClientRect().top + scroll - menu - height;
@@ -266,8 +250,8 @@ export function createStack(root: HTMLElement, { onLand }: StackOptions): StackE
     ]);
     // on the stage they wait for the camera, which the frame below decides at once
     instant = true;
-    show(head, headItems, mode !== 'stage');
-    show(panel, panelItems, mode !== 'stage');
+    show(head, mode !== 'stage');
+    show(panel, mode !== 'stage');
     scrolled();
     progress = target;
     shader!.draw();
@@ -289,46 +273,40 @@ export function createStack(root: HTMLElement, { onLand }: StackOptions): StackE
     return easeCamera(clamp((p - 0.4) / 0.4));
   }
 
+  /** the box across the page's width from `y0` to `y1` and `z0` to `z1`, into `lo` and `hi` */
+  function box(y0: number, y1: number, z0: number, z1: number) {
+    lo[0] = -W / 2;
+    lo[1] = y0;
+    lo[2] = z0;
+    hi[0] = W / 2;
+    hi[1] = y1;
+    hi[2] = z1;
+  }
+
   /** the stack's box on the canvas with its layers parted by `part`, no tray out */
   function stackBox(part: number) {
-    lo[0] = -W / 2;
-    lo[1] = 0;
-    lo[2] = -D / 2;
-    hi[0] = W / 2;
-    hi[1] = 4 * T + 3 * GAP * T * part;
-    hi[2] = D / 2;
+    box(0, 4 * T + 3 * GAP * T * part, -D / 2, D / 2);
     return boundsOf(cam, lo, hi);
   }
 
   /**
-   * The corners of a face into `quad`, its top left, top right, bottom right and bottom left, on
-   * the canvas less where its element already sits (`dx`, `dy`)
+   * A face across the page's width, top edge at `y0`, `z0` and bottom at `y1`, `z1`: its corners on
+   * the canvas less where its element sits (`dx`, `dy`), into `quad` from the top left, clockwise
    */
-  function corners(
-    x0: number,
-    y0: number,
-    z0: number,
-    x1: number,
-    y1: number,
-    z1: number,
-    dx = 0,
-    dy = 0,
-  ) {
-    const ys = [y0, y0, y1, y1];
-    const zs = [z0, z0, z1, z1];
+  function corners(y0: number, z0: number, y1: number, z1: number, dx = 0, dy = 0) {
     for (let i = 0; i < 4; i++) {
-      project(cam, i === 0 || i === 3 ? x0 : x1, ys[i], zs[i], point);
+      const bottom = i >= 2;
+      project(cam, i === 0 || i === 3 ? -W / 2 : W / 2, bottom ? y1 : y0, bottom ? z1 : z0, point);
       quad[2 * i] = point[0] - dx;
       quad[2 * i + 1] = point[1] - dy;
     }
     return quad;
   }
 
-  function write(i: number, el: HTMLElement, transform: string): boolean {
-    if (written[i] === transform) return false;
+  function write(i: number, transform: string) {
+    if (written[i] === transform) return;
     written[i] = transform;
-    el.style.transform = transform;
-    return true;
+    faces[i].style.transform = transform;
   }
 
   function onFrame() {
@@ -365,9 +343,7 @@ export function createStack(root: HTMLElement, { onLand }: StackOptions): StackE
     shader!.set('uUp', cam.up);
     shader!.set('uFwd', cam.fwd);
     shader!.set('uFocal', cam.focal);
-    centre[0] = cam.cx;
-    centre[1] = cam.cy;
-    shader!.set('uCentre', centre);
+    shader!.set('uCentre', cam.centre);
 
     // the layers top down, parted by `part`, each slid out by its tray; the real faces on them
     const step = T + GAP * T * part;
@@ -378,40 +354,24 @@ export function createStack(root: HTMLElement, { onLand }: StackOptions): StackE
       const y = (3 - i) * step;
       const z = D / 2 + dz;
       reach = Math.max(reach, dz);
-      lo[0] = -W / 2;
-      lo[1] = y;
-      lo[2] = -D / 2 + dz;
-      hi[0] = W / 2;
-      hi[1] = y + T;
-      hi[2] = z;
+      box(y, y + T, -D / 2 + dz, z);
       shader!.set(UNIFORM_MIN[i], lo);
       shader!.set(UNIFORM_MAX[i], hi);
-      if (i === 0)
-        write(
-          0,
-          page,
-          quadMatrix(corners(-W / 2, y + T, -D / 2 + dz, W / 2, y + T, z, pageX, pageY), W, D),
-        );
+      if (i === 0) write(0, quadMatrix(corners(y + T, -D / 2 + dz, y + T, z, pageX, pageY), W, D));
       // a front shows once the eye is in front of it, and the tray out sits over the ones below
       const front = fronts[i];
-      const faces = cam.eye[2] > z + 1;
-      if (faces !== facing[i]) {
-        facing[i] = faces;
-        front.style.visibility = faces ? 'visible' : 'hidden';
+      const shows = cam.eye[2] > z + 1;
+      if (shows !== facing[i]) {
+        facing[i] = shows;
+        front.style.visibility = shows ? 'visible' : 'hidden';
       }
-      if (faces)
-        write(i + 1, front, quadMatrix(corners(-W / 2, y + T, z, W / 2, y, z), frontW, frontH));
+      if (shows) write(i + 1, quadMatrix(corners(y + T, z, y, z), frontW, frontH));
       if (out > 0 !== raised[i]) {
         raised[i] = out > 0;
         front.style.zIndex = raised[i] ? '1' : '';
       }
     }
-    lo[0] = -W / 2;
-    lo[1] = 0;
-    lo[2] = -D / 2;
-    hi[0] = W / 2;
-    hi[1] = 3 * step + T;
-    hi[2] = D / 2 + reach;
+    box(0, 3 * step + T, -D / 2, D / 2 + reach);
     shader!.set('uBoundMin', lo);
     shader!.set('uBoundMax', hi);
     // the floor's shadow and grid come in once the camera has left overhead, so the page starts flat
@@ -423,12 +383,10 @@ export function createStack(root: HTMLElement, { onLand }: StackOptions): StackE
     shader!.set('uGrid', grid);
 
     if (moving) {
-      page.style.willChange = 'transform';
-      for (const front of fronts) front.style.willChange = 'transform';
+      for (const face of faces) face.style.willChange = 'transform';
       clearTimeout(still);
       still = window.setTimeout(() => {
-        page.style.willChange = '';
-        for (const front of fronts) front.style.willChange = '';
+        for (const face of faces) face.style.willChange = '';
       }, STILL);
     }
 
@@ -437,36 +395,33 @@ export function createStack(root: HTMLElement, { onLand }: StackOptions): StackE
     // apart so it never flickers. A pick still on its way lands as the panel goes, and focus in the
     // panel moves to the figure.
     if (mode === 'stage') {
-      const box = stackBox(part);
-      const headRoom = box.y - headFoot;
-      const panelRoom = panelLeft - (box.x + box.w);
-      if (headShown ? headRoom < 0 : headRoom >= 16) show(head, headItems, !headShown);
+      const stack = stackBox(part);
+      const headRoom = stack.y - headFoot;
+      const panelRoom = panelLeft - (stack.x + stack.w);
+      if (headShown ? headRoom < 0 : headRoom >= 16) show(head, !headShown);
       if (panelShown ? panelRoom < 0 : panelRoom >= 24) {
         if (panelShown) {
           settle(false);
           if (panel.contains(document.activeElement)) root.focus({ preventScroll: true });
         }
-        show(panel, panelItems, !panelShown);
+        show(panel, !panelShown);
       }
     }
     instant = false;
     if (moving) shader!.invalidate();
   }
 
-  function show(container: HTMLElement, items: NodeListOf<HTMLElement>, next: boolean) {
-    if (container === head) headShown = next;
-    else panelShown = next;
-    container.toggleAttribute('data-shown', next);
-    reveal(items, next, instant);
-  }
-
   /**
    * The header rises on ticks with the lead's pixels morphing in, as Start's does; the panel's keys
-   * rise layer by layer and our window Opens from a 1px line, in about 300ms. Hidden at once, and
-   * inert to the pointer while hidden.
+   * rise in pairs with their labels and our window opens from a 1px line, in about 300ms. Hidden at
+   * once, and inert to the pointer while hidden.
    */
-  function reveal(items: NodeListOf<HTMLElement>, next: boolean, now = false) {
-    const quick = items === panelItems;
+  function show(container: HTMLElement, next: boolean) {
+    const quick = container === panel;
+    if (quick) panelShown = next;
+    else headShown = next;
+    container.toggleAttribute('data-shown', next);
+    const items = quick ? panelItems : headItems;
     for (let i = 0; i < items.length; i++) {
       const item = items[i];
       item.style.pointerEvents = next ? 'auto' : 'none';
@@ -478,47 +433,27 @@ export function createStack(root: HTMLElement, { onLand }: StackOptions): StackE
       const shown = opens
         ? { clipPath: 'inset(0 0 0 0)' }
         : { transform: 'none', clipPath: 'inset(0 0 0 0)' };
-      if (now || !next) {
-        item.animate([next ? shown : hidden, next ? shown : hidden], {
-          duration: 1,
-          fill: 'forwards',
-        });
-        item.animate([{ opacity: next ? 1 : 0 }, { opacity: next ? 1 : 0 }], {
-          duration: now ? 1 : 120,
-          fill: 'forwards',
-        });
+      if (instant || !next) {
+        const end = next ? shown : hidden;
+        const opacity = next ? 1 : 0;
+        item.animate([end, end], { duration: 1, fill: 'forwards' });
+        item.animate([{ opacity }, { opacity }], { duration: instant ? 1 : 120, fill: 'forwards' });
         continue;
       }
-      // a layer's keys come in a pair with its label
       const delay = quick ? (opens ? 70 : Math.floor(i / 2) * 35) : i * TICK;
-      if (opens)
-        item.animate([hidden, shown], {
-          duration: 200,
-          delay,
-          easing: 'steps(4, end)',
-          fill: 'both',
-        });
-      else
-        item.animate([hidden, shown], {
-          duration: quick ? 220 : 700,
-          delay,
-          easing: settleCss,
-          fill: 'both',
-        });
+      const motion = opens
+        ? { duration: 200, easing: 'steps(4, end)' }
+        : { duration: quick ? 220 : 700, easing: settleCss };
+      item.animate([hidden, shown], { ...motion, delay, fill: 'both' });
       item.animate([{ opacity: 0 }, { opacity: 1 }], {
         duration: quick ? 80 : 120,
         delay,
         fill: 'both',
       });
-      if (i === 0 && items === headItems)
+      if (i === 0 && !quick)
         item.animate(
           [{ fontVariationSettings: "'ELSH' 100" }, { fontVariationSettings: "'ELSH' 0" }],
-          {
-            duration: 4 * TICK,
-            delay,
-            easing: 'steps(4, end)',
-            fill: 'both',
-          },
+          { duration: 4 * TICK, delay, easing: 'steps(4, end)', fill: 'both' },
         );
     }
   }

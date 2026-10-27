@@ -5,10 +5,10 @@ import { copy } from '../../content';
 import { TICK } from '../../lib/motion';
 import { Scramble } from '../../ui/text';
 import { Window } from '../../ui/window';
-import { DEMOS, LAYOUTS, type LayoutId, TABS, type TabId, THEME_NAMES, type ThemeId } from './data';
+import { DEMOS, LAYOUTS, type LayoutId, type TabId, THEME_NAMES, type ThemeId } from './data';
+import { createFrames, type Frames } from './frames';
 import { Plan } from './plan';
 import type { InkTable } from './presets';
-import { createStage, type Stage } from './stage';
 
 interface MonitorProps {
   table: InkTable;
@@ -17,19 +17,15 @@ interface MonitorProps {
   theme: ThemeId;
   /** ink a theme without the print, while the dial turns */
   instant: boolean;
-  /** the next screen is on its way */
   busy: boolean;
-  stageRef: RefObject<Stage | null>;
-  /** the screen is the tabs' panel */
-  panelId: string;
-  labelledBy: string;
+  framesRef: RefObject<Frames | null>;
   onBusy: (busy: boolean) => void;
-  className?: string;
+  className: string;
 }
 
 const SPIN = '◒◐◓◑';
 
-/** clack's spinner in the title bar while the next screen is on its way, still for reduced motion */
+/** clack's spinner while the next screen is on its way, still for reduced motion */
 function spin(span: HTMLSpanElement | null) {
   if (!span || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   let frame = 0;
@@ -39,7 +35,6 @@ function spin(span: HTMLSpanElement | null) {
   return () => clearInterval(timer);
 }
 
-/** the live layout, or a hands-on demo, in the chosen theme */
 export function Monitor({
   table,
   tab,
@@ -47,35 +42,31 @@ export function Monitor({
   theme,
   instant,
   busy,
-  stageRef,
-  panelId,
-  labelledBy,
+  framesRef,
   onBusy,
   className,
 }: MonitorProps) {
   const ref = useCallback(
     (element: HTMLDivElement | null) => {
       if (!element) return;
-      const instance = createStage(element, table, onBusy);
-      stageRef.current = instance;
+      const instance = createFrames(element, table, onBusy);
+      framesRef.current = instance;
       return () => {
         instance.destroy();
-        stageRef.current = null;
+        framesRef.current = null;
       };
     },
-    [table, onBusy, stageRef],
+    [table, onBusy, framesRef],
   );
 
   useEffect(() => {
-    stageRef.current?.show(tab, layout, theme, instant);
-  }, [stageRef, tab, layout, theme, instant]);
+    framesRef.current?.show(tab, layout, theme, instant);
+  }, [framesRef, tab, layout, theme, instant]);
 
   const name = LAYOUTS.find((item) => item.id === layout)!.name;
-  const title = tab === 'layouts' ? `fumadocs-ui/layouts/${layout}` : DEMOS[tab].source;
   const docs = copy.style.tabs[tab];
   const screens = [];
-  for (const id of TABS) {
-    if (id === 'layouts') continue;
+  for (const id in DEMOS) {
     screens.push(
       <div
         key={id}
@@ -89,7 +80,12 @@ export function Monitor({
   return (
     <Window
       className={className}
-      title={<Scramble text={title} speed={14} />}
+      title={
+        <Scramble
+          text={tab === 'layouts' ? `fumadocs-ui/layouts/${layout}` : DEMOS[tab].source}
+          speed={14}
+        />
+      }
       actions={
         busy ? (
           <span
@@ -114,8 +110,8 @@ export function Monitor({
       <div
         ref={ref}
         role="tabpanel"
-        id={panelId}
-        aria-labelledby={labelledBy}
+        id="style-panel"
+        aria-labelledby={`style-tab-${tab}`}
         className="relative min-h-0 flex-1 overflow-hidden"
       >
         <div

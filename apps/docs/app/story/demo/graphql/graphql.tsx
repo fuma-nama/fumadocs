@@ -1,11 +1,10 @@
 'use client';
 import { preload } from 'react-dom';
-import { createGraphQLPage, type GraphQLPageProps } from '@fumadocs/graphql/ui';
+import { createGraphQLPage } from '@fumadocs/graphql/ui';
 import { apiHighlighter } from '@/lib/highlighter';
-import { Screen, type ScreenProps } from '../screen';
 
 /** the docs' GraphQL page, laid out to fit one screen */
-const GraphQLPage = createGraphQLPage({
+export const GraphQLPage = createGraphQLPage({
   highlighter: apiHighlighter,
   playground: {
     url: '/api/graphql',
@@ -33,11 +32,3 @@ const GraphQLPage = createGraphQLPage({
     ),
   },
 });
-
-export function GraphQLScreen({ title, docs, ...props }: GraphQLPageProps & ScreenProps) {
-  return (
-    <Screen title={title} docs={docs}>
-      <GraphQLPage {...props} />
-    </Screen>
-  );
-}

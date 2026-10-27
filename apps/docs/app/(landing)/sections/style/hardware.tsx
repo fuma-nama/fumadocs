@@ -1,22 +1,9 @@
-import type { ReactNode } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 import { cn } from '@/lib/cn';
-import { DITHER_MASKS } from '../../lib/bayer';
-import { HUB, hubPort, percent, SLOTS, WINDOW, windowPort } from './board';
+import { DITHER_MASKS } from '../../lib/dither';
 import type { LayoutId } from './data';
-import { Hazard, LINE, type PartProps, Screw, Stamp } from './parts';
-
-/**
- * The fixed hardware of the desk, drawn on the server: what never moves on its own or changes
- * with the reader. The desk places it, and moves what it is bolted to.
- */
-export interface Hardware {
-  /** each window's plate, and the jack its cable plugs into */
-  plates: Record<LayoutId, ReactNode>;
-  /** the face of the junction box, with a jack for each cable */
-  junction: ReactNode;
-  /** the parts screwed to the board around the box */
-  bench: ReactNode;
-}
+import { Hazard, PART, type PartProps, Screw, Stamp } from './parts';
+import { HUB, hubPort, percent, SLOTS, WINDOW, windowPort } from './scene';
 
 /** a dither of ink over the box, `level` of 16 cells */
 function Dither({ level, className }: { level: number; className?: string }) {
@@ -29,49 +16,18 @@ function Dither({ level, className }: { level: number; className?: string }) {
   );
 }
 
-/** a domed rivet: its far side in a dither */
-function Rivet({ className, style }: PartProps) {
-  return (
-    <span
-      aria-hidden
-      className={cn(
-        'absolute size-[max(5px,1cqw)] -translate-1/2 overflow-hidden rounded-full border border-lp-ink-2 bg-lp-paper',
-        className,
-      )}
-      style={style}
-    >
-      <Dither level={6} className="left-1/2" />
-    </span>
-  );
-}
-
-/** a socket a cable plugs into, over the frame line it sits on */
-function Jack({ style }: { style: PartProps['style'] }) {
+function Jack({ x, y, w, h }: { x: number; y: number; w: number; h: number }) {
   return (
     <span
       aria-hidden
       className="absolute z-[1] grid size-[max(8px,1.7cqw)] -translate-1/2 place-items-center rounded-full border border-lp-ink-2 bg-lp-paper"
-      style={style}
+      style={{ left: `${(x / w) * 100}%`, top: `${(y / h) * 100}%` }}
     >
       <span className="size-[38%] rounded-full bg-lp-ink-2" />
     </span>
   );
 }
 
-/** a speaker grille: holes punched in a plate */
-function Grille({ className }: { className: string }) {
-  return (
-    <span
-      aria-hidden
-      className={cn(
-        'absolute rounded-[3px] border border-lp-ink-2 bg-[radial-gradient(var(--lp-ink-2)_1px,transparent_1.4px)] bg-size-[5px_5px] bg-center',
-        className,
-      )}
-    />
-  );
-}
-
-/** a strip of worn tape over a corner: torn ends, a hairline, a dither of grime */
 function Tape({ className, style }: PartProps) {
   return (
     <span
@@ -87,113 +43,55 @@ function Tape({ className, style }: PartProps) {
   );
 }
 
-/* the hardware screwed to the board, in its own units; the box sizes it */
-
-/** a glass fuse in its clips, the wire running through it */
-function Fuse({ style }: Pick<PartProps, 'style'>) {
+function Fuse({ style }: { style: CSSProperties }) {
   return (
-    <svg aria-hidden viewBox="0 0 96 24" className="absolute overflow-visible" style={style}>
-      <path
-        d="M10 22V6a4 4 0 0 1 8 0v16M78 22V6a4 4 0 0 1 8 0v16"
-        className="fill-none stroke-lp-ink-2"
-        style={LINE}
-      />
-      <rect
-        x={4.5}
-        y={5.5}
-        width={87}
-        height={13}
-        rx={2}
-        className="fill-lp-paper stroke-lp-ink-2"
-        style={LINE}
-      />
-      <rect x={4.5} y={5.5} width={12} height={13} className="fill-lp-ink-2" />
-      <rect x={79.5} y={5.5} width={12} height={13} className="fill-lp-ink-2" />
-      <path
-        d="M17 12h8l3-3 4 6 4-6 4 6 4-6 4 6 4-6 4 6 3-3h17"
-        className="fill-none stroke-lp-ink-2"
-        style={LINE}
-      />
+    <svg aria-hidden viewBox="0 0 96 24" className={PART} style={style}>
+      <path d="M10 22V6a4 4 0 0 1 8 0v16M78 22V6a4 4 0 0 1 8 0v16" className="fill-none" />
+      <rect x={4.5} y={5.5} width={87} height={13} rx={2} />
+      <rect x={4.5} y={5.5} width={12} height={13} className="fill-lp-ink-2 stroke-none" />
+      <rect x={79.5} y={5.5} width={12} height={13} className="fill-lp-ink-2 stroke-none" />
+      <path d="M17 12h8l3-3 4 6 4-6 4 6 4-6 4 6 4-6 4 6 3-3h17" className="fill-none" />
     </svg>
   );
 }
 
-/** a small transformer: laminated core, two wound bobbins, feet with their screws */
-function Transformer({ style }: Pick<PartProps, 'style'>) {
+function Transformer({ style }: { style: CSSProperties }) {
   let lamination = '';
   for (let y = 12; y <= 52; y += 4) lamination += `M14 ${y}h68`;
   let winding = '';
   for (let x = 22; x <= 38; x += 2) winding += `M${x} 18v28`;
   for (let x = 58; x <= 74; x += 2) winding += `M${x} 18v28`;
   return (
-    <svg aria-hidden viewBox="0 0 96 70" className="absolute overflow-visible" style={style}>
-      <path d="M2.5 60.5h91v8h-91z" className="fill-lp-paper stroke-lp-ink-2" style={LINE} />
-      <circle cx={9} cy={64.5} r={2} className="fill-lp-paper stroke-lp-ink-2" style={LINE} />
-      <circle cx={87} cy={64.5} r={2} className="fill-lp-paper stroke-lp-ink-2" style={LINE} />
-      <rect
-        x={12.5}
-        y={8.5}
-        width={71}
-        height={52}
-        className="fill-lp-paper stroke-lp-ink-2"
-        style={LINE}
-      />
-      <path d={lamination} className="stroke-lp-line-strong" style={LINE} />
-      <rect
-        x={19.5}
-        y={16.5}
-        width={22}
-        height={32}
-        className="fill-lp-paper stroke-lp-ink-2"
-        style={LINE}
-      />
-      <rect
-        x={55.5}
-        y={16.5}
-        width={22}
-        height={32}
-        className="fill-lp-paper stroke-lp-ink-2"
-        style={LINE}
-      />
-      <path d={winding} className="stroke-lp-ink-2" style={LINE} />
-      <path d="M26 8.5V2M34 8.5V2M62 8.5V2M70 8.5V2" className="stroke-lp-ink-2" style={LINE} />
+    <svg aria-hidden viewBox="0 0 96 70" className={PART} style={style}>
+      <path d="M2.5 60.5h91v8h-91z" />
+      <circle cx={9} cy={64.5} r={2} />
+      <circle cx={87} cy={64.5} r={2} />
+      <rect x={12.5} y={8.5} width={71} height={52} />
+      <path d={lamination} className="stroke-lp-line-strong" />
+      <rect x={19.5} y={16.5} width={22} height={32} />
+      <rect x={55.5} y={16.5} width={22} height={32} />
+      <path d={winding} />
+      <path d="M26 8.5V2M34 8.5V2M62 8.5V2M70 8.5V2" />
     </svg>
   );
 }
 
-/** a trimmer potentiometer: a square body, a slotted rotor, its three legs */
-function Trimmer({ style }: Pick<PartProps, 'style'>) {
+function Trimmer({ style }: { style: CSSProperties }) {
   return (
-    <svg aria-hidden viewBox="0 0 30 34" className="absolute overflow-visible" style={style}>
-      <path d="M7 27v6M15 27v6M23 27v6" className="stroke-lp-ink-2" style={LINE} />
-      <rect
-        x={0.5}
-        y={0.5}
-        width={29}
-        height={27}
-        className="fill-lp-paper stroke-lp-ink-2"
-        style={LINE}
-      />
-      <circle cx={15} cy={14} r={8.5} className="fill-lp-paper stroke-lp-ink-2" style={LINE} />
-      <path d="M10 9l10 10" strokeWidth={2} className="stroke-lp-ink-2" style={LINE} />
+    <svg aria-hidden viewBox="0 0 30 34" className={PART} style={style}>
+      <path d="M7 27v6M15 27v6M23 27v6" />
+      <rect x={0.5} y={0.5} width={29} height={27} />
+      <circle cx={15} cy={14} r={8.5} />
+      <path d="M10 9l10 10" strokeWidth={2} />
     </svg>
   );
 }
 
-/** a crystal in its can: a long rounded body on two leads */
-function Crystal({ style }: Pick<PartProps, 'style'>) {
+function Crystal({ style }: { style: CSSProperties }) {
   return (
-    <svg aria-hidden viewBox="0 0 44 22" className="absolute overflow-visible" style={style}>
-      <path d="M14 16v6M30 16v6" className="stroke-lp-ink-2" style={LINE} />
-      <rect
-        x={0.5}
-        y={0.5}
-        width={43}
-        height={15}
-        rx={7.5}
-        className="fill-lp-paper stroke-lp-ink-2"
-        style={LINE}
-      />
+    <svg aria-hidden viewBox="0 0 44 22" className={PART} style={style}>
+      <path d="M14 16v6M30 16v6" />
+      <rect x={0.5} y={0.5} width={43} height={15} rx={7.5} />
       <rect
         x={5.5}
         y={4.5}
@@ -201,30 +99,19 @@ function Crystal({ style }: Pick<PartProps, 'style'>) {
         height={7}
         rx={3.5}
         className="fill-none stroke-lp-line-strong"
-        style={LINE}
       />
     </svg>
   );
 }
 
-/** a safety pin, closed */
-function SafetyPin({ style }: Pick<PartProps, 'style'>) {
+function SafetyPin({ style }: { style: CSSProperties }) {
   return (
-    <svg aria-hidden viewBox="0 0 48 12" className="absolute overflow-visible" style={style}>
-      <path d="M8 3.5H40M8 8.5H38" className="stroke-lp-ink-2" style={LINE} />
-      <circle cx={6} cy={6} r={3.5} className="fill-none stroke-lp-ink-2" style={LINE} />
-      <path
-        d="M38 2.5h6.5a2.5 2.5 0 0 1 0 7H38z"
-        className="fill-lp-paper stroke-lp-ink-2"
-        style={LINE}
-      />
+    <svg aria-hidden viewBox="0 0 48 12" className={PART} style={style}>
+      <path d="M8 3.5H40M8 8.5H38" />
+      <circle cx={6} cy={6} r={3.5} className="fill-none" />
+      <path d="M38 2.5h6.5a2.5 2.5 0 0 1 0 7H38z" />
     </svg>
   );
-}
-
-/** a point on a box as % of its size */
-function at(x: number, y: number, w: number, h: number) {
-  return { left: `${(x / w) * 100}%`, top: `${(y / h) * 100}%` };
 }
 
 /** a plate around a window, `--plate` wider on each side */
@@ -242,33 +129,35 @@ function Plate({ className, children }: { className?: string; children?: ReactNo
   );
 }
 
-/** a row of rivets along an edge of a plate, from `from`% to `to`% of it */
-function Rivets({
-  edge,
-  from,
-  to,
-  count,
-}: {
-  edge: 'top' | 'bottom' | 'right';
+const EDGES = {
+  top: 'top-[var(--rim)]',
+  bottom: 'top-[calc(100%-var(--rim))]',
+  right: 'left-[calc(100%-var(--rim))]',
+};
+
+interface RivetsProps {
+  edge: keyof typeof EDGES;
   from: number;
   to: number;
   count: number;
-}) {
+}
+
+function Rivets({ edge, from, to, count }: RivetsProps) {
   const rivets = [];
   for (let i = 0; i < count; i++) {
     const offset = `${from + ((to - from) * i) / (count - 1)}%`;
     rivets.push(
-      <Rivet
+      <span
         key={i}
-        className={
-          edge === 'top'
-            ? 'top-[var(--rim)]'
-            : edge === 'bottom'
-              ? 'top-[calc(100%-var(--rim))]'
-              : 'left-[calc(100%-var(--rim))]'
-        }
+        aria-hidden
+        className={cn(
+          'absolute size-[max(5px,1cqw)] -translate-1/2 overflow-hidden rounded-full border border-lp-ink-2 bg-lp-paper',
+          EDGES[edge],
+        )}
         style={edge === 'right' ? { top: offset } : { left: offset }}
-      />,
+      >
+        <Dither level={6} className="left-1/2" />
+      </span>,
     );
   }
   return rivets;
@@ -319,8 +208,8 @@ const CHASSIS: Record<LayoutId, ReactNode> = {
   ),
 };
 
-/** the desk's fixed hardware */
-export function createHardware(): Hardware {
+/** the desk's fixed hardware, drawn on the server */
+export function createHardware() {
   const plates = {} as Record<LayoutId, ReactNode>;
   const jacks = [];
   for (const slot of SLOTS) {
@@ -328,11 +217,11 @@ export function createHardware(): Hardware {
     plates[slot.id] = (
       <>
         {CHASSIS[slot.id]}
-        <Jack style={at(x, y, WINDOW.w, WINDOW.h)} />
+        <Jack x={x} y={y} w={WINDOW.w} h={WINDOW.h} />
       </>
     );
     const [hx, hy] = hubPort(slot);
-    jacks.push(<Jack key={slot.id} style={at(hx, hy, HUB.w, HUB.h)} />);
+    jacks.push(<Jack key={slot.id} x={hx} y={hy} w={HUB.w} h={HUB.h} />);
   }
 
   return {
@@ -349,12 +238,16 @@ export function createHardware(): Hardware {
             search
           </Stamp>
         </span>
-        <Grille className="right-[14%] bottom-[12%] h-[24%] w-[18%]" />
+        {/* a speaker grille: holes punched in a plate */}
+        <span
+          aria-hidden
+          className="absolute right-[14%] bottom-[12%] h-[24%] w-[18%] rounded-[3px] border border-lp-ink-2 bg-[radial-gradient(var(--lp-ink-2)_1px,transparent_1.4px)] bg-size-[5px_5px] bg-center"
+        />
         {jacks}
       </>
     ),
     // in the two bands beside the box that no window, shadow or cable reaches in any frame of a
-    // move, under the windows and the cables, in the mid-grey ink; a small desk keeps the fewest
+    // move, under the windows and the cables; a small desk keeps the fewest
     bench: (
       <div aria-hidden className="pointer-events-none absolute inset-0">
         <SafetyPin style={{ ...percent(14, 406, 60, 15), rotate: '-16deg' }} />
@@ -366,3 +259,5 @@ export function createHardware(): Hardware {
     ),
   };
 }
+
+export type Hardware = ReturnType<typeof createHardware>;

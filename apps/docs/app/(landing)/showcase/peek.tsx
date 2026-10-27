@@ -1,5 +1,5 @@
 'use client';
-import { type ReactNode, useCallback } from 'react';
+import { type ReactNode, useRef } from 'react';
 import { useReducedMotion } from 'motion/react';
 import { BEAT } from '../lib/motion';
 import { restore, setStatus } from '../lib/status';
@@ -15,56 +15,44 @@ function morph(glyph: HTMLElement) {
 }
 
 /**
- * The status bar names where a pointed or focused link inside leads; a site without a screenshot
- * morphs its initial.
+ * A list whose links show where they lead in the status bar while pointed at or focused; a site
+ * without a screenshot morphs its initial.
  */
-export function Peek({ children }: { children: ReactNode }) {
+export function Peek({ className, children }: { className: string; children: ReactNode }) {
   const reduced = useReducedMotion();
-  const ref = useCallback(
-    (element: HTMLDivElement | null) => {
-      if (!element) return;
-      let current: HTMLAnchorElement | null = null;
+  const peeked = useRef<HTMLAnchorElement | null>(null);
 
-      function enter(link: HTMLAnchorElement) {
-        current = link;
-        setStatus(`open ${address(link.href)}`);
-        const glyph = link.querySelector<HTMLElement>('[data-glyph]');
-        if (glyph && !reduced) morph(glyph);
-      }
+  function enter(link: HTMLAnchorElement) {
+    peeked.current = link;
+    setStatus(`open ${address(link.href)}`);
+    const glyph = link.querySelector<HTMLElement>('[data-glyph]');
+    if (glyph && !reduced) morph(glyph);
+  }
 
-      function leave() {
-        current = null;
-        restore();
-      }
+  function leave() {
+    peeked.current = null;
+    restore();
+  }
 
-      const onPointerOver = (event: PointerEvent) => {
+  return (
+    <ul
+      className={className}
+      onPointerOver={(event) => {
         const link = (event.target as Element).closest('a');
-        if (event.pointerType !== 'touch' && link && link !== current) enter(link);
-      };
-      const onPointerLeave = (event: PointerEvent) => {
+        if (event.pointerType !== 'touch' && link && link !== peeked.current) enter(link);
+      }}
+      onPointerLeave={(event) => {
         if (event.pointerType !== 'touch') leave();
-      };
-      const onFocusIn = (event: FocusEvent) => {
-        const link = (event.target as Element).closest('a');
+      }}
+      onFocus={(event) => {
+        const link = event.target.closest('a');
         if (link?.matches(':focus-visible')) enter(link);
-      };
-      const onFocusOut = (event: FocusEvent) => {
-        if (!element.contains(event.relatedTarget as Node | null)) leave();
-      };
-
-      element.addEventListener('pointerover', onPointerOver);
-      element.addEventListener('pointerleave', onPointerLeave);
-      element.addEventListener('focusin', onFocusIn);
-      element.addEventListener('focusout', onFocusOut);
-      return () => {
-        element.removeEventListener('pointerover', onPointerOver);
-        element.removeEventListener('pointerleave', onPointerLeave);
-        element.removeEventListener('focusin', onFocusIn);
-        element.removeEventListener('focusout', onFocusOut);
-      };
-    },
-    [reduced],
+      }}
+      onBlur={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget)) leave();
+      }}
+    >
+      {children}
+    </ul>
   );
-
-  return <div ref={ref}>{children}</div>;
 }

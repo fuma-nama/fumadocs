@@ -1,10 +1,10 @@
 import type { Metadata } from 'next';
 import { ArrowUpRight } from 'lucide-react';
 import { createMetadata } from '@/lib/metadata';
-import { blogs, showcases, vercel } from '@/lib/showcases';
+import { blogs, showcases } from '@/lib/showcases';
 import { Figure, FigureHeader, Lead } from '../ui/figure';
 import { address } from '../ui/site-tile';
-import { arrange, copy, suggest } from './data';
+import { arrange, copy, online, suggest } from './data';
 import { DeckBack, DeckFront } from './deck';
 import { Projector } from './projector';
 import { Blogs, Wall } from './wall';
@@ -23,7 +23,6 @@ export const metadata: Metadata = createMetadata({
 const figure = 'flex flex-col gap-12 px-(--lp-gutter) py-16 md:gap-16 md:py-20';
 
 export default function Page() {
-  // the reel runs in the wall's order: the featured first, then every other site with a screenshot
   const { featured, shots } = arrange(showcases);
   const reel = [...featured, ...shots];
 
@@ -56,12 +55,7 @@ export default function Page() {
         </div>
         <Projector sites={reel} back={<DeckBack count={reel.length} />} front={<DeckFront />} />
       </Figure>
-      <Figure
-        id="sites"
-        aria-label="Sites"
-        status={`${showcases.length + vercel.length} sites online`}
-        className={figure}
-      >
+      <Figure id="sites" aria-label="Sites" status={`${online} sites online`} className={figure}>
         <FigureHeader lead={copy.sites.lead} title={copy.sites.title} />
         <Wall sites={showcases} />
       </Figure>

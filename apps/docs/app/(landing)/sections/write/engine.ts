@@ -1,30 +1,18 @@
 import { cubicBezier } from 'motion/react';
 import { createShaderCanvas, cssRgb, cssRgba } from '../../lib/gl';
-import { clamp, type Rect, rectIn } from '../../lib/math';
-import { camera, settle, TICK } from '../../lib/motion';
+import { camera, clamp, type Rect, rectIn, settle, TICK } from '../../lib/motion';
 import { report } from '../../lib/status';
 import { isDark, onTheme } from '../../lib/theme';
 import {
-  BED,
-  BED_DECK,
-  BOOM,
-  COLUMN_DECK,
-  type Deck,
-  fragment,
-  PEN,
-  PENCIL,
-  ram,
-  type Vec2,
-  YOKE,
-} from './arm';
-import {
   ARM_BOX,
+  BLINK,
   CROWN_CELL,
   MATE_H,
   MATE_PAD,
   MATE_RISE,
   MATE_W,
   type MateInk,
+  mateInk,
   ORBIT_STEPS,
   paintMate,
   POSE_BOX,
@@ -33,20 +21,27 @@ import {
   silhouette,
   SPRITE_H,
   SPRITE_W,
-} from './mascot';
+  STEP,
+} from '../../ui/mascot';
+import {
+  BED,
+  BED_DECK,
+  BOOM,
+  COLUMN_DECK,
+  fragment,
+  PEN,
+  PENCIL,
+  ram,
+  type Vec2,
+  YOKE,
+} from './scene';
 
-/** a key types in this long, two a frame at 60 Hz */
+/** ms a key takes, two a frame at 60 Hz */
 const CHAR = 1000 / 120;
-/** the writer starts the next block this long after finishing one */
 const GAP = 140;
-/** a finished block's tab shows inverted this long */
+/** ms a finished block's tab shows inverted */
 const POP = 60;
-/** the beats of a press, ms: the carriage drives to the plate's station while the arm reaches to
- * where the slide starts, her pencil standing up on its trunnion while the joints turn; it tips down
- * onto the plate and the quill lowers it, the last of that once the arm has stopped; its point slides
- * down the plate (or up, back to Markdown) at this pace within these bounds, the quill lifts it and
- * it tips up off the plate; the rig parks this long after the last, arriving this long after its
- * block's tab pops */
+/** a press's beats, ms; the slide takes SLIDE_MS a px, within SLIDE */
 const DRIVE = 460;
 const TIP_UP = 140;
 const TIP_DOWN = 200;
@@ -57,115 +52,85 @@ const LIFT = 160;
 const REST = 60;
 const PARK = 700;
 const ARRIVE = 40;
-/** a long move cruises at this top speed, px/ms, between a start and a stop each this long, ms: the
- * two halves of a short move's curve, so a long one only adds the cruise; a move this short keeps
- * that curve over the drive's beat */
+/** a long move cruises at TOP px/ms between RAMP ms ramps; under SHORT px it keeps the drive's */
 const TOP = 2.8;
 const RAMP = 160;
 const SHORT = (TOP * DRIVE) / 2.857;
 /** of the drop, the share after the arm has stopped */
 const SETTLE = 0.25;
-/** ms a joint takes a radian at its gentlest: the boom turning on its ring, the elbow; the share
- * of the shorter of two windows of a move that run together */
+/** ms a radian takes at its gentlest: the boom's turn, the elbow's bend */
 const TURN_RATE = 140;
 const BEND_RATE = 110;
-/** up a phone's column, where the boom swings round over the page, the fastest its elbow sweeps on
- * average, stage px a ms; on a reader's springs, how far from its aim the boom still counts as
- * swinging, rad */
+/** a phone's elbow sweep (px/ms); rad off its aim a boom still swings; windows' overlap share */
 const SWING = 1;
 const SWUNG = 0.3;
 const OVERLAP = 0.35;
-/** ms an arm caught mid-move by a press brakes for, along its way, before it sets off anew */
+/** ms an arm caught mid-move brakes before it sets off anew */
 const BRAKE = 32;
-/** the elbow's inner angle, rad: at both ends of every slide it stays between these; folded at
- * rest, it leaves this much */
+/** the elbow's inner angle at both ends of a slide, rad; folded at rest it leaves TUCK */
 const INNER: Vec2 = [(50 * Math.PI) / 180, (150 * Math.PI) / 180];
 const TUCK = 0.06;
-/** her pencil stood up off the page on its trunnion, rad; up a phone's column it tips no further
- * than this, never end-on to the camera */
+/** her pencil stood up on its trunnion; up a phone's column never further, never end-on */
 const UPRIGHT = Math.PI / 2;
 const STEEP = Math.PI / 3;
-/** the replay dithers the page out in 16 frames at 60 fps */
 const FADE = (16 * 1000) / 60;
 /** world px: how high the camera stands over the page */
 const CAMERA = 4000;
-/** toward the light: high, from the upper right, so shadows stay short and fall onto the plate
- * being slid or into the bay */
+/** high from the upper right, so shadows stay short and fall on the plate or into the bay */
 const LIGHT = normalize(0.13, -0.18, 0.975);
-/** share of the stage in view that starts the cycle */
+/** share of the stage in view that starts the writer */
 const START = 0.4;
-/** the arm on a reader's springs: this stiff (1/s), critically damped; the carriage no faster
- * than this, stage px/s, its joints than this, rad/s */
+/** a reader's springs: stiffness (1/s), top speeds (px/s, rad/s), and her pencil's tip */
 const AIM = 10;
 const AIM_SPEED = 1500;
 const AIM_SLEW = 7;
-/** her pencil tips on a spring this stiff (1/s), up while the joints swing it round */
 const AIM_TIP = 16;
-/** up a phone's column the arm follows the scroll: the line a reader reads at, this share down the
- * viewport; the carriage's spring there (1/s) */
+/** up a phone's column the arm follows the line read this far down the viewport, on this spring */
 const READ = 0.45;
 const SCROLL_AIM = 16;
-/** in follow mode her pencil points at the cursor, its point this many px short of it */
 const AIM_GAP = 10;
-/** ms: a mouse that rests this long in the stage lets the rig go back to its park */
+/** ms a resting mouse holds the rig before it goes home */
 const IDLE = 2000;
-/** ms the status line says a press asked for while the sequence plays is queued */
 const NOTE = 1500;
-/** ms: a second click within this long makes a double-click, which selects a word, not a press */
+/** ms within which a second click makes a double-click, which selects a word */
 const DOUBLE = 250;
-/** how big the rig is drawn: its scale, her cell (CSS px) and her moon's ring (cells wide) */
-interface Rig {
-  scale: number;
-  cell: number;
-  ring: number;
-}
-
-/** the rig on the bed's rail, and on a phone's column, smaller there only as its pencil, slanted no
- * further than the elbow opens, must be to keep its point this many px clear of the widest tab */
-const BED_RIG: Rig = { scale: 0.6, cell: 2, ring: 21 };
-const COLUMN_RIG: Rig = { scale: 0.6, cell: 2, ring: 13 };
+/** the rig's scale, and her moon's ring (cells wide) on the bed and up a phone's column */
+const RIG_SCALE = 0.6;
+const RING: Vec2 = [21, 13];
+/** px a phone's pencil point keeps clear of the widest tab */
 const TAB_CLEAR = 24;
-/** a phone's column rail stops this far short of the window's top and of its foot, for her crown
- * and her deck */
+/** px a phone's column rail stops short of the window's top and foot, for her crown and deck */
 const COLUMN_END: Vec2 = [96, 44];
-/** her moon takes a step round its ring every this many ticks */
-const STEP = 2;
-/** she blinks for a tick every this many ticks */
-const BLINK = 33;
 /** the pressure gauge: at rest, while the pencil slides, as it lifts */
 const GAUGE: [number, number, number] = [0.2, 0.75, 1];
-/** her eyes follow the pencil or the cursor once it is this far from her head, stage px */
+/** px off her head past which her eyes follow the pencil or the cursor */
 const GLANCE = 60;
-/** she raises her remote this long before a planned press sets off; her arm swings a pose every
- * this many ms */
+/** ms she raises her remote before a press sets off; ms between her arm's poses */
 const LEAD = TICK;
 const SWAY = 48;
-/** degrees from her shoulder: her remote goes low below the first, up above the second, and keeps
- * its height this much past either; px past her middle before she points it with her other hand */
+/** degrees from her shoulder: her remote low under the first, up over the second; with slack */
 const RAISE: Vec2 = [-30, 50];
 const RAISE_SLACK = 8;
 const HAND_SLACK = 8;
-/** px: her pencil's point keeps this far inside a cell's edges; the boom's pivot this far clear of
- * the sides of a tab it stands past, she this far clear of a tab */
+/** px: her pencil's point inside a cell's edges, the pivot clear of a tab's sides, she of a tab */
 const INSET = 2;
 const PIVOT_CLEAR = 18;
 const HER_CLEAR = 6;
-/** arm units round the elbow its eye, crank and yoke reach, which keep inside the window */
+/** arm units round the elbow its eye, crank and yoke reach, kept inside the window */
 const ELBOW = 50;
-/** the boom down a phone's column, as the camera sees it */
 const DOWN = Math.PI / 2;
+/** her pencil's radius to its hexagon's corners, arm units */
+const PEN_R = PENCIL.radius * 1.16;
 
 const ease = cubicBezier(...settle);
 const inOut = cubicBezier(...camera);
 
-/** the progress through window w (shares of a move) at u */
 function within(u: number, w: Vec2): number {
   if (w[1] <= w[0]) return u >= w[1] ? 1 : 0;
   return clamp((u - w[0]) / (w[1] - w[0]));
 }
 
-/** progress over a long move with ramps of share r of its time: the first half of the camera
- * curve up to the cruise, the cruise, its second half to a stop */
+/** a long move's progress with ramps of share r: the camera curve's halves round a cruise */
 function cruise(r: number): (u: number) => number {
   const v = 1 / (1 - 1.3 * r);
   const d = 0.35 * r * v;
@@ -176,7 +141,6 @@ function cruise(r: number): (u: number) => number {
   };
 }
 
-/** whether the segment from (x0, y0) to (x1, y1) meets box b grown by r on every side */
 function crosses(x0: number, y0: number, x1: number, y1: number, r: number, b: Rect): boolean {
   let enter = 0;
   let leave = 1;
@@ -201,12 +165,11 @@ function crosses(x0: number, y0: number, x1: number, y1: number, r: number, b: R
   return true;
 }
 
-/** whether point (x, y) lies in box b grown by r on every side */
 function inBox(x: number, y: number, r: number, b: Rect): boolean {
   return x > b.x - r && x < b.x + b.w + r && y > b.y - r && y < b.y + b.h + r;
 }
 
-/** `angle` turned by whole turns to the nearest of `near`, so a turn takes the short way round */
+/** `angle` turned by whole turns nearest to `near`, so a turn takes the short way round */
 function nearest(angle: number, near: number): number {
   const turn = 2 * Math.PI;
   return angle + Math.round((near - angle) / turn) * turn;
@@ -217,9 +180,7 @@ function normalize(x: number, y: number, z: number): [number, number, number] {
   return [x / l, y / l, z / l];
 }
 
-/** a move from `a` to `b` between `t0` and `t1`, each value on its own curve, and her pencil's tilt
- * on its own; a slide instead runs her pencil's point straight from `task.a` to `task.b`, each the
- * carriage and the point from the pivot, its elbow bent to `task.bend`'s side */
+/** a move from pose `a` to `b` over [t0, t1]; a slide (`task`) runs her pencil's point straight */
 interface Segment {
   t0: number;
   t1: number;
@@ -227,12 +188,10 @@ interface Segment {
   b: number[];
   ease: (u: number, i: number) => number;
   tilt?: (u: number) => number;
-  /** her pencil's angle from the boom, where it takes its own way */
   bend?: (u: number) => number;
   task?: { a: number[]; b: number[]; bend: number };
 }
 
-/** a move's end pose, its angles unwrapped the way it goes, how long it takes, ms, and its curves */
 interface Leg {
   end: number[];
   time: number;
@@ -246,24 +205,19 @@ interface Block {
   src: HTMLElement;
   out: HTMLElement;
   tab: HTMLElement;
-  /** the tab's text, the block's Markdown in short */
   label: string;
   lines: HTMLElement[];
   lengths: number[];
   status: string;
   keys: number;
-  /** shows its output before this plan's presses, or its Markdown */
+  /** shows its output before this plan's presses */
   base: boolean;
-  /** stage px, at rest: its plate, the cell its source and output share, which a slide wipes, and
-   * its tab */
-  box: Rect;
   cell: Rect;
   tabBox: Rect;
   rows: Vec2[];
-  /** per source line, the characters its later rows start at: it wraps between words */
+  /** per source line, the characters its wrapped rows start at */
   breaks: number[][];
-  /** its slide, stage px: the line her pencil's point runs down, its top and foot, and where the
-   * carriage stands along its rail at each; which way the elbow bends for it */
+  /** its slide: the point's line, its top and foot, the carriage at each, the elbow's side */
   tipX: number;
   range: Vec2;
   stop: number;
@@ -277,73 +231,53 @@ interface Block {
   clip: string;
   tabState: number;
   framed: boolean;
-  /** the share of its cell, from the top, its output shows over its Markdown */
   wipe: number;
   srcShown: boolean;
   pressed: boolean;
   queued: boolean;
 }
 
-/** a press asked for: by the writer finishing a block, or by a reader */
 interface Ask {
   block: Block;
-  /** to its output, or back to its Markdown */
   out: boolean;
-  /** the block is held in its frame from here, the rig sets off and the pencil drops no earlier */
+  /** framed from `held`; it sets off no sooner than `earliest`, the pencil drops after `descend` */
   held: number;
   earliest: number;
   descend: number;
-  /** asked for while the sequence plays: it waits for the sequence's end, held from when the rig
-   * sets off for it */
+  /** asked while the sequence plays: it waits for its end */
   queued: boolean;
-  /** asked for by a reader, so its flip is told to a screen reader */
   reader: boolean;
 }
 
-/** a planned press: the rig sets off at `go`, the pencil starts its slide at `touch` (the flip
- * counts from there, `flip`), ends it at `hit`, and the rig is free at `free` */
+/** a planned press: it sets off at `go`, slides from `touch` to `hit`, and is free at `free` */
 interface Job {
   ask: Ask;
   go: number;
   touch: number;
-  flip: number;
   hit: number;
   free: number;
 }
 
-/**
- * `quick-start.mdx`, written and pressed into its page. A caret types a block; the rig drives to its
- * plate, stands its boom up and reaches her pencil out over it, lowers it onto the plate and draws
- * its point straight down it: above the line it drags, the block is the real component, below it
- * still Markdown. A reader can ask for presses too: a press slides a block back up to its Markdown,
- * or down to its output. Everything on screen is a function of the cycle's clock, which runs on the
- * shader's frames while there is something to do. Once the writer's sequence has played, her pencil
- * points at a reader's mouse over the stage.
- */
+/** `quick-start.mdx` typed and pressed into its page: everything on screen is a function of the
+ * cycle's clock, run on the shader's frames; after the sequence the rig is the reader's */
 export function createPress(stage: HTMLElement): () => void {
   const canvas = stage.querySelector<HTMLCanvasElement>('canvas[data-arm]')!;
   const doc = stage.querySelector<HTMLElement>('[data-doc]')!;
-  /** the rail band at the bed's foot, and a phone's column: the one the layout shows carries the rig */
   const bed = stage.querySelector<HTMLElement>('[data-bay]')!;
   const column = stage.querySelector<HTMLElement>('[data-bay-phone]')!;
-  /** the drag chain on the bed: its fixed run, the run the carriage pulls, the bend */
-  const fixedRun = stage.querySelector<HTMLElement>('[data-chain="fixed"]');
-  const pulledRun = stage.querySelector<HTMLElement>('[data-chain="pulled"]');
-  const bend = stage.querySelector<SVGElement>('[data-chain="bend"]');
-  /** the detents on the bed's rail, one where the carriage stops for each plate */
+  const fixedRun = stage.querySelector<HTMLElement>('[data-chain="fixed"]')!;
+  const pulledRun = stage.querySelector<HTMLElement>('[data-chain="pulled"]')!;
+  const bend = stage.querySelector<SVGElement>('[data-chain="bend"]')!;
   const stations = stage.querySelectorAll<SVGElement>('[data-station]');
-  /** her, and her moon, painted a pixel a cell */
   const mate = stage.querySelector<HTMLCanvasElement>('canvas[data-mate]')!;
   const mateImage = new ImageData(MATE_W, MATE_H);
   mate.width = MATE_W;
   mate.height = MATE_H;
   const caret = stage.querySelector<HTMLElement>('[data-caret]')!;
-  const button = stage.querySelector<HTMLButtonElement>('[data-replay]');
-  /** what a screen reader hears of a reader's presses */
-  const voice = stage.querySelector<HTMLElement>('[data-voice]');
-  const figure = stage.closest<HTMLElement>('[data-figure]');
-  /** the figure's own line, which the status bar says once there is nothing going on */
-  const compiled = figure?.dataset.status ?? '';
+  const button = stage.querySelector<HTMLButtonElement>('[data-replay]')!;
+  const voice = stage.querySelector<HTMLElement>('[data-voice]')!;
+  /** the figure's own line, once there is nothing going on */
+  const compiled = stage.closest<HTMLElement>('[data-figure]')?.dataset.status ?? '';
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   const blocks: Block[] = [];
@@ -367,7 +301,6 @@ export function createPress(stage: HTMLElement): () => void {
       status: el.dataset.status ?? '',
       keys,
       base: true,
-      box: { x: 0, y: 0, w: 0, h: 0 },
       cell: { x: 0, y: 0, w: 0, h: 0 },
       tabBox: { x: 0, y: 0, w: 0, h: 0 },
       rows: [],
@@ -394,45 +327,34 @@ export function createPress(stage: HTMLElement): () => void {
   shader?.texture('uSprite', silhouette(0));
 
   // metrics, stage px
-  const size: Vec2 = [0, 0];
   let scale = 1;
+  /** her cell, CSS px */
+  let cell = 2;
   let foot: Vec2 = [0, 0];
-  /** the carriage's rail: along x (0) on the bed or y (1) up a phone's column, from (x0, y0) to
-   * (x1, y1) */
+  /** the rail: along x (0) on the bed, y (1) up a phone's column, from (x0, y0) to (x1, y1) */
   let along = 0;
   const rail = [0, 0, 0, 0];
-  let rig = BED_RIG;
-  /** the carriage's deck: on the bed's rail, or up a phone's column */
-  let deck: Deck = BED_DECK;
-  /** the bed's band, where the drag chain lies, and the bay the carriage rides, where her shadow
-   * falls: the band, or a phone's column; whether the bed has plates below its band */
+  let deck = BED_DECK;
+  /** the bed's band (the drag chain), the bay the carriage rides (her shadow); plates below it */
   let band: Rect = { x: 0, y: 0, w: 0, h: 0 };
   let bay: Rect = band;
   let below = false;
-  /** the arm's links, stage px: the boom, and her pencil from the elbow to its point; on the bed,
-   * how far along its rail the carriage can be for the boom to turn through the band, and how far
-   * right the elbow may reach */
   let boom = 1;
   let fore = 1;
-  let turnMax = Infinity;
   let reachMax = Infinity;
   let advance = 8;
   let lineHeight = 20;
-  /** up a phone's column, the page's y a reader reads at, as the last scroll left it */
   let readAt = 0;
-  /** inside the window's frame, where shadows fall */
   let inside: Rect = { x: 0, y: 0, w: 0, h: 0 };
 
-  // the plan: from a pose at a time, the asked presses in order, then the rig parks. A pose is
-  // [the carriage along its rail, the boom's angle, her pencil's angle from the boom, as the camera
-  // sees them, and how far it is tipped up off the page]
+  // the plan: the asked presses in order from a pose at a time, then the park. A pose is the
+  // carriage, the boom's angle, her pencil's from the boom, and its tip up off the page
   const asks: Ask[] = [];
   const jobs: Job[] = [];
   const track: Segment[] = [];
   const pen: Segment[] = [];
   let park: number[] = [0, 0, TUCK - Math.PI, 0];
-  /** up a phone's column, how far her pencil folded back along the boom opens off it, rad, to put
-   * its point on the window's border */
+  /** up a phone's column, how far her folded pencil opens off the boom to the window's border */
   let fold = TUCK;
   let from: number[] = park;
   /** the plan a press took over from mid-move, its first pose, and when: the arm brakes along it */
@@ -441,47 +363,36 @@ export function createPress(stage: HTMLElement): () => void {
   let since = 0;
   let total = 0;
   let clock = 0;
-  /** rest: nothing to do; ready: an empty file waiting for the view; fade: the page dithering out */
+  /** rest: nothing to do; ready: an empty file awaiting the view; fade: the page dithers out */
   let phase: 'rest' | 'ready' | 'fade' | 'play' = 'rest';
-  /** the writer has started: until then the page is the server's finished one; the writer's
-   * sequence plays, until its plan comes to rest */
+  /** the writer has started (till then the page is the server's), and its sequence still plays */
   let begun = false;
   let playing = false;
   let fading = 0;
   let last = -1;
-  /** the stage is on screen, where her idle plays */
   let onScreen = false;
 
-  // once the sequence has played, the rig is the reader's: off its plan, on springs that point her
-  // pencil at a mouse's cursor, then back to its park
   let aiming = false;
   let following = false;
-  /** a mouse is over the stage */
   let over = false;
-  /** the last real input was a mouse that moved, not a touch: the rig follows its cursor on either
-   * rail; up a phone's column, without one, the scroll */
+  /** the last input was a moving mouse, not a touch; without one a phone's arm follows scroll */
   let mouse = false;
-  /** what the status line says for a while, a press queued */
   let note = '';
   let noteUntil = -1;
-  /** the stage on the page, the cursor on the stage and in the viewport, px */
   const stageAt: Vec2 = [0, 0];
   const cursorAt: Vec2 = [0, 0];
   const client: Vec2 = [0, 0];
   let movedAt = 0;
   let idle = 0;
-  /** the pose the arm is aimed at, the one on its springs, and its speeds; how high the quill holds
-   * her pencil */
   const aimAt = [0, 0, 0, 0];
   const aimPose = [0, 0, 0, 0];
   const aimSpeed = [0, 0, 0, 0];
   let lift: number = PEN.up;
 
-  // the frame's state
   const pose = [0, 0, 0, 0];
   const up: number[] = [PEN.up];
   const sole: number[] = [PEN.up];
-  const bounds = [0, 0, 0, 0];
+  const bounds: [number, number, number, number] = [0, 0, 0, 0];
   const point: [number, number, number] = [0, 0, 1];
   const caretAt: Vec2 = [-1, -1];
   let caretMode = '';
@@ -489,25 +400,17 @@ export function createPress(stage: HTMLElement): () => void {
   const v2: [number, number] = [0, 0];
   const v3: [number, number, number] = [0, 0, 0];
   const v4: [number, number, number, number] = [0, 0, 0, 0];
-  /** her seat on the stage and its height; the pivot, the elbow and her pencil's point, stage px;
-   * the elbow ram's clevis, barrel end and crank pin, arm units */
   const seat: [number, number, number] = [0, 0, 0];
   const pivotAt: Vec2 = [0, 0];
   const elbowAt: Vec2 = [0, 0];
   const tipAt: Vec2 = [0, 0];
   const rams = [0, 0, 0, 0, 0, 0];
-  /** what is on screen of her and of the chain, so a frame writes only what changed: her frame and
-   * moon's step, her place, and the carriage the chain was laid out for */
   let mateShown = -1;
   let mateAt = '';
   let chainAt = -1;
-  /** her eyes' frame from the work, and the colours she is painted in */
   let gaze = 0;
   let ink: MateInk | undefined;
-  /** her remote: the hand she holds it in (-1 idle, 0 her left, 1 her right) and how high (0 ready,
-   * 1 low, 2 out, 3 up), shown and wanted; its light, wanted while she commands; when her arm may
-   * swing to its next pose; what she points it at, and where her sprite was; the pose her
-   * silhouette was cast in, and each pose's, cast once */
+  /** her remote's hand (-1 none, 0 left, 1 right) and height (0 ready, 1 low, 2 out, 3 up) */
   let hand = -1;
   let height = 0;
   let wantHand = -1;
@@ -518,11 +421,9 @@ export function createPress(stage: HTMLElement): () => void {
   const herAt: Vec2 = [0, 0];
   let castPose = 0;
   const casts: ImageData[] = [];
-  /** the reader's springs have come to rest */
   let steady = false;
   const none: Rect = { x: 0, y: 0, w: 0, h: 0 };
 
-  /** where a source line's rows after its first start, in characters, as the browser wrapped it */
   function breaksOf(line: HTMLElement): number[] {
     const out: number[] = [];
     const range = document.createRange();
@@ -543,9 +444,7 @@ export function createPress(stage: HTMLElement): () => void {
     return out;
   }
 
-  /** whole device pixels for the window's lines: each plate's height rounded up, and the stage
-   * nudged up off the fraction the sections above leave its top at, so a block rasterizes the same
-   * whatever has painted over it */
+  /** whole device pixels for the window's lines, so a block rasterizes the same under overlays */
   function snap() {
     const dpr = window.devicePixelRatio || 1;
     stage.style.top = '';
@@ -562,28 +461,41 @@ export function createPress(stage: HTMLElement): () => void {
 
   function layout() {
     snap();
-    // up a phone's column, how far left of the rail her pencil's point lies on a stroke
-    let span = 0;
     const s = stage.getBoundingClientRect();
     if (s.width === 0) return;
-    size[0] = s.width;
-    size[1] = s.height;
     stageAt[0] = s.left + scrollX;
     stageAt[1] = s.top + scrollY;
     const page = rectIn(doc, s);
     inside = rectIn(doc.lastElementChild!, s);
-    // the carriage rides the bed's rail band, or a phone's column beside the window
+    // a monospace advance, measured on ten characters
+    const probe = document.createElement('span');
+    probe.textContent = '0000000000';
+    blocks[0].lines[0].append(probe);
+    advance = probe.getBoundingClientRect().width / 10;
+    probe.remove();
+    lineHeight = Number.parseFloat(getComputedStyle(blocks[0].lines[0]).lineHeight) || 20;
+    for (const b of blocks) {
+      b.tabBox = rectIn(b.tab, s);
+      b.cell = rectIn(b.src.parentElement!, s);
+      b.rows = [];
+      b.breaks = [];
+      for (const line of b.lines) {
+        const r = line.getBoundingClientRect();
+        b.rows.push([r.left - s.left, r.top - s.top]);
+        b.breaks.push(r.height > 1.5 * lineHeight ? breaksOf(line) : []);
+      }
+      b.range = [b.cell.y + INSET, b.cell.y + b.cell.h - INSET];
+    }
     band = rectIn(bed, s);
     const onBed = band.w > 0;
     along = onBed ? 0 : 1;
-    rig = onBed ? BED_RIG : COLUMN_RIG;
-    scale = rig.scale;
+    cell = 2;
+    scale = RIG_SCALE;
     foot = [page.x + page.w / 2, s.height * 0.3];
+    let span = 0;
     if (onBed) {
       rail[0] = band.x + BED.start;
       rail[1] = band.y + BED.rail;
-      // the far end of its travel is the last plate's station, set below
-      rail[2] = band.x + band.w;
       rail[3] = rail[1];
       bay = band;
       below = inside.y + inside.h > band.y + band.h + 8;
@@ -596,53 +508,25 @@ export function createPress(stage: HTMLElement): () => void {
       rail[2] = rail[0];
       rail[3] = page.y + page.h - COLUMN_END[1];
       below = false;
-      // her pencil lies across the plates from the column's middle, its point clear of the widest
-      // tab: slanted off the stroke line as far as that needs, the rig smaller only where the elbow
-      // would open wider than it may
+      // its point clear of the widest tab: the rig smaller only where the elbow would open too wide
       let tabs = 0;
-      for (const b of blocks) {
-        const t = rectIn(b.tab, s);
-        tabs = Math.max(tabs, t.x + t.w);
-      }
+      for (const b of blocks) tabs = Math.max(tabs, b.tabBox.x + b.tabBox.w);
       span = rail[0] - tabs - TAB_CLEAR;
-      scale = Math.min(rig.scale, span / (Math.cos(INNER[1] - Math.PI / 2) * PENCIL.reach));
-      // she stands as tall as on the bed, unless the boom is then too short for her pencil to pass
-      // over her head, on the narrowest phones
-      const crown = (SEAT_CELL[1] + MATE_RISE) * rig.cell + PENCIL.radius * 1.16 * scale + 8;
-      if (BOOM * scale < crown) rig = { ...rig, cell: 1 };
-      // her deck as wide as she is
-      const half = Math.max(COLUMN_DECK.box[2], ((SPRITE_W / 2) * rig.cell + 2) / scale);
+      scale = Math.min(RIG_SCALE, span / (Math.cos(INNER[1] - Math.PI / 2) * PENCIL.reach));
+      // her full size, unless the boom is then too short to carry her pencil over her head
+      const crown = (SEAT_CELL[1] + MATE_RISE) * cell + PEN_R * scale + 8;
+      if (BOOM * scale < crown) cell = 1;
+      const half = Math.max(COLUMN_DECK.box[2], ((SPRITE_W / 2) * cell + 2) / scale);
       deck = { ...COLUMN_DECK, box: [0, COLUMN_DECK.box[1], half, COLUMN_DECK.box[3]] };
     }
     boom = BOOM * scale;
     fore = PENCIL.reach * scale;
     // on the bed the elbow and the ram's crank keep inside its end, also while the boom turns
     reachMax = onBed ? band.x + band.w - 32 * scale - 6 : Infinity;
-    turnMax = reachMax - boom;
     chainAt = -1;
     mateAt = '';
-    mate.style.width = `${MATE_W * rig.cell}px`;
-    mate.style.height = `${MATE_H * rig.cell}px`;
-    // a monospace advance, measured on ten characters
-    const probe = document.createElement('span');
-    probe.textContent = '0000000000';
-    blocks[0].lines[0].append(probe);
-    advance = probe.getBoundingClientRect().width / 10;
-    probe.remove();
-    lineHeight = Number.parseFloat(getComputedStyle(blocks[0].lines[0]).lineHeight) || 20;
-    for (const b of blocks) {
-      b.box = rectIn(b.el, s);
-      b.tabBox = rectIn(b.tab, s);
-      b.cell = rectIn(b.src.parentElement!, s);
-      b.rows = [];
-      b.breaks = [];
-      for (const line of b.lines) {
-        const r = line.getBoundingClientRect();
-        b.rows.push([r.left - s.left, r.top - s.top]);
-        b.breaks.push(r.height > 1.5 * lineHeight ? breaksOf(line) : []);
-      }
-      b.range = [b.cell.y + INSET, b.cell.y + b.cell.h - INSET];
-    }
+    mate.style.width = `${MATE_W * cell}px`;
+    mate.style.height = `${MATE_H * cell}px`;
     if (onBed) {
       const end = band.x + band.w - (deck.box[0] + deck.box[2]) * scale - 4;
       for (const b of blocks) station(b, end);
@@ -657,9 +541,7 @@ export function createPress(stage: HTMLElement): () => void {
         stations[i].style.visibility = shared ? 'hidden' : '';
       }
     } else {
-      // up a phone's column her pencil lies flat across each plate's right part from an elbow on the
-      // column's middle, slanted away from the boom: the boom up the column over a plate it can
-      // reach so, down it under the lower ones; the carriage carries the whole slide
+      // her pencil flat across a plate, the boom up the column over a plate it reaches, else down
       const reach = Math.min(fore, span);
       const drop = boom + Math.sqrt(fore * fore - reach * reach);
       for (const b of blocks) {
@@ -672,10 +554,7 @@ export function createPress(stage: HTMLElement): () => void {
     }
     caret.style.width = `${advance}px`;
     caret.style.height = `${lineHeight}px`;
-    // at rest: on the bed, at the rail's left end, the boom along the band toward the right, her
-    // pencil folded back under it, she standing left of it; up a phone's column, as low as keeps
-    // the elbow in the window, the boom hanging down the rail and her pencil folded back up along
-    // it, its point, as the camera sees it, on the window's border
+    // at rest: the bed rail's left end; up a column as low as keeps the elbow in the window
     if (along === 0) park = [rail[0], 0, TUCK - Math.PI, 0];
     else {
       const k = CAMERA / (CAMERA - PEN.up * scale);
@@ -687,11 +566,7 @@ export function createPress(stage: HTMLElement): () => void {
     plan();
   }
 
-  /** block b's slide on the bed: where the carriage stops, to either side of the line her pencil's
-   * point runs down and far enough from it that the elbow bends comfortably at both its ends, the
-   * line as near its cell's middle as that allows; the pivot clear of the tabs the boom stands up
-   * past, she clear of the tabs her head reaches and of her pencil at both ends, and, where plates
-   * lie both sides of the rail, the stop where the boom has room to turn through the band */
+  /** block b's slide on the bed: the best stop with the elbow comfortable at both its ends */
   function station(b: Block, end: number) {
     const up = b.cell.y < rail[1];
     const near = up ? rail[1] - b.range[1] : b.range[0] - rail[1];
@@ -699,9 +574,10 @@ export function createPress(stage: HTMLElement): () => void {
     const row: Rect[] = [];
     for (const o of blocks) if (o.cell.y < rail[1] === up) row.push(o.tabBox);
     const turns = blocks.some((o) => o.cell.y > rail[1]);
-    const half = (SPRITE_W / 2) * rig.cell;
-    const crown = (SEAT_CELL[1] + MATE_RISE) * rig.cell + 2;
-    const radius = PENCIL.radius * 1.16 * scale;
+    const half = (SPRITE_W / 2) * cell;
+    const crown = (SEAT_CELL[1] + MATE_RISE) * cell + 2;
+    const radius = PEN_R * scale;
+    const elbow = ELBOW * scale;
     const middle = b.cell.x + b.cell.w / 2;
     const joints = [0, 0, 0];
     let best = -Infinity;
@@ -720,24 +596,19 @@ export function createPress(stage: HTMLElement): () => void {
           const stop = x + side * d;
           if (stop < rail[0] || stop > end) continue;
           if (row.some((t) => stop > t.x - PIVOT_CLEAR && stop < t.x + t.w + PIVOT_CLEAR)) continue;
-          // her, as the camera sees her at that stop
-          project(
-            stop + deck.seat[0] * scale,
-            rail[1] + deck.seat[1] * scale,
-            deck.seat[2] * scale,
-          );
-          const her: Rect = { x: point[0] - half, y: point[1] - crown, w: 2 * half, h: crown };
           if (!clearOfTabs(stop)) continue;
+          const her: Rect = { x: point[0] - half, y: point[1] - crown, w: 2 * half, h: crown };
           let clear = true;
           for (const y of b.range) {
             reachTo(x - stop, y - rail[1], bendTo, joints);
             const ex = stop + boom * Math.cos(joints[1]);
             const ey = rail[1] + boom * Math.sin(joints[1]);
-            if (crosses(x, y, ex, ey, radius + HER_CLEAR, her) || !elbowIn(ex, ey)) clear = false;
+            if (crosses(x, y, ex, ey, radius + HER_CLEAR, her) || !inBox(ex, ey, -elbow, inside))
+              clear = false;
           }
           if (!clear) continue;
           let score = margin - Math.abs(x - middle) * 0.0015;
-          if (turns && stop > turnMax) score -= 0.3;
+          if (turns && stop > reachMax - boom) score -= 0.3;
           if (score > best) {
             best = score;
             b.bend = bendTo;
@@ -750,34 +621,23 @@ export function createPress(stage: HTMLElement): () => void {
     b.stopEnd = b.stop;
   }
 
-  /** whether she, her moon's ring and all, keeps clear of every tab with the carriage at `c` along
-   * its rail, as the camera sees her */
+  /** whether box [x0, x1) by [y0, y1) comes within HER_CLEAR of a tab's sides, or onto it */
+  function onTab(x0: number, y0: number, x1: number, y1: number): boolean {
+    for (const { tabBox: t } of blocks) {
+      if (x1 <= t.x - HER_CLEAR || x0 >= t.x + t.w + HER_CLEAR) continue;
+      if (y1 > t.y && y0 < t.y + t.h) return true;
+    }
+    return false;
+  }
+
+  /** whether she keeps clear of every tab with the carriage at `c`; her seat stays in `point` */
   function clearOfTabs(c: number): boolean {
     project(xOf(c) + deck.seat[0] * scale, yOf(c) + deck.seat[1] * scale, deck.seat[2] * scale);
-    const cell = rig.cell;
     const x = point[0] - (SEAT_CELL[0] + MATE_PAD[0]) * cell;
     const y = point[1] - (SEAT_CELL[1] + MATE_PAD[1]) * cell;
-    return !blocks.some(
-      ({ tabBox: t }) =>
-        x + MATE_W * cell > t.x - HER_CLEAR &&
-        x < t.x + t.w + HER_CLEAR &&
-        y + MATE_H * cell > t.y &&
-        y < t.y + t.h,
-    );
+    return !onTab(x, y, x + MATE_W * cell, y + MATE_H * cell);
   }
 
-  /** whether the elbow at (x, y), with its eye, crank and yoke round it, is inside the window */
-  function elbowIn(x: number, y: number): boolean {
-    const r = ELBOW * scale;
-    return (
-      x - r > inside.x &&
-      y - r > inside.y &&
-      x + r < inside.x + inside.w &&
-      y + r < inside.y + inside.h
-    );
-  }
-
-  /** the carriage's x and y at `c` along its rail */
   function xOf(c: number): number {
     return along === 0 ? c : rail[0];
   }
@@ -786,14 +646,11 @@ export function createPress(stage: HTMLElement): () => void {
     return along === 1 ? c : rail[1];
   }
 
-  /** the elbow's inner angle with the end of a second link this long r from the pivot */
   function innerAt(r: number, l2 = fore): number {
     return Math.acos(clamp((boom * boom + l2 * l2 - r * r) / (2 * boom * l2), -1, 1));
   }
 
-  /** the joints that put the end of a second link this long at (x, y) from the pivot, the elbow
-   * bent to `bend`'s side (-1: the pencil turned anticlockwise from the boom, as the camera sees
-   * it), into out[1] and out[2]; out of reach, the arm points straight at it */
+  /** the joints that put a second link's end at (x, y) from the pivot, into out[1] and out[2] */
   function reachTo(x: number, y: number, bend: number, out: number[], l2 = fore) {
     const d = clamp(Math.hypot(x, y), Math.abs(boom - l2) + 0.5, boom + l2 - 0.5);
     const a = Math.acos(clamp((boom * boom + d * d - l2 * l2) / (2 * boom * d), -1, 1));
@@ -801,16 +658,12 @@ export function createPress(stage: HTMLElement): () => void {
     out[2] = bend * (Math.PI - innerAt(d, l2));
   }
 
-  /** the boom's angle `angle`: on the bed always on the band's side, never round past her; up a
-   * phone's column on the plates' side, from up the column round to down it, never out past the
-   * stage's edge */
+  /** the boom on the band's side on the bed, on the plates' side up a phone's column */
   function boomAngle(angle: number): number {
     if (along === 0) return Math.atan2(Math.sin(angle), Math.cos(angle));
     return angle - 2 * Math.PI * Math.ceil((angle + Math.PI / 2 - 0.5) / (2 * Math.PI));
   }
 
-  /** the pose that puts her pencil's point at `task` (the carriage, and the point from the pivot),
-   * the elbow bent to `bend`'s side, its angles the nearest to pose `near`'s */
   function solve(task: number[], bendTo: number, near: number[]): number[] {
     const out = [task[0], 0, 0, 0];
     reachTo(task[1], task[2], bendTo, out);
@@ -819,7 +672,6 @@ export function createPress(stage: HTMLElement): () => void {
     return out;
   }
 
-  /** the pivot, the elbow and her pencil's point of pose p, stage px */
   function place(p: number[]) {
     pivotAt[0] = xOf(p[0]);
     pivotAt[1] = yOf(p[0]);
@@ -829,7 +681,6 @@ export function createPress(stage: HTMLElement): () => void {
     tipAt[1] = elbowAt[1] + fore * Math.sin(p[1] + p[2]);
   }
 
-  /** whether pose p has its boom along its rail, as at the park */
   function stowed(p: number[]): boolean {
     return Math.abs(along === 0 ? Math.sin(p[1]) : Math.cos(p[1])) < 0.34;
   }
@@ -841,13 +692,10 @@ export function createPress(stage: HTMLElement): () => void {
     return Math.max(Math.cos(a), Math.cos(b));
   }
 
-  /** up a phone's column, her pencil's angle from the boom at `angle` folded back flat along it on
-   * the window's side, as at rest, the way round nearest `near` */
   function foldAt(angle: number, near: number): number {
     return nearest(Math.PI - fold * Math.sin(angle), near);
   }
 
-  /** the share of a move at which the carriage, on its curve from c0 to c1, passes c */
   function crossing(c0: number, c1: number, curve: (u: number) => number, c: number): number {
     const k = (c - c0) / (c1 - c0);
     let lo = 0;
@@ -860,25 +708,13 @@ export function createPress(stage: HTMLElement): () => void {
     return (lo + hi) / 2;
   }
 
-  /** ms the carriage takes over a run of this many px: a short one the drive's beat, a long one
-   * cruising */
-  function driveTime(run: number): number {
-    if (run < 1) return 0;
-    return run > SHORT ? Math.max(DRIVE, 1.3 * RAMP + run / TOP) : DRIVE;
-  }
-
-  /** a move from pose a to pose b, `pace` times a press's, at least this long: the carriage on the
-   * camera curve, or cruising on a long run; her pencil tips up off the page at the start, the boom
-   * and the elbow turn while it stands (on the bed the boom only where the carriage leaves the elbow
-   * inside the bed's end), and it tips down at the end. Off the band the joints turn as early as
-   * they can, from it as late */
+  /** a move from pose a to b: her pencil tips up, the joints turn while it stands, it tips down; on
+   * the bed the boom turns only where the elbow keeps inside the bed's end */
   function move(a: number[], b: number[], pace = 1, least = 0): Leg {
     const turn = boomAngle(b[1]);
     const limit = reachMax - boom * widest(a[1], turn);
-    // up a phone's column her pencil folds back flat along the boom as the move starts, as at rest,
-    // goes round with it folded, and unfolds as it ends: never stood up end-on. On the bed the trip
-    // home brings the elbow down out of the plates before the carriage drives off, her stood pencil
-    // turning to point off along the band meanwhile, away from the tabs, then folds it home
+    // up a phone's column her pencil folds along the boom, never end-on; on the bed the trip home
+    // first brings the elbow out of the plates, her pencil pointing off along the band
     const flat = along === 1;
     const home = !flat && stowed([b[0], turn]) && !stowed(a) && a[0] <= limit;
     const fa = flat ? foldAt(a[1], a[2]) : a[2];
@@ -887,32 +723,23 @@ export function createPress(stage: HTMLElement): () => void {
     const run = Math.abs(b[0] - a[0]);
     // a move that goes nowhere only tips her pencil across
     const stays = run < 0.5 && Math.abs(end[1] - a[1]) < 1e-3 && Math.abs(end[2] - a[2]) < 1e-3;
-    // her pencil tips in the time its drawn length takes to change, so a part tip near upright,
-    // where that length changes fastest, runs no quicker than a whole one
-    let upT = Math.cos(a[3]) * TIP_UP * pace;
-    let downT = Math.cos(b[3]) * TIP_DOWN * pace;
-    // the elbow's turns before and after the boom's
     const preT = Math.abs(fa - a[2]) * BEND_RATE * pace;
     const postT = Math.abs(end[2] - fb) * BEND_RATE * pace;
-    if (flat) {
-      upT = preT;
-      downT = postT;
-    }
-    if (stays) {
-      upT = 0;
-      downT = 0;
-    }
+    // a tip takes as long as its drawn length takes to change, so a part tip is no quicker
+    const upT = stays ? 0 : flat ? preT : Math.cos(a[3]) * TIP_UP * pace;
+    const downT = stays ? 0 : flat ? postT : Math.cos(b[3]) * TIP_DOWN * pace;
     const turnT =
       Math.abs(end[1] - a[1]) * (flat ? Math.max(TURN_RATE, boom / SWING) : TURN_RATE) * pace;
     const bendT = Math.abs((flat || home ? fb - fa : end[2] - a[2]) * BEND_RATE * pace);
     const jointT = home ? preT + Math.max(turnT, bendT) + postT : Math.max(turnT, bendT);
+    const driveT = run < 1 ? 0 : run > SHORT ? Math.max(DRIVE, 1.3 * RAMP + run / TOP) : DRIVE;
     let time = Math.max(
       least,
-      pace * driveTime(run) + (home ? upT + jointT : 0),
+      pace * driveT + (home ? upT + jointT : 0),
       upT + jointT + downT - OVERLAP * (Math.min(upT, jointT) + Math.min(jointT, downT)),
       160,
     );
-    let curve = run > SHORT ? cruise(RAMP / time) : inOut;
+    let curve = inOut;
     let joints: Vec2 = [0, 1];
     for (let tries = 0; tries < 12; tries++) {
       curve = run > SHORT ? cruise(RAMP / time) : inOut;
@@ -937,11 +764,10 @@ export function createPress(stage: HTMLElement): () => void {
     if (home) curve = run > SHORT ? cruise(RAMP / (time * (1 - drive[0]))) : inOut;
     const before: Vec2 = flat ? up : [joints[0], turns[0]];
     const after: Vec2 = flat ? down : [turns[1], joints[1]];
-    const carriage = curve;
     return {
       end,
       time,
-      ease: (u, i) => (i === 0 ? carriage(within(u, drive)) : inOut(within(u, turns))),
+      ease: (u, i) => (i === 0 ? curve(within(u, drive)) : inOut(within(u, turns))),
       bend:
         (flat || home) && !stays
           ? (u) =>
@@ -959,8 +785,7 @@ export function createPress(stage: HTMLElement): () => void {
     };
   }
 
-  /** the legs of a move from pose a to b: one, unless the boom turns along the band where neither
-   * end leaves the elbow room before the bed's end; then by where it has the room, turning there */
+  /** a move's legs: turning along the band past the bed's end, it first drives to where it can */
   function route(a: number[], b: number[], pace = 1, least = 0): Leg[] {
     const turn = boomAngle(b[1]);
     const limit = reachMax - boom * widest(a[1], turn);
@@ -972,12 +797,6 @@ export function createPress(stage: HTMLElement): () => void {
     return [move(a, b, pace, least)];
   }
 
-  /** the time a slide over block b takes */
-  function slideTime(b: Block): number {
-    return Math.min(SLIDE[1], Math.max(SLIDE[0], (b.range[1] - b.range[0]) * SLIDE_MS));
-  }
-
-  /** the value of a track of moves at time t, from `first` before any, into out */
   function sample(list: Segment[], t: number, first: number[], out: number[]) {
     let at = first;
     for (const s of list) {
@@ -1006,7 +825,6 @@ export function createPress(stage: HTMLElement): () => void {
     for (let i = 0; i < out.length; i++) out[i] = at[i];
   }
 
-  /** the legs of a move pushed onto the track from time t, the pose it ends at and when */
   function push(legs: Leg[], a: number[], t: number): [number[], number] {
     let at = a;
     let time = t;
@@ -1026,7 +844,6 @@ export function createPress(stage: HTMLElement): () => void {
     return [at, time];
   }
 
-  /** the presses asked for, from `from` at `since`, then the park */
   function plan() {
     track.length = 0;
     pen.length = 0;
@@ -1035,17 +852,16 @@ export function createPress(stage: HTMLElement): () => void {
     let free = since;
     for (const ask of asks) {
       const b = ask.block;
-      // the slide runs down the cell to its output, up it back to its Markdown
       const c0 = ask.out ? b.stop : b.stopEnd;
       const c1 = ask.out ? b.stopEnd : b.stop;
       const a = [c0, b.tipX - xOf(c0), (ask.out ? b.range[0] : b.range[1]) - yOf(c0)];
       const z = [c1, b.tipX - xOf(c1), (ask.out ? b.range[1] : b.range[0]) - yOf(c1)];
       const legs = route(previous, solve(a, b.bend, previous));
-      let move = 0;
-      for (const leg of legs) move += leg.time;
-      // the writer's press sets off so it arrives as its block's tab pops, a reader's at once; it
-      // arrives no sooner than the pencil may touch, so the quill lowers it without a stop
-      const go = Math.max(free, ask.earliest - (ask.reader ? 0 : move - DRIVE), ask.descend - move);
+      let legT = 0;
+      for (const leg of legs) legT += leg.time;
+      // the writer's press arrives as its block's tab pops, a reader's sets off at once; neither
+      // arrives before the pencil may touch, so the quill lowers it without a stop
+      const go = Math.max(free, ask.earliest - (ask.reader ? 0 : legT - DRIVE), ask.descend - legT);
       const [start, at] = push(legs, previous, go);
       const reached = Math.max(at, ask.descend);
       pen.push({
@@ -1056,7 +872,7 @@ export function createPress(stage: HTMLElement): () => void {
         ease: inOut,
       });
       const touch = reached + DROP * SETTLE;
-      const hit = touch + slideTime(b);
+      const hit = touch + clamp((b.range[1] - b.range[0]) * SLIDE_MS, SLIDE[0], SLIDE[1]);
       const done = solve(z, b.bend, start);
       track.push({
         t0: touch,
@@ -1066,8 +882,6 @@ export function createPress(stage: HTMLElement): () => void {
         ease: inOut,
         task: { a, b: z, bend: b.bend },
       });
-      // the quill lifts it, and it tips up off the plate, out of the way; up a phone's column it
-      // folds back flat along the boom instead
       const stood =
         along === 1
           ? [done[0], done[1], foldAt(done[1], done[2]), 0]
@@ -1075,24 +889,15 @@ export function createPress(stage: HTMLElement): () => void {
       const away = Math.max(TIP_UP, Math.abs(stood[2] - done[2]) * BEND_RATE);
       track.push({ t0: hit, t1: hit + away, a: done, b: stood, ease: inOut });
       pen.push({ t0: hit, t1: hit + LIFT, a: [PEN.down], b: [PEN.up], ease });
-      jobs.push({ ask, go, touch, flip: touch, hit, free: hit + away });
+      jobs.push({ ask, go, touch, hit, free: hit + away });
       previous = stood;
       free = hit + away;
     }
-    // the park answers no one, so it takes its time: a press can catch it on the way at a gentle pace
-    const [, parked] = push(route(previous, park, 1.5, PARK), previous, free + REST);
-    total = parked;
+    // the park answers no one, so it takes its time: a press can catch it on the way
+    total = push(route(previous, park, 1.5, PARK), previous, free + REST)[1];
   }
 
-  /** whether a block shows its output once every press asked for it is done */
-  function settled(b: Block): boolean {
-    let out = b.base;
-    for (const ask of asks) if (ask.block === b) out = ask.out;
-    return out;
-  }
-
-  /** a reader's press on a block: it flips between its output and its Markdown; the press asked
-   * for, if a new one */
+  /** a reader's press: the block flips between output and Markdown; the press asked, if new */
   function press(b: Block): Ask | undefined {
     if (reduced || !shader) {
       // no arm to move: the block flips at once
@@ -1113,19 +918,18 @@ export function createPress(stage: HTMLElement): () => void {
         asks.splice(i, 1);
         noteUntil = -1;
       } else {
-        const out = !settled(b);
+        const out = !shown(b, Infinity);
         ask = { block: b, out, held: t, earliest: t, descend: t, queued: true, reader: true };
         asks.push(ask);
         note = `queued ${b.label}`;
         noteUntil = t + NOTE;
-        if (voice) voice.textContent = `${b.label}: queued`;
+        voice.textContent = `${b.label}: queued`;
       }
       plan();
       apply();
       return ask;
     }
-    // off a reader's spring, or once the arm has left for its park, the press sets off from where
-    // the arm is
+    // off a reader's springs, or once the arm has left for home, it sets off from where it is
     if (aiming || !jobs.length || t >= jobs[jobs.length - 1].free + REST) settle(t);
     let next = jobs.length;
     for (let i = 0; i < jobs.length; i++) {
@@ -1142,15 +946,8 @@ export function createPress(stage: HTMLElement): () => void {
       wake();
       return;
     }
-    const ask = {
-      block: b,
-      out: !settled(b),
-      held: t,
-      earliest: t,
-      descend: t,
-      queued: false,
-      reader: true,
-    };
+    const out = !shown(b, Infinity);
+    const ask = { block: b, out, held: t, earliest: t, descend: t, queued: false, reader: true };
     asks.splice(next, 0, ask);
     plan();
     wake();
@@ -1158,26 +955,25 @@ export function createPress(stage: HTMLElement): () => void {
   }
 
   function tell(b: Block, out: boolean) {
-    if (voice) voice.textContent = `${b.label}: showing ${out ? 'output' : 'Markdown'}`;
+    voice.textContent = `${b.label}: showing ${out ? 'output' : 'Markdown'}`;
   }
 
-  /** whether a block shows its output at time t, a flip counting from its start */
+  /** whether a block shows its output at time t, a flip counting from its slide's start */
   function shown(b: Block, t: number): boolean {
     let out = b.base;
-    for (const job of jobs) if (job.ask.block === b && job.flip <= t) out = job.ask.out;
+    for (const job of jobs) if (job.ask.block === b && job.touch <= t) out = job.ask.out;
     return out;
   }
 
-  /** a new plan from where everything stands now: each block keeps what it shows, the presses whose
-   * slide hasn't started yet wait their turn */
+  /** a new plan from now: blocks keep what they show, presses not yet sliding wait their turn */
   function settle(t: number) {
     const waiting: Ask[] = [];
     for (let i = 0; i < jobs.length; i++) if (jobs[i].touch > t) waiting.push(jobs[i].ask);
     for (const b of blocks) b.base = shown(b, t);
     asks.length = 0;
     for (const ask of waiting) asks.push(ask);
-    // caught mid-move, the arm brakes along its way first, its speed falling to nothing, so it never
-    // stops dead: it covers half the way the old plan would have in that time
+    // caught mid-move, the arm brakes along its way first, so it never stops dead: it covers half
+    // the way the old plan would have in that time
     brake = null;
     since = t;
     if (aiming) from = [...aimPose];
@@ -1203,7 +999,6 @@ export function createPress(stage: HTMLElement): () => void {
     shader?.invalidate();
   }
 
-  /** the screen point of world point (x, y) at height z, and the scale there, into `point` */
   function project(x: number, y: number, z: number) {
     const k = CAMERA / (CAMERA - z);
     point[0] = foot[0] + (x - foot[0]) * k;
@@ -1221,25 +1016,15 @@ export function createPress(stage: HTMLElement): () => void {
     bounds[3] = Math.max(bounds[3], point[1] + r, shadowY + r);
   }
 
-  /** whether stage point (x, y) is on a tab or on her, grown by her pencil's radius */
   function blocked(x: number, y: number): boolean {
-    const r = PENCIL.radius * 1.16 * scale + 2;
+    const r = PEN_R * scale + 2;
     for (const b of blocks) if (inBox(x, y, r, b.tabBox)) return true;
-    const cell = rig.cell;
-    const left = seat[0] - SEAT_CELL[0] * cell;
-    const top = seat[1] - (SEAT_CELL[1] + MATE_RISE) * cell;
-    return inBox(x, y, r, {
-      x: left,
-      y: top,
-      w: SPRITE_W * cell,
-      h: (SPRITE_H + MATE_RISE) * cell,
-    });
+    const x0 = seat[0] - SEAT_CELL[0] * cell;
+    const y0 = seat[1] - (SEAT_CELL[1] + MATE_RISE) * cell;
+    return inBox(x, y, r, { x: x0, y: y0, w: SPRITE_W * cell, h: (SPRITE_H + MATE_RISE) * cell });
   }
 
-  /** the pose that points her pencil at the cursor, its point AIM_GAP short of it and short of
-   * every tab and of her, from where its elbow bends comfortably, into `out`: on the bed the
-   * carriage right of the cursor, the arm on the cursor's side of the rail; up a phone's column the
-   * carriage level with it. Up the column without a mouse, the line a reader reads at instead */
+  /** the pose pointing her pencil at the cursor, AIM_GAP short of it, clear of the tabs and her */
   function aimFor(out: number[]) {
     if (along === 1 && !mouse) return readFor(out);
     out[3] = 0;
@@ -1248,7 +1033,6 @@ export function createPress(stage: HTMLElement): () => void {
     const y = clamp(foot[1] + (cursorAt[1] - foot[1]) / k, inside.y + 6, inside.y + inside.h - 6);
     let bendTo: number;
     if (along === 1) {
-      // up a phone's column the boom along it, up it from under the cursor, or down it from over
       const up = y + boom <= rail[3];
       bendTo = up ? -1 : 1;
       out[0] = clamp(y + (up ? boom : -boom), rail[1], rail[3]);
@@ -1257,12 +1041,8 @@ export function createPress(stage: HTMLElement): () => void {
       // the cursor's distance from the pivot where the elbow's inner angle is about 100 degrees
       const r = Math.sqrt(boom * boom + fore * fore + 0.35 * boom * fore);
       const h = Math.abs(y - rail[1]);
-      out[0] = clamp(
-        x + Math.max(60 * scale, Math.sqrt(Math.max(0, r * r - h * h))),
-        rail[0],
-        rail[2],
-      );
-      // the nearest stop that keeps her clear of the tabs
+      const reach = Math.sqrt(Math.max(0, r * r - h * h));
+      out[0] = clamp(x + Math.max(60 * scale, reach), rail[0], rail[2]);
       for (let step = 0; step < 50 && !clearOfTabs(out[0]); step++) {
         const at = out[0] + (step % 2 ? 1 : -1) * 8 * Math.ceil((step + 1) / 2);
         if (at >= rail[0] && at <= rail[2] && clearOfTabs(at)) out[0] = at;
@@ -1274,7 +1054,6 @@ export function createPress(stage: HTMLElement): () => void {
       const ex = xOf(out[0]) + boom * Math.cos(out[1]);
       const ey = yOf(out[0]) + boom * Math.sin(out[1]);
       const length = Math.hypot(x - ex, y - ey) || 1;
-      // its point steps back off a tab, or off her
       let g = gap;
       while (g < 220 && blocked(x - ((x - ex) / length) * g, y - ((y - ey) / length) * g)) g += 4;
       if (g === gap) break;
@@ -1284,22 +1063,18 @@ export function createPress(stage: HTMLElement): () => void {
     out[2] = nearest(out[2], aimPose[2]);
   }
 
-  /** up a phone's column, the parked fold carried to the line a reader reads at, into `out`: the
-   * carriage where her pencil's point, as the camera sees it, marks that line on the window's
-   * border, as far as the rail and the window let it */
+  /** up a phone's column, the park's fold carried to the line a reader reads at */
   function readFor(out: number[]) {
     const k = CAMERA / (CAMERA - PEN.up * scale);
-    const first = blocks[0].range[0];
-    const last = blocks[blocks.length - 1].range[1];
-    const y = foot[1] + (clamp(readAt - stageAt[1], first, last) - foot[1]) / k;
+    const top = blocks[0].range[0];
+    const bottom = blocks[blocks.length - 1].range[1];
+    const y = foot[1] + (clamp(readAt - stageAt[1], top, bottom) - foot[1]) / k;
     out[0] = clamp(y - boom + fore * Math.cos(fold), rail[1], park[0]);
     out[1] = DOWN;
     out[2] = Math.PI - fold;
     out[3] = 0;
   }
 
-  /** how far her pencil, along its line on the page from the trunnion of the pose last placed, must
-   * tip up off the page to keep clear of every tab and of her */
   function tipFor(p: number[]): number {
     const dx = Math.cos(p[1] + p[2]);
     const dy = Math.sin(p[1] + p[2]);
@@ -1312,23 +1087,20 @@ export function createPress(stage: HTMLElement): () => void {
     return 0;
   }
 
-  /** the arm on its springs, one step of `dt` seconds: the carriage no faster than its top speed,
-   * the joints than their slew, the elbow kept inside the bed's end, and her pencil tipped up as far
-   * as it must to keep clear, and up while the joints swing it round; whether it stopped */
   function aimStep(dt: number): boolean {
     if (following) aimFor(aimAt);
     lift = Math.min(PEN.up, lift + ((PEN.up - PEN.down) / LIFT) * 1000 * dt);
     const turn = boomAngle(aimAt[1]);
     const swinging = Math.abs(turn - aimPose[1]) > SWUNG;
-    // up a phone's column her pencil folds back flat along the boom while the boom swings round; on
-    // the bed, going home, the carriage waits while the elbow comes down out of the plates
+    // up a phone's column her pencil folds along the boom while it swings round; on the bed, going
+    // home, the carriage waits while the elbow comes out of the plates
     const targets = [
       along === 0 && !following && swinging ? aimPose[0] : aimAt[0],
       turn,
       along === 1 && swinging ? foldAt(aimPose[1], aimPose[2]) : nearest(aimAt[2], aimPose[2]),
     ];
     const stiff = along === 1 && !mouse ? SCROLL_AIM : AIM;
-    // up a phone's column the boom's elbow sweeps no faster than a move's
+    // up a phone's column the elbow sweeps no faster than in a move
     const slew = Math.min(AIM_SLEW, (SWING * 1000) / boom);
     let still = true;
     for (let i = 0; i < 3; i++) {
@@ -1347,8 +1119,7 @@ export function createPress(stage: HTMLElement): () => void {
       }
     }
     place(aimPose);
-    // on the bed it stands up while the joints swing it round; up a phone's column it folds instead,
-    // and lies clear of her and of the tabs folded, and never stands up end-on
+    // up a phone's column it lies folded, never stood up end-on
     const swing = along === 1 ? 0 : 0.25 * (Math.abs(aimSpeed[1]) + Math.abs(aimSpeed[2]));
     const clear = along === 1 && !mouse ? 0 : tipFor(aimPose);
     const need = Math.min(along === 1 ? STEEP : UPRIGHT, Math.max(aimAt[3], clear, swing));
@@ -1366,16 +1137,13 @@ export function createPress(stage: HTMLElement): () => void {
     } else sample(track, t, from, out);
   }
 
-  /** the state at the clock */
   function apply() {
     const t = clock;
-    const live = begun;
-    // the writer: the lines typed so far show, the one being typed is cut at the caret
     let caretX = 0;
     let caretY = 0;
     let typing = false;
     for (const b of blocks) {
-      let keys = !live || t < b.type ? -1 : Math.min(b.keys, Math.floor((t - b.type) / CHAR));
+      let keys = !begun || t < b.type ? -1 : Math.min(b.keys, Math.floor((t - b.type) / CHAR));
       if (keys >= 0 && keys < b.keys) typing = true;
       let shown = 0;
       let clip = '';
@@ -1398,7 +1166,7 @@ export function createPress(stage: HTMLElement): () => void {
       }
       if (shown !== b.shownLines) {
         for (let i = 0; i < b.lines.length; i++) {
-          b.lines[i].style.visibility = !live || i < shown ? '' : 'hidden';
+          b.lines[i].style.visibility = !begun || i < shown ? '' : 'hidden';
           b.lines[i].style.clipPath = '';
         }
         b.shownLines = shown;
@@ -1409,9 +1177,8 @@ export function createPress(stage: HTMLElement): () => void {
         b.clip = clip;
       }
     }
-    const lastBlock = blocks[blocks.length - 1];
-    const mode =
-      !live || t >= lastBlock.typed + 600 ? 'none' : typing && phase === 'play' ? 'solid' : 'blink';
+    const caretOff = blocks[blocks.length - 1].typed + 600;
+    const mode = !begun || t >= caretOff ? 'none' : typing && phase === 'play' ? 'solid' : 'blink';
     if (mode !== caretMode) {
       caretMode = mode;
       caret.style.visibility = mode === 'none' ? 'hidden' : 'visible';
@@ -1424,20 +1191,17 @@ export function createPress(stage: HTMLElement): () => void {
       caret.style.transform = `translate(${caretX}px, ${caretY}px)`;
     }
 
-    // the rig
     if (aiming) for (let i = 0; i < 4; i++) pose[i] = aimPose[i];
     else poseAt(t, pose);
     sample(pen, t, up, sole);
     const z = aiming ? lift : sole[0];
     place(pose);
-    // the line her pencil's point drags, where the camera sees it, on whole device pixels: the
-    // wipe's edge and the canvas's line
+    // the line her pencil's point drags, on whole device pixels: the wipe's edge and the canvas's
     const dpr = Math.min(2, window.devicePixelRatio);
     project(tipAt[0], tipAt[1], z * scale);
     const lineY = Math.round(point[1] * dpr) / dpr;
     let gauge = GAUGE[0];
     let sliding: Block | null = null;
-    // the writer, a press, or, with nothing left to do, the figure's own line
     let status = !begun ? '' : typing ? 'typing quick-start.mdx' : compiled;
     for (const job of jobs) {
       if (t >= job.touch && t < job.hit) {
@@ -1453,7 +1217,6 @@ export function createPress(stage: HTMLElement): () => void {
     seat[0] = point[0];
     seat[1] = point[1];
     seat[2] = deck.seat[2] * scale;
-    const cell = rig.cell;
     const mateX = Math.round(seat[0] - SEAT_CELL[0] * cell);
     const mateY = Math.round(seat[1] - SEAT_CELL[1] * cell);
     const crownX = mateX + CROWN_CELL[0] * cell;
@@ -1461,7 +1224,6 @@ export function createPress(stage: HTMLElement): () => void {
     sway(performance.now());
     const herPose = hand < 0 ? 0 : poseOf(hand, height);
 
-    // the strips
     for (const b of blocks) {
       let framed = false;
       let queued = false;
@@ -1470,22 +1232,19 @@ export function createPress(stage: HTMLElement): () => void {
         if (job.ask.block !== b) continue;
         if (t >= (job.ask.queued ? job.go : job.ask.held) && t < job.hit) framed = true;
         if (job.ask.queued && t < job.go) queued = true;
-        if (job.flip <= t) flip = job;
+        if (job.touch <= t) flip = job;
       }
-      // a finished block: its tab pops, inverted for a moment, and its frame holds it as one strip
-      const tabState = !live ? 2 : t < b.typed ? 0 : t < b.typed + POP ? 1 : 2;
+      // a finished block's tab pops, inverted for a moment, and its frame holds it as one strip
+      const tabState = !begun ? 2 : t < b.typed ? 0 : t < b.typed + POP ? 1 : 2;
       if (tabState !== b.tabState) {
         b.tabState = tabState;
         b.tab.style.visibility = tabState === 0 ? 'hidden' : '';
-        if (tabState === 1) b.tab.dataset.inverted = '';
-        else delete b.tab.dataset.inverted;
+        b.tab.toggleAttribute('data-inverted', tabState === 1);
       }
       if (framed !== b.framed) {
         b.framed = framed;
-        if (framed) b.el.dataset.framed = '';
-        else delete b.el.dataset.framed;
+        b.el.toggleAttribute('data-framed', framed);
       }
-      // the output over the Markdown: shown above the pencil's line while it slides
       const out = flip ? flip.ask.out : b.base;
       let wipe = out ? 1 : 0;
       if (flip && t < flip.hit && sliding === b) wipe = clamp((lineY - b.cell.y) / b.cell.h);
@@ -1495,7 +1254,7 @@ export function createPress(stage: HTMLElement): () => void {
         b.out.style.clipPath = wipe > 0 && wipe < 1 ? `inset(0 0 ${(1 - wipe) * 100}% 0)` : '';
         b.src.style.clipPath = wipe > 0 && wipe < 1 ? `inset(${wipe * 100}% 0 0 0)` : '';
       }
-      const src = wipe < 1 && (!live || t >= b.type);
+      const src = wipe < 1 && (!begun || t >= b.type);
       if (src !== b.srcShown) {
         b.srcShown = src;
         b.src.style.visibility = src ? 'visible' : '';
@@ -1506,58 +1265,38 @@ export function createPress(stage: HTMLElement): () => void {
         b.tab.setAttribute('aria-pressed', String(pressed));
         if (flip?.ask.reader) tell(b, out);
       }
-      // a press waiting for the sequence's end latches its tab
       if (queued !== b.queued) {
         b.queued = queued;
-        if (queued) b.tab.dataset.queued = '';
-        else delete b.tab.dataset.queued;
+        b.tab.toggleAttribute('data-queued', queued);
       }
     }
 
     if (t < noteUntil) status = note;
     if (status) report(stage, status);
 
-    bounds[0] = Infinity;
-    bounds[1] = Infinity;
-    bounds[2] = -Infinity;
-    bounds[3] = -Infinity;
-    grow(
-      bx + deck.box[0] * scale,
-      by + deck.box[1] * scale,
-      0,
-      Math.hypot(deck.box[2], deck.box[3]) * scale,
-    );
+    bounds.fill(Infinity, 0, 2);
+    bounds.fill(-Infinity, 2);
+    const [dx, dy, hw, hh] = deck.box;
+    grow(bx + dx * scale, by + dy * scale, 0, Math.hypot(hw, hh) * scale);
     grow(bx, by, 140 * scale, 36 * scale);
-    // the boom with its ram to the elbow, its counterweight, the quill and its yoke, and her pencil
-    // from its butt to its point
     for (let i = 0; i <= 4; i++) {
       const u = i / 4;
       grow(bx + (elbowAt[0] - bx) * u, by + (elbowAt[1] - by) * u, 160 * scale, 54 * scale);
     }
-    grow(
-      bx - Math.cos(pose[1]) * 54 * scale,
-      by - Math.sin(pose[1]) * 54 * scale,
-      152 * scale,
-      30 * scale,
-    );
+    const cos = Math.cos(pose[1]);
+    const sin = Math.sin(pose[1]);
+    grow(bx - cos * 54 * scale, by - sin * 54 * scale, 152 * scale, 30 * scale);
     grow(elbowAt[0], elbowAt[1], (z + YOKE + 12) * scale, 54 * scale);
     const fx = Math.cos(pose[1] + pose[2]);
     const fy = Math.sin(pose[1] + pose[2]);
-    // her pencil from its trunnion to its point, tipped up off the page by pose[3]
-    const flat = Math.cos(pose[3]);
     const rise = Math.sin(pose[3]) * (PENCIL.reach - PENCIL.wrist);
     const wrist = PENCIL.wrist * scale;
-    const length = (fore - wrist) * flat;
+    const length = (fore - wrist) * Math.cos(pose[3]);
     for (let i = 0; i <= 3; i++) {
       const u = i / 3;
-      grow(
-        elbowAt[0] + fx * (wrist + length * u),
-        elbowAt[1] + fy * (wrist + length * u),
-        (z + rise * u + 22) * scale,
-        26 * scale,
-      );
+      const l = wrist + length * u;
+      grow(elbowAt[0] + fx * l, elbowAt[1] + fy * l, (z + rise * u + 22) * scale, 26 * scale);
     }
-    // her shadow on the rig and the bay
     const shadowX = (-LIGHT[0] / LIGHT[2]) * seat[2];
     const shadowY = (-LIGHT[1] / LIGHT[2]) * seat[2];
     const [x0, y0, x1, y1] = POSE_BOX[herPose];
@@ -1586,10 +1325,10 @@ export function createPress(stage: HTMLElement): () => void {
 
     if (!shader) return;
     set3('uCam', foot[0], foot[1], CAMERA);
-    set2('uB', bx, by);
+    shader.set('uB', pivotAt);
     shader.set('uS', scale);
-    const ex = BOOM * Math.cos(pose[1]);
-    const ey = BOOM * Math.sin(pose[1]);
+    const ex = BOOM * cos;
+    const ey = BOOM * sin;
     set2('uE', ex, ey);
     set2('uF', fx, fy);
     shader.set('uPen', z);
@@ -1604,23 +1343,20 @@ export function createPress(stage: HTMLElement): () => void {
     set4('uScan', scan.x, scan.x + scan.w, lineY, sliding ? 1 : 0);
     set4('uDoc', inside.x, inside.y, inside.w, inside.h);
     set4('uBay', bay.x, bay.y, bay.w, bay.h);
-    set4('uClip', bounds[0], bounds[1], bounds[2], bounds[3]);
+    shader.set('uClip', bounds);
     // the march starts over the highest part: the quill's yoke, or her pencil's point tipped up
     shader.set('uTop', Math.max(170, z + YOKE + 12, z + rise + PENCIL.radius + 6) * scale);
-    set4('uDeck', deck.box[0], deck.box[1], deck.box[2], deck.box[3]);
-    set2('uValve', deck.valve[0], deck.valve[1]);
-    set2('uDial', deck.gauge[0], deck.gauge[1]);
-    set2('uMotor', deck.motor[0], deck.motor[1]);
+    shader.set('uDeck', deck.box);
+    shader.set('uValve', deck.valve);
+    shader.set('uDial', deck.gauge);
+    shader.set('uMotor', deck.motor);
     set3('uMate', mateX - MATE_PAD[0] * cell, mateY - MATE_PAD[1] * cell, cell);
     shader.set('uMateZ', seat[2]);
   }
 
-  /** the drag chain for the carriage at `c` along the band: its bend halfway between the carriage
-   * and the start of its travel, the fixed run from there to its anchor, the pulled run from there
-   * to the carriage, its links moving with it */
   function chain(c: number) {
     const at = Math.round(c);
-    if (at === chainAt || !fixedRun || !pulledRun || !bend) return;
+    if (at === chainAt) return;
     chainAt = at;
     const b = Math.round((at + BED.start) / 2);
     const end = band.w - BED.anchor;
@@ -1630,8 +1366,6 @@ export function createPress(stage: HTMLElement): () => void {
     bend.style.transform = `translateX(${b - 9}px)`;
   }
 
-  /** her frame and her moon's step: her pose and remote's light, her gaze, a blink now and then,
-   * the moon's orbit in steps; a new pose casts its silhouette on the rig */
   function paint() {
     if (!ink) return;
     const now = performance.now();
@@ -1641,31 +1375,21 @@ export function createPress(stage: HTMLElement): () => void {
     const ticks = reduced ? 0 : Math.floor(now / TICK);
     const eyes = !reduced && ticks % BLINK === 0 ? 1 : gaze;
     const step = Math.floor(ticks / STEP) % ORBIT_STEPS;
-    const shown = (((herPose * 2 + (lit ? 1 : 0)) * 4 + eyes) * ORBIT_STEPS + step) * 64 + rig.ring;
+    const shown =
+      (((herPose * 2 + (lit ? 1 : 0)) * 4 + eyes) * ORBIT_STEPS + step) * 64 + RING[along];
     if (shown === mateShown) return;
     mateShown = shown;
-    paintMate(mateImage, herPose, lit, eyes, step, rig.ring, ink, LIGHT);
+    paintMate(mateImage, herPose, lit, eyes, step, RING[along], ink, LIGHT);
     mate.getContext('2d')!.putImageData(mateImage, 0, 0);
     mate.style.visibility = 'visible';
     if (herPose !== castPose) {
       castPose = herPose;
-      shader?.texture('uSprite', castOf(herPose));
+      shader?.texture('uSprite', (casts[herPose] ??= silhouette(herPose)));
     }
   }
 
-  function castOf(pose: number): ImageData {
-    casts[pose] ??= silhouette(pose);
-    return casts[pose];
-  }
-
-  /**
-   * Where she wants her remote at time t, her sprite at (x, y): pointed at what the arm works at,
-   * from the hand on its side and as high as it lies from her shoulder, lower while that arm would
-   * touch a tab. A press: the slide's start from just before it sets off, the pencil's point as it
-   * slides, the slide's end till it's done, lit till the pencil lifts. The reader's springs: the
-   * cursor, lit while the arm moves to it, or up a phone's column the line it reads at. Nothing to
-   * point at: idle.
-   */
+  /** where she wants her remote at time t: at what the arm works at, from the hand on its side, as
+   * high as it lies from her shoulder, lower while that arm would touch a tab */
   function aimHer(t: number, x: number, y: number) {
     herAt[0] = x;
     herAt[1] = y;
@@ -1698,30 +1422,20 @@ export function createPress(stage: HTMLElement): () => void {
       wantHand = -1;
       return;
     }
-    const cell = rig.cell;
     const middle = x + (SPRITE_W / 2) * cell;
     const held = wantHand;
     if (held < 0 || Math.abs(aimed[0] - middle) > HAND_SLACK) wantHand = aimed[0] > middle ? 0 : 1;
-    const e =
-      (Math.atan2(
-        y + 30.5 * cell - aimed[1],
-        Math.abs(aimed[0] - x - (wantHand === 0 ? 23 : 6) * cell),
-      ) *
-        180) /
-      Math.PI;
+    const across = Math.abs(aimed[0] - x - (wantHand === 0 ? 23 : 6) * cell);
+    const e = (Math.atan2(y + 30.5 * cell - aimed[1], across) * 180) / Math.PI;
     const was = wantHand === held ? wantHeight : 2;
-    wantHeight =
-      e > RAISE[1] + (was === 3 ? -RAISE_SLACK : RAISE_SLACK)
-        ? 3
-        : e < RAISE[0] + (was === 1 ? RAISE_SLACK : -RAISE_SLACK)
-          ? 1
-          : 2;
+    wantHeight = 2;
+    if (e > RAISE[1] + (was === 3 ? -RAISE_SLACK : RAISE_SLACK)) wantHeight = 3;
+    else if (e < RAISE[0] + (was === 1 ? RAISE_SLACK : -RAISE_SLACK)) wantHeight = 1;
     while (wantHeight >= 0 && !armClear(x, y, poseOf(wantHand, wantHeight))) wantHeight--;
     if (wantHeight < 0) wantHand = -1;
   }
 
-  /** her arm a pose nearer the one she wants, a pose every SWAY ms: down to change hands or to idle,
-   * through ready from idle; at once lower while it would touch a tab where she now stands */
+  /** her arm a pose nearer the one she wants every SWAY ms, at once lower off a tab */
   function sway(now: number) {
     while (hand >= 0 && !armClear(herAt[0], herAt[1], poseOf(hand, height))) {
       height--;
@@ -1743,20 +1457,9 @@ export function createPress(stage: HTMLElement): () => void {
     }
   }
 
-  /** whether her arm in `pose`, her sprite at (x, y), keeps clear of every tab as her canvas does */
   function armClear(x: number, y: number, pose: number): boolean {
-    const cell = rig.cell;
     const [x0, y0, x1, y1] = ARM_BOX[pose];
-    for (const { tabBox: t } of blocks) {
-      if (
-        x + x1 * cell > t.x - HER_CLEAR &&
-        x + x0 * cell < t.x + t.w + HER_CLEAR &&
-        y + y1 * cell > t.y &&
-        y + y0 * cell < t.y + t.h
-      )
-        return false;
-    }
-    return true;
+    return !onTab(x + x0 * cell, y + y0 * cell, x + x1 * cell, y + y1 * cell);
   }
 
   function set2(name: string, x: number, y: number) {
@@ -1780,7 +1483,6 @@ export function createPress(stage: HTMLElement): () => void {
     shader!.set(name, v4);
   }
 
-  /** measure the stage again, and draw the state at the clock in it, the arm back on its plan */
   function refresh() {
     aiming = false;
     following = false;
@@ -1813,28 +1515,24 @@ export function createPress(stage: HTMLElement): () => void {
       shader!.invalidate();
       return;
     }
-    // the clock runs on with the arm on the reader's springs, so a press plays out as in the
-    // sequence
+    // the clock runs on under the reader's springs, so a press plays out as in the sequence
     if (phase === 'play') {
       clock = Math.min(total, clock + dt);
       if (clock >= total) {
         phase = 'rest';
-        // the sequence has played: the rig is the reader's, and reaches for a mouse over it; up a
-        // phone's column it rests until the reader scrolls
         if (playing) {
           playing = false;
           if (over) follow();
         }
       }
     }
-    // a reader's mouse takes the rig once it is free
     if (following && !aiming && free()) take();
     let still = false;
     if (aiming) {
       still = aimStep(dt / 1000);
       steady = still;
       if (still && !following) {
-        // back at its park; stopped short of it, it drives the rest of the way
+        // home; stopped short of it, it drives the rest of the way
         const short = Math.abs(aimAt[0] - aimPose[0]) >= 1;
         settle(clock);
         if (short) wake();
@@ -1845,7 +1543,6 @@ export function createPress(stage: HTMLElement): () => void {
     else last = -1;
   }
 
-  /** the writer's presses: each block as it is typed */
   function write() {
     begun = true;
     playing = true;
@@ -1900,17 +1597,7 @@ export function createPress(stage: HTMLElement): () => void {
     const ink3 = cssRgb(style.getPropertyValue('--lp-ink'));
     const yellow = cssRgb(style.getPropertyValue('--lp-yellow'));
     const accent = night ? yellow : cssRgb(style.getPropertyValue('--lp-sun'));
-    // she keeps her look in either theme: a light jacket, black clothes, an outline in the ink
-    const paperBytes = bytes(paper);
-    const inkBytes = bytes(ink3);
-    ink = {
-      line: night ? paperBytes : inkBytes,
-      pen: inkBytes,
-      lit: night ? inkBytes : paperBytes,
-      yellow: bytes(yellow),
-      paper: paperBytes,
-      accent: bytes(accent),
-    };
+    ink = mateInk(style);
     mateShown = -1;
     paint();
     if (!shader) return;
@@ -1924,15 +1611,11 @@ export function createPress(stage: HTMLElement): () => void {
     shader.invalidate();
   }
 
-  // a reader plays with the rig: a mouse in the stage draws it, her pencil pointing at the cursor;
-  // a click on a block, or a press of its tab, presses the block
-
-  /** whether the arm is free for the reader: the sequence played, every press done */
   function free(): boolean {
     return begun && !playing && (!jobs.length || clock >= jobs[jobs.length - 1].free);
   }
 
-  /** the rig leaves its plan for the reader's springs, from where the plan has it and as fast */
+  /** the rig leaves its plan for the reader's springs, from where and as fast as the plan has it */
   function take() {
     // it rests by the cursor a while before going back
     movedAt = performance.now();
@@ -1947,7 +1630,6 @@ export function createPress(stage: HTMLElement): () => void {
     steady = false;
   }
 
-  /** a mouse moves or clicks in the stage: once the sequence has played, the arm follows it */
   function follow() {
     if (!mouse || !begun || playing || reduced || !shader) return;
     following = true;
@@ -1956,7 +1638,6 @@ export function createPress(stage: HTMLElement): () => void {
     shader.invalidate();
   }
 
-  /** the mouse rests or leaves: the arm springs back to its park */
   function goBack() {
     following = false;
     window.clearTimeout(idle);
@@ -1965,8 +1646,6 @@ export function createPress(stage: HTMLElement): () => void {
     shader?.invalidate();
   }
 
-  /** up a phone's column, with no mouse moving, the arm follows the scroll once the sequence has
-   * played */
   function onScroll() {
     if (along !== 1 || mouse || !begun || playing || reduced || !shader) return;
     readAt = scrollY + READ * innerHeight;
@@ -2020,8 +1699,7 @@ export function createPress(stage: HTMLElement): () => void {
     follow();
   }
 
-  /** a finger or a pen anywhere on the page: the scroll leads again, and the mouse's rest no longer
-   * parks the arm */
+  /** a finger or a pen anywhere on the page: the scroll leads again, no mouse rest parks it */
   function onTouch(event: PointerEvent) {
     if (event.pointerType === 'mouse' || !mouse) return;
     mouse = false;
@@ -2034,8 +1712,6 @@ export function createPress(stage: HTMLElement): () => void {
   let tentative: Ask | undefined;
   let clickTimer = 0;
 
-  /** a second click, or a selection, takes back the press the first asked for: the arm drifts back
-   * before its pencil comes down */
   function drop() {
     window.clearTimeout(clickTimer);
     const ask = tentative;
@@ -2074,13 +1750,16 @@ export function createPress(stage: HTMLElement): () => void {
     }, DOUBLE);
   }
 
-  const passive = { passive: true };
+  const listeners = new AbortController();
+  const { signal } = listeners;
+  const passive = { passive: true, signal };
   stage.addEventListener('pointerenter', onEnter, passive);
   stage.addEventListener('pointermove', onMove, passive);
   stage.addEventListener('pointerleave', onLeave, passive);
   stage.addEventListener('pointerdown', onDown, passive);
-  stage.addEventListener('click', onClick);
+  stage.addEventListener('click', onClick, { signal });
   addEventListener('pointerdown', onTouch, passive);
+  button.addEventListener('click', replay, { signal });
 
   const view = new IntersectionObserver(
     ([entry]) => {
@@ -2090,7 +1769,6 @@ export function createPress(stage: HTMLElement): () => void {
         addEventListener('scroll', onScroll, passive);
         onScroll();
       } else removeEventListener('scroll', onScroll);
-      // started: the writer begun and past its empty file
       if ((begun && phase !== 'ready') || reduced || !shader) return;
       // a stage taller than the viewport counts by the share of the viewport it fills
       const seen =
@@ -2117,38 +1795,23 @@ export function createPress(stage: HTMLElement): () => void {
   moved.observe(document.body);
   view.observe(stage);
   const stopTheme = onTheme(colours);
-  button?.addEventListener('click', replay);
   // her idle between the arm's frames: a blink now and then, her moon's next step
   const ticker = window.setInterval(() => {
     if (onScreen && !reduced) paint();
   }, TICK);
-  let disposed = false;
   void document.fonts.ready.then(() => {
-    if (!disposed) refresh();
+    if (!signal.aborted) refresh();
   });
 
   return () => {
-    disposed = true;
+    listeners.abort();
     view.disconnect();
     resize.disconnect();
     moved.disconnect();
     stopTheme();
-    button?.removeEventListener('click', replay);
-    stage.removeEventListener('pointerenter', onEnter);
-    stage.removeEventListener('pointermove', onMove);
-    stage.removeEventListener('pointerleave', onLeave);
-    stage.removeEventListener('pointerdown', onDown);
-    stage.removeEventListener('click', onClick);
-    removeEventListener('scroll', onScroll);
-    removeEventListener('pointerdown', onTouch);
     window.clearTimeout(idle);
     window.clearTimeout(clickTimer);
     window.clearInterval(ticker);
     shader?.destroy();
   };
-}
-
-/** a colour as bytes, for a 2D canvas */
-function bytes([r, g, b]: readonly [number, number, number]): [number, number, number] {
-  return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
 }

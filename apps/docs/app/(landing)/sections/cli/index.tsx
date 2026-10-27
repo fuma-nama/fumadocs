@@ -1,17 +1,25 @@
 import type { CSSProperties, ReactNode } from 'react';
-import { File as FileIcon, RotateCcw } from 'lucide-react';
+import { FileIcon, RotateCcw, Search, SidebarIcon, Text } from 'lucide-react';
+import { Banner } from 'fumadocs-ui/components/banner';
+import { Card, Cards } from 'fumadocs-ui/components/card';
+import { File, Files, Folder } from 'fumadocs-ui/components/files';
+import { DocsDescription, DocsTitle } from 'fumadocs-ui/layouts/docs/page';
 import pkg from 'fumadocs-ui/package.json';
 import { cn } from '@/lib/cn';
 import { copy } from '../../content';
 import { Figure, FigureHeader } from '../../ui/figure';
 import { Window } from '../../ui/window';
-import { Editor } from './code';
-import { deliveries, type Plan, plans } from './data';
-import { Preview, type PreviewProps } from './preview';
+import { deliveries, type Entry, type Plan, plans } from './data';
+import { Editor } from './editor';
 import { Stage } from './stage';
-import { Tree } from './tree';
 
-/** the page before and after each plan's edit: the classes your copy of the component adds */
+/** the classes your copy of the component adds: `DocsTitle`'s, or `Banner`'s over the page */
+interface PreviewProps {
+  title?: string;
+  banner?: string;
+}
+
+/** each plan's page before and after its edit */
 const previews: Record<Plan['id'], [PreviewProps, PreviewProps]> = {
   customize: [{}, { title: 'text-[2.5em]' }],
   add: [{ banner: '' }, { banner: 'bg-fd-primary text-fd-primary-foreground' }],
@@ -25,16 +33,99 @@ function machine(className: string) {
 const chip =
   'inline-flex h-7 items-center justify-center border border-lp-line-strong bg-lp-paper px-2.5 font-mono text-xs transition-none hover:bg-lp-ink hover:text-lp-paper focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-lp-ink aria-pressed:bg-lp-yellow aria-pressed:text-[#121210]';
 
+// classes of `layouts/docs/slots/sidebar.tsx`
+const item =
+  'relative flex flex-row items-center gap-2 rounded-lg p-2 text-start text-fd-muted-foreground [&_svg]:size-4 [&_svg]:shrink-0';
+
+/**
+ * The template's first page in the docs layout, `content/docs/index.mdx` as it is: the real title,
+ * description, cards and banner, in chrome that mirrors `fumadocs-ui/layouts/docs` with its links as
+ * plain text. Your edit applies as the class it produces, `cn` merges it the same way.
+ */
+function Preview({ title, banner }: PreviewProps) {
+  return (
+    <div className="@container isolate flex h-full flex-col bg-fd-background text-[13px] text-fd-foreground">
+      {banner !== undefined && (
+        // static: the page doesn't scroll inside the preview
+        <Banner changeLayout={false} className={cn('static z-0', banner)}>
+          Hello World
+        </Banner>
+      )}
+      {/* classes of `layouts/docs/slots/header.tsx` */}
+      <div className="flex h-12 items-center border-b ps-4 pe-2.5 md:hidden">
+        <p className="flex-1 font-semibold">My App</p>
+        <span className="p-2 text-fd-muted-foreground [&_svg]:size-4">
+          <Search />
+        </span>
+        <span className="p-2 text-fd-muted-foreground [&_svg]:size-4">
+          <SidebarIcon />
+        </span>
+      </div>
+      <div className="grid flex-1 grid-cols-[minmax(0,1fr)] md:grid-cols-[38%_minmax(0,1fr)] md:@xl:grid-cols-[180px_minmax(0,1fr)] md:@3xl:grid-cols-[190px_minmax(0,1fr)_170px]">
+        <div className="hidden flex-col gap-2 border-e bg-fd-card p-2 md:flex">
+          <p className="px-2 pt-1 font-medium">My App</p>
+          <p className="flex items-center gap-2 rounded-lg border bg-fd-secondary/50 p-1.5 text-fd-muted-foreground [&_svg]:size-3.5">
+            <Search />
+            Search
+          </p>
+          <div className="flex flex-col">
+            <span className={cn(item, 'bg-fd-primary/10 text-fd-primary')}>Hello World</span>
+            <span className={item}>Components</span>
+          </div>
+        </div>
+        <article className="flex flex-col px-4 py-6 md:px-5 md:pt-8 md:@xl:px-8">
+          {/* a heading inside the figure's own */}
+          <DocsTitle aria-level={3} className={title}>
+            Hello World
+          </DocsTitle>
+          <DocsDescription className="mb-4 text-[1.1em]">Your first document</DocsDescription>
+          <p className="text-fd-muted-foreground">
+            Welcome to the docs! You can start writing documents in{' '}
+            <code className="rounded-md border bg-fd-muted p-0.5 text-[0.85em]">/content/docs</code>
+            .
+          </p>
+          <p role="heading" aria-level={4} className="mt-6 mb-3 text-[1.2em] font-semibold">
+            What is Next?
+          </p>
+          <Cards>
+            <Card title="Learn more about Next.js" />
+            <Card title="Learn more about Fumadocs" />
+          </Cards>
+        </article>
+        <div className="hidden flex-col gap-3 pt-8 pe-4 md:@3xl:flex">
+          <p className="inline-flex items-center gap-1.5 text-fd-muted-foreground [&_svg]:size-3.5">
+            <Text />
+            On this page
+          </p>
+          <p className="border-s ps-3 text-fd-primary">What is Next?</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/** your project's rows as the real `Files` component, each carrying its path for the scene */
+function rows(entries: Entry[]): ReactNode[] {
+  const out: ReactNode[] = [];
+  for (const entry of entries) {
+    const data = { 'data-path': entry.path, 'data-added': entry.added || undefined };
+    if (entry.children) {
+      out.push(
+        <Folder key={entry.path} name={entry.name} defaultOpen={entry.open} {...data}>
+          {rows(entry.children)}
+        </Folder>,
+      );
+    } else {
+      out.push(
+        <File key={entry.path} name={entry.name} className="py-0.5 md:text-[13px]" {...data} />,
+      );
+    }
+  }
+  return out;
+}
+
 /** the split-flap file count on the hopper, smaller on a phone's narrow one */
-function Counter({
-  scene,
-  count,
-  className,
-}: {
-  scene: number;
-  count: number;
-  className?: string;
-}) {
+function Counter({ scene, count, className }: { scene: number; count: number; className: string }) {
   const flaps: ReactNode[] = [];
   const digits = String(count);
   for (let i = 0; i < digits.length; i++) {
@@ -52,9 +143,9 @@ function Counter({
     <p
       data-counter
       data-scene={scene}
-      hidden={scene > 0}
+      inert={scene > 0}
       className={cn(
-        'z-[6] flex items-center gap-1.5 border border-lp-line-strong bg-lp-paper px-3 py-1 md:gap-2',
+        'z-[6] flex items-center gap-1.5 border border-lp-line-strong bg-lp-paper px-3 py-1 inert:hidden md:gap-2',
         className,
       )}
     >
@@ -86,6 +177,7 @@ export function Cli() {
           data-card={delivery.inlet}
           data-scene={i}
           data-reveals={delivery.reveals.join(' ')}
+          inert={i > 0}
           className="invisible absolute top-0 left-0 flex h-6 origin-top-left items-center gap-1.5 border border-lp-line-strong bg-lp-paper px-2 font-mono text-xs whitespace-nowrap"
         >
           <FileIcon className="size-3.5 text-lp-ink-2" />
@@ -96,40 +188,49 @@ export function Cli() {
     cells.push(
       <div
         key={plan.id}
-        data-tree-cell={i}
-        data-args={plan.args}
+        data-tree-cell
+        data-scene={i}
         data-done={plan.done}
         data-fetch={plan.fetch}
-        data-edit-name={plan.edit.name}
+        data-component={plan.component}
         inert={i > 0}
         className="col-start-1 row-start-2 mt-4 inert:invisible md:col-start-2 md:mt-6 lg:row-start-1 lg:mt-(--cli-top)"
       >
-        {/* a phone's window is short, a row cut in half at its foot: the list reads as one that scrolls */}
+        {/* a phone's window is short, a row cut in half at its foot: the list reads as one that
+            scrolls. Rows come in without moving the window, the folders you open scroll inside it */}
         <Window data-tree title="my-app" className="h-[266px] md:h-full">
-          <Tree entries={plan.tree} />
+          <div className="relative min-h-0 flex-1">
+            <div
+              data-list
+              className="absolute inset-0 overflow-y-auto [scrollbar-color:var(--lp-ink)_var(--lp-paper)] [scrollbar-width:thin]"
+            >
+              {/* a name wider than its column, in a font still loading, breaks instead of spilling */}
+              <Files className="rounded-none border-0 bg-transparent py-2 ps-2 pe-1 font-mono wrap-anywhere [&_.ms-2]:ms-1.5 [&_.ps-2]:ps-1 [&_button]:py-0.5 md:[&_button]:text-[13px] [&_svg]:text-lp-ink-2">
+                {rows(plan.tree)}
+              </Files>
+            </div>
+          </div>
         </Window>
       </div>,
     );
     // its editor and its page each share their cell with the other run's: switching keeps them
     columns.push(
-      <div key={plan.id} data-column={i} inert={i > 0} className="contents inert:invisible">
-        <Editor
-          id={`cli-${plan.id}`}
-          sources={plan.sources}
-          rewires={plan.rewires}
-          edit={plan.edit}
-          className="col-start-1 row-start-1"
-        />
-        {/* a phone's window keeps a height that fits it under the editor on one screen, the page
-            cut off at its foot like a browser's */}
+      <div
+        key={plan.id}
+        data-column
+        data-scene={i}
+        inert={i > 0}
+        className="contents inert:invisible"
+      >
+        <Editor id={`cli-${plan.id}`} sources={plan.sources} className="col-start-1 row-start-1" />
+        {/* a phone's window fits under the editor on one screen, the page cut off like a browser's */}
         <Window
           data-preview
           title="localhost:3000/docs"
           className="col-start-1 row-start-2 min-h-0 overflow-hidden max-sm:h-[376px]"
         >
-          {/* the page before your edit and after it, in one place; `data-edited` says which shows.
-              Only ever hidden, never forced visible, so an inactive run's page stays unseen. A
-              short screen's window shows the top of the page, cut off like a browser's */}
+          {/* the page before your edit and after it, `data-edited` says which shows: only ever
+              hidden, never forced visible, so an inactive run's page stays unseen */}
           <div
             data-page
             data-edited
@@ -168,7 +269,8 @@ export function Cli() {
     commands.push(
       <code
         key={plan.id}
-        data-command={i}
+        data-command
+        data-scene={i}
         inert={i > 0}
         className="col-start-1 row-start-1 block inert:invisible *:[opacity:clamp(0,calc(var(--typed,999)_-_var(--i)),1)]"
       >
@@ -184,16 +286,14 @@ export function Cli() {
 
   return (
     <Figure id="cli" aria-label="CLI" status={plans[0].done}>
-      {/* the section's text and the runs to pick; the stage under them plays the one picked */}
       <div className="flex flex-col gap-8 px-(--lp-gutter) pt-16 pb-10 lg:flex-row lg:items-end lg:justify-between lg:gap-16">
         <FigureHeader
-          data-header
           lead={copy.cli.lead}
           title={copy.cli.title}
           description={copy.cli.description}
         />
-        {/* the runs and the command share both edges: the stage's width on a phone and a tablet,
-            the command's from 1024px, against the stage's right edge */}
+        {/* the runs and the command share both edges: the stage's width on a phone and a tablet, the
+            command's from 1024px, against the stage's right edge */}
         <div className="flex flex-col gap-3 lg:shrink-0">
           <div className="grid grid-cols-2 gap-2 [@media(scripting:none)]:hidden">{chips}</div>
           <div className="flex max-w-full items-stretch border border-lp-line-strong bg-lp-paper">
@@ -223,9 +323,8 @@ export function Cli() {
         </div>
       </div>
       <Stage>
-        {/* on a phone and a tablet the machine has a block of its own above your project: the
-            drive unit and its beam on top, the crate and the hopper under it; from 1024px it
-            stands left of your project, its riser climbing to the hopper */}
+        {/* on a phone and a tablet the machine has a block of its own above your project; from
+            1024px it stands left of your project, its riser climbing to the hopper */}
         <div className="relative col-start-1 row-start-1 h-[360px] md:col-span-2 lg:contents">
           <div
             data-crate

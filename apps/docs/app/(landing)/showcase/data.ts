@@ -3,14 +3,11 @@ import { type ShowcaseObject, showcases, vercel } from '@/lib/showcases';
 export const suggest = 'https://github.com/fuma-nama/fumadocs/discussions/30';
 
 /** projects with docs on Fumadocs: the showcase and Vercel's SDKs */
-const online = showcases.length + vercel.length;
+export const online = showcases.length + vercel.length;
 
 const range = 'from UI libraries and auth frameworks to databases and AI platforms';
 
-/**
- * The copy of the showcase, shared by the page and its Markdown version (`/showcase.md`). A title
- * reads `lead` then `title`, the lead set in the orange pixel type.
- */
+/** the showcase's copy, shared with `/showcase.md`: a title reads `lead`, in pixel type, then `title` */
 export const copy = {
   header: {
     lead: 'Showcase.',

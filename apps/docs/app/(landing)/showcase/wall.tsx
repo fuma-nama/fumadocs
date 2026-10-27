@@ -3,7 +3,7 @@ import Image from 'next/image';
 import { ArrowUpRight } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { type ShowcaseObject, vercel } from '@/lib/showcases';
-import { address, SiteTile } from '../ui/site-tile';
+import { address, fit, SiteTile } from '../ui/site-tile';
 import { TitleBar } from '../ui/window';
 import { arrange, copy, kinds, suggest } from './data';
 import { Peek } from './peek';
@@ -18,17 +18,8 @@ const invert =
 /** a cell overlaps its neighbours by its 1px frame, so the grid's outer edges are its frames' */
 const cell = '-ms-px -mt-px';
 const frame = 'h-full border border-lp-line-strong';
-/** one grid: 2 columns on a phone, 4 on a tablet, 6 from 1280px; a featured window spans 2 */
 const grid = 'grid grid-cols-2 ps-px pt-px md:grid-cols-4 xl:grid-cols-6';
 
-/** a name past `budget` characters ends on a word */
-function fit(name: string, budget: number): string {
-  if (name.length <= budget) return name;
-  const end = name.lastIndexOf(' ', budget - 1);
-  return `${name.slice(0, end > 0 ? end : budget - 1)}…`;
-}
-
-/** a featured project: a larger window, and what it is in its own words */
 function Featured({ site }: { site: Required<ShowcaseObject> }) {
   return (
     <li className={cn('col-span-2', cell)}>
@@ -64,7 +55,6 @@ function Featured({ site }: { site: Required<ShowcaseObject> }) {
   );
 }
 
-/** Vercel: the open source SDKs whose docs run on Fumadocs, in one window */
 function Vercel() {
   const rows: ReactNode[] = [];
   for (const item of vercel) {
@@ -108,7 +98,6 @@ function Vercel() {
  * on a small phone; its initial, for a site without a screenshot, scales with it.
  */
 function Tile({ site }: { site: ShowcaseObject }) {
-  const name = fit(site.name, 20);
   const short = fit(site.name, 15);
   return (
     <li className={cell}>
@@ -116,13 +105,11 @@ function Tile({ site }: { site: ShowcaseObject }) {
         site={site}
         sizes={tileSizes}
         name={
-          name === site.name && short === site.name ? (
-            name
-          ) : (
+          short === site.name ? undefined : (
             <>
               <span className="sr-only">{site.name}</span>
               <span aria-hidden className="@max-[159px]:hidden">
-                {name}
+                {fit(site.name, 20)}
               </span>
               <span aria-hidden className="hidden @max-[159px]:inline">
                 {short}
@@ -136,7 +123,6 @@ function Tile({ site }: { site: ShowcaseObject }) {
   );
 }
 
-/** the empty place after the last site, drawn as a phantom window of a tile's size */
 function Slot() {
   return (
     <li className={cell}>
@@ -160,11 +146,6 @@ function Slot() {
   );
 }
 
-/**
- * Every site in one wall: the projects people know lead it in larger windows with their own words,
- * Vercel's SDKs beside them, then every other site, the ones without a screenshot last, and the
- * place for yours.
- */
 export function Wall({ sites }: { sites: ShowcaseObject[] }) {
   const { featured, shots, blank } = arrange(sites);
   const cells: ReactNode[] = [];
@@ -173,20 +154,11 @@ export function Wall({ sites }: { sites: ShowcaseObject[] }) {
   for (const site of [...shots, ...blank]) cells.push(<Tile key={site.url} site={site} />);
   cells.push(<Slot key="slot" />);
 
-  return (
-    <Peek>
-      <ul className={grid}>{cells}</ul>
-    </Peek>
-  );
+  return <Peek className={grid}>{cells}</Peek>;
 }
 
-/** the blogs, in the wall's cells */
 export function Blogs({ sites }: { sites: ShowcaseObject[] }) {
   const cells: ReactNode[] = [];
   for (const site of sites) cells.push(<Tile key={site.url} site={site} />);
-  return (
-    <Peek>
-      <ul className={grid}>{cells}</ul>
-    </Peek>
-  );
+  return <Peek className={grid}>{cells}</Peek>;
 }

@@ -1,13 +1,13 @@
 import { useSyncExternalStore } from 'react';
 
-export interface FigureEntry {
+interface FigureEntry {
   el: HTMLElement;
   id: string;
   label: string;
 }
 
 let status = 'ready';
-/** the page's figures in document order, and the one covering the middle of the viewport */
+/** the page's figures in document order, and the first one crossing the middle of the viewport */
 let figures: readonly FigureEntry[] = [];
 let active: HTMLElement | null = null;
 const crossing = new Set<HTMLElement>();
@@ -26,11 +26,13 @@ function emit() {
   for (const listener of listeners) listener();
 }
 
-/** the active figure changed: its own line replaces the status */
-function activate(figure: HTMLElement | null) {
-  if (figure === active) return;
-  active = figure;
-  status = figure?.dataset.status ?? 'ready';
+/** a new active figure brings its own line to the status */
+function update() {
+  const [figure = null] = crossing;
+  if (figure !== active) {
+    active = figure;
+    status = figure?.dataset.status ?? 'ready';
+  }
   emit();
 }
 
@@ -40,40 +42,24 @@ function onMiddle(records: IntersectionObserverEntry[]) {
     if (record.isIntersecting) crossing.add(figure);
     else crossing.delete(figure);
   }
-  const [figure = null] = crossing;
-  activate(figure);
+  update();
 }
 
 /** `Figure`'s ref callback: the status bar lists the figure and follows it while it is mounted */
 export function registerFigure(el: HTMLElement): () => void {
-  const observer = (middle ??= new IntersectionObserver(onMiddle, {
-    rootMargin: '-50% 0px -50% 0px',
-  }));
-  const entry: FigureEntry = { el, id: el.id, label: el.getAttribute('aria-label') ?? el.id };
-  const next: FigureEntry[] = [];
-  let placed = false;
-  for (const item of figures) {
-    // in document order, also when a figure mounts between two others
-    if (!placed && el.compareDocumentPosition(item.el) & Node.DOCUMENT_POSITION_FOLLOWING) {
-      next.push(entry);
-      placed = true;
-    }
-    next.push(item);
-  }
-  if (!placed) next.push(entry);
-  figures = next;
-  observer.observe(el);
+  middle ??= new IntersectionObserver(onMiddle, { rootMargin: '-50% 0px -50% 0px' });
+  const entry = { el, id: el.id, label: el.getAttribute('aria-label') ?? el.id };
+  // in document order, also when a figure mounts between two others
+  figures = [...figures, entry].sort((a, b) =>
+    a.el.compareDocumentPosition(b.el) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1,
+  );
+  middle.observe(el);
   emit();
   return () => {
-    observer.unobserve(el);
+    middle!.unobserve(el);
     crossing.delete(el);
-    const rest: FigureEntry[] = [];
-    for (const item of figures) if (item.el !== el) rest.push(item);
-    figures = rest;
-    if (active === el) {
-      const [figure = null] = crossing;
-      activate(figure);
-    } else emit();
+    figures = figures.filter((item) => item.el !== el);
+    update();
   };
 }
 
@@ -100,27 +86,19 @@ export function restore() {
   setStatus(active?.dataset.status ?? 'ready');
 }
 
+function useStore<T>(snapshot: () => T, server: T): T {
+  return useSyncExternalStore(subscribe, snapshot, () => server);
+}
+
 export function useStatus(): string {
-  return useSyncExternalStore(
-    subscribe,
-    () => status,
-    () => 'ready',
-  );
+  return useStore(() => status, 'ready');
 }
 
 export function useFigures(): readonly FigureEntry[] {
-  return useSyncExternalStore(
-    subscribe,
-    () => figures,
-    () => none,
-  );
+  return useStore(() => figures, none);
 }
 
 /** the active figure's id */
 export function useActive(): string | null {
-  return useSyncExternalStore(
-    subscribe,
-    () => active?.id ?? null,
-    () => null,
-  );
+  return useStore(() => active?.id ?? null, null);
 }

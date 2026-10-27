@@ -23,9 +23,7 @@ export async function fetchContributors(
       },
     );
 
-    if (!response.ok) {
-      throw new Error(`Failed to fetch contributors: ${response.statusText}`);
-    }
+    if (!response.ok) throw new Error(`Failed to fetch contributors: ${response.statusText}`);
 
     const list = (await response.json()) as Contributor[];
     for (const contributor of list) {

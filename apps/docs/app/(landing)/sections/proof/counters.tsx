@@ -4,7 +4,7 @@ import { useReducedMotion } from 'motion/react';
 import { cn } from '@/lib/cn';
 import { whenSeen } from '../../lib/later';
 import { TICK } from '../../lib/motion';
-import { Roller } from '../../ui/roller';
+import { Roller } from '../../ui/text';
 
 export interface Counter {
   label: string;
@@ -16,9 +16,8 @@ export interface Counter {
 const format = new Intl.NumberFormat('en-US');
 
 /**
- * Columns a counter spans, on the wall's columns: halves on phones with a lone last counter filling
- * its row, one row of 2 | 2 | 1 from md, and from xl 2 | 3 under the wall with the last counter
- * under the testimonials. A row gives two columns each and the rest to its last counter.
+ * Columns a counter spans on the wall's: halves on phones, a lone last counter filling its row;
+ * 2 | 2 | 1 from md; from xl 2 | 3 under the wall, the last counter under the testimonials.
  */
 function spans(i: number, count: number): CSSProperties {
   const last = i === count - 1;
@@ -38,21 +37,14 @@ export function Counters({ items }: { items: Counter[] }) {
   const ref = useCallback(
     (root: HTMLDivElement | null) => {
       if (!root || reduced) return;
+      // the entrance starts from zeros only once on screen, then rolls in a counter a tick
       let timer = 0;
-      let count = 0;
+      let count = -1;
       const next = () => {
         setPrinted(++count);
         if (count < items.length) timer = window.setTimeout(next, TICK);
       };
-      const stopView = whenSeen(
-        root,
-        () => {
-          // the entrance starts from zeros only now, on screen
-          setPrinted(0);
-          timer = window.setTimeout(next, TICK);
-        },
-        { threshold: 0.4 },
-      );
+      const stopView = whenSeen(root, next, { threshold: 0.4 });
       return () => {
         stopView();
         clearTimeout(timer);

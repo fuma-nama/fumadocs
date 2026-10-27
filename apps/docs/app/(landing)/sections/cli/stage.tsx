@@ -3,11 +3,10 @@ import type { ReactNode } from 'react';
 import { whenSeen } from '../../lib/later';
 import { createCli } from './engine';
 
-function mount(root: HTMLDivElement | null) {
-  if (!root) return;
+function mount(root: HTMLDivElement) {
   // the WebGL context and its shader wait until the figure is within a viewport of the screen
   let destroy: (() => void) | undefined;
-  const stopView = whenSeen(
+  const stop = whenSeen(
     root,
     () => {
       destroy = createCli(root);
@@ -15,18 +14,14 @@ function mount(root: HTMLDivElement | null) {
     { rootMargin: '100% 0px' },
   );
   return () => {
-    stopView();
+    stop();
     destroy?.();
   };
 }
 
 /**
- * The stage, a row of its own under the section's text: the page's windows on the wall, the
- * machine drawn in front of them. A phone stacks them, a tablet puts your project beside the editor
- * and the page; from 1024px the machine and your project stand on the left, the editor and the
- * page take the rest, in a stage of a fixed height, lower on a short screen so each act's parts are
- * on it together. Both runs' windows share their cells, so nothing changes size when you switch,
- * and your project's window never takes the size of its list.
+ * The stage under the section's text: the windows on the wall, the machine drawn in front of them.
+ * From 1024px its height follows the screen's, so each act's parts are on it together.
  */
 export function Stage({ children }: { children: ReactNode }) {
   return (

@@ -1,8 +1,5 @@
-/*
- * 02 Parts: the stage's layouts, by what the screen has room for. The base is the still one (reduced
- * motion, no JS, no WebGL, which marks the figure `data-flat`): no pin, the stack at rest, or the
- * page straight on without the engine.
- */
+/* 02 Parts by the room the screen has. The base is the still layout, unpinned: reduced motion, no
+ * JS, or no WebGL, which marks the figure `data-flat`. */
 
 .parts-pin {
   padding: 32px var(--lp-gutter) 40px;
@@ -25,18 +22,6 @@
   inset: 0;
   overflow: hidden;
   transform-origin: 0 0;
-}
-
-.parts-front {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 420px;
-  height: 64px;
-  transform-origin: 0 0;
-  visibility: hidden;
-  background: var(--lp-paper);
-  color: var(--lp-ink);
 }
 
 /* in dark mode the stack is a light object, as Start's terminal is: its fronts take the shader's tones */
@@ -67,13 +52,6 @@
   }
 }
 
-@media (min-width: 768px) {
-  .parts-front {
-    width: 1069px;
-    height: 72px;
-  }
-}
-
 @media (min-width: 1024px) {
   .parts-stage {
     grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
@@ -87,6 +65,17 @@
 
   .parts-cell {
     aspect-ratio: 16 / 10;
+  }
+}
+
+/* every pinned layout */
+@media (prefers-reduced-motion: no-preference) and (scripting: enabled) {
+  .parts-pin:not([data-flat]) .parts-cell {
+    aspect-ratio: auto;
+  }
+
+  .parts-pin:not([data-flat]) .parts-page {
+    inset: var(--lp-gutter);
   }
 }
 
@@ -108,11 +97,6 @@
   .parts-pin:not([data-flat]) .parts-cell {
     position: absolute;
     inset: 0;
-    aspect-ratio: auto;
-  }
-
-  .parts-pin:not([data-flat]) .parts-page {
-    inset: var(--lp-gutter);
   }
 
   .parts-pin:not([data-flat]) .parts-head,
@@ -142,9 +126,9 @@
   }
 }
 
-/* the canvas pins across the sheet, the header and the panel pass over its right part */
-@media (min-width: 1024px) and (max-width: 1347px) and (prefers-reduced-motion: no-preference) and (scripting: enabled),
-  (min-width: 1024px) and (max-height: 883px) and (prefers-reduced-motion: no-preference) and (scripting: enabled) {
+/* otherwise the canvas pins, and the header and the panel scroll past it */
+@media (max-width: 1347px) and (prefers-reduced-motion: no-preference) and (scripting: enabled),
+  (max-height: 883px) and (prefers-reduced-motion: no-preference) and (scripting: enabled) {
   .parts-pin:not([data-flat]) {
     display: flex;
     flex-direction: column;
@@ -159,18 +143,19 @@
     order: -1;
     position: sticky;
     top: var(--lp-menu-h);
-    height: calc(100svh - var(--lp-menu-h) - var(--lp-status-h));
-    aspect-ratio: auto;
   }
+}
 
-  .parts-pin:not([data-flat]) .parts-page {
-    inset: var(--lp-gutter);
+/* across the sheet, the header and the panel passing over its right part */
+@media (min-width: 1024px) and (max-width: 1347px) and (prefers-reduced-motion: no-preference) and (scripting: enabled),
+  (min-width: 1024px) and (max-height: 883px) and (prefers-reduced-motion: no-preference) and (scripting: enabled) {
+  .parts-pin:not([data-flat]) .parts-cell {
+    height: calc(100svh - var(--lp-menu-h) - var(--lp-status-h));
   }
 
   /* the header comes in once the camera has cleared the right part, near the run's middle */
   .parts-pin:not([data-flat]) .parts-run {
     display: block;
-    order: 0;
     height: calc((100svh - var(--lp-menu-h) - var(--lp-status-h)) * 0.54);
   }
 
@@ -190,31 +175,13 @@
   }
 }
 
-/* the canvas pins as a band on top, the header and the panel pass beneath it */
+/* as a band on top, the header and the panel passing beneath it */
 @media (max-width: 1023px) and (prefers-reduced-motion: no-preference) and (scripting: enabled) {
-  .parts-pin:not([data-flat]) {
-    display: flex;
-    flex-direction: column;
-    padding: 0 0 40px;
-  }
-
-  .parts-pin:not([data-flat]) .parts-stage {
-    display: contents;
-  }
-
   .parts-pin:not([data-flat]) .parts-cell {
-    order: -1;
-    position: sticky;
-    top: var(--lp-menu-h);
     z-index: 1;
     height: calc((100svh - var(--lp-menu-h) - var(--lp-status-h)) * 0.56);
-    aspect-ratio: auto;
     border-bottom: 1px solid var(--lp-line);
     background: var(--lp-paper);
-  }
-
-  .parts-pin:not([data-flat]) .parts-page {
-    inset: var(--lp-gutter);
   }
 
   .parts-pin:not([data-flat]) .parts-head,

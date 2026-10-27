@@ -1,92 +1,67 @@
 /**
  * What `npx @fumadocs/cli` writes into a project made by `pnpm create fumadocs-app` (the Next.js
- * template, `examples/next`), as the installer of `@fumadocs/cli` plans it against the registry
- * built from this repo: `customize` picking Docs Layout > All, and `add banner files`. Both skip
- * `lib/cn.ts`, the template has the same file.
+ * template, `examples/next`), as the installer plans it against the registry built from this repo:
+ * `customize` picking Docs Layout > All, and `add banner files`. Both skip `lib/cn.ts`, the
+ * template has the same file.
  */
 
 export interface Entry {
   name: string;
-  /** the path from the project root */
   path: string;
-  /** a folder's entries, a file has none */
   children?: Entry[];
-  /** a folder shown open */
   open?: boolean;
   /** written by the command */
   added?: boolean;
 }
 
-/** a file the editor shows: its lines around what the run changes in it, as written once it ran */
+/** a line's change: the import's path the command points at your copy, or your edit */
+export interface Change {
+  line: number;
+  from: string;
+  to: string;
+}
+
+/** a file the editor shows: its lines around what the run changes, as written once it ran */
 export interface Source {
   file: string;
-  /** runs of lines, each from the number of its first */
-  hunks: { line: number; lines: string[] }[];
   /** the row of your project its imports now resolve to: its cable plugs in there */
   target?: string;
-}
-
-/** an import the command points at your copy: the path in that line, before and after */
-export interface Rewire {
-  file: string;
-  line: number;
-  from: string;
-  to: string;
-}
-
-/** the line you change in your copy */
-export interface Edit {
-  /** what it changes */
-  name: string;
-  file: string;
-  line: number;
-  from: string;
-  to: string;
+  hunks: { line: number; lines: string[] }[];
+  rewires?: Change[];
+  /** the line you change in your copy */
+  edit?: Change;
 }
 
 export interface Plan {
   id: 'customize' | 'add';
   /** after `npx @fumadocs/cli ` */
   args: string;
-  /** its button */
   label: string;
   /** what the registry hands over, for the status line */
   fetch: string;
-  /** the CLI's line once it is done */
   done: string;
-  /** the folder it installs into, its files land first */
+  /** the folder it installs into: its files land first */
   target: string;
   /** the files it writes, in its order */
   files: string[];
-  /** your project once it ran */
   tree: Entry[];
-  /** the files the editor shows, in its tabs' order */
   sources: Source[];
-  rewires: Rewire[];
-  edit: Edit;
+  /** what your edit changes */
+  component: string;
 }
 
-/** the project's files, the root ones left out */
-const project = [
-  'app/(home)/layout.tsx',
-  'app/(home)/page.tsx',
-  'app/api/search/route.ts',
-  'app/docs/[[...slug]]/page.tsx',
-  'app/docs/layout.tsx',
-  'app/global.css',
-  'app/layout.tsx',
-  'app/llms-full.txt/route.ts',
-  'app/llms.mdx/docs/[[...slug]]/route.ts',
-  'app/llms.txt/route.ts',
-  'app/og/docs/[...slug]/route.tsx',
-  'components/mdx.tsx',
-  'content/docs/index.mdx',
-  'content/docs/test.mdx',
-  'lib/cn.ts',
-  'lib/layout.shared.tsx',
-  'lib/shared.ts',
-  'lib/source.ts',
-];
+function paths(block: string): string[] {
+  return block.trim().split(/\s+/);
+}
+
+/** the template's files, the root ones left out */
+const project = paths(`
+  app/(home)/layout.tsx app/(home)/page.tsx app/api/search/route.ts app/docs/[[...slug]]/page.tsx
+  app/docs/layout.tsx app/global.css app/layout.tsx app/llms-full.txt/route.ts
+  app/llms.mdx/docs/[[...slug]]/route.ts app/llms.txt/route.ts app/og/docs/[...slug]/route.tsx
+  components/mdx.tsx content/docs/index.mdx content/docs/test.mdx
+  lib/cn.ts lib/layout.shared.tsx lib/shared.ts lib/source.ts
+`);
 
 /** the project with `files` added, folders first */
 function tree(files: string[], open: string[]): Entry[] {
@@ -119,55 +94,30 @@ function tree(files: string[], open: string[]): Entry[] {
 
 function sort(entry: Entry) {
   if (!entry.children) return;
-  entry.children.sort((a, b) =>
-    Boolean(a.children) === Boolean(b.children)
-      ? a.name.localeCompare(b.name)
-      : a.children
-        ? -1
-        : 1,
+  entry.children.sort(
+    (a, b) => Number(!a.children) - Number(!b.children) || a.name.localeCompare(b.name),
   );
   for (const child of entry.children) sort(child);
 }
 
-const customizeFiles = [
-  'layouts/docs/page/index.tsx',
-  'components/ai/page-actions.tsx',
-  'components/ui/button.tsx',
-  'components/ui/popover.tsx',
-  'layouts/docs/page/slots/footer.tsx',
-  'lib/urls.ts',
-  'layouts/docs/page/slots/breadcrumb.tsx',
-  'layouts/docs/page/slots/container.tsx',
-  'layouts/docs/page/slots/toc.tsx',
-  'components/ui/collapsible.tsx',
-  'components/toc/index.tsx',
-  'lib/merge-refs.ts',
-  'components/toc/block.tsx',
-  'components/toc/default.tsx',
-  'components/toc/clerk.tsx',
-  'layouts/docs/index.tsx',
-  'layouts/docs/client.tsx',
-  'layouts/docs/slots/container.tsx',
-  'layouts/docs/slots/header.tsx',
-  'layouts/shared/client.tsx',
-  'layouts/shared/slots/theme-switch.tsx',
-  'layouts/shared/slots/search-trigger.tsx',
-  'layouts/shared/slots/language-select.tsx',
-  'layouts/docs/slots/sidebar.tsx',
-  'components/docs-sidebar/tabs/dropdown.tsx',
-  'components/docs-sidebar/base.tsx',
-  'lib/hotkey.ts',
-  'components/docs-sidebar/link-item.tsx',
-  'components/docs-sidebar/page-tree.tsx',
-];
+const customizeFiles = paths(`
+  layouts/docs/page/index.tsx components/ai/page-actions.tsx components/ui/button.tsx
+  components/ui/popover.tsx layouts/docs/page/slots/footer.tsx lib/urls.ts
+  layouts/docs/page/slots/breadcrumb.tsx layouts/docs/page/slots/container.tsx
+  layouts/docs/page/slots/toc.tsx components/ui/collapsible.tsx components/toc/index.tsx
+  lib/merge-refs.ts components/toc/block.tsx components/toc/default.tsx components/toc/clerk.tsx
+  layouts/docs/index.tsx layouts/docs/client.tsx layouts/docs/slots/container.tsx
+  layouts/docs/slots/header.tsx layouts/shared/client.tsx layouts/shared/slots/theme-switch.tsx
+  layouts/shared/slots/search-trigger.tsx layouts/shared/slots/language-select.tsx
+  layouts/docs/slots/sidebar.tsx components/docs-sidebar/tabs/dropdown.tsx
+  components/docs-sidebar/base.tsx lib/hotkey.ts components/docs-sidebar/link-item.tsx
+  components/docs-sidebar/page-tree.tsx
+`);
 
 // `add` installs one target after the other
-const addFiles = [
-  'components/banner.tsx',
-  'components/ui/button.tsx',
-  'components/files.tsx',
-  'components/ui/collapsible.tsx',
-];
+const addFiles = paths(`
+  components/banner.tsx components/ui/button.tsx components/files.tsx components/ui/collapsible.tsx
+`);
 
 export const plans: Plan[] = [
   {
@@ -177,18 +127,17 @@ export const plans: Plan[] = [
     fetch: 'layouts/docs',
     done: 'layouts/docs installed',
     target: 'layouts',
+    component: 'DocsTitle',
     files: customizeFiles,
-    tree: tree(customizeFiles, [
-      'layouts',
-      'layouts/docs',
-      'layouts/docs/page',
-      'layouts/docs/page/slots',
-      'layouts/docs/slots',
-    ]),
+    tree: tree(
+      customizeFiles,
+      paths('layouts layouts/docs layouts/docs/page layouts/docs/page/slots layouts/docs/slots'),
+    ),
     sources: [
       {
         file: 'app/docs/layout.tsx',
         target: 'layouts/docs',
+        rewires: [{ line: 2, from: 'fumadocs-ui/layouts/docs', to: '@/layouts/docs' }],
         hunks: [
           {
             line: 1,
@@ -211,6 +160,7 @@ export const plans: Plan[] = [
       {
         file: 'app/docs/[[...slug]]/page.tsx',
         target: 'layouts/docs/page',
+        rewires: [{ line: 9, from: 'fumadocs-ui/layouts/docs/page', to: '@/layouts/docs/page' }],
         hunks: [
           {
             line: 1,
@@ -231,6 +181,7 @@ export const plans: Plan[] = [
       },
       {
         file: 'layouts/docs/page/index.tsx',
+        edit: { line: 199, from: '1.75', to: '2.5' },
         hunks: [
           {
             line: 197,
@@ -247,27 +198,6 @@ export const plans: Plan[] = [
         ],
       },
     ],
-    rewires: [
-      {
-        file: 'app/docs/layout.tsx',
-        line: 2,
-        from: 'fumadocs-ui/layouts/docs',
-        to: '@/layouts/docs',
-      },
-      {
-        file: 'app/docs/[[...slug]]/page.tsx',
-        line: 9,
-        from: 'fumadocs-ui/layouts/docs/page',
-        to: '@/layouts/docs/page',
-      },
-    ],
-    edit: {
-      name: 'DocsTitle',
-      file: 'layouts/docs/page/index.tsx',
-      line: 199,
-      from: '1.75',
-      to: '2.5',
-    },
   },
   {
     id: 'add',
@@ -276,12 +206,18 @@ export const plans: Plan[] = [
     fetch: 'banner, files',
     done: 'banner, files installed',
     target: 'components',
+    component: 'Banner',
     files: addFiles,
-    tree: tree(addFiles, ['components', 'components/ui', 'lib']),
+    tree: tree(addFiles, paths('components components/ui lib')),
     sources: [
       {
         file: 'components/banner.tsx',
         target: 'components/ui/button.tsx',
+        rewires: [
+          { line: 5, from: '@/utils/cn', to: '../lib/cn' },
+          { line: 6, from: '@/components/ui/button', to: './ui/button' },
+        ],
+        edit: { line: 67, from: 'bg-fd-secondary', to: 'bg-fd-primary text-fd-primary-foreground' },
         hunks: [
           {
             line: 3,
@@ -306,6 +242,7 @@ export const plans: Plan[] = [
       {
         file: 'components/files.tsx',
         target: 'lib/cn.ts',
+        rewires: [{ line: 6, from: '@/utils/cn', to: '../lib/cn' }],
         hunks: [
           {
             line: 3,
@@ -320,28 +257,15 @@ export const plans: Plan[] = [
         ],
       },
     ],
-    rewires: [
-      { file: 'components/banner.tsx', line: 5, from: '@/utils/cn', to: '../lib/cn' },
-      { file: 'components/banner.tsx', line: 6, from: '@/components/ui/button', to: './ui/button' },
-      { file: 'components/files.tsx', line: 6, from: '@/utils/cn', to: '../lib/cn' },
-    ],
-    edit: {
-      name: 'Banner',
-      file: 'components/banner.tsx',
-      line: 67,
-      from: 'bg-fd-secondary',
-      to: 'bg-fd-primary text-fd-primary-foreground',
-    },
   },
 ];
 
-/** a written file on its way into the tree */
+/** a written file on its way into the tree: the row it lands in, its own or the closed folder that
+ * takes it, and the rows that show once it landed */
 interface Delivery {
   path: string;
   name: string;
-  /** the row it lands in: its own, or the closed folder that takes it */
   inlet: string;
-  /** rows that show once it landed */
   reveals: string[];
 }
 

@@ -1,5 +1,5 @@
-/* the landing's palette applies to the whole document while it is mounted, portals included;
-   on `body` too, where the docs' section class (`.framework`) sets its own primary */
+/* the palette covers the whole document while the landing is mounted, portals included, and
+   `body`, where the docs' section class (`.framework`) sets its own primary */
 :root:has(.landing),
 :root:has(.landing) body {
   --lp-paper: #f2f0ea;
@@ -153,7 +153,6 @@ body:has(.landing),
   background-size: 12px 12px;
 }
 
-/* striped title bar of a window, interrupted by its title */
 .lp-pinstripe {
   background-image: repeating-linear-gradient(
     to bottom,
@@ -165,7 +164,7 @@ body:has(.landing),
   background-repeat: no-repeat;
 }
 
-/* film grain with sparse coloured dust over the whole sheet, moved in steps */
+/* film grain with sparse coloured dust, moved in steps */
 .lp-grain {
   position: fixed;
   inset: -80px;

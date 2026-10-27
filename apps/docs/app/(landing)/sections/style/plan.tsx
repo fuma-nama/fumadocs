@@ -1,16 +1,7 @@
-import { type CSSProperties, memo } from 'react';
-import { DITHER_MASKS } from '../../lib/bayer';
-import { FRAME_H, FRAME_W, type LayoutId } from './data';
-import { PLANS } from './plans';
-
-function place(x: number, y: number, w: number, h: number): CSSProperties {
-  return {
-    left: `${(x / FRAME_W) * 100}%`,
-    top: `${(y / FRAME_H) * 100}%`,
-    width: `${(w / FRAME_W) * 100}%`,
-    height: `${(h / FRAME_H) * 100}%`,
-  };
-}
+import { memo } from 'react';
+import { DITHER_MASKS } from '../../lib/dither';
+import { FRAME, type LayoutId, PLANS } from './data';
+import { percent } from './scene';
 
 /** `x, y, w, h` rectangles in a row as one SVG path */
 function path(rects: number[]): string {
@@ -20,10 +11,7 @@ function path(rects: number[]): string {
   return d;
 }
 
-/**
- * The layout drawn in 1 bit from its measured plan, at any size: panels in a screen-space stipple,
- * hairline frames, text as solid bars. The shared search trigger is marked in yellow.
- */
+/** the layout in 1 bit from its measured plan: panels stippled in screen space, text as bars */
 export const Plan = memo(function Plan({ layout }: { layout: LayoutId }) {
   const plan = PLANS[layout];
   const dots = [];
@@ -33,7 +21,7 @@ export const Plan = memo(function Plan({ layout }: { layout: LayoutId }) {
       <span
         key={i}
         className="absolute bg-lp-ink"
-        style={{ ...place(x, y, w, h), maskImage: DITHER_MASKS[2], maskSize: '4px 4px' }}
+        style={{ ...percent(x, y, w, h, FRAME), maskImage: DITHER_MASKS[2], maskSize: '4px 4px' }}
       />,
     );
   }
@@ -46,7 +34,7 @@ export const Plan = memo(function Plan({ layout }: { layout: LayoutId }) {
     >
       {dots}
       <svg
-        viewBox={`0 0 ${FRAME_W} ${FRAME_H}`}
+        viewBox={`0 0 ${FRAME.w} ${FRAME.h}`}
         preserveAspectRatio="none"
         shapeRendering="crispEdges"
         className="absolute inset-0 size-full"
@@ -63,7 +51,10 @@ export const Plan = memo(function Plan({ layout }: { layout: LayoutId }) {
         />
         <path d={path(plan.solid)} className="fill-lp-ink" />
       </svg>
-      <span className="absolute bg-lp-yellow outline outline-lp-ink" style={place(x, y, w, h)} />
+      <span
+        className="absolute bg-lp-yellow outline outline-lp-ink"
+        style={percent(x, y, w, h, FRAME)}
+      />
     </span>
   );
 });

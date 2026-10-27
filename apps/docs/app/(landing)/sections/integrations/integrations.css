@@ -1,57 +1,14 @@
-/*
- * 05 Integrations: the board, its seams and power-on, and the parts of the mechanisms. Each
- * mechanism's keyframes come from `choreography.ts`, poses held on the 125 ms tick grid.
- */
+/* the board takes `--cols` from its root; `--bt-at` is when a part powers on */
 
 .bt-board {
-  --cols: 1;
-  --rows: 12;
-  --bt-lead: 250ms;
-}
-
-/* the 96x40 cells of a mechanism */
-.bt-board,
-.bt-more {
-  --bt-stage: 288px;
+  /* twelve modules */
+  --rows: calc(12 / var(--cols));
+  grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
 }
 
 /* row 13 at rest (reduced motion): two names to each column of the board */
 .bt-more {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-@media (min-width: 640px) {
-  .bt-board {
-    --cols: 2;
-    --rows: 6;
-  }
-
-  .bt-more {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-}
-
-@media (min-width: 1024px) {
-  .bt-board {
-    --cols: 3;
-    --rows: 4;
-    --bt-lead: 500ms;
-  }
-
-  .bt-more {
-    grid-template-columns: repeat(6, minmax(0, 1fr));
-  }
-}
-
-@media (min-width: 1280px) {
-  .bt-board {
-    --cols: 4;
-    --rows: 3;
-  }
-
-  .bt-more {
-    grid-template-columns: repeat(8, minmax(0, 1fr));
-  }
+  grid-template-columns: repeat(var(--cols), minmax(0, 1fr) minmax(0, 1fr));
 }
 
 /* the last column ends on the sheet's wider gutter: room for a mechanism between two gutters */
@@ -87,6 +44,8 @@
   inset-inline: 0;
   height: 1px;
   transform-origin: left;
+  --bt-draw: bt-draw-h;
+  --bt-at: calc(min(var(--k), var(--rows)) * 63ms);
 }
 
 .bt-seam-h {
@@ -98,7 +57,7 @@
 .bt-board::after {
   content: '';
   bottom: 0;
-  --k: 12;
+  --k: var(--rows);
 }
 
 .bt-seam-v {
@@ -108,6 +67,8 @@
   grid-row: 1 / -1;
   transform-origin: top;
   opacity: clamp(0, var(--cols) - var(--k), 1);
+  --bt-draw: bt-draw-v;
+  --bt-at: calc(125ms + var(--k) * 63ms);
 }
 
 .bt-board[data-power='off'] :is(.bt-seam-h, .bt-seam-v),
@@ -115,18 +76,11 @@
   visibility: hidden;
 }
 
-.bt-board[data-power='on'] .bt-seam-h,
+/* the seams carry current while they draw, then cool to a hairline */
+.bt-board[data-power='on'] :is(.bt-seam-h, .bt-seam-v),
 .bt-board[data-power='on']::after {
-  --bt-at: calc(min(var(--k), var(--rows)) * 63ms);
   animation:
-    bt-draw-h 700ms cubic-bezier(0.16, 1, 0.3, 1) var(--bt-at) backwards,
-    bt-hot 1000ms steps(1, end) var(--bt-at) backwards;
-}
-
-.bt-board[data-power='on'] .bt-seam-v {
-  --bt-at: calc(125ms + var(--k) * 63ms);
-  animation:
-    bt-draw-v 700ms cubic-bezier(0.16, 1, 0.3, 1) var(--bt-at) backwards,
+    var(--bt-draw) 700ms cubic-bezier(0.16, 1, 0.3, 1) var(--bt-at) backwards,
     bt-hot 1000ms steps(1, end) var(--bt-at) backwards;
 }
 
@@ -142,29 +96,21 @@
   }
 }
 
-/* the seams carry current while they draw, then cool to a hairline */
 @keyframes bt-hot {
   from {
     background-color: var(--lp-sun);
   }
 }
 
-/* cells */
 .bt-cell {
   --bt-ink: var(--lp-ink);
   --bt-paper: var(--lp-paper);
+  --bt-orange: var(--lp-orange);
   --bt-speed: 1;
   /* orange over ink-filled cards: vivid while the ink is dark */
   --bt-on-ink: var(--lp-sun);
-  --d: mod(var(--i), var(--cols));
   /* content starts on the gutter; the end gives way so a mechanism always fits */
   padding-inline-end: min(var(--lp-gutter), calc(100% - var(--lp-gutter) - var(--bt-stage)));
-}
-
-@media (min-width: 1024px) {
-  .bt-cell {
-    --d: calc(mod(var(--i), var(--cols)) + round(down, var(--i) / var(--cols), 1));
-  }
 }
 
 .bt-cell:hover,
@@ -178,17 +124,21 @@
   outline: none;
 }
 
+.bt-ink-card {
+  --bt-orange: var(--bt-on-ink);
+}
+
 /* power on: unlit until its tick, one inverted frame, then the content */
 .bt-board[data-power] .bt-cell {
   opacity: 0.15;
 }
 
 .bt-board[data-power] .bt-cell[data-on] {
-  animation: bt-power 125ms steps(1, end) calc(var(--bt-lead) + var(--d) * 125ms) forwards;
+  animation: bt-power 125ms steps(1, end) var(--bt-at) forwards;
 }
 
 .bt-board[data-power] .bt-cell[data-on] .bt-num {
-  animation: bt-morph 500ms steps(4, end) calc(var(--bt-lead) + (var(--d) + 1) * 125ms) backwards;
+  animation: bt-morph 500ms steps(4, end) calc(var(--bt-at) + 125ms) backwards;
 }
 
 @keyframes bt-power {
@@ -213,67 +163,6 @@
   }
 }
 
-.bt-cell[data-active] .bt-num {
-  background-color: var(--lp-yellow);
-  color: #121210;
-}
-
-/* mechanisms */
-.bt-stage {
-  position: relative;
-  display: block;
-  width: var(--bt-stage);
-  height: 120px;
-  color: var(--bt-ink);
-}
-
-.bt-stage > *,
-.bt-layer > *,
-.bt-clip > * {
-  position: absolute;
-}
-
-.bt-clip {
-  overflow: clip;
-}
-
-.bt-strip {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-}
-
-.bt-row {
-  display: flex;
-  align-items: center;
-  flex-shrink: 0;
-}
-
-/* a group of parts that animates together, positioned in stage cells */
-.bt-layer {
-  inset: 0;
-}
-
-.bt-ink {
-  fill: var(--bt-ink);
-}
-
-.bt-paper {
-  fill: var(--bt-paper);
-}
-
-.bt-orange {
-  fill: var(--lp-orange);
-}
-
-.bt-ink-card .bt-orange {
-  fill: var(--bt-on-ink);
-}
-
-.bt-hi {
-  fill: var(--lp-yellow);
-}
-
 .bt-text {
   font-family: var(--font-geist-pixel);
   /* one font pixel per CSS px */
@@ -282,13 +171,29 @@
   white-space: pre;
 }
 
-.bt-caret {
-  display: inline-block;
-  width: 7px;
-  height: 11px;
-  margin-inline-start: 2px;
-  vertical-align: -1px;
-  background-color: var(--lp-orange);
+.bt-code {
+  font-family: var(--font-mono);
+  /* 6px per character, two cells */
+  font-size: 10px;
+}
+
+/* a split-flap face: two pixels per font pixel, the bottom half shows the lower part */
+.bt-flap-face {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--bt-ink);
+  color: var(--bt-paper);
+  font-family: var(--font-geist-pixel), sans-serif;
+  font-size: calc(80px / 3);
+}
+
+/* content on the yellow highlight is always dark */
+.bt-on-hi {
+  --bt-ink: #121210;
+  color: #121210;
 }
 
 .bt-a {
@@ -310,72 +215,6 @@
 /* the second unit of a flap display follows one tick later */
 .bt-lag .bt-a {
   animation-delay: calc(125ms / var(--bt-speed));
-}
-
-.bt-knock {
-  color: var(--bt-paper);
-}
-
-/* content on the yellow highlight is always dark */
-.bt-on-hi {
-  --bt-ink: #121210;
-  color: #121210;
-}
-
-.bt-orange-text {
-  color: var(--lp-orange);
-}
-
-.bt-ink-card .bt-orange-text {
-  color: var(--bt-on-ink);
-}
-
-.bt-dim {
-  opacity: 0.55;
-}
-
-.bt-code {
-  font-family: var(--font-mono);
-  /* 6px per character, two cells */
-  font-size: 10px;
-}
-
-.bt-link {
-  color: var(--lp-orange);
-  text-decoration: underline;
-  text-underline-offset: 2px;
-}
-
-.bt-badge {
-  display: flex;
-  width: 100%;
-  height: 100%;
-  align-items: center;
-  justify-content: center;
-  background-color: var(--lp-orange);
-  color: var(--bt-paper);
-  font-family: var(--font-geist-pixel);
-  font-size: calc(40px / 3);
-  line-height: 1;
-}
-
-/* a split-flap face: two pixels per font pixel, the bottom half shows the lower part */
-.bt-flap-face {
-  display: flex;
-  width: 100%;
-  height: 100%;
-  align-items: center;
-  justify-content: center;
-  background-color: var(--bt-ink);
-  color: var(--bt-paper);
-  font-family: var(--font-geist-pixel), sans-serif;
-  font-size: calc(80px / 3);
-  line-height: 1;
-  white-space: pre;
-}
-
-.bt-flap-low {
-  top: -26px;
 }
 
 [data-run='off'] :is(.bt-a, .bt-blink, .bt-track) {
@@ -402,23 +241,6 @@
     display: grid;
   }
 
-  .bt-more > p {
-    border-inline-end-width: 0;
-  }
-
-  .bt-more :is(.bt-marquee, .bt-track),
-  .bt-track > ul {
-    display: contents;
-  }
-
-  .bt-track {
-    animation: none;
-  }
-
-  .bt-track > ul + ul {
-    display: none;
-  }
-
   /*
    * each name on its column's content edge, like the titles above, its highlight bleeding past
    * it; a size down so the longest one fits half a column
@@ -432,8 +254,9 @@
     white-space: nowrap;
   }
 
-  .bt-board :is(.bt-a, .bt-blink),
-  .bt-board :is(.bt-seam-h, .bt-seam-v, .bt-cell, .bt-num),
+  .bt-track,
+  .bt-board :is(.bt-a, .bt-seam-h, .bt-seam-v, .bt-cell, .bt-num),
+  .bt-cell:not([data-active]) .bt-blink,
   .bt-board::after {
     animation: none;
   }

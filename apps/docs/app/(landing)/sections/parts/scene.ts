@@ -1,5 +1,5 @@
-import { bayer8 } from '../../lib/glsl';
-import { mix, type Rect } from '../../lib/math';
+import { bayer8 } from '../../lib/dither';
+import { mix, type Rect } from '../../lib/motion';
 
 /**
  * World units are the page's CSS px: the stack stands on y = 0 with the page on its top (+y), the
@@ -206,15 +206,14 @@ export interface View {
   shift: [number, number];
 }
 
-/** a view's basis and principal point, written in place by `aim` */
+/** a view's basis and principal point (CSS px), written in place by `aim` */
 export interface Camera {
   eye: Vec3;
   fwd: Vec3;
   right: Vec3;
   up: Vec3;
   focal: number;
-  cx: number;
-  cy: number;
+  centre: [number, number];
 }
 
 const FOV = (30 * Math.PI) / 180;
@@ -230,8 +229,7 @@ export function createCamera(): Camera {
     right: [0, 0, 0],
     up: [0, 0, 0],
     focal: 1,
-    cx: 0,
-    cy: 0,
+    centre: [0, 0],
   };
 }
 
@@ -257,23 +255,21 @@ export function aim(cam: Camera, view: View, width: number, height: number): Cam
   cam.up[1] = cam.right[2] * cam.fwd[0] - cam.right[0] * cam.fwd[2];
   cam.up[2] = cam.right[0] * cam.fwd[1];
   cam.focal = view.focal;
-  cam.cx = width / 2 + view.shift[0];
-  cam.cy = height / 2 + view.shift[1];
+  cam.centre[0] = width / 2 + view.shift[0];
+  cam.centre[1] = height / 2 + view.shift[1];
   return cam;
 }
 
-/** a world point in canvas CSS px into `out` (x, y, depth along the view) */
-export function project(cam: Camera, x: number, y: number, z: number, out: number[]): number[] {
+/** a world point in canvas CSS px into `out` */
+export function project(cam: Camera, x: number, y: number, z: number, out: number[]) {
   const vx = x - cam.eye[0];
   const vy = y - cam.eye[1];
   const vz = z - cam.eye[2];
   const rx = vx * cam.right[0] + vz * cam.right[2];
   const uy = vx * cam.up[0] + vy * cam.up[1] + vz * cam.up[2];
   const d = vx * cam.fwd[0] + vy * cam.fwd[1] + vz * cam.fwd[2];
-  out[0] = cam.cx + (cam.focal * rx) / d;
-  out[1] = cam.cy - (cam.focal * uy) / d;
-  out[2] = d;
-  return out;
+  out[0] = cam.centre[0] + (cam.focal * rx) / d;
+  out[1] = cam.centre[1] - (cam.focal * uy) / d;
 }
 
 function num(v: number): string {
@@ -303,7 +299,7 @@ export function quadMatrix(q: readonly number[], w: number, h: number): string {
   return `matrix3d(${num(a / w)},${num(d / w)},0,${num(g / w)},${num(b / h)},${num(e / h)},0,${num(k / h)},0,0,1,0,${num(q[0])},${num(q[1])},0,1)`;
 }
 
-const corner = [0, 0, 0];
+const corner = [0, 0];
 
 /** the box `lo`..`hi` on the canvas */
 export function boundsOf(cam: Camera, lo: Vec3, hi: Vec3): Rect {
@@ -360,7 +356,7 @@ export function viewAt(
   dolly: number,
   tilt: number,
   swing: number,
-): View {
+) {
   for (let i = 0; i < 3; i++) out.target[i] = mix(from.target[i], to.target[i], swing);
   out.dist = Math.exp(mix(Math.log(from.dist), Math.log(to.dist), dolly));
   out.elev = mix(from.elev, to.elev, tilt);
@@ -368,5 +364,4 @@ export function viewAt(
   out.focal = to.focal;
   out.shift[0] = mix(from.shift[0], to.shift[0], swing);
   out.shift[1] = mix(from.shift[1], to.shift[1], swing);
-  return out;
 }

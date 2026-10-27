@@ -17,12 +17,20 @@ import {
 } from 'lucide-react';
 import { Callout } from 'fumadocs-ui/components/callout';
 import { Card, Cards } from 'fumadocs-ui/components/card';
+import {
+  CodeBlockTab,
+  CodeBlockTabs,
+  CodeBlockTabsList,
+  CodeBlockTabsTrigger,
+} from 'fumadocs-ui/components/codeblock';
+import type { CodeBlockProps } from 'fumadocs-ui/components/codeblock';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { DocsBody, DocsDescription } from 'fumadocs-ui/layouts/docs/page';
 import { FullSearchTrigger } from 'fumadocs-ui/layouts/shared/slots/search-trigger';
 import { ThemeSwitch } from 'fumadocs-ui/layouts/shared/slots/theme-switch';
+import { ServerCodeBlock } from '@/components/server-codeblock';
 import { cn } from '@/lib/cn';
-import { toc } from './data';
+import { install, toc } from './data';
 
 // classes of `layouts/docs/slots/sidebar.tsx`
 const item =
@@ -74,14 +82,45 @@ const navButton = cn(
 /** a prose heading as text: the page's headings are not the landing's */
 const heading = 'not-prose mt-[2em] mb-[1em] text-[1.5em] leading-[1.333] font-semibold [&+*]:mt-0';
 
+/** the page's own code block: nothing on the landing scrolls but the page */
+const still: CodeBlockProps = { viewportProps: { className: 'overflow-hidden' } };
+
 /**
- * fumadocs.dev's Quick Start in the default docs layout, reflowing with the face it is laid on like
- * the real layout: a phone's navbar, the sidebar from 700px, the table of contents from 1100px.
- * Callout, cards, code block, description, body, search trigger and theme switch are the real
- * components; the layout chrome mirrors the markup of `fumadocs-ui/layouts/docs`, whose providers
- * need a full page, and its links are plain text here.
+ * fumadocs.dev's Quick Start in the default docs layout, reflowing with the face it is laid on: a
+ * phone's navbar, the sidebar from 700px, the table of contents from 1100px. The content and the
+ * search trigger and theme switch are the real components; the chrome mirrors the markup of
+ * `fumadocs-ui/layouts/docs`, whose providers need a full page, with its links as plain text.
  */
-export function DocsPreview({ code }: { code: ReactNode }) {
+export function DocsPreview() {
+  const items: ReactNode[] = [];
+  for (const node of tree) {
+    if ('separator' in node) {
+      items.push(
+        <p
+          key={node.separator}
+          className="mt-6 mb-1 inline-flex items-center gap-2 px-2 first:mt-0"
+        >
+          {node.separator}
+        </p>,
+      );
+      continue;
+    }
+    items.push(
+      <span
+        key={node.name}
+        className={cn(
+          item,
+          node.active && 'bg-fd-primary/10 text-fd-primary',
+          node.folder && 'w-full',
+        )}
+      >
+        {node.icon}
+        {node.name}
+        {node.folder && <ChevronDown className="ms-auto -rotate-90" />}
+      </span>,
+    );
+  }
+
   const cards: ReactNode[] = [];
   for (const layer of layers)
     cards.push(
@@ -111,9 +150,18 @@ export function DocsPreview({ code }: { code: ReactNode }) {
           </div>
           <FullSearchTrigger />
         </div>
-        <Tree />
+        <div className="flex flex-col gap-0.5 p-4 px-2">{items}</div>
         <div className="flex-1" />
-        <SidebarFooter />
+        <div className="flex flex-col p-4 pt-2">
+          <div className="flex items-center rounded-lg border bg-fd-secondary/50 p-0.5 pe-0 text-fd-muted-foreground">
+            <span className={buttonVariants({ size: 'icon-sm', variant: 'ghost' })}>
+              <svg aria-hidden viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" />
+              </svg>
+            </span>
+            <ThemeSwitch className="ms-auto rounded-none border-y-0 border-e-0 px-1 py-0 *:rounded-md" />
+          </div>
+        </div>
       </div>
       <article className="flex min-w-0 flex-col px-4 pt-6 @min-[700px]:px-8 @min-[700px]:pt-12">
         <div className="mb-8 flex flex-col gap-4">
@@ -135,7 +183,22 @@ export function DocsPreview({ code }: { code: ReactNode }) {
           </Callout>
           <p className={heading}>Automatic Installation</p>
           <p>A minimum version of Node.js 22 required.</p>
-          <div>{code}</div>
+          <div>
+            <CodeBlockTabs defaultValue="npm">
+              <CodeBlockTabsList>
+                {install.map((tab) => (
+                  <CodeBlockTabsTrigger key={tab.value} value={tab.value}>
+                    {tab.value}
+                  </CodeBlockTabsTrigger>
+                ))}
+              </CodeBlockTabsList>
+              {install.map((tab) => (
+                <CodeBlockTab key={tab.value} value={tab.value}>
+                  <ServerCodeBlock lang="bash" code={tab.code} codeblock={still} />
+                </CodeBlockTab>
+              ))}
+            </CodeBlockTabs>
+          </div>
         </DocsBody>
       </article>
       <div className="-ms-3 mt-12 hidden min-h-0 flex-col self-start p-3 @min-[1100px]:flex">
@@ -145,10 +208,7 @@ export function DocsPreview({ code }: { code: ReactNode }) {
   );
 }
 
-/**
- * The same page with the UI swapped for your own: what `fumadocs-core` hands over (the page tree,
- * the TOC, the page's title and body) as plain elements, the start of a UI you build yourself.
- */
+/** the same page on a UI of your own: what `fumadocs-core` hands over, as plain elements */
 export function HeadlessPreview() {
   const items: ReactNode[] = [];
   for (const node of tree) {
@@ -222,55 +282,9 @@ function Brand() {
   );
 }
 
-function Tree() {
-  const items: ReactNode[] = [];
-  for (const node of tree) {
-    if ('separator' in node) {
-      items.push(
-        <p
-          key={node.separator}
-          className="mt-6 mb-1 inline-flex items-center gap-2 px-2 first:mt-0"
-        >
-          {node.separator}
-        </p>,
-      );
-      continue;
-    }
-    items.push(
-      <span
-        key={node.name}
-        className={cn(
-          item,
-          node.active && 'bg-fd-primary/10 text-fd-primary',
-          node.folder && 'w-full',
-        )}
-      >
-        {node.icon}
-        {node.name}
-        {node.folder && <ChevronDown className="ms-auto -rotate-90" />}
-      </span>,
-    );
-  }
-  return <div className="flex flex-col gap-0.5 p-4 px-2">{items}</div>;
-}
-
-function SidebarFooter() {
-  return (
-    <div className="flex flex-col p-4 pt-2">
-      <div className="flex items-center rounded-lg border bg-fd-secondary/50 p-0.5 pe-0 text-fd-muted-foreground">
-        <span className={buttonVariants({ size: 'icon-sm', variant: 'ghost' })}>
-          <GitHub />
-        </span>
-        <ThemeSwitch className="ms-auto rounded-none border-y-0 border-e-0 px-1 py-0 *:rounded-md" />
-      </div>
-    </div>
-  );
-}
-
-// `TOCItem` and its track from `components/toc/default.tsx`, without the anchors
-const BASE = 8;
+// `TOCItem` and its track from `components/toc/default.tsx`, without the anchors, for depths 2 and 3
 function lineOffset(depth: number) {
-  return depth <= 2 ? BASE : depth === 3 ? 8 + BASE : 16 + BASE;
+  return depth > 2 ? 16 : 8;
 }
 
 function TocBlock() {
@@ -290,7 +304,7 @@ function TocBlock() {
           i === toc.length - 1 && 'pb-0',
           active && 'text-fd-primary',
         )}
-        style={{ paddingInlineStart: entry.depth <= 2 ? 20 : entry.depth === 3 ? 32 : 44 }}
+        style={{ paddingInlineStart: entry.depth > 2 ? 32 : 20 }}
       >
         <svg
           aria-hidden
@@ -330,13 +344,5 @@ function TocBlock() {
       </p>
       <div className="relative isolate ms-px flex flex-col py-3 text-sm">{items}</div>
     </>
-  );
-}
-
-function GitHub() {
-  return (
-    <svg aria-hidden viewBox="0 0 24 24" fill="currentColor">
-      <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" />
-    </svg>
   );
 }

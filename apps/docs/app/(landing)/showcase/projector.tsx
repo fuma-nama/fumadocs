@@ -13,41 +13,37 @@ import { useReducedMotion } from 'motion/react';
 import { cn } from '@/lib/cn';
 import type { ShowcaseObject } from '@/lib/showcases';
 import { whenSeen } from '../lib/later';
-import { clamp } from '../lib/math';
-import { TICK } from '../lib/motion';
+import { clamp, TICK } from '../lib/motion';
 import { report } from '../lib/status';
 import { onTheme } from '../lib/theme';
 import { useIsClient } from '../lib/use-is-client';
-import { Roller } from '../ui/roller';
 import { address } from '../ui/site-tile';
+import { Roller } from '../ui/text';
 import { Window } from '../ui/window';
 import {
+  BAND,
   createProjector,
   DEVELOP,
   dither,
-  hidePrint,
-  printFrame,
-  type ProjectorEngine,
-} from './engine';
-import {
-  BAND,
   FRAME_H,
   FRAME_W,
   H,
+  hidePrint,
   LEADER,
   PITCH,
+  printFrame,
+  type ProjectorEngine,
   STRIP_Y,
   TRACK_LEFT,
   TRACK_RIGHT,
   W,
-} from './film';
+} from './engine';
 
 interface ProjectorProps {
   sites: Required<ShowcaseObject>[];
   /** the deck's fixed hardware, drawn on the server: under the strip, and over it */
   back: ReactNode;
   front: ReactNode;
-  className?: string;
 }
 
 /** strokes stay 1px at any size */
@@ -58,7 +54,6 @@ const NEAR = 4;
 /** frames the strip shows either side of the gate; they print in one a tick at first */
 const SIDE = 2;
 const PRINT_IN = (SIDE * 2 + 1) * TICK;
-/** the screen goes dark in this long as the strip leaves */
 const DARKEN = TICK * 2;
 /** the name on the base rolls to the next within the pull and the develop, 6 ticks a cell at most */
 const ROLL = 500;
@@ -106,11 +101,10 @@ function Leader({ style }: { style: CSSProperties }) {
 }
 
 /**
- * The showcase on a reel: a film of every site with a screenshot runs through the gate of a little
- * projector, one frame at a time, and the window above shows the frame in the gate. Pick a frame
- * and the strip runs to it; the switch on the base stops the reel.
+ * The showcase on a reel: the strip runs one frame at a time through the gate, and the window above
+ * shows the frame in the gate. Pick a frame and the strip runs to it; the switch stops the reel.
  */
-export function Projector({ sites, back, front, className }: ProjectorProps) {
+export function Projector({ sites, back, front }: ProjectorProps) {
   const reduced = useReducedMotion() === true;
   const client = useIsClient();
   const [current, setCurrent] = useState(0);
@@ -122,8 +116,9 @@ export function Projector({ sites, back, front, className }: ProjectorProps) {
   const screen = useRef<HTMLSpanElement>(null);
   const arrived = useRef(false);
   const site = sites[current];
+  const checked = picked ?? current;
   /** the name on the base, and the frame the screen has ready next */
-  const title = heading ?? current;
+  const name = sites[heading ?? current].name;
   const incoming = heading ?? (current + 1) % sites.length;
   const frames = sites.length + LEADER * 2;
   // a roll covers the longer of two names: the cells of the longest one start within the budget
@@ -134,17 +129,13 @@ export function Projector({ sites, back, front, className }: ProjectorProps) {
   const root = useCallback(
     (element: HTMLDivElement | null) => {
       if (!element) return;
-      const layer = (index: number) => {
-        const box = screen.current?.querySelector<HTMLElement>(`[data-layer="${index}"]`);
-        return { canvas: box?.querySelector('canvas'), image: box?.querySelector('img') };
-      };
+      const layer = (index: number) => screen.current?.querySelector(`[data-layer="${index}"]`);
       /** strips that left so far: an arrival from before the last one is stale */
       let leaves = 0;
       const instance = createProjector(element, sites.length, reduced, {
         leave(from, to) {
           leaves++;
-          const { canvas, image } = layer(from);
-          if (canvas && image && !reduced) dither(canvas, image, 0, 16, DARKEN);
+          if (!reduced) dither(layer(from), 0, 16, DARKEN);
           setHeading(to);
           report(element, `showing ${address(sites[to].url)}`);
         },
@@ -160,7 +151,7 @@ export function Projector({ sites, back, front, className }: ProjectorProps) {
             // the same line as at the leave, unless a pick turned the strip on its way
             report(element, `showing ${address(sites[index].url)}`);
           };
-          const { image } = layer(index);
+          const image = layer(index)?.querySelector('img');
           if (image) void image.decode().then(show, show);
           else show();
         },
@@ -169,11 +160,7 @@ export function Projector({ sites, back, front, className }: ProjectorProps) {
 
       // prints follow the strip's size and the theme; the ones loaded before hydration print now
       const reprint = () => {
-        for (const frame of element.querySelectorAll<HTMLElement>('[data-frame]')) {
-          const canvas = frame.querySelector('canvas');
-          const image = frame.querySelector('img');
-          if (canvas && image) printFrame(canvas, image);
-        }
+        for (const frame of element.querySelectorAll('[data-frame]')) printFrame(frame);
       };
       const resize = new ResizeObserver(reprint);
       resize.observe(element.querySelector('[data-reel]')!);
@@ -205,11 +192,8 @@ export function Projector({ sites, back, front, className }: ProjectorProps) {
   useLayoutEffect(() => {
     if (!arrived.current) return;
     for (const layer of screen.current!.querySelectorAll<HTMLElement>('[data-layer]')) {
-      const canvas = layer.querySelector('canvas');
-      const image = layer.querySelector('img');
-      if (!canvas || !image) continue;
-      if (layer.dataset.layer !== String(current) || reduced) hidePrint(canvas);
-      else dither(canvas, image, 16, 0, DEVELOP);
+      if (layer.dataset.layer !== String(current) || reduced) hidePrint(layer);
+      else dither(layer, 16, 0, DEVELOP);
     }
   }, [current, reduced]);
 
@@ -219,10 +203,9 @@ export function Projector({ sites, back, front, className }: ProjectorProps) {
   }
 
   function onKeyDown(event: KeyboardEvent<HTMLDivElement>) {
-    const from = picked ?? current;
-    let to = from;
-    if (event.key === 'ArrowRight' || event.key === 'ArrowDown') to = from + 1;
-    else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') to = from - 1;
+    let to = checked;
+    if (event.key === 'ArrowRight' || event.key === 'ArrowDown') to++;
+    else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') to--;
     else return;
     event.preventDefault();
     to = clamp(to, 0, sites.length - 1);
@@ -261,7 +244,6 @@ export function Projector({ sites, back, front, className }: ProjectorProps) {
     );
   }
 
-  const checked = picked ?? current;
   // the strip shows the frames either side of the gate, and those it passes on its way to the next;
   // their screenshots load a few frames ahead, the rest of the reel is wound away
   const low = Math.min(current, heading ?? current);
@@ -271,19 +253,47 @@ export function Projector({ sites, back, front, className }: ProjectorProps) {
   const strip: ReactNode[] = [];
   for (let i = 0; i < sites.length; i++) {
     const item = sites[i];
+    const shown = i >= low - SIDE && i <= high + SIDE;
     strip.push(
-      <Frame
+      <button
         key={item.url}
-        index={i}
-        count={sites.length}
-        site={item}
-        near={i >= first && i <= last}
-        shown={i >= low - SIDE && i <= high + SIDE}
-        loading={client ? 'eager' : 'lazy'}
-        checked={i === checked}
+        // a frame prints as it comes onto the strip: a hidden one has no size to print at
+        ref={shown ? printFrame : undefined}
+        type="button"
+        role="radio"
+        aria-checked={i === checked}
+        aria-label={item.name}
+        aria-posinset={i + 1}
+        aria-setsize={sites.length}
+        tabIndex={i === checked ? 0 : -1}
+        data-frame={i}
+        onClick={() => pick(i)}
+        className={cn(
+          'group/frame absolute bg-lp-paper outline-lp-yellow focus-visible:outline-2 focus-visible:-outline-offset-2',
+          !shown && 'hidden',
+        )}
         style={{ ...slot(i, frames), ...(i <= SIDE ? pop(i) : undefined) }}
-        onPick={pick}
-      />,
+      >
+        {i >= first && i <= last && (
+          <Image
+            src={item.image}
+            alt=""
+            width={FRAME_W + 1}
+            height={FRAME_H + 1}
+            // eager once hydrated: on the server it would add a preload for every frame
+            loading={client ? 'eager' : 'lazy'}
+            onLoad={(event) => printFrame(event.currentTarget.parentElement)}
+            className="invisible absolute inset-0 size-full object-cover [@media(scripting:none)]:visible"
+          />
+        )}
+        <canvas
+          aria-hidden
+          className={cn(
+            'absolute inset-0 size-full [image-rendering:pixelated] group-hover/frame:invert',
+            reveal,
+          )}
+        />
+      </button>,
     );
   }
   const leader: ReactNode[] = [];
@@ -295,7 +305,7 @@ export function Projector({ sites, back, front, className }: ProjectorProps) {
   }
 
   return (
-    <div ref={root} className={cn('group/projector flex flex-col', className)}>
+    <div ref={root} className="group/projector flex flex-col">
       <a
         href={site.url}
         target="_blank"
@@ -348,129 +358,52 @@ export function Projector({ sites, back, front, className }: ProjectorProps) {
         </div>
         <div className="pointer-events-none">{front}</div>
       </div>
-      <Plate name={sites[title].name} stagger={stagger} on={on} onToggle={toggle} />
-    </div>
-  );
-}
-
-interface FrameProps {
-  index: number;
-  count: number;
-  site: Required<ShowcaseObject>;
-  /** its screenshot loads */
-  near: boolean;
-  /** on the strip, where the reader can see it */
-  shown: boolean;
-  /** eager once hydrated: on the server it would add a preload for every frame */
-  loading: 'eager' | 'lazy';
-  checked: boolean;
-  style: CSSProperties;
-  onPick: (index: number) => void;
-}
-
-function Frame({ index, count, site, near, shown, loading, checked, style, onPick }: FrameProps) {
-  const canvas = useRef<HTMLCanvasElement>(null);
-  const image = useRef<HTMLImageElement>(null);
-  // a frame prints when it comes onto the strip: a hidden one has no size to print at
-  useLayoutEffect(() => {
-    if (shown && image.current) printFrame(canvas.current!, image.current);
-  }, [shown]);
-  return (
-    <button
-      type="button"
-      role="radio"
-      aria-checked={checked}
-      aria-label={site.name}
-      aria-posinset={index + 1}
-      aria-setsize={count}
-      tabIndex={checked ? 0 : -1}
-      data-frame={index}
-      onClick={() => onPick(index)}
-      className={cn(
-        'group/frame absolute bg-lp-paper outline-lp-yellow focus-visible:outline-2 focus-visible:-outline-offset-2',
-        !shown && 'hidden',
-      )}
-      style={style}
-    >
-      {near && (
-        <Image
-          ref={image}
-          src={site.image}
-          alt=""
-          width={FRAME_W + 1}
-          height={FRAME_H + 1}
-          loading={loading}
-          onLoad={(event) => printFrame(canvas.current!, event.currentTarget)}
-          className="invisible absolute inset-0 size-full object-cover [@media(scripting:none)]:visible"
+      {/* the base: the name of the site in the gate, the run switch and its lamp */}
+      <div className="@container flex h-12 items-center gap-3 border border-lp-line-strong bg-lp-paper px-4">
+        <p
+          className="min-w-0 flex-1 font-pixel leading-none whitespace-nowrap"
+          style={{
+            fontSize: `min(24px, calc((100cqw - 96px) / ${(name.length * 0.62).toFixed(2)}))`,
+          }}
+        >
+          <Roller value={name} step={ROLL_STEP} stagger={stagger} />
+        </p>
+        <span className="font-mono text-[11px] leading-none text-lp-ink-2 motion-reduce:hidden">
+          run
+        </span>
+        <button
+          type="button"
+          aria-pressed={on}
+          aria-label="Run the reel"
+          onClick={toggle}
+          className="relative h-6 w-4 shrink-0 outline-offset-2 outline-lp-ink focus-visible:outline motion-reduce:hidden"
+        >
+          <svg aria-hidden viewBox="0 0 16 24" className="size-full overflow-visible">
+            <rect
+              x="0.5"
+              y="0.5"
+              width="15"
+              height="23"
+              rx="2"
+              className="fill-lp-paper stroke-lp-ink-2"
+            />
+            <circle cx="8" cy="12" r="3.5" className="fill-lp-paper stroke-lp-ink-2" />
+            <path
+              d={on ? 'M8 12V3' : 'M8 12v9'}
+              strokeWidth={2.5}
+              strokeLinecap="round"
+              className="stroke-lp-ink"
+            />
+          </svg>
+        </button>
+        <span
+          aria-hidden
+          className={cn(
+            'size-2.5 shrink-0 rounded-full border motion-reduce:hidden',
+            on ? 'border-lp-ink bg-lp-sun' : 'border-lp-ink-2 bg-lp-paper',
+          )}
         />
-      )}
-      <canvas
-        ref={canvas}
-        aria-hidden
-        className={cn(
-          'absolute inset-0 size-full [image-rendering:pixelated] group-hover/frame:invert',
-          reveal,
-        )}
-      />
-    </button>
-  );
-}
-
-/** the base: the name of the site in the gate, the run switch and its lamp */
-interface PlateProps {
-  name: string;
-  /** ms between the cells of the name's roll */
-  stagger: number;
-  on: boolean;
-  onToggle: () => void;
-}
-
-function Plate({ name, stagger, on, onToggle }: PlateProps) {
-  return (
-    <div className="@container flex h-12 items-center gap-3 border border-lp-line-strong bg-lp-paper px-4">
-      <p
-        className="min-w-0 flex-1 font-pixel leading-none whitespace-nowrap"
-        style={{
-          fontSize: `min(24px, calc((100cqw - 96px) / ${(name.length * 0.62).toFixed(2)}))`,
-        }}
-      >
-        <Roller value={name} step={ROLL_STEP} stagger={stagger} />
-      </p>
-      <span className="font-mono text-[11px] leading-none text-lp-ink-2 motion-reduce:hidden">
-        run
-      </span>
-      <button
-        type="button"
-        aria-pressed={on}
-        aria-label="Run the reel"
-        onClick={onToggle}
-        className="relative h-6 w-4 shrink-0 outline-offset-2 outline-lp-ink focus-visible:outline motion-reduce:hidden"
-      >
-        <svg aria-hidden viewBox="0 0 16 24" className="size-full overflow-visible">
-          <rect
-            x="0.5"
-            y="0.5"
-            width="15"
-            height="23"
-            rx="2"
-            className="fill-lp-paper stroke-lp-ink-2"
-          />
-          <circle cx="8" cy="12" r="3.5" className="fill-lp-paper stroke-lp-ink-2" />
-          <path
-            d={on ? 'M8 12V3' : 'M8 12v9'}
-            strokeWidth={2.5}
-            strokeLinecap="round"
-            className="stroke-lp-ink"
-          />
-        </svg>
-      </button>
-      <span
-        aria-hidden
-        className={cn(
-          'size-2.5 shrink-0 rounded-full border motion-reduce:hidden',
-          on ? 'border-lp-ink bg-lp-sun' : 'border-lp-ink-2 bg-lp-paper',
-        )}
-      />
+      </div>
     </div>
   );
 }

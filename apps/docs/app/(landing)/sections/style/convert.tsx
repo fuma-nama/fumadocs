@@ -4,24 +4,22 @@ import { cn } from '@/lib/cn';
 import { TICK } from '../../lib/motion';
 import { DitherSwap } from '../../ui/dither';
 import { paint } from './data';
+import { createSprings, due, type Springs, stepSprings } from './engine';
 import type { Wiring } from './presets';
-import { createSprings, due, type Springs, STEP, stepSprings } from './spring';
 
 interface ConvertProps {
   /** the variables, without `--color-fd-` */
   names: string[];
-  light: Wiring;
-  dark: Wiring;
-  /** the preset, a new one re-routes the wires and dithers the chips in */
+  wiring: { light: Wiring; dark: Wiring };
+  /** the preset: a new one re-routes the wires and dithers the chips in */
   preset: string;
 }
 
 /**
- * The variables of a preset wired to its colours, light to dark, like a cipher: shared values
- * gather many variables, so the wires cross. A preset that maps to your own variables (shadcn)
- * wires one to one; this page's palette stands in for them. Rows are `--row` tall.
+ * Each variable wired to its colour, light to dark: shared values gather many variables, so the
+ * wires cross. Rows are `--row` tall.
  */
-export function Convert({ names, light, dark, preset }: ConvertProps) {
+export function Convert({ names, wiring, preset }: ConvertProps) {
   const rows = [];
   for (const name of names) {
     rows.push(
@@ -36,21 +34,19 @@ export function Convert({ names, light, dark, preset }: ConvertProps) {
       <ol aria-label="Variables" className="w-[150px] shrink-0 text-end text-lp-ink-2">
         {rows}
       </ol>
-      <Wires wiring={light} preset={preset} className="flex dark:hidden" />
-      <Wires wiring={dark} preset={preset} className="hidden dark:flex" />
+      <Wires wiring={wiring.light} preset={preset} className="flex dark:hidden" />
+      <Wires wiring={wiring.dark} preset={preset} className="hidden dark:flex" />
     </div>
   );
 }
 
-function Wires({
-  wiring,
-  preset,
-  className,
-}: {
+interface WiresProps {
   wiring: Wiring;
   preset: string;
   className: string;
-}) {
+}
+
+function Wires({ wiring, preset, className }: WiresProps) {
   const n = wiring.to.length;
   const pitch = n / wiring.chips.length;
   const svg = useRef<SVGSVGElement>(null);
@@ -59,18 +55,15 @@ function Wires({
 
   useLayoutEffect(() => {
     const lines = svg.current!.querySelectorAll('line');
-    let springs = ends.current;
-    if (!springs) {
-      springs = createSprings(lines.length);
-      for (let i = 0; i < lines.length; i++)
-        springs.value[i] = springs.target[i] = Number(lines[i].getAttribute('y2'));
-      ends.current = springs;
-      return;
-    }
+    // the targets come from the wiring: React leaves an unchanged `y2` at the springs' last value
+    const first = !ends.current;
+    const springs = (ends.current ??= createSprings(lines.length));
     for (let i = 0; i < lines.length; i++) {
-      springs.target[i] = Number(lines[i].getAttribute('y2'));
-      lines[i].setAttribute('y2', springs.value[i].toFixed(3));
+      springs.target[i] = (wiring.to.length / wiring.chips.length) * (wiring.to[i] + 0.5);
+      if (first) springs.value[i] = springs.target[i];
+      else lines[i].setAttribute('y2', springs.value[i].toFixed(3));
     }
+    if (first) return;
     if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
       springs.value.set(springs.target);
       for (let i = 0; i < lines.length; i++) lines[i].setAttribute('y2', String(springs.target[i]));
@@ -81,7 +74,7 @@ function Wires({
     let raf = 0;
     const tick = (now: number) => {
       let energy = Infinity;
-      for (let i = due(clock, now); i > 0; i--) energy = stepSprings(s, STEP, 320, 20);
+      for (let i = due(clock, now); i > 0; i--) energy = stepSprings(s, 320, 20);
       for (let i = 0; i < lines.length; i++) lines[i].setAttribute('y2', s.value[i].toFixed(3));
       if (energy > 0.002) raf = requestAnimationFrame(tick);
     };
