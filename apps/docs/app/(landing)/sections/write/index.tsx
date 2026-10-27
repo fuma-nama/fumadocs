@@ -46,16 +46,20 @@ export function Press({
   sources,
   steps,
 }: PressProps) {
-  const [frontmatter, ...rest] = entries;
-  const slots: ReactNode[] = [
-    <div key={frontmatter.info.path}>
-      <h3 className="text-[1.75em] font-semibold">{frontmatter.title}</h3>
-      <p className="text-lg text-fd-muted-foreground">{frontmatter.description}</p>
-    </div>,
-  ];
-  for (const entry of rest) {
+  const slots: ReactNode[] = [];
+  for (const entry of entries) {
     const Body = entry.body;
-    slots.push(<Body key={entry.info.path} components={components} />);
+    slots.push(
+      // a block of frontmatter renders as the page's title
+      entry.title === undefined ? (
+        <Body key={entry.info.path} components={components} />
+      ) : (
+        <div key={entry.info.path} className="not-prose">
+          <h3 className="text-[1.75em] font-semibold">{entry.title}</h3>
+          <p className="text-lg text-fd-muted-foreground">{entry.description}</p>
+        </div>
+      ),
+    );
   }
 
   return (
@@ -71,7 +75,7 @@ export function Press({
         steps={steps}
         sources={sources}
         slots={slots}
-        bed={<RailBed />}
+        bed={<RailBed stops={steps.length} />}
         column={<RailColumn id={id} />}
       />
     </Figure>

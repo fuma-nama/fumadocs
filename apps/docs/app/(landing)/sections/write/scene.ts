@@ -38,6 +38,8 @@ export const PENCIL = { reach: 290, wrist: 48, radius: 18, cone: 52 } as const;
 /** how high the quill holds her pencil's axis, down and lifted; its yoke rides this far over it */
 export const PEN = { down: 24, up: 72 } as const;
 export const YOKE = 146;
+/** the hub's radius over the boom's root, arm units */
+export const HUB = 30;
 /** the elbow ram: its clevis along the boom, its barrel, and the crank it pushes on the elbow */
 const RAM_AT = 80;
 const BARREL = 180;
@@ -252,7 +254,7 @@ float dValve(vec3 q) {
 }
 float dGauge(vec3 q) { return cyl(q, uDial, 12.0, 8.0, 30.0, 2.5); }
 float dHub(vec3 q) {
-  float d = cyl(q, vec2(0.0), 30.0, 98.0, 130.0, 3.0);
+  float d = cyl(q, vec2(0.0), ${HUB}.0, 98.0, 130.0, 3.0);
   if (dot(q.xy, q.xy) > 260.0 || q.z < 126.0) return min(d, max(length(q.xy) - 14.0, 128.0 - q.z));
   return min(d, min(cyl(q, vec2(0.0), 13.0, 128.0, 133.0, 1.0), slab(hex(turned(q.xy), 8.5), q.z, 130.0, 139.0, 1.5)));
 }
@@ -532,7 +534,8 @@ bool stencil(vec2 p, float cell) {
 }
 
 void main() {
-  vec2 px = vec2(gl_FragCoord.x, uResolution.y - gl_FragCoord.y) / uDpr;
+  vec2 device = vec2(gl_FragCoord.x, uResolution.y - gl_FragCoord.y);
+  vec2 px = device / uDpr;
   color = vec4(0.0);
   if (px.x < uClip.x || px.y < uClip.y || px.x > uClip.z || px.y > uClip.w) return;
   // she stands over the rig on a canvas of her own: what lies under her never shows
@@ -541,7 +544,8 @@ void main() {
 
   vec3 ro = uCam;
   vec3 rd = normalize(vec3(px - uCam.xy, -uCam.z));
-  float threshold = bayer8(floor(px / 2.0));
+  // dither cells of about 2 CSS px in whole canvas pixels, so they stay even at any density
+  float threshold = bayer8(floor(device / max(1.0, floor(2.0 * uDpr + 0.5))));
   vec3 pen = uNight > 0.5 ? uLit : uShade;
   vec4 line = vec4(uLine.rgb * uLine.a, uLine.a);
 
@@ -705,7 +709,7 @@ void main() {
   }
 
   // the page dithers out under paper before it is written again
-  if (uCover > 0.0 && inside(px, uDoc) && bayer8(floor(px / 3.0)) < uCover) {
+  if (uCover > 0.0 && inside(px, uDoc) && bayer8(floor(device / max(1.0, floor(3.0 * uDpr + 0.5)))) < uCover) {
     color = vec4(uNight > 0.5 ? uShade : uLit, 1.0);
     return;
   }

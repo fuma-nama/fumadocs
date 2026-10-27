@@ -21,9 +21,9 @@ import {
   SPRITE_H,
   SPRITE_W,
 } from '@/components/mascot/sprite';
-import { createShaderCanvas, cssRgb, cssRgba } from '../../lib/gl';
+import { createShaderCanvas, cssRgba, type ShaderCanvas } from '../../lib/gl';
 import { camera, clamp, type Rect, rectIn, settle, TICK } from '../../lib/motion';
-import { report } from '../../lib/status';
+import { onActive, report } from '../../lib/status';
 import { isDark, onTheme } from '../../lib/theme';
 import {
   BED,
@@ -31,6 +31,7 @@ import {
   BOOM,
   COLUMN_DECK,
   fragment,
+  HUB,
   PEN,
   PENCIL,
   ram,
@@ -54,10 +55,12 @@ const LIFT = 160;
 const REST = 60;
 const PARK = 700;
 const ARRIVE = 40;
-/** a long move cruises at TOP px/ms between RAMP ms ramps; under SHORT px it keeps the drive's */
+/** a long move cruises at TOP px/ms between RAMP ms ramps; the drive's curve is at its steepest
+ * STEEPEST times its mean speed, so under SHORT px it never passes TOP */
 const TOP = 2.8;
 const RAMP = 160;
-const SHORT = (TOP * DRIVE) / 2.857;
+const STEEPEST = 2.857;
+const SHORT = (TOP * DRIVE) / STEEPEST;
 /** of the drop, the share after the arm has stopped */
 const SETTLE = 0.25;
 /** ms a radian takes at its gentlest: the boom's turn, the elbow's bend */
@@ -67,10 +70,10 @@ const BEND_RATE = 110;
 const SWING = 1;
 const SWUNG = 0.3;
 const OVERLAP = 0.35;
-/** ms an arm caught mid-move brakes before it sets off anew */
-const BRAKE = 32;
-/** the elbow's inner angle at both ends of a slide, rad; folded at rest it leaves TUCK */
+/** the elbow's inner angle at both ends of a slide, and pointing at a cursor, rad; folded at rest
+ * it leaves TUCK */
 const INNER: Vec2 = [(50 * Math.PI) / 180, (150 * Math.PI) / 180];
+const AIMED = (100 * Math.PI) / 180;
 const TUCK = 0.06;
 /** her pencil stood up on its trunnion; up a phone's column never further, never end-on */
 const UPRIGHT = Math.PI / 2;
@@ -80,29 +83,19 @@ const FADE = (16 * 1000) / 60;
 const CAMERA = 4000;
 /** high from the upper right, so shadows stay short and fall on the plate or into the bay */
 const LIGHT = normalize(0.13, -0.18, 0.975);
-/** share of the stage in view that starts the writer */
-const START = 0.4;
-/** a reader's springs: stiffness (1/s), top speeds (px/s, rad/s), and her pencil's tip */
+/** a reader's springs: stiffness (1/s), top speeds (px/s, rad/s), and her pencil's tip; up a
+ * phone's column the arm follows the viewport's middle on a stiffer one */
 const AIM = 10;
 const AIM_SPEED = 1500;
 const AIM_SLEW = 7;
 const AIM_TIP = 16;
-/** up a phone's column the arm follows the line read this far down the viewport, on this spring */
-const READ = 0.45;
 const SCROLL_AIM = 16;
 const AIM_GAP = 10;
-/** ms a resting mouse holds the rig before it goes home */
-const IDLE = 2000;
-const NOTE = 1500;
-/** ms within which a second click makes a double-click, which selects a word */
-const DOUBLE = 250;
-/** the rig's scale, and her moon's ring (cells wide) on the bed and up a phone's column */
-const RIG_SCALE = 0.6;
+/** CSS px an arm unit takes, and one of her sprite's cells */
+const SCALE = 0.6;
+const CELL = 2;
+/** her moon's ring, cells wide, on the bed and up a phone's column */
 const RING: Vec2 = [21, 13];
-/** px a phone's pencil point keeps clear of the widest tab */
-const TAB_CLEAR = 24;
-/** px a phone's column rail stops short of the window's top and foot, for her crown and deck */
-const COLUMN_END: Vec2 = [96, 44];
 /** the pressure gauge: at rest, while the pencil slides, as it lifts */
 const GAUGE: [number, number, number] = [0.2, 0.75, 1];
 /** px off her head past which her eyes follow the pencil or the cursor */
@@ -114,10 +107,6 @@ const SWAY = 48;
 const RAISE: Vec2 = [-30, 50];
 const RAISE_SLACK = 8;
 const HAND_SLACK = 8;
-/** px: her pencil's point inside a cell's edges, the pivot clear of a tab's sides, she of a tab */
-const INSET = 2;
-const PIVOT_CLEAR = 18;
-const HER_CLEAR = 6;
 /** arm units round the elbow its eye, crank and yoke reach, kept inside the window */
 const ELBOW = 50;
 const DOWN = Math.PI / 2;
@@ -143,30 +132,6 @@ function cruise(r: number): (u: number) => number {
   };
 }
 
-function crosses(x0: number, y0: number, x1: number, y1: number, r: number, b: Rect): boolean {
-  let enter = 0;
-  let leave = 1;
-  const dx = x1 - x0;
-  const dy = y1 - y0;
-  const sides: [number, number][] = [
-    [-dx, x0 - (b.x - r)],
-    [dx, b.x + b.w + r - x0],
-    [-dy, y0 - (b.y - r)],
-    [dy, b.y + b.h + r - y0],
-  ];
-  for (const [p, q] of sides) {
-    if (p === 0) {
-      if (q < 0) return false;
-      continue;
-    }
-    const t = q / p;
-    if (p < 0) enter = Math.max(enter, t);
-    else leave = Math.min(leave, t);
-    if (enter > leave) return false;
-  }
-  return true;
-}
-
 function inBox(x: number, y: number, r: number, b: Rect): boolean {
   return x > b.x - r && x < b.x + b.w + r && y > b.y - r && y < b.y + b.h + r;
 }
@@ -180,6 +145,18 @@ function nearest(angle: number, near: number): number {
 function normalize(x: number, y: number, z: number): [number, number, number] {
   const l = Math.hypot(x, y, z);
   return [x / l, y / l, z / l];
+}
+
+/** spans in order, the overlapping ones joined */
+function merge(spans: Vec2[]): Vec2[] {
+  spans.sort((a, b) => a[0] - b[0]);
+  const out: Vec2[] = [];
+  for (const [from, to] of spans) {
+    const last = out.at(-1);
+    if (last && from <= last[1]) last[1] = Math.max(last[1], to);
+    else out.push([from, to]);
+  }
+  return out;
 }
 
 /** a move from pose `a` to `b` over [t0, t1]; a slide (`task`) runs her pencil's point straight */
@@ -216,9 +193,8 @@ interface Block {
   base: boolean;
   cell: Rect;
   tabBox: Rect;
-  rows: Vec2[];
-  /** per source line, the characters its wrapped rows start at */
-  breaks: number[][];
+  /** px from one source row to the next */
+  leading: number;
   /** its slide: the point's line, its top and foot, the carriage at each, the elbow's side */
   tipX: number;
   range: Vec2;
@@ -261,9 +237,9 @@ interface Job {
 }
 
 /** a file's blocks typed and pressed into its page: everything on screen is a function of the
- * cycle's clock, run on the shader's frames; after the sequence the rig is the reader's */
+ * cycle's clock, run on the shader's frames; after the sequence the rig is the reader's. The arm's
+ * canvas and its context are made as the stage first comes on screen. */
 export function createPress(stage: HTMLElement): () => void {
-  const canvas = stage.querySelector<HTMLCanvasElement>('canvas[data-arm]')!;
   const doc = stage.querySelector<HTMLElement>('[data-doc]')!;
   const bed = stage.querySelector<HTMLElement>('[data-bay]')!;
   const column = stage.querySelector<HTMLElement>('[data-bay-phone]')!;
@@ -275,13 +251,19 @@ export function createPress(stage: HTMLElement): () => void {
   const mateImage = new ImageData(MATE_W, MATE_H);
   mate.width = MATE_W;
   mate.height = MATE_H;
+  mate.style.width = `${MATE_W * CELL}px`;
+  mate.style.height = `${MATE_H * CELL}px`;
   const typingLine = `typing ${stage.dataset.file}`;
   const caret = stage.querySelector<HTMLElement>('[data-caret]')!;
   const button = stage.querySelector<HTMLButtonElement>('[data-replay]')!;
   const voice = stage.querySelector<HTMLElement>('[data-voice]')!;
+  const figure = stage.closest<HTMLElement>('[data-figure]');
   /** the figure's own line, once there is nothing going on */
-  const compiled = stage.closest<HTMLElement>('[data-figure]')?.dataset.status ?? '';
+  const compiled = figure?.dataset.status ?? '';
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const range = document.createRange();
+  const boom = BOOM * SCALE;
+  const fore = PENCIL.reach * SCALE;
 
   const blocks: Block[] = [];
   for (const el of stage.querySelectorAll<HTMLElement>('[data-block]')) {
@@ -306,8 +288,7 @@ export function createPress(stage: HTMLElement): () => void {
       base: true,
       cell: { x: 0, y: 0, w: 0, h: 0 },
       tabBox: { x: 0, y: 0, w: 0, h: 0 },
-      rows: [],
-      breaks: [],
+      leading: 0,
       tipX: 0,
       range: [0, 0],
       stop: 0,
@@ -326,13 +307,17 @@ export function createPress(stage: HTMLElement): () => void {
     });
   }
 
-  const shader = createShaderCanvas(canvas, { fragment, onFrame });
-  shader?.texture('uSprite', silhouette(0));
+  let shader: ShaderCanvas | null = null;
+  let canvas: HTMLCanvasElement | null = null;
+  /** the stage shows */
+  let visible = false;
+  /** the figure has been the one read, so the writer starts once the arm can draw */
+  let seen = false;
+  /** canvas px per CSS px */
+  let density = 1;
 
   // metrics, stage px
-  let scale = 1;
-  /** her cell, CSS px */
-  let cell = 2;
+  let laidOut = false;
   let foot: Vec2 = [0, 0];
   /** the rail: along x (0) on the bed, y (1) up a phone's column, from (x0, y0) to (x1, y1) */
   let along = 0;
@@ -342,14 +327,10 @@ export function createPress(stage: HTMLElement): () => void {
   let band: Rect = { x: 0, y: 0, w: 0, h: 0 };
   let bay: Rect = band;
   let below = false;
-  let boom = 1;
-  let fore = 1;
-  let reachMax = Infinity;
-  let advance = 8;
-  let lineHeight = 20;
-  let readAt = 0;
   let inside: Rect = { x: 0, y: 0, w: 0, h: 0 };
-  let laidOut = '';
+  /** carriage spans on the bed where she would stand on a tab, and at a stop the hub too */
+  let herOff: Vec2[] = [];
+  let stopOff: Vec2[] = [];
 
   // the plan: the asked presses in order from a pose at a time, then the park. A pose is the
   // carriage, the boom's angle, her pencil's from the boom, and its tip up off the page
@@ -361,9 +342,6 @@ export function createPress(stage: HTMLElement): () => void {
   /** up a phone's column, how far her folded pencil opens off the boom to the window's border */
   let fold = TUCK;
   let from: number[] = park;
-  /** the plan a press took over from mid-move, its first pose, and when: the arm brakes along it */
-  let brake: { track: Segment[]; from: number[]; at: number } | null = null;
-  const other = [0, 0, 0, 0];
   let since = 0;
   let total = 0;
   let clock = 0;
@@ -374,23 +352,17 @@ export function createPress(stage: HTMLElement): () => void {
   let playing = false;
   let fading = 0;
   let last = -1;
-  let onScreen = false;
 
   let aiming = false;
   let following = false;
-  let over = false;
-  /** the last input was a moving mouse, not a touch; without one a phone's arm follows scroll */
-  let mouse = false;
-  let note = '';
-  let noteUntil = -1;
-  const stageAt: Vec2 = [0, 0];
+  /** the stage's top left in the viewport, read once a frame; the pointer's over the bed */
+  const view: Vec2 = [0, 0];
+  const pointer: Vec2 = [0, 0];
   const cursorAt: Vec2 = [0, 0];
-  const client: Vec2 = [0, 0];
-  let movedAt = 0;
-  let idle = 0;
   const aimAt = [0, 0, 0, 0];
   const aimPose = [0, 0, 0, 0];
   const aimSpeed = [0, 0, 0, 0];
+  const targets = [0, 0, 0];
   let lift: number = PEN.up;
 
   const pose = [0, 0, 0, 0];
@@ -398,8 +370,10 @@ export function createPress(stage: HTMLElement): () => void {
   const sole: number[] = [PEN.up];
   const bounds: [number, number, number, number] = [0, 0, 0, 0];
   const point: [number, number, number] = [0, 0, 1];
-  const caretAt: Vec2 = [-1, -1];
   let caretMode = '';
+  const caretAt: Vec2 = [-1, -1];
+  const caretSize: Vec2 = [0, 0];
+  let said = '';
   /** the shader's vectors, written in place */
   const v2: [number, number] = [0, 0];
   const v3: [number, number, number] = [0, 0, 0];
@@ -428,126 +402,60 @@ export function createPress(stage: HTMLElement): () => void {
   let steady = false;
   const none: Rect = { x: 0, y: 0, w: 0, h: 0 };
 
-  function breaksOf(line: HTMLElement): number[] {
-    const out: number[] = [];
-    const range = document.createRange();
-    const walker = document.createTreeWalker(line, NodeFilter.SHOW_TEXT);
-    let at = 0;
-    let top = -Infinity;
-    while (walker.nextNode()) {
-      const node = walker.currentNode as Text;
-      for (let i = 0; i < node.length; i++, at++) {
-        range.setStart(node, i);
-        range.setEnd(node, i + 1);
-        const r = range.getClientRects()[0];
-        if (!r || r.top < top + lineHeight / 2) continue;
-        if (at > 0) out.push(at);
-        top = r.top;
-      }
-    }
-    return out;
-  }
-
-  /** whole device pixels for the window's lines, so a block rasterizes the same under overlays */
-  function snap() {
-    const dpr = window.devicePixelRatio || 1;
-    stage.style.top = '';
-    for (const b of blocks) b.el.style.minHeight = '';
-    const heights: number[] = [];
-    for (const b of blocks) heights.push(b.el.getBoundingClientRect().height);
-    for (let i = 0; i < blocks.length; i++) {
-      blocks[i].el.style.minHeight = `${Math.ceil(heights[i] * dpr - 0.01) / dpr}px`;
-    }
-    const top = (stage.getBoundingClientRect().top + scrollY) * dpr;
-    const off = top - Math.floor(top + 0.01);
-    if (off > 0.01) stage.style.top = `${-off / dpr}px`;
-  }
-
   function layout() {
-    snap();
     const s = stage.getBoundingClientRect();
     if (s.width === 0) return;
-    laidOut = `${s.width}x${s.height}`;
-    stageAt[0] = s.left + scrollX;
-    stageAt[1] = s.top + scrollY;
+    laidOut = true;
     const page = rectIn(doc, s);
     inside = rectIn(doc.lastElementChild!, s);
-    // a monospace advance, measured on ten characters
-    const probe = document.createElement('span');
-    probe.textContent = '0000000000';
-    blocks[0].lines[0].append(probe);
-    advance = probe.getBoundingClientRect().width / 10;
-    probe.remove();
-    lineHeight = Number.parseFloat(getComputedStyle(blocks[0].lines[0]).lineHeight) || 20;
     for (const b of blocks) {
       b.tabBox = rectIn(b.tab, s);
       b.cell = rectIn(b.src.parentElement!, s);
-      b.rows = [];
-      b.breaks = [];
-      for (const line of b.lines) {
-        const r = line.getBoundingClientRect();
-        b.rows.push([r.left - s.left, r.top - s.top]);
-        b.breaks.push(r.height > 1.5 * lineHeight ? breaksOf(line) : []);
-      }
-      b.range = [b.cell.y + INSET, b.cell.y + b.cell.h - INSET];
+      b.range = [b.cell.y, b.cell.y + b.cell.h];
+      b.leading = Number.parseFloat(getComputedStyle(b.src).lineHeight);
     }
     band = rectIn(bed, s);
-    const onBed = band.w > 0;
-    along = onBed ? 0 : 1;
-    cell = 2;
-    scale = RIG_SCALE;
+    along = band.w > 0 ? 0 : 1;
     foot = [page.x + page.w / 2, s.height * 0.3];
-    let span = 0;
-    if (onBed) {
-      rail[0] = band.x + BED.start;
-      rail[1] = band.y + BED.rail;
-      rail[3] = rail[1];
-      bay = band;
-      below = inside.y + inside.h > band.y + band.h + 8;
-      deck = BED_DECK;
-    } else {
-      const c = rectIn(column, s);
-      bay = c;
-      rail[0] = c.x + c.w / 2;
-      rail[1] = page.y + COLUMN_END[0];
-      rail[2] = rail[0];
-      rail[3] = page.y + page.h - COLUMN_END[1];
-      below = false;
-      // its point clear of the widest tab: the rig smaller only where the elbow would open too wide
-      let tabs = 0;
-      for (const b of blocks) tabs = Math.max(tabs, b.tabBox.x + b.tabBox.w);
-      span = rail[0] - tabs - TAB_CLEAR;
-      scale = Math.min(RIG_SCALE, span / (Math.cos(INNER[1] - Math.PI / 2) * PENCIL.reach));
-      // her full size, unless the boom is then too short to carry her pencil over her head
-      const crown = (SEAT_CELL[1] + MATE_RISE) * cell + PEN_R * scale + 8;
-      if (BOOM * scale < crown) cell = 1;
-      const half = Math.max(COLUMN_DECK.box[2], ((SPRITE_W / 2) * cell + 2) / scale);
-      deck = { ...COLUMN_DECK, box: [0, COLUMN_DECK.box[1], half, COLUMN_DECK.box[3]] };
-    }
-    boom = BOOM * scale;
-    fore = PENCIL.reach * scale;
-    // on the bed the elbow and the ram's crank keep inside its end, also while the boom turns
-    reachMax = onBed ? band.x + band.w - 32 * scale - 6 : Infinity;
     chainAt = -1;
     mateAt = '';
-    mate.style.width = `${MATE_W * cell}px`;
-    mate.style.height = `${MATE_H * cell}px`;
-    if (onBed) {
-      const end = band.x + band.w - (deck.box[0] + deck.box[2]) * scale - 4;
-      for (const b of blocks) station(b, end);
-      rail[2] = rail[0];
-      for (const b of blocks) rail[2] = Math.max(rail[2], b.stop);
-      for (let i = 0; i < blocks.length && i < stations.length; i++) {
-        const stop = blocks[i].stop;
-        stations[i].style.left = `${Math.round(stop - band.x - 8)}px`;
-        // plates worked from one stop share its detent
+    if (along === 0) {
+      deck = BED_DECK;
+      bay = band;
+      rail[0] = band.x + BED.start;
+      rail[1] = band.y + BED.rail;
+      // anywhere short of this the boom turns with its elbow and crank inside the band's end
+      rail[2] = band.x + band.w - (BOOM + ELBOW) * SCALE;
+      rail[3] = rail[1];
+      below = blocks.some((b) => b.cell.y > rail[1]);
+      offTabs();
+      park = [clear(rail[0], herOff), 0, TUCK - Math.PI, 0];
+      for (const b of blocks) station(b);
+      // the detents the carriage stops on, home's first; stops within one's width share it
+      const stops = [park[0]];
+      for (const b of blocks) stops.push(b.stop);
+      const width = stations[0]?.getBoundingClientRect().width ?? 0;
+      for (let i = 0; i < stations.length && i < stops.length; i++) {
         let shared = false;
-        for (let j = 0; j < i; j++) if (Math.abs(blocks[j].stop - stop) < 20) shared = true;
-        stations[i].style.visibility = shared ? 'hidden' : '';
+        for (let j = 0; j < i; j++) if (Math.abs(stops[j] - stops[i]) < width) shared = true;
+        stations[i].style.left = `${Math.round(stops[i] - band.x - width / 2)}px`;
+        stations[i].style.visibility = shared ? 'hidden' : 'visible';
       }
     } else {
-      // her pencil flat across a plate, the boom up the column over a plate it reaches, else down
-      const reach = Math.min(fore, span);
+      deck = COLUMN_DECK;
+      bay = rectIn(column, s);
+      rail[0] = bay.x + bay.w / 2;
+      rail[2] = rail[0];
+      // her crown, as the camera sees it, at the window's top; the deck's foot at its bottom
+      const k = CAMERA / (CAMERA - deck.seat[2] * SCALE);
+      rail[1] = foot[1] + (page.y + (SEAT_CELL[1] + MATE_RISE) * CELL - foot[1]) / k;
+      rail[3] = page.y + page.h - (deck.box[1] + deck.box[3]) * SCALE;
+      below = false;
+      // her pencil flat across the plates as far as the window lets it, the boom up the column
+      // under a plate it reaches, else down over it
+      let left = Infinity;
+      for (const b of blocks) left = Math.min(left, b.cell.x);
+      const reach = Math.min(fore, rail[0] - left);
       const drop = boom + Math.sqrt(fore * fore - reach * reach);
       for (const b of blocks) {
         b.tipX = rail[0] - reach;
@@ -556,91 +464,86 @@ export function createPress(stage: HTMLElement): () => void {
         b.stop = clamp(b.range[0] + (up ? drop : -drop), rail[1], rail[3]);
         b.stopEnd = clamp(b.range[1] + (up ? drop : -drop), rail[1], rail[3]);
       }
-    }
-    caret.style.width = `${advance}px`;
-    caret.style.height = `${lineHeight}px`;
-    // at rest: the bed rail's left end; up a column as low as keeps the elbow in the window
-    if (along === 0) park = [rail[0], 0, TUCK - Math.PI, 0];
-    else {
-      const k = CAMERA / (CAMERA - PEN.up * scale);
-      const border = foot[0] + (inside.x + inside.w + 1 - foot[0]) / k;
+      // at rest as low as keeps the elbow in the window, her pencil open to the window's border
+      const lifted = CAMERA / (CAMERA - PEN.up * SCALE);
+      const border = foot[0] + (inside.x + inside.w + 1 - foot[0]) / lifted;
       fold = Math.asin(clamp((rail[0] - border) / fore, 0, 1));
-      park = [page.y + page.h - boom - ELBOW * scale, boomAngle(DOWN), Math.PI - fold, 0];
+      park = [page.y + page.h - boom - ELBOW * SCALE, boomAngle(DOWN), Math.PI - fold, 0];
     }
-    if (!begun) from = park;
+    if (!begun || phase === 'ready') from = park;
     plan();
+    listen();
   }
 
-  /** block b's slide on the bed: the best stop with the elbow comfortable at both its ends */
-  function station(b: Block, end: number) {
+  /** the carriage spans where her canvas would cover a tab, and at a stop the hub over the boom's
+   * root too; on the bed her box moves with the carriage, scaled by the camera, and lands on whole
+   * pixels */
+  function offTabs() {
+    const k = CAMERA / (CAMERA - deck.seat[2] * SCALE);
+    const left =
+      foot[0] * (1 - k) + deck.seat[0] * SCALE * k - (SEAT_CELL[0] + MATE_PAD[0]) * CELL - 0.5;
+    const width = MATE_W * CELL + 1;
+    const top =
+      foot[1] +
+      (rail[1] + deck.seat[1] * SCALE - foot[1]) * k -
+      (SEAT_CELL[1] + MATE_PAD[1]) * CELL;
+    const her: Vec2[] = [];
+    const hub: Vec2[] = [];
+    for (const { tabBox: t } of blocks) {
+      if (t.y < top + MATE_H * CELL && t.y + t.h > top)
+        her.push([(t.x - left - width) / k, (t.x + t.w - left) / k]);
+      hub.push([t.x - HUB * SCALE, t.x + t.w + HUB * SCALE]);
+    }
+    stopOff = merge(her.concat(hub));
+    herOff = merge(her);
+  }
+
+  /** c, or the nearest carriage on the rail clear of `off` */
+  function clear(c: number, off: Vec2[]): number {
+    for (const [start, end] of off) {
+      if (c <= start || c >= end) continue;
+      const back = start >= rail[0];
+      if (end <= rail[2] && (!back || end - c < c - start)) return end;
+      return back ? start : c;
+    }
+    return c;
+  }
+
+  /** block b's stop on the bed: the pivot off the slide's line by as much as keeps the elbow's
+   * inner angle within INNER at both its ends, on the side the tabs move it least */
+  function station(b: Block) {
     const up = b.cell.y < rail[1];
     const near = up ? rail[1] - b.range[1] : b.range[0] - rail[1];
     const far = up ? rail[1] - b.range[0] : b.range[1] - rail[1];
-    const row: Rect[] = [];
-    for (const o of blocks) if (o.cell.y < rail[1] === up) row.push(o.tabBox);
-    const turns = blocks.some((o) => o.cell.y > rail[1]);
-    const half = (SPRITE_W / 2) * cell;
-    const crown = (SEAT_CELL[1] + MATE_RISE) * cell + 2;
-    const radius = PEN_R * scale;
-    const elbow = ELBOW * scale;
+    const d =
+      (Math.sqrt(Math.max(0, span(INNER[0]) ** 2 - near * near)) +
+        Math.sqrt(Math.max(0, span(INNER[1]) ** 2 - far * far))) /
+      2;
     const middle = b.cell.x + b.cell.w / 2;
-    const joints = [0, 0, 0];
-    let best = -Infinity;
-    b.bend = up ? -1 : 1;
-    b.tipX = middle;
-    b.stop = clamp(middle + 2 * near, rail[0], end);
+    let least = Infinity;
     for (const side of [1, -1]) {
-      const bendTo = side * (up ? -1 : 1);
-      for (let d = 60; d <= 320; d += 4) {
-        const margin = Math.min(
-          innerAt(Math.hypot(d, near)) - INNER[0],
-          INNER[1] - innerAt(Math.hypot(d, far)),
-        );
-        if (margin < 0) continue;
-        for (let x = b.cell.x + 24; x <= b.cell.x + b.cell.w - 24; x += 4) {
-          const stop = x + side * d;
-          if (stop < rail[0] || stop > end) continue;
-          if (row.some((t) => stop > t.x - PIVOT_CLEAR && stop < t.x + t.w + PIVOT_CLEAR)) continue;
-          if (!clearOfTabs(stop)) continue;
-          const her: Rect = { x: point[0] - half, y: point[1] - crown, w: 2 * half, h: crown };
-          let clear = true;
-          for (const y of b.range) {
-            reachTo(x - stop, y - rail[1], bendTo, joints);
-            const ex = stop + boom * Math.cos(joints[1]);
-            const ey = rail[1] + boom * Math.sin(joints[1]);
-            if (crosses(x, y, ex, ey, radius + HER_CLEAR, her) || !inBox(ex, ey, -elbow, inside))
-              clear = false;
-          }
-          if (!clear) continue;
-          let score = margin - Math.abs(x - middle) * 0.0015;
-          if (turns && stop > reachMax - boom) score -= 0.3;
-          if (score > best) {
-            best = score;
-            b.bend = bendTo;
-            b.tipX = x;
-            b.stop = stop;
-          }
-        }
-      }
+      const ideal = middle + side * d;
+      const stop = clear(clamp(ideal, rail[0], rail[2]), stopOff);
+      if (Math.abs(stop - ideal) >= least) continue;
+      least = Math.abs(stop - ideal);
+      b.stop = stop;
+      b.stopEnd = stop;
+      b.tipX = clamp(stop - side * d, b.cell.x, b.cell.x + b.cell.w);
+      b.bend = side * (up ? -1 : 1);
     }
-    b.stopEnd = b.stop;
   }
 
-  /** whether box [x0, x1) by [y0, y1) comes within HER_CLEAR of a tab's sides, or onto it */
+  /** her pencil's point's distance from the pivot with the elbow's inner angle at `inner` */
+  function span(inner: number): number {
+    return Math.sqrt(boom * boom + fore * fore - 2 * boom * fore * Math.cos(inner));
+  }
+
+  /** whether box [x0, x1) by [y0, y1) lies on a tab */
   function onTab(x0: number, y0: number, x1: number, y1: number): boolean {
     for (const { tabBox: t } of blocks) {
-      if (x1 <= t.x - HER_CLEAR || x0 >= t.x + t.w + HER_CLEAR) continue;
-      if (y1 > t.y && y0 < t.y + t.h) return true;
+      if (x1 > t.x && x0 < t.x + t.w && y1 > t.y && y0 < t.y + t.h) return true;
     }
     return false;
-  }
-
-  /** whether she keeps clear of every tab with the carriage at `c`; her seat stays in `point` */
-  function clearOfTabs(c: number): boolean {
-    project(xOf(c) + deck.seat[0] * scale, yOf(c) + deck.seat[1] * scale, deck.seat[2] * scale);
-    const x = point[0] - (SEAT_CELL[0] + MATE_PAD[0]) * cell;
-    const y = point[1] - (SEAT_CELL[1] + MATE_PAD[1]) * cell;
-    return !onTab(x, y, x + MATE_W * cell, y + MATE_H * cell);
   }
 
   function xOf(c: number): number {
@@ -690,38 +593,17 @@ export function createPress(stage: HTMLElement): () => void {
     return Math.abs(along === 0 ? Math.sin(p[1]) : Math.cos(p[1])) < 0.34;
   }
 
-  /** the most the boom points along the band, its cosine, turning from angle a to b */
-  function widest(a: number, b: number): number {
-    if (along === 1) return 0;
-    if (Math.min(a, b) <= 0 && Math.max(a, b) >= 0) return 1;
-    return Math.max(Math.cos(a), Math.cos(b));
-  }
-
   function foldAt(angle: number, near: number): number {
     return nearest(Math.PI - fold * Math.sin(angle), near);
   }
 
-  function crossing(c0: number, c1: number, curve: (u: number) => number, c: number): number {
-    const k = (c - c0) / (c1 - c0);
-    let lo = 0;
-    let hi = 1;
-    for (let i = 0; i < 20; i++) {
-      const m = (lo + hi) / 2;
-      if (curve(m) < k) lo = m;
-      else hi = m;
-    }
-    return (lo + hi) / 2;
-  }
-
   /** a move from pose a to b: her pencil tips up, the joints turn while it stands, it tips down; on
-   * the bed the boom turns only where the elbow keeps inside the bed's end */
+   * the bed the trip home first brings the elbow out of the plates, her pencil along the band */
   function move(a: number[], b: number[], pace = 1, least = 0): Leg {
     const turn = boomAngle(b[1]);
-    const limit = reachMax - boom * widest(a[1], turn);
-    // up a phone's column her pencil folds along the boom, never end-on; on the bed the trip home
-    // first brings the elbow out of the plates, her pencil pointing off along the band
+    // up a phone's column her pencil folds along the boom, never end-on
     const flat = along === 1;
-    const home = !flat && stowed([b[0], turn]) && !stowed(a) && a[0] <= limit;
+    const home = !flat && stowed([b[0], turn]) && !stowed(a);
     const fa = flat ? foldAt(a[1], a[2]) : a[2];
     const fb = flat ? foldAt(turn, fa) : home ? nearest(-turn, a[2]) : a[2];
     const end = [b[0], turn, nearest(b[2], fb), b[3]];
@@ -738,35 +620,23 @@ export function createPress(stage: HTMLElement): () => void {
     const bendT = Math.abs((flat || home ? fb - fa : end[2] - a[2]) * BEND_RATE * pace);
     const jointT = home ? preT + Math.max(turnT, bendT) + postT : Math.max(turnT, bendT);
     const driveT = run < 1 ? 0 : run > SHORT ? Math.max(DRIVE, 1.3 * RAMP + run / TOP) : DRIVE;
-    let time = Math.max(
+    const time = Math.max(
       least,
       pace * driveT + (home ? upT + jointT : 0),
       upT + jointT + downT - OVERLAP * (Math.min(upT, jointT) + Math.min(jointT, downT)),
       160,
     );
-    let curve = inOut;
-    let joints: Vec2 = [0, 1];
-    for (let tries = 0; tries < 12; tries++) {
-      curve = run > SHORT ? cruise(RAMP / time) : inOut;
-      let lo = upT - OVERLAP * Math.min(upT, jointT);
-      let hi = time - downT + OVERLAP * Math.min(jointT, downT);
-      if (turnT > 1 && a[0] > limit && b[0] <= limit)
-        lo = Math.max(lo, time * crossing(a[0], b[0], curve, limit));
-      if (turnT > 1 && b[0] > limit && a[0] <= limit)
-        hi = Math.min(hi, time * crossing(a[0], b[0], curve, limit));
-      if (hi - lo >= jointT - 1) {
-        const s0 = stowed(a) ? hi - jointT : lo;
-        joints = [s0 / time, (s0 + jointT) / time];
-        break;
-      }
-      time *= 1.15;
-    }
+    // the joints turn as soon as her pencil stands, or out of the stowed pose as late as they can
+    const start = stowed(a)
+      ? time - downT + OVERLAP * Math.min(jointT, downT) - jointT
+      : upT - OVERLAP * Math.min(upT, jointT);
+    const joints: Vec2 = [start / time, (start + jointT) / time];
     const up: Vec2 = [0, upT / time];
     const down: Vec2 = [1 - downT / time, 1];
     // the boom's turn: on the trip home between the elbow's, and the carriage only after them
     const turns: Vec2 = home ? [joints[0] + preT / time, joints[1] - postT / time] : joints;
     const drive: Vec2 = home ? [joints[1], 1] : [0, 1];
-    if (home) curve = run > SHORT ? cruise(RAMP / (time * (1 - drive[0]))) : inOut;
+    const curve = run > SHORT ? cruise(RAMP / (time * (1 - drive[0]))) : inOut;
     const before: Vec2 = flat ? up : [joints[0], turns[0]];
     const after: Vec2 = flat ? down : [turns[1], joints[1]];
     return {
@@ -788,18 +658,6 @@ export function createPress(stage: HTMLElement): () => void {
             (UPRIGHT - a[3]) * inOut(within(u, up)) -
             (UPRIGHT - b[3]) * inOut(within(u, down)),
     };
-  }
-
-  /** a move's legs: turning along the band past the bed's end, it first drives to where it can */
-  function route(a: number[], b: number[], pace = 1, least = 0): Leg[] {
-    const turn = boomAngle(b[1]);
-    const limit = reachMax - boom * widest(a[1], turn);
-    if (a[0] > limit && b[0] > limit && Math.abs(turn - a[1]) > 0.01) {
-      const there = move(a, [limit, a[1], a[2], UPRIGHT], pace, least / 3);
-      const turned = move(there.end, [limit, b[1], b[2], UPRIGHT], pace, least / 3);
-      return [there, turned, move(turned.end, b, pace, least / 3)];
-    }
-    return [move(a, b, pace, least)];
   }
 
   function sample(list: Segment[], t: number, first: number[], out: number[]) {
@@ -830,26 +688,20 @@ export function createPress(stage: HTMLElement): () => void {
     for (let i = 0; i < out.length; i++) out[i] = at[i];
   }
 
-  function push(legs: Leg[], a: number[], t: number): [number[], number] {
-    let at = a;
-    let time = t;
-    for (const leg of legs) {
-      track.push({
-        t0: time,
-        t1: time + leg.time,
-        a: at,
-        b: leg.end,
-        ease: leg.ease,
-        tilt: leg.tilt,
-        bend: leg.bend,
-      });
-      time += leg.time;
-      at = leg.end;
-    }
-    return [at, time];
+  function push(leg: Leg, a: number[], t: number) {
+    track.push({
+      t0: t,
+      t1: t + leg.time,
+      a,
+      b: leg.end,
+      ease: leg.ease,
+      tilt: leg.tilt,
+      bend: leg.bend,
+    });
   }
 
   function plan() {
+    if (!laidOut) return;
     track.length = 0;
     pen.length = 0;
     jobs.length = 0;
@@ -861,14 +713,17 @@ export function createPress(stage: HTMLElement): () => void {
       const c1 = ask.out ? b.stopEnd : b.stop;
       const a = [c0, b.tipX - xOf(c0), (ask.out ? b.range[0] : b.range[1]) - yOf(c0)];
       const z = [c1, b.tipX - xOf(c1), (ask.out ? b.range[1] : b.range[0]) - yOf(c1)];
-      const legs = route(previous, solve(a, b.bend, previous));
-      let legT = 0;
-      for (const leg of legs) legT += leg.time;
+      const leg = move(previous, solve(a, b.bend, previous));
       // the writer's press arrives as its block's tab pops, a reader's sets off at once; neither
       // arrives before the pencil may touch, so the quill lowers it without a stop
-      const go = Math.max(free, ask.earliest - (ask.reader ? 0 : legT - DRIVE), ask.descend - legT);
-      const [start, at] = push(legs, previous, go);
-      const reached = Math.max(at, ask.descend);
+      const go = Math.max(
+        free,
+        ask.earliest - (ask.reader ? 0 : leg.time - DRIVE),
+        ask.descend - leg.time,
+      );
+      push(leg, previous, go);
+      const start = leg.end;
+      const reached = Math.max(go + leg.time, ask.descend);
       pen.push({
         t0: reached - DROP * (1 - SETTLE),
         t1: reached + DROP * SETTLE,
@@ -899,13 +754,14 @@ export function createPress(stage: HTMLElement): () => void {
       free = hit + away;
     }
     // the park answers no one, so it takes its time: a press can catch it on the way
-    total = push(route(previous, park, 1.5, PARK), previous, free + REST)[1];
+    const leg = move(previous, park, 1.5, PARK);
+    push(leg, previous, free + REST);
+    total = free + REST + leg.time;
   }
 
-  /** a reader's press: the block flips between output and Markdown; the press asked, if new */
-  function press(b: Block): Ask | undefined {
+  /** a reader's press: the block flips between output and Markdown, by the arm when it can */
+  function press(b: Block) {
     if (reduced || !shader) {
-      // no arm to move: the block flips at once
       b.base = !shown(b, clock);
       for (let i = asks.length - 1; i >= 0; i--) if (asks[i].block === b) asks.splice(i, 1);
       plan();
@@ -915,27 +771,22 @@ export function createPress(stage: HTMLElement): () => void {
     }
     const t = clock;
     if (playing) {
-      // the sequence plays through: the press waits for its end, or a second one takes it back
+      // the sequence plays through: the press waits for its end, a second one takes it back
       let i = asks.length - 1;
       while (i >= 0 && !(asks[i].block === b && asks[i].queued)) i--;
-      let ask: Ask | undefined;
-      if (i >= 0 && jobs[i].go > t) {
-        asks.splice(i, 1);
-        noteUntil = -1;
-      } else {
+      const job = jobs[i];
+      if (i >= 0 && (!job || job.go > t)) asks.splice(i, 1);
+      else {
         const out = !shown(b, Infinity);
-        ask = { block: b, out, held: t, earliest: t, descend: t, queued: true, reader: true };
-        asks.push(ask);
-        note = `queued ${b.label}`;
-        noteUntil = t + NOTE;
+        asks.push({ block: b, out, held: t, earliest: t, descend: t, queued: true, reader: true });
         voice.textContent = `${b.label}: queued`;
       }
       plan();
       apply();
-      return ask;
+      return;
     }
     // off a reader's springs, or once the arm has left for home, it sets off from where it is
-    if (aiming || !jobs.length || t >= jobs[jobs.length - 1].free + REST) settle(t);
+    if (aiming || !jobs.length || t >= jobs[jobs.length - 1].free + REST) replan(t);
     let next = jobs.length;
     for (let i = 0; i < jobs.length; i++) {
       const job = jobs[i];
@@ -952,11 +803,17 @@ export function createPress(stage: HTMLElement): () => void {
       return;
     }
     const out = !shown(b, Infinity);
-    const ask = { block: b, out, held: t, earliest: t, descend: t, queued: false, reader: true };
-    asks.splice(next, 0, ask);
+    asks.splice(next, 0, {
+      block: b,
+      out,
+      held: t,
+      earliest: t,
+      descend: t,
+      queued: false,
+      reader: true,
+    });
     plan();
     wake();
-    return ask;
   }
 
   function tell(b: Block, out: boolean) {
@@ -970,28 +827,16 @@ export function createPress(stage: HTMLElement): () => void {
     return out;
   }
 
-  /** a new plan from now: blocks keep what they show, presses not yet sliding wait their turn */
-  function settle(t: number) {
+  /** a new plan from now and the arm's pose: blocks keep what they show, presses not yet sliding
+   * wait their turn */
+  function replan(t: number) {
     const waiting: Ask[] = [];
     for (let i = 0; i < jobs.length; i++) if (jobs[i].touch > t) waiting.push(jobs[i].ask);
     for (const b of blocks) b.base = shown(b, t);
     asks.length = 0;
     for (const ask of waiting) asks.push(ask);
-    // caught mid-move, the arm brakes along its way first, so it never stops dead: it covers half
-    // the way the old plan would have in that time
-    brake = null;
     since = t;
-    if (aiming) from = [...aimPose];
-    else {
-      const stop = [...pose];
-      sample(track, t - 16, from, other);
-      if (other.some((v, i) => Math.abs(v - pose[i]) > 1e-3)) {
-        brake = { track: [...track], from, at: t };
-        sample(track, t + BRAKE / 2, from, stop);
-        since = t + BRAKE;
-      }
-      from = stop;
-    }
+    from = [...(aiming ? aimPose : pose)];
     aiming = false;
     plan();
   }
@@ -1021,69 +866,56 @@ export function createPress(stage: HTMLElement): () => void {
     bounds[3] = Math.max(bounds[3], point[1] + r, shadowY + r);
   }
 
+  /** whether her pencil at (x, y) lies on a tab or on her */
   function blocked(x: number, y: number): boolean {
-    const r = PEN_R * scale + 2;
+    const r = PEN_R * SCALE;
     for (const b of blocks) if (inBox(x, y, r, b.tabBox)) return true;
-    const x0 = seat[0] - SEAT_CELL[0] * cell;
-    const y0 = seat[1] - (SEAT_CELL[1] + MATE_RISE) * cell;
-    return inBox(x, y, r, { x: x0, y: y0, w: SPRITE_W * cell, h: (SPRITE_H + MATE_RISE) * cell });
+    const x0 = seat[0] - SEAT_CELL[0] * CELL;
+    const y0 = seat[1] - (SEAT_CELL[1] + MATE_RISE) * CELL;
+    return (
+      x > x0 - r &&
+      x < x0 + SPRITE_W * CELL + r &&
+      y > y0 - r &&
+      y < y0 + (SPRITE_H + MATE_RISE) * CELL + r
+    );
   }
 
-  /** the pose pointing her pencil at the cursor, AIM_GAP short of it, clear of the tabs and her */
+  /** the pose pointing her pencil at the cursor, AIM_GAP short of it, her clear of the tabs */
   function aimFor(out: number[]) {
-    if (along === 1 && !mouse) return readFor(out);
+    if (along === 1) return readFor(out);
     out[3] = 0;
-    const k = CAMERA / (CAMERA - lift * scale);
-    const x = clamp(foot[0] + (cursorAt[0] - foot[0]) / k, inside.x + 6, inside.x + inside.w - 6);
-    const y = clamp(foot[1] + (cursorAt[1] - foot[1]) / k, inside.y + 6, inside.y + inside.h - 6);
-    let bendTo: number;
-    if (along === 1) {
-      const up = y + boom <= rail[3];
-      bendTo = up ? -1 : 1;
-      out[0] = clamp(y + (up ? boom : -boom), rail[1], rail[3]);
-    } else {
-      bendTo = below && y > rail[1] ? 1 : -1;
-      // the cursor's distance from the pivot where the elbow's inner angle is about 100 degrees
-      const r = Math.sqrt(boom * boom + fore * fore + 0.35 * boom * fore);
-      const h = Math.abs(y - rail[1]);
-      const reach = Math.sqrt(Math.max(0, r * r - h * h));
-      out[0] = clamp(x + Math.max(60 * scale, reach), rail[0], rail[2]);
-      for (let step = 0; step < 50 && !clearOfTabs(out[0]); step++) {
-        const at = out[0] + (step % 2 ? 1 : -1) * 8 * Math.ceil((step + 1) / 2);
-        if (at >= rail[0] && at <= rail[2] && clearOfTabs(at)) out[0] = at;
-      }
-    }
-    let gap = AIM_GAP;
-    for (let i = 0; i < 3; i++) {
-      reachTo(x - xOf(out[0]), y - yOf(out[0]), bendTo, out, fore + gap);
-      const ex = xOf(out[0]) + boom * Math.cos(out[1]);
-      const ey = yOf(out[0]) + boom * Math.sin(out[1]);
-      const length = Math.hypot(x - ex, y - ey) || 1;
-      let g = gap;
-      while (g < 220 && blocked(x - ((x - ex) / length) * g, y - ((y - ey) / length) * g)) g += 4;
-      if (g === gap) break;
-      gap = g;
-    }
+    cursorAt[0] = pointer[0] - view[0];
+    cursorAt[1] = pointer[1] - view[1];
+    const k = CAMERA / (CAMERA - lift * SCALE);
+    const x = clamp(foot[0] + (cursorAt[0] - foot[0]) / k, inside.x, inside.x + inside.w);
+    const y = clamp(foot[1] + (cursorAt[1] - foot[1]) / k, inside.y, inside.y + inside.h);
+    const bendTo = below && y > rail[1] ? 1 : -1;
+    const r = span(AIMED);
+    const h = Math.abs(y - rail[1]);
+    const reach = Math.sqrt(Math.max(0, r * r - h * h));
+    out[0] = clear(clamp(x + Math.max(60 * SCALE, reach), rail[0], rail[2]), herOff);
+    reachTo(x - out[0], y - rail[1], bendTo, out, fore + AIM_GAP);
     out[1] = boomAngle(out[1]);
     out[2] = nearest(out[2], aimPose[2]);
   }
 
-  /** up a phone's column, the park's fold carried to the line a reader reads at */
+  /** up a phone's column, the park's fold carried to the line in the viewport's middle */
   function readFor(out: number[]) {
-    const k = CAMERA / (CAMERA - PEN.up * scale);
+    const k = CAMERA / (CAMERA - PEN.up * SCALE);
     const top = blocks[0].range[0];
     const bottom = blocks[blocks.length - 1].range[1];
-    const y = foot[1] + (clamp(readAt - stageAt[1], top, bottom) - foot[1]) / k;
+    const y = foot[1] + (clamp(innerHeight / 2 - view[1], top, bottom) - foot[1]) / k;
     out[0] = clamp(y - boom + fore * Math.cos(fold), rail[1], park[0]);
     out[1] = DOWN;
     out[2] = Math.PI - fold;
     out[3] = 0;
   }
 
+  /** how far her pencil stands up for its drawn length to stop short of a tab or her */
   function tipFor(p: number[]): number {
     const dx = Math.cos(p[1] + p[2]);
     const dy = Math.sin(p[1] + p[2]);
-    const wrist = PENCIL.wrist * scale;
+    const wrist = PENCIL.wrist * SCALE;
     const length = fore - wrist;
     for (let l = 0; l <= length; l += 4) {
       if (blocked(elbowAt[0] + dx * (wrist + l), elbowAt[1] + dy * (wrist + l)))
@@ -1099,12 +931,11 @@ export function createPress(stage: HTMLElement): () => void {
     const swinging = Math.abs(turn - aimPose[1]) > SWUNG;
     // up a phone's column her pencil folds along the boom while it swings round; on the bed, going
     // home, the carriage waits while the elbow comes out of the plates
-    const targets = [
-      along === 0 && !following && swinging ? aimPose[0] : aimAt[0],
-      turn,
-      along === 1 && swinging ? foldAt(aimPose[1], aimPose[2]) : nearest(aimAt[2], aimPose[2]),
-    ];
-    const stiff = along === 1 && !mouse ? SCROLL_AIM : AIM;
+    targets[0] = along === 0 && !following && swinging ? aimPose[0] : aimAt[0];
+    targets[1] = turn;
+    targets[2] =
+      along === 1 && swinging ? foldAt(aimPose[1], aimPose[2]) : nearest(aimAt[2], aimPose[2]);
+    const stiff = along === 1 ? SCROLL_AIM : AIM;
     // up a phone's column the elbow sweeps no faster than in a move
     const slew = Math.min(AIM_SLEW, (SWING * 1000) / boom);
     let still = true;
@@ -1116,58 +947,72 @@ export function createPress(stage: HTMLElement): () => void {
       if (Math.abs(targets[i] - aimPose[i]) > (i === 0 ? 1 : 0.004)) still = false;
       if (Math.abs(aimSpeed[i]) > (i === 0 ? 20 : 0.05)) still = false;
     }
-    if (along === 0) {
-      const most = reachMax - boom * Math.max(0, Math.cos(aimPose[1]));
-      if (aimPose[0] > most) {
-        aimPose[0] = most;
-        aimSpeed[0] = Math.min(0, aimSpeed[0]);
-      }
-    }
     place(aimPose);
     // up a phone's column it lies folded, never stood up end-on
     const swing = along === 1 ? 0 : 0.25 * (Math.abs(aimSpeed[1]) + Math.abs(aimSpeed[2]));
-    const clear = along === 1 && !mouse ? 0 : tipFor(aimPose);
-    const need = Math.min(along === 1 ? STEEP : UPRIGHT, Math.max(aimAt[3], clear, swing));
+    const tipped = along === 1 ? 0 : tipFor(aimPose);
+    const need = Math.min(along === 1 ? STEEP : UPRIGHT, Math.max(aimAt[3], tipped, swing));
     aimSpeed[3] += (AIM_TIP * AIM_TIP * (need - aimPose[3]) - 2 * AIM_TIP * aimSpeed[3]) * dt;
     aimPose[3] = clamp(aimPose[3] + aimSpeed[3] * dt, 0, UPRIGHT);
     if (Math.abs(need - aimPose[3]) > 0.004 || Math.abs(aimSpeed[3]) > 0.05) still = false;
     return still && lift === PEN.up;
   }
 
-  /** the rig's pose at time t into `out`: the plan's, or braking along the one it took over from */
-  function poseAt(t: number, out: number[]) {
-    if (brake && t < brake.at + BRAKE) {
-      const s = t - brake.at;
-      sample(brake.track, brake.at + s - (s * s) / (2 * BRAKE), brake.from, out);
-    } else sample(track, t, from, out);
+  /** the box of a line's character k, or of its last when k is past it; none in an empty line */
+  function charBox(line: HTMLElement, k: number): DOMRect | undefined {
+    const walker = document.createTreeWalker(line, NodeFilter.SHOW_TEXT);
+    let last: Text | undefined;
+    while (walker.nextNode()) {
+      const node = walker.currentNode as Text;
+      if (k < node.length) {
+        range.setStart(node, k);
+        range.setEnd(node, k + 1);
+        return range.getBoundingClientRect();
+      }
+      k -= node.length;
+      if (node.length > 0) last = node;
+    }
+    if (!last) return;
+    range.setStart(last, last.length - 1);
+    range.setEnd(last, last.length);
+    return range.getBoundingClientRect();
   }
 
   function apply() {
     const t = clock;
-    let caretX = 0;
-    let caretY = 0;
+    let lineY = 0;
+    let z: number = PEN.up;
+    if (laidOut) {
+      if (aiming) for (let i = 0; i < 4; i++) pose[i] = aimPose[i];
+      else sample(track, t, from, pose);
+      sample(pen, t, up, sole);
+      z = aiming ? lift : sole[0];
+      place(pose);
+      // the line her pencil's point drags, on whole canvas pixels: the wipe's edge and the canvas's
+      project(tipAt[0], tipAt[1], z * SCALE);
+      lineY = Math.round(point[1] * density) / density;
+    }
+
+    // the source typed so far; the caret's line shows once a key of it is typed
     let typing = false;
+    let caretBlock: Block | undefined;
+    let caretLine = 0;
+    let caretKeys = 0;
     for (const b of blocks) {
       let keys = !begun || t < b.type ? -1 : Math.min(b.keys, Math.floor((t - b.type) / CHAR));
       if (keys >= 0 && keys < b.keys) typing = true;
       let shown = 0;
-      let clip = '';
       for (let i = 0; i < b.lines.length && keys >= 0; i++) {
-        shown = i + 1;
         if (keys <= b.lengths[i]) {
-          // a long line wraps: the rows before the caret's show whole, its own up to the caret
-          const breaks = b.breaks[i];
-          let row = 0;
-          while (row < breaks.length && keys >= breaks[row]) row++;
-          const x = (keys - (row > 0 ? breaks[row - 1] : 0)) * advance;
-          const top = row * lineHeight;
-          if (keys < b.lengths[i]) {
-            clip = `polygon(0 0, 100% 0, 100% ${top}px, ${x}px ${top}px, ${x}px ${top + lineHeight}px, 0 ${top + lineHeight}px)`;
-          }
-          caretX = b.rows[i][0] + x;
-          caretY = b.rows[i][1] + top;
+          if (keys > 0) shown = i + 1;
+          caretBlock = b;
+          caretLine = i;
+          caretKeys = keys;
           keys = -1;
-        } else keys -= b.lengths[i] + 1;
+        } else {
+          shown = i + 1;
+          keys -= b.lengths[i] + 1;
+        }
       }
       if (shown !== b.shownLines) {
         for (let i = 0; i < b.lines.length; i++) {
@@ -1177,34 +1022,47 @@ export function createPress(stage: HTMLElement): () => void {
         b.shownLines = shown;
         b.clip = '';
       }
-      if (clip !== b.clip) {
-        b.lines[shown - 1].style.clipPath = clip;
-        b.clip = clip;
-      }
     }
     const caretOff = blocks[blocks.length - 1].typed + 600;
-    const mode = !begun || t >= caretOff ? 'none' : typing && phase === 'play' ? 'solid' : 'blink';
+    const mode = !begun || t >= caretOff || phase !== 'play' ? 'none' : typing ? 'solid' : 'blink';
+    // the caret's character, measured: a long line wraps, its rows before the caret's show whole
+    let clip = '';
+    if (caretBlock && mode !== 'none') {
+      const line = caretBlock.lines[caretLine];
+      const length = caretBlock.lengths[caretLine];
+      const s = stage.getBoundingClientRect();
+      const box = line.getBoundingClientRect();
+      const char = charBox(line, caretKeys);
+      if (char) caretSize[0] = char.width;
+      caretSize[1] = caretBlock.leading || char?.height || box.height;
+      const x = char ? (caretKeys < length ? char.left : char.right) - box.left : 0;
+      const top = char ? char.top - box.top - (caretSize[1] - char.height) / 2 : 0;
+      if (caretKeys > 0 && caretKeys < length)
+        clip = `polygon(0 0, 100% 0, 100% ${top}px, ${x}px ${top}px, ${x}px ${top + caretSize[1]}px, 0 ${top + caretSize[1]}px)`;
+      const caretX = box.left - s.left + x;
+      const caretY = box.top - s.top + top;
+      if (caretX !== caretAt[0] || caretY !== caretAt[1]) {
+        caretAt[0] = caretX;
+        caretAt[1] = caretY;
+        caret.style.transform = `translate(${caretX}px, ${caretY}px)`;
+        caret.style.width = `${caretSize[0]}px`;
+        caret.style.height = `${caretSize[1]}px`;
+      }
+    }
+    for (const b of blocks) {
+      const want = b === caretBlock ? clip : '';
+      if (want !== b.clip) {
+        b.lines[b.shownLines - 1].style.clipPath = want;
+        b.clip = want;
+      }
+    }
     if (mode !== caretMode) {
       caretMode = mode;
       caret.style.visibility = mode === 'none' ? 'hidden' : 'visible';
       // it blinks only while it shows, so a hidden or typing caret runs no animation
       caret.classList.toggle('lp-caret', mode === 'blink');
     }
-    if (mode !== 'none' && (caretX !== caretAt[0] || caretY !== caretAt[1])) {
-      caretAt[0] = caretX;
-      caretAt[1] = caretY;
-      caret.style.transform = `translate(${caretX}px, ${caretY}px)`;
-    }
 
-    if (aiming) for (let i = 0; i < 4; i++) pose[i] = aimPose[i];
-    else poseAt(t, pose);
-    sample(pen, t, up, sole);
-    const z = aiming ? lift : sole[0];
-    place(pose);
-    // the line her pencil's point drags, on whole device pixels: the wipe's edge and the canvas's
-    const dpr = Math.min(2, window.devicePixelRatio);
-    project(tipAt[0], tipAt[1], z * scale);
-    const lineY = Math.round(point[1] * dpr) / dpr;
     let gauge = GAUGE[0];
     let sliding: Block | null = null;
     let status = !begun ? '' : typing ? typingLine : compiled;
@@ -1216,18 +1074,10 @@ export function createPress(stage: HTMLElement): () => void {
       } else if (t >= job.hit && t < job.free) gauge = Math.max(gauge, GAUGE[2]);
       else if (!typing && t < job.free && t >= job.go - DRIVE) status = '';
     }
-    const bx = pivotAt[0];
-    const by = pivotAt[1];
-    project(bx + deck.seat[0] * scale, by + deck.seat[1] * scale, deck.seat[2] * scale);
-    seat[0] = point[0];
-    seat[1] = point[1];
-    seat[2] = deck.seat[2] * scale;
-    const mateX = Math.round(seat[0] - SEAT_CELL[0] * cell);
-    const mateY = Math.round(seat[1] - SEAT_CELL[1] * cell);
-    const crownX = mateX + CROWN_CELL[0] * cell;
-    aimHer(t, mateX, mateY);
-    sway(performance.now());
-    const herPose = hand < 0 ? 0 : poseOf(hand, height);
+    if (status && status !== said) {
+      said = status;
+      report(stage, status);
+    }
 
     for (const b of blocks) {
       let framed = false;
@@ -1275,40 +1125,51 @@ export function createPress(stage: HTMLElement): () => void {
         b.tab.toggleAttribute('data-queued', queued);
       }
     }
+    if (!laidOut) return;
 
-    if (t < noteUntil) status = note;
-    if (status) report(stage, status);
+    const bx = pivotAt[0];
+    const by = pivotAt[1];
+    project(bx + deck.seat[0] * SCALE, by + deck.seat[1] * SCALE, deck.seat[2] * SCALE);
+    seat[0] = point[0];
+    seat[1] = point[1];
+    seat[2] = deck.seat[2] * SCALE;
+    const mateX = Math.round(seat[0] - SEAT_CELL[0] * CELL);
+    const mateY = Math.round(seat[1] - SEAT_CELL[1] * CELL);
+    const crownX = mateX + CROWN_CELL[0] * CELL;
+    aimHer(t, mateX, mateY);
+    sway(performance.now());
+    const herPose = hand < 0 ? 0 : poseOf(hand, height);
 
     bounds.fill(Infinity, 0, 2);
     bounds.fill(-Infinity, 2);
     const [dx, dy, hw, hh] = deck.box;
-    grow(bx + dx * scale, by + dy * scale, 0, Math.hypot(hw, hh) * scale);
-    grow(bx, by, 140 * scale, 36 * scale);
+    grow(bx + dx * SCALE, by + dy * SCALE, 0, Math.hypot(hw, hh) * SCALE);
+    grow(bx, by, 140 * SCALE, 36 * SCALE);
     for (let i = 0; i <= 4; i++) {
       const u = i / 4;
-      grow(bx + (elbowAt[0] - bx) * u, by + (elbowAt[1] - by) * u, 160 * scale, 54 * scale);
+      grow(bx + (elbowAt[0] - bx) * u, by + (elbowAt[1] - by) * u, 160 * SCALE, 54 * SCALE);
     }
     const cos = Math.cos(pose[1]);
     const sin = Math.sin(pose[1]);
-    grow(bx - cos * 54 * scale, by - sin * 54 * scale, 152 * scale, 30 * scale);
-    grow(elbowAt[0], elbowAt[1], (z + YOKE + 12) * scale, 54 * scale);
+    grow(bx - cos * 54 * SCALE, by - sin * 54 * SCALE, 152 * SCALE, 30 * SCALE);
+    grow(elbowAt[0], elbowAt[1], (z + YOKE + 12) * SCALE, 54 * SCALE);
     const fx = Math.cos(pose[1] + pose[2]);
     const fy = Math.sin(pose[1] + pose[2]);
     const rise = Math.sin(pose[3]) * (PENCIL.reach - PENCIL.wrist);
-    const wrist = PENCIL.wrist * scale;
+    const wrist = PENCIL.wrist * SCALE;
     const length = (fore - wrist) * Math.cos(pose[3]);
     for (let i = 0; i <= 3; i++) {
       const u = i / 3;
       const l = wrist + length * u;
-      grow(elbowAt[0] + fx * l, elbowAt[1] + fy * l, (z + rise * u + 22) * scale, 26 * scale);
+      grow(elbowAt[0] + fx * l, elbowAt[1] + fy * l, (z + rise * u + 22) * SCALE, 26 * SCALE);
     }
     const shadowX = (-LIGHT[0] / LIGHT[2]) * seat[2];
     const shadowY = (-LIGHT[1] / LIGHT[2]) * seat[2];
     const [x0, y0, x1, y1] = POSE_BOX[herPose];
-    bounds[0] = Math.min(bounds[0], mateX + x0 * cell + Math.min(0, shadowX));
-    bounds[1] = Math.min(bounds[1], mateY + y0 * cell + Math.min(0, shadowY));
-    bounds[2] = Math.max(bounds[2], mateX + x1 * cell + Math.max(0, shadowX));
-    bounds[3] = Math.max(bounds[3], mateY + y1 * cell + Math.max(0, shadowY));
+    bounds[0] = Math.min(bounds[0], mateX + x0 * CELL + Math.min(0, shadowX));
+    bounds[1] = Math.min(bounds[1], mateY + y0 * CELL + Math.min(0, shadowY));
+    bounds[2] = Math.max(bounds[2], mateX + x1 * CELL + Math.max(0, shadowX));
+    bounds[3] = Math.max(bounds[3], mateY + y1 * CELL + Math.max(0, shadowY));
     if (sliding) {
       bounds[0] = Math.min(bounds[0], sliding.cell.x);
       bounds[1] = Math.min(bounds[1], lineY - 1);
@@ -1318,11 +1179,11 @@ export function createPress(stage: HTMLElement): () => void {
 
     if (along === 0) chain(bx - band.x);
     // she watches her pencil while it works, the cursor while it points at it
-    let lookX = aiming && following ? (mouse ? cursorAt[0] : tipAt[0]) : crownX;
+    let lookX = aiming && following ? (along === 0 ? cursorAt[0] : tipAt[0]) : crownX;
     for (const job of jobs) if (t >= job.go && t < job.free) lookX = tipAt[0];
     gaze = lookX < crownX - GLANCE ? 2 : lookX > crownX + GLANCE ? 3 : 0;
     paint();
-    const at = `translate(${mateX - MATE_PAD[0] * cell}px, ${mateY - MATE_PAD[1] * cell}px)`;
+    const at = `translate(${mateX - MATE_PAD[0] * CELL}px, ${mateY - MATE_PAD[1] * CELL}px)`;
     if (at !== mateAt) {
       mateAt = at;
       mate.style.transform = at;
@@ -1331,7 +1192,7 @@ export function createPress(stage: HTMLElement): () => void {
     if (!shader) return;
     set3('uCam', foot[0], foot[1], CAMERA);
     shader.set('uB', pivotAt);
-    shader.set('uS', scale);
+    shader.set('uS', SCALE);
     const ex = BOOM * cos;
     const ey = BOOM * sin;
     set2('uE', ex, ey);
@@ -1350,12 +1211,12 @@ export function createPress(stage: HTMLElement): () => void {
     set4('uBay', bay.x, bay.y, bay.w, bay.h);
     shader.set('uClip', bounds);
     // the march starts over the highest part: the quill's yoke, or her pencil's point tipped up
-    shader.set('uTop', Math.max(170, z + YOKE + 12, z + rise + PENCIL.radius + 6) * scale);
+    shader.set('uTop', Math.max(170, z + YOKE + 12, z + rise + PENCIL.radius + 6) * SCALE);
     shader.set('uDeck', deck.box);
     shader.set('uValve', deck.valve);
     shader.set('uDial', deck.gauge);
     shader.set('uMotor', deck.motor);
-    set3('uMate', mateX - MATE_PAD[0] * cell, mateY - MATE_PAD[1] * cell, cell);
+    set3('uMate', mateX - MATE_PAD[0] * CELL, mateY - MATE_PAD[1] * CELL, CELL);
     shader.set('uMateZ', seat[2]);
   }
 
@@ -1371,13 +1232,13 @@ export function createPress(stage: HTMLElement): () => void {
     bend.style.transform = `translateX(${b - 9}px)`;
   }
 
+  /** her canvas, painted when anything of it changed: her moon steps and she blinks on the frames
+   * the arm draws */
   function paint() {
     if (!ink) return;
-    const now = performance.now();
-    sway(now);
     const herPose = hand < 0 ? 0 : poseOf(hand, height);
     const lit = wantLit && herPose > 0 && hand === wantHand && height > 0;
-    const ticks = reduced ? 0 : Math.floor(now / TICK);
+    const ticks = reduced ? 0 : Math.floor(performance.now() / TICK);
     const eyes = !reduced && ticks % BLINK === 0 ? 1 : gaze;
     const step = Math.floor(ticks / STEP) % ORBIT_STEPS;
     const shown =
@@ -1403,9 +1264,9 @@ export function createPress(stage: HTMLElement): () => void {
     if (begun && !reduced) {
       if (aiming && following) {
         target = true;
-        aimed[0] = mouse ? cursorAt[0] : tipAt[0];
-        aimed[1] = mouse ? cursorAt[1] : tipAt[1];
-        wantLit = mouse && !steady;
+        aimed[0] = along === 0 ? cursorAt[0] : tipAt[0];
+        aimed[1] = along === 0 ? cursorAt[1] : tipAt[1];
+        wantLit = along === 0 && !steady;
       } else {
         for (const job of jobs) {
           if (t < job.go - LEAD || t >= job.free) continue;
@@ -1427,11 +1288,11 @@ export function createPress(stage: HTMLElement): () => void {
       wantHand = -1;
       return;
     }
-    const middle = x + (SPRITE_W / 2) * cell;
+    const middle = x + (SPRITE_W / 2) * CELL;
     const held = wantHand;
     if (held < 0 || Math.abs(aimed[0] - middle) > HAND_SLACK) wantHand = aimed[0] > middle ? 0 : 1;
-    const across = Math.abs(aimed[0] - x - (wantHand === 0 ? 23 : 6) * cell);
-    const e = (Math.atan2(y + 30.5 * cell - aimed[1], across) * 180) / Math.PI;
+    const across = Math.abs(aimed[0] - x - (wantHand === 0 ? 23 : 6) * CELL);
+    const e = (Math.atan2(y + 30.5 * CELL - aimed[1], across) * 180) / Math.PI;
     const was = wantHand === held ? wantHeight : 2;
     wantHeight = 2;
     if (e > RAISE[1] + (was === 3 ? -RAISE_SLACK : RAISE_SLACK)) wantHeight = 3;
@@ -1464,7 +1325,7 @@ export function createPress(stage: HTMLElement): () => void {
 
   function armClear(x: number, y: number, pose: number): boolean {
     const [x0, y0, x1, y1] = ARM_BOX[pose];
-    return !onTab(x + x0 * cell, y + y0 * cell, x + x1 * cell, y + y1 * cell);
+    return !onTab(x + x0 * CELL, y + y0 * CELL, x + x1 * CELL, y + y1 * CELL);
   }
 
   function set2(name: string, x: number, y: number) {
@@ -1500,6 +1361,9 @@ export function createPress(stage: HTMLElement): () => void {
     const now = time * 1000;
     const dt = last < 0 ? 1000 / 60 : Math.min(48, now - last);
     last = now;
+    const s = stage.getBoundingClientRect();
+    view[0] = s.left;
+    view[1] = s.top;
     if (phase === 'fade') {
       fading += dt;
       // paper covers the page on the canvas, cell by cell, then the page is cleared under it
@@ -1525,10 +1389,7 @@ export function createPress(stage: HTMLElement): () => void {
       clock = Math.min(total, clock + dt);
       if (clock >= total) {
         phase = 'rest';
-        if (playing) {
-          playing = false;
-          if (over) follow();
-        }
+        playing = false;
       }
     }
     if (following && !aiming && free()) take();
@@ -1539,7 +1400,7 @@ export function createPress(stage: HTMLElement): () => void {
       if (still && !following) {
         // home; stopped short of it, it drives the rest of the way
         const short = Math.abs(aimAt[0] - aimPose[0]) >= 1;
-        settle(clock);
+        replan(clock);
         if (short) wake();
       }
     }
@@ -1551,7 +1412,6 @@ export function createPress(stage: HTMLElement): () => void {
   function write() {
     begun = true;
     playing = true;
-    brake = null;
     let t = 0;
     asks.length = 0;
     for (const b of blocks) {
@@ -1576,7 +1436,7 @@ export function createPress(stage: HTMLElement): () => void {
   /** dither the page out, then write it again from the arm's pose */
   function replay() {
     if (!shader) return;
-    from = [...pose];
+    from = begun ? [...pose] : park;
     aiming = false;
     following = false;
     write();
@@ -1595,23 +1455,25 @@ export function createPress(stage: HTMLElement): () => void {
     apply();
   }
 
+  /** the writer starts: from the empty file, or dithering the server's page out first */
+  function begin() {
+    if (reduced || !shader || !laidOut) return;
+    if (phase === 'ready') wake();
+    else if (!begun) replay();
+  }
+
+  /** the theme's colours, for her next frame and the shader's */
   function colours() {
     const style = getComputedStyle(stage);
-    const night = isDark();
-    const paper = cssRgb(style.getPropertyValue('--lp-paper'));
-    const ink3 = cssRgb(style.getPropertyValue('--lp-ink'));
-    const yellow = cssRgb(style.getPropertyValue('--lp-yellow'));
-    const accent = night ? yellow : cssRgb(style.getPropertyValue('--lp-sun'));
     ink = mateInk(style);
     mateShown = -1;
-    paint();
     if (!shader) return;
-    shader.set('uLit', night ? ink3 : paper);
-    shader.set('uShade', night ? paper : ink3);
-    shader.set('uAccent', accent);
-    shader.set('uYellow', yellow);
+    shader.set('uLit', unit(ink.lit));
+    shader.set('uShade', unit(ink.line));
+    shader.set('uAccent', unit(ink.accent));
+    shader.set('uYellow', unit(ink.yellow));
     shader.set('uLine', cssRgba(style.getPropertyValue('--lp-line-strong')));
-    shader.set('uNight', night ? 1 : 0);
+    shader.set('uNight', isDark() ? 1 : 0);
     shader.set('uL', LIGHT);
     shader.invalidate();
   }
@@ -1622,13 +1484,11 @@ export function createPress(stage: HTMLElement): () => void {
 
   /** the rig leaves its plan for the reader's springs, from where and as fast as the plan has it */
   function take() {
-    // it rests by the cursor a while before going back
-    movedAt = performance.now();
-    poseAt(clock, aimPose);
+    sample(track, clock, from, aimPose);
     sample(pen, clock, up, sole);
     lift = sole[0];
     const before = [0, 0, 0, 0];
-    poseAt(clock - 16, before);
+    sample(track, clock - 16, from, before);
     aimSpeed[0] = (aimPose[0] - before[0]) / 0.016;
     for (let i = 1; i < 4; i++) aimSpeed[i] = (aimPose[i] - nearest(before[i], aimPose[i])) / 0.016;
     aiming = true;
@@ -1636,192 +1496,131 @@ export function createPress(stage: HTMLElement): () => void {
   }
 
   function follow() {
-    if (!mouse || !begun || playing || reduced || !shader) return;
+    if (along === 1 || !begun || playing || reduced || !shader) return;
     following = true;
-    movedAt = performance.now();
-    if (!idle) idle = window.setTimeout(onIdle, IDLE);
     shader.invalidate();
   }
 
   function goBack() {
     following = false;
-    window.clearTimeout(idle);
-    idle = 0;
     for (let i = 0; i < 4; i++) aimAt[i] = park[i];
     shader?.invalidate();
   }
 
+  /** up a phone's column the arm follows the reading after the sequence */
   function onScroll() {
-    if (along !== 1 || mouse || !begun || playing || reduced || !shader) return;
-    readAt = scrollY + READ * innerHeight;
+    if (!begun || playing || reduced || !shader) return;
     following = true;
     shader.invalidate();
   }
 
-  function onIdle() {
-    const left = movedAt + IDLE - performance.now();
-    idle = left > 0 ? window.setTimeout(onIdle, left) : 0;
-    if (!idle) goBack();
-  }
-
-  function onEnter(event: PointerEvent) {
-    if (event.pointerType !== 'mouse') return;
-    over = true;
-    // where the stage is, so a move reads no layout; the cursor's own moves count from here, as a
-    // scroll carries the page under a cursor that stays put
-    const s = stage.getBoundingClientRect();
-    stageAt[0] = s.left + scrollX;
-    stageAt[1] = s.top + scrollY;
-    client[0] = event.clientX;
-    client[1] = event.clientY;
-  }
-
   function onMove(event: PointerEvent) {
-    if (event.pointerType !== 'mouse') return;
-    cursorAt[0] = event.pageX - stageAt[0];
-    cursorAt[1] = event.pageY - stageAt[1];
-    if (event.clientX !== client[0] || event.clientY !== client[1]) {
-      client[0] = event.clientX;
-      client[1] = event.clientY;
-      mouse = true;
-      follow();
-    }
-    if (following) shader?.invalidate();
-  }
-
-  function onLeave(event: PointerEvent) {
-    if (event.pointerType !== 'mouse') return;
-    over = false;
-    if (following && mouse) goBack();
-  }
-
-  /** what the last pointer to come down on the stage was: a finger presses only tabs */
-  let downBy = '';
-  function onDown(event: PointerEvent) {
-    downBy = event.pointerType;
-    if (downBy !== 'mouse') return;
-    mouse = true;
+    if (event.pointerType === 'touch') return;
+    pointer[0] = event.clientX;
+    pointer[1] = event.clientY;
     follow();
   }
 
-  /** a finger or a pen anywhere on the page: the scroll leads again, no mouse rest parks it */
-  function onTouch(event: PointerEvent) {
-    if (event.pointerType === 'mouse' || !mouse) return;
-    mouse = false;
-    window.clearTimeout(idle);
-    idle = 0;
-    onScroll();
-  }
-
-  /** a press a click on a block asked for, until the double-click window has passed */
-  let tentative: Ask | undefined;
-  let clickTimer = 0;
-
-  function drop() {
-    window.clearTimeout(clickTimer);
-    const ask = tentative;
-    tentative = undefined;
-    const i = ask ? asks.indexOf(ask) : -1;
-    if (i < 0 || jobs[i].touch <= clock) return;
-    if (!playing) settle(clock);
-    asks.splice(asks.indexOf(ask!), 1);
-    noteUntil = -1;
-    plan();
-    wake();
+  function onLeave(event: PointerEvent) {
+    if (event.pointerType !== 'touch' && following) goBack();
   }
 
   function onClick(event: MouseEvent) {
-    const target = event.target as Element;
-    const tab = target.closest('[data-tab]');
-    if (tab) {
-      const b = blocks.find((block) => block.tab === tab);
-      if (b && (!begun || clock >= b.typed)) press(b);
+    const tab = (event.target as Element).closest('[data-tab]');
+    const b = tab && blocks.find((block) => block.tab === tab);
+    if (b && (!begun || clock >= b.typed)) press(b);
+  }
+
+  /** the arm's canvas and context, made as the stage first comes on screen and kept: off screen
+   * its drawing buffer shrinks away */
+  function show() {
+    canvas = document.createElement('canvas');
+    canvas.className = 'pointer-events-none absolute inset-0 z-2 size-full';
+    canvas.ariaHidden = 'true';
+    stage.append(canvas);
+    shader = createShaderCanvas(canvas, {
+      fragment,
+      onFrame,
+      density: 1,
+      onResize(dpr) {
+        density = dpr;
+        refresh();
+        if (seen) begin();
+      },
+      onVisible(ratio) {
+        visible = ratio > 0;
+        listen();
+        // an empty file till the stage comes back into view
+        if (!visible && !begun && !reduced) ready();
+      },
+    });
+    if (!shader) {
+      canvas.remove();
+      canvas = null;
+      button.hidden = true;
+      // no WebGL2: the server's page stays, done, and a press flips its block at once
+      for (const b of blocks) b.base = true;
+      begun = false;
+      playing = false;
+      asks.length = 0;
+      jobs.length = 0;
+      phase = 'rest';
+      apply();
       return;
     }
-    // a mouse presses a block anywhere but on its own controls; a double-click or a selection
-    // selects text instead, the press the first click set going taken back
-    if (downBy !== 'mouse' || target.closest('a, button, input, [role="tab"]')) return;
-    if (event.detail > 1 || getSelection()?.isCollapsed === false) {
-      drop();
-      return;
-    }
-    const b = blocks.find((block) => block.el.contains(target));
-    if (!b || (begun && clock < b.typed)) return;
-    window.clearTimeout(clickTimer);
-    tentative = press(b);
-    clickTimer = window.setTimeout(() => {
-      if (getSelection()?.isCollapsed === false) drop();
-      tentative = undefined;
-    }, DOUBLE);
+    shader.texture('uSprite', (casts[castPose] ??= silhouette(castPose)));
+    colours();
   }
 
   const listeners = new AbortController();
   const { signal } = listeners;
   const passive = { passive: true, signal };
-  stage.addEventListener('pointerenter', onEnter, passive);
+
+  /** the scroll moves a phone's arm only while its figure shows */
+  function listen() {
+    if (visible && along === 1) addEventListener('scroll', onScroll, passive);
+    else removeEventListener('scroll', onScroll);
+  }
+
   stage.addEventListener('pointermove', onMove, passive);
   stage.addEventListener('pointerleave', onLeave, passive);
-  stage.addEventListener('pointerdown', onDown, passive);
   stage.addEventListener('click', onClick, { signal });
-  addEventListener('pointerdown', onTouch, passive);
   button.addEventListener('click', replay, { signal });
 
-  const view = new IntersectionObserver(
-    ([entry]) => {
-      onScreen = entry.isIntersecting;
-      // the scroll moves a phone's arm only while the figure shows
-      if (onScreen) {
-        addEventListener('scroll', onScroll, passive);
-        onScroll();
-      } else removeEventListener('scroll', onScroll);
-      if ((begun && phase !== 'ready') || reduced || !shader) return;
-      // a stage taller than the viewport counts by the share of the viewport it fills
-      const seen =
-        entry.intersectionRatio >= START || entry.intersectionRect.height >= innerHeight * START;
-      if (seen) {
-        if (phase === 'ready') wake();
-        else replay();
-      } else if (!entry.isIntersecting && phase === 'rest' && !begun) ready();
-    },
-    { threshold: [0, 0.1, 0.2, START, 0.6] },
-  );
-  // only a new size: the first notification brings the size the stage was just laid out at
-  const resize = new ResizeObserver(([entry]) => {
-    const { width, height } = entry.contentRect;
-    if (`${width}x${height}` !== laidOut) refresh();
+  const near = new IntersectionObserver((entries) => {
+    if (!entries[entries.length - 1].isIntersecting) {
+      // an empty file till the stage comes into view
+      if (!begun && !reduced) ready();
+      return;
+    }
+    near.disconnect();
+    show();
   });
-  // a section above that changes height moves the stage off whole pixels again
-  const moved = new ResizeObserver(() => {
-    snap();
-    const s = stage.getBoundingClientRect();
-    stageAt[0] = s.left + scrollX;
-    stageAt[1] = s.top + scrollY;
+  near.observe(stage);
+  // the writer starts as its figure becomes the one read
+  const stopActive = onActive((active) => {
+    if (active !== figure) return;
+    seen = true;
+    begin();
   });
-
-  refresh();
-  colours();
-  resize.observe(stage);
-  moved.observe(document.body);
-  view.observe(stage);
   const stopTheme = onTheme(colours);
-  // her idle between the arm's frames: a blink now and then, her moon's next step
-  const ticker = window.setInterval(() => {
-    if (onScreen && !reduced) paint();
-  }, TICK);
   if (document.fonts.status === 'loading')
     void document.fonts.ready.then(() => {
-      if (!signal.aborted) refresh();
+      if (!signal.aborted && shader) refresh();
     });
 
   return () => {
     listeners.abort();
-    view.disconnect();
-    resize.disconnect();
-    moved.disconnect();
+    near.disconnect();
+    stopActive();
     stopTheme();
-    window.clearTimeout(idle);
-    window.clearTimeout(clickTimer);
-    window.clearInterval(ticker);
     shader?.destroy();
+    // a remount makes its own canvas, so this one's context goes now
+    canvas?.getContext('webgl2')?.getExtension('WEBGL_lose_context')?.loseContext();
+    canvas?.remove();
   };
+}
+
+function unit([r, g, b]: readonly [number, number, number]): [number, number, number] {
+  return [r / 255, g / 255, b / 255];
 }

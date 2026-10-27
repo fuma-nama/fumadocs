@@ -10,14 +10,6 @@ const LINKS =
 /** a bracket every twelfth of the band: one under each plate's seam, two in each plate */
 const BRACKETS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
 
-/** about where the carriage stops for each plate, till the engine sets the stop it computes */
-const STOPS = [
-  'md:left-[calc(50%-14px)] xl:left-[calc(25%-16px)]',
-  'md:left-[calc(50%-23px)] xl:left-[calc(25%-27px)]',
-  'md:left-[calc(50%-66px)] xl:left-[calc(50%-27px)]',
-  'md:left-[calc(50%-15px)] xl:left-[calc(75%-27px)]',
-];
-
 function Bolt({ x, y }: { x: number; y: number }) {
   return (
     <path
@@ -58,8 +50,9 @@ function Station({ className, ...props }: ComponentProps<'svg'>) {
   );
 }
 
-/** the rail band at the bed's foot; the engine moves the drag chain's bend and pulled run */
-export function RailBed() {
+/** the rail band at the bed's foot; the engine sets its detents, home's and a plate's each of
+ * `stops`, and moves the drag chain's bend and pulled run */
+export function RailBed({ stops }: { stops: number }) {
   return (
     <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
       {/* the extrusion, its two T-slots */}
@@ -70,10 +63,8 @@ export function RailBed() {
       {/* the rack, the rail and its groove */}
       <span className="absolute top-[32px] right-0 left-[20px] h-[3px] bg-[repeating-linear-gradient(to_right,var(--lp-ink-2)_0_1px,transparent_1px_3px)]" />
       <span className="absolute top-[35px] right-0 left-[20px] h-[6px] bg-[linear-gradient(to_bottom,var(--lp-ink-2)_2px,var(--lp-paper)_2px_4px,var(--lp-ink-2)_4px)]" />
-      {/* home, then a station for each plate */}
-      <Station style={{ left: BED.start - 8 }} />
-      {STOPS.map((at) => (
-        <Station key={at} data-station className={at} />
+      {Array.from({ length: stops + 1 }, (_, i) => (
+        <Station key={i} data-station className="invisible" />
       ))}
       {/* the limit switch it trips at home, and the end stop behind it */}
       <svg className="absolute top-[22px] h-[11px] w-[14px] left-[22px]" viewBox="0 0 14 11">

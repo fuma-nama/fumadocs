@@ -14,12 +14,12 @@ declare module 'satteri' {
   }
 }
 
-/** each block of `quick-start.mdx`: the tab the arm grips, the status line while it's pressed */
+/** each block of `quick-start.mdx`: what its tab calls it, the status line while it's pressed */
 export const steps = [
-  { tab: '---', status: 'rendering <DocsTitle>' },
-  { tab: '```npm', status: 'rendering <CodeBlockTabs>' },
-  { tab: '```ts twoslash', status: 'running Twoslash' },
-  { tab: '<Mermaid />', status: 'rendering <Mermaid>' },
+  { tab: 'Frontmatter', status: 'rendering <DocsTitle>' },
+  { tab: 'Install command', status: 'rendering <CodeBlockTabs>' },
+  { tab: 'Type hints', status: 'running Twoslash' },
+  { tab: 'Diagram', status: 'rendering <Mermaid>' },
 ];
 
 /** keeps a file's authored source, so the editor shows what was compiled */

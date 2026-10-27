@@ -2,7 +2,6 @@
 import type { ReactNode } from 'react';
 import { RotateCcw } from 'lucide-react';
 import { cn } from '@/lib/cn';
-import { whenSeen } from '../../lib/later';
 import { Window } from '../../ui/window';
 import { createPress } from './engine';
 import { BED } from './scene';
@@ -60,15 +59,7 @@ function words(line: string): ReactNode[] {
 }
 
 function mount(stage: HTMLDivElement | null) {
-  if (!stage) return;
-  // the WebGL context, its shader and her ticker are made two screens ahead, so a phone reader
-  // flicking through finds the arm drawn when the figure shows
-  let destroy: (() => void) | undefined;
-  const stop = whenSeen(stage, () => (destroy = createPress(stage)), { rootMargin: '200% 0px' });
-  return () => {
-    stop();
-    destroy?.();
-  };
+  if (stage) return createPress(stage);
 }
 
 interface StageProps {
@@ -121,9 +112,11 @@ export function Stage({ file, steps, sources, slots, bed, column }: StageProps) 
                 <button
                   type="button"
                   data-tab
+                  // pressed while the block shows its Markdown
+                  aria-label={`${steps[i].tab} Markdown`}
                   aria-pressed="false"
                   className={cn(
-                    'relative inline-flex h-7 cursor-pointer items-center justify-self-start border border-lp-line bg-lp-paper px-3 font-mono text-xs whitespace-pre text-lp-ink-2 transition-none before:absolute before:top-1/2 before:left-1 before:hidden before:size-1 before:-translate-y-1/2 before:bg-current after:absolute after:-inset-y-2 after:inset-x-0 hover:bg-lp-ink hover:text-lp-paper focus-visible:bg-lp-ink focus-visible:text-lp-paper focus-visible:outline-none data-inverted:bg-lp-ink data-inverted:text-lp-paper aria-pressed:bg-lp-yellow aria-pressed:text-[#121210] data-queued:bg-lp-ink data-queued:text-lp-paper data-queued:before:block data-queued:before:animate-[lp-caret_1s_steps(1,end)_infinite] [@media(scripting:none)]:pointer-events-none',
+                    'relative inline-flex h-7 cursor-pointer items-center justify-self-start border border-lp-line bg-lp-paper px-3 text-xs font-medium tracking-normal whitespace-pre text-lp-ink-2 transition-none before:absolute before:top-1/2 before:left-1 before:hidden before:size-1 before:-translate-y-1/2 before:bg-current after:absolute after:-inset-y-2 after:inset-x-0 hover:bg-lp-ink hover:text-lp-paper focus-visible:bg-lp-ink focus-visible:text-lp-paper focus-visible:outline-none data-inverted:bg-lp-ink data-inverted:text-lp-paper aria-pressed:bg-lp-yellow aria-pressed:text-[#121210] data-queued:bg-lp-ink data-queued:text-lp-paper data-queued:before:block data-queued:before:animate-[lp-caret_1s_steps(1,end)_infinite] [@media(scripting:none)]:pointer-events-none',
                     PLATES[i].foot ? 'md:row-start-2' : 'xl:row-start-2',
                   )}
                 >
@@ -131,15 +124,13 @@ export function Stage({ file, steps, sources, slots, bed, column }: StageProps) 
                 </button>
                 <div
                   className={cn(
-                    'grid grid-cols-[minmax(0,1fr)] @container *:col-start-1 *:row-start-1',
+                    'grid grid-cols-[minmax(0,1fr)] *:col-start-1 *:row-start-1',
                     PLATES[i].foot ? 'md:row-start-1' : 'xl:row-start-1',
                   )}
                 >
                   <div
                     data-src
-                    // 13px on a phone's full-width plates; from md 12px where a plate holds its
-                    // longest line, 11px where it has to
-                    className="invisible font-mono text-[13px] leading-[20px] [font-variant-ligatures:none] md:text-[11px] md:leading-[17px] md:@min-[296px]:text-xs md:@min-[296px]:leading-[18px]"
+                    className="invisible font-mono text-[13px]/5 [font-variant-ligatures:none] md:text-xs/[18px]"
                   >
                     {sources[i].split('\n').map((line, j) => (
                       <div
@@ -153,12 +144,8 @@ export function Stage({ file, steps, sources, slots, bed, column }: StageProps) 
                   </div>
                   <div
                     data-out
-                    // zoomed out like a browser to fit its plate; a stacking context keeps popovers
-                    // like Twoslash's under the arm
-                    className={cn(
-                      'isolate bg-lp-paper md:max-lg:[zoom:0.9] lg:max-xl:[zoom:0.8] xl:[zoom:0.82] [&_.twoslash-completion-list]:w-56! [&_.twoslash-completion-list]:select-text!',
-                      i > 0 && 'prose [&>:first-child]:mt-0 [&>:last-child]:mb-0',
-                    )}
+                    // a stacking context keeps popovers like Twoslash's under the arm
+                    className="prose isolate bg-lp-paper [&_.twoslash-completion-list]:w-56! [&_.twoslash-completion-list]:select-text! [&>:first-child]:mt-0 [&>:last-child]:mb-0"
                   >
                     {slot}
                   </div>
@@ -181,11 +168,6 @@ export function Stage({ file, steps, sources, slots, bed, column }: StageProps) 
           data-caret
           aria-hidden
           className="pointer-events-none invisible absolute top-0 left-0 bg-lp-ink"
-        />
-        <canvas
-          data-arm
-          aria-hidden
-          className="pointer-events-none absolute inset-0 z-2 size-full"
         />
         <canvas
           data-mate

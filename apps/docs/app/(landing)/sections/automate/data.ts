@@ -6,12 +6,12 @@ import { createFileSystemGeneratorCache, createGenerator } from 'fumadocs-typesc
 import { apiHighlighter, highlighter } from '@/lib/highlighter';
 import { frontmatter, remarkRaw, sourcesOf } from '../write/data';
 
-/** each block of `button.mdx`: the tab the arm grips, the status line while it's pressed */
+/** each block of `button.mdx`: what its tab calls it, the status line while it's pressed */
 export const steps = [
-  { tab: '---', status: 'rendering <DocsTitle>' },
-  { tab: '<include>', status: 'including button.tsx' },
-  { tab: '<auto-type-table />', status: 'generating ButtonProps' },
-  { tab: '<Releases />', status: 'running <Releases>' },
+  { tab: 'Preview', status: 'rendering <Button>' },
+  { tab: 'Props type', status: 'including button.tsx' },
+  { tab: 'Props table', status: 'generating ButtonProps' },
+  { tab: 'Releases', status: 'running <Releases>' },
 ];
 
 /** the blocks of `button.mdx`, a file each for a plate each, compiled like the docs */
