@@ -1,28 +1,30 @@
 import { cubicBezier } from 'motion/react';
-import { createShaderCanvas, cssRgb, cssRgba } from '../../lib/gl';
-import { camera, clamp, type Rect, rectIn, settle, TICK } from '../../lib/motion';
-import { report } from '../../lib/status';
-import { isDark, onTheme } from '../../lib/theme';
+import {
+  BLINK,
+  type MateInk,
+  mateInk,
+  ORBIT_STEPS,
+  paintMate,
+  STEP,
+} from '@/components/mascot/paint';
 import {
   ARM_BOX,
-  BLINK,
   CROWN_CELL,
   MATE_H,
   MATE_PAD,
   MATE_RISE,
   MATE_W,
-  type MateInk,
-  mateInk,
-  ORBIT_STEPS,
-  paintMate,
   POSE_BOX,
   poseOf,
   SEAT_CELL,
   silhouette,
   SPRITE_H,
   SPRITE_W,
-  STEP,
-} from '../../ui/mascot';
+} from '@/components/mascot/sprite';
+import { createShaderCanvas, cssRgb, cssRgba } from '../../lib/gl';
+import { camera, clamp, type Rect, rectIn, settle, TICK } from '../../lib/motion';
+import { report } from '../../lib/status';
+import { isDark, onTheme } from '../../lib/theme';
 import {
   BED,
   BED_DECK,

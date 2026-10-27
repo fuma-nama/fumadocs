@@ -1,4 +1,6 @@
-import { BEAT, clamp } from '../lib/motion';
+import { type MateInk, mateInk, ORBIT_STEPS, paintMate } from '@/components/mascot/paint';
+import { MATE_H, MATE_RISE, MATE_W, poseOf, SPRITE_H } from '@/components/mascot/sprite';
+import { BEAT, clamp, TICK } from '../lib/motion';
 import { isDark } from '../lib/theme';
 import { level, print, printDots, show } from '../ui/site-tile';
 
@@ -46,6 +48,13 @@ export const ROLLERS = [
 ] as const;
 
 export const DANCER = { pivot: [TRACK_LEFT + 30, 34] as const, length: 34, rest: 24, roller: 6 };
+
+/** her feet's middle on the base, between the take-up drum and the Geneva drive, under the strip */
+export const HER_X = 215;
+/** she works her remote with her left hand (on your right), toward the drive; her moon's ring */
+const HAND = 0;
+const RING = 13;
+const LIGHT = [0.13, -0.18, 0.975] as const;
 
 /** a turn of the driver, one frame: its pin winds up for 3/8 of it and pulls for the middle quarter */
 const TURN = 1200;
@@ -135,6 +144,11 @@ export function createProjector(
   ];
   const wounds = [part('wound-take'), part('wound-feed')];
   const rollers = [part('roller-0'), part('roller-1')];
+  const mate = root.querySelector<HTMLCanvasElement>('canvas[data-mate]')!;
+  const mateImage = new ImageData(MATE_W, MATE_H);
+  let ink: MateInk | null = null;
+  let mateShown = -1;
+  let blinkUntil = 0;
 
   let mode: 'rest' | 'turn' | 'run' = 'rest';
   let alpha = restAt(0);
@@ -170,8 +184,31 @@ export function createProjector(
   let gaugeSpeed = 0;
 
   function measure() {
-    pitch = (track.clientWidth * PITCH) / (TRACK_RIGHT - TRACK_LEFT);
+    const unit = track.clientWidth / (TRACK_RIGHT - TRACK_LEFT);
+    pitch = unit * PITCH;
+    // her cells: the most whole device pixels that keep her and her ring on the bench under the strip
+    const bench = (H - STRIP_Y - BAND / 2) * unit;
+    const fit = Math.floor((bench * devicePixelRatio) / (SPRITE_H + MATE_RISE));
+    mate.style.setProperty('--cell', `${fit / devicePixelRatio}px`);
+    mate.style.display = fit < 1 ? 'none' : '';
     write();
+  }
+
+  /** her at the drive: the remote low while the driver winds and swings back, out while the strip
+   * moves, up for a straight run; her eyes on the drive, a blink as the frame locks; her moon steps
+   * round with the motor */
+  function paintHer(now: number) {
+    if (!ink) return;
+    const height = mode === 'run' ? 3 : mode === 'turn' ? (left ? 2 : 1) : 0;
+    const eyes = now < blinkUntil ? 1 : mode === 'rest' ? 0 : 3;
+    const step = ((Math.floor((motor * 2) / Math.PI) % ORBIT_STEPS) + ORBIT_STEPS) % ORBIT_STEPS;
+    const pose = poseOf(HAND, height);
+    const shown = (pose * 4 + eyes) * ORBIT_STEPS + step;
+    if (shown === mateShown) return;
+    mateShown = shown;
+    paintMate(mateImage, pose, height >= 2, eyes, step, RING, ink, LIGHT);
+    mate.getContext('2d')!.putImageData(mateImage, 0, 0);
+    mate.style.visibility = 'visible';
   }
 
   function write() {
@@ -224,6 +261,7 @@ export function createProjector(
     left = false;
     // the next pull darkens it after its develop and its hold, the driver's wind-up included
     due = performance.now() + DEVELOP + HOLD - WIND;
+    blinkUntil = performance.now() + TICK;
     events.arrive(index);
   }
 
@@ -291,6 +329,7 @@ export function createProjector(
       gauge += gaugeSpeed * h;
     }
     write();
+    paintHer(now);
 
     const still =
       mode === 'rest' &&
@@ -363,7 +402,16 @@ export function createProjector(
     boot() {
       booted = true;
       due = performance.now() + HOLD - WIND - BEAT * 2;
+      ink = mateInk(getComputedStyle(mate));
+      paintHer(performance.now());
       rest();
+    },
+    /** her colours follow the theme */
+    restyle() {
+      if (!ink) return;
+      ink = mateInk(getComputedStyle(mate));
+      mateShown = -1;
+      paintHer(performance.now());
     },
     destroy() {
       clearTimeout(timer);

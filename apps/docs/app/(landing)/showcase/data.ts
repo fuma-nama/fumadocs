@@ -1,24 +1,18 @@
-import { type ShowcaseObject, showcases, vercel } from '@/lib/showcases';
+import type { ShowcaseObject } from '@/lib/showcases';
 
 export const suggest = 'https://github.com/fuma-nama/fumadocs/discussions/30';
-
-/** projects with docs on Fumadocs: the showcase and Vercel's SDKs */
-export const online = showcases.length + vercel.length;
-
-const range = 'from UI libraries and auth frameworks to databases and AI platforms';
 
 /** the showcase's copy, shared with `/showcase.md`: a title reads `lead`, in pixel type, then `title` */
 export const copy = {
   header: {
     lead: 'Showcase.',
-    title: 'Built with Fumadocs.',
-    description: `${online} projects ship their docs with it, ${range}.`,
-    /** for search results, link previews and the Markdown, where "it" has nothing to refer to */
-    summary: `Docs built with Fumadocs: ${online} projects, ${range}.`,
+    title: 'Loved by teams and developers.',
+    /** for search results, link previews and the Markdown */
+    summary:
+      'Docs built with Fumadocs, from UI libraries and auth frameworks to databases and AI platforms.',
   },
-  sites: { lead: 'Every site.', title: 'Some you already know.' },
   vercel: 'Fumadocs powers the docs of its open source SDKs.',
-  blogs: { lead: 'Beyond docs.', title: 'Blogs, too.' },
+  blogs: { lead: 'Beyond docs.', title: 'Fumadocs can power your blogs.' },
 };
 
 /** the featured projects by URL, and what they are in their own words */

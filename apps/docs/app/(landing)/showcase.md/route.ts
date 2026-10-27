@@ -14,7 +14,7 @@ export function GET() {
     '',
     `- Suggest yours: ${suggest}`,
     '',
-    `## ${copy.sites.lead} ${copy.sites.title}`,
+    '## Sites',
     '',
   ];
   // the wall's order: the featured with their own words, Vercel's SDKs, then every other site

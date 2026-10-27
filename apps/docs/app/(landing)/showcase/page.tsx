@@ -4,7 +4,7 @@ import { createMetadata } from '@/lib/metadata';
 import { blogs, showcases } from '@/lib/showcases';
 import { Figure, FigureHeader, Lead } from '../ui/figure';
 import { address } from '../ui/site-tile';
-import { arrange, copy, online, suggest } from './data';
+import { arrange, copy, suggest } from './data';
 import { DeckBack, DeckFront } from './deck';
 import { Projector } from './projector';
 import { Blogs, Wall } from './wall';
@@ -40,9 +40,6 @@ export default function Page() {
             <Lead>{copy.header.lead}</Lead>{' '}
             <span className="block max-w-[16ch]">{copy.header.title}</span>
           </h1>
-          <p className="max-w-[46ch] text-lg leading-relaxed text-pretty text-lp-ink-2">
-            {copy.header.description}
-          </p>
           <a
             href={suggest}
             target="_blank"
@@ -55,16 +52,10 @@ export default function Page() {
         </div>
         <Projector sites={reel} back={<DeckBack count={reel.length} />} front={<DeckFront />} />
       </Figure>
-      <Figure id="sites" aria-label="Sites" status={`${online} sites online`} className={figure}>
-        <FigureHeader lead={copy.sites.lead} title={copy.sites.title} />
+      <Figure id="sites" aria-label="Sites" status="sites online" className={figure}>
         <Wall sites={showcases} />
       </Figure>
-      <Figure
-        id="blogs"
-        aria-label="Blogs"
-        status={`${blogs.length} blogs online`}
-        className={figure}
-      >
+      <Figure id="blogs" aria-label="Blogs" status="blogs online" className={figure}>
         <FigureHeader lead={copy.blogs.lead} title={copy.blogs.title} />
         <Blogs sites={blogs} />
       </Figure>

@@ -1,21 +1,17 @@
 import { cubicBezier, springValue } from 'motion/react';
-import { createShaderCanvas, cssRgb } from '../../lib/gl';
-import { clamp, settle, TICK } from '../../lib/motion';
-import { report } from '../../lib/status';
-import { isDark, onTheme } from '../../lib/theme';
 import {
   BLINK,
-  CROWN_CELL,
-  MATE_H,
-  MATE_PAD,
-  MATE_W,
   type MateInk,
   mateInk,
   ORBIT_STEPS,
   paintMate,
-  SIT,
   STEP,
-} from '../../ui/mascot';
+} from '@/components/mascot/paint';
+import { CROWN_CELL, MATE_H, MATE_PAD, MATE_W, SIT } from '@/components/mascot/sprite';
+import { createShaderCanvas, cssRgb } from '../../lib/gl';
+import { clamp, settle, TICK } from '../../lib/motion';
+import { report } from '../../lib/status';
+import { isDark, onTheme } from '../../lib/theme';
 import { CRATER_UNIFORMS, drawFace, moonFragment, PRISMS } from './scene';
 
 /** boot beats, in ticks from the start */

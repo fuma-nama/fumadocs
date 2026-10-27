@@ -10,6 +10,7 @@ import {
 } from 'react';
 import Image from 'next/image';
 import { useReducedMotion } from 'motion/react';
+import { MATE_H, MATE_PAD, MATE_W, SPRITE_W } from '@/components/mascot/sprite';
 import { cn } from '@/lib/cn';
 import type { ShowcaseObject } from '@/lib/showcases';
 import { whenSeen } from '../lib/later';
@@ -28,6 +29,7 @@ import {
   FRAME_H,
   FRAME_W,
   H,
+  HER_X,
   hidePrint,
   LEADER,
   PITCH,
@@ -164,7 +166,10 @@ export function Projector({ sites, back, front }: ProjectorProps) {
       };
       const resize = new ResizeObserver(reprint);
       resize.observe(element.querySelector('[data-reel]')!);
-      const stopTheme = onTheme(reprint);
+      const stopTheme = onTheme(() => {
+        reprint();
+        instance.restyle();
+      });
 
       // the first time the reel is in view, the frames on the strip print in, then it plays
       let boot = 0;
@@ -357,6 +362,18 @@ export function Projector({ sites, back, front }: ProjectorProps) {
           </div>
         </div>
         <div className="pointer-events-none">{front}</div>
+        {/* her, on the base at the drive, working her remote; her feet on the base's top edge */}
+        <canvas
+          data-mate
+          aria-hidden
+          width={MATE_W}
+          height={MATE_H}
+          className="pointer-events-none invisible absolute bottom-[calc(var(--cell)*-1)] [--cell:1px] [image-rendering:pixelated]"
+          style={{
+            left: `calc(${(HER_X / W) * 100}% - ${MATE_PAD[0] + SPRITE_W / 2} * var(--cell))`,
+            width: `calc(${MATE_W} * var(--cell))`,
+          }}
+        />
       </div>
       {/* the base: the name of the site in the gate, the run switch and its lamp */}
       <div className="@container flex h-12 items-center gap-3 border border-lp-line-strong bg-lp-paper px-4">

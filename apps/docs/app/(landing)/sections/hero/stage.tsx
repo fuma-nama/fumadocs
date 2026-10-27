@@ -1,8 +1,8 @@
 'use client';
 import { useCallback } from 'react';
 import { useReducedMotion } from 'motion/react';
+import { MATE_H, MATE_PAD, MATE_W, SEAT_CELL } from '@/components/mascot/sprite';
 import { Chip } from '../../ui/chip';
-import { MATE_H, MATE_PAD, MATE_W, SEAT_CELL } from '../../ui/mascot';
 import { createHero, SATELLITES } from './engine';
 
 /** her canvas's cells below her seat, which rests on the moon's rim */
