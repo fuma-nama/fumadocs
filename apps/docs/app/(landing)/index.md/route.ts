@@ -47,8 +47,6 @@ async function landingMarkdown(): Promise<string> {
     '',
     `> ${copy.hero.lead} ${copy.hero.title}`,
     '',
-    copy.hero.description,
-    '',
     `- Get started: ${url('/docs')}`,
     `- Create a project: \`${command}\``,
     `- Runs on: ${runsOn.join(', ')}`,
@@ -59,13 +57,10 @@ async function landingMarkdown(): Promise<string> {
   for (const layout of LAYOUTS) layouts.push(layout.name);
   const themes: string[] = [];
   for (const id of THEMES) themes.push(`${THEME_NAMES[id]} (\`${id}\`)`);
-  const claims: string[] = [];
-  for (const line of copy.style.title) {
-    let claim = '';
-    for (const run of line) claim += typeof run === 'string' ? run : run.term;
-    claims.push(claim);
-  }
-  out.push('', `## ${claims.join(' ')}`, '', '- Restyle any layout or theme with CSS variables.');
+  let statement = '';
+  for (const run of copy.style.title) statement += typeof run === 'string' ? run : run.term;
+  for (const claim of copy.style.claims) statement += ` ${claim}`;
+  out.push('', `## ${statement}`, '', '- Restyle any layout or theme with CSS variables.');
   for (const id of TABS) {
     const tab = copy.style.tabs[id];
     out.push(`- [${tab.label}](${url(tab.href)}): ${tab.line}`);

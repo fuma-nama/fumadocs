@@ -1,3 +1,7 @@
+/** the page's description in search results and link previews */
+export const summary =
+  'Fumadocs is a React documentation framework for developers, beautifully designed by Fuma Nama.';
+
 /**
  * The copy of every figure, shared by the page and its Markdown version (`/index.md`). A title
  * reads `lead` then `title`, the lead set in the orange pixel type, with a line under it only for
@@ -6,9 +10,7 @@
 export const copy = {
   hero: {
     lead: 'Meet Fumadocs.',
-    title: 'Build better docs.',
-    description:
-      'A React documentation framework for developers, beautifully designed by Fuma Nama.',
+    title: 'Build beautiful docs in seconds.',
   },
   parts: {
     lead: 'Fits your stack.',
@@ -25,14 +27,21 @@ export const copy = {
     description: 'Change your code, and the next build updates the page.',
   },
   style: {
-    /**
-     * A long title with no lead, going on from the hero's line: what Fumadocs brings, a line each,
-     * its key terms in the orange pixel type.
-     */
+    /** a long title with no lead: what Fumadocs is, its key terms in the orange pixel type */
     title: [
-      ['Bringing ', { term: 'powerful features' }, ' for your docs workflows,'],
-      ['with ', { term: 'high customizability' }, ' to fit your preferences,'],
-      ['works seamlessly with any React framework, Astro, CMS, ', { term: 'anything' }, '.'],
+      'Fumadocs is a ',
+      { term: 'React' },
+      ' documentation framework for ',
+      { term: 'developers' },
+      ', beautifully designed by ',
+      { term: 'Fuma Nama' },
+      '.',
+    ],
+    /** the rest of the title, a line each */
+    claims: [
+      'Bringing powerful features for your docs workflows,',
+      'with high customizability to fit your preferences,',
+      'works seamlessly with any React framework, Astro, CMS, anything.',
     ],
     /** the hands-on tabs, each with its line and its docs */
     tabs: {

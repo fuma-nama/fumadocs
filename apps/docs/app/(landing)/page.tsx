@@ -9,10 +9,10 @@ import { Integrations } from './sections/integrations';
 import { Cli } from './sections/cli';
 import { Proof } from './sections/proof';
 import { Start } from './sections/start';
-import { copy } from './content';
+import { summary } from './content';
 
 export const metadata: Metadata = createMetadata({
-  description: `${copy.hero.lead} ${copy.hero.description}`,
+  description: summary,
   alternates: {
     types: { 'text/markdown': '/index.md' },
   },

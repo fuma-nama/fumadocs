@@ -26,15 +26,12 @@ export function Hero() {
       className={`isolate flex min-h-[calc(100svh-var(--lp-menu-h))] flex-col px-(--lp-gutter) pb-(--h) @container ${geometry}`}
     >
       <div className="relative z-10 flex flex-col pt-8 lg:my-auto lg:py-6">
-        {/* three lines, sized by width and by the height left for the sky, so the horizon stays on screen */}
+        {/* three lines, sized by width and by the height left for the sky, so the horizon stays on
+            screen; a phone's narrow column breaks it where it fits */}
         <h1 className="text-[clamp(3rem,7.2vw,6.5rem)] leading-[0.95] font-medium tracking-[-0.045em] lg:max-xl:text-[clamp(3rem,min(6.4vw,calc((100svh-530px)/2.85)),6.5rem)] xl:text-[clamp(3rem,min(7.2vw,calc((100svh-470px)/2.85)),6.5rem)]">
-          <Lead className="text-[0.6em]">{copy.hero.lead}</Lead> Build <Glitch>better</Glitch>
-          <br />
-          docs.
+          <Lead className="text-[0.6em]">{copy.hero.lead}</Lead> Build <Glitch>beautiful</Glitch>
+          <br className="max-sm:hidden" /> docs in seconds.
         </h1>
-        <p className="mt-7 max-w-[46ch] text-lg leading-snug text-pretty text-lp-ink-2 lg:text-xl lg:max-xl:max-w-[40ch]">
-          {copy.hero.description}
-        </p>
         <div className="mt-8 flex flex-wrap items-center gap-3">
           <Link
             href="/docs"
