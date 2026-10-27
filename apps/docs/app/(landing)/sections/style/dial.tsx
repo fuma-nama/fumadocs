@@ -245,7 +245,7 @@ export function Dial({ table, value, onChange }: DialProps) {
           onChange(theme, false);
         }}
         className={cn(
-          'absolute -translate-y-1/2 px-1.5 font-pixel text-[13px] leading-5 whitespace-nowrap transition-none',
+          'absolute -translate-y-1/2 px-1.5 font-mono text-xs leading-5 whitespace-nowrap transition-none',
           i === index ? 'bg-lp-yellow text-[#121210]' : 'hover:bg-lp-ink hover:text-lp-paper',
         )}
         style={left ? { right: W - lx, top: ly } : { left: lx, top: ly }}

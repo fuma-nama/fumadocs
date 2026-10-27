@@ -41,10 +41,10 @@ function Mark({ className }: { className: string }) {
   );
 }
 
-/** a run of a title's text, or a key term of it, set in the orange pixel type */
+/** a run of a title's text, or a key term of it in orange */
 export type Run = string | { term: string };
 
-/** a title's runs, its key terms in the orange pixel type */
+/** a title's runs, its key terms in orange */
 export function Terms({ runs }: { runs: readonly Run[] }) {
   const out: ReactNode[] = [];
   for (const run of runs) {
@@ -52,10 +52,7 @@ export function Terms({ runs }: { runs: readonly Run[] }) {
       typeof run === 'string' ? (
         run
       ) : (
-        <span
-          key={run.term}
-          className="font-pixel font-normal tracking-normal whitespace-nowrap text-lp-orange"
-        >
+        <span key={run.term} className="whitespace-nowrap text-lp-orange">
           {run.term}
         </span>
       ),
@@ -65,7 +62,7 @@ export function Terms({ runs }: { runs: readonly Run[] }) {
 }
 
 interface FigureHeaderProps extends Omit<ComponentProps<'div'>, 'title'> {
-  /** the opening of the title, set in the orange pixel type on its own line */
+  /** the opening of the title, in orange on its own line */
   lead?: ReactNode;
   /** a line break in its text breaks the title there */
   title: ReactNode;
@@ -87,16 +84,7 @@ export function FigureHeader({ lead, title, description, className, ...props }: 
   );
 }
 
-/** the opening of a title in the orange pixel type of the sheet, sized from its heading */
+/** the opening of a title, in orange on its own line */
 export function Lead({ className, children }: { className?: string; children: ReactNode }) {
-  return (
-    <span
-      className={cn(
-        'mb-[0.33em] block font-pixel text-[0.8em] leading-[1.1] font-normal tracking-normal text-lp-orange',
-        className,
-      )}
-    >
-      {children}
-    </span>
-  );
+  return <span className={cn('block text-lp-orange', className)}>{children}</span>;
 }

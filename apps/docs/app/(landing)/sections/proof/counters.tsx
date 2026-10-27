@@ -70,10 +70,7 @@ export function Counters({ items }: { items: Counter[] }) {
         <dd
           className={cn(
             // a long number keeps to its cell on a narrow phone: a digit is under half an em
-            'mt-5 font-pixel text-[length:min(28px,calc(200cqw/var(--len)))] leading-none text-lp-orange tabular-nums md:mt-8 md:text-5xl lg:text-[56px] xl:text-[64px] min-[87.5rem]:text-7xl',
-            shown
-              ? "transition-[font-variation-settings] duration-250 ease-[steps(4,end)] [font-variation-settings:'ELSH'_0]"
-              : "[font-variation-settings:'ELSH'_20]",
+            'mt-5 text-[length:min(28px,calc(200cqw/var(--len)))] leading-none font-medium tracking-[-0.03em] text-lp-orange tabular-nums md:mt-8 md:text-5xl lg:text-[56px] xl:text-[64px] min-[87.5rem]:text-7xl',
           )}
         >
           <Roller

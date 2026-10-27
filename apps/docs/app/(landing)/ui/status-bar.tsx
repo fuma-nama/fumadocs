@@ -8,7 +8,7 @@ import { Waveform } from './waveform';
 /** the bar itself never re-renders: the status, the figure links and the clock each subscribe */
 export function StatusBar() {
   return (
-    <div className="fixed inset-x-0 bottom-0 z-50 h-(--lp-status-h) border-t border-lp-line-strong bg-lp-paper font-pixel text-[13px]">
+    <div className="fixed inset-x-0 bottom-0 z-50 h-(--lp-status-h) border-t border-lp-line-strong bg-lp-paper font-mono text-xs">
       <div className="mx-auto flex h-full max-w-(--lp-max) items-stretch">
         {/* decoration that follows the page, the figure links are the only part for assistive tech */}
         <p

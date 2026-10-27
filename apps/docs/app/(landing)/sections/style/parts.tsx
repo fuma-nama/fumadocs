@@ -59,7 +59,7 @@ interface StampProps {
 export function Stamp({ children, tilt, active, className }: StampProps) {
   return (
     <span
-      className={cn('relative inline-block font-pixel leading-4 whitespace-nowrap', className)}
+      className={cn('relative inline-block font-mono text-xs leading-4 whitespace-nowrap', className)}
       style={{ rotate: `${tilt}deg` }}
     >
       <span

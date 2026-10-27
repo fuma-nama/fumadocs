@@ -382,7 +382,7 @@ export function Projector({ sites, back, front }: ProjectorProps) {
       {/* the base: the name of the site in the gate, the run switch and its lamp */}
       <div className="@container flex h-12 items-center gap-3 border border-lp-line-strong bg-lp-paper px-4">
         <p
-          className="min-w-0 flex-1 font-pixel leading-none whitespace-nowrap"
+          className="min-w-0 flex-1 font-mono leading-none whitespace-nowrap"
           style={{
             fontSize: `min(24px, calc((100cqw - 96px) / ${(name.length * 0.62).toFixed(2)}))`,
           }}

@@ -64,7 +64,7 @@ function createSand(host: HTMLElement): () => void {
   let ghost = '';
 
   function family() {
-    return getComputedStyle(host).getPropertyValue('--font-geist-pixel').trim() || 'monospace';
+    return getComputedStyle(host).getPropertyValue('--font-sans').trim() || 'sans-serif';
   }
 
   function layout() {

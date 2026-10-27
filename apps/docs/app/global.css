@@ -37,7 +37,6 @@
   --color-lp-orange: var(--lp-orange);
   --color-lp-sun: var(--lp-sun);
   --color-lp-yellow: var(--lp-yellow);
-  --font-pixel: var(--font-geist-pixel);
 }
 
 @theme inline {

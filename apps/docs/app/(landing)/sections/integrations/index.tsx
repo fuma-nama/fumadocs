@@ -41,7 +41,7 @@ function Marquee() {
 
   return (
     <div className="bt-more flex items-stretch">
-      <p className="flex shrink-0 items-center gap-2 border-e border-lp-line px-(--lp-gutter) font-pixel text-[13px] motion-reduce:border-e-0">
+      <p className="flex shrink-0 items-center gap-2 border-e border-lp-line px-(--lp-gutter) font-mono text-xs motion-reduce:border-e-0">
         <span className="text-lp-orange">+{more.length}</span>
         <span className="text-lp-ink-2">more</span>
       </p>

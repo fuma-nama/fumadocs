@@ -233,16 +233,11 @@ export function createHardware() {
         <Screw angle={-40} className="top-[30%] right-[7%] translate-x-1/2" />
         <Screw angle={75} className="bottom-[12%] left-[7%]" />
         <Screw angle={-10} className="right-[7%] bottom-[12%] translate-x-1/2" />
-        <span className="absolute inset-x-0 top-[16%] bottom-0 flex items-center justify-center">
-          <Stamp tilt={-2} className="text-[max(9px,1.2cqw)]">
-            search
+        <span className="absolute inset-x-0 top-[16%] bottom-0 flex items-center justify-center @container">
+          <Stamp tilt={-2} className="text-center text-[11cqw] leading-[1.2] whitespace-pre-line">
+            {'Pick a\nlayout'}
           </Stamp>
         </span>
-        {/* a speaker grille: holes punched in a plate */}
-        <span
-          aria-hidden
-          className="absolute right-[14%] bottom-[12%] h-[24%] w-[18%] rounded-[3px] border border-lp-ink-2 bg-[radial-gradient(var(--lp-ink-2)_1px,transparent_1.4px)] bg-size-[5px_5px] bg-center"
-        />
         {jacks}
       </>
     ),

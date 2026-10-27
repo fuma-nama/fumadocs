@@ -146,7 +146,7 @@ function Counter({ scene, count, className }: { scene: number; count: number; cl
       <span
         key={i}
         data-flap
-        className="relative grid h-6 w-[15px] place-items-center overflow-hidden bg-lp-ink font-pixel text-[18px] leading-none text-lp-sun tabular-nums after:absolute after:inset-x-0 after:top-1/2 after:h-px after:bg-lp-paper md:h-7 md:w-[18px] md:text-[22px] dark:bg-lp-paper-2"
+        className="relative grid h-6 w-[15px] place-items-center overflow-hidden bg-lp-ink font-mono text-[17px] leading-none text-lp-sun tabular-nums after:absolute after:inset-x-0 after:top-1/2 after:h-px after:bg-lp-paper md:h-7 md:w-[18px] md:text-[21px] dark:bg-lp-paper-2"
       >
         {digits[i]}
       </span>,
@@ -164,7 +164,7 @@ function Counter({ scene, count, className }: { scene: number; count: number; cl
     >
       <span className="flex gap-px">{flaps}</span>
       {/* the plural keeps its width while the count is 1 */}
-      <span className="grid font-pixel text-[11px] text-lp-ink-2 *:col-start-1 *:row-start-1 md:text-xs">
+      <span className="grid font-mono text-[11px] text-lp-ink-2 *:col-start-1 *:row-start-1 md:text-xs">
         <span aria-hidden className="invisible">
           files
         </span>
@@ -338,7 +338,7 @@ export function Cli() {
               <span className="font-mono text-[13px] lg:text-[10px] xl:text-[11px]">
                 fumadocs-ui
               </span>
-              <span className="font-pixel text-sm text-lp-orange lg:text-[11px] xl:text-xs">
+              <span className="font-mono text-[13px] text-lp-orange lg:text-[10px] xl:text-[11px]">
                 {pkg.version}
               </span>
             </p>

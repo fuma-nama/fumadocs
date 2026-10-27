@@ -4,8 +4,8 @@ export const summary =
 
 /**
  * The copy of every figure, shared by the page and its Markdown version (`/index.md`). A title
- * reads `lead` then `title`, the lead set in the orange pixel type, with a line under it only for
- * what its figure can't show.
+ * reads `lead` then `title`, the lead in orange, with a line under it only for what its figure
+ * can't show.
  */
 export const copy = {
   hero: {
@@ -33,7 +33,7 @@ export const copy = {
     ],
   },
   style: {
-    /** a long title with no lead: what Fumadocs is, its key terms in the orange pixel type */
+    /** a long title with no lead: what Fumadocs is, its key terms in orange */
     title: [
       'Fumadocs is a ',
       { term: 'React' },

@@ -138,10 +138,6 @@
   animation: bt-power 125ms steps(1, end) forwards;
 }
 
-.bt-board[data-power] .bt-cell[data-on] .bt-num {
-  animation: bt-morph 500ms steps(4, end) backwards;
-}
-
 @keyframes bt-power {
   0% {
     opacity: 1;
@@ -155,19 +151,9 @@
   }
 }
 
-@keyframes bt-morph {
-  from {
-    font-variation-settings: 'ELSH' 80;
-  }
-  to {
-    font-variation-settings: 'ELSH' 0;
-  }
-}
-
 .bt-text {
-  font-family: var(--font-geist-pixel);
-  /* one font pixel per CSS px */
-  font-size: calc(40px / 3);
+  font-family: var(--font-mono);
+  font-size: 12px;
   line-height: 1;
   white-space: pre;
 }
@@ -187,8 +173,8 @@
   justify-content: center;
   background-color: var(--bt-ink);
   color: var(--bt-paper);
-  font-family: var(--font-geist-pixel), sans-serif;
-  font-size: calc(80px / 3);
+  font-family: var(--font-mono);
+  font-size: 22px;
 }
 
 /* content on the yellow highlight is always dark */
@@ -256,7 +242,7 @@
   }
 
   .bt-track,
-  .bt-board :is(.bt-a, .bt-seam-h, .bt-seam-v, .bt-cell, .bt-num),
+  .bt-board :is(.bt-a, .bt-seam-h, .bt-seam-v, .bt-cell),
   .bt-cell:not([data-active]) .bt-blink,
   .bt-board::after {
     animation: none;

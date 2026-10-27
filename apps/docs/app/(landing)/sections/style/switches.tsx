@@ -115,7 +115,7 @@ export function Switches({ value, onChange, onIntent, className }: SwitchesProps
         </span>
         <span
           className={cn(
-            'mt-1 max-w-full truncate px-1 font-pixel text-[12px] leading-4 @min-[400px]:px-1.5 @min-[400px]:text-[13px]',
+            'mt-1 max-w-full truncate px-1 font-mono text-[11px] leading-4 @min-[400px]:px-1.5 @min-[400px]:text-xs',
             on
               ? 'bg-lp-yellow text-[#121210]'
               : 'group-hover/switch:bg-lp-ink group-hover/switch:text-lp-paper',

@@ -162,7 +162,7 @@ export function SiteTile({
         <span aria-hidden className={box} />
         <span
           ref={nameRef}
-          className="relative mx-auto min-w-0 overflow-hidden bg-lp-paper px-1.5 font-pixel text-[11px] leading-none whitespace-nowrap group-hover:bg-transparent group-focus-visible:bg-transparent"
+          className="relative mx-auto min-w-0 overflow-hidden bg-lp-paper px-1.5 font-mono text-[11px] leading-none whitespace-nowrap group-hover:bg-transparent group-focus-visible:bg-transparent"
         >
           {name}
         </span>
@@ -186,7 +186,7 @@ export function SiteTile({
           aria-hidden
           className="flex aspect-[1.91/1] items-center justify-center bg-lp-paper-2 group-hover:bg-lp-ink group-hover:text-lp-paper group-focus-visible:bg-lp-ink group-focus-visible:text-lp-paper"
         >
-          <span data-glyph="" className="font-pixel text-[88px] leading-none">
+          <span data-glyph="" className="text-[88px] leading-none font-medium">
             {site.name[0]}
           </span>
         </span>

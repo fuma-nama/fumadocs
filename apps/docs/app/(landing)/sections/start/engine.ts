@@ -202,12 +202,6 @@ export function createStart(pin: HTMLElement): () => void {
       const to = { transform: 'none', clipPath: 'inset(0 0 0 0)' };
       item.animate([from, to], { duration: 700, delay, easing: settleCss, fill: 'backwards' });
       item.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 120, delay, fill: 'both' });
-      if (i === 0) {
-        item.animate(
-          [{ fontVariationSettings: "'ELSH' 100" }, { fontVariationSettings: "'ELSH' 0" }],
-          { duration: 4 * TICK, delay, easing: 'steps(4, end)', fill: 'both' },
-        );
-      }
     }
   }
 

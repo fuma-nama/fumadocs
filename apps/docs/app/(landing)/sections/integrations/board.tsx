@@ -192,14 +192,11 @@ export function Board({
       <>
         {/* as wide as the mechanism, so the hotkeys end on its right edge */}
         <span className="flex max-w-(--bt-stage) items-start justify-between gap-4">
-          <span
-            className="bt-num -ms-[3px] px-[3px] font-pixel text-[28px] leading-none text-lp-orange group-data-active:bg-lp-yellow group-data-active:text-[#121210]"
-            style={at === undefined ? undefined : { animationDelay: `${at + TICK}ms` }}
-          >
+          <span className="bt-num -ms-[3px] px-[3px] text-[28px] leading-none font-medium tracking-[-0.02em] text-lp-orange group-data-active:bg-lp-yellow group-data-active:text-[#121210]">
             {module.title}
           </span>
           {!module.href && (
-            <span className="flex gap-1 font-pixel text-xs max-md:hidden">
+            <span className="flex gap-1 font-mono text-xs max-md:hidden">
               {search.hotKey.map((key, k) => (
                 <kbd key={k} className="border border-current px-1.5 leading-5">
                   {key.display}

@@ -45,7 +45,7 @@ export function Start() {
       <footer className="border-t border-lp-line pt-10">
         <Wordmark />
         <div className="flex flex-wrap items-center justify-between gap-3 px-(--lp-gutter) pt-4 pb-8">
-          <nav aria-label="Footer" className="-mx-2.5 flex flex-wrap font-pixel text-sm">
+          <nav aria-label="Footer" className="-mx-2.5 flex flex-wrap text-sm">
             {links.map((link) => (
               <Link
                 key={link.text}

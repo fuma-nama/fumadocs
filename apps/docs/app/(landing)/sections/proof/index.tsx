@@ -47,7 +47,7 @@ export async function Proof() {
               className="-ms-1.5 inline-flex items-baseline gap-2 px-1.5 text-sm font-medium underline decoration-lp-line-strong underline-offset-4 hover:bg-lp-ink hover:text-lp-paper hover:no-underline focus-visible:bg-lp-ink focus-visible:text-lp-paper focus-visible:no-underline focus-visible:outline-none"
             >
               See all {online} sites
-              <span aria-hidden className="font-pixel">
+              <span aria-hidden>
                 -&gt;
               </span>
             </Link>
