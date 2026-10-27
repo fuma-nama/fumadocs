@@ -116,6 +116,7 @@ export function createHero(stage: HTMLElement, reduced: boolean): () => void {
   let mateUp = false;
   const mateLight: [number, number, number] = [0, 0, 0];
   let pointerX = Number.NaN;
+  let onScreen = false;
   let crownX = 0;
 
   const shader = createShaderCanvas(canvas, {
@@ -169,10 +170,12 @@ export function createHero(stage: HTMLElement, reduced: boolean): () => void {
 
   function onPointerMove(e: PointerEvent) {
     if (e.pointerType === 'touch' || reduced) return;
+    pointerX = e.clientX;
+    // the light needs the moon's box, read only while the hero shows
+    if (!onScreen) return;
     const rect = scene.getBoundingClientRect();
     sunX.set((e.clientX - rect.left) / radius - 1.6);
     sunY.set((e.clientY - rect.top) / radius - 1.1);
-    pointerX = e.clientX;
   }
   function onPointerLeave() {
     sunX.set(REST.x);
@@ -193,7 +196,8 @@ export function createHero(stage: HTMLElement, reduced: boolean): () => void {
     });
   }
   const view = new IntersectionObserver(([entry]) => {
-    if (entry.isIntersecting) {
+    onScreen = entry.isIntersecting;
+    if (onScreen) {
       window.addEventListener('scroll', onScroll, { passive: true });
       // in the next frame, with its style recalc: reading the scroll now would force one of its own
       onScroll();
