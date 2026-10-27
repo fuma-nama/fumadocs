@@ -4,23 +4,41 @@ const VERTEX = `#version 300 es
 in vec2 p;
 void main() { gl_Position = vec4(p, 0.0, 1.0); }`;
 
+interface ShaderCanvasOptions {
+  fragment: string;
+  /** draw every frame while on screen, not only after `invalidate()` */
+  loop?: boolean;
+  /** sets animated uniforms before each draw */
+  onFrame?: (time: number) => void;
+  /** after the canvas took its box's new size, before the frame that shows it */
+  onResize?: () => void;
+  /** how much of the canvas is on screen, 0 to 1, each time that crosses 0 or one of `thresholds` */
+  onVisible?: (ratio: number) => void;
+  thresholds?: number[];
+}
+
+export type ShaderCanvas = NonNullable<ReturnType<typeof createShaderCanvas>>;
+
 /**
  * A full-canvas GLSL ES 3.00 fragment shader that only renders while the canvas is on screen: after
  * `invalidate()`, or every frame with `loop`. It gets `vec2 uResolution` (device px), `float uDpr`
- * and `float uTime` (seconds since creation), writes `out vec4 color`, and `onFrame` sets animated
- * uniforms before each draw. Making one never waits for the GPU: it compiles while the page goes on,
- * and the first frame drawn reads the link, so a canvas made off screen is ready when it shows.
+ * and `float uTime` (seconds since creation), and writes `out vec4 color`. The program compiles
+ * while the page goes on: frames before it's ready draw nothing, and never wait for the GPU where
+ * the browser can tell when it's done (`KHR_parallel_shader_compile`).
  */
 export function createShaderCanvas(
   canvas: HTMLCanvasElement,
-  {
-    fragment,
-    loop = false,
-    onFrame,
-  }: { fragment: string; loop?: boolean; onFrame?: (time: number) => void },
+  { fragment, loop = false, onFrame, onResize, onVisible, thresholds = [] }: ShaderCanvasOptions,
 ) {
-  const gl = canvas.getContext('webgl2', { antialias: false, premultipliedAlpha: true });
+  const gl = canvas.getContext('webgl2', {
+    antialias: false,
+    depth: false,
+    stencil: false,
+    premultipliedAlpha: true,
+    powerPreference: 'low-power',
+  });
   if (!gl) return null;
+  const parallel = gl.getExtension('KHR_parallel_shader_compile');
   const program = gl.createProgram();
   const shaders: WebGLShader[] = [];
   for (const [type, source] of [
@@ -44,7 +62,7 @@ export function createShaderCanvas(
   gl.enableVertexAttribArray(0);
   gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
 
-  /** `null` until the first frame reads the link */
+  /** `null` until a frame finds the program compiled */
   let linked: boolean | null = null;
   const locations = new Map<string, WebGLUniformLocation | null>();
   /** uniforms set before that, written then */
@@ -89,14 +107,18 @@ export function createShaderCanvas(
     invalidate();
   }
 
-  /** reads the link, waiting for the GPU only if it hasn't finished, and puts the program to use */
+  /** reads the link and puts the program to use; the shaders' sources are freed either way */
   function link() {
     linked = gl!.getProgramParameter(program, gl!.LINK_STATUS) as boolean;
     if (!linked) {
       for (const shader of shaders) console.error(gl!.getShaderInfoLog(shader));
       console.error(gl!.getProgramInfoLog(program));
-      return;
     }
+    for (const shader of shaders) {
+      gl!.detachShader(program, shader);
+      gl!.deleteShader(shader);
+    }
+    if (!linked) return;
     gl!.useProgram(program);
     for (const [name, entry] of textures) {
       gl!.uniform1i(gl!.getUniformLocation(program, name), entry.unit);
@@ -108,43 +130,31 @@ export function createShaderCanvas(
   const start = performance.now();
   let raf = 0;
   let onScreen = false;
-  // at most 2x; a GPU that can't keep up renders at 1x instead: running frames under ~40fps for a second
-  let limit = 2;
-  let last = 0;
-  /** ms of frames under 40fps, up to 100 each, less twice the ms of frames that kept up */
-  let slow = 0;
-  // the next frame was asked for while one drew, so the gap between them, however long, is a frame
-  // time; one asked for from idle (a typed character, a resize) comes after a gap the page chose
-  let chained = false;
 
   function frame(now: number) {
     raf = 0;
-    if (linked === null) link();
-    const dt = now - last;
-    if (chained && limit > 1) {
-      // in ms, not frames: 40 frames at 10fps would be 4 seconds of stutter
-      slow = dt > 25 ? slow + Math.min(dt, 100) : Math.max(0, slow - 2 * dt);
-      if (slow > 1000) {
-        limit = 1;
-        fit();
+    if (linked === null) {
+      // still compiling: look again next frame rather than wait for it
+      if (parallel && !gl!.getProgramParameter(program, parallel.COMPLETION_STATUS_KHR)) {
+        raf = requestAnimationFrame(frame);
+        return;
       }
+      link();
     }
-    last = now;
     const time = (now - start) / 1000;
     set('uTime', time);
     onFrame?.(time);
     if (linked) gl!.drawArrays(gl!.TRIANGLES, 0, 3);
     if (loop) invalidate();
-    chained = raf !== 0;
   }
 
   function invalidate() {
-    if (raf === 0 && onScreen && !document.hidden) raf = requestAnimationFrame(frame);
+    if (raf === 0 && onScreen) raf = requestAnimationFrame(frame);
   }
 
   /** draws right away instead of in the next frame, for a change this frame shows */
   function draw() {
-    if (!onScreen || document.hidden) return;
+    if (!onScreen) return;
     cancelAnimationFrame(raf);
     frame(performance.now());
   }
@@ -152,37 +162,34 @@ export function createShaderCanvas(
   function pause() {
     cancelAnimationFrame(raf);
     raf = 0;
-    chained = false;
-  }
-
-  function fit() {
-    // under the limit by a whole factor of the screen's density, so its pixels stretch evenly:
-    // a 3x screen renders at 1.5x, each pixel 2 device pixels
-    const dpr = window.devicePixelRatio / Math.ceil(window.devicePixelRatio / limit);
-    canvas.width = Math.max(1, Math.round(canvas.clientWidth * dpr));
-    canvas.height = Math.max(1, Math.round(canvas.clientHeight * dpr));
-    // below the screen's density, upscale in whole pixels: the shaders draw pixel art
-    canvas.style.imageRendering = dpr < window.devicePixelRatio ? 'pixelated' : '';
-    gl!.viewport(0, 0, canvas.width, canvas.height);
-    set('uResolution', [canvas.width, canvas.height]);
-    set('uDpr', dpr);
   }
 
   // resizing clears the canvas, and a frame requested now would come after this one paints it blank
   const resize = new ResizeObserver(() => {
-    fit();
+    // whole device pixels per canvas pixel, so a 3x screen's pixels stretch evenly over 1.5x
+    const dpr = window.devicePixelRatio / Math.ceil(window.devicePixelRatio / 2);
+    canvas.width = Math.max(1, Math.round(canvas.clientWidth * dpr));
+    canvas.height = Math.max(1, Math.round(canvas.clientHeight * dpr));
+    canvas.style.imageRendering = dpr < window.devicePixelRatio ? 'pixelated' : '';
+    gl.viewport(0, 0, canvas.width, canvas.height);
+    set('uResolution', [canvas.width, canvas.height]);
+    set('uDpr', dpr);
+    onResize?.();
     draw();
   });
-  const visibility = new IntersectionObserver(([entry]) => {
-    onScreen = entry.isIntersecting;
-    if (onScreen) invalidate();
-    else pause();
-  });
-  const onVisibilityChange = () => (document.hidden ? pause() : invalidate());
-
+  const visibility = new IntersectionObserver(
+    (entries) => {
+      // the latest record wins when a busy page delivers several
+      const entry = entries[entries.length - 1];
+      onScreen = entry.isIntersecting;
+      if (onScreen) invalidate();
+      else pause();
+      onVisible?.(entry.intersectionRatio);
+    },
+    { threshold: [0, ...thresholds] },
+  );
   resize.observe(canvas);
   visibility.observe(canvas);
-  document.addEventListener('visibilitychange', onVisibilityChange);
 
   return {
     set,
@@ -193,11 +200,13 @@ export function createShaderCanvas(
       pause();
       resize.disconnect();
       visibility.disconnect();
-      document.removeEventListener('visibilitychange', onVisibilityChange);
-      // free the GPU resources but keep the context: a remount (StrictMode, HMR) reuses the canvas
+      if (linked === null) for (const shader of shaders) gl.deleteShader(shader);
       for (const entry of textures.values()) gl.deleteTexture(entry.tex);
       gl.deleteBuffer(buffer);
       gl.deleteProgram(program);
+      // the context stays for a remount (StrictMode, HMR) to reuse; its backing store goes now
+      canvas.width = 1;
+      canvas.height = 1;
     },
   };
 }
@@ -210,7 +219,8 @@ export function cssRgba(value: string): [r: number, g: number, b: number, a: num
     const n = (i: number) => Number.parseInt(hex.slice(i, i + 2), 16) / 255;
     return [n(0), n(2), n(4), hex.length === 8 ? n(6) : 1];
   }
-  const [r, g, b, a = 1] = text.match(/[\d.]+/g)!.map(Number);
+  // a token read while the page that defines it unmounts is empty
+  const [r = 0, g = 0, b = 0, a = 1] = (text.match(/[\d.]+/g) ?? []).map(Number);
   return [r / 255, g / 255, b / 255, a];
 }
 
