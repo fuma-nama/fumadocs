@@ -51,6 +51,7 @@ const UNIFORM_MAX = ['uMax[0]', 'uMax[1]', 'uMax[2]', 'uMax[3]'];
  * key it is watched for */
 const KEY_QUIET = 120;
 const KEY_WATCH = 1000;
+const SCROLL_KEYS = new Set(['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', ' ', 'Home', 'End']);
 /** the least of the run the camera moves before the full step, and the margin the step keeps */
 const STEP = 0.1;
 const STEP_MARGIN = 0.05;
@@ -150,6 +151,9 @@ export function createStack(
   let panelLeft = 0;
   let runFrom = 0;
   let runTo = 1;
+  let menu = 0;
+  /** the sizes and the mode the views were last made for */
+  let laidOut = '';
   /** where in the run the full step starts, and whether the page is still zoomed in */
   let fullFrom = STEP;
   let zoomed = true;
@@ -218,15 +222,23 @@ export function createStack(
           : wide.matches
             ? 'column'
             : 'phone';
+    // the page's height changing around the figure, as a code window grows after a pick, only moves
+    // the run: the camera and the header and keys carry on as they are
+    const layout = `${mode} ${width} ${height} ${W} ${D}`;
+    if (layout === laidOut) {
+      run();
+      scrolled();
+      return;
+    }
+    laidOut = layout;
     frontW = fronts[0].offsetWidth;
     frontH = fronts[0].offsetHeight;
     T = (W * frontH) / frontW;
     pull = PULL * D;
     const style = getComputedStyle(root);
-    const menu = Number.parseFloat(style.getPropertyValue('--lp-menu-h')) || 0;
+    menu = Number.parseFloat(style.getPropertyValue('--lp-menu-h')) || 0;
     const gutter = Number.parseFloat(style.getPropertyValue('--lp-gutter')) || 16;
     const origin = cell.getBoundingClientRect();
-    const scroll = window.scrollY;
     const headBox = rectIn(head, origin);
     const headFoot = headBox.y + headBox.h;
     panelLeft = rectIn(panel, origin).x;
@@ -268,9 +280,7 @@ export function createStack(
       rest,
     );
 
-    // it pins from the figure's top (never read from what is stuck) for its spacer
-    runFrom = root.getBoundingClientRect().top + scroll - menu;
-    runTo = runFrom + spacer.offsetHeight;
+    run();
     // the full step starts once the stack has left the header's and the keys' place for good; a
     // phone's have a row of their own
     let clear = 0;
@@ -297,6 +307,12 @@ export function createStack(
     progress = target;
     place(true);
     shader!.draw();
+  }
+
+  /** where the run is on the page: it pins from the figure's top (never read from what is stuck) */
+  function run() {
+    runFrom = root.getBoundingClientRect().top + window.scrollY - menu;
+    runTo = runFrom + spacer.offsetHeight;
   }
 
   function scrolled() {
@@ -540,7 +556,15 @@ export function createStack(
     window.scrollTo({ top: way > 0 ? runTo : runFrom, behavior: 'instant' });
   }
 
-  function onKey() {
+  function onKey(event: KeyboardEvent) {
+    // only the keys that scroll the page, and not while typing
+    const target = event.target;
+    if (!SCROLL_KEYS.has(event.key)) return;
+    if (
+      target instanceof HTMLElement &&
+      (target.isContentEditable || target.closest('input, textarea, select'))
+    )
+      return;
     keyAt = performance.now();
   }
 
@@ -553,8 +577,9 @@ export function createStack(
   // the camera follows the page's scroll only while the canvas is on screen; frames stop off
   // screen, so coming back it takes the pose the scroll has it in at once rather than catching up
   // through the states between
-  const visibility = new IntersectionObserver(([entry]) => {
-    seen = entry.isIntersecting;
+  const visibility = new IntersectionObserver((entries) => {
+    // a batch can hold both ways: the last is where it stands
+    seen = entries[entries.length - 1].isIntersecting;
     if (!seen) {
       window.removeEventListener('scroll', scrolled);
       return settle();
