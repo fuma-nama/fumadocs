@@ -39,32 +39,46 @@ function Mark({ className }: { className: string }) {
   );
 }
 
-/** a run of a title's text, or a key term of it, `code` when the term is code itself */
-export type Run = string | { term: string; code?: boolean };
+/**
+ * A lead with a proofreader's edit: `was` struck through before `is`, the correction an update
+ * makes. The struck words are drawing, so the line still reads as `text`.
+ */
+export function Corrected({ text, was, is }: { text: string; was: string; is: string }) {
+  const at = text.indexOf(is);
+  if (at < 0) return text;
+  return (
+    <>
+      {text.slice(0, at)}
+      <s
+        aria-hidden
+        className="relative text-lp-ink-2 no-underline after:absolute after:inset-x-[-0.06em] after:top-[56%] after:h-[max(1.5px,0.045em)] after:-rotate-3 after:bg-lp-ink"
+      >
+        {was}
+      </s>{' '}
+      {text.slice(at)}
+    </>
+  );
+}
+
+/** a run of a title's text, or a key term of it */
+export type Run = string | { term: string };
 
 /**
- * A title with key terms, set as a statement: light, its terms a step up in medium and in orange,
- * so each is the strongest word on its line; a term that is code is set as code.
+ * A title with key terms, set as a statement in one family: light, its terms a step up in medium
+ * and in orange, so each is the strongest word on its line.
  */
 export function Terms({ runs }: { runs: readonly Run[] }) {
   const out: ReactNode[] = [];
   for (const run of runs) {
-    if (typeof run === 'string') out.push(run);
-    else if (run.code)
-      out.push(
-        <code
-          key={run.term}
-          className="font-normal tracking-[-0.02em] whitespace-nowrap text-lp-orange"
-        >
-          {run.term}
-        </code>,
-      );
-    else
-      out.push(
+    out.push(
+      typeof run === 'string' ? (
+        run
+      ) : (
         <span key={run.term} className="font-medium whitespace-nowrap text-lp-orange">
           {run.term}
-        </span>,
-      );
+        </span>
+      ),
+    );
   }
   return <span className="font-light">{out}</span>;
 }

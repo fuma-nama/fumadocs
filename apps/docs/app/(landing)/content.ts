@@ -9,10 +9,8 @@ export const summary =
  */
 export const copy = {
   hero: {
-    lead: 'Meet Fumadocs.',
-    title: 'Build better docs.',
-    description:
-      'Fumadocs turns your Markdown into a beautiful React documentation site, in seconds.',
+    lead: 'Build better docs.',
+    title: 'Fumadocs turns your Markdown into a beautiful React documentation site, in seconds.',
   },
   parts: {
     lead: 'Fits your stack.',
@@ -26,7 +24,7 @@ export const copy = {
     lead: 'Always up to date.',
     title: [
       'Generate content from your ',
-      { term: 'code', code: true },
+      { term: 'code' },
       ',\nthe single ',
       { term: 'source of truth' },
       '.',
@@ -80,13 +78,7 @@ export const copy = {
   },
   cli: {
     lead: 'Need more control?',
-    title: [
-      'Use ',
-      { term: 'Fumadocs CLI' },
-      ',\ninstall & own the UI as ',
-      { term: 'code', code: true },
-      '.',
-    ],
+    title: ['Use ', { term: 'Fumadocs CLI' }, ',\ninstall & own the UI as ', { term: 'code' }, '.'],
   },
   integrations: {
     lead: 'Feature rich.',
