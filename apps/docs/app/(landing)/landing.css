@@ -80,12 +80,30 @@ body:has(.landing),
   color: var(--lp-ink);
 }
 
-/* the page's light voice over its titles' medium: leads, key terms and big numbers. Only set at
-   24px and up, where a light stroke still reads; a layer under the utilities, which adjust it */
+/* a heading's size, as a length its smaller lead can measure against */
+@property --lp-heading {
+  syntax: '<length>';
+  inherits: true;
+  initial-value: 0px;
+}
+
+.landing :is(h1, h2) {
+  --lp-heading: 1em;
+}
+
+/* the page's light voice over its titles' medium, for a lead on its own line and big numbers. Only
+   set at 24px and up, where a light stroke still reads; a layer under the utilities, which adjust it */
 @layer components {
   .lp-voice {
     font-weight: 300;
     letter-spacing: -0.04em;
+  }
+
+  /* Geist's straight stems sit 0.086em in at the titles' medium and 0.093em at the light voice: a
+     lead set smaller than its heading (the hero's) moves in by the difference, so its first stem and
+     the heading's share one line */
+  .lp-lead {
+    margin-inline-start: max(0px, 0.086 * var(--lp-heading) - 0.093em);
   }
 }
 
@@ -186,35 +204,8 @@ body:has(.landing),
   }
 }
 
-/* Style's claims: a line goes from ink-2 to ink as its lamp dithers on, both on the line's own view
-   timeline; past it, under reduced motion and without scroll timelines it is lit */
-.lp-claim {
-  view-timeline: --claim;
-  animation: lp-lit linear both;
-}
-
-.lp-claim > [aria-hidden] > span {
-  animation: lp-dither-in linear both;
-  mask-size: 4px 4px;
-}
-
-/* after the shorthands, which reset them */
-.lp-claim,
-.lp-claim > [aria-hidden] > span {
-  animation-timeline: --claim;
-  animation-range: cover calc(22% + var(--i) * 6%) cover calc(28% + var(--i) * 6%);
-}
-
-@keyframes lp-lit {
-  from {
-    color: var(--lp-ink-2);
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .lp-caret,
-  .lp-claim,
-  .lp-claim > [aria-hidden] > span {
+  .lp-caret {
     animation: none;
   }
 

@@ -39,10 +39,10 @@ function Mark({ className }: { className: string }) {
   );
 }
 
-/** a run of a title's text, or a key term of it in the orange voice (`.lp-voice`) */
+/** a run of a title's text, or a key term of it */
 export type Run = string | { term: string };
 
-/** a title's runs, its key terms in the orange voice */
+/** a title's runs, its key terms the strongest words on their line: semibold, in orange */
 export function Terms({ runs }: { runs: readonly Run[] }) {
   const out: ReactNode[] = [];
   for (const run of runs) {
@@ -50,7 +50,7 @@ export function Terms({ runs }: { runs: readonly Run[] }) {
       typeof run === 'string' ? (
         run
       ) : (
-        <span key={run.term} className="lp-voice whitespace-nowrap text-lp-orange">
+        <span key={run.term} className="font-semibold whitespace-nowrap text-lp-orange">
           {run.term}
         </span>
       ),
@@ -82,7 +82,7 @@ export function FigureHeader({ lead, title, description, className, ...props }: 
   );
 }
 
-/** the opening of a title, in the orange voice on its own line */
+/** the opening of a title, in the orange voice on its own line, its first stem on the title's */
 export function Lead({ className, children }: { className?: string; children: ReactNode }) {
-  return <span className={cn('lp-voice block text-lp-orange', className)}>{children}</span>;
+  return <span className={cn('lp-voice lp-lead block text-lp-orange', className)}>{children}</span>;
 }
