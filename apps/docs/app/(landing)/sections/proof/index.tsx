@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { cn } from '@/lib/cn';
+import { owner, repo } from '@/lib/github';
 import { showcases, vercel } from '@/lib/showcases';
 import { copy, quotes } from '../../content';
 import { Figure, FigureHeader } from '../../ui/figure';
@@ -34,11 +35,14 @@ export async function Proof() {
   }
   const online = showcases.length + vercel.length;
 
+  const repository = `${owner}/${repo}`;
   const counters: Counter[] = [];
-  if (stars !== undefined) counters.push({ label: 'GitHub stars', value: stars });
+  if (stars !== undefined)
+    counters.push({ label: 'GitHub stars', value: stars, source: repository });
   if (downloads !== undefined)
-    counters.push({ label: 'Weekly downloads', value: downloads, note: 'fumadocs-core' });
-  if (contributors !== undefined) counters.push({ label: 'Contributors', value: contributors });
+    counters.push({ label: 'Weekly downloads', value: downloads, source: 'fumadocs-core' });
+  if (contributors !== undefined)
+    counters.push({ label: 'Contributors', value: contributors, source: repository });
 
   return (
     <Figure

@@ -1,5 +1,5 @@
 'use client';
-import { type CSSProperties, useCallback, useState } from 'react';
+import { type CSSProperties, type ReactNode, useCallback, useState } from 'react';
 import { useReducedMotion } from 'motion/react';
 import { whenSeen } from '../../lib/later';
 import { TICK } from '../../lib/motion';
@@ -8,11 +8,22 @@ import { Roller } from '../../ui/text';
 export interface Counter {
   label: string;
   value: number;
-  /** mono readout under the value, quoting where it comes from */
-  note?: string;
+  /** where the reading comes from: a repository or a package */
+  source: string;
 }
 
 const format = new Intl.NumberFormat('en-US');
+
+/** `path` with a break opportunity after each slash */
+function breakable(path: string): ReactNode[] {
+  const out: ReactNode[] = [];
+  const parts = path.split('/');
+  for (let i = 0; i < parts.length; i++) {
+    if (i > 0) out.push('/', <wbr key={i} />);
+    out.push(parts[i]);
+  }
+  return out;
+}
 
 /**
  * Columns a counter spans on the wall's: halves on phones, a lone last counter filling its row;
@@ -69,11 +80,16 @@ export function Counters({ items }: { items: Counter[] }) {
         style={spans(i, items.length)}
         className="col-span-(--span) flex flex-col bg-lp-paper p-4 md:col-span-(--span-md) md:py-5 xl:col-span-(--span-xl)"
       >
-        {/* a meter's plate: its name, a hairline on to the cell's edge */}
-        <dt className="flex items-center gap-2 text-xs font-medium text-lp-ink-2 after:h-px after:flex-1 after:bg-lp-line-strong">
-          {item.label}
+        {/* a meter's plate: its name, a hairline on to where the reading comes from; a narrow cell
+            takes the source under the name, a path after its slash, the hairline staying with
+            the name, and the reading keeps to the cell's foot, so a row's readings stay level */}
+        <dt className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-lp-ink-2">
+          <span className="flex flex-1 items-center gap-2 font-medium after:h-px after:min-w-4 after:flex-1 after:bg-lp-line-strong">
+            {item.label}
+          </span>
+          <span className="font-mono">{breakable(item.source)}</span>
         </dt>
-        <dd className="mt-5 font-mono text-[28px] leading-none font-light tracking-[-0.05em] text-lp-orange md:mt-8 md:text-5xl lg:text-[56px] xl:text-[64px] min-[87.5rem]:text-7xl">
+        <dd className="mt-auto pt-5 font-mono text-[28px] leading-none font-light tracking-[-0.05em] text-lp-orange md:pt-8 md:text-5xl lg:text-[56px] xl:text-[64px] min-[87.5rem]:text-7xl">
           <Roller
             key={printed === null ? 'rest' : 'roll'}
             value={shown ? text : text.replace(/\d/g, '0')}
@@ -81,7 +97,6 @@ export function Counters({ items }: { items: Counter[] }) {
             stagger={TICK / 8}
           />
         </dd>
-        {item.note && <dd className="mt-3 font-mono text-xs text-lp-ink-2">{item.note}</dd>}
       </div>,
     );
   }
