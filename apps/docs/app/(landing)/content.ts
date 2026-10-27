@@ -8,7 +8,7 @@ export const copy = {
     lead: 'Meet Fumadocs.',
     title: 'Build better docs.',
     description:
-      'A React documentation framework for developers, built to fit the framework and content source you already use.',
+      'A React documentation framework for developers, beautifully designed by Fuma Nama.',
   },
   parts: {
     lead: 'Fits your stack.',
@@ -25,21 +25,14 @@ export const copy = {
     description: 'Change your code, and the next build updates the page.',
   },
   style: {
-    /** a long title with no lead: what Fumadocs is, its key terms in the orange pixel type */
+    /**
+     * A long title with no lead, going on from the hero's line: what Fumadocs brings, a line each,
+     * its key terms in the orange pixel type.
+     */
     title: [
-      'Fumadocs is a ',
-      { term: 'React' },
-      ' documentation framework for ',
-      { term: 'developers' },
-      ', beautifully designed by ',
-      { term: 'Fuma Nama' },
-      '.',
-    ],
-    /** the rest of the title, a line each */
-    claims: [
-      'Bringing powerful features for your docs workflows,',
-      'with high customizability to fit your preferences,',
-      'works seamlessly with any React framework, Astro, CMS, anything.',
+      ['Bringing ', { term: 'powerful features' }, ' for your docs workflows,'],
+      ['with ', { term: 'high customizability' }, ' to fit your preferences,'],
+      ['works seamlessly with any React framework, Astro, CMS, ', { term: 'anything' }, '.'],
     ],
     /** the hands-on tabs, each with its line and its docs */
     tabs: {
