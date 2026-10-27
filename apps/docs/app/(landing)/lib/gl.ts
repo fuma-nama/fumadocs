@@ -112,12 +112,15 @@ export function createShaderCanvas(
   let limit = 2;
   let last = 0;
   let slow = 0;
+  // the next frame was asked for while one drew, so the gap between them, however long, is a frame
+  // time; one asked for from idle (a typed character, a resize) comes after a gap the page chose
+  let chained = false;
 
   function frame(now: number) {
     raf = 0;
     if (linked === null) link();
     const dt = now - last;
-    if (limit > 1 && dt < 100) {
+    if (chained && limit > 1) {
       slow = dt > 25 ? slow + 1 : Math.max(0, slow - 2);
       if (slow > 40) {
         limit = 1;
@@ -130,6 +133,7 @@ export function createShaderCanvas(
     onFrame?.(time);
     if (linked) gl!.drawArrays(gl!.TRIANGLES, 0, 3);
     if (loop) invalidate();
+    chained = raf !== 0;
   }
 
   function invalidate() {
@@ -146,6 +150,7 @@ export function createShaderCanvas(
   function pause() {
     cancelAnimationFrame(raf);
     raf = 0;
+    chained = false;
   }
 
   function fit() {
