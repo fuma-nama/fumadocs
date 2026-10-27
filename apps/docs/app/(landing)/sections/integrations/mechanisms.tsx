@@ -169,25 +169,13 @@ function OpenAPIMechanism() {
           Send
         </Text>
       </Layer>
-      <Px x={24} y={13} w={3} h={3} orange={rect(0, 0, 3, 3)} className={c.out} />
+      <Px x={24} y={13} w={3} h={3} ink={rect(0, 0, 3, 3)} className={c.out} />
       <Px x={69} y={13} w={3} h={3} ink={rect(0, 0, 3, 3)} className={c.back} />
-      <Px
-        orange={rect(89, 11, 2, 2) + rect(92, 18, 2, 2) + rect(89, 25, 2, 2)}
-        className={c.ledA}
-      />
-      <Px
-        orange={rect(92, 11, 2, 2) + rect(89, 18, 2, 2) + rect(92, 25, 2, 2)}
-        className={c.ledB}
-      />
-      <Px orange={rect(92, 25, 2, 2)} />
+      <Px ink={rect(89, 11, 2, 2) + rect(92, 18, 2, 2) + rect(89, 25, 2, 2)} className={c.ledA} />
+      <Px ink={rect(92, 11, 2, 2) + rect(89, 18, 2, 2) + rect(92, 25, 2, 2)} className={c.ledB} />
+      <Px ink={rect(92, 25, 2, 2)} />
       <Clip x={0} y={22} w={12} h={7} className={c.status}>
-        <Strip
-          items={CODES}
-          h={7}
-          loop
-          itemClassName="font-mono text-(--bt-orange)"
-          className={c.operation}
-        />
+        <Strip items={CODES} h={7} loop itemClassName="font-mono" className={c.operation} />
       </Clip>
       <Px ink={rect(0, 31, 30, 1)} className={c.line0} />
       <Px ink={rect(3, 34, 42, 1)} className={c.line1} />
@@ -252,8 +240,8 @@ function AsyncAPIMechanism() {
         }
         knock={rect(84, 16, 1, 11)}
       />
-      <Px orange={rect(88, 2, 4, 2)} />
-      <Px orange={art(ARC_LEFT, 84, 1) + art(ARC_RIGHT, 93, 1)} className={c.arcs} />
+      <Px ink={rect(88, 2, 4, 2)} />
+      <Px ink={art(ARC_LEFT, 84, 1) + art(ARC_RIGHT, 93, 1)} className={c.arcs} />
       <Clip x={0} y={16} w={84} h={11}>
         <Px x={-24} y={2} w={120} h={7} orange={belt} className={c.belt} />
       </Clip>
@@ -427,10 +415,10 @@ function LLMsMechanism() {
           rect(3, 19, 20, 1) +
           rect(3, 21, 15, 1) +
           rect(3, 25, 20, 9) +
-          frame(34, 4, 62, 35)
+          frame(34, 4, 62, 35) +
+          art(PLAY, 28, 19)
         }
         knock={rect(5, 27, 10, 1) + rect(5, 29, 14, 1) + rect(5, 31, 8, 1)}
-        orange={art(PLAY, 28, 19)}
       />
       <Text x={34} y={0} h={4} className="bt-code opacity-55">
         /docs/markdown/twoslash.md
@@ -620,12 +608,12 @@ function OGMechanism() {
         w={76}
         h={3}
         ink={rect(0, 1, 70, 1) + rect(26, 0, 12, 3) + rect(70, 0, 6, 3)}
-        orange={rect(30, 1, 4, 1)}
+        knock={rect(30, 1, 4, 1)}
         className={c.head}
       />
       <Px ink={art(GEAR, 72, 2)} className={c.gear} />
       <Px ink={art(GEAR_TURNED, 72, 2)} className={c.gearTurned} />
-      <Px orange={rect(76, 2, 1, 1)} className={c.led} />
+      <Px ink={rect(76, 2, 1, 1)} className={c.led} />
     </Stage>
   );
 }
@@ -918,8 +906,7 @@ function ObsidianMechanism() {
         </Text>
       </Layer>
       <Px
-        ink={frame(56, 18, 40, 8) + rect(64, 21, 22, 2)}
-        orange={rect(56, 18, 2, 8) + art(WARNING, 59, 19)}
+        ink={frame(56, 18, 40, 8) + rect(64, 21, 22, 2) + rect(56, 18, 2, 8) + art(WARNING, 59, 19)}
         className={c.callout}
       />
       <Px

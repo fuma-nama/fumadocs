@@ -26,6 +26,16 @@
   --bt-orange: var(--bt-on-ink);
 }
 
+/* a card's name: ink, dark on the yellow highlight while it's pointed at or focused */
+.bt-name {
+  color: var(--lp-ink);
+}
+
+.bt-cell:is(:hover, :focus-visible) .bt-name {
+  background-color: var(--lp-yellow);
+  color: #121210;
+}
+
 .bt-text {
   font-size: 12px;
   font-weight: 500;
@@ -68,11 +78,6 @@
   animation-duration: calc(var(--bt-dur) / var(--bt-speed));
   animation-timing-function: steps(1, end);
   animation-iteration-count: infinite;
-}
-
-/* only an active cell plays its loop, the others hold their key pose */
-.bt-cell:not([data-active]) .bt-a {
-  animation: none;
 }
 
 /* the second unit of a flap display follows one tick later */

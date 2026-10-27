@@ -1,8 +1,7 @@
 'use client';
-import { type FocusEvent, type ReactNode, useCallback, useState } from 'react';
+import { type FocusEvent, type ReactNode, useState } from 'react';
 import Link from 'next/link';
 import { Check, Clipboard } from 'lucide-react';
-import { useReducedMotion } from 'motion/react';
 import { useSearchContext } from 'fumadocs-ui/contexts/search';
 import { useCopyButton } from 'fumadocs-ui/utils/use-copy-button';
 import { restore, setStatus } from '../../lib/status';
@@ -11,9 +10,8 @@ import { Window } from '../../ui/window';
 import type { Module } from './data';
 
 /**
- * The board of modules: a card plays its mechanism while it's on the viewport's middle line, or
- * while it's pointed at or focused. The install window shows the command of the card last pointed
- * at or focused.
+ * The board of modules, every card playing its mechanism. The install window shows the command of the
+ * card last pointed at or focused.
  */
 export function Board({
   header,
@@ -28,48 +26,12 @@ export function Board({
   /** the row under the board */
   children: ReactNode;
 }) {
-  const reduced = useReducedMotion();
-  /** the cards on the viewport's middle line */
-  const [band, setBand] = useState<ReadonlySet<number>>(() => new Set());
-  const [hovered, setHovered] = useState<number | null>(null);
   const [inspected, setInspected] = useState(0);
   const search = useSearchContext();
 
-  const boardRef = useCallback(
-    (board: HTMLDivElement | null) => {
-      if (!board || reduced) return;
-      const observer = new IntersectionObserver(
-        (entries) => {
-          setBand((prev) => {
-            const next = new Set(prev);
-            for (const entry of entries) {
-              const i = Number((entry.target as HTMLElement).dataset.i);
-              if (entry.isIntersecting) next.add(i);
-              else next.delete(i);
-            }
-            return next;
-          });
-        },
-        { rootMargin: '-50% 0px -50% 0px' },
-      );
-      for (const cell of board.children) observer.observe(cell);
-      return () => {
-        observer.disconnect();
-        setBand(new Set());
-      };
-    },
-    [reduced],
-  );
-
   function enter(i: number) {
-    setHovered(i);
     setInspected(i);
     setStatus(`inspecting ${modules[i].pkg}`);
-  }
-
-  function leave() {
-    setHovered(null);
-    restore();
   }
 
   const commands: string[] = [];
@@ -78,22 +40,20 @@ export function Board({
     const module = modules[i];
     commands.push(module.install);
     const props = {
-      'data-i': i,
-      'data-active': band.has(i) || i === hovered ? '' : undefined,
       className:
         'bt-cell group relative flex flex-col border-e border-b border-lp-line p-(--lp-gutter) text-start text-lp-ink transition-none',
       onPointerEnter: () => enter(i),
-      onPointerLeave: leave,
+      onPointerLeave: restore,
       onFocus: (event: FocusEvent<HTMLElement>) => {
         if (event.currentTarget.matches(':focus-visible')) enter(i);
       },
-      onBlur: leave,
+      onBlur: restore,
     };
     const content = (
       <>
         {/* as wide as the mechanism, so the hotkeys end on its right edge */}
         <span className="flex max-w-(--bt-stage) items-start justify-between gap-4">
-          <span className="lp-voice -ms-[3px] px-[3px] text-[28px] leading-none text-(--bt-orange) group-hover:bg-lp-yellow group-hover:text-[#121210] group-focus-visible:bg-lp-yellow group-focus-visible:text-[#121210]">
+          <span className="bt-name -ms-[3px] px-[3px] text-[28px] leading-none tracking-[-0.02em]">
             {module.title}
           </span>
           {!module.href && (
@@ -147,10 +107,7 @@ export function Board({
         <Install commands={commands} command={modules[inspected].install} />
       </div>
       {/* a pixel wider than the figure: the last column's end line falls outside, clipped */}
-      <div
-        ref={boardRef}
-        className="-me-px grid border-t border-lp-line sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
-      >
+      <div className="-me-px grid border-t border-lp-line sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {cells}
       </div>
       {children}
