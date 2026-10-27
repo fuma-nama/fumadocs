@@ -15,12 +15,7 @@ export function Integrations() {
         modules={modules}
         mechanisms={mechanisms}
         loaded={loaded}
-        header={
-          <FigureHeader
-            lead={copy.integrations.lead}
-            title={copy.integrations.title}
-          />
-        }
+        header={<FigureHeader lead={copy.integrations.lead} title={copy.integrations.title} />}
       >
         <Marquee />
       </Board>
