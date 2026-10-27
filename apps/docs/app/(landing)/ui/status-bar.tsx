@@ -87,7 +87,7 @@ function Clock() {
           <span>
             {pad(date.getHours())}:{pad(date.getMinutes())}:{pad(date.getSeconds())}
           </span>
-          <span className="text-lp-ink-2 max-lg:hidden">
+          <span className="text-lp-ink-2 max-xl:hidden">
             {date.getFullYear()}/{pad(date.getMonth() + 1)}/{pad(date.getDate())}
           </span>
         </>

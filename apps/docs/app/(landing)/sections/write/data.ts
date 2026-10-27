@@ -23,7 +23,7 @@ export const steps = [
 ];
 
 /** keeps a file's authored source, so the editor shows what was compiled */
-function remarkRaw(): MdastPluginDefinition {
+export function remarkRaw(): MdastPluginDefinition {
   return {
     name: 'remark-raw',
     before(_root, ctx) {
@@ -32,15 +32,18 @@ function remarkRaw(): MdastPluginDefinition {
   };
 }
 
+/** a file on the press: its first block is the page's frontmatter */
+export const frontmatter = z.object({
+  title: z.string().optional(),
+  description: z.string().optional(),
+});
+
 /** the blocks of `quick-start.mdx`, a file each for a plate each, compiled like the docs */
 export const quickStart = defineCollections({
   type: 'doc',
   dir: 'app/(landing)/sections/write/content',
   compiler: 'satteri',
-  schema: z.object({
-    title: z.string().optional(),
-    description: z.string().optional(),
-  }),
+  schema: frontmatter,
   postprocess: { valueToExport: ['raw'] },
   satteriOptions(): SatteriPresetOptions {
     return {
@@ -68,16 +71,21 @@ export const quickStart = defineCollections({
 });
 
 /** each block's authored source; the frontmatter is parsed apart, so it comes back from its data */
-export const blocks: string[] = [];
-for (const entry of quickStart.entries) {
-  let source = '';
-  if (entry.title !== undefined) source += `title: ${entry.title}\n`;
-  if (entry.description !== undefined) source += `description: ${entry.description}\n`;
-  if (source) source = `---\n${source}---`;
-  const raw = entry._exports.raw;
-  if (typeof raw === 'string' && raw) source += (source ? '\n\n' : '') + raw;
-  blocks.push(source);
+export function sourcesOf(entries: typeof quickStart.entries): string[] {
+  const out: string[] = [];
+  for (const entry of entries) {
+    let source = '';
+    if (entry.title !== undefined) source += `title: ${entry.title}\n`;
+    if (entry.description !== undefined) source += `description: ${entry.description}\n`;
+    if (source) source = `---\n${source}---`;
+    const raw = entry._exports.raw;
+    if (typeof raw === 'string' && raw) source += (source ? '\n\n' : '') + raw;
+    out.push(source);
+  }
+  return out;
 }
+
+export const blocks = sourcesOf(quickStart.entries);
 
 /** the sources as one file, a blank line between blocks */
 export function fileLines(sources: string[]): string[] {

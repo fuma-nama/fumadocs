@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import type { MDXComponents } from 'mdx/types';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
+import { TypeTable } from 'fumadocs-ui/components/type-table';
 import * as Twoslash from 'fumadocs-twoslash/ui';
 import { Mermaid } from '@/components/mdx/mermaid';
 import { copy } from '../../content';
@@ -15,12 +16,37 @@ const components: MDXComponents = {
   ...defaultMdxComponents,
   ...Twoslash,
   Mermaid,
+  TypeTable,
   // the page's headings sit under the figure's own h2
   h2: (props) => <H2 {...props} aria-level={4} />,
 };
 
-export function Write() {
-  const [frontmatter, ...rest] = quickStart.entries;
+interface PressProps {
+  id: string;
+  label: string;
+  lead: string;
+  title: string;
+  description: string;
+  /** the MDX file, its blocks compiled and their sources */
+  file: string;
+  entries: typeof quickStart.entries;
+  sources: string[];
+  steps: { tab: string; status: string }[];
+}
+
+/** a figure that types an MDX file block by block, and presses each into its page */
+export function Press({
+  id,
+  label,
+  lead,
+  title,
+  description,
+  file,
+  entries,
+  sources,
+  steps,
+}: PressProps) {
+  const [frontmatter, ...rest] = entries;
   const slots: ReactNode[] = [
     <div key={frontmatter.info.path}>
       <h3 className="text-[1.75em] font-semibold">{frontmatter.title}</h3>
@@ -33,20 +59,35 @@ export function Write() {
   }
 
   return (
-    <Figure id="write" aria-label="Write" status="compiled quick-start.mdx">
+    <Figure id={id} aria-label={label} status={`compiled ${file}`}>
       <FigureHeader
-        lead={copy.write.lead}
-        title={copy.write.title}
-        description={copy.write.description}
+        lead={lead}
+        title={title}
+        description={description}
         className="p-(--lp-gutter) pb-8 md:pt-10"
       />
       <Stage
+        file={file}
         steps={steps}
-        sources={blocks}
+        sources={sources}
         slots={slots}
         bed={<RailBed />}
-        column={<RailColumn />}
+        column={<RailColumn id={id} />}
       />
     </Figure>
+  );
+}
+
+export function Write() {
+  return (
+    <Press
+      id="write"
+      label="Write"
+      {...copy.write}
+      file="quick-start.mdx"
+      entries={quickStart.entries}
+      sources={blocks}
+      steps={steps}
+    />
   );
 }

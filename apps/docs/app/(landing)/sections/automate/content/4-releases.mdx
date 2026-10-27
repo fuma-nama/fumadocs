@@ -1,0 +1,11 @@
+import { Card, Cards } from 'fumadocs-ui/components/card';
+import { getReleases } from './releases';
+
+export async function Releases() {
+  const releases = await getReleases();
+  return releases.map((release) => <Card key={release.title} {...release} />);
+}
+
+<Cards>
+  <Releases />
+</Cards>

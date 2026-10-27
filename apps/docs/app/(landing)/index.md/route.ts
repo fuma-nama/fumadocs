@@ -5,6 +5,7 @@ import { modules, more } from '../sections/integrations/data';
 import { CORE, LAYERS, OPTIONS } from '../sections/parts/data';
 import { getContributorCount, getDownloads, getStars } from '../sections/proof/data';
 import { LAYOUTS, TABS, THEME_NAMES, THEMES } from '../sections/style/data';
+import { blocks as buttonBlocks } from '../sections/automate/data';
 import { blocks, fileLines } from '../sections/write/data';
 
 // the counters in it, like the page
@@ -70,6 +71,15 @@ async function landingMarkdown(): Promise<string> {
   const source = fileLines(blocks);
   const fence = fenceFor(source);
   out.push(...section(copy.write), `${fence}mdx title="quick-start.mdx"`, ...source, fence);
+
+  const button = fileLines(buttonBlocks);
+  const buttonFence = fenceFor(button);
+  out.push(
+    ...section(copy.automate),
+    `${buttonFence}mdx title="button.mdx"`,
+    ...button,
+    buttonFence,
+  );
 
   out.push(...section(copy.parts));
   for (const layer of LAYERS) {

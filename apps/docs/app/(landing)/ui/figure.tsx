@@ -13,6 +13,8 @@ interface FigureProps extends ComponentProps<'section'> {
 export function Figure({ status, className, children, ...props }: FigureProps) {
   return (
     <section
+      // a hot reload can shift figures' props along the page: another id is another figure
+      key={props.id}
       {...props}
       ref={registerFigure}
       data-figure=""

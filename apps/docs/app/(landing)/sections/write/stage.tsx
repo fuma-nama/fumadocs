@@ -10,7 +10,7 @@ const TONES = ['text-lp-ink', 'text-lp-ink-2', 'text-lp-orange'];
 
 /** syntax in ink-2, numbers in orange, the rest in ink */
 const SYNTAX =
-  /(---|^#{1,6}(?= )|```\w*|<\/?|\/?>|[{}[\]()=:;,"']|\/\/.*$|\b(?:import|from|const|export)\b)|(\b\d+\b)/g;
+  /(---|^#{1,6}(?= )|```\w*|<\/?|\/?>|[{}[\]()=:;,"']|\/\/.*$|\/\*.*?\*\/|\b(?:import|from|const|export|async|function|await|return|interface)\b)|(\b\d+\b)/g;
 
 /** a plate a block: a row of 4 from xl, 2 rows round the rail band from md, tabs facing the rail */
 const PLATES = [
@@ -63,6 +63,8 @@ function mount(stage: HTMLDivElement | null) {
 }
 
 interface StageProps {
+  /** the MDX file on the bed */
+  file: string;
   steps: { tab: string; status: string }[];
   sources: string[];
   /** each block's compiled output */
@@ -73,13 +75,13 @@ interface StageProps {
 }
 
 /** the finished page, each block's source hidden under its output till the engine writes it */
-export function Stage({ steps, sources, slots, bed, column }: StageProps) {
+export function Stage({ file, steps, sources, slots, bed, column }: StageProps) {
   return (
     <div className="px-(--lp-gutter) pb-(--lp-gutter)">
-      <div ref={mount} className="relative flex">
+      <div ref={mount} data-file={file} className="relative flex">
         <Window
           data-doc
-          title="quick-start.mdx"
+          title={file}
           actions={
             <button
               type="button"

@@ -21,6 +21,12 @@ export const copy = {
     description:
       'With MDX, writers stay in plain Markdown while developers add React components and type-checked code. Fumadocs compiles both into one page.',
   },
+  automate: {
+    lead: 'Always up to date.',
+    title: 'Never hardcoded.',
+    description:
+      'Auto Type Table reads your TypeScript, and server components in MDX query your data at build time. Change either, and the page follows.',
+  },
   style: {
     lead: 'Beautiful by default.',
     title: 'Yours by design.',

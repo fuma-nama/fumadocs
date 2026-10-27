@@ -124,8 +124,9 @@ export function RailBed() {
   );
 }
 
-/** the rail down the middle of a phone's column, bracketed to the window's frame on its left */
-export function RailColumn() {
+/** the rail down the middle of a phone's column, bracketed to the window's frame on its left; `id`
+ * names its figure, for the page's one bracket pattern by that name */
+export function RailColumn({ id }: { id: string }) {
   return (
     <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
       <svg
@@ -133,13 +134,13 @@ export function RailColumn() {
         shapeRendering="crispEdges"
       >
         <defs>
-          <pattern id="write-bracket-y" width="26" height="96" patternUnits="userSpaceOnUse">
+          <pattern id={`${id}-bracket-y`} width="26" height="96" patternUnits="userSpaceOnUse">
             <path d="M27 42.5H6.5V36.5H0.5V59.5H6.5V53.5H27" className={PART} />
             <Bolt x={3.5} y={48} />
             <Bolt x={16} y={48} />
           </pattern>
         </defs>
-        <rect width="26" height="100%" fill="url(#write-bracket-y)" />
+        <rect width="26" height="100%" fill={`url(#${id}-bracket-y)`} />
       </svg>
       <span className="absolute inset-y-[6px] left-[26px] w-[20px] border border-lp-ink-2 bg-lp-paper" />
       <span className="absolute inset-y-[12px] left-[30px] w-[3px] bg-[repeating-linear-gradient(to_bottom,var(--lp-ink-2)_0_1px,transparent_1px_3px)]" />

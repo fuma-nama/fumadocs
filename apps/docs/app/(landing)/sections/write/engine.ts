@@ -258,7 +258,7 @@ interface Job {
   free: number;
 }
 
-/** `quick-start.mdx` typed and pressed into its page: everything on screen is a function of the
+/** a file's blocks typed and pressed into its page: everything on screen is a function of the
  * cycle's clock, run on the shader's frames; after the sequence the rig is the reader's */
 export function createPress(stage: HTMLElement): () => void {
   const canvas = stage.querySelector<HTMLCanvasElement>('canvas[data-arm]')!;
@@ -273,6 +273,7 @@ export function createPress(stage: HTMLElement): () => void {
   const mateImage = new ImageData(MATE_W, MATE_H);
   mate.width = MATE_W;
   mate.height = MATE_H;
+  const typingLine = `typing ${stage.dataset.file}`;
   const caret = stage.querySelector<HTMLElement>('[data-caret]')!;
   const button = stage.querySelector<HTMLButtonElement>('[data-replay]')!;
   const voice = stage.querySelector<HTMLElement>('[data-voice]')!;
@@ -1202,7 +1203,7 @@ export function createPress(stage: HTMLElement): () => void {
     const lineY = Math.round(point[1] * dpr) / dpr;
     let gauge = GAUGE[0];
     let sliding: Block | null = null;
-    let status = !begun ? '' : typing ? 'typing quick-start.mdx' : compiled;
+    let status = !begun ? '' : typing ? typingLine : compiled;
     for (const job of jobs) {
       if (t >= job.touch && t < job.hit) {
         sliding = job.ask.block;
