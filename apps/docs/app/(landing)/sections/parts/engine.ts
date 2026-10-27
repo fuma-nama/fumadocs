@@ -550,11 +550,16 @@ export function createStack(
   }
 
   const resize = new ResizeObserver(measure);
+  // the camera follows the page's scroll only while the canvas is on screen; frames stop off
+  // screen, so coming back it takes the pose the scroll has it in at once rather than catching up
+  // through the states between
   const visibility = new IntersectionObserver(([entry]) => {
     seen = entry.isIntersecting;
-    if (!seen) return settle();
-    // frames stop off screen: coming back, the camera takes the pose the scroll has it in at once
-    // rather than catching up through the states between
+    if (!seen) {
+      window.removeEventListener('scroll', scrolled);
+      return settle();
+    }
+    window.addEventListener('scroll', scrolled, { passive: true });
     scrolled();
     progress = target;
   });
@@ -563,7 +568,6 @@ export function createStack(
   resize.observe(root);
   resize.observe(document.documentElement);
   visibility.observe(cell);
-  window.addEventListener('scroll', scrolled, { passive: true });
   full.addEventListener('change', measure);
   wide.addEventListener('change', measure);
   reduce.addEventListener('change', measure);
