@@ -154,10 +154,11 @@
   }
 }
 
-/* on a sheet the canvas fills the stage, and the header waits for the full step with the keys */
+/* on a sheet the canvas fills the stage, and the header waits for the full step with the keys,
+ * 64px under the menu as other sections' headers sit under their top edge */
 @media (min-width: 1024px) and (prefers-reduced-motion: no-preference) and (scripting: enabled) {
   .parts-pin:not([data-flat]) .parts-stage {
-    padding: 24px var(--lp-gutter);
+    padding: 64px var(--lp-gutter) 24px;
   }
 
   .parts-pin:not([data-flat]) .parts-cell {
@@ -232,6 +233,11 @@
   .parts-pin:not([data-flat]) .parts-panel {
     grid-area: 2 / 1;
     padding: 0 var(--lp-gutter);
+  }
+
+  /* the header 64px under the canvas, as other sections' headers sit under their top edge */
+  .parts-pin:not([data-flat]) .parts-head {
+    padding-top: 48px;
   }
 
   .parts-pin:not([data-flat]) .parts-panel [data-window] {
