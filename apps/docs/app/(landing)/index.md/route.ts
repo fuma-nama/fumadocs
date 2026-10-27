@@ -47,6 +47,8 @@ async function landingMarkdown(): Promise<string> {
     '',
     `> ${copy.hero.lead} ${copy.hero.title}`,
     '',
+    copy.hero.description,
+    '',
     `- Get started: ${url('/docs')}`,
     `- Create a project: \`${command}\``,
     `- Runs on: ${runsOn.join(', ')}`,

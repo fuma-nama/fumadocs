@@ -10,7 +10,9 @@ export const summary =
 export const copy = {
   hero: {
     lead: 'Meet Fumadocs.',
-    title: 'Build beautiful docs in seconds.',
+    title: 'Build better docs.',
+    description:
+      'Fumadocs turns your Markdown into a beautiful React docs site, set up in seconds with one command.',
   },
   parts: {
     lead: 'Fits your stack.',
@@ -18,13 +20,12 @@ export const copy = {
   },
   write: {
     lead: 'Write in Markdown.',
-    title: 'Reach for React.',
-    description: 'Fumadocs compiles both into one page.',
+    title: 'Express more in fewer words.',
   },
   automate: {
     lead: 'Always up to date.',
-    title: 'Generated from your code.',
-    description: 'Change your code, and the next build updates the page.',
+    title: 'Content never go stale.',
+    description: 'Generate new content from your code, the single source-of-truth.',
   },
   style: {
     /** a long title with no lead: what Fumadocs is, its key terms in the orange pixel type */
@@ -79,7 +80,7 @@ export const copy = {
   },
   integrations: {
     lead: 'Feature rich.',
-    title: 'Integrations that just work.',
+    title: 'Build with integrations.',
   },
   proof: {
     lead: 'Built in the open.',
@@ -88,7 +89,6 @@ export const copy = {
   start: {
     lead: 'Your turn.',
     title: 'Start in 1 command.',
-    description: 'Pick a framework and a content source. The CLI sets up the rest.',
   },
 };
 

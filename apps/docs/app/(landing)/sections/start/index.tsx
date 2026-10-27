@@ -28,7 +28,6 @@ export function Start() {
           className="lg:[&_h2]:text-[length:min(3.75rem,calc(100cqw/9.05))]"
           lead={copy.start.lead}
           title={copy.start.title}
-          description={copy.start.description}
         />
         <Command command={command} data-rise className="w-full" />
         {/* 24.75rem: three of the widest button ("Why Fumadocs") and the gaps */}

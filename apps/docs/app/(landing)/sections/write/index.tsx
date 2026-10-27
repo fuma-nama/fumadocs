@@ -26,7 +26,7 @@ interface PressProps {
   label: string;
   lead: string;
   title: string;
-  description: string;
+  description?: string;
   /** the MDX file, its blocks compiled and their sources */
   file: string;
   entries: typeof quickStart.entries;
