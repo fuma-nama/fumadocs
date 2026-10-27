@@ -5,7 +5,7 @@ export const suggest = 'https://github.com/fuma-nama/fumadocs/discussions/30';
 /** the showcase's copy, shared with `/showcase.md`: a title reads `lead`, in pixel type, then `title` */
 export const copy = {
   header: {
-    lead: 'Showcase.',
+    lead: 'Built with Fumadocs.',
     title: 'Loved by teams and developers.',
     /** for search results, link previews and the Markdown */
     summary:

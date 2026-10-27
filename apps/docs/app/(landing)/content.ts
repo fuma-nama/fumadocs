@@ -83,9 +83,11 @@ export const copy = {
     title: [
       'Use ',
       { term: 'Fumadocs CLI' },
-      ' to install the UI into your codebase, and own the ',
-      { term: 'source code' },
-      ' with full control.',
+      ',\ninstall & own the UI as ',
+      {
+        term: 'code',
+      },
+      '.',
     ],
   },
   integrations: {
