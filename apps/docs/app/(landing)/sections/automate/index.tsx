@@ -1,5 +1,5 @@
 import { copy } from '../../content';
-import { Corrected } from '../../ui/figure';
+import { Status } from '../../ui/figure';
 import { Press } from '../write';
 import { blocks, button, steps } from './data';
 
@@ -9,7 +9,7 @@ export function Automate() {
       id="automate"
       label="Automate"
       {...copy.automate}
-      lead={<Corrected text={copy.automate.lead} was="out of" is="up to" />}
+      lead={<Status>{copy.automate.lead}</Status>}
       file="button.mdx"
       entries={button.entries}
       sources={blocks}

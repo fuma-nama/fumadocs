@@ -40,23 +40,20 @@ function Mark({ className }: { className: string }) {
 }
 
 /**
- * A lead with a proofreader's edit: `was` struck through before `is`, the correction an update
- * makes. The struck words are drawing, so the line still reads as `text`.
+ * A lead set as a sync status: a capsule with a lit lamp, its text half the title's size (16px at
+ * least) and inside the lead's own line, so the title below starts where it does after a plain lead.
  */
-export function Corrected({ text, was, is }: { text: string; was: string; is: string }) {
-  const at = text.indexOf(is);
-  if (at < 0) return text;
+export function Status({ children }: { children: ReactNode }) {
   return (
-    <>
-      {text.slice(0, at)}
-      <s
-        aria-hidden
-        className="relative text-lp-ink-2 no-underline after:absolute after:inset-x-[-0.06em] after:top-[56%] after:h-[max(1.5px,0.045em)] after:-rotate-3 after:bg-lp-ink"
-      >
-        {was}
-      </s>{' '}
-      {text.slice(at)}
-    </>
+    <span className="flex h-[1lh] items-center">
+      <span className="inline-flex h-[1.9em] items-center gap-[0.5em] rounded-full border border-lp-line-strong bg-lp-paper-2 ps-[0.75em] pe-[1em] text-[length:max(1rem,0.5em)] leading-none font-medium tracking-[-0.01em]">
+        <span
+          aria-hidden
+          className="size-[0.55em] shrink-0 rounded-full border border-lp-ink bg-lp-sun"
+        />
+        {children}
+      </span>
+    </span>
   );
 }
 
