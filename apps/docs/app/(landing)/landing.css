@@ -80,16 +80,6 @@ body:has(.landing),
   color: var(--lp-ink);
 }
 
-/* film grain with sparse coloured dust, in the paper itself */
-.landing {
-  background-image: url('./assets/grain-light.png');
-  background-size: 160px 160px;
-}
-
-.dark .landing {
-  background-image: url('./assets/grain-dark.png');
-}
-
 /* the page's light voice over its titles' medium: leads, key terms and big numbers. Only set at
    24px and up, where a light stroke still reads; a layer under the utilities, which adjust it */
 @layer components {
