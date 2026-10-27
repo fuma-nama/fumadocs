@@ -349,6 +349,7 @@ export function createPress(stage: HTMLElement): () => void {
   let lineHeight = 20;
   let readAt = 0;
   let inside: Rect = { x: 0, y: 0, w: 0, h: 0 };
+  let laidOut = '';
 
   // the plan: the asked presses in order from a pose at a time, then the park. A pose is the
   // carriage, the boom's angle, her pencil's from the boom, and its tip up off the page
@@ -466,6 +467,7 @@ export function createPress(stage: HTMLElement): () => void {
     snap();
     const s = stage.getBoundingClientRect();
     if (s.width === 0) return;
+    laidOut = `${s.width}x${s.height}`;
     stageAt[0] = s.left + scrollX;
     stageAt[1] = s.top + scrollY;
     const page = rectIn(doc, s);
@@ -1783,7 +1785,11 @@ export function createPress(stage: HTMLElement): () => void {
     },
     { threshold: [0, 0.1, 0.2, START, 0.6] },
   );
-  const resize = new ResizeObserver(refresh);
+  // only a new size: the first notification brings the size the stage was just laid out at
+  const resize = new ResizeObserver(([entry]) => {
+    const { width, height } = entry.contentRect;
+    if (`${width}x${height}` !== laidOut) refresh();
+  });
   // a section above that changes height moves the stage off whole pixels again
   const moved = new ResizeObserver(() => {
     snap();
@@ -1802,9 +1808,10 @@ export function createPress(stage: HTMLElement): () => void {
   const ticker = window.setInterval(() => {
     if (onScreen && !reduced) paint();
   }, TICK);
-  void document.fonts.ready.then(() => {
-    if (!signal.aborted) refresh();
-  });
+  if (document.fonts.status === 'loading')
+    void document.fonts.ready.then(() => {
+      if (!signal.aborted) refresh();
+    });
 
   return () => {
     listeners.abort();

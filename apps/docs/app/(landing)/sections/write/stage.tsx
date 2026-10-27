@@ -2,7 +2,7 @@
 import type { ReactNode } from 'react';
 import { RotateCcw } from 'lucide-react';
 import { cn } from '@/lib/cn';
-import { idle, whenSeen } from '../../lib/later';
+import { whenSeen } from '../../lib/later';
 import { Window } from '../../ui/window';
 import { createPress } from './engine';
 import { BED } from './scene';
@@ -61,22 +61,12 @@ function words(line: string): ReactNode[] {
 
 function mount(stage: HTMLDivElement | null) {
   if (!stage) return;
-  // the WebGL context, its shader and her ticker wait until the figure is within a viewport of the
-  // screen and the page is still, so neither hydration nor a scroll pays for them
+  // the WebGL context, its shader and her ticker are made two screens ahead, so a phone reader
+  // flicking through finds the arm drawn when the figure shows
   let destroy: (() => void) | undefined;
-  let stopIdle: (() => void) | undefined;
-  const stopView = whenSeen(
-    stage,
-    () => {
-      stopIdle = idle(() => {
-        destroy = createPress(stage);
-      });
-    },
-    { rootMargin: '100% 0px' },
-  );
+  const stop = whenSeen(stage, () => (destroy = createPress(stage)), { rootMargin: '200% 0px' });
   return () => {
-    stopView();
-    stopIdle?.();
+    stop();
     destroy?.();
   };
 }
