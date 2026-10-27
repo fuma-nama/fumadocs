@@ -101,7 +101,7 @@ export const CodeWindow = memo(function CodeWindow({
     <Window
       title={
         <span className="flex min-w-0 items-center gap-2">
-          <span className="truncate">{info.title}</span>
+          <span className="truncate font-sans font-medium">{info.title}</span>
           <span className="shrink-0 text-lp-ink-2">{info.file}</span>
         </span>
       }

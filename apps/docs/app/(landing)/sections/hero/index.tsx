@@ -20,7 +20,7 @@ export function Hero() {
       className="grid min-h-[calc(100svh-var(--lp-menu-h))] grid-rows-[auto_1fr_auto] gap-x-12 px-(--lp-gutter) pb-(--lp-status-h) @container lg:grid-cols-2 lg:grid-rows-[1fr_auto]"
     >
       <div className="py-8 lg:self-center">
-        <h1 className="text-[clamp(3rem,7.2vw,6.5rem)] leading-[0.95] font-medium tracking-[-0.045em]">
+        <h1 className="text-[clamp(3rem,7.2vw,6.5rem)] leading-[0.95] font-medium tracking-tight">
           <Lead className="text-[0.6em]">{copy.hero.lead}</Lead> Build <Glitch>better</Glitch>
           <br />
           docs.
