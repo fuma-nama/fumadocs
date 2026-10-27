@@ -1,6 +1,7 @@
 'use client';
 import type { ComponentProps, ReactNode } from 'react';
 import { cn } from '@/lib/cn';
+import { DITHER_MASKS } from '../lib/dither';
 import { registerFigure } from '../lib/status';
 
 interface FigureProps extends ComponentProps<'section'> {
@@ -40,18 +41,31 @@ function Mark({ className }: { className: string }) {
 }
 
 /**
- * A lead set as a sync status: a capsule with a lit lamp, its text half the title's size (16px at
- * least) and inside the lead's own line, so the title below starts where it does after a plain lead.
+ * A lead set as a status plate of the status bar's machine: a lamp lit in a square cell, the line in
+ * the next, one hairline between, over the dithered shadow of the CLI's bubble. Half the title's
+ * size (16px at least); the plate and its shadow's drop fill the lead's own line, so the title below
+ * starts where it does after a plain lead.
  */
 export function Status({ children }: { children: ReactNode }) {
   return (
-    <span className="flex h-[1lh] items-center">
-      <span className="inline-flex h-[1.9em] items-center gap-[0.5em] rounded-full border border-lp-line-strong bg-lp-paper-2 ps-[0.75em] pe-[1em] text-[length:max(1rem,0.5em)] leading-none font-medium tracking-[-0.01em]">
+    // as much air under it as the CLI bubble's tail leaves its title
+    <span className="mb-[0.25em] flex h-[1lh] [--drop:4px]">
+      <span className="relative isolate flex h-[calc(100%-var(--drop))] text-[length:max(1rem,0.5em)] leading-none font-medium tracking-[-0.01em] text-lp-ink">
         <span
           aria-hidden
-          className="size-[0.55em] shrink-0 rounded-full border border-lp-ink bg-lp-sun"
+          className="absolute inset-0 translate-x-[3px] translate-y-(--drop) bg-lp-ink-2"
+          style={{ maskImage: DITHER_MASKS[6], maskSize: '4px 4px' }}
         />
-        {children}
+        <span
+          aria-hidden
+          className="relative flex aspect-square h-full items-center justify-center border border-lp-ink bg-lp-paper"
+        >
+          <span className="size-[0.55em] rounded-full border border-lp-ink bg-lp-sun" />
+        </span>
+        {/* the cap height trimmed, so the line sits optically centred in its cell */}
+        <span className="relative flex items-center border border-s-0 border-lp-ink bg-lp-paper px-[0.75em]">
+          <span className="[text-box:trim-both_cap_alphabetic]">{children}</span>
+        </span>
       </span>
     </span>
   );
