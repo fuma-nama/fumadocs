@@ -456,7 +456,7 @@ export const PLUG = 18;
 const BEND = 12;
 const SAMPLES = 4;
 
-export function bezier(a: number, b: number, c: number, t: number) {
+function bezier(a: number, b: number, c: number, t: number) {
   const s = 1 - t;
   return s * s * a + 2 * s * t * b + t * t * c;
 }

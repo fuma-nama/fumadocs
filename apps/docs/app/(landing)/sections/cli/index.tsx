@@ -7,6 +7,7 @@ import { DocsDescription, DocsTitle } from 'fumadocs-ui/layouts/docs/page';
 import pkg from 'fumadocs-ui/package.json';
 import { cn } from '@/lib/cn';
 import { copy } from '../../content';
+import { DITHER_MASKS } from '../../lib/dither';
 import { Figure, FigureHeader, Terms } from '../../ui/figure';
 import { Window } from '../../ui/window';
 import { deliveries, type Entry, type Plan, plans } from './data';
@@ -20,18 +21,18 @@ interface PreviewProps {
 }
 
 /** each plan's page before and after its edit */
-const previews: Record<Plan['id'], [PreviewProps, PreviewProps]> = {
-  customize: [{}, { title: 'text-[2.5em]' }],
-  add: [{ banner: '' }, { banner: 'bg-fd-primary text-fd-primary-foreground' }],
+const previews: Record<Plan['id'], { before: PreviewProps; after: PreviewProps }> = {
+  customize: { before: {}, after: { title: 'text-[2.5em]' } },
+  add: { before: { banner: '' }, after: { banner: 'bg-fd-primary text-fd-primary-foreground' } },
 };
 
-/** a part of the machine: in its block on a phone, against the tree's column from 1024px */
+/** a part of the machine: in its block, against the tree's column from 1280px */
 function machine(className: string) {
-  return cn('absolute lg:col-start-2 lg:row-start-1 lg:row-end-2', className);
+  return cn('absolute xl:col-start-2 xl:row-start-1 xl:row-end-2', className);
 }
 
 const chip =
-  'inline-flex h-7 items-center justify-center border border-lp-line-strong bg-lp-paper px-2.5 font-mono text-xs transition-none hover:bg-lp-ink hover:text-lp-paper focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-lp-ink aria-pressed:bg-lp-yellow aria-pressed:text-[#121210]';
+  'inline-flex h-7 items-center justify-center border border-lp-line-strong bg-lp-paper px-2.5 text-xs font-medium transition-none hover:bg-lp-ink hover:text-lp-paper focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-lp-ink aria-pressed:bg-lp-yellow aria-pressed:text-[#121210]';
 
 // classes of `layouts/docs/slots/sidebar.tsx`
 const item =
@@ -137,8 +138,58 @@ function rows(entries: Entry[]): ReactNode[] {
   return out;
 }
 
-/** the split-flap file count on the hopper, smaller on a phone's narrow one */
-function Counter({ scene, count, className }: { scene: number; count: number; className: string }) {
+/** the bubble's tail in hundredths of an em of its line: it drops from the foot's corner, along the
+ * bubble's edge, onto the answer's first letter, its root `root` wide */
+const TAIL = { root: 80, drop: 55 };
+
+function em(hundredths: number) {
+  return `${hundredths / 100}em`;
+}
+
+/**
+ * The lead asked as a question, set as speech: half the title's size (16px at least) in the titles'
+ * medium, paper on the lead's orange, a bubble and its tail filled as one shape over the dithered
+ * shadow of the desk's hub plate.
+ */
+function Asked({ children }: { children: string }) {
+  const foot = `calc(100% - ${em(TAIL.drop)})`;
+  return (
+    <span
+      className="relative isolate block w-fit text-[length:max(1rem,0.5em)] leading-none font-medium tracking-[-0.01em]"
+      style={{ marginBottom: em(TAIL.drop + 50) }}
+    >
+      <span
+        aria-hidden
+        className="absolute inset-x-0 top-0 translate-x-[3px] translate-y-[4px] bg-lp-ink-2"
+        style={{
+          bottom: `-${em(TAIL.drop)}`,
+          clipPath: `polygon(0 0, 100% 0, 100% ${foot}, ${em(TAIL.root)} ${foot}, 0 100%)`,
+          maskImage: DITHER_MASKS[6],
+          maskSize: '4px 4px',
+        }}
+      />
+      <span className="relative block bg-lp-orange px-[0.75em] py-[0.55em] whitespace-nowrap text-lp-paper [text-box:trim-both_cap_alphabetic]">
+        {children}
+      </span>
+      {/* a pixel into the bubble, so the two fills meet without a seam */}
+      <svg
+        aria-hidden
+        viewBox={`0 0 ${TAIL.root} ${TAIL.drop}`}
+        preserveAspectRatio="none"
+        className="absolute top-full left-0 -mt-px overflow-visible fill-lp-orange"
+        style={{ width: em(TAIL.root), height: em(TAIL.drop) }}
+      >
+        <path d={`M0 0V${TAIL.drop}L${TAIL.root} 0Z`} />
+      </svg>
+    </span>
+  );
+}
+
+/**
+ * The split-flap file count on the hopper, above your project's window: at its end on a phone,
+ * centred from 768px, toward the riser from 1280px
+ */
+function Counter({ count }: { count: number }) {
   const flaps: ReactNode[] = [];
   const digits = String(count);
   for (let i = 0; i < digits.length; i++) {
@@ -146,7 +197,7 @@ function Counter({ scene, count, className }: { scene: number; count: number; cl
       <span
         key={i}
         data-flap
-        className="relative grid h-6 w-[15px] place-items-center overflow-hidden bg-lp-ink font-mono text-[17px] leading-none text-lp-sun tabular-nums after:absolute after:inset-x-0 after:top-1/2 after:h-px after:bg-lp-paper md:h-7 md:w-[18px] md:text-[21px] dark:bg-lp-paper-2"
+        className="relative grid h-6 w-[15px] place-items-center overflow-hidden bg-lp-ink font-mono text-[17px] leading-none text-lp-sun after:absolute after:inset-x-0 after:top-1/2 after:h-px after:bg-lp-paper md:h-7 md:w-[18px] md:text-[21px] dark:bg-lp-paper-2"
       >
         {digits[i]}
       </span>,
@@ -155,16 +206,11 @@ function Counter({ scene, count, className }: { scene: number; count: number; cl
   return (
     <p
       data-counter
-      data-scene={scene}
-      inert={scene > 0}
-      className={cn(
-        'z-[6] flex items-center gap-1.5 border border-lp-line-strong bg-lp-paper px-3 py-1 inert:hidden md:gap-2',
-        className,
-      )}
+      className="absolute right-4 bottom-full z-[6] mb-2.5 flex items-center gap-1.5 border border-lp-line-strong bg-lp-paper px-3 py-1 md:right-auto md:left-1/2 md:-translate-x-1/2 md:gap-2 xl:left-[21px] xl:translate-x-0"
     >
       <span className="flex gap-px">{flaps}</span>
       {/* the plural keeps its width while the count is 1 */}
-      <span className="grid font-mono text-[11px] text-lp-ink-2 *:col-start-1 *:row-start-1 md:text-xs">
+      <span className="grid text-xs font-medium text-lp-ink-2 *:col-start-1 *:row-start-1">
         <span aria-hidden className="invisible">
           files
         </span>
@@ -177,7 +223,6 @@ function Counter({ scene, count, className }: { scene: number; count: number; cl
 export function Cli() {
   const cells: ReactNode[] = [];
   const editors: ReactNode[] = [];
-  const counters: ReactNode[] = [];
   const cards: ReactNode[] = [];
   const chips: ReactNode[] = [];
   const commands: ReactNode[] = [];
@@ -187,7 +232,7 @@ export function Cli() {
       cards.push(
         <div
           key={`${plan.id}:${delivery.path}`}
-          data-card={delivery.inlet}
+          data-inlet={delivery.inlet}
           data-scene={i}
           data-reveals={delivery.reveals.join(' ')}
           inert={i > 0}
@@ -207,8 +252,9 @@ export function Cli() {
         data-fetch={plan.fetch}
         data-component={plan.component}
         inert={i > 0}
-        className="col-start-1 row-start-2 mt-4 inert:invisible md:col-start-2 md:mt-6 lg:row-start-1 lg:mt-(--cli-top)"
+        className="relative col-start-1 row-start-2 mt-4 inert:invisible md:col-start-2 md:mt-6 xl:row-start-1 xl:mt-(--cli-top)"
       >
+        <Counter count={plan.files.length} />
         {/* a phone's window is short, a row cut in half at its foot: the list reads as one that
             scrolls. Rows come in without moving the window, the folders you open scroll inside it */}
         <Window data-tree title="my-app" className="h-[266px] md:h-full">
@@ -234,29 +280,19 @@ export function Cli() {
         sources={plan.sources}
         data-scene={i}
         inert={i > 0}
-        className="col-start-1 row-start-3 mt-4 inert:invisible md:row-start-2 md:mt-6 lg:col-start-4 lg:row-start-1 lg:mt-0 lg:aspect-video lg:w-full lg:self-stretch"
+        className="col-start-1 row-start-3 mt-4 inert:invisible md:row-start-2 md:mt-6 md:aspect-video md:min-h-0 xl:col-start-4 xl:row-start-1 xl:mt-0 xl:w-full xl:self-stretch"
         page={
           // the page before your edit and after it, `data-edited` says which shows: only ever
           // hidden, never forced visible, so an inactive run's page stays unseen
           <div data-page data-edited className="group grid h-full *:col-start-1 *:row-start-1">
             <div className="group-data-edited:invisible">
-              <Preview {...previews[plan.id][0]} />
+              <Preview {...previews[plan.id].before} />
             </div>
             <div data-after className="group-[:not([data-edited])]:invisible">
-              <Preview {...previews[plan.id][1]} />
+              <Preview {...previews[plan.id].after} />
             </div>
           </div>
         }
-      />,
-    );
-    counters.push(
-      <Counter
-        key={plan.id}
-        scene={i}
-        count={plan.files.length}
-        className={machine(
-          'right-4 -bottom-1.5 md:right-[130px] md:-bottom-3.5 md:translate-x-1/2 lg:top-[calc(var(--cli-top)_-_48px)] lg:right-auto lg:bottom-auto lg:left-[21px] lg:translate-x-0',
-        )}
       />,
     );
     // a character per span: typing shows them in place, so the command never reflows
@@ -290,11 +326,16 @@ export function Cli() {
   return (
     <Figure id="cli" aria-label="CLI" status={plans[0].done}>
       <div className="flex flex-col gap-8 px-(--lp-gutter) pt-16 pb-10 lg:flex-row lg:items-end lg:justify-between lg:gap-16">
-        <FigureHeader lead={copy.cli.lead} title={<Terms runs={copy.cli.title} />} />
+        <FigureHeader
+          lead={<Asked>{copy.cli.lead}</Asked>}
+          title={<Terms runs={copy.cli.title} />}
+        />
         {/* the runs and the command share both edges: the stage's width on a phone and a tablet, the
             command's from 1024px, against the stage's right edge */}
         <div className="flex flex-col gap-3 lg:shrink-0">
-          <div className="grid grid-cols-2 gap-2 [@media(scripting:none)]:hidden">{chips}</div>
+          <div className="grid grid-cols-2 gap-2 in-data-static:hidden [@media(scripting:none)]:hidden">
+            {chips}
+          </div>
           <div className="flex max-w-full items-stretch border border-lp-line-strong bg-lp-paper">
             <div className="flex min-w-0 flex-1 gap-2 px-3 py-[11px] font-mono text-[13px] leading-5 sm:text-sm">
               <span aria-hidden className="text-lp-ink-2 select-none">
@@ -314,7 +355,7 @@ export function Cli() {
               type="button"
               data-replay
               aria-label="Run again"
-              className="flex w-11 shrink-0 items-center justify-center border-s border-lp-line-strong transition-none hover:bg-lp-ink hover:text-lp-paper focus-visible:bg-lp-ink focus-visible:text-lp-paper focus-visible:outline-none motion-reduce:hidden [@media(scripting:none)]:hidden"
+              className="flex w-11 shrink-0 items-center justify-center border-s border-lp-line-strong transition-none hover:bg-lp-ink hover:text-lp-paper focus-visible:bg-lp-ink focus-visible:text-lp-paper focus-visible:outline-none motion-reduce:hidden in-data-static:hidden [@media(scripting:none)]:hidden"
             >
               <RotateCcw aria-hidden className="size-4" />
             </button>
@@ -322,36 +363,31 @@ export function Cli() {
         </div>
       </div>
       <Stage>
-        {/* on a phone and a tablet the machine has a block of its own above your project; from
-            1024px it stands left of your project, its riser climbing to the hopper */}
-        <div className="relative col-start-1 row-start-1 h-[360px] md:col-span-2 lg:contents">
+        {/* the machine has a block of its own above your project; from 1280px it stands left of
+            your project, its riser climbing to the hopper */}
+        <div className="relative col-start-1 row-start-1 h-[360px] md:col-span-2 xl:contents">
           <div
             data-crate
             className={machine(
-              'bottom-0 left-0.5 h-[160px] w-[min(180px,calc(50%-8px))] lg:right-[calc(100%_+_40px)] lg:left-auto lg:h-[136px] lg:w-[172px] xl:h-[150px] xl:w-[200px]',
+              'bottom-0 left-0.5 h-[160px] w-[min(180px,calc(50%-8px))] xl:right-[calc(100%_+_40px)] xl:left-auto xl:h-[150px] xl:w-[200px]',
             )}
           >
             <p
               data-label
-              className="absolute bottom-4 left-4 z-[6] flex flex-col gap-1 border border-lp-line-strong bg-lp-paper px-3 py-2 leading-none lg:bottom-3 lg:left-3 lg:px-2 lg:py-1 xl:left-[18px] xl:px-3"
+              className="absolute bottom-4 left-4 z-[6] flex flex-col gap-1 border border-lp-line-strong bg-lp-paper px-3 py-2 leading-none xl:bottom-3 xl:left-[18px] xl:py-1"
             >
-              <span className="font-mono text-[13px] lg:text-[10px] xl:text-[11px]">
-                fumadocs-ui
-              </span>
-              <span className="font-mono text-[13px] text-lp-orange lg:text-[10px] xl:text-[11px]">
-                {pkg.version}
-              </span>
+              <code className="text-xs leading-none">fumadocs-ui</code>
+              <code className="text-xs leading-none text-lp-orange">{pkg.version}</code>
             </p>
           </div>
           <p
             data-plate
             className={machine(
-              'top-2 left-2 z-[6] border border-lp-line-strong bg-lp-paper px-3 py-1 font-mono text-[11px] leading-none whitespace-nowrap text-lp-ink-2 lg:top-[calc(var(--cli-top)_-_80px)] lg:right-[calc(100%_+_69px)] lg:left-auto lg:text-[10px] xl:text-[11px]',
+              'top-2 left-2 z-[6] border border-lp-line-strong bg-lp-paper px-3 py-1 font-mono text-xs leading-none whitespace-nowrap text-lp-ink-2 xl:top-[calc(var(--cli-top)_-_80px)] xl:right-[calc(100%_+_69px)] xl:left-auto',
             )}
           >
             fumadocs.dev/registry
           </p>
-          {counters}
         </div>
         {cells}
         {editors}

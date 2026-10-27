@@ -22,13 +22,15 @@ precision highp float;
 precision highp int;
 
 uniform vec2 uResolution, uShift, uHorizon;
-uniform float uDpr, uYaw, uFocal, uNight, uSpin, uOpen;
-uniform vec3 uEye, uLight, uLit, uShade, uAccent;
+uniform float uDpr, uYaw, uFocal, uNight, uOpen;
+uniform vec3 uEye, uLit, uShade, uAccent;
 // uClear: the call to action's edges and foot (stage px), and how far the valley under it is open
 uniform vec4 uMoon, uClear, uGlyph;
 uniform sampler2D uAtlas, uChars;
 out vec4 color;
 ${bayer8}
+// from the front right and above
+const vec3 LIGHT = vec3(sin(0.85) * cos(0.62), sin(0.62), cos(0.85) * cos(0.62));
 const vec3 BODY_C = vec3(0.0, 2.05, 0.0);
 const vec3 BODY_B = vec3(2.3, 1.55, 1.3);
 const float BODY_R = 0.2;
@@ -275,8 +277,8 @@ void main() {
       col = screen(p, w, abs(dot(rd, n)));
       tone = 0.0;
     } else {
-      float lambert = dot(n, uLight);
-      float v = lambert > 0.0 ? lambert * lit(p + n * 2.0 * w, uLight) : lambert;
+      float lambert = dot(n, LIGHT);
+      float v = lambert > 0.0 ? lambert * lit(p + n * 2.0 * w, LIGHT) : lambert;
       tone = clamp((v - 0.12) / 0.3, 0.0, 1.0);
       col = tone > threshold ? uLit : uShade;
     }
@@ -297,7 +299,7 @@ void main() {
         depth = ground;
         sky = false;
         vec3 p = ro + rd * ground;
-        if (k == 0 && threshold < 0.22 && lit(p + vec3(0.0, 0.002, 0.0), uLight) < 0.5) col = pen;
+        if (k == 0 && threshold < 0.22 && lit(p + vec3(0.0, 0.002, 0.0), LIGHT) < 0.5) col = pen;
         break;
       }
       vec3 p = ro + rd * t;
@@ -318,7 +320,7 @@ void main() {
         // slopes facing the light are lighter near the crest, the mass below is one flat screen
         vec3 normal = normalize(vec3(-cos(theta), 1.0, -sin(theta)) * 0.7 + vec3(sin(theta), 0.0, -cos(theta)) * slope * 2.5);
         float crest = 1.0 - step(RIDGE_H[k] * 0.22, h - p.y);
-        float density = RIDGE_D[k] + (dot(normal, uLight) > 0.3 ? 0.0 : crest * 0.08);
+        float density = RIDGE_D[k] + (dot(normal, LIGHT) > 0.3 ? 0.0 : crest * 0.08);
         if (density > stipple) col = pen;
       }
       break;
@@ -336,9 +338,8 @@ void main() {
         float bc = dot(oc, rc);
         float hc = uMoon.w * uMoon.w - (dot(oc, oc) - bc * bc);
         vec3 n = hc > 0.0 ? normalize(oc + rc * (-bc - sqrt(hc))) : normalize(oc + rd * (-b - sqrt(uMoon.w * uMoon.w - closest * closest)));
-        vec3 m = vec3(n.x * cos(uSpin) - n.z * sin(uSpin), n.y, n.x * sin(uSpin) + n.z * cos(uSpin));
-        float maria = smoothstep(0.52, 0.64, noise3(m * 2.3) * 0.65 + noise3(m * 5.3 + 3.1) * 0.35);
-        float v = dot(n, uLight) * (1.0 - 0.45 * maria);
+        float maria = smoothstep(0.52, 0.64, noise3(n * 2.3) * 0.65 + noise3(n * 5.3 + 3.1) * 0.35);
+        float v = dot(n, LIGHT) * (1.0 - 0.45 * maria);
         float t3 = bayer8(cell);
         if (clamp((v - 0.04) / 0.32, 0.0, 1.0) > t3) col = uAccent;
         else if (t3 < 0.07) col = pen;
@@ -393,27 +394,45 @@ export function insideView(width: number, height: number): View {
   return { eye: [0, SCREEN.c[1], z], yaw: 0, focal, shift: [0, 0] };
 }
 
-/** projected bounds of the terminal in stage CSS px */
-export function terminalRect(view: View, width: number, height: number): Rect {
+/** where a world point shows from `view`, CSS px from the stage centre before the view's shift */
+function project(view: View, x: number, y: number, z: number): [x: number, y: number] {
   const s = Math.sin(view.yaw);
   const c = Math.cos(view.yaw);
+  const vx = x - view.eye[0];
+  const vz = z - view.eye[2];
+  const depth = -vx * s - vz * c;
+  return [((vx * c - vz * s) / depth) * view.focal, ((view.eye[1] - y) / depth) * view.focal];
+}
+
+/** projected bounds of the terminal in stage CSS px */
+export function terminalRect(view: View, width: number, height: number): Rect {
   let minX = Infinity;
   let minY = Infinity;
   let maxX = -Infinity;
   let maxY = -Infinity;
   for (let i = 0; i < 8; i++) {
-    const vx = (i & 1 ? BOUNDS.max[0] : BOUNDS.min[0]) - view.eye[0];
-    const vy = (i & 2 ? BOUNDS.max[1] : BOUNDS.min[1]) - view.eye[1];
-    const vz = (i & 4 ? BOUNDS.max[2] : BOUNDS.min[2]) - view.eye[2];
-    const z = -vx * s - vz * c;
-    const x = width / 2 + view.shift[0] + ((vx * c - vz * s) / z) * view.focal;
-    const y = height / 2 + view.shift[1] - (vy / z) * view.focal;
+    const [x, y] = project(
+      view,
+      i & 1 ? BOUNDS.max[0] : BOUNDS.min[0],
+      i & 2 ? BOUNDS.max[1] : BOUNDS.min[1],
+      i & 4 ? BOUNDS.max[2] : BOUNDS.min[2],
+    );
     minX = Math.min(minX, x);
     minY = Math.min(minY, y);
     maxX = Math.max(maxX, x);
     maxY = Math.max(maxY, y);
   }
-  return { x: minX, y: minY, w: maxX - minX, h: maxY - minY };
+  const x = width / 2 + view.shift[0];
+  const y = height / 2 + view.shift[1];
+  return { x: x + minX, y: y + minY, w: maxX - minX, h: maxY - minY };
+}
+
+/** CSS px a column of the session spans at the middle of the glass, seen from `view` */
+export function columnWidth(view: View): number {
+  const half = GRID[0] / COLS;
+  const [right] = project(view, half, SCREEN.c[1], GLASS_Z);
+  const [left] = project(view, -half, SCREEN.c[1], GLASS_Z);
+  return right - left;
 }
 
 /** orbiting the terminal at ground level, fitted into `slot` (stage CSS px) */

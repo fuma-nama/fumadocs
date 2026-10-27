@@ -247,7 +247,7 @@ export function Editor({
     panels.push(
       panel(
         i + 1,
-        'flex flex-col px-3 py-2 font-mono text-[11px] leading-4 [font-variant-ligatures:none] md:py-3 md:pe-4 md:text-xs md:leading-5',
+        'flex flex-col overflow-y-auto px-3 py-2 font-mono text-[11px] leading-4 [font-variant-ligatures:none] [scrollbar-color:var(--lp-ink)_var(--lp-paper)] [scrollbar-width:thin] md:py-3 md:pe-4 md:text-xs md:leading-5',
         rows,
       ),
     );
@@ -262,7 +262,7 @@ export function Editor({
       title={<span data-title>localhost:3000/docs</span>}
       className={cn('group/window', className)}
     >
-      <div className="flex flex-1 flex-col md:flex-row">
+      <div className="flex min-h-0 flex-1 flex-col md:flex-row">
         <div
           role="tablist"
           aria-label="Tabs"
@@ -270,8 +270,9 @@ export function Editor({
         >
           {tabs}
         </div>
-        {/* every tab in one place: the window keeps the size of the largest */}
-        <div className="grid min-w-0 flex-1">{panels}</div>
+        {/* every tab in one place: the largest sizes a window without a ratio, a 16:9 one keeps
+            its size and its code scrolls */}
+        <div className="grid min-w-0 flex-1 grid-rows-1">{panels}</div>
       </div>
     </Window>
   );

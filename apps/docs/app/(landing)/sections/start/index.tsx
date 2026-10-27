@@ -22,10 +22,10 @@ export function Start() {
   return (
     <Figure id="start" aria-label="Start" status="awaiting input">
       <Stage>
-        <FigureHeader data-rise-group lead={copy.start.lead} title={copy.start.title} />
-        <Command command={command} data-rise className="w-full" />
-        {/* 24.75rem: three of the widest button ("Why Fumadocs") and the gaps */}
-        <div data-rise className="grid grid-cols-2 gap-2 @min-[24.75rem]:grid-cols-3">
+        <FigureHeader lead={copy.start.lead} title={copy.start.title} />
+        <Command command={command} className="w-full" />
+        {/* a row of equal buttons, the last on a row of its own when they don't fit */}
+        <div className="flex flex-wrap gap-2 *:min-w-max *:flex-1">
           <Link href="/docs" className={cn(button, 'bg-lp-yellow text-[#121210]')}>
             Get started
           </Link>
@@ -36,7 +36,7 @@ export function Start() {
             href="https://github.com/fuma-nama/fumadocs"
             target="_blank"
             rel="noreferrer noopener"
-            className={cn(button, 'col-span-2 bg-lp-paper @min-[24.75rem]:col-span-1')}
+            className={cn(button, 'bg-lp-paper')}
           >
             Star on GitHub
           </a>

@@ -1,5 +1,5 @@
 'use client';
-import { later } from '../../lib/later';
+import { whenSeen } from '../../lib/later';
 import { BEAT } from '../../lib/motion';
 import { onTheme } from '../../lib/theme';
 
@@ -63,8 +63,10 @@ function createSand(host: HTMLElement): () => void {
   let disposed = false;
   let ghost = '';
 
-  function family() {
-    return getComputedStyle(host).getPropertyValue('--font-sans').trim() || 'sans-serif';
+  /** the titles' medium, `size` px tall */
+  function face(size: number) {
+    const family = getComputedStyle(host).getPropertyValue('--font-sans').trim() || 'sans-serif';
+    return `500 ${size}px ${family}`;
   }
 
   function layout() {
@@ -84,16 +86,15 @@ function createSand(host: HTMLElement): () => void {
     canvas.style.height = `${rows * cellH}px`;
 
     // the wordmark mask: its ink spans the gutters, sitting near the bottom, sampled at cell centres
-    const font = family();
     const mask = new OffscreenCanvas(width, height);
     const m = mask.getContext('2d', { willReadFrequently: true })!;
-    m.font = `100px ${font}`;
+    m.font = face(100);
     const metrics = m.measureText(WORD);
     const fit = Math.min(
       width / (metrics.actualBoundingBoxLeft + metrics.actualBoundingBoxRight),
       (height * 0.74) / metrics.actualBoundingBoxAscent,
     );
-    m.font = `${100 * fit}px ${font}`;
+    m.font = face(100 * fit);
     m.fillText(
       WORD,
       metrics.actualBoundingBoxLeft * fit,
@@ -148,7 +149,7 @@ function createSand(host: HTMLElement): () => void {
     s.clearRect(0, 0, sprites.width, sprites.height);
     s.fillStyle = style.getPropertyValue('--lp-yellow').trim();
     s.fillRect(0, PUSHED * h, sprites.width, h);
-    s.font = `${Math.round(cellH * 0.92 * dpr)}px ${family()}`;
+    s.font = face(Math.round(cellH * 0.92 * dpr));
     s.textAlign = 'center';
     s.textBaseline = 'middle';
     const colors = [ghost, style.getPropertyValue('--lp-ink').trim(), '#121210'];
@@ -307,14 +308,13 @@ function createSand(host: HTMLElement): () => void {
     pointer = -1;
   }
 
-  function onPreference() {
+  /** lays the grid out for the host's size and the motion preference, and runs it */
+  function restart() {
     layout();
     start();
   }
 
-  const resize = new ResizeObserver(() => {
-    if (document.fonts.status === 'loaded') layout();
-  });
+  const resize = new ResizeObserver(restart);
   const visibility = new IntersectionObserver(([entry]) => {
     visible = entry.isIntersecting;
     if (visible) start();
@@ -329,14 +329,15 @@ function createSand(host: HTMLElement): () => void {
     draw(true);
   });
 
-  void document.fonts.load(`100px ${family()}`).then(() => {
-    if (disposed) return;
-    layout();
-    resize.observe(host);
-    start();
-  });
+  // the observer's first report lays the grid out, in the font or its fallback
+  void document.fonts
+    .load(face(100))
+    .catch(() => undefined)
+    .then(() => {
+      if (!disposed) resize.observe(host);
+    });
   visibility.observe(host);
-  reduce.addEventListener('change', onPreference, { signal });
+  reduce.addEventListener('change', restart, { signal });
   host.addEventListener('pointermove', onPointer, { signal });
   host.addEventListener('pointerleave', onLeave, { signal });
 
@@ -350,8 +351,13 @@ function createSand(host: HTMLElement): () => void {
   };
 }
 
-function mount(host: HTMLDivElement | null) {
-  if (host) return later(() => createSand(host));
+function mount(host: HTMLDivElement) {
+  let destroy: (() => void) | undefined;
+  const stop = whenSeen(host, () => (destroy = createSand(host)), { rootMargin: '100% 0px' });
+  return () => {
+    stop();
+    destroy?.();
+  };
 }
 
 /** the footer wordmark, filled by falling glyphs */

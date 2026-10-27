@@ -21,13 +21,13 @@ function mount(root: HTMLDivElement) {
 
 /**
  * The stage under the section's text: the windows on the wall, the machine drawn in front of them.
- * From 1024px it takes the height of the window, a monitor's 16:9.
+ * From 1280px, where its 16:9 window is tall enough for the riser, it takes the window's height.
  */
 export function Stage({ children }: { children: ReactNode }) {
   return (
     <div
       ref={mount}
-      className="relative grid grid-cols-[minmax(0,1fr)] px-(--lp-gutter) pb-16 md:grid-cols-[minmax(0,1fr)_240px] md:gap-x-6 lg:grid-cols-[230px_240px_40px_minmax(0,1fr)] lg:gap-x-0 lg:pb-8 lg:[--cli-top:88px] xl:grid-cols-[260px_244px_44px_minmax(0,1fr)] xl:[--cli-top:96px]"
+      className="relative grid grid-cols-[minmax(0,1fr)] px-(--lp-gutter) pb-16 md:grid-cols-[minmax(0,1fr)_240px] md:gap-x-6 xl:grid-cols-[260px_244px_44px_minmax(0,1fr)] xl:gap-x-0 xl:pb-8 xl:[--cli-top:96px]"
     >
       {children}
       <canvas aria-hidden className="pointer-events-none absolute inset-0 z-10 size-full" />
