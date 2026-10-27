@@ -111,6 +111,7 @@ export function createShaderCanvas(
   // at most 2x; a GPU that can't keep up renders at 1x instead: running frames under ~40fps for a second
   let limit = 2;
   let last = 0;
+  /** ms of frames under 40fps, up to 100 each, less twice the ms of frames that kept up */
   let slow = 0;
   // the next frame was asked for while one drew, so the gap between them, however long, is a frame
   // time; one asked for from idle (a typed character, a resize) comes after a gap the page chose
@@ -121,8 +122,9 @@ export function createShaderCanvas(
     if (linked === null) link();
     const dt = now - last;
     if (chained && limit > 1) {
-      slow = dt > 25 ? slow + 1 : Math.max(0, slow - 2);
-      if (slow > 40) {
+      // in ms, not frames: 40 frames at 10fps would be 4 seconds of stutter
+      slow = dt > 25 ? slow + Math.min(dt, 100) : Math.max(0, slow - 2 * dt);
+      if (slow > 1000) {
         limit = 1;
         fit();
       }

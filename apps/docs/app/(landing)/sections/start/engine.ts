@@ -294,7 +294,7 @@ export function createStart(pin: HTMLElement): () => void {
 
   function onPreference() {
     layout();
-    play();
+    if (visible) play();
   }
 
   const resize = new ResizeObserver(layout);

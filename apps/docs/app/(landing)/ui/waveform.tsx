@@ -31,8 +31,8 @@ export function Waveform({ className }: { className?: string }) {
       /** the samples as steps of pixels in the current ink; returns the loudest */
       const paint = () => {
         const dpr = Math.min(window.devicePixelRatio, 2);
-        const width = cssWidth * dpr;
-        const height = cssHeight * dpr;
+        const width = Math.round(cssWidth * dpr);
+        const height = Math.round(cssHeight * dpr);
         if (canvas.width !== width || canvas.height !== height) {
           canvas.width = width;
           canvas.height = height;
