@@ -873,6 +873,7 @@ export function createCli(root: HTMLElement): () => void {
     if (edited !== scene.edited) {
       scene.edited = edited;
       scene.page.toggleAttribute('data-edited', edited);
+      scene.editor.toggleAttribute('data-edited', edited);
       if (edited && live) {
         scene.after.animate(ditherKeyframes(2), { duration: 3 * TICK });
         scene.mark.animate(MARK, { delay: 8 * TICK, duration: 3 * TICK, fill: 'backwards' });

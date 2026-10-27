@@ -208,7 +208,7 @@ export function Editor({
         />
         <span
           aria-hidden
-          className="absolute top-1 right-1 hidden size-2 bg-lp-orange group-has-[[data-edited]]/window:block"
+          className="absolute top-1 right-1 hidden size-2 bg-lp-orange group-data-edited/window:block"
         />
       </>,
     ),
@@ -256,6 +256,9 @@ export function Editor({
     <Window
       {...props}
       data-editor
+      // mirrors the page's `data-edited` for the tab's dot: a `:has()` on it restyled the whole page
+      // on every DOM change
+      data-edited
       title={<span data-title>localhost:3000/docs</span>}
       className={cn('group/window', className)}
     >
