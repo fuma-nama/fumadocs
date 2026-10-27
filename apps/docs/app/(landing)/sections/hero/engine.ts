@@ -195,7 +195,8 @@ export function createHero(stage: HTMLElement, reduced: boolean): () => void {
   const view = new IntersectionObserver(([entry]) => {
     if (entry.isIntersecting) {
       window.addEventListener('scroll', onScroll, { passive: true });
-      place();
+      // in the next frame, with its style recalc: reading the scroll now would force one of its own
+      onScroll();
     } else window.removeEventListener('scroll', onScroll);
   });
   if (!reduced) view.observe(stage);

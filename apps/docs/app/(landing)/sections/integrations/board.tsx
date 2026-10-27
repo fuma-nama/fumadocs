@@ -179,7 +179,8 @@ export function Board({
       'data-i': i,
       'data-on': on ? '' : undefined,
       'data-active': i === shown ? '' : undefined,
-      style: at === undefined ? undefined : ({ '--bt-at': `${at}ms` } as CSSProperties),
+      // a plain property: an inherited variable here would restyle the whole cell as it powers on
+      style: at === undefined ? undefined : { animationDelay: `${at}ms` },
       className:
         'bt-cell group relative flex flex-col p-(--lp-gutter) text-start text-lp-ink transition-none',
       onPointerEnter: () => enter(i),
@@ -191,7 +192,10 @@ export function Board({
       <>
         {/* as wide as the mechanism, so the hotkeys end on its right edge */}
         <span className="flex max-w-(--bt-stage) items-start justify-between gap-4">
-          <span className="bt-num -ms-[3px] px-[3px] font-pixel text-[28px] leading-none text-lp-orange group-data-active:bg-lp-yellow group-data-active:text-[#121210]">
+          <span
+            className="bt-num -ms-[3px] px-[3px] font-pixel text-[28px] leading-none text-lp-orange group-data-active:bg-lp-yellow group-data-active:text-[#121210]"
+            style={at === undefined ? undefined : { animationDelay: `${at + TICK}ms` }}
+          >
             {module.title}
           </span>
           {!module.href && (

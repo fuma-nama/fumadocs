@@ -1,4 +1,5 @@
-/* the board takes `--cols` from its root; `--bt-at` is when a part powers on */
+/* the board takes `--cols` from its root; a seam's `--bt-at` is when it powers on, a cell's delays
+   are inline */
 
 .bt-board {
   /* twelve modules */
@@ -134,11 +135,11 @@
 }
 
 .bt-board[data-power] .bt-cell[data-on] {
-  animation: bt-power 125ms steps(1, end) var(--bt-at) forwards;
+  animation: bt-power 125ms steps(1, end) forwards;
 }
 
 .bt-board[data-power] .bt-cell[data-on] .bt-num {
-  animation: bt-morph 500ms steps(4, end) calc(var(--bt-at) + 125ms) backwards;
+  animation: bt-morph 500ms steps(4, end) backwards;
 }
 
 @keyframes bt-power {
