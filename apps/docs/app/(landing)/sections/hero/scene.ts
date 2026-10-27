@@ -190,6 +190,8 @@ uniform float uCell;
 uniform float uOutline;
 uniform float uRise;
 uniform float uTwinkle;
+// a shooting star: its head on the sky's cells, its side (0: none) and slope
+uniform vec4 uShoot;
 uniform float uDark;
 uniform vec3 uLight;
 uniform vec3 uLit;
@@ -213,8 +215,11 @@ const vec3 PRISM[3] = vec3[](${prisms});
 const float REACH = ${REACH.toFixed(3)};
 const float HORIZON = ${HORIZON.toFixed(3)};
 const float CELL = ${CELL.toFixed(1)};
-// cells a side of the blocks that hold a star at most
-const uint BLOCK = 32u;
+// the star field's blocks, cells a side, a star at most in each, inside it
+const uint BLOCK = 26u;
+// a shooting star's trail, cells, and its solid start
+const float SHOOT_TRAIL = 30.0;
+const float SHOOT_SOLID = 5.0;
 const float TAU = 6.2831853;
 
 vec3 rotate(vec4 q, vec3 v) {
@@ -228,30 +233,65 @@ uint hash(uvec2 p) {
   return h ^ (h >> 16);
 }
 
-// the sky's star in this cell's block, on the canvas's own grid so it stays while the moon rises: 7
-// blocks in 10 hold one, a glint clear of the block's edges; ink dots go out for a tick now and then,
-// one star in 5 is lit and glints, a plus for two ticks
-vec4 star(vec2 cell) {
+// a sparkle's cell \`d\` from its centre at \`level\`: 0 a dot, 1 a plus, 2 a long cross, 3 a burst,
+// its arms longer still with ink tips and four ink glints apart at its corners; 1 lit, 2 ink, 0 none
+int sparkle(vec2 d, int level) {
+  vec2 a = abs(d);
+  float far = a.x + a.y;
+  if (min(a.x, a.y) == 0.0 && far <= float(level)) return far < 3.0 ? 1 : 2;
+  return level == 3 && a.x == 2.0 && a.y == 2.0 ? 2 : 0;
+}
+
+/**
+ * The star field over the sky's cells, counted from its top left: bright stars rest as lit pluses
+ * and every few seconds sparkle up to a star, some to a burst, and back; faint ink dots thin out
+ * toward the horizon and glint for a tick now and then; every so often a shooting star crosses the
+ * upper sky, its trail dithering away behind it. Stepped on \`uTwinkle\`, ticks.
+ */
+vec4 stars(vec2 cell, vec2 grid) {
+  // a shooting star, its head a lit plus, its trail a staircase one cell thick
+  if (uShoot.z != 0.0) {
+    if (sparkle(cell - uShoot.xy, 1) != 0) return vec4(uLit, 1.0);
+    float behind = (uShoot.x - cell.x) * uShoot.z;
+    if (behind > 0.0 && behind < SHOOT_TRAIL && cell.y == floor(uShoot.y - behind * uShoot.w + 0.5)) {
+      float fade = (behind - SHOOT_SOLID) / (SHOOT_TRAIL - SHOOT_SOLID);
+      return bayer8(cell) > fade ? vec4(uInk, 1.0) : vec4(0.0);
+    }
+  }
+
+  // fewer toward the horizon, one in 7 bright; a burst's reach clear of the block's edges
   uvec2 block = uvec2(cell) / BLOCK;
   uint h = hash(block);
-  vec2 d = abs(cell - vec2(block * BLOCK + 2u + uvec2(h >> 4, h >> 9) % (BLOCK - 4u)));
-  float off = d.x + d.y;
-  if (off > 1.0 || h % 10u >= 7u) return vec4(0.0);
-  bool lit = (h >> 14) % 5u == 0u;
-  uint beat = (uint(uTwinkle) + (h >> 22)) % (12u + (h >> 17) % 20u);
-  if (off == 0.0 && (lit || beat != 0u)) return vec4(lit ? uLit : uInk, 1.0);
-  if (off == 1.0 && lit && beat < 2u) return vec4(uLit, 1.0);
-  return vec4(0.0);
+  float row = (float(block.y) + 0.5) * float(BLOCK) / grid.y;
+  if (float(h % 100u) >= mix(70.0, 15.0, row)) return vec4(0.0);
+  vec2 d = cell - vec2(block * BLOCK + 4u + uvec2(h >> 8, h >> 16) % (BLOCK - 8u));
+  if (max(abs(d.x), abs(d.y)) > 3.0) return vec4(0.0);
+  // its twinkle: every 3 to 9 seconds, a bright star sparkles up and back, some to a burst; a
+  // faint one glints a plus
+  uint g = hash(uvec2(h, 7u));
+  uint at = (uint(uTwinkle) + (g >> 8)) % (24u + (g >> 20) % 48u);
+  bool bright = g % 7u == 0u;
+  bool burst = (g & 16u) == 0u;
+  int level = !bright ? (at == 0u ? 1 : 0)
+    : at == 1u && burst ? 3 : at == 0u || (at == 2u && burst) ? 2 : 1;
+  int s = sparkle(d, level);
+  return s == 0 ? vec4(0.0) : vec4(s == 1 && bright ? uLit : uInk, 1.0);
+}
+
+/** the sky behind everything: its stars, once the boot's mosaic resolves */
+vec4 sky() {
+  float px = CELL * uDpr;
+  if (uCell > CELL) return vec4(0.0);
+  vec2 cell = floor(vec2(gl_FragCoord.x, uResolution.y - gl_FragCoord.y) / px);
+  return stars(cell, floor(uResolution / px));
 }
 
 void main() {
   float radius = uRadius;
-  // the stars come out once the mosaic resolves
-  vec4 sky = uCell > CELL ? vec4(0.0) : star(floor(gl_FragCoord.xy / (CELL * uDpr)));
   vec2 frag = gl_FragCoord.xy - vec2(uResolution.x * 0.5, (HORIZON - uRise) * radius);
-  // over the moon's crown and past the ring's reach: only stars
+  // over the moon's crown and past the ring's reach: only the sky
   if (frag.y > radius || abs(frag.x) > REACH * radius) {
-    color = sky;
+    color = sky();
     return;
   }
   float cellPx = uCell * uDpr;
@@ -261,7 +301,7 @@ void main() {
   vec2 pf = frag / radius;
   float threshold = bayer8(cell);
 
-  vec4 col = sky;
+  vec4 col = vec4(0.0);
   float depth = -1e9;
 
   // the moon: large cells (the mosaic) keep a blocky silhouette, small ones a true circle
@@ -303,7 +343,7 @@ void main() {
       bool ink = shade || (sea && level <= threshold);
       col = vec4(ink ? uInk : level > threshold ? uLit : uPaper, 1.0);
     }
-  }
+  } else col = sky();
 
   // the prisms: rays straight down the view axis, intersected with each box
   for (int i = 0; i < 3; i++) {

@@ -66,6 +66,15 @@ const GLANCE = 60;
 const CELLS = 120;
 /** the drawing's height over the horizon in moon radii: the moon, and her on its crown */
 export const SKY = HORIZON + 1 + (MATE_H - LEGS) / CELLS;
+/** a shooting star: ticks between two, about, ticks one lasts, dither cells a tick */
+const SHOOT = { every: 100, ticks: 6, speed: 14 };
+
+/** a 32-bit integer's bits mixed (lowbias32) */
+function mix32(n: number): number {
+  const h = Math.imul(n ^ (n >>> 16), 0x7feb352d);
+  const k = Math.imul(h ^ (h >>> 15), 0x846ca68b);
+  return (k ^ (k >>> 16)) >>> 0;
+}
 
 /** the moon's face, drawn once a page */
 let face: HTMLCanvasElement | null | undefined;
@@ -103,6 +112,8 @@ export function createHero(stage: HTMLElement, reduced: boolean): (() => void) |
   const start = bootStart();
   /** CSS px a moon radius */
   let radius = 1;
+  /** the sky in dither cells */
+  let cells = { x: 1, y: 1 };
   /** ms between the satellites' moves: a tick's whole fraction, a cell at their fastest */
   let stride = TICK;
   /** the next move's frame */
@@ -114,6 +125,7 @@ export function createHero(stage: HTMLElement, reduced: boolean): (() => void) |
   // uniform values written every frame, reused
   const light: [number, number, number] = [0, 0, 0];
   const vec4: [number, number, number, number] = [0, 0, 0, 0];
+  const shoot: [number, number, number, number] = [0, 0, 0, 0];
   // her: her colours, inverted for her Pop, what she shows, the light on her moon in her canvas's axes
   let ink: MateInk | undefined;
   let popInk: MateInk | undefined;
@@ -143,6 +155,7 @@ export function createHero(stage: HTMLElement, reduced: boolean): (() => void) |
   const measure = (dpr: number) => {
     radius = drawing.getBoundingClientRect().width / (2 * REACH);
     shader.set('uRadius', radius * dpr);
+    cells = { x: Math.floor(canvas.clientWidth / CELL), y: Math.floor(canvas.clientHeight / CELL) };
     // her cell: an eighth of the moon's width over her 30, in whole device px, a CSS px at least
     const cell = Math.max(1, Math.round((radius * devicePixelRatio) / CELLS) / devicePixelRatio);
     drawing.style.setProperty('--cell', `${cell}px`);
@@ -212,7 +225,21 @@ export function createHero(stage: HTMLElement, reduced: boolean): (() => void) |
     shader.set('uOutline', cell < 4.5 && t >= BEAT_AT.outline * TICK ? 1 : 0);
     shader.set('uRise', rise);
     shader.set('uLight', light);
-    shader.set('uTwinkle', reduced ? 0 : Math.floor((clock * 1000) / TICK));
+    // the stars twinkle on ticks; a shooting star now and then crosses the upper sky, down and
+    // across from where it starts, a move at a time
+    const beat = reduced ? 0 : (clock * 1000) / TICK;
+    shader.set('uTwinkle', beat);
+    const event = Math.floor(beat / SHOOT.every);
+    const seed = mix32(event);
+    const run = beat - event * SHOOT.every - 1 - (seed % (SHOOT.every - SHOOT.ticks - 2));
+    shoot[2] = run >= 0 && run < SHOOT.ticks ? (seed & 1 ? 1 : -1) : 0;
+    shoot[3] = 0.35 + (0.25 * ((seed >>> 8) & 255)) / 255;
+    const from = (shoot[2] < 0 ? 0.5 : 0) + (0.5 * ((seed >>> 16) & 255)) / 255;
+    shoot[0] = Math.floor(from * cells.x + shoot[2] * SHOOT.speed * run);
+    shoot[1] = Math.floor(
+      (0.05 + (0.3 * (seed >>> 24)) / 255) * cells.y + shoot[3] * SHOOT.speed * run,
+    );
+    shader.set('uShoot', shoot);
 
     // the ring strokes on as one pen line, the back half, then the front half
     vec4[0] = ORBIT.a;
