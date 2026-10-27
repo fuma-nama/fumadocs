@@ -1,12 +1,9 @@
 'use client';
 import { useCallback } from 'react';
 import { useReducedMotion } from 'motion/react';
-import { MATE_H, MATE_PAD, MATE_W, SEAT_CELL } from '@/components/mascot/sprite';
+import { LEGS, MATE_H, MATE_W } from '@/components/mascot/sprite';
 import { Chip } from '../../ui/chip';
 import { createHero, SATELLITES } from './engine';
-
-/** her canvas's cells below her seat, which rests on the moon's rim */
-const LEGS = MATE_H - MATE_PAD[1] - SEAT_CELL[1] - 1;
 
 /** the sky over the horizon: the moon with its ring and prisms (3.2 x 2.2 moon radii round its
  * centre), her sitting on its crown (2px cells where the sky has room), the labels on its centre */

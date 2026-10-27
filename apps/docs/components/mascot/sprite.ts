@@ -186,6 +186,8 @@ export const MATE_PAD = [9, 6] as const;
 export const MATE_RISE = 3;
 export const MATE_W = SPRITE_W + 2 * MATE_PAD[0];
 export const MATE_H = SPRITE_H + MATE_PAD[1] + 1;
+/** her canvas's rows below her seat, which hang under the edge she sits on */
+export const LEGS = MATE_H - MATE_PAD[1] - SEAT_CELL[1] - 1;
 /** her eyes, rows 21 to 23 of each: shut, both looking left, both looking right */
 const EYES = [
   ['wwww', '####', 'wwww'],
@@ -195,8 +197,8 @@ const EYES = [
 
 /** her poses: 0 idle, else her remote in hand (0 her left, 1 her right) at height (0 ready, 1 low,
  * 2 out, 3 up), pose 1 + HEIGHTS * hand + height */
-export const HEIGHTS = 4;
-export const POSES = 1 + 2 * HEIGHTS;
+const HEIGHTS = 4;
+const POSES = 1 + 2 * HEIGHTS;
 export function poseOf(hand: number, height: number): number {
   return 1 + HEIGHTS * hand + height;
 }

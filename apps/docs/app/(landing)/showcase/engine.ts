@@ -1,5 +1,5 @@
 import { type MateInk, mateInk, ORBIT_STEPS, paintMate } from '@/components/mascot/paint';
-import { MATE_H, MATE_RISE, MATE_W, poseOf, SPRITE_H } from '@/components/mascot/sprite';
+import { LEGS, MATE_H, MATE_W, SIT } from '@/components/mascot/sprite';
 import { BEAT, clamp, TICK } from '../lib/motion';
 import { isDark } from '../lib/theme';
 import { level, print, printDots, show } from '../ui/site-tile';
@@ -49,11 +49,10 @@ export const ROLLERS = [
 
 export const DANCER = { pivot: [TRACK_LEFT + 30, 34] as const, length: 34, rest: 24, roller: 6 };
 
-/** her feet's middle on the base, between the take-up drum and the Geneva drive, under the strip */
-export const HER_X = 215;
-/** she works her remote with her left hand (on your right), toward the drive; her moon's ring */
-const HAND = 0;
-const RING = 13;
+/** her seat on the screen's bottom edge, over the free deck between the gate and the feed drum */
+export const SEAT_X = 420;
+/** her moon's ring, as wide as on the hero's moon, and the light on her moon */
+const RING = 21;
 const LIGHT = [0.13, -0.18, 0.975] as const;
 
 /** a turn of the driver, one frame: its pin winds up for 3/8 of it and pulls for the middle quarter */
@@ -186,27 +185,26 @@ export function createProjector(
   function measure() {
     const unit = track.clientWidth / (TRACK_RIGHT - TRACK_LEFT);
     pitch = unit * PITCH;
-    // her cells: the most whole device pixels that keep her and her ring on the bench under the strip
-    const bench = (H - STRIP_Y - BAND / 2) * unit;
-    const fit = Math.floor((bench * devicePixelRatio) / (SPRITE_H + MATE_RISE));
+    // her cells: the most whole device pixels that leave the lower half of the gap above the strip
+    // clear of her legs
+    const gap = (STRIP_Y - BAND / 2) * unit;
+    const fit = Math.floor((gap * devicePixelRatio) / (2 * LEGS));
     mate.style.setProperty('--cell', `${fit / devicePixelRatio}px`);
     mate.style.display = fit < 1 ? 'none' : '';
     write();
   }
 
-  /** her at the drive: the remote low while the driver winds and swings back, out while the strip
-   * moves, up for a straight run; her eyes on the drive, a blink as the frame locks; her moon steps
-   * round with the motor */
+  /** her on the screen's edge: her eyes follow the film while it moves (it runs left, a rewind
+   * right), she blinks as a frame locks, her moon steps round with the motor */
   function paintHer(now: number) {
     if (!ink) return;
-    const height = mode === 'run' ? 3 : mode === 'turn' ? (left ? 2 : 1) : 0;
-    const eyes = now < blinkUntil ? 1 : mode === 'rest' ? 0 : 3;
+    const moving = mode === 'run' || (mode === 'turn' && left);
+    const eyes = now < blinkUntil ? 1 : moving ? (way > 0 ? 2 : 3) : 0;
     const step = ((Math.floor((motor * 2) / Math.PI) % ORBIT_STEPS) + ORBIT_STEPS) % ORBIT_STEPS;
-    const pose = poseOf(HAND, height);
-    const shown = (pose * 4 + eyes) * ORBIT_STEPS + step;
+    const shown = eyes * ORBIT_STEPS + step;
     if (shown === mateShown) return;
     mateShown = shown;
-    paintMate(mateImage, pose, height >= 2, eyes, step, RING, ink, LIGHT);
+    paintMate(mateImage, SIT, false, eyes, step, RING, ink, LIGHT);
     mate.getContext('2d')!.putImageData(mateImage, 0, 0);
     mate.style.visibility = 'visible';
   }

@@ -10,7 +10,7 @@ import {
 } from 'react';
 import Image from 'next/image';
 import { useReducedMotion } from 'motion/react';
-import { MATE_H, MATE_PAD, MATE_W, SPRITE_W } from '@/components/mascot/sprite';
+import { LEGS, MATE_H, MATE_PAD, MATE_W, SPRITE_W } from '@/components/mascot/sprite';
 import { cn } from '@/lib/cn';
 import type { ShowcaseObject } from '@/lib/showcases';
 import { whenSeen } from '../lib/later';
@@ -29,12 +29,12 @@ import {
   FRAME_H,
   FRAME_W,
   H,
-  HER_X,
   hidePrint,
   LEADER,
   PITCH,
   printFrame,
   type ProjectorEngine,
+  SEAT_X,
   STRIP_Y,
   TRACK_LEFT,
   TRACK_RIGHT,
@@ -362,15 +362,16 @@ export function Projector({ sites, back, front }: ProjectorProps) {
           </div>
         </div>
         <div className="pointer-events-none">{front}</div>
-        {/* her, on the base at the drive, working her remote; her feet on the base's top edge */}
+        {/* her, sitting on the screen's bottom edge, her legs over the gap above the strip */}
         <canvas
           data-mate
           aria-hidden
           width={MATE_W}
           height={MATE_H}
-          className="pointer-events-none invisible absolute bottom-[calc(var(--cell)*-1)] [--cell:1px] [image-rendering:pixelated]"
+          className="pointer-events-none invisible absolute [--cell:1px] [image-rendering:pixelated]"
           style={{
-            left: `calc(${(HER_X / W) * 100}% - ${MATE_PAD[0] + SPRITE_W / 2} * var(--cell))`,
+            top: `calc(${LEGS - MATE_H} * var(--cell))`,
+            left: `calc(${(SEAT_X / W) * 100}% - ${MATE_PAD[0] + SPRITE_W / 2} * var(--cell))`,
             width: `calc(${MATE_W} * var(--cell))`,
           }}
         />
