@@ -77,7 +77,7 @@
  * engine snaps the page only within the run, so nothing above or past it pulls a reader in or back;
  * nothing else on the page snaps. */
 @media (prefers-reduced-motion: no-preference) and (scripting: enabled) and (min-width: 760px),
-  (prefers-reduced-motion: no-preference) and (scripting: enabled) and (min-height: 500px) {
+  (prefers-reduced-motion: no-preference) and (scripting: enabled) and (min-height: 640px) {
   html:has(.parts-pin[data-snapping]) {
     scroll-snap-type: y proximity;
   }
@@ -219,25 +219,28 @@
   }
 }
 
-/* a phone's stage: the canvas, and below it, or beside it in landscape, one place the header holds
- * while the page is zoomed in and the keys take in the full step; the code window follows the stage */
-@media (max-width: 1023px) and (min-height: 500px) and (prefers-reduced-motion: no-preference) and (scripting: enabled),
+/* a phone's stage: the header on top, then the canvas, whose foot the keys take in the full step;
+ * the code window follows the stage */
+@media (max-width: 1023px) and (min-height: 640px) and (prefers-reduced-motion: no-preference) and (scripting: enabled),
   (min-width: 760px) and (max-width: 1023px) and (prefers-reduced-motion: no-preference) and (scripting: enabled) {
   .parts-pin:not([data-flat]) .parts-stage {
-    grid-template-rows: minmax(0, 1fr) auto;
+    grid-template-rows: auto minmax(0, 1fr) auto;
     gap: 16px;
     padding-bottom: 16px;
   }
 
-  .parts-pin:not([data-flat]) .parts-head,
-  .parts-pin:not([data-flat]) .parts-panel {
-    grid-area: 2 / 1;
-    padding: 0 var(--lp-gutter);
+  .parts-pin:not([data-flat]) .parts-head {
+    grid-area: 1 / 1;
+    padding: 24px var(--lp-gutter) 0;
   }
 
-  /* the header 64px under the canvas, as other sections' headers sit under their top edge */
-  .parts-pin:not([data-flat]) .parts-head {
-    padding-top: 48px;
+  .parts-pin:not([data-flat]) .parts-cell {
+    grid-area: 2 / 1 / 4 / 2;
+  }
+
+  .parts-pin:not([data-flat]) .parts-panel {
+    grid-area: 3 / 1;
+    padding: 0 var(--lp-gutter);
   }
 
   .parts-pin:not([data-flat]) .parts-panel [data-window] {
@@ -250,24 +253,36 @@
   }
 }
 
+/* in landscape the header and the keys stand beside the canvas */
 @media (min-width: 760px) and (max-width: 1023px) and (max-height: 499px) and (prefers-reduced-motion: no-preference) and (scripting: enabled) {
   .parts-pin:not([data-flat]) .parts-stage {
     grid-template-columns: minmax(0, 1fr) calc(33rem + var(--lp-gutter));
-    grid-template-rows: minmax(0, 1fr);
-    padding: 16px 0;
+    grid-template-rows: minmax(0, 1fr) auto auto minmax(0, 1fr);
+    gap: 8px 16px;
+    padding: 12px 0;
   }
 
-  .parts-pin:not([data-flat]) .parts-head,
-  .parts-pin:not([data-flat]) .parts-panel {
-    grid-area: 1 / 2;
-    align-self: center;
+  .parts-pin:not([data-flat]) .parts-cell {
+    grid-area: 1 / 1 / -1 / 2;
+  }
+
+  .parts-pin:not([data-flat]) .parts-head {
+    grid-area: 2 / 2;
     padding: 0 var(--lp-gutter) 0 0;
+  }
+
+  .parts-pin:not([data-flat]) .parts-panel {
+    grid-area: 3 / 2;
+    padding: 0 var(--lp-gutter) 0 0;
+  }
+
+  .parts-pin:not([data-flat]) .parts-head h2 {
+    font-size: 1.75rem;
   }
 }
 
-/* a short stage's header takes the phone's title */
-@media (min-width: 760px) and (max-width: 1023px) and (max-height: 499px) and (prefers-reduced-motion: no-preference) and (scripting: enabled),
-  (min-width: 1024px) and (max-height: 649px) and (prefers-reduced-motion: no-preference) and (scripting: enabled) {
+/* a short sheet's header takes the phone's title */
+@media (min-width: 1024px) and (max-height: 649px) and (prefers-reduced-motion: no-preference) and (scripting: enabled) {
   .parts-pin:not([data-flat]) .parts-head h2 {
     font-size: 2.25rem;
   }

@@ -131,7 +131,7 @@ export function createStack(
   const full = matchMedia('(min-width: 1348px) and (min-height: 884px)');
   const wide = matchMedia('(min-width: 1024px)');
   const reduce = matchMedia('(prefers-reduced-motion: reduce)');
-  const cramped = matchMedia('(max-width: 759px) and (max-height: 499px)');
+  const cramped = matchMedia('(max-width: 759px) and (max-height: 639px)');
 
   let mode: Mode = 'still';
   let width = 0;
@@ -241,13 +241,16 @@ export function createStack(
     const origin = cell.getBoundingClientRect();
     const headBox = rectIn(head, origin);
     const headFoot = headBox.y + headBox.h;
-    panelLeft = rectIn(panel, origin).x;
+    const panelBox = rectIn(panel, origin);
+    panelLeft = panelBox.x;
+    // a phone's keys stand over the canvas' foot, a landscape phone's beside it
+    const keysTop = mode === 'phone' && panelLeft < width / 2 ? panelBox.y : height;
 
     let rest: Rect;
     if (mode === 'stage') rest = rectIn(slot, origin);
     else if (mode === 'column')
       rest = { x: gutter, y: gutter, w: panelLeft - 48 - gutter, h: height - 2 * gutter };
-    else if (mode === 'phone') rest = { x: 12, y: 12, w: width - 24, h: height - 24 };
+    else if (mode === 'phone') rest = { x: 12, y: 12, w: width - 24, h: keysTop - 24 };
     else rest = { x: 0, y: 0, w: width, h: height };
 
     // straight on: the page's face at 1:1, where the CSS lays it out
@@ -281,14 +284,16 @@ export function createStack(
     );
 
     run();
-    // the full step starts once the stack has left the header's and the keys' place for good; a
-    // phone's have a row of their own
+    // the full step starts once the stack has left the header's and the keys' place for good
     let clear = 0;
-    if (mode === 'stage' || mode === 'column')
+    if (mode !== 'still')
       for (let i = 100; i >= 0 && clear === 0; i--) {
         const stack = stackBox(aimAt(i / 100));
-        if (stack.x + stack.w > panelLeft - 24 || (mode === 'stage' && stack.y < headFoot + 16))
-          clear = Math.min(1, (i + 1) / 100);
+        const over =
+          mode === 'phone'
+            ? stack.y + stack.h > keysTop - 16
+            : stack.x + stack.w > panelLeft - 24 || (mode === 'stage' && stack.y < headFoot + 16);
+        if (over) clear = Math.min(1, (i + 1) / 100);
       }
     fullFrom = Math.max(STEP, clear);
     shader!.set('uCell', 2);
@@ -300,7 +305,7 @@ export function createStack(
       0,
       stage ? headFoot + 12 : 0,
       stage || mode === 'column' ? panelLeft - 12 : width,
-      height,
+      keysTop - 12,
     ]);
     instant = true;
     scrolled();
@@ -475,7 +480,7 @@ export function createStack(
    */
   function place(force = false) {
     zoomed = progress < fullFrom - (zoomed ? 0 : STEP_MARGIN);
-    const headNext = mode === 'phone' ? zoomed : !zoomed;
+    const headNext = mode === 'phone' || !zoomed;
     const panelNext = !zoomed;
     if (force || headNext !== headShown) show(head, headNext);
     if (force || panelNext !== panelShown) {
