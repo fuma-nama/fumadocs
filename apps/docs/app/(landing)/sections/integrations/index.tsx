@@ -44,9 +44,8 @@ function More() {
   return (
     <div className="px-(--lp-gutter) py-3">
       <ul className="-mx-3 flex flex-wrap">
-        <li className="flex h-9 items-center gap-2 px-3 text-sm pointer-coarse:h-11">
-          <span className="font-medium">+{more.length}</span>
-          <span className="text-lp-ink-2">more</span>
+        <li className="flex h-9 items-center gap-2 px-3 text-sm font-mono font-medium text-lp-orange pointer-coarse:h-11">
+          +{more.length} more
         </li>
         {items}
       </ul>

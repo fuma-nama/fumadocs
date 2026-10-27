@@ -1,8 +1,8 @@
 import Link from 'next/link';
 import { ArrowUpRight } from 'lucide-react';
-import { command, copy, frameworks } from '../../content';
+import { command, frameworks } from '../../content';
 import { Command } from '../../ui/command';
-import { Figure, Lead } from '../../ui/figure';
+import { Figure } from '../../ui/figure';
 import { Glitch } from './glitch';
 import { Stage } from './stage';
 
@@ -20,14 +20,14 @@ export function Hero() {
       className="grid min-h-[calc(100svh-var(--lp-menu-h))] grid-rows-[auto_1fr_auto] gap-x-12 px-(--lp-gutter) pb-(--lp-status-h) @container lg:grid-cols-2 lg:grid-rows-[1fr_auto]"
     >
       <div className="py-8 lg:self-center">
-        <h1 className="text-[clamp(3rem,7.2vw,6.5rem)] leading-[0.95] font-medium tracking-tight">
-          <Lead className="text-[0.6em]">{copy.hero.lead}</Lead> Build <Glitch>better</Glitch>
-          <br />
-          docs.
+        <h1 className="text-[clamp(2.5rem,7.2vw,5rem)] leading-tight text-nowrap tracking-tight">
+          Build{' '}
+          <span className="text-lp-orange font-medium">
+            <Glitch>better docs</Glitch>
+          </span>
+          ,<br />
+          in seconds.
         </h1>
-        <p className="mt-7 max-w-[46ch] text-lg leading-[1.45] text-pretty text-lp-ink-2 lg:text-xl">
-          {copy.hero.description}
-        </p>
         <div className="mt-8 flex flex-wrap items-center gap-3">
           <Link
             href="/docs"
@@ -35,7 +35,7 @@ export function Hero() {
           >
             Get started
           </Link>
-          <Command command={command} caret className="max-sm:w-full" />
+          <Command command={command} className="max-sm:w-full" />
           <a
             href="https://stackblitz.com/github/fuma-nama/fumadocs/tree/main/examples/stackblitz"
             target="_blank"
@@ -59,7 +59,6 @@ export function Hero() {
         </p>
       </div>
       <Stage />
-      {/* the horizon: a hairline ruler, a tick every 24px and a longer one every 240px from the gutter */}
       <div
         aria-hidden
         className="relative col-span-full -mx-(--lp-gutter) h-10 border-t border-lp-line-strong"
