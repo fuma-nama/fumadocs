@@ -24,7 +24,7 @@ const components: MDXComponents = {
 interface PressProps {
   id: string;
   label: string;
-  lead: string;
+  lead: ReactNode;
   title: string | readonly Run[];
   description?: string;
   /** the MDX file, its blocks compiled and their sources */

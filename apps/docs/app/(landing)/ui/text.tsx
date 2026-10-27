@@ -2,6 +2,7 @@
 import { type ComponentProps, useCallback, useLayoutEffect, useRef, useState } from 'react';
 import { useReducedMotion } from 'motion/react';
 import { cn } from '@/lib/cn';
+import { whenSeen } from '../lib/later';
 
 const GLYPHS = 'abcdefghijklmnopqrstuvwxyz0123456789<>/{}[]=+*#';
 
@@ -59,6 +60,8 @@ const ALPHABET = ' abcdefghijklmnopqrstuvwxyz0123456789-_./:@';
 
 interface RollerProps {
   value: string;
+  /** a value to roll in from as it mounts */
+  from?: string;
   className?: string;
   /** ms per character tick */
   step?: number;
@@ -70,12 +73,12 @@ interface RollerProps {
  * Characters that tick to a new value cell by cell, like an odometer, in proportional fonts too: a
  * rolling cell takes its final character's width and swaps its glyph in place on each tick.
  */
-export function Roller({ value, className, step = 36, stagger = 24 }: RollerProps) {
+export function Roller({ value, from, className, step = 36, stagger = 24 }: RollerProps) {
   const reduced = useReducedMotion();
   // `from` is the value it rolls from, `null` at rest
   const [roll, setRoll] = useState<{ value: string; from: string | null; id: number }>({
     value,
-    from: null,
+    from: from ?? null,
     id: 0,
   });
   if (roll.value !== value) setRoll({ value, from: reduced ? null : roll.value, id: roll.id + 1 });
@@ -135,6 +138,27 @@ export function Roller({ value, className, step = 36, stagger = 24 }: RollerProp
       <span ref={cells} aria-hidden className="inline-flex">
         {items}
       </span>
+    </span>
+  );
+}
+
+/**
+ * Text that regenerates once, rolling in from blank, when it's all on screen: an update the reader
+ * sees land. Static before that, without script and under reduced motion.
+ */
+export function Regenerate({ text }: { text: string }) {
+  const reduced = useReducedMotion();
+  const [seen, setSeen] = useState(false);
+  const ref = useCallback(
+    (element: HTMLSpanElement | null) => {
+      if (element && !reduced) return whenSeen(element, () => setSeen(true), { threshold: 1 });
+    },
+    [reduced],
+  );
+
+  return (
+    <span ref={ref}>
+      {seen ? <Roller value={text} from={' '.repeat(text.length)} stagger={32} /> : text}
     </span>
   );
 }

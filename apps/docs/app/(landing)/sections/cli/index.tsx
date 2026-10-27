@@ -148,8 +148,8 @@ function em(hundredths: number) {
 
 /**
  * The lead asked as a question, set as speech: half the title's size (16px at least) in the titles'
- * medium, paper on the lead's orange, a bubble and its tail filled as one shape over the dithered
- * shadow of the desk's hub plate.
+ * medium, paper on the page's ink, a bubble and its tail filled as one shape over the dithered shadow
+ * of the desk's hub plate.
  */
 function Asked({ children }: { children: string }) {
   const foot = `calc(100% - ${em(TAIL.drop)})`;
@@ -168,7 +168,7 @@ function Asked({ children }: { children: string }) {
           maskSize: '4px 4px',
         }}
       />
-      <span className="relative block bg-lp-orange px-[0.75em] py-[0.55em] whitespace-nowrap text-lp-paper [text-box:trim-both_cap_alphabetic]">
+      <span className="relative block bg-lp-ink px-[0.75em] py-[0.55em] whitespace-nowrap text-lp-paper [text-box:trim-both_cap_alphabetic]">
         {children}
       </span>
       {/* a pixel into the bubble, so the two fills meet without a seam */}
@@ -176,7 +176,7 @@ function Asked({ children }: { children: string }) {
         aria-hidden
         viewBox={`0 0 ${TAIL.root} ${TAIL.drop}`}
         preserveAspectRatio="none"
-        className="absolute top-full left-0 -mt-px overflow-visible fill-lp-orange"
+        className="absolute top-full left-0 -mt-px overflow-visible fill-lp-ink"
         style={{ width: em(TAIL.root), height: em(TAIL.drop) }}
       >
         <path d={`M0 0V${TAIL.drop}L${TAIL.root} 0Z`} />

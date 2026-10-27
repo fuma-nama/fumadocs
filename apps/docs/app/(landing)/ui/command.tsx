@@ -1,5 +1,5 @@
 'use client';
-import type { ComponentProps } from 'react';
+import type { ComponentProps, ReactNode } from 'react';
 import { Check, Clipboard } from 'lucide-react';
 import { useCopyButton } from 'fumadocs-ui/utils/use-copy-button';
 import { cn } from '@/lib/cn';
@@ -18,25 +18,39 @@ export function Command({ command, caret = false, className, ...props }: Command
     setStatus(`copied ${command}`);
   });
 
+  // a box too narrow for the command wraps it between its words, never inside one, the lines hung
+  // after the prompt; the caret stays on the last word
+  const words: ReactNode[] = [];
+  const parts = command.split(' ');
+  for (let i = 0; i < parts.length; i++) {
+    const last = i === parts.length - 1;
+    words.push(
+      <span key={i} className="whitespace-nowrap">
+        {parts[i]}
+        {last && caret && (
+          <span
+            aria-hidden
+            className="lp-caret ms-0.5 inline-block h-[1.1em] w-[0.55em] align-text-bottom bg-current"
+          />
+        )}
+      </span>,
+    );
+    if (!last) words.push(' ');
+  }
+
   return (
     <div
       {...props}
       className={cn(
-        'flex h-11 w-fit max-w-full items-stretch border border-lp-line-strong bg-lp-paper',
+        'flex min-h-11 w-fit max-w-full items-stretch border border-lp-line-strong bg-lp-paper',
         className,
       )}
     >
-      <code className="flex min-w-0 flex-1 items-center gap-2 overflow-x-auto px-3 font-mono text-sm whitespace-nowrap">
+      <code className="flex min-w-0 flex-1 items-baseline gap-2 px-3 py-[11px] font-mono text-sm leading-5">
         <span aria-hidden className="text-lp-ink-2 select-none">
           $
         </span>
-        <span>{command}</span>
-        {caret && (
-          <span
-            aria-hidden
-            className="lp-caret -ms-1.5 inline-block h-[1.1em] w-[0.55em] translate-y-[0.15em] bg-current"
-          />
-        )}
+        <span className="min-w-0">{words}</span>
       </code>
       <button
         type="button"

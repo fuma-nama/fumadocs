@@ -9,17 +9,18 @@ import { Stage } from './stage';
 
 /**
  * The long title: a statement (`Terms`, light with its key terms a step up), then the claims
- * carrying it on in ink-2, a line each after a lit lamp of the switches' kind: the light voice a
- * step under the statement from md, a body size on a phone's narrow measure.
+ * carrying it on, a line each after a lit lamp of the switches' kind, stepping down by size and
+ * spacing: the light voice a step under the statement from md, a body size on a phone's narrow
+ * measure.
  */
 function Title() {
   const claims: ReactNode[] = [];
   for (const claim of copy.style.claims) {
     claims.push(
-      <span key={claim} className="relative block ps-[1.1em] md:ps-[0.62em]">
+      <span key={claim} className="relative block ps-[1.4em] md:ps-[0.85em]">
         <span
           aria-hidden
-          className="absolute top-[0.55lh] left-0 size-[0.5em] -translate-y-1/2 rounded-full border border-lp-ink bg-lp-sun after:absolute after:top-[22%] after:left-[22%] after:size-0.5 after:bg-lp-yellow md:size-[0.3em]"
+          className="absolute top-[0.55lh] left-0 size-[0.5em] -translate-y-1/2 rounded-full border border-lp-ink bg-lp-sun after:absolute after:top-[22%] after:left-[22%] after:size-0.5 after:bg-lp-yellow md:size-2"
         />{' '}
         {claim}
       </span>,
@@ -31,9 +32,7 @@ function Title() {
       <span className="block max-w-[29em]">
         <Terms runs={copy.style.title} />
       </span>{' '}
-      <span className="lp-voice mt-4 flex flex-col gap-2 text-lg/[1.45] text-lp-ink-2 max-md:font-normal max-md:tracking-normal md:mt-[0.25em] md:gap-[0.2em] md:text-[length:0.8em]/[1.1]">
-        {claims}
-      </span>
+      <span className="lp-voice mt-6 flex flex-col gap-3 text-base">{claims}</span>
     </>
   );
 }

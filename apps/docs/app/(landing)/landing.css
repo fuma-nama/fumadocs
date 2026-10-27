@@ -96,7 +96,7 @@ body:has(.landing),
 @layer components {
   .lp-voice {
     font-weight: 300;
-    letter-spacing: -0.04em;
+    letter-spacing: -0.025em;
   }
 
   /* Geist's straight stems sit 0.086em in at the titles' medium and 0.093em at the light voice: a

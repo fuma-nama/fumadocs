@@ -12,7 +12,7 @@ export const copy = {
     lead: 'Meet Fumadocs.',
     title: 'Build better docs.',
     description:
-      'Fumadocs turns your Markdown into a beautiful React docs site, set up in seconds with one command.',
+      'Fumadocs turns your Markdown into a beautiful React documentation site, in seconds.',
   },
   parts: {
     lead: 'Fits your stack.',
@@ -26,7 +26,7 @@ export const copy = {
     lead: 'Always up to date.',
     title: [
       'Generate content from your ',
-      { term: 'code' },
+      { term: 'code', code: true },
       ',\nthe single ',
       { term: 'source of truth' },
       '.',
@@ -45,9 +45,9 @@ export const copy = {
     ],
     /** the rest of the title, a line each */
     claims: [
-      'Bringing powerful features for your docs workflows,',
-      'with high customizability to fit your preferences,',
-      'works seamlessly with any React framework, Astro, CMS, anything.',
+      'Brings powerful features for your docs workflows.',
+      'High customizability to fit your preferences.',
+      'Works seamlessly with any React framework, Astro, CMS, anything.',
     ],
     /** the hands-on tabs, each with its line and its docs */
     tabs: {
@@ -84,9 +84,7 @@ export const copy = {
       'Use ',
       { term: 'Fumadocs CLI' },
       ',\ninstall & own the UI as ',
-      {
-        term: 'code',
-      },
+      { term: 'code', code: true },
       '.',
     ],
   },

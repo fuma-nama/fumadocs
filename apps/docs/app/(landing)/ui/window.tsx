@@ -7,13 +7,16 @@ interface TitleBarProps {
   actions?: ReactNode;
 }
 
-/** a window's striped title bar, its title between two boxes */
+/**
+ * A window's striped title bar, its title between two boxes. A window holds a file, a path or an
+ * address, so the title is set as code; a title that names something else sets itself in sans.
+ */
 export function TitleBar({ title, actions }: TitleBarProps) {
   return (
     <div className="relative flex h-7 shrink-0 items-center gap-1.5 border-b border-lp-line-strong px-1.5">
       <div aria-hidden className="lp-pinstripe absolute inset-x-1.5 inset-y-0" />
       <span aria-hidden className="relative size-3.5 border border-lp-line-strong bg-lp-paper" />
-      <span className="relative mx-auto truncate bg-lp-paper px-2 text-xs leading-[17px] font-medium">
+      <span className="relative mx-auto truncate bg-lp-paper px-2 font-mono text-xs leading-[17px]">
         {title}
       </span>
       {actions ?? (

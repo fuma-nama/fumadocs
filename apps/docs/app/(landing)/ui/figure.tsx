@@ -39,24 +39,34 @@ function Mark({ className }: { className: string }) {
   );
 }
 
-/** a run of a title's text, or a key term of it */
-export type Run = string | { term: string };
+/** a run of a title's text, or a key term of it, `code` when the term is code itself */
+export type Run = string | { term: string; code?: boolean };
 
-/** a title's runs, its key terms the strongest words on their line: semibold, in orange */
+/**
+ * A title with key terms, set as a statement: light, its terms a step up in medium and in orange,
+ * so each is the strongest word on its line; a term that is code is set as code.
+ */
 export function Terms({ runs }: { runs: readonly Run[] }) {
   const out: ReactNode[] = [];
   for (const run of runs) {
-    out.push(
-      typeof run === 'string' ? (
-        run
-      ) : (
-        <span key={run.term} className="font-semibold whitespace-nowrap text-lp-orange">
+    if (typeof run === 'string') out.push(run);
+    else if (run.code)
+      out.push(
+        <code
+          key={run.term}
+          className="font-normal tracking-[-0.02em] whitespace-nowrap text-lp-orange"
+        >
           {run.term}
-        </span>
-      ),
-    );
+        </code>,
+      );
+    else
+      out.push(
+        <span key={run.term} className="font-medium whitespace-nowrap text-lp-orange">
+          {run.term}
+        </span>,
+      );
   }
-  return out;
+  return <span className="font-light">{out}</span>;
 }
 
 interface FigureHeaderProps extends Omit<ComponentProps<'div'>, 'title'> {
@@ -70,7 +80,7 @@ interface FigureHeaderProps extends Omit<ComponentProps<'div'>, 'title'> {
 export function FigureHeader({ lead, title, description, className, ...props }: FigureHeaderProps) {
   return (
     <div {...props} className={cn('flex flex-col gap-4', className)}>
-      <h2 className="text-[clamp(1.625rem,1rem+2vw,2.5rem)] leading-[1.2] font-medium tracking-[-0.03em] text-pretty whitespace-pre-line md:leading-[1.1]">
+      <h2 className="text-[clamp(1.625rem,1rem+2vw,2.5rem)] leading-[1.2] font-medium tracking-tight text-pretty whitespace-pre-line md:leading-[1.1]">
         {lead && <Lead>{lead}</Lead>} {title}
       </h2>
       {description && (
