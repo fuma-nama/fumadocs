@@ -23,24 +23,19 @@ const KEYFRAMES = [
   [frame(62, 20, -0.05), frame(20, 70, 0.04), frame(0, 100, 0), { visibility: 'hidden' }],
 ];
 
-/** a burst of slice offsets at boot, then every 5-9s */
+/** a burst of slice offsets on its beat of the boot */
 export function Glitch({ children }: { children: string }) {
   const reduced = useReducedMotion();
   const ref = useCallback(
     (root: HTMLSpanElement | null) => {
-      if (!root) return;
-      const start = bootStart(root);
-      if (reduced) return;
+      if (!root || reduced) return;
+      const start = bootStart();
+      const wait = start === null ? -1 : untilBeat(start, BEAT_AT.glitch);
+      if (wait < 0) return;
       const layers = root.querySelectorAll('span');
-      let timer = 0;
-      const play = () => {
+      const timer = window.setTimeout(() => {
         for (let i = 0; i < layers.length; i++) layers[i].animate(KEYFRAMES[i], { duration: 150 });
-        timer = window.setTimeout(play, 5000 + Math.random() * 4000);
-      };
-      timer = window.setTimeout(
-        play,
-        start === null ? 5000 + Math.random() * 4000 : untilBeat(start, BEAT_AT.glitch),
-      );
+      }, wait);
       return () => clearTimeout(timer);
     },
     [reduced],

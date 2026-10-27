@@ -1,10 +1,21 @@
 import { bayer8 } from '../../lib/dither';
 
-/** half sizes of the satellites' prisms in moon radii: core, ui, content */
-export const PRISMS = [
-  [0.09, 0.09, 0.09],
-  [0.14, 0.055, 0.055],
-  [0.15, 0.105, 0.036],
+/**
+ * The drawing's box, in moon radii: the ring and its prisms reach `REACH` either side of the moon's
+ * centre, which sits `HORIZON` over the horizon, the box's bottom edge.
+ */
+export const REACH = 1.46;
+export const HORIZON = 0.76;
+
+/**
+ * The satellites in the order they pop: their layer, their prism's half sizes in moon radii, phase in
+ * turns (0 the ring's right end, 0.25 its front), the unit axis they tumble round and seconds a turn
+ * of it. A third of a turn or more apart, so the moon hides one at most, none at boot.
+ */
+export const SATELLITES = [
+  { layer: 'core', size: [0.09, 0.09, 0.09], phase: 0.25, axis: [0.28, 0.94, 0.19], spin: 16 },
+  { layer: 'ui', size: [0.14, 0.055, 0.055], phase: 0.95, axis: [0.89, 0.36, 0.27], spin: 20 },
+  { layer: 'content', size: [0.15, 0.105, 0.036], phase: 0.55, axis: [0.17, 0.51, 0.85], spin: 24 },
 ] as const;
 
 /** the near side's maria, blobs that merge: latitude, longitude and radius in degrees */
@@ -82,18 +93,20 @@ for (const [lat, lon, r] of CRATERS) {
 /**
  * The moon's face over its disc, `size` px square, for the shader's `uFace`: R the maria's merging
  * field, G the rays, B the crater within 2 of its radii (16 a step, so a colour conversion can't
- * change it; 255: none). Drawn on a 2D canvas, so it costs well under a millisecond.
+ * change it; 255: none). Drawn on a 2D canvas, so it costs well under a millisecond; `null` when the
+ * page has no canvas memory left for it.
  */
-export function drawFace(size: number): HTMLCanvasElement {
+export function drawFace(size: number): HTMLCanvasElement | null {
   const canvas = document.createElement('canvas');
   canvas.width = size;
   canvas.height = size;
-  const ctx = canvas.getContext('2d')!;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return null;
   const half = size / 2;
   ctx.fillStyle = 'rgb(0 0 255)';
   ctx.fillRect(0, 0, size, size);
   /** traces a cap of `r` degrees round (lat, lon), the ellipse it shows as; false past the limb */
-  function cap(lat: number, lon: number, r: number, scale = 1): boolean {
+  const cap = (lat: number, lon: number, r: number, scale = 1): boolean => {
     const [x, y, z] = onMoon(lat, lon);
     if (z <= 0.05) return false;
     const across = Math.sin((r * Math.PI) / 180) * half;
@@ -103,7 +116,7 @@ export function drawFace(size: number): HTMLCanvasElement {
     ctx.beginPath();
     ctx.arc(0, 0, across * scale, 0, Math.PI * 2);
     return true;
-  }
+  };
   for (let k = 0; k < CRATERS.length; k++) {
     const [lat, lon, r] = CRATERS[k];
     if (!cap(lat, lon, r * 2)) continue;
@@ -155,14 +168,14 @@ export function drawFace(size: number): HTMLCanvasElement {
 }
 
 let prisms = '';
-for (const [w, h, d] of PRISMS) prisms += `${prisms ? ',' : ''}vec3(${w},${h},${d})`;
+for (const { size } of SATELLITES) prisms += `${prisms ? ',' : ''}vec3(${size.join(',')})`;
 
 /**
  * The Fumadocs icon as the moon with its layers in orbit, one depth-tested scene: the moon (an
  * analytic sphere with its near side's face), the ring (a hairline ellipse) and three toon prisms
  * (analytic boxes). Shading is per cell (`uCell` CSS px) and 1-bit through an ordered dither; rims,
- * edges, crater lines and the ring are drawn at device resolution. The canvas spans 3.2 x 2.2 moon
- * radii round the moon.
+ * edges, crater lines and the ring are drawn at device resolution. The canvas is the drawing's box
+ * (`REACH`, `HORIZON`), empty over the moon's crown; at boot the moon rises from `uRise` radii lower.
  */
 export const moonFragment = `#version 300 es
 precision highp float;
@@ -171,6 +184,7 @@ uniform vec2 uResolution;
 uniform float uDpr;
 uniform float uCell;
 uniform float uOutline;
+uniform float uRise;
 uniform float uDark;
 uniform vec3 uLight;
 uniform vec3 uLit;
@@ -191,6 +205,8 @@ out vec4 color;
 ${bayer8}
 
 const vec3 PRISM[3] = vec3[](${prisms});
+const float REACH = ${REACH.toFixed(3)};
+const float HORIZON = ${HORIZON.toFixed(3)};
 const float TAU = 6.2831853;
 
 vec3 rotate(vec4 q, vec3 v) {
@@ -198,9 +214,13 @@ vec3 rotate(vec4 q, vec3 v) {
 }
 
 void main() {
-  float radius = uResolution.x / 3.2;
+  float radius = uResolution.x / (2.0 * REACH);
   float cellPx = uCell * uDpr;
-  vec2 frag = gl_FragCoord.xy - uResolution * 0.5;
+  vec2 frag = gl_FragCoord.xy - vec2(uResolution.x * 0.5, (HORIZON - uRise) * radius);
+  if (frag.y > radius) {
+    color = vec4(0.0);
+    return;
+  }
   vec2 cell = floor(frag / cellPx);
   // the cell's centre and the pixel itself, in moon radii
   vec2 pc = (cell + 0.5) * cellPx / radius;
