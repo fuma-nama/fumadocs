@@ -25,7 +25,7 @@ export function Hero() {
           <br />
           docs.
         </h1>
-        <p className="mt-7 max-w-[46ch] text-lg leading-snug text-pretty text-lp-ink-2 lg:text-xl">
+        <p className="mt-7 max-w-[46ch] text-lg leading-[1.45] text-pretty text-lp-ink-2 lg:text-xl">
           {copy.hero.description}
         </p>
         <div className="mt-8 flex flex-wrap items-center gap-3">
@@ -50,8 +50,8 @@ export function Hero() {
           Runs on{' '}
           {frameworks.map((framework, i) => (
             <span key={framework.name}>
-              {i > 0 && ' · '}
-              <Link href={framework.href} className={`text-lp-ink ${invert}`}>
+              {i > 0 && <> ·&nbsp;</>}
+              <Link href={framework.href} className={`whitespace-nowrap text-lp-ink ${invert}`}>
                 {framework.name}
               </Link>
             </span>
