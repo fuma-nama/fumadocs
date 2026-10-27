@@ -1,7 +1,17 @@
 'use client';
-import { type KeyboardEvent, memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  type CSSProperties,
+  type KeyboardEvent,
+  memo,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { cn } from '@/lib/cn';
 import { DITHER_MASKS } from '../../lib/dither';
+import { Window } from '../../ui/window';
 import type { LayoutId } from './data';
 import { createDesk } from './engine';
 import type { Hardware } from './hardware';
@@ -260,7 +270,7 @@ export const Desk = memo(function Desk({
         <span
           data-caption
           className={cn(
-            'absolute left-0 -ms-1 text-[13px]',
+            'absolute left-0 -ms-1',
             slot.row === 0
               ? 'bottom-[calc(100%+var(--plate)+8px)] origin-[6px_100%]'
               : 'top-[calc(100%+var(--plate)+8px)] origin-[6px_0]',
@@ -276,67 +286,73 @@ export const Desk = memo(function Desk({
   }
 
   return (
-    <div
-      role="radiogroup"
-      aria-label="Layouts"
-      onKeyDown={onKeyDown}
-      className={cn('@container py-11 [--plate:max(6px,1.4cqw)] sm:py-14 lg:py-11', className)}
-    >
-      {/* the plates stand out of the board by `--plate`, more on a chosen window grown from its
-          edge; the stamps above and below take the room around it */}
-      <div className="px-[calc(var(--plate)*1.1)]">
-        <div
-          ref={ref}
-          className="@container relative w-full"
-          style={{ aspectRatio: `${BOARD.w} / ${BOARD.h}` }}
-        >
-          {hardware.bench}
-          <DipBank
-            on={live ? index : -1}
-            className="pointer-events-none"
-            style={percent(10, 344, 120, 50)}
-          />
-          <Relay
-            flip={relay.flip}
-            className="pointer-events-none"
-            style={percent(140, 346, 56, 42)}
-          />
+    <Window title={`fumadocs-ui/layouts/${selected}`} className={className}>
+      <div className="@container flex [--plate:max(6px,1.4cqw)] xl:min-h-0 xl:flex-1">
+        {/* A chosen window's plate stands out of the board by `--plate`, its stamp over its edge at
+            the overshoot, a line tall: both keep the stamps' gap to the frame. Under the browser
+            the board takes the width, beside it the height it is given. */}
+        <div className="grid flex-1 place-items-center px-[calc(var(--plate)+8px)] py-[calc(1.5*(var(--plate)+8px)+1lh+3px)] leading-4 [container-type:inline-size] xl:[container-type:size]">
           <div
-            data-hub
-            aria-hidden
-            className="absolute"
-            style={{
-              ...percent(HUB.x, HUB.y, HUB.w, HUB.h),
-              transform: hubTransform(FIRST_POSE.hub[0], FIRST_POSE.hub[1]),
-            }}
+            ref={ref}
+            role="radiogroup"
+            aria-label="Layouts"
+            onKeyDown={onKeyDown}
+            className="@container relative w-full xl:w-[min(100cqw,100cqh*var(--wide))]"
+            style={
+              {
+                aspectRatio: `${BOARD.w} / ${BOARD.h}`,
+                '--wide': BOARD.w / BOARD.h,
+              } as CSSProperties
+            }
           >
-            <span
-              className="absolute inset-0 bg-lp-ink-2"
-              style={{ maskImage: DITHER_MASKS[4], maskSize: '4px 4px', translate: '5px 7px' }}
+            {hardware.bench}
+            <DipBank
+              on={live ? index : -1}
+              className="pointer-events-none"
+              style={percent(10, 344, 120, 50)}
             />
-            <span className="absolute inset-0 border border-lp-ink bg-lp-paper" />
-            {hardware.junction}
-            <Led on className={cn('top-[31%] left-[50%]', busy && 'lp-caret')} />
+            <Relay
+              flip={relay.flip}
+              className="pointer-events-none"
+              style={percent(140, 346, 56, 42)}
+            />
+            <div
+              data-hub
+              aria-hidden
+              className="absolute"
+              style={{
+                ...percent(HUB.x, HUB.y, HUB.w, HUB.h),
+                transform: hubTransform(FIRST_POSE.hub[0], FIRST_POSE.hub[1]),
+              }}
+            >
+              <span
+                className="absolute inset-0 bg-lp-ink-2"
+                style={{ maskImage: DITHER_MASKS[4], maskSize: '4px 4px', translate: '5px 7px' }}
+              />
+              <span className="absolute inset-0 border border-lp-ink bg-lp-paper" />
+              {hardware.junction}
+              <Led on className={cn('top-[31%] left-[50%]', busy && 'lp-caret')} />
+            </div>
+            {/* the cables run over the desk and behind the windows, their plugs over both */}
+            <svg
+              aria-hidden
+              viewBox={`0 0 ${BOARD.w} ${BOARD.h}`}
+              className="pointer-events-none absolute inset-0 size-full overflow-visible"
+            >
+              {cables}
+              {ties}
+            </svg>
+            {windows}
+            <svg
+              aria-hidden
+              viewBox={`0 0 ${BOARD.w} ${BOARD.h}`}
+              className="pointer-events-none absolute inset-0 size-full overflow-visible"
+            >
+              {plugs}
+            </svg>
           </div>
-          {/* the cables run over the desk and behind the windows, their plugs over both */}
-          <svg
-            aria-hidden
-            viewBox={`0 0 ${BOARD.w} ${BOARD.h}`}
-            className="pointer-events-none absolute inset-0 size-full overflow-visible"
-          >
-            {cables}
-            {ties}
-          </svg>
-          {windows}
-          <svg
-            aria-hidden
-            viewBox={`0 0 ${BOARD.w} ${BOARD.h}`}
-            className="pointer-events-none absolute inset-0 size-full overflow-visible"
-          >
-            {plugs}
-          </svg>
         </div>
       </div>
-    </div>
+    </Window>
   );
 });

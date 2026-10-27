@@ -28,7 +28,7 @@ export function createSprings(count: number, initial = 0) {
   };
 }
 
-export type Springs = ReturnType<typeof createSprings>;
+type Springs = ReturnType<typeof createSprings>;
 
 /** one step; returns how far from rest the springs are */
 export function stepSprings(s: Springs, stiffness: number, damping: number): number {
@@ -99,7 +99,6 @@ export function createDesk(board: HTMLElement, hung: Hung) {
 
   let raf = 0;
   const clock = { last: 0, acc: 0 };
-  let onScreen = false;
 
   function sync(jump: boolean) {
     for (let i = 0; i < SLOTS.length; i++) {
@@ -172,25 +171,14 @@ export function createDesk(board: HTMLElement, hung: Hung) {
       moved = stepRopes(ropes);
     }
     write();
-    if (energy > 0.004 || moved > 0.01 || paying > 0.01) schedule();
+    // settled to the eye once no cable point moves a tenth of a unit in a step
+    if (energy > 0.004 || moved > 0.1 || paying > 0.1) schedule();
     else clock.last = clock.acc = 0;
   }
 
   function schedule() {
-    if (raf === 0 && onScreen && !document.hidden) raf = requestAnimationFrame(frame);
+    if (raf === 0) raf = requestAnimationFrame(frame);
   }
-
-  const visibility = new IntersectionObserver(([entry]) => {
-    onScreen = entry.isIntersecting;
-    if (onScreen) schedule();
-    else {
-      cancelAnimationFrame(raf);
-      raf = 0;
-      clock.last = 0;
-    }
-  });
-  visibility.observe(board);
-  document.addEventListener('visibilitychange', schedule);
 
   return {
     /** `-1` unplugs every cable */
@@ -210,8 +198,6 @@ export function createDesk(board: HTMLElement, hung: Hung) {
     },
     destroy() {
       cancelAnimationFrame(raf);
-      visibility.disconnect();
-      document.removeEventListener('visibilitychange', schedule);
     },
   };
 }

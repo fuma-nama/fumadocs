@@ -233,8 +233,8 @@ export function createHardware() {
         <Screw angle={-40} className="top-[30%] right-[7%] translate-x-1/2" />
         <Screw angle={75} className="bottom-[12%] left-[7%]" />
         <Screw angle={-10} className="right-[7%] bottom-[12%] translate-x-1/2" />
-        <span className="absolute inset-x-0 top-[16%] bottom-0 flex items-center justify-center @container">
-          <Stamp tilt={-2} className="text-center text-[11cqw] leading-[1.2] whitespace-pre-line">
+        <span className="absolute inset-x-0 top-[16%] bottom-0 flex items-center justify-center">
+          <Stamp tilt={-2} className="text-center text-xs leading-[1.2] whitespace-pre-line">
             {'Pick a\nlayout'}
           </Stamp>
         </span>
@@ -242,7 +242,7 @@ export function createHardware() {
       </>
     ),
     // in the two bands beside the box that no window, shadow or cable reaches in any frame of a
-    // move, under the windows and the cables; a small desk keeps the fewest
+    // move, under the windows and the cables
     bench: (
       <div aria-hidden className="pointer-events-none absolute inset-0">
         <SafetyPin style={{ ...percent(14, 406, 60, 15), rotate: '-16deg' }} />

@@ -11,13 +11,9 @@ export const metadata: Metadata = {
 export default async function Page(props: PageProps<'/story/[name]/[[...path]]'>) {
   const { name } = await props.params;
   if (!(name in stories)) notFound();
-  const { Frame } = stories[name as keyof typeof stories];
 
-  return (
-    <StoryNavigation>
-      <Frame />
-    </StoryNavigation>
-  );
+  // the story's own component: `<Frame />` can't tell the page framing it once it has rendered
+  return <StoryNavigation Component={stories[name as keyof typeof stories]._private_.component!} />;
 }
 
 export function generateStaticParams() {

@@ -18,14 +18,13 @@ export type ThemeId = keyof typeof THEME_NAMES;
 
 export const THEMES = Object.keys(THEME_NAMES) as ThemeId[];
 
-/** `root` is the element a story renders once its lazy layout loaded */
 export const LAYOUTS = [
-  { id: 'docs', name: 'Docs', root: '#nd-docs-layout' },
-  { id: 'notebook', name: 'Notebook', root: '#nd-notebook-layout' },
-  { id: 'flux', name: 'Flux', root: '#nd-flux-layout' },
-  { id: 'glass', name: 'Glass', root: '#fd-glass-layout' },
-  { id: 'spacious', name: 'Spacious', root: '#fd-spacious-layout' },
-  { id: 'home', name: 'Home', root: '#nd-home-layout' },
+  { id: 'docs', name: 'Docs' },
+  { id: 'notebook', name: 'Notebook' },
+  { id: 'flux', name: 'Flux' },
+  { id: 'glass', name: 'Glass' },
+  { id: 'spacious', name: 'Spacious' },
+  { id: 'home', name: 'Home' },
 ] as const;
 
 export type LayoutId = (typeof LAYOUTS)[number]['id'];
@@ -37,23 +36,14 @@ export const TABS = ['layouts', 'story', 'openapi', 'graphql', 'asyncapi'] as co
 
 export type TabId = (typeof TABS)[number];
 
-export type DemoId = Exclude<TabId, 'layouts'>;
+type DemoId = Exclude<TabId, 'layouts'>;
 
-/** where each demo's UI comes from, named in the monitor's bar, and its frame's accessible name */
-export const DEMOS: Record<DemoId, { source: string; title: string }> = {
-  story: { source: '@fumadocs/story', title: 'Story of a Callout, with its controls' },
-  openapi: {
-    source: 'fumadocs-openapi/ui',
-    title: 'OpenAPI page of an operation, with its playground',
-  },
-  graphql: {
-    source: '@fumadocs/graphql/ui',
-    title: 'GraphQL page of a query, with its playground',
-  },
-  asyncapi: {
-    source: '@fumadocs/asyncapi/ui',
-    title: 'AsyncAPI page of a channel, with its playground',
-  },
+/** each demo's frame, by its accessible name */
+export const DEMOS: Record<DemoId, string> = {
+  story: 'Story of a Callout, with its controls',
+  openapi: 'OpenAPI page of an operation, with its playground',
+  graphql: 'GraphQL page of a query, with its playground',
+  asyncapi: 'AsyncAPI page of a channel, with its playground',
 };
 
 /** a preset's colour on this page: the shadcn preset's `var(--x)` reads this page's `--color-fd-x` */
@@ -64,8 +54,8 @@ export function paint(value: string): string {
 /** the viewport of a story frame, like `<story.WithControl />` */
 export const FRAME = { w: 1280, h: 800 };
 
-// same arguments as `content/docs/ui/layouts/layouts.story.tsx`; the shared ones fit every layout
-export const SHARED_ARGS = {
+// same arguments as `content/docs/ui/layouts/layouts.story.tsx`
+const SHARED_ARGS = {
   nav: { title: 'My Docs' },
   themeSwitch: { enabled: true, mode: 'light-dark' },
   searchToggle: { enabled: true },
