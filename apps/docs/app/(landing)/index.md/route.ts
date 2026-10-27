@@ -17,9 +17,11 @@ function url(path: string): string {
   return new URL(path, baseUrl).toString();
 }
 
-/** a figure's title and description, opening its section */
-function section(item: { lead: string; title: string; description: string }): string[] {
-  return ['', `## ${item.lead} ${item.title}`, '', item.description, ''];
+/** a figure's title and its line, if it has one, opening its section */
+function section(item: { lead: string; title: string; description?: string }): string[] {
+  const out = ['', `## ${item.lead} ${item.title}`, ''];
+  if (item.description) out.push(item.description, '');
+  return out;
 }
 
 /** a code fence longer than any backtick run in the lines it wraps, so their own fences stay inside */
@@ -57,7 +59,10 @@ async function landingMarkdown(): Promise<string> {
   for (const layout of LAYOUTS) layouts.push(layout.name);
   const themes: string[] = [];
   for (const id of THEMES) themes.push(`${THEME_NAMES[id]} (\`${id}\`)`);
-  out.push(...section(copy.style));
+  let statement = '';
+  for (const run of copy.style.title) statement += typeof run === 'string' ? run : run.term;
+  for (const claim of copy.style.claims) statement += ` ${claim}`;
+  out.push('', `## ${statement}`, '', '- Restyle any layout or theme with CSS variables.');
   for (const id of TABS) {
     const tab = copy.style.tabs[id];
     out.push(`- [${tab.label}](${url(tab.href)}): ${tab.line}`);
@@ -70,29 +75,41 @@ async function landingMarkdown(): Promise<string> {
 
   const source = fileLines(blocks);
   const fence = fenceFor(source);
-  out.push(...section(copy.write), `${fence}mdx title="quick-start.mdx"`, ...source, fence);
+  out.push(
+    ...section(copy.write),
+    '- Writers stay in Markdown, and developers add React components and code checked by Twoslash.',
+    '',
+    `${fence}mdx title="quick-start.mdx"`,
+    ...source,
+    fence,
+  );
 
   const button = fileLines(buttonBlocks);
   const buttonFence = fenceFor(button);
   out.push(
     ...section(copy.automate),
+    '- `<auto-type-table>` reads a TypeScript type, and async server components in MDX read your data, both at build time.',
+    '',
     `${buttonFence}mdx title="button.mdx"`,
     ...button,
     buttonFence,
   );
 
-  out.push(...section(copy.parts));
+  out.push(
+    ...section(copy.parts),
+    `- Every page runs on these ${LAYERS.length} layers, each a library of its own:`,
+  );
   for (const layer of LAYERS) {
     const names: string[] = [];
     for (const option of layer === 'core' ? [CORE] : OPTIONS[layer])
       names.push(`${option.title} (\`${option.name}\`)`);
-    out.push(`- ${layer}${layer === 'core' ? ' (kept)' : ''}: ${names.join(', ')}`);
+    out.push(`  - ${layer}${layer === 'core' ? ' (kept)' : ''}: ${names.join(', ')}`);
   }
 
   out.push(...section(copy.integrations));
   for (const item of modules) {
     out.push(
-      `- [${item.title}](${url(item.href ?? '/docs/search')}) (\`${item.pkg}\`): ${item.line}`,
+      `- [${item.title}](${url(item.href ?? '/docs/search')}) (\`${item.pkg}\`): ${item.line} Add it with \`${item.install}\`.`,
     );
   }
   const extras: string[] = [];

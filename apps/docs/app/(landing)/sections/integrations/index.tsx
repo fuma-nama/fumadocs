@@ -19,7 +19,6 @@ export function Integrations() {
           <FigureHeader
             lead={copy.integrations.lead}
             title={copy.integrations.title}
-            description={copy.integrations.description}
           />
         }
       >

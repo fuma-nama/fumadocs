@@ -1,6 +1,7 @@
 /**
  * The copy of every figure, shared by the page and its Markdown version (`/index.md`). A title
- * reads `lead` then `title`, the lead set in the orange pixel type.
+ * reads `lead` then `title`, the lead set in the orange pixel type, with a line under it only for
+ * what its figure can't show.
  */
 export const copy = {
   hero: {
@@ -10,28 +11,36 @@ export const copy = {
       'A React documentation framework for developers, built to fit the framework and content source you already use.',
   },
   parts: {
-    lead: 'Inside a page.',
+    lead: 'Fits your stack.',
     title: 'Swap one, keep the rest.',
-    description:
-      'Every page runs on a UI, a core and a content source, on the framework you choose. Each is a library on its own.',
   },
   write: {
     lead: 'Write in Markdown.',
     title: 'Reach for React.',
-    description:
-      'With MDX, writers stay in plain Markdown while developers add React components and type-checked code. Fumadocs compiles both into one page.',
+    description: 'Fumadocs compiles both into one page.',
   },
   automate: {
     lead: 'Always up to date.',
-    title: 'Never hardcoded.',
-    description:
-      'Auto Type Table reads your TypeScript, and server components in MDX query your data at build time. Change either, and the page follows.',
+    title: 'Generated from your code.',
+    description: 'Change your code, and the next build updates the page.',
   },
   style: {
-    lead: 'Beautiful by default.',
-    title: 'Yours by design.',
-    description:
-      'Try 6 layouts and 12 themes, plus API references and component previews. Restyle any of them with CSS variables.',
+    /** a long title with no lead: what Fumadocs is, its key terms in the orange pixel type */
+    title: [
+      'Fumadocs is a ',
+      { term: 'React' },
+      ' documentation framework for ',
+      { term: 'developers' },
+      ', beautifully designed by ',
+      { term: 'Fuma Nama' },
+      '.',
+    ],
+    /** the rest of the title, a line each */
+    claims: [
+      'Bringing powerful features for your docs workflows,',
+      'with high customizability to fit your preferences,',
+      'works seamlessly with any React framework, Astro, CMS, anything.',
+    ],
     /** the hands-on tabs, each with its line and its docs */
     tabs: {
       layouts: {
@@ -64,20 +73,15 @@ export const copy = {
   cli: {
     lead: 'Need more control?',
     title: 'Own the source code.',
-    description:
-      'The Fumadocs CLI installs layouts and components into your codebase and updates the imports, so you can change any line.',
+    description: 'The Fumadocs CLI copies the UI into your codebase and rewires the imports.',
   },
   integrations: {
-    lead: 'Integrations.',
-    title: 'Add only what you need.',
-    description:
-      'Search, API references, AI chat, i18n and more ship in first-party packages. They all start with a single command.',
+    lead: 'Feature rich.',
+    title: 'Integrations that just work.',
   },
   proof: {
     lead: 'Built in the open.',
     title: 'Running in production.',
-    description:
-      'Projects like shadcn/ui, Better Auth, Prisma and Zod ship their docs on Fumadocs.',
   },
   start: {
     lead: 'Your turn.',

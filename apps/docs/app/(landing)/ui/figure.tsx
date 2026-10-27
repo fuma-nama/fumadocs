@@ -42,8 +42,8 @@ function Mark({ className }: { className: string }) {
 }
 
 interface FigureHeaderProps extends Omit<ComponentProps<'div'>, 'title'> {
-  /** the opening of the title, set in the orange pixel type */
-  lead: ReactNode;
+  /** the opening of the title, set in the orange pixel type; a title without one is a long one */
+  lead?: ReactNode;
   title: ReactNode;
   description?: ReactNode;
 }
@@ -51,8 +51,21 @@ interface FigureHeaderProps extends Omit<ComponentProps<'div'>, 'title'> {
 export function FigureHeader({ lead, title, description, className, ...props }: FigureHeaderProps) {
   return (
     <div {...props} className={cn('flex flex-col gap-4', className)}>
-      <h2 className="text-4xl leading-[1.02] font-medium tracking-[-0.035em] text-balance md:text-6xl">
-        <Lead>{lead}</Lead> <span className="block max-w-[16ch]">{title}</span>
+      <h2
+        className={cn(
+          'font-medium',
+          lead
+            ? 'text-4xl leading-[1.02] tracking-[-0.035em] text-balance md:text-6xl'
+            : 'text-[clamp(1.625rem,1rem+2vw,2.5rem)] leading-[1.1] tracking-[-0.028em] text-pretty',
+        )}
+      >
+        {lead ? (
+          <>
+            <Lead>{lead}</Lead> <span className="block max-w-[16ch]">{title}</span>
+          </>
+        ) : (
+          title
+        )}
       </h2>
       {description && (
         <p className="max-w-[46ch] text-lg leading-relaxed text-pretty text-lp-ink-2">

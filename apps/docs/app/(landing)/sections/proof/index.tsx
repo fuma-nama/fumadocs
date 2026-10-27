@@ -38,7 +38,6 @@ export async function Proof() {
       <FigureHeader
         lead={copy.proof.lead}
         title={copy.proof.title}
-        description={copy.proof.description}
       />
       {/* 9 | 3 of 12 columns, the wall's rounded to whole pixels: a half pixel left a seam inside its frame */}
       <div className="grid gap-6 xl:grid-cols-[round(75%_-_6px,1px)_minmax(0,1fr)]">

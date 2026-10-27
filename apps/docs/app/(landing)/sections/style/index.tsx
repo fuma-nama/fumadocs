@@ -1,3 +1,4 @@
+import type { CSSProperties, ReactNode } from 'react';
 import { copy } from '../../content';
 import { Figure, FigureHeader } from '../../ui/figure';
 import { FIRST, THEMES, type ThemeId } from './data';
@@ -5,6 +6,53 @@ import { createHardware } from './hardware';
 import { loadInks, wire, type Wiring } from './presets';
 import { FIRST_POSE, hangRopes } from './scene';
 import { Stage } from './stage';
+
+/**
+ * The long title: its opening in the page's type, ending on "developers," where the sheet is wide
+ * enough, then the claims in the pixel type, each after a lamp of the switches' kind. A lamp dithers
+ * on as its line comes up the screen, scrubbed by the scroll; without scroll timelines it is lit.
+ */
+function Title() {
+  const opening: ReactNode[] = [];
+  for (const run of copy.style.title) {
+    opening.push(
+      typeof run === 'string' ? (
+        run
+      ) : (
+        <span
+          key={run.term}
+          className="font-pixel font-normal tracking-normal whitespace-nowrap text-lp-orange"
+        >
+          {run.term}
+        </span>
+      ),
+    );
+  }
+  const claims: ReactNode[] = [];
+  for (let i = 0; i < copy.style.claims.length; i++) {
+    claims.push(
+      <span key={i} style={{ '--i': i } as CSSProperties} className="relative block ps-[1.2em]">
+        {/* clipped, not hidden: a scroll container would be its own lamp's scroller */}
+        <span
+          aria-hidden
+          className="absolute top-[0.5lh] left-0 size-[0.56em] -translate-y-1/2 overflow-clip rounded-full border border-lp-ink bg-lp-paper"
+        >
+          <span className="absolute inset-0 animate-[lp-dither-in_linear_both] bg-lp-sun [mask-size:4px_4px] [animation-range:cover_calc(22%+var(--i)*6%)_cover_calc(28%+var(--i)*6%)] [animation-timeline:view()] after:absolute after:top-[22%] after:left-[22%] after:size-0.5 after:bg-lp-yellow motion-reduce:animate-none" />
+        </span>{' '}
+        {copy.style.claims[i]}
+      </span>,
+    );
+  }
+
+  return (
+    <>
+      <span className="block max-w-[29em]">{opening}</span>{' '}
+      <span className="mt-[0.5em] block font-pixel text-[length:max(0.6em,16px)] leading-[1.25] font-normal tracking-normal">
+        {claims}
+      </span>
+    </>
+  );
+}
 
 export async function Style() {
   const table = await loadInks();
@@ -23,12 +71,7 @@ export async function Style() {
 
   return (
     <Figure id="style" aria-label="Style" status={`layout: ${FIRST}`} className="pb-16">
-      <FigureHeader
-        lead={copy.style.lead}
-        title={copy.style.title}
-        description={copy.style.description}
-        className="px-(--lp-gutter) pt-16 pb-10"
-      />
+      <FigureHeader title={<Title />} className="px-(--lp-gutter) pt-16 pb-10 md:pb-12" />
       <Stage
         table={table}
         names={names}
