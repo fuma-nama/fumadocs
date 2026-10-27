@@ -2,7 +2,7 @@ import type { ShowcaseObject } from '@/lib/showcases';
 
 export const suggest = 'https://github.com/fuma-nama/fumadocs/discussions/30';
 
-/** the showcase's copy, shared with `/showcase.md`: a title reads `lead`, in pixel type, then `title` */
+/** the showcase's copy, shared with `/showcase.md`: a title reads `lead`, then `title` */
 export const copy = {
   header: {
     lead: 'Built with Fumadocs.',

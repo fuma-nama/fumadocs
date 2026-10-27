@@ -45,8 +45,7 @@ const searchTracks: Record<string, Track> = {
   sel2: { base: 'opacity:0', poses: show(20, 26) },
   flash: { base: 'opacity:0', poses: show(26, 27) },
 };
-// the query is typed one glyph per tick (2-10) and cleared on 27; Geist Pixel is proportional,
-// so glyphs appear one by one and the caret follows them inline
+// the query is typed one glyph per tick (2-10) and cleared on 27, the caret following the glyphs
 for (let k = 0; k < QUERY.length; k++) {
   searchTracks[`key${k}`] = {
     poses: { 0: 'display:none', [2 + k]: 'display:inline', 27: 'display:none' },
@@ -59,7 +58,7 @@ function Result({ i }: { i: number }) {
   return (
     <>
       {i > 0 && <Px ink={rect(5, y, 1, 8) + art(HASH, 8, y + 2)} />}
-      <Text x={i === 0 ? 4 : 15} y={y + 1.7}>
+      <Text x={i === 0 ? 4 : 15} y={y} h={8}>
         {RESULTS[i]}
       </Text>
     </>
@@ -94,14 +93,12 @@ function SearchMechanism() {
       <Px
         ink={frame(0, 0, 96, 40) + rect(0, 10, 96, 1) + art(MAGNIFIER, 3, 2) + frame(80, 2, 14, 7)}
       />
-      <Text x={82} y={3.4}>
+      <Text x={80} y={2} w={14} h={7} className="justify-center">
         ESC
       </Text>
-      <Text x={12} y={3.3}>
+      <Text x={12} y={2} h={7}>
         {typed}
-        <span
-          className={`bt-blink ms-[2px] inline-block h-[11px] w-[7px] bg-lp-orange align-[-1px] ${c.caret}`}
-        />
+        <span className={`ms-[0.15em] h-[1lh] w-[0.5em] bg-lp-orange ${c.caret}`} />
       </Text>
       {results}
       <Px ink={rect(0, 0, 96, 40)} className={c.flash} />
@@ -155,20 +152,20 @@ function OpenAPIMechanism() {
           items={METHODS}
           h={7}
           loop
-          itemClassName="flex size-full items-center justify-center bg-lp-orange text-(--bt-paper)"
+          itemClassName="flex size-full items-center justify-center bg-lp-orange font-mono text-(--bt-paper)"
           className={c.operation}
         />
       </Clip>
       <Clip x={20} y={0} w={76} h={7}>
-        <Strip items={PATHS} h={7} loop className={c.operation} />
+        <Strip items={PATHS} h={7} loop itemClassName="font-mono" className={c.operation} />
       </Clip>
       <Px ink={frame(0, 10, 22, 9) + art(PLAY, 3, 12) + dashes(23, 14, 49, 1, 2) + server} />
-      <Text x={8} y={11.9}>
+      <Text x={8} y={10} h={9}>
         Send
       </Text>
       <Layer className={c.press}>
         <Px ink={rect(0, 10, 22, 9)} knock={art(PLAY, 3, 12)} />
-        <Text x={8} y={11.9} className="text-(--bt-paper)">
+        <Text x={8} y={10} h={9} className="text-(--bt-paper)">
           Send
         </Text>
       </Layer>
@@ -182,13 +179,13 @@ function OpenAPIMechanism() {
         orange={rect(92, 11, 2, 2) + rect(89, 18, 2, 2) + rect(92, 25, 2, 2)}
         className={c.ledB}
       />
-      <Px orange={rect(92, 25, 2, 2)} className="bt-blink" />
+      <Px orange={rect(92, 25, 2, 2)} />
       <Clip x={0} y={22} w={12} h={7} className={c.status}>
         <Strip
           items={CODES}
           h={7}
           loop
-          itemClassName="text-(--bt-orange)"
+          itemClassName="font-mono text-(--bt-orange)"
           className={c.operation}
         />
       </Clip>
@@ -242,12 +239,12 @@ function AsyncAPIMechanism() {
           items={PROTOCOLS}
           h={5}
           loop
-          itemClassName="w-full text-center"
+          itemClassName="w-full text-center font-mono"
           className={c.protocol}
         />
       </Clip>
       <Clip x={23} y={1} w={58} h={7}>
-        <Strip items={MESSAGES} h={7} loop className={c.message} />
+        <Strip items={MESSAGES} h={7} loop itemClassName="font-mono" className={c.message} />
       </Clip>
       <Px
         ink={
@@ -255,7 +252,7 @@ function AsyncAPIMechanism() {
         }
         knock={rect(84, 16, 1, 11)}
       />
-      <Px orange={rect(88, 2, 4, 2)} className="bt-blink" />
+      <Px orange={rect(88, 2, 4, 2)} />
       <Px orange={art(ARC_LEFT, 84, 1) + art(ARC_RIGHT, 93, 1)} className={c.arcs} />
       <Clip x={0} y={16} w={84} h={11}>
         <Px x={-24} y={2} w={120} h={7} orange={belt} className={c.belt} />
@@ -294,15 +291,15 @@ function GraphQLMechanism() {
     const [name, x, y, field, row] = TYPES[i];
     ink += frame(x, y, 28, 18) + rect(x, y, 28, 6) + rect(x + 2, y + 8 + 6 * (1 - row), 14, 1);
     labels.push(
-      <Text key={name} x={x + 2} y={y + 0.9} className="text-(--bt-paper)">
+      <Text key={name} x={x + 2} y={y} h={6} className="font-mono text-(--bt-paper)">
         {name}
       </Text>,
-      <Text key={field} x={x + 2} y={y + 6.9 + 6 * row}>
+      <Text key={field} x={x + 2} y={y + 6 + 6 * row} h={6} className="font-mono">
         {field}
       </Text>,
       <Layer key={`hl-${field}`} className={`bt-on-hi ${hlCls[i]}`}>
         <Px hi={rect(x + 1, y + 6 + 6 * row, 26, 6)} />
-        <Text x={x + 2} y={y + 6.9 + 6 * row}>
+        <Text x={x + 2} y={y + 6 + 6 * row} h={6} className="font-mono">
           {field}
         </Text>
       </Layer>,
@@ -317,13 +314,13 @@ function GraphQLMechanism() {
       <Px x={62} y={18} w={6} h={5} ink={EDGE} className={c.edge2} />
       <Layer className={c.flash1}>
         <Px paper={rect(35, 7, 26, 4)} />
-        <Text x={36} y={6.9}>
+        <Text x={36} y={6} h={6} className="font-mono">
           Customer
         </Text>
       </Layer>
       <Layer className={c.flash2}>
         <Px paper={rect(69, 19, 26, 4)} />
-        <Text x={70} y={18.9}>
+        <Text x={70} y={18} h={6} className="font-mono">
           Order
         </Text>
       </Layer>
@@ -380,7 +377,7 @@ function AIChatMechanism() {
           <Strip items={['Searching', 'Searched']} h={7} className={c.label} />
         </Clip>
       </Layer>
-      <Text x={39} y={12.4} className={`opacity-55 ${c.count}`}>
+      <Text x={39} y={11} h={7} className={`opacity-55 ${c.count}`}>
         3 results
       </Text>
       <Px ink={rect(0, 22, 76, 1)} className={c.answer0} />
@@ -435,29 +432,29 @@ function LLMsMechanism() {
         knock={rect(5, 27, 10, 1) + rect(5, 29, 14, 1) + rect(5, 31, 8, 1)}
         orange={art(PLAY, 28, 19)}
       />
-      <Text x={34} y={0.4} className="bt-code opacity-55">
+      <Text x={34} y={0} h={4} className="bt-code opacity-55">
         /docs/markdown/twoslash.md
       </Text>
       <Px x={1} y={7} w={24} h={1} orange={rect(0, 0, 24, 1)} className={c.beam} />
       <Layer className={c.title}>
-        <Text x={37} y={6.9} className="bt-code">
+        <Text x={37} y={7} h={3} className="bt-code">
           #
         </Text>
         <Px ink={rect(41, 8, 22, 1)} />
       </Layer>
       <Px ink={rect(37, 12, 40, 1)} className={c.description} />
       <Layer className={c.heading}>
-        <Text x={37} y={14.9} className="bt-code">
+        <Text x={37} y={15} h={3} className="bt-code">
           ##
         </Text>
         <Px ink={rect(43, 16, 12, 1)} />
       </Layer>
       <Px ink={rect(37, 20, 50, 1) + rect(37, 22, 36, 1)} className={c.paragraph} />
-      <Text x={37} y={24.9} className={`bt-code ${c.fence}`}>
+      <Text x={37} y={25} h={3} className={`bt-code ${c.fence}`}>
         ```ts
       </Text>
       <Px ink={rect(39, 30, 30, 1)} className={c.code} />
-      <Text x={37} y={32.9} className={`bt-code ${c.close}`}>
+      <Text x={37} y={33} h={3} className={`bt-code ${c.close}`}>
         ```
       </Text>
     </Stage>
@@ -493,11 +490,25 @@ const i18n = choreograph('i18n', 48, {
 const HALF = 25 / 3;
 const LOW = 26 / 3;
 
+interface FlapProps {
+  x: number;
+  y: number;
+  w: number;
+  values: readonly string[];
+  /** the values are codes, like a locale's */
+  code?: boolean;
+}
+
 /** a split-flap unit, 17 cells tall; static halves under the falling flaps */
-function Flap({ x, y, w, values }: { x: number; y: number; w: number; values: readonly string[] }) {
+function Flap({ x, y, w, values, code }: FlapProps) {
   const c = i18n.cls;
   const faces = (className: string) => (
-    <Strip items={values} h={17} itemClassName="bt-flap-face" className={className} />
+    <Strip
+      items={values}
+      h={17}
+      itemClassName={code ? 'bt-flap-face font-mono' : 'bt-flap-face'}
+      className={className}
+    />
   );
   return (
     <>
@@ -522,7 +533,7 @@ function Flap({ x, y, w, values }: { x: number; y: number; w: number; values: re
 function I18nMechanism() {
   return (
     <Stage c={i18n}>
-      <Flap x={0} y={3} w={32} values={LOCALES} />
+      <Flap x={0} y={3} w={32} values={LOCALES} code />
       <Layer className="bt-lag">
         <Flap x={0} y={22} w={96} values={LABELS} />
       </Layer>
@@ -585,7 +596,7 @@ function OGMechanism() {
           frame(69, 0, 9, 6)
         }
       />
-      <Text x={24} y={0.1} className="bt-code">
+      <Text x={22} y={0} w={20} h={3} className="bt-code justify-center">
         1200×630
       </Text>
       <Layer className="bt-ink-card">
@@ -594,10 +605,10 @@ function OGMechanism() {
           knock={dither(5, 14, 44, 2, 12) + dither(5, 18, 30, 2, 12)}
           orange={dashes(5, 22, 54, 3, 2) + art(LOGO, 5, 28) + rect(1, 36, 62, 2)}
         />
-        <Text x={5} y={7.8} className="text-(--bt-paper)">
+        <Text x={5} y={8} h={4} className="text-(--bt-paper)">
           Twoslash
         </Text>
-        <Text x={12} y={27.9} className="text-(--bt-orange)">
+        <Text x={12} y={28} h={5} className="text-(--bt-orange)">
           Fumadocs
         </Text>
       </Layer>
@@ -619,7 +630,7 @@ function OGMechanism() {
   );
 }
 
-// Twoslash: a code block of the docs example: hovering `player` pops its type from the compiler
+// Twoslash: a code block like the docs example: hovering `player` pops its type from the compiler
 const POINTER = [
   '#......',
   '##.....',
@@ -657,16 +668,21 @@ function TwoslashMechanism() {
         }
         orange={rect(5, 6, 8, 1)}
       />
-      {/* a size down from the board's code, so the docs' whole line fits in the frame */}
-      <Text x={5} y={15.2} className="bt-code text-[9px]!">
+      <Text x={5} y={15} h={3} className="bt-code">
         <span className="text-(--bt-orange)">const</span>
-        {" player: Player = { name: 'Hello World' };"}
+        {" player: Player = { name: 'Hello' };"}
       </Text>
       <Layer className={c.popup}>
-        <Px paper={rect(15, 3, 40, 9)} ink={frame(15, 3, 40, 9) + rect(20, 12, 1, 1)} />
-        <Text x={17} y={5.6} className="bt-code text-[9px]!">
+        {/* the popup's frame is a cell thick and as wide as its type */}
+        <Text
+          x={15}
+          y={3}
+          h={9}
+          className="bt-code border-[3px] border-(--bt-ink) bg-(--bt-paper) px-[3px]"
+        >
           <span className="text-(--bt-orange)">const</span> player: Player
         </Text>
+        <Px ink={rect(20, 12, 1, 1)} />
       </Layer>
       <Px
         x={21}
@@ -706,7 +722,7 @@ function TypeTableMechanism() {
         <Px
           ink={dashes(1, 14 + 6 * i, 94, 1, 1) + (i < 2 ? art(CHEVRON_DOWN, 88, 10 + 6 * i) : '')}
         />
-        <Text x={3} y={9.5 + 6 * i} className="bt-code">
+        <Text x={3} y={9 + 6 * i} h={5} className="bt-code">
           {PROPS[i]}
         </Text>
       </Layer>,
@@ -716,30 +732,30 @@ function TypeTableMechanism() {
   return (
     <Stage c={table}>
       <Px ink={frame(0, 0, 96, 40) + dashes(1, 8, 94, 1, 1)} />
-      <Text x={3} y={2.4} className="opacity-55">
+      <Text x={3} y={1} h={7} className="opacity-55">
         Prop
       </Text>
       {rows}
       <Px ink={art(CHEVRON_DOWN, 88, 22)} className={c.closed} />
       <Layer className={`bt-on-hi ${c.open}`}>
         <Px hi={rect(1, 20, 94, 6)} ink={art(CHEVRON_UP, 88, 22)} />
-        <Text x={3} y={21.5} className="bt-code">
+        <Text x={3} y={21} h={5} className="bt-code">
           options?
         </Text>
       </Layer>
       <Layer className={c.type}>
-        <Text x={4} y={28.4} className="opacity-55">
+        <Text x={4} y={28} h={5} className="opacity-55">
           Type
         </Text>
-        <Text x={24} y={28.9} className="bt-code">
+        <Text x={24} y={28} h={5} className="bt-code">
           {'Partial<{ a: unknown }>'}
         </Text>
       </Layer>
       <Layer className={c.default}>
-        <Text x={4} y={33.4} className="opacity-55">
+        <Text x={4} y={33} h={5} className="opacity-55">
           Default
         </Text>
-        <Text x={24} y={33.9} className="bt-code">
+        <Text x={24} y={33} h={5} className="bt-code">
           {'{ a: "test" }'}
         </Text>
       </Layer>
@@ -770,7 +786,7 @@ function StoryMechanism() {
     picks.push(
       <Layer key={VARIANTS[i]} className={`bt-on-hi ${pickCls[i]}`}>
         <Px hi={rect(64, 8 + 7 * i, 31, 7)} />
-        <Text x={66} y={8.9 + 7 * i}>
+        <Text x={66} y={8 + 7 * i} h={7}>
           {VARIANTS[i]}
         </Text>
       </Layer>,
@@ -779,10 +795,10 @@ function StoryMechanism() {
 
   return (
     <Stage c={story}>
-      <Text x={0} y={0.9}>
+      <Text x={0} y={0} h={7}>
         Callout
       </Text>
-      <Text x={44} y={0.9} className="opacity-55">
+      <Text x={44} y={0} h={7} className="opacity-55">
         Variant
       </Text>
       <Clip x={65} y={0} w={22} h={7}>
@@ -803,7 +819,7 @@ function StoryMechanism() {
         }
         paper={rect(7, 13, 82, 11)}
       />
-      <Text x={2} y={33.4} className="opacity-55">
+      <Text x={2} y={33} h={6} className="opacity-55">
         title
       </Text>
       <Px ink={art(INFO, 9, 15)} className={c.info} />
@@ -814,10 +830,10 @@ function StoryMechanism() {
       />
       <Layer className={c.menu}>
         <Px paper={rect(63, 7, 33, 16)} ink={frame(63, 7, 33, 16)} />
-        <Text x={66} y={8.9}>
+        <Text x={66} y={8} h={7}>
           {VARIANTS[0]}
         </Text>
-        <Text x={66} y={15.9}>
+        <Text x={66} y={15} h={7}>
           {VARIANTS[1]}
         </Text>
         {picks}
@@ -859,17 +875,19 @@ const obsidian = choreograph('obsidian', 32, {
 function ObsidianMechanism() {
   const c = obsidian.cls;
   const hlCls = [c.hl0, c.hl1, c.hl2];
+  const linkCls = [c.link0, c.link1, c.link2];
   const lines = [];
   for (let i = 0; i < LINES.length; i++) {
     const y = 10 + 9 * i;
     lines.push(
-      <Text key={i} x={3} y={y + 0.7} className="bt-code">
-        {LINES[i]}
+      // the line, and its link drawn on to the page's column
+      <Text key={i} x={2} y={y} w={54} h={5} className="bt-code">
+        <span className="px-[3px]">{LINES[i]}</span>
+        <span className={`bt-dashes flex-1 ${linkCls[i]}`} />
       </Text>,
       <Layer key={`hl${i}`} className={`bt-on-hi ${hlCls[i]}`}>
-        <Px hi={rect(2, y, LINES[i].length * 2 + 2, 5)} />
-        <Text x={3} y={y + 0.7} className="bt-code">
-          {LINES[i]}
+        <Text x={2} y={y} h={5} className="bt-code">
+          <span className="flex items-center self-stretch bg-lp-yellow px-[3px]">{LINES[i]}</span>
         </Text>
       </Layer>,
     );
@@ -889,16 +907,13 @@ function ObsidianMechanism() {
           rect(3, 35, 20, 1)
         }
       />
-      <Text x={3} y={1.6}>
+      <Text x={3} y={1} h={6}>
         Welcome
       </Text>
       {lines}
-      <Px x={38} y={12} w={18} h={1} ink={dashes(0, 0, 18, 2, 1)} className={c.link0} />
-      <Px x={28} y={21} w={28} h={1} ink={dashes(0, 0, 28, 2, 1)} className={c.link1} />
-      <Px x={30} y={30} w={26} h={1} ink={dashes(0, 0, 26, 2, 1)} className={c.link2} />
       <Layer className={c.note}>
         <Px ink={frame(56, 7, 40, 10)} paper={rect(57, 8, 38, 8)} />
-        <Text x={58} y={9.6} className="text-lp-orange underline underline-offset-2">
+        <Text x={58} y={8} h={8} className="text-lp-orange underline underline-offset-2">
           create a link
         </Text>
       </Layer>

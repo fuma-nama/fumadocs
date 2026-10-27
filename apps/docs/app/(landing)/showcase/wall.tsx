@@ -3,7 +3,7 @@ import Image from 'next/image';
 import { ArrowUpRight } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { type ShowcaseObject, vercel } from '@/lib/showcases';
-import { address, fit, SiteTile } from '../ui/site-tile';
+import { address, SiteTile } from '../ui/site-tile';
 import { TitleBar } from '../ui/window';
 import { arrange, copy, kinds, suggest } from './data';
 import { Peek } from './peek';
@@ -18,6 +18,9 @@ const invert =
 /** a cell overlaps its neighbours by its 1px frame, so the grid's outer edges are its frames' */
 const cell = '-ms-px -mt-px';
 const frame = 'h-full border border-lp-line-strong';
+/** a dotted leader on the baseline, from a name to what it points at */
+const leader =
+  'h-px min-w-4 flex-1 bg-[linear-gradient(to_right,currentColor_1px,transparent_1px)] bg-size-[4px_1px] opacity-60';
 const grid = 'grid grid-cols-2 ps-px pt-px md:grid-cols-4 xl:grid-cols-6';
 
 function Featured({ site }: { site: Required<ShowcaseObject> }) {
@@ -32,20 +35,28 @@ function Featured({ site }: { site: Required<ShowcaseObject> }) {
           frame,
         )}
       >
-        <TitleBar title={<span className={cn('-mx-2 block px-2', invert)}>{site.name}</span>} />
+        <TitleBar
+          title={
+            <span className={cn('-mx-2 block px-2 font-sans font-medium', invert)}>
+              {site.name}
+            </span>
+          }
+        />
         <span className="relative block aspect-[1.91/1] overflow-hidden">
           <Image src={site.image} alt="" fill sizes={featuredSizes} className="object-cover" />
         </span>
+        {/* what it is, a dotted leader on the baseline, where it lives */}
         <span
           className={cn(
-            'mt-auto flex h-9 items-center justify-between gap-3 border-t border-lp-line-strong px-3 font-mono text-xs',
+            'mt-auto flex items-baseline gap-2 border-t border-lp-line-strong px-3 py-2.5 text-xs leading-4 font-medium',
             invert,
           )}
         >
           <span className="text-lp-ink-2 group-hover:text-lp-paper group-focus-visible:text-lp-paper">
             {kinds[site.url]}
           </span>
-          <span className="inline-flex items-center gap-1">
+          <span aria-hidden className={leader} />
+          <span className="inline-flex items-center gap-1 font-mono font-normal">
             {address(site.url)}
             <ArrowUpRight aria-hidden className="size-3.5" />
           </span>
@@ -64,12 +75,15 @@ function Vercel() {
           href={item.url}
           target="_blank"
           rel="noreferrer noopener"
-          className="group flex min-h-9 flex-1 items-center justify-between gap-3 px-3 font-mono text-xs hover:bg-lp-ink hover:text-lp-paper focus-visible:bg-lp-ink focus-visible:text-lp-paper focus-visible:outline-none"
+          className="group flex min-h-9 flex-1 items-center px-3 text-xs font-medium hover:bg-lp-ink hover:text-lp-paper focus-visible:bg-lp-ink focus-visible:text-lp-paper focus-visible:outline-none"
         >
-          <span className="font-sans text-[15px] font-medium">{item.name}</span>
-          <span className="inline-flex items-center gap-1 text-lp-ink-2 group-hover:text-lp-paper group-focus-visible:text-lp-paper">
-            {kinds[item.url]}
-            <ArrowUpRight aria-hidden className="size-3.5" />
+          <span className="flex flex-1 items-baseline gap-2">
+            <span className="text-[15px]">{item.name}</span>
+            <span aria-hidden className={leader} />
+            <span className="inline-flex items-center gap-1 text-lp-ink-2 group-hover:text-lp-paper group-focus-visible:text-lp-paper">
+              {kinds[item.url]}
+              <ArrowUpRight aria-hidden className="size-3.5" />
+            </span>
           </span>
         </a>
       </li>,
@@ -79,7 +93,7 @@ function Vercel() {
     <li className={cn('col-span-2 flex flex-col border border-lp-line-strong bg-lp-paper', cell)}>
       <TitleBar
         title={
-          <span className="inline-flex items-center gap-1.5">
+          <span className="inline-flex items-center gap-1.5 font-sans font-medium">
             <svg aria-hidden viewBox="0 0 74 64" className="h-2.5 w-3 fill-current">
               <path d="M37.59.25 74.54 64.25H.64L37.59.25Z" />
             </svg>
@@ -93,32 +107,10 @@ function Vercel() {
   );
 }
 
-/**
- * A site's tile. Its title bar fits about 20 characters of the pixel type, 15 in a tile under 160px
- * on a small phone; its initial, for a site without a screenshot, scales with it.
- */
 function Tile({ site }: { site: ShowcaseObject }) {
-  const short = fit(site.name, 15);
   return (
     <li className={cell}>
-      <SiteTile
-        site={site}
-        sizes={tileSizes}
-        name={
-          short === site.name ? undefined : (
-            <>
-              <span className="sr-only">{site.name}</span>
-              <span aria-hidden className="@max-[159px]:hidden">
-                {fit(site.name, 20)}
-              </span>
-              <span aria-hidden className="hidden @max-[159px]:inline">
-                {short}
-              </span>
-            </>
-          )
-        }
-        className={cn('@container [&_[data-glyph]]:text-[min(88px,40cqw)]', frame)}
-      />
+      <SiteTile site={site} sizes={tileSizes} className={frame} />
     </li>
   );
 }

@@ -4,10 +4,10 @@ import { BAYER4, DITHER_MASKS } from '../../lib/dither';
 import { TICK } from '../../lib/motion';
 
 /*
- * The stage of a mechanism: 96x40 cells of 3px, the grid Geist Pixel at 40px draws on. Parts are
- * SVG paths and labels placed in cells, posed by tracks on the 125 ms tick grid.
+ * The stage of a mechanism: 96x40 cells of 3px. Parts are SVG paths and labels placed in cells,
+ * posed by tracks on the 125 ms tick grid.
  */
-export const CELL = 3;
+const CELL = 3;
 
 export function rect(x: number, y: number, w: number, h: number): string {
   return `M${x} ${y}h${w}v${h}h${-w}z`;
@@ -158,8 +158,13 @@ export function draw(from: number, count: number, to: number): Track {
   };
 }
 
-function box(x: number, y: number, w: number, h: number): CSSProperties {
-  return { left: x * CELL, top: y * CELL, width: w * CELL, height: h * CELL };
+function box(x: number, y: number, w: number | undefined, h: number): CSSProperties {
+  return {
+    left: x * CELL,
+    top: y * CELL,
+    width: w === undefined ? undefined : w * CELL,
+    height: h * CELL,
+  };
 }
 
 /** a 96x40 cell stage running one choreography */
@@ -215,21 +220,24 @@ export function Px({ x = 0, y = 0, w = 96, h = 40, className, ...tones }: PxProp
 interface PartProps {
   x: number;
   y: number;
+  /** cells across; a label without it is as wide as its text */
+  w?: number;
+  h: number;
   className?: string;
   children: ReactNode;
 }
 
-/** a Geist Pixel label where one font pixel is one CSS px */
-export function Text({ x, y, className, children }: PartProps) {
+/** a label in the middle of its row of `h` cells, its parts laid out in a line */
+export function Text({ x, y, w, h, className, children }: PartProps) {
   return (
-    <span className={cn('bt-text', className)} style={{ left: x * CELL, top: y * CELL }}>
+    <span className={cn('bt-text flex items-center', className)} style={box(x, y, w, h)}>
       {children}
     </span>
   );
 }
 
 /** a window that clips what moves inside it */
-export function Clip({ x, y, w, h, className, children }: PartProps & { w: number; h: number }) {
+export function Clip({ x, y, w, h, className, children }: PartProps & { w: number }) {
   return (
     <span className={cn('overflow-clip *:absolute', className)} style={box(x, y, w, h)}>
       {children}

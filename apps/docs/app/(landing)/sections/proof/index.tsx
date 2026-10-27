@@ -1,14 +1,20 @@
+import type { ReactNode } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { type ShowcaseObject, showcases, vercel } from '@/lib/showcases';
+import { cn } from '@/lib/cn';
+import { showcases, vercel } from '@/lib/showcases';
 import { copy, quotes } from '../../content';
 import { Figure, FigureHeader } from '../../ui/figure';
+import { SiteTile } from '../../ui/site-tile';
 import { type Counter, Counters } from './counters';
 import { getContributorCount, getDownloads, getStars } from './data';
 import { Press } from './press';
 
 /** tiles on the wall, the rest are on the showcase page */
 const WALL = 30;
+/** tiles on phones, the rest of the wall shows from md */
+const PHONE = 12;
+const sizes = '(min-width: 1280px) 208px, (min-width: 768px) 20vw, 50vw';
 
 export async function Proof() {
   const [stars, downloads, contributors] = await Promise.all([
@@ -16,9 +22,15 @@ export async function Proof() {
     getDownloads(),
     getContributorCount(),
   ]);
-  const sites: Required<ShowcaseObject>[] = [];
-  for (const { name, url, image } of showcases) {
-    if (image && sites.length < WALL) sites.push({ name, url, image });
+  const tiles: ReactNode[] = [];
+  for (const site of showcases) {
+    if (tiles.length === WALL) break;
+    if (!site.image) continue;
+    tiles.push(
+      <li key={site.url} className={cn(tiles.length >= PHONE && 'max-md:hidden')}>
+        <SiteTile site={site} sizes={sizes} />
+      </li>,
+    );
   }
   const online = showcases.length + vercel.length;
 
@@ -39,7 +51,11 @@ export async function Proof() {
       {/* 9 | 3 of 12 columns, the wall's rounded to whole pixels: a half pixel left a seam inside its frame */}
       <div className="grid gap-6 xl:grid-cols-[round(75%_-_6px,1px)_minmax(0,1fr)]">
         <div className="flex flex-col gap-4">
-          <Press sites={sites} />
+          <Press>
+            <ul className="grid grid-cols-2 gap-px border border-lp-line-strong bg-lp-line-strong md:grid-cols-5">
+              {tiles}
+            </ul>
+          </Press>
           {/* ends level with the testimonials when they run longer than the wall */}
           <div className="mt-auto flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
             <Link
@@ -47,9 +63,7 @@ export async function Proof() {
               className="-ms-1.5 inline-flex items-baseline gap-2 px-1.5 text-sm font-medium underline decoration-lp-line-strong underline-offset-4 hover:bg-lp-ink hover:text-lp-paper hover:no-underline focus-visible:bg-lp-ink focus-visible:text-lp-paper focus-visible:no-underline focus-visible:outline-none"
             >
               See all {online} sites
-              <span aria-hidden>
-                -&gt;
-              </span>
+              <span aria-hidden>-&gt;</span>
             </Link>
             <p className="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-sm text-lp-ink-2">
               Also the docs of Vercel’s open source SDKs:
@@ -75,7 +89,7 @@ export async function Proof() {
               key={quote.name}
               className="flex flex-col border border-lp-line-strong bg-lp-paper"
             >
-              <blockquote className="flex-1 px-4 pt-3.5 pb-4 text-[15px] leading-normal text-pretty">
+              <blockquote className="flex-1 px-4 pt-3.5 pb-4 text-[15px] leading-normal text-pretty -indent-[0.42em] before:text-lp-orange before:content-['“'] after:text-lp-orange after:content-['”']">
                 {quote.message}
               </blockquote>
               <figcaption className="flex items-center gap-3 border-t border-lp-line px-4 py-2.5">
@@ -89,7 +103,7 @@ export async function Proof() {
                 />
                 <span className="flex min-w-0 flex-col">
                   <span className="truncate text-sm font-medium">{quote.name}</span>
-                  <span className="truncate text-[13px] text-lp-ink-2">{quote.role}</span>
+                  <span className="truncate text-sm text-lp-ink-2">{quote.role}</span>
                 </span>
               </figcaption>
             </figure>

@@ -36,9 +36,8 @@ export default function Page() {
       >
         {/* side by side, the button's bottom edge sits on the base's */}
         <div className="flex flex-col gap-4">
-          <h1 className="text-4xl leading-[1.02] font-medium tracking-[-0.035em] text-balance md:text-6xl">
-            <Lead>{copy.header.lead}</Lead>{' '}
-            <span className="block max-w-[16ch]">{copy.header.title}</span>
+          <h1 className="text-[clamp(2rem,1.25rem+3.5vw,3.75rem)] leading-[1.02] font-medium tracking-tight text-balance">
+            <Lead>{copy.header.lead}</Lead> {copy.header.title}
           </h1>
           <a
             href={suggest}

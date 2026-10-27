@@ -1,108 +1,3 @@
-/* the board takes `--cols` from its root; a seam's `--bt-at` is when it powers on, a cell's delays
-   are inline */
-
-.bt-board {
-  /* twelve modules */
-  --rows: calc(12 / var(--cols));
-  grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
-}
-
-/* row 13 at rest (reduced motion): two names to each column of the board */
-.bt-more {
-  grid-template-columns: repeat(var(--cols), minmax(0, 1fr) minmax(0, 1fr));
-}
-
-/* the last column ends on the sheet's wider gutter: room for a mechanism between two gutters */
-@media (min-width: 1400px) {
-  .bt-board {
-    grid-template-columns:
-      repeat(3, minmax(0, 1fr))
-      minmax(calc(var(--bt-stage) + 2 * var(--lp-gutter)), 1fr);
-  }
-
-  .bt-more {
-    grid-template-columns:
-      repeat(6, minmax(0, 1fr))
-      repeat(2, minmax(calc(var(--bt-stage) / 2 + var(--lp-gutter)), 1fr));
-  }
-}
-
-/*
- * seams: absolutely positioned grid children sit on the real cell edges; seam k is the top
- * (or left) edge of row (or column) k + 1, the ones past the last row or column are hidden
- */
-.bt-seam-h,
-.bt-seam-v,
-.bt-board::after {
-  position: absolute;
-  z-index: 1;
-  pointer-events: none;
-  background-color: var(--lp-line);
-}
-
-.bt-seam-h,
-.bt-board::after {
-  inset-inline: 0;
-  height: 1px;
-  transform-origin: left;
-  --bt-draw: bt-draw-h;
-  --bt-at: calc(min(var(--k), var(--rows)) * 63ms);
-}
-
-.bt-seam-h {
-  top: 0;
-  grid-column: 1 / -1;
-  opacity: clamp(0, var(--rows) - var(--k), 1);
-}
-
-.bt-board::after {
-  content: '';
-  bottom: 0;
-  --k: var(--rows);
-}
-
-.bt-seam-v {
-  inset-block: 0;
-  left: 0;
-  width: 1px;
-  grid-row: 1 / -1;
-  transform-origin: top;
-  opacity: clamp(0, var(--cols) - var(--k), 1);
-  --bt-draw: bt-draw-v;
-  --bt-at: calc(125ms + var(--k) * 63ms);
-}
-
-.bt-board[data-power='off'] :is(.bt-seam-h, .bt-seam-v),
-.bt-board[data-power='off']::after {
-  visibility: hidden;
-}
-
-/* the seams carry current while they draw, then cool to a hairline */
-.bt-board[data-power='on'] :is(.bt-seam-h, .bt-seam-v),
-.bt-board[data-power='on']::after {
-  animation:
-    var(--bt-draw) 700ms cubic-bezier(0.16, 1, 0.3, 1) var(--bt-at) backwards,
-    bt-hot 1000ms steps(1, end) var(--bt-at) backwards;
-}
-
-@keyframes bt-draw-h {
-  from {
-    transform: scaleX(0);
-  }
-}
-
-@keyframes bt-draw-v {
-  from {
-    transform: scaleY(0);
-  }
-}
-
-@keyframes bt-hot {
-  from {
-    background-color: var(--lp-sun);
-  }
-}
-
 .bt-cell {
   --bt-ink: var(--lp-ink);
   --bt-paper: var(--lp-paper);
@@ -110,8 +5,9 @@
   --bt-speed: 1;
   /* orange over ink-filled cards: vivid while the ink is dark */
   --bt-on-ink: var(--lp-sun);
-  /* content starts on the gutter; the end gives way so a mechanism always fits */
-  padding-inline-end: min(var(--lp-gutter), calc(100% - var(--lp-gutter) - var(--bt-stage)));
+  /* content starts on the gutter; the end, inside the cell's 1px line, gives way so a mechanism
+     always fits */
+  padding-inline-end: min(var(--lp-gutter), calc(100% - 1px - var(--lp-gutter) - var(--bt-stage)));
 }
 
 .bt-cell:hover,
@@ -119,6 +15,7 @@
   --bt-ink: var(--lp-paper);
   --bt-paper: var(--lp-ink);
   --bt-speed: 2;
+  --bt-orange: var(--lp-orange-on-ink);
   --bt-on-ink: var(--lp-orange);
   background-color: var(--lp-ink);
   color: var(--lp-paper);
@@ -129,42 +26,20 @@
   --bt-orange: var(--bt-on-ink);
 }
 
-/* power on: unlit until its tick, one inverted frame, then the content */
-.bt-board[data-power] .bt-cell {
-  opacity: 0.15;
-}
-
-.bt-board[data-power] .bt-cell[data-on] {
-  animation: bt-power 125ms steps(1, end) forwards;
-}
-
-@keyframes bt-power {
-  0% {
-    opacity: 1;
-    background-color: var(--lp-ink);
-    color: var(--lp-paper);
-    --bt-ink: var(--lp-paper);
-    --bt-paper: var(--lp-ink);
-  }
-  100% {
-    opacity: 1;
-  }
-}
-
 .bt-text {
-  font-family: var(--font-mono);
   font-size: 12px;
+  font-weight: 500;
   line-height: 1;
   white-space: pre;
 }
 
 .bt-code {
   font-family: var(--font-mono);
-  /* 6px per character, two cells */
+  /* a character is two cells: 0.6em */
   font-size: 10px;
 }
 
-/* a split-flap face: two pixels per font pixel, the bottom half shows the lower part */
+/* a split-flap face, the bottom half shows the lower part */
 .bt-flap-face {
   display: flex;
   width: 100%;
@@ -173,8 +48,8 @@
   justify-content: center;
   background-color: var(--bt-ink);
   color: var(--bt-paper);
-  font-family: var(--font-mono);
   font-size: 22px;
+  font-weight: 500;
 }
 
 /* content on the yellow highlight is always dark */
@@ -183,20 +58,21 @@
   color: #121210;
 }
 
+/* a dashed line on the cell grid: two cells drawn, one skipped */
+.bt-dashes {
+  height: 3px;
+  background-image: repeating-linear-gradient(to right, var(--bt-ink) 0 6px, transparent 6px 9px);
+}
+
 .bt-a {
   animation-duration: calc(var(--bt-dur) / var(--bt-speed));
   animation-timing-function: steps(1, end);
   animation-iteration-count: infinite;
 }
 
-/* one focal point: only the active cell plays its loop, the others hold their key pose */
+/* only an active cell plays its loop, the others hold their key pose */
 .bt-cell:not([data-active]) .bt-a {
   animation: none;
-}
-
-/* idle micro-motion of the resting cells: a caret, a status light */
-.bt-cell:not([data-active]) .bt-blink {
-  animation: lp-caret 1s steps(1, end) infinite;
 }
 
 /* the second unit of a flap display follows one tick later */
@@ -204,47 +80,8 @@
   animation-delay: calc(125ms / var(--bt-speed));
 }
 
-[data-run='off'] :is(.bt-a, .bt-blink, .bt-track) {
-  animation-play-state: paused;
-}
-
-/* row 13: further integrations */
-.bt-track {
-  animation: bt-marquee 80s linear infinite;
-}
-
-.bt-marquee:is(:hover, :focus-within) .bt-track {
-  animation-play-state: paused;
-}
-
-@keyframes bt-marquee {
-  to {
-    transform: translateX(-50%);
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .bt-more {
-    display: grid;
-  }
-
-  /*
-   * each name on its column's content edge, like the titles above, its highlight bleeding past
-   * it; a size down so the longest one fits half a column
-   */
-  .bt-track a {
-    width: max-content;
-    height: 36px;
-    margin-inline-start: calc(var(--lp-gutter) - 8px);
-    padding-inline: 8px;
-    font-size: 12px;
-    white-space: nowrap;
-  }
-
-  .bt-track,
-  .bt-board :is(.bt-a, .bt-seam-h, .bt-seam-v, .bt-cell),
-  .bt-cell:not([data-active]) .bt-blink,
-  .bt-board::after {
+  .bt-a {
     animation: none;
   }
 }

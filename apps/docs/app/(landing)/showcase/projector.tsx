@@ -14,10 +14,8 @@ import { useReducedMotion } from 'motion/react';
 import { LEGS, MATE_H, MATE_PAD, MATE_W, SPRITE_W } from '@/components/mascot/sprite';
 import { cn } from '@/lib/cn';
 import type { ShowcaseObject } from '@/lib/showcases';
-import { whenSeen } from '../lib/later';
 import { clamp, TICK } from '../lib/motion';
 import { report } from '../lib/status';
-import { onTheme } from '../lib/theme';
 import { useIsClient } from '../lib/use-is-client';
 import { address } from '../ui/site-tile';
 import { Roller } from '../ui/text';
@@ -36,6 +34,7 @@ import {
   printFrame,
   type ProjectorEngine,
   SEAT_X,
+  SIDE,
   STRIP_Y,
   TRACK_LEFT,
   TRACK_RIGHT,
@@ -54,9 +53,6 @@ const LINE = { vectorEffect: 'non-scaling-stroke' } as const;
 const TRACK = TRACK_RIGHT - TRACK_LEFT;
 /** frames kept on the strip either side of the gate and the next frame; their screenshots load */
 const NEAR = 4;
-/** frames the strip shows either side of the gate; they print in one a tick at first */
-const SIDE = 2;
-const PRINT_IN = (SIDE * 2 + 1) * TICK;
 const DARKEN = TICK * 2;
 /** the name on the base rolls to the next within the pull and the develop, 6 ticks a cell at most */
 const ROLL = 500;
@@ -138,7 +134,7 @@ export function Projector({ sites, back, front }: ProjectorProps) {
       const instance = createProjector(element, sites.length, reduced, {
         leave(from, to) {
           leaves++;
-          if (!reduced) dither(layer(from), 0, 16, DARKEN);
+          if (!reduced) dither(layer(from), 16, DARKEN);
           setHeading(to);
           report(element, `showing ${address(sites[to].url)}`);
         },
@@ -161,33 +157,7 @@ export function Projector({ sites, back, front }: ProjectorProps) {
         },
       });
       engine.current = instance;
-
-      // prints follow the strip's size and the theme; the ones loaded before hydration print now
-      const reprint = () => {
-        for (const frame of element.querySelectorAll('[data-frame]')) printFrame(frame);
-      };
-      const resize = new ResizeObserver(reprint);
-      resize.observe(element.querySelector('[data-reel]')!);
-      const stopTheme = onTheme(() => {
-        reprint();
-        instance.restyle();
-      });
-
-      // the first time the reel is in view, the frames on the strip print in, then it plays
-      let boot = 0;
-      const stopView = whenSeen(
-        element,
-        () => {
-          element.dataset.booted = '';
-          boot = window.setTimeout(instance.boot, reduced ? 0 : PRINT_IN);
-        },
-        { threshold: 0.4 },
-      );
       return () => {
-        clearTimeout(boot);
-        stopView();
-        resize.disconnect();
-        stopTheme();
         instance.destroy();
         engine.current = null;
       };
@@ -200,7 +170,7 @@ export function Projector({ sites, back, front }: ProjectorProps) {
     if (!arrived.current) return;
     for (const layer of screen.current!.querySelectorAll<HTMLElement>('[data-layer]')) {
       if (layer.dataset.layer !== String(current) || reduced) hidePrint(layer);
-      else dither(layer, 16, 0, DEVELOP);
+      else dither(layer, 0, DEVELOP);
     }
   }, [current, reduced]);
 
@@ -277,7 +247,8 @@ export function Projector({ sites, back, front }: ProjectorProps) {
         data-frame={i}
         onClick={() => pick(i)}
         className={cn(
-          'group/frame absolute bg-lp-paper outline-lp-yellow focus-visible:outline-2 focus-visible:-outline-offset-2',
+          // focused like hovered, its print inverted, and ringed on the strip outside the gate
+          'group/frame absolute bg-lp-paper outline-lp-yellow focus-visible:outline-2 focus-visible:outline-offset-1',
           !shown && 'hidden',
         )}
         style={{ ...slot(i, frames), ...(i <= SIDE ? pop(i) : undefined) }}
@@ -297,7 +268,7 @@ export function Projector({ sites, back, front }: ProjectorProps) {
         <canvas
           aria-hidden
           className={cn(
-            'absolute inset-0 size-full [image-rendering:pixelated] group-hover/frame:invert',
+            'absolute inset-0 size-full [image-rendering:pixelated] group-hover/frame:invert group-focus-visible/frame:invert',
             reveal,
           )}
         />
@@ -380,16 +351,12 @@ export function Projector({ sites, back, front }: ProjectorProps) {
         />
       </div>
       {/* the base: the name of the site in the gate, the run switch and its lamp */}
-      <div className="@container flex h-12 items-center gap-3 border border-lp-line-strong bg-lp-paper px-4">
-        <p
-          className="min-w-0 flex-1 font-mono leading-none whitespace-nowrap"
-          style={{
-            fontSize: `min(24px, calc((100cqw - 96px) / ${(name.length * 0.62).toFixed(2)}))`,
-          }}
-        >
+      <div className="flex h-12 items-center gap-3 border border-lp-line-strong bg-lp-paper px-4">
+        {/* a name longer than the gate fades out at its edge */}
+        <p className="lp-voice min-w-0 flex-1 overflow-hidden text-2xl leading-none whitespace-nowrap [mask-image:linear-gradient(to_right,#000_calc(100%-2rem),transparent)]">
           <Roller value={name} step={ROLL_STEP} stagger={stagger} />
         </p>
-        <span className="font-mono text-[11px] leading-none text-lp-ink-2 motion-reduce:hidden">
+        <span className="text-xs leading-none font-medium text-lp-ink-2 motion-reduce:hidden">
           run
         </span>
         <button

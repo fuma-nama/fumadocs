@@ -1,7 +1,6 @@
 'use client';
 import { type CSSProperties, useCallback, useState } from 'react';
 import { useReducedMotion } from 'motion/react';
-import { cn } from '@/lib/cn';
 import { whenSeen } from '../../lib/later';
 import { TICK } from '../../lib/motion';
 import { Roller } from '../../ui/text';
@@ -28,7 +27,10 @@ function spans(i: number, count: number): CSSProperties {
   } as CSSProperties;
 }
 
-/** the counters under the wall and the testimonials, from xl a subgrid of their two columns */
+/**
+ * The counters under the wall and the testimonials, from xl a subgrid of their two columns. A column
+ * is never narrower than its number: a long one widens its column instead of overflowing.
+ */
 export function Counters({ items }: { items: Counter[] }) {
   const reduced = useReducedMotion();
   // counters rolled in so far, `null` at rest (the final numbers)
@@ -36,8 +38,9 @@ export function Counters({ items }: { items: Counter[] }) {
 
   const ref = useCallback(
     (root: HTMLDivElement | null) => {
-      if (!root || reduced) return;
-      // the entrance starts from zeros only once on screen, then rolls in a counter a tick
+      // counters the reader hasn't reached start from zeros once on screen, then roll in a counter
+      // a tick; ones already in view keep their numbers
+      if (!root || reduced || root.getBoundingClientRect().top < window.innerHeight) return;
       let timer = 0;
       let count = -1;
       const next = () => {
@@ -63,16 +66,14 @@ export function Counters({ items }: { items: Counter[] }) {
     cells.push(
       <div
         key={item.label}
-        style={{ '--len': text.length, ...spans(i, items.length) } as CSSProperties}
-        className="col-span-(--span) flex flex-col bg-lp-paper p-4 @container md:col-span-(--span-md) md:py-5 xl:col-span-(--span-xl)"
+        style={spans(i, items.length)}
+        className="col-span-(--span) flex flex-col bg-lp-paper p-4 md:col-span-(--span-md) md:py-5 xl:col-span-(--span-xl)"
       >
-        <dt className="text-[15px] leading-tight">{item.label}</dt>
-        <dd
-          className={cn(
-            // a long number keeps to its cell on a narrow phone: a digit is under half an em
-            'mt-5 text-[length:min(28px,calc(200cqw/var(--len)))] leading-none font-medium tracking-[-0.03em] text-lp-orange tabular-nums md:mt-8 md:text-5xl lg:text-[56px] xl:text-[64px] min-[87.5rem]:text-7xl',
-          )}
-        >
+        {/* a meter's plate: its name, a hairline on to the cell's edge */}
+        <dt className="flex items-center gap-2 text-xs font-medium text-lp-ink-2 after:h-px after:flex-1 after:bg-lp-line-strong">
+          {item.label}
+        </dt>
+        <dd className="mt-5 font-mono text-[28px] leading-none font-light tracking-[-0.05em] text-lp-orange md:mt-8 md:text-5xl lg:text-[56px] xl:text-[64px] min-[87.5rem]:text-7xl">
           <Roller
             key={printed === null ? 'rest' : 'roll'}
             value={shown ? text : text.replace(/\d/g, '0')}
@@ -89,10 +90,10 @@ export function Counters({ items }: { items: Counter[] }) {
   return (
     <div
       ref={ref}
-      className="grid grid-cols-2 gap-px border border-lp-line-strong bg-lp-line-strong md:grid-cols-5 xl:col-span-full xl:grid-cols-subgrid xl:gap-[normal] xl:border-0 xl:bg-transparent"
+      className="grid grid-cols-[repeat(2,minmax(min-content,1fr))] gap-px border border-lp-line-strong bg-lp-line-strong md:grid-cols-[repeat(5,minmax(min-content,1fr))] xl:col-span-full xl:grid-cols-subgrid xl:gap-[normal] xl:border-0 xl:bg-transparent"
     >
       {cells.length > 0 && (
-        <dl className="contents xl:grid xl:grid-cols-5 xl:gap-px xl:border xl:border-lp-line-strong xl:bg-lp-line-strong">
+        <dl className="contents xl:grid xl:grid-cols-[repeat(5,minmax(min-content,1fr))] xl:gap-px xl:border xl:border-lp-line-strong xl:bg-lp-line-strong">
           {cells}
         </dl>
       )}

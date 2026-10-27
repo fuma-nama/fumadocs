@@ -1,8 +1,9 @@
 import { type MateInk, mateInk, ORBIT_STEPS, paintMate } from '@/components/mascot/paint';
 import { LEGS, MATE_H, MATE_W, SIT } from '@/components/mascot/sprite';
+import { BAYER4, ditherKeyframes } from '../lib/dither';
+import { cssRgb } from '../lib/gl';
 import { BEAT, clamp, TICK } from '../lib/motion';
-import { isDark } from '../lib/theme';
-import { level, print, printDots, show } from '../ui/site-tile';
+import { isDark, onTheme } from '../lib/theme';
 
 /** the deck in its own units, y down from the viewer's bottom edge; it scales with its column */
 export const W = 640;
@@ -18,12 +19,8 @@ export const LEADER = 3;
 export const TRACK_LEFT = 136;
 export const TRACK_RIGHT = 504;
 export const GATE = (TRACK_LEFT + TRACK_RIGHT) / 2;
-
-/** the drums the reels turn in, and the radius of film wound on a reel: empty to full */
-export const DRUM_R = 56;
-export const DRUMS = { take: [68, STRIP_Y], feed: [572, STRIP_Y] } as const;
-const HUB = 12;
-export const FULL = 44;
+/** frames the strip shows either side of the gate; they print in one a tick at first */
+export const SIDE = 2;
 
 /** the Geneva drive under the gate: its wheel, the driver beside it, their centre distance */
 export const GENEVA_C = 30;
@@ -32,22 +29,6 @@ export const CRANK = GENEVA_C / Math.SQRT2;
 export const LOCK = 14;
 export const WHEEL = [GATE - 26, 136] as const;
 export const DRIVER = [WHEEL[0] + GENEVA_C, WHEEL[1]] as const;
-
-export const MOTOR = [GATE + 72, 138] as const;
-export const PULLEY = 5;
-export const DRIVER_PULLEY = 7.5;
-export const GAUGE = [MOTOR[0] + 39, MOTOR[1] - 13.5] as const;
-/** the needle's angle from upright when the motor stands, and its sweep to flat out */
-export const NEEDLE_REST = -70;
-export const NEEDLE_SWEEP = 140;
-
-export const ROLLER = 8;
-export const ROLLERS = [
-  [TRACK_LEFT + 22, STRIP_Y + BAND / 2 + ROLLER],
-  [TRACK_RIGHT - 22, STRIP_Y + BAND / 2 + ROLLER],
-] as const;
-
-export const DANCER = { pivot: [TRACK_LEFT + 30, 34] as const, length: 34, rest: 24, roller: 6 };
 
 /** her seat on the screen's bottom edge, over the free deck between the gate and the feed drum */
 export const SEAT_X = 420;
@@ -58,7 +39,7 @@ const LIGHT = [0.13, -0.18, 0.975] as const;
 /** a turn of the driver, one frame: its pin winds up for 3/8 of it and pulls for the middle quarter */
 const TURN = 1200;
 const WIND = (TURN * 3) / 8;
-/** the screen's develop, 8 steps, ends a frame after "showing constatic-docs.vercel.app" resolves */
+/** the screen's develop */
 export const DEVELOP = 312;
 /** the frame shows in colour this long before the next pull darkens it */
 const HOLD = 3000;
@@ -68,20 +49,8 @@ const PICK_MIN = 120;
 const FAR = 6;
 /** a straight run: the rewind at the reel's end, and a far pick */
 const RUN = 1000;
-
-/** the motor's speed for a turn of the driver, and flat out for a run */
-const MOTOR_TURN = ((2 * Math.PI) / TURN) * (DRIVER_PULLEY / PULLEY);
-const MOTOR_MAX = MOTOR_TURN * 12;
-/** the dancer's spring: how far the strip's speed lifts the arm, how fast it swings back */
-const LIFT = 70;
-const STIFF = 0.0011;
-const DAMP = 0.012;
-/** the gauge's needle reads the motor's speed on a stiffer spring */
-const NEEDLE_STIFF = 0.0016;
-const NEEDLE_DAMP = 0.05;
-
-/** the drums' centres, the take-up reel's first like the radii of `reels()` */
-const CENTRES = [DRUMS.take, DRUMS.feed];
+/** the frames on the strip print in, one a tick, before the reel first plays */
+const PRINT_IN = (SIDE * 2 + 1) * TICK;
 
 /**
  * Where the strip stands for a total driver angle, in frames. The driver rests with its pin away
@@ -101,16 +70,6 @@ function restAt(n: number): number {
   return -Math.PI + n * 2 * Math.PI;
 }
 
-/** the radius of film on a reel holding `share` of the reel, the area of film kept */
-function wound(share: number): number {
-  return Math.sqrt(HUB * HUB + clamp(share) * (FULL * FULL - HUB * HUB));
-}
-
-export function reels(position: number, count: number): [take: number, feed: number] {
-  const taken = (position + LEADER) / (count + LEADER * 2);
-  return [wound(taken), wound(1 - taken)];
-}
-
 function rotate(deg: number, [x, y]: readonly [number, number]) {
   return `rotate(${deg.toFixed(2)} ${x} ${y})`;
 }
@@ -119,8 +78,9 @@ export type ProjectorEngine = ReturnType<typeof createProjector>;
 
 /**
  * The projector's loop: still between frames; for a frame, the driver turns once and its pin turns
- * the Geneva wheel a quarter, which pulls the strip a frame and locks it. The reels, rollers, belt,
- * dancer arm and gauge follow.
+ * the Geneva wheel a quarter, which pulls the strip a frame and locks it. The first time the deck
+ * is seen, the frames on the strip print in; then it plays while on screen and out of the reader's
+ * hands.
  */
 export function createProjector(
   root: HTMLElement,
@@ -133,16 +93,6 @@ export function createProjector(
   const track = reel.parentElement!;
   const wheel = part('wheel');
   const driver = part('driver');
-  const belt = part('belt');
-  const pulley = part('pulley');
-  const dancer = part('dancer');
-  const needle = part('needle');
-  const spins = [
-    root.querySelectorAll<SVGElement>('[data-spin="take"]'),
-    root.querySelectorAll<SVGElement>('[data-spin="feed"]'),
-  ];
-  const wounds = [part('wound-take'), part('wound-feed')];
-  const rollers = [part('roller-0'), part('roller-1')];
   const mate = root.querySelector<HTMLCanvasElement>('canvas[data-mate]')!;
   const mateImage = new ImageData(MATE_W, MATE_H);
   let ink: MateInk | null = null;
@@ -158,29 +108,22 @@ export function createProjector(
   let rate = 0;
   let runFrom = 0;
   let runStart = 0;
+  /** forward, or back on a rewind */
+  let way = 1;
   let left = false;
   let queued: number | null = null;
 
   let on = true;
+  let seen = false;
   let booted = false;
   let held = false;
   let visible = false;
   let due = 0;
   let timer = 0;
+  let boot = 0;
   let raf = 0;
   let last = 0;
   let pitch = 0;
-
-  const turned = [0, 0];
-  let roll = 0;
-  let motor = 0;
-  let motorSpeed = 0;
-  /** forward or back: the motor keeps its last way round while it spins down */
-  let way = 1;
-  let swing = 0;
-  let swingSpeed = 0;
-  let gauge = 0;
-  let gaugeSpeed = 0;
 
   function measure() {
     const unit = track.clientWidth / (TRACK_RIGHT - TRACK_LEFT);
@@ -194,13 +137,18 @@ export function createProjector(
     write();
   }
 
+  /** the strip's frames, at their size and in the theme's colours */
+  function reprint() {
+    for (const frame of root.querySelectorAll('[data-frame]')) printFrame(frame);
+  }
+
   /** her on the screen's edge: her eyes follow the film while it moves (it runs left, a rewind
-   * right), she blinks as a frame locks, her moon steps round with the motor */
+   * right), she blinks as a frame locks, her moon steps round as the strip runs */
   function paintHer(now: number) {
     if (!ink) return;
     const moving = mode === 'run' || (mode === 'turn' && left);
     const eyes = now < blinkUntil ? 1 : moving ? (way > 0 ? 2 : 3) : 0;
-    const step = ((Math.floor((motor * 2) / Math.PI) % ORBIT_STEPS) + ORBIT_STEPS) % ORBIT_STEPS;
+    const step = ((Math.floor(position * 4) % ORBIT_STEPS) + ORBIT_STEPS) % ORBIT_STEPS;
     const shown = eyes * ORBIT_STEPS + step;
     if (shown === mateShown) return;
     mateShown = shown;
@@ -213,21 +161,10 @@ export function createProjector(
     reel.style.transform = `translate3d(${(-position * pitch).toFixed(2)}px, 0, 0)`;
     wheel.setAttribute('transform', rotate(-90 * indexed, WHEEL));
     driver.setAttribute('transform', rotate((alpha * 180) / Math.PI, DRIVER));
-    pulley.setAttribute('transform', rotate((motor * 180) / Math.PI, MOTOR));
-    belt.style.strokeDashoffset = (-motor * PULLEY).toFixed(2);
-    const r = reels(position, count);
-    for (let i = 0; i < 2; i++) {
-      wounds[i].setAttribute('r', r[i].toFixed(2));
-      const spun = rotate((-turned[i] * 180) / Math.PI, CENTRES[i]);
-      for (const element of spins[i]) element.setAttribute('transform', spun);
-      rollers[i].setAttribute('transform', rotate((-roll * 180) / Math.PI, ROLLERS[i]));
-    }
-    dancer.setAttribute('transform', rotate(swing, DANCER.pivot));
-    needle.setAttribute('transform', rotate(NEEDLE_REST + gauge * NEEDLE_SWEEP, GAUGE));
   }
 
   function playing() {
-    return on && booted && !held && visible && !document.hidden && !reduced;
+    return on && booted && !held && visible && !reduced;
   }
 
   function schedule() {
@@ -265,11 +202,10 @@ export function createProjector(
 
   function rest() {
     mode = 'rest';
-    if (queued !== null) {
-      const next = queued;
-      queued = null;
-      seek(next);
-    } else schedule();
+    const next = queued;
+    queued = null;
+    if (next !== null) seek(next);
+    if (mode === 'rest') schedule();
   }
 
   function step(now: number) {
@@ -277,7 +213,6 @@ export function createProjector(
     const dt = clamp(now - last, 0, 48);
     last = Math.max(last, now);
     const from = position;
-    let target = 0;
 
     if (mode === 'turn') {
       const end = restAt(goal);
@@ -285,12 +220,10 @@ export function createProjector(
       if (rate > 0 ? alpha >= end : alpha <= end) alpha = end;
       position = framesAt(alpha);
       indexed = position;
-      target = Math.abs(rate) * (DRIVER_PULLEY / PULLEY);
     } else if (mode === 'run') {
       const t = Math.min(1, (now - runStart) / RUN);
       // a straight run settles symmetrically
       position = runFrom + (goal - runFrom) * (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2);
-      target = MOTOR_MAX;
     }
 
     if (!left && position !== from) {
@@ -307,34 +240,10 @@ export function createProjector(
       }
     }
     if (mode === 'turn' && alpha === restAt(goal)) rest();
-
-    const travel = (position - from) * PITCH;
-    const r = reels(position, count);
-    turned[0] += travel / r[0];
-    turned[1] += travel / r[1];
-    roll += travel / ROLLER;
-    motorSpeed += (target - motorSpeed) * (1 - Math.exp(-dt / 60));
-    motor += way * motorSpeed * dt;
-
-    // the dancer lifts with the strip's speed; the needle reads the motor on a log scale
-    const lift = clamp((-LIFT * travel) / Math.max(dt, 1), -18, 18);
-    const reading = Math.log2(1 + motorSpeed / MOTOR_TURN) / Math.log2(1 + MOTOR_MAX / MOTOR_TURN);
-    for (let t = 0; t < dt; t += 8) {
-      const h = Math.min(8, dt - t);
-      swingSpeed += (STIFF * (lift - swing) - DAMP * swingSpeed) * h;
-      swing += swingSpeed * h;
-      gaugeSpeed += (NEEDLE_STIFF * (reading - gauge) - NEEDLE_DAMP * gaugeSpeed) * h;
-      gauge += gaugeSpeed * h;
-    }
     write();
     paintHer(now);
-
-    const still =
-      mode === 'rest' &&
-      motorSpeed < 1e-5 &&
-      Math.abs(swing) + Math.abs(swingSpeed) < 0.01 &&
-      Math.abs(gauge) + Math.abs(gaugeSpeed) < 0.001;
-    raf = still ? 0 : requestAnimationFrame(step);
+    // the loop sleeps at rest, once her blink is over
+    raf = mode === 'rest' && now >= blinkUntil ? 0 : requestAnimationFrame(step);
   }
 
   function wake() {
@@ -355,21 +264,46 @@ export function createProjector(
       events.arrive(to);
       return;
     }
-    // a run, a far pick in a turn, or the strip before it has printed in: it finishes first
-    if (mode === 'run' || !booted || (mode === 'turn' && Math.abs(to - position) > FAR)) {
+    // a pick waits for the pull in flight, and for the strip to print in
+    if (mode !== 'rest' || !booted) {
       queued = to;
       return;
     }
-    if (mode === 'rest' && to === position) return;
+    if (to === position) return;
     clearTimeout(timer);
     start(to, clamp((PICK * 2) / (Math.abs(to - position) + 1), PICK_MIN, PICK));
   }
 
+  function play() {
+    booted = true;
+    due = performance.now() + HOLD - WIND - BEAT * 2;
+    ink = mateInk(getComputedStyle(mate));
+    paintHer(performance.now());
+    rest();
+  }
+
   const view = new IntersectionObserver(([entry]) => {
     visible = entry.isIntersecting;
+    if (visible && !seen) {
+      seen = true;
+      root.dataset.booted = '';
+      boot = window.setTimeout(play, reduced ? 0 : PRINT_IN);
+    }
     schedule();
   });
-  const resize = new ResizeObserver(measure);
+  // also prints the frames whose screenshots loaded before hydration
+  const resize = new ResizeObserver(() => {
+    measure();
+    reprint();
+  });
+  // her colours and the prints follow the theme
+  const stopTheme = onTheme(() => {
+    reprint();
+    if (!ink) return;
+    ink = mateInk(getComputedStyle(mate));
+    mateShown = -1;
+    paintHer(performance.now());
+  });
   const listeners = new AbortController();
   const hold = () => {
     held = true;
@@ -387,8 +321,6 @@ export function createProjector(
   root.addEventListener('pointerleave', release, { signal: listeners.signal });
   root.addEventListener('focusin', hold, { signal: listeners.signal });
   root.addEventListener('focusout', release, { signal: listeners.signal });
-  document.addEventListener('visibilitychange', schedule, { signal: listeners.signal });
-  measure();
 
   return {
     seek,
@@ -397,28 +329,52 @@ export function createProjector(
       due = Math.max(due, performance.now() + BEAT);
       schedule();
     },
-    boot() {
-      booted = true;
-      due = performance.now() + HOLD - WIND - BEAT * 2;
-      ink = mateInk(getComputedStyle(mate));
-      paintHer(performance.now());
-      rest();
-    },
-    /** her colours follow the theme */
-    restyle() {
-      if (!ink) return;
-      ink = mateInk(getComputedStyle(mate));
-      mateShown = -1;
-      paintHer(performance.now());
-    },
     destroy() {
       clearTimeout(timer);
+      clearTimeout(boot);
       cancelAnimationFrame(raf);
       view.disconnect();
       resize.disconnect();
+      stopTheme();
       listeners.abort();
     },
   };
+}
+
+/**
+ * Prints the screenshot on the canvas at its size, a dot a pixel: object-cover and centred like the
+ * <img>, an ordered 4x4 dither in the theme's ink and paper.
+ */
+function printDots(canvas: HTMLCanvasElement, image: HTMLImageElement) {
+  const cols = canvas.width;
+  const rows = canvas.height;
+  const ctx = canvas.getContext('2d', { willReadFrequently: true })!;
+  // the whole image goes in, a source rectangle would be in bitmap pixels while `naturalWidth` of
+  // a `srcset` image is density-corrected
+  const scale = Math.max(cols / image.naturalWidth, rows / image.naturalHeight);
+  const width = image.naturalWidth * scale;
+  const height = image.naturalHeight * scale;
+  ctx.imageSmoothingQuality = 'high';
+  ctx.drawImage(image, (cols - width) / 2, (rows - height) / 2, width, height);
+  // dark dots take the darker theme colour, the rest the lighter one, so dark mode keeps tones
+  const style = getComputedStyle(canvas);
+  const ink = cssRgb(style.getPropertyValue('--lp-ink'));
+  const paper = cssRgb(style.getPropertyValue('--lp-paper'));
+  const [dot, ground] = isDark() ? [paper, ink] : [ink, paper];
+  const pixels = ctx.getImageData(0, 0, cols, rows);
+  const data = pixels.data;
+  for (let y = 0; y < rows; y++) {
+    for (let x = 0; x < cols; x++) {
+      const i = (y * cols + x) * 4;
+      const light = (0.2126 * data[i] + 0.7152 * data[i + 1] + 0.0722 * data[i + 2]) / 255;
+      const color = light > (BAYER4[(y % 4) * 4 + (x % 4)] + 0.5) / 16 ? ground : dot;
+      data[i] = color[0] * 255;
+      data[i + 1] = color[1] * 255;
+      data[i + 2] = color[2] * 255;
+      data[i + 3] = 255;
+    }
+  }
+  ctx.putImageData(pixels, 0, 0);
 }
 
 /** a frame of the strip: its screenshot as a 1-bit print in 1px dots */
@@ -434,47 +390,48 @@ export function printFrame(frame: Element | null) {
   printDots(canvas, image);
 }
 
-const runs = new WeakMap<HTMLCanvasElement, number>();
+/** a screen print's dots, in CSS px */
+const DOT = 2;
 /** the size and theme each screen print was made for */
 const made = new WeakMap<HTMLCanvasElement, string>();
 
 /**
- * Dither: crossfades a screen layer's 1-bit print over its screenshot from `from` to `to` of 16
- * levels, in steps: 16 is the full print, 0 the screenshot in colour, the print hidden again.
+ * Dither: shows a screen layer's 1-bit print over its screenshot (`to` 16), or develops it back to
+ * the screenshot (`to` 0), through an ordered dither of 2x2 dots.
  */
-export function dither(
-  layer: Element | null | undefined,
-  from: number,
-  to: number,
-  duration: number,
-) {
+export function dither(layer: Element | null | undefined, to: 0 | 16, duration: number) {
   const canvas = layer?.querySelector('canvas');
   const image = layer?.querySelector('img');
   if (!layer || !canvas || !image) return;
-  cancelAnimationFrame(runs.get(canvas) ?? 0);
-  // the print is made once per size and theme, once the screenshot decodes
+  for (const animation of canvas.getAnimations()) animation.cancel();
   if (!image.complete || image.naturalWidth === 0) return;
+  // the print is made once per size and theme, over the box the screenshot covers
   const key = `${layer.clientWidth}x${layer.clientHeight} ${isDark()}`;
   if (made.get(canvas) !== key) {
-    print(canvas, image);
+    const cols = Math.ceil(layer.clientWidth / DOT);
+    const rows = Math.ceil(layer.clientHeight / DOT);
+    canvas.width = cols;
+    canvas.height = rows;
+    // exact dot sizes, the layer clips the last partial dot
+    canvas.style.width = `${cols * DOT}px`;
+    canvas.style.height = `${rows * DOT}px`;
+    printDots(canvas, image);
     made.set(canvas, key);
   }
-  show(canvas, from);
+  const frames = ditherKeyframes(DOT * 2);
+  if (to === 0) frames.reverse();
   canvas.style.visibility = 'visible';
-  const start = performance.now();
-  const tick = (now: number) => {
-    const t = now - start;
-    show(canvas, from + ((to - from) * level(t, duration)) / 16);
-    if (t < duration) runs.set(canvas, requestAnimationFrame(tick));
-    else if (to === 0) canvas.style.visibility = '';
-  };
-  runs.set(canvas, requestAnimationFrame(tick));
+  const animation = canvas.animate(frames, { duration });
+  if (to === 0) {
+    animation.onfinish = () => {
+      canvas.style.visibility = '';
+    };
+  }
 }
 
 export function hidePrint(layer: Element) {
   const canvas = layer.querySelector('canvas');
   if (!canvas) return;
-  cancelAnimationFrame(runs.get(canvas) ?? 0);
-  show(canvas, 0);
+  for (const animation of canvas.getAnimations()) animation.cancel();
   canvas.style.visibility = '';
 }
