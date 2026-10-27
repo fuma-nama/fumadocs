@@ -52,10 +52,10 @@ export default function Page() {
         </div>
         <Projector sites={reel} back={<DeckBack count={reel.length} />} front={<DeckFront />} />
       </Figure>
-      <Figure id="sites" aria-label="Sites" status="sites online" className={figure}>
+      <Figure id="sites" aria-label="Sites" status="showing every site" className={figure}>
         <Wall sites={showcases} />
       </Figure>
-      <Figure id="blogs" aria-label="Blogs" status="blogs online" className={figure}>
+      <Figure id="blogs" aria-label="Blogs" status="showing every blog" className={figure}>
         <FigureHeader lead={copy.blogs.lead} title={copy.blogs.title} />
         <Blogs sites={blogs} />
       </Figure>
