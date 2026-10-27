@@ -38,8 +38,7 @@ export function Write() {
         lead={copy.write.lead}
         title={copy.write.title}
         description={copy.write.description}
-        // from lg one row: the title on the window's edge, the description on the bed's middle seam
-        className="p-(--lp-gutter) pb-8 md:pt-10 lg:grid lg:grid-cols-2 lg:items-end lg:gap-x-0 lg:max-xl:pb-6 lg:max-xl:[&_h2]:text-5xl"
+        className="p-(--lp-gutter) pb-8 md:pt-10"
       />
       <Stage
         steps={steps}
