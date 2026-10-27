@@ -94,8 +94,10 @@ export function createHero(stage: HTMLElement, reduced: boolean): () => void {
   let horizon = 0;
   let radius = 1;
   let dpr = 1;
-  // the moon starts to set once the horizon reaches the bottom of the viewport
+  // the moon starts to set once the horizon reaches the bottom of the viewport, and sets 0.55px a px
+  // of scroll, slower where it is small for the viewport (phones), so its crown sets near the top
   let exitStart = 0;
+  let setRate = 0.55;
   let span = 1;
   /** px the moon and its labels are moved down by */
   let placed = 0;
@@ -156,6 +158,7 @@ export function createHero(stage: HTMLElement, reduced: boolean): () => void {
     left = gutter - (moon.left - box.left);
     right = box.width - gutter - (moon.left - box.left);
     horizon = box.bottom - moon.top + placed;
+    setRate = Math.min(0.55, (horizon + radius) / (span * 0.7));
     for (let i = 0; i < labels.length; i++) halves[i] = labels[i].getBoundingClientRect().width / 2;
     const her = mate.getBoundingClientRect();
     crownX = her.left + (her.width * (MATE_PAD[0] + CROWN_CELL[0])) / MATE_W;
@@ -227,7 +230,7 @@ export function createHero(stage: HTMLElement, reduced: boolean): () => void {
 
   /** the moon and its labels rise out of the horizon at boot and set behind it on scroll, as one */
   function place() {
-    const sink = exitScroll() * 0.55;
+    const sink = exitScroll() * setRate;
     placed = round(rise(elapsed()) + sink);
     scene.style.transform = `translate3d(0, ${placed}px, 0)`;
     anchor.style.transform = scene.style.transform;
