@@ -13,7 +13,6 @@ export default function Layout({ children }: { children: ReactNode }) {
         {children}
       </div>
       <StatusBar />
-      <div aria-hidden className="lp-grain" />
     </SiteHomeLayout>
   );
 }

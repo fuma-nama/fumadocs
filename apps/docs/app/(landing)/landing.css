@@ -77,6 +77,16 @@ body:has(.landing),
   color: var(--lp-ink);
 }
 
+/* film grain with sparse coloured dust, in the paper itself */
+.landing {
+  background-image: url('./assets/grain-light.png');
+  background-size: 160px 160px;
+}
+
+.dark .landing {
+  background-image: url('./assets/grain-dark.png');
+}
+
 .landing ::selection {
   background-color: var(--lp-yellow);
   color: #121210;
@@ -164,48 +174,6 @@ body:has(.landing),
   background-repeat: no-repeat;
 }
 
-/* film grain with sparse coloured dust, moved in steps */
-.lp-grain {
-  position: fixed;
-  inset: -80px;
-  z-index: 30;
-  pointer-events: none;
-  background-image: url('./assets/grain-light.png');
-  background-size: 160px 160px;
-  animation: lp-grain 0.8s steps(1, end) infinite;
-}
-
-.dark .lp-grain {
-  background-image: url('./assets/grain-dark.png');
-}
-
-@keyframes lp-grain {
-  0% {
-    transform: translate(0, 0);
-  }
-  12.5% {
-    transform: translate(-37px, 21px);
-  }
-  25% {
-    transform: translate(52px, -13px);
-  }
-  37.5% {
-    transform: translate(-11px, -58px);
-  }
-  50% {
-    transform: translate(29px, 44px);
-  }
-  62.5% {
-    transform: translate(-63px, -7px);
-  }
-  75% {
-    transform: translate(16px, 61px);
-  }
-  87.5% {
-    transform: translate(70px, 33px);
-  }
-}
-
 .lp-caret {
   animation: lp-caret 1s steps(1, end) infinite;
 }
@@ -217,8 +185,7 @@ body:has(.landing),
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .lp-caret,
-  .lp-grain {
+  .lp-caret {
     animation: none;
   }
 

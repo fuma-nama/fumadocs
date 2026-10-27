@@ -10,8 +10,9 @@ interface ShaderCanvasOptions {
   loop?: boolean;
   /** sets animated uniforms before each draw */
   onFrame?: (time: number) => void;
-  /** after the canvas took its box's new size, before the frame that shows it */
-  onResize?: () => void;
+  /** after the canvas's box changed size, before the frame that shows it, with the canvas pixels
+   * per CSS pixel it draws at */
+  onResize?: (dpr: number) => void;
   /** how much of the canvas is on screen, 0 to 1, each time that crosses 0 or one of `thresholds` */
   onVisible?: (ratio: number) => void;
   thresholds?: number[];
@@ -164,26 +165,39 @@ export function createShaderCanvas(
     raf = 0;
   }
 
+  // whole device pixels per canvas pixel, so a 3x screen's pixels stretch evenly over 1.5x
+  let dpr = 1;
+
+  /** a drawing buffer the canvas's size while it's on screen, none off screen */
+  function fit() {
+    const width = onScreen ? Math.max(1, Math.round(canvas.clientWidth * dpr)) : 1;
+    const height = onScreen ? Math.max(1, Math.round(canvas.clientHeight * dpr)) : 1;
+    if (canvas.width === width && canvas.height === height) return;
+    canvas.width = width;
+    canvas.height = height;
+    gl!.viewport(0, 0, width, height);
+    set('uResolution', [width, height]);
+  }
+
   // resizing clears the canvas, and a frame requested now would come after this one paints it blank
   const resize = new ResizeObserver(() => {
-    // whole device pixels per canvas pixel, so a 3x screen's pixels stretch evenly over 1.5x
-    const dpr = window.devicePixelRatio / Math.ceil(window.devicePixelRatio / 2);
-    canvas.width = Math.max(1, Math.round(canvas.clientWidth * dpr));
-    canvas.height = Math.max(1, Math.round(canvas.clientHeight * dpr));
+    dpr = window.devicePixelRatio / Math.ceil(window.devicePixelRatio / 2);
     canvas.style.imageRendering = dpr < window.devicePixelRatio ? 'pixelated' : '';
-    gl.viewport(0, 0, canvas.width, canvas.height);
-    set('uResolution', [canvas.width, canvas.height]);
     set('uDpr', dpr);
-    onResize?.();
+    fit();
+    onResize?.(dpr);
     draw();
   });
   const visibility = new IntersectionObserver(
     (entries) => {
       // the latest record wins when a busy page delivers several
       const entry = entries[entries.length - 1];
-      onScreen = entry.isIntersecting;
-      if (onScreen) invalidate();
-      else pause();
+      if (entry.isIntersecting !== onScreen) {
+        onScreen = entry.isIntersecting;
+        fit();
+        if (onScreen) draw();
+        else pause();
+      }
       onVisible?.(entry.intersectionRatio);
     },
     { threshold: [0, ...thresholds] },
