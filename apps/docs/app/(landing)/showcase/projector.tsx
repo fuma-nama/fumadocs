@@ -8,6 +8,7 @@ import {
   useRef,
   useState,
 } from 'react';
+import { flushSync } from 'react-dom';
 import Image from 'next/image';
 import { useReducedMotion } from 'motion/react';
 import { LEGS, MATE_H, MATE_PAD, MATE_W, SPRITE_W } from '@/components/mascot/sprite';
@@ -148,7 +149,8 @@ export function Projector({ sites, back, front }: ProjectorProps) {
             if (at !== leaves) return;
             arrived.current = true;
             setCurrent(index);
-            setPicked(null);
+            // a pick queued past this frame stays checked
+            setPicked((pick) => (pick === index ? null : pick));
             setHeading(null);
             // the same line as at the leave, unless a pick turned the strip on its way
             report(element, `showing ${address(sites[index].url)}`);
@@ -214,7 +216,8 @@ export function Projector({ sites, back, front }: ProjectorProps) {
     else return;
     event.preventDefault();
     to = clamp(to, 0, sites.length - 1);
-    pick(to);
+    // the picked frame comes onto the strip before it takes focus
+    flushSync(() => pick(to));
     event.currentTarget.querySelector<HTMLElement>(`[data-frame="${to}"]`)?.focus();
   }
 
@@ -249,10 +252,10 @@ export function Projector({ sites, back, front }: ProjectorProps) {
     );
   }
 
-  // the strip shows the frames either side of the gate, and those it passes on its way to the next;
-  // their screenshots load a few frames ahead, the rest of the reel is wound away
-  const low = Math.min(current, heading ?? current);
-  const high = Math.max(current, heading ?? current);
+  // the strip shows the frames either side of the gate, those it passes on its way to the next and
+  // the picked one; their screenshots load a few frames ahead, the rest of the reel is wound away
+  const low = Math.min(current, heading ?? current, checked);
+  const high = Math.max(current, heading ?? current, checked);
   const first = Math.min(current, incoming) - NEAR;
   const last = Math.max(current, incoming) + NEAR;
   const strip: ReactNode[] = [];
