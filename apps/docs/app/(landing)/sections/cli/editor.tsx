@@ -1,5 +1,5 @@
 import type { ComponentProps, ReactNode } from 'react';
-import { Globe } from 'lucide-react';
+import { Globe, LoaderCircle } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { Window } from '../../ui/window';
 import type { Change, Source } from './data';
@@ -191,18 +191,24 @@ export function Editor({
     </div>
   );
   // below 400px the browser's tab is a globe, so every file's name stays whole down to 360px; under
-  // that the names shrink like a browser's tabs
+  // that the names shrink like a browser's tabs. A spinner takes the label's place while the page
+  // reloads, a dot says it shows your edit: both shown by display, so an inactive run's tab stays
+  // unseen
   tabs.push(
     tab(
       0,
       'localhost:3000/docs',
       <>
-        <Globe aria-hidden className="size-3.5 min-[400px]:hidden" />
-        <span className="max-[400px]:sr-only">localhost</span>
-        {/* the page shows your edit: shown by display, so an inactive run's tab stays unseen */}
+        <Globe aria-hidden className="size-3.5 min-[400px]:hidden in-data-reloading:opacity-0" />
+        <span className="max-[400px]:sr-only in-data-reloading:opacity-0">localhost</span>
+        <LoaderCircle
+          aria-hidden
+          data-spinner
+          className="absolute inset-0 m-auto hidden size-3.5 in-data-reloading:block"
+        />
         <span
           aria-hidden
-          className="absolute top-1 right-1 hidden size-1.5 bg-lp-orange group-has-[[data-edited]]/window:block"
+          className="absolute top-1 right-1 hidden size-2 bg-lp-orange group-has-[[data-edited]]/window:block"
         />
       </>,
     ),

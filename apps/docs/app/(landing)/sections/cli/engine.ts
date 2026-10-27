@@ -65,6 +65,9 @@ const COMMAND = 0.5;
 const TYPE = 60;
 
 const ease = cubicBezier(...settle);
+/** the frame round your change: shown as it dithers in, dithered out a second later */
+const MARK = ditherKeyframes(2).reverse();
+for (const frame of MARK) frame.opacity = 1;
 
 interface Card {
   el: HTMLElement;
@@ -186,6 +189,8 @@ export function createCli(root: HTMLElement): () => void {
       editCut: find('cut', editLine),
       page,
       after: find('after', editor),
+      mark: find('mark', page),
+      spinner: editor.querySelector<SVGSVGElement>('[data-spinner]')!,
       edited: page.hasAttribute('data-edited'),
     };
   }
@@ -389,8 +394,8 @@ export function createCli(root: HTMLElement): () => void {
     const edit = Math.max(free, t) + 120;
     // typed within the run's last beat: a long edit types faster
     const editFor = Math.min(scene.editCut.dataset.new!.length * 40, 240);
-    // the dev server reloads as your edit is saved, its tab flashing while the code still shows; the
-    // browser then shows the old page a moment before your change dithers in
+    // the dev server reloads as your edit is saved: the browser's tab spins while the code still
+    // shows, then over the old page a moment, until your change dithers in with a frame round it
     const reload = edit + 300 + editFor + 60;
     const page = reload + 2 * TICK;
     return {
@@ -858,13 +863,20 @@ export function createCli(root: HTMLElement): () => void {
         editCaret.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px)`;
       }
     }
-    highlight(scene.tabs[scene.browser], live && t >= b.reload && t < b.page);
+    const browser = scene.tabs[scene.browser];
+    const reloading = live && t >= b.reload && t < b.change;
+    browser.toggleAttribute('data-reloading', reloading);
+    highlight(browser, reloading);
+    const turn = reloading ? `${Math.floor((t - b.reload) / (TICK / 2)) * 45}deg` : '';
+    if (scene.spinner.style.rotate !== turn) scene.spinner.style.rotate = turn;
     const edited = !live || t >= b.change;
     if (edited !== scene.edited) {
       scene.edited = edited;
       scene.page.toggleAttribute('data-edited', edited);
-      if (edited && live)
-        scene.after.animate(ditherKeyframes(2), { duration: 3 * TICK, easing: 'linear' });
+      if (edited && live) {
+        scene.after.animate(ditherKeyframes(2), { duration: 3 * TICK });
+        scene.mark.animate(MARK, { delay: 8 * TICK, duration: 3 * TICK, fill: 'backwards' });
+      }
     }
 
     let status = scene.done;

@@ -37,6 +37,11 @@ const chip =
 const item =
   'relative flex flex-row items-center gap-2 rounded-lg p-2 text-start text-fd-muted-foreground [&_svg]:size-4 [&_svg]:shrink-0';
 
+/** a frame round the part your edit changed: the scene shows it a moment as the change dithers in,
+ * reduced motion and no script keep it */
+const mark =
+  'pointer-events-none absolute border-2 opacity-0 motion-reduce:opacity-100 [@media(scripting:none)]:opacity-100';
+
 /**
  * The template's first page in the docs layout, `content/docs/index.mdx` as it is: the real title,
  * description, cards and banner, in chrome that mirrors `fumadocs-ui/layouts/docs` with its links as
@@ -46,9 +51,10 @@ function Preview({ title, banner }: PreviewProps) {
   return (
     <div className="@container isolate flex h-full flex-col bg-fd-background text-[13px] text-fd-foreground">
       {banner !== undefined && (
-        // static: the page doesn't scroll inside the preview
-        <Banner changeLayout={false} className={cn('static z-0', banner)}>
+        // not sticky: the page doesn't scroll inside the preview
+        <Banner changeLayout={false} className={cn('relative z-0', banner)}>
           Hello World
+          {banner && <span aria-hidden data-mark className={cn(mark, 'inset-1 border-current')} />}
         </Banner>
       )}
       {/* classes of `layouts/docs/slots/header.tsx` */}
@@ -75,8 +81,15 @@ function Preview({ title, banner }: PreviewProps) {
         </div>
         <article className="flex flex-col px-4 py-6 md:px-5 md:pt-8 md:@xl:px-8">
           {/* a heading inside the figure's own */}
-          <DocsTitle aria-level={3} className={title}>
+          <DocsTitle aria-level={3} className={cn('relative w-fit', title)}>
             Hello World
+            {title && (
+              <span
+                aria-hidden
+                data-mark
+                className={cn(mark, '-inset-x-2 inset-y-0.5 border-lp-orange')}
+              />
+            )}
           </DocsTitle>
           <DocsDescription className="mb-4 text-[1.1em]">Your first document</DocsDescription>
           <p className="text-fd-muted-foreground">
