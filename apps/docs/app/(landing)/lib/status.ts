@@ -81,6 +81,17 @@ export function report(from: Element, text: string) {
   if (figure === active) setStatus(text);
 }
 
+/** calls `listener` with the active figure now and each time another becomes active; returns its stop */
+export function onActive(listener: (figure: HTMLElement | null) => void): () => void {
+  let last = active;
+  listener(last);
+  return subscribe(() => {
+    if (active === last) return;
+    last = active;
+    listener(active);
+  });
+}
+
 /** after a passing line: the active figure's own line again */
 export function restore() {
   setStatus(active?.dataset.status ?? 'ready');
