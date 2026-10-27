@@ -1,16 +1,18 @@
 'use client';
-import { type ReactNode, useCallback, useRef, useState } from 'react';
+import { type CSSProperties, type ReactNode, useCallback, useRef, useState } from 'react';
 import { whenSeen } from '../../lib/later';
 import { report } from '../../lib/status';
+import type { Layer } from '../../ui/chip';
 import { DitherSwap } from '../../ui/dither';
-import { CORE, HEADLESS, LAYERS, OPTIONS, type SwapLayer } from './data';
+import { CORE, LAYERS, NAMES, OPTIONS, type SwapLayer } from './data';
 import { createStack, type StackEngine } from './engine';
 import { Front } from './front';
-import { CodeWindow, Keys, type Picks, type Snippets } from './panel';
+import { CodeWindow, type Picks, Selects, type Snippets } from './panel';
+import { POSE } from './scene';
 import './parts.css';
 
 interface StageProps {
-  /** the figure's title and description, in an element marked `data-rise-group` */
+  /** the figure's title */
   header: ReactNode;
   /** a docs page in Fumadocs UI, and the same page with the UI swapped for your own */
   page: ReactNode;
@@ -21,66 +23,97 @@ interface StageProps {
 const initial: Picks = { ui: 0, content: 0, framework: 0 };
 
 /**
- * The page on top of a stack of layers, one per library, that the camera finds as the reader
- * scrolls (`engine.ts`); a pick slides its layer's tray out to take the new module.
+ * The real page on a stack of layers, one per library, each a key (`engine.ts`): a press swaps its
+ * module for the next. Beside it, a select per layer picks one outright, and the code window shows
+ * the setup of the last swap, starting with the content.
  */
 export function Stage({ header, page, headless, snippets }: StageProps) {
-  const [picks, setPicks] = useState<Picks>(initial);
+  // the options in use, which a press on the stack reads, and in state to render
+  const picks = useRef<Picks>(initial);
   const [shown, setShown] = useState<Picks>(initial);
   const [last, setLast] = useState<SwapLayer>('content');
+  /** what a screen reader hears after a press */
+  const [said, setSaid] = useState('');
   const engine = useRef<StackEngine | null>(null);
+  const figure = useRef<HTMLDivElement | null>(null);
 
-  const ref = useCallback((root: HTMLDivElement | null) => {
-    if (!root) return;
-    // the WebGL context and its shader are made a viewport ahead, so they are ready when it shows
-    const stopView = whenSeen(
-      root,
-      () => {
-        engine.current = createStack(root, (layer, option) => {
-          setShown((prev) => ({ ...prev, [layer]: option }));
-          setLast(layer);
-          report(root, `${layer}: ${OPTIONS[layer][option].title}`);
-        });
-      },
-      { rootMargin: '100% 0px' },
-    );
-    return () => {
-      stopView();
-      engine.current?.destroy();
-      engine.current = null;
-    };
+  const tell = useCallback((layer: Layer, title: string, line: string) => {
+    setSaid(line);
+    if (figure.current) report(figure.current, `${layer}: ${title}`);
   }, []);
 
-  const pick = useCallback((layer: SwapLayer, option: number) => {
-    setPicks((prev) => ({ ...prev, [layer]: option }));
-    if (engine.current) engine.current.want(layer, option);
-    else {
-      setShown((prev) => ({ ...prev, [layer]: option }));
+  const choose = useCallback(
+    (layer: SwapLayer, option: number) => {
+      picks.current = { ...picks.current, [layer]: option };
+      setShown(picks.current);
       setLast(layer);
-    }
-  }, []);
+      const { title } = OPTIONS[layer][option];
+      tell(layer, title, `${NAMES[layer]}: ${title}`);
+      engine.current?.press(layer);
+    },
+    [tell],
+  );
+
+  /** a layer pressed on the stack takes its next option; the core is bolted in */
+  const press = useCallback(
+    (layer: Layer) => {
+      if (layer !== 'core') {
+        choose(layer, (picks.current[layer] + 1) % OPTIONS[layer].length);
+        return;
+      }
+      tell(layer, CORE.title, `${NAMES.core}: ${CORE.title}, fixed`);
+      engine.current?.press(layer);
+    },
+    [choose, tell],
+  );
+
+  const ref = useCallback(
+    (root: HTMLDivElement | null) => {
+      figure.current = root;
+      if (!root) return;
+      // the WebGL context is made a screen ahead, so it's ready when the stack shows
+      const stop = whenSeen(
+        root,
+        () => {
+          engine.current = createStack(root, press);
+        },
+        { rootMargin: '100% 0px' },
+      );
+      return () => {
+        stop();
+        engine.current?.destroy();
+        engine.current = null;
+      };
+    },
+    [press],
+  );
 
   const fronts: ReactNode[] = [];
   for (const layer of LAYERS) {
-    const info = layer === 'core' ? CORE : OPTIONS[layer][shown[layer]];
-    fronts.push(<Front key={layer} layer={layer} title={info.title} name={info.name} />);
+    fronts.push(
+      layer === 'core' ? (
+        <Front key={layer} layer={layer} title={CORE.title} option={0} count={0} active={false} />
+      ) : (
+        <Front
+          key={layer}
+          layer={layer}
+          title={OPTIONS[layer][shown[layer]].title}
+          option={shown[layer]}
+          count={OPTIONS[layer].length}
+          active={layer === last}
+        />
+      ),
+    );
   }
-  const isHeadless = shown.ui === HEADLESS;
-
-  const code = (
-    <CodeWindow layer={last} option={shown[last]} headless={isHeadless} snippets={snippets} />
-  );
+  const isHeadless = OPTIONS.ui[shown.ui].headless === true;
 
   return (
-    <>
-      {/* the figure takes focus when the panel goes from under it */}
-      <div ref={ref} tabIndex={-1} className="parts-pin outline-none">
-        <div className="parts-stage">
-          <div data-head className="parts-head @container">
-            {header}
-          </div>
-          <div data-cell className="parts-cell">
-            <div data-page className="parts-page @container">
+    <div ref={ref} className="parts">
+      <div className="parts-row">
+        <div className="parts-stack">
+          {header}
+          <div data-cell className="parts-cell" style={{ '--stack': POSE.aspect } as CSSProperties}>
+            <div data-page inert aria-hidden className="parts-face parts-page">
               <DitherSwap swapKey={isHeadless ? 'headless' : 'page'} opaque className="size-full">
                 {isHeadless ? headless : page}
               </DitherSwap>
@@ -88,23 +121,15 @@ export function Stage({ header, page, headless, snippets }: StageProps) {
             {fronts}
             <canvas aria-hidden className="pointer-events-none absolute inset-0 size-full" />
           </div>
-          <div data-slot aria-hidden className="parts-slot" />
-          <div data-panel className="parts-panel flex flex-col gap-4">
-            <div className="@container">
-              <Keys picks={picks} onPick={pick} />
-            </div>
-            {code}
-          </div>
+          <p aria-live="polite" className="sr-only">
+            {said}
+          </p>
         </div>
-        <div data-run aria-hidden className="parts-run" />
-        {/* snap targets: the run's two ends, and one well beyond each */}
-        <i className="parts-snap" />
-        <i className="parts-snap" />
-        <i className="parts-snap" />
-        <i className="parts-snap" />
+        <div className="parts-panel">
+          <Selects picks={shown} onPick={choose} />
+          <CodeWindow layer={last} option={shown[last]} headless={isHeadless} snippets={snippets} />
+        </div>
       </div>
-      {/* a phone's stage has room for the keys alone: its code window follows the stage */}
-      <div className="parts-after">{code}</div>
-    </>
+    </div>
   );
 }

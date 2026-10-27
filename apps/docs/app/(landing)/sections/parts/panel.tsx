@@ -1,89 +1,87 @@
 'use client';
-import { Fragment, type KeyboardEvent, memo, type ReactNode } from 'react';
+import { Fragment, memo, type ReactNode } from 'react';
+import { Select } from '@base-ui/react/select';
 import { Chip } from '../../ui/chip';
 import { DitherSwap } from '../../ui/dither';
 import { Window } from '../../ui/window';
-import { OPTIONS, SWAPS, type SwapLayer } from './data';
+import { NAMES, OPTIONS, SWAPS, type SwapLayer } from './data';
 
 /** the real setup of every option, highlighted on the server, by layer; `core` is each framework's on a headless UI */
 export type Snippets = Record<SwapLayer, ReactNode[]> & { core: ReactNode[] };
 
 export type Picks = Record<SwapLayer, number>;
 
-const STEP: Record<string, number> = { ArrowDown: 1, ArrowRight: 1, ArrowUp: -1, ArrowLeft: -1 };
-
 /**
- * Each swap layer's options as a radio group of keys: the key in use is filled, hover inverts and
- * arrow keys move. Keys share columns, 3 where each name still fits on one line, else 2, beside
- * their labels or, in a narrow panel, under them.
+ * A select for each layer that swaps, in the stack's order beside its label, naming the module in
+ * use: a pick presses the layer on the stack too. Its list drops under it, the option in use filled
+ * as the page's pickers fill theirs, the one under the pointer or the keys inverted.
  */
-export const Keys = memo(function Keys({
+export const Selects = memo(function Selects({
   picks,
   onPick,
 }: {
   picks: Picks;
   onPick: (layer: SwapLayer, option: number) => void;
 }) {
-  const groups: ReactNode[] = [];
+  const rows: ReactNode[] = [];
   for (const layer of SWAPS) {
     const options = OPTIONS[layer];
-    const pick = picks[layer];
-    const onKeyDown = (event: KeyboardEvent<HTMLButtonElement>) => {
-      const step = STEP[event.key];
-      if (!step) return;
-      event.preventDefault();
-      const next = (pick + step + options.length) % options.length;
-      onPick(layer, next);
-      event.currentTarget.parentElement!.querySelectorAll('button')[next].focus();
-    };
-    const buttons: ReactNode[] = [];
+    const items: ReactNode[] = [];
     for (let i = 0; i < options.length; i++) {
-      buttons.push(
-        <button
+      items.push(
+        <Select.Item
           key={options[i].name}
-          type="button"
-          role="radio"
-          aria-checked={i === pick}
-          tabIndex={i === pick ? 0 : -1}
-          onClick={() => i !== pick && onPick(layer, i)}
-          onKeyDown={onKeyDown}
-          className="flex h-8 cursor-pointer items-center border border-lp-line-strong px-3 text-[12px] whitespace-nowrap not-aria-checked:hover:bg-lp-ink not-aria-checked:hover:text-lp-paper focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-lp-ink aria-checked:bg-lp-yellow aria-checked:text-[#121210]"
+          value={i}
+          className="flex h-8 cursor-pointer items-center px-3 text-sm font-medium whitespace-nowrap outline-none select-none data-highlighted:not-data-selected:bg-lp-ink data-highlighted:not-data-selected:text-lp-paper data-selected:bg-lp-yellow data-selected:text-[#121210] data-selected:data-highlighted:shadow-[inset_0_0_0_1.5px_#121210]"
         >
-          {options[i].title}
-        </button>,
+          <Select.ItemText>{options[i].title}</Select.ItemText>
+        </Select.Item>,
       );
     }
-    groups.push(
+    rows.push(
       <Fragment key={layer}>
-        <Chip
-          data-rise
-          layer={layer}
-          className="h-8 @max-[24rem]:hidden @min-[24rem]:justify-self-stretch"
-        />
-        <div
-          data-rise
-          role="radiogroup"
-          aria-label={`${layer} layer`}
-          className="grid grid-cols-2 gap-2 @min-[33rem]:grid-cols-3"
+        <Chip aria-hidden layer={layer} className="h-8" />
+        <Select.Root
+          value={picks[layer]}
+          onValueChange={(option) => option !== null && onPick(layer, option)}
         >
-          {/* in a narrow panel the label is the group's first cell, a row shorter */}
-          <Chip aria-hidden layer={layer} className="h-8 @min-[24rem]:hidden" />
-          {buttons}
-        </div>
+          <Select.Trigger
+            aria-label={`${NAMES[layer]} layer`}
+            className="flex h-8 min-w-0 cursor-pointer items-center justify-between gap-2 border border-lp-line-strong bg-lp-paper ps-3 pe-2.5 text-sm font-medium hover:bg-lp-paper-2 focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-lp-ink data-popup-open:bg-lp-paper-2"
+          >
+            <Select.Value className="min-w-0 truncate">
+              {(option: number) => options[option].title}
+            </Select.Value>
+            <Select.Icon className="shrink-0">
+              <svg aria-hidden viewBox="0 0 12 12" className="size-3">
+                <path d="M2 4.5l4 4 4-4" fill="none" stroke="currentColor" strokeWidth={1.5} />
+              </svg>
+            </Select.Icon>
+          </Select.Trigger>
+          <Select.Portal>
+            <Select.Positioner
+              alignItemWithTrigger={false}
+              align="start"
+              sideOffset={4}
+              className="z-50"
+            >
+              <Select.Popup className="max-w-(--available-width) min-w-(--anchor-width) border border-lp-line-strong bg-lp-paper text-lp-ink outline-none transition-opacity duration-100 data-ending-style:opacity-0 data-starting-style:opacity-0">
+                <Select.List className="max-h-(--available-height) scroll-py-1 overflow-y-auto py-1">
+                  {items}
+                </Select.List>
+              </Select.Popup>
+            </Select.Positioner>
+          </Select.Portal>
+        </Select.Root>
       </Fragment>,
     );
   }
-  return (
-    <div className="grid items-start gap-2 @min-[24rem]:grid-cols-[auto_minmax(0,1fr)]">
-      {groups}
-    </div>
-  );
+  return <div className="grid grid-cols-[max-content_minmax(0,1fr)] gap-2">{rows}</div>;
 });
 
 /**
  * The real setup of the option in use of the layer that landed last, every file whole: on a swap
- * the new file dithers in while the window eases to its height. Where the whole stage pins at a
- * MacBook Air's height, the code is a size smaller so the tallest file still fits beside the stack.
+ * the new file dithers in, from its top where the window scrolls.
  */
 export const CodeWindow = memo(function CodeWindow({
   layer,
@@ -100,27 +98,28 @@ export const CodeWindow = memo(function CodeWindow({
   const core = layer === 'framework' && headless;
 
   return (
-    <div data-rise data-window className="@container">
-      <Window
-        title={
-          // in a phone's panel the file alone: its option is lit in the keys above
-          <span className="flex items-center gap-2 font-mono text-xs">
-            <span className="@max-[22rem]:hidden">{info.title}</span>
-            <span className="text-lp-ink-2">{info.file}</span>
-          </span>
-        }
-        className="overflow-hidden [&_pre]:w-full [&_pre]:wrap-anywhere [&_pre]:whitespace-pre-wrap max-sm:[&_pre]:text-[11px]/[15px] [@media(min-width:1348px)_and_(min-height:884px)_and_(max-height:947px)]:[&_pre]:text-[11px]/[15px]"
+    <Window
+      title={
+        <span className="flex min-w-0 items-center gap-2">
+          <span className="truncate">{info.title}</span>
+          <span className="shrink-0 text-lp-ink-2">{info.file}</span>
+        </span>
+      }
+      className="parts-code [&_pre]:w-full [&_pre]:wrap-anywhere [&_pre]:whitespace-pre-wrap"
+    >
+      <DitherSwap
+        swapKey={`${layer}:${option}:${core ? 'core' : 'ui'}`}
+        opaque
+        className="min-h-0 flex-1 grid-rows-[minmax(0,1fr)] *:overflow-y-auto"
       >
-        <DitherSwap swapKey={`${layer}:${option}:${core ? 'core' : 'ui'}`} opaque resize={560}>
-          {info.command && (
-            <p className="border-b border-lp-line px-4 py-2 font-mono text-xs">
-              <span className="text-lp-ink-2">$ </span>
-              {info.command}
-            </p>
-          )}
-          {(core ? snippets.core : snippets[layer])[option]}
-        </DitherSwap>
-      </Window>
-    </div>
+        {info.command && (
+          <p className="border-b border-lp-line px-4 py-2 font-mono text-xs">
+            <span className="text-lp-ink-2">$ </span>
+            {info.command}
+          </p>
+        )}
+        {(core ? snippets.core : snippets[layer])[option]}
+      </DitherSwap>
+    </Window>
   );
 });

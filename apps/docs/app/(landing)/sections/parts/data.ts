@@ -1,42 +1,33 @@
-import type { TOCItemType } from 'fumadocs-core/toc';
 import type { Layer } from '../../ui/chip';
-
-/** headings of fumadocs.dev's Quick Start */
-export const toc: TOCItemType[] = [
-  { title: 'Introduction', url: '#introduction', depth: 2 },
-  { title: 'Terminology', url: '#terminology', depth: 3 },
-  { title: 'Automatic Installation', url: '#automatic-installation', depth: 2 },
-  { title: 'Enjoy!', url: '#enjoy', depth: 3 },
-  { title: 'FAQ', url: '#faq', depth: 2 },
-  { title: 'Learn More', url: '#learn-more', depth: 2 },
-];
-
-/** the npm code block of the page, as `remarkNpm` converts it */
-export const install = [
-  { value: 'npm', code: 'npm create fumadocs-app' },
-  { value: 'pnpm', code: 'pnpm create fumadocs-app' },
-  { value: 'yarn', code: 'yarn create fumadocs-app' },
-  { value: 'bun', code: 'bunx create-fumadocs-app' },
-];
 
 /** the layers top down, the page is the top of the first */
 export const LAYERS: Layer[] = ['ui', 'core', 'content', 'framework'];
 
+/** each layer's name in a sentence */
+export const NAMES: Record<Layer, string> = {
+  ui: 'UI',
+  core: 'Core',
+  content: 'Content',
+  framework: 'Framework',
+};
+
 export type SwapLayer = Exclude<Layer, 'core'>;
 
-/** the swaps in the order of the trays */
-export const SWAPS: SwapLayer[] = ['ui', 'content', 'framework'];
+/** every layer but the core, which the others plug into */
+export const SWAPS = LAYERS.filter((layer): layer is SwapLayer => layer !== 'core');
 
 export interface Option {
-  /** its name in prose, as the docs spell it: the label of its key */
+  /** its name in prose, as the docs spell it: the label of its key and the layer's nameplate */
   title: string;
-  /** the module, on the layer's nameplate */
+  /** the module */
   name: string;
   /** the code window's title; its extension is the code's language */
   file: string;
   code: string;
   /** a command that produced the file */
   command?: string;
+  /** a UI of your own: the page on the stack is plain, and the framework's provider is the core's */
+  headless?: boolean;
 }
 
 interface Framework extends Option {
@@ -76,6 +67,7 @@ const ui: Option[] = [
     title: 'Headless',
     name: 'fumadocs-core/toc',
     file: 'components/toc.tsx',
+    headless: true,
     code: `import { AnchorProvider, ScrollProvider, TOCItem, type TOCItemType } from 'fumadocs-core/toc';
 import { type ReactNode, useRef } from 'react';
 
@@ -106,9 +98,6 @@ export function Page({ items, children }: { items: TOCItemType[]; children: Reac
     code: layout('@/layouts/docs'),
   },
 ];
-
-/** the UI option with no UI package: the framework's provider comes from the core */
-export const HEADLESS = 1;
 
 // examples/next-min and examples/content-collections, then integrations/content/*.mdx without
 // their optional options and comments

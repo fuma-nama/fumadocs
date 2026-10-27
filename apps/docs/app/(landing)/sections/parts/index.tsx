@@ -30,7 +30,7 @@ export function Parts() {
   return (
     <Figure id="parts" aria-label="Parts" status="4 layers">
       <Stage
-        header={<FigureHeader data-rise-group lead={copy.parts.lead} title={copy.parts.title} />}
+        header={<FigureHeader lead={copy.parts.lead} title={copy.parts.title} />}
         page={<DocsPreview />}
         headless={<HeadlessPreview />}
         snippets={snippets}

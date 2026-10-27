@@ -1,10 +1,10 @@
 import { bayer8 } from '../../lib/dither';
-import { mix, type Rect } from '../../lib/motion';
 
 /**
- * World units are the page's CSS px: the stack stands on y = 0 with the page on its top (+y), the
- * reader's side is +z. Every part is a box: the four layers top down (ui, core, content,
- * framework), then a guide post at each corner of each gap between them.
+ * World units are a 1000px page's: the stack stands on the floor, y = 0, with the page on its top
+ * (+y), the reader's side is +z. Every part is a box: the four layers top down (ui, core, content,
+ * framework), then a post at each corner of the gap under each layer, standing on the layer under
+ * it or, for the feet, on the floor.
  */
 export const fragment = `#version 300 es
 precision highp float;
@@ -21,21 +21,25 @@ uniform vec2 uCentre;
 uniform vec3 uLight;
 uniform vec3 uLit;
 uniform vec3 uShade;
+uniform vec3 uPaper;
 uniform float uNight;
-uniform float uCell;
 uniform vec3 uMin[4];
 uniform vec3 uMax[4];
-// the posts' x and z off the centre, and their half width
-uniform vec3 uPost;
+// how far each layer has dithered in, 0 to 1
+uniform float uShow[4];
+// the posts' x and z off the centre, their half width and their height
+uniform vec4 uPost;
 // every box together, for rays that miss them all
 uniform vec3 uBoundMin;
 uniform vec3 uBoundMax;
-// the floor: its shadow's density, the grid's step, alpha and radius, and its bounds on the canvas
+// the floor's shadow density, and its grid's step, alpha and radius
 uniform float uShadow;
 uniform vec3 uGrid;
-uniform vec4 uFloor;
 out vec4 color;
 ${bayer8}
+// this pixel's dither threshold, in cells of 2 CSS px
+float threshold;
+
 vec3 invert(vec3 d) {
   return 1.0 / mix(d, vec3(1e-9), lessThan(abs(d), vec3(1e-9)));
 }
@@ -51,21 +55,24 @@ vec3 slab(vec3 ro, vec3 inv, vec3 lo, vec3 hi) {
   return vec3(tn, tf, tn == a.x ? 0.0 : (tn == a.y ? 1.0 : 2.0));
 }
 
-bool part(int i, out vec3 lo, out vec3 hi) {
+void part(int i, out vec3 lo, out vec3 hi) {
   if (i < 4) {
     lo = uMin[i];
     hi = uMax[i];
-    return true;
+    return;
   }
   int gap = (i - 4) / 4;
   int corner = i - 4 - gap * 4;
-  float y0 = uMax[gap + 1].y;
-  float y1 = uMin[gap].y;
-  if (y1 - y0 < 0.5) return false;
+  float y = gap < 3 ? uMax[gap + 1].y : 0.0;
   vec2 at = vec2(corner == 1 || corner == 3 ? uPost.x : -uPost.x, corner >= 2 ? -uPost.y : uPost.y);
-  lo = vec3(at.x - uPost.z, y0, at.y - uPost.z);
-  hi = vec3(at.x + uPost.z, y1, at.y + uPost.z);
-  return true;
+  lo = vec3(at.x - uPost.z, y, at.y - uPost.z);
+  hi = vec3(at.x + uPost.z, y + uPost.w, at.y + uPost.z);
+}
+
+// the part has dithered in at this pixel; a post with the layer it stands on, the feet with the
+// layer on them
+bool shows(int i) {
+  return uShow[i < 4 ? i : min((i - 4) / 4 + 1, 3)] > threshold;
 }
 
 float lit(vec3 p, int self) {
@@ -74,8 +81,9 @@ float lit(vec3 p, int self) {
   if (s.x >= s.y || s.y <= 0.0) return 1.0;
   vec3 lo;
   vec3 hi;
-  for (int i = 0; i < 16; i++) {
-    if (i == self || !part(i, lo, hi)) continue;
+  for (int i = 0; i < 20; i++) {
+    if (i == self || !shows(i)) continue;
+    part(i, lo, hi);
     s = slab(p, inv, lo, hi);
     if (s.x < s.y && s.y > 0.0) return 0.0;
   }
@@ -83,11 +91,12 @@ float lit(vec3 p, int self) {
 }
 
 void main() {
+  vec2 size = uResolution / uDpr;
   vec2 px = vec2(gl_FragCoord.x, uResolution.y - gl_FragCoord.y) / uDpr;
   // one CSS px across the screen moves the ray by t world units at t
   vec3 D = uFwd * uFocal + uRight * (px.x - uCentre.x) + uUp * (uCentre.y - px.y);
   vec3 inv = invert(D);
-  float threshold = bayer8(floor(px / uCell));
+  threshold = bayer8(floor(px / 2.0));
   // a line on each face (a crease gets two), and one outside a silhouette
   float inner = max(0.75, 1.0 / uDpr);
   float outer = max(1.0, 1.0 / uDpr);
@@ -104,8 +113,8 @@ void main() {
   float far = outer * max(dot(c - uEye, uFwd) / uFocal, 1e-3) * 2.0;
   vec3 s = slab(uEye, inv, uBoundMin - far, uBoundMax + far);
   if (s.x < s.y && s.y > 0.0) {
-    for (int i = 0; i < 16; i++) {
-      if (!part(i, lo, hi)) continue;
+    for (int i = 0; i < 20; i++) {
+      part(i, lo, hi);
       s = slab(uEye, inv, lo, hi);
       if (s.x < s.y && s.x > 0.0 && s.x < best) {
         best = s.x;
@@ -115,8 +124,9 @@ void main() {
     }
     // silhouettes: a near miss of a part in front of whatever the ray reaches
     float depth = min(best, ground);
-    for (int i = 0; i < 16; i++) {
-      if (i == hit || !part(i, lo, hi)) continue;
+    for (int i = 0; i < 20; i++) {
+      if (i == hit || !shows(i)) continue;
+      part(i, lo, hi);
       float guess = max(dot(0.5 * (lo + hi) - uEye, uFwd) / uFocal, 1e-3);
       s = slab(uEye, inv, lo - outer * guess, hi + outer * guess);
       if (s.x < s.y && s.x > 0.0 && s.x < depth) {
@@ -132,6 +142,11 @@ void main() {
   }
 
   if (hit >= 0 && best < ground) {
+    // a part still dithering in covers its share of the faces under the canvas with paper
+    if (!shows(hit)) {
+      color = vec4(uPaper, 1.0);
+      return;
+    }
     part(hit, lo, hi);
     vec3 p = uEye + best * D;
     vec3 n = vec3(0.0);
@@ -164,12 +179,8 @@ void main() {
 
   if (ground < 1e19) {
     vec3 p = uEye + ground * D;
-    // the floor dissolves before its bounds, never cut by them
-    float edge = smoothstep(
-      0.0,
-      24.0,
-      min(min(px.x - uFloor.x, uFloor.z - px.x), min(px.y - uFloor.y, uFloor.w - px.y))
-    );
+    // the floor dissolves before the canvas' edges, never cut by them
+    float edge = smoothstep(0.0, 24.0, min(min(px.x, size.x - px.x), min(px.y, size.y - px.y)));
     if (threshold < uShadow * edge && lit(p + vec3(0.0, 0.01, 0.0), -1) < 0.5) {
       color = vec4(pen, 1.0);
       return;
@@ -193,20 +204,25 @@ void main() {
 
 export type Vec3 = [number, number, number];
 
-export interface View {
-  target: Vec3;
-  dist: number;
-  /** above the ground, radians */
-  elev: number;
-  /** round y, radians; negative swings to the left */
-  yaw: number;
-  /** CSS px */
-  focal: number;
-  /** the principal point off the canvas centre, CSS px */
-  shift: [number, number];
-}
+/** the page on the stack's top, a 16:10 screen, a layer's thickness and the gap its posts keep */
+export const W = 1000;
+export const D = 625;
+export const T = 140;
+export const GAP = 60;
+/** the stack's height at rest, on its feet, and the height a layer settles in from */
+export const HEIGHT = 4 * (T + GAP);
+export const DROP = GAP;
 
-/** a view's basis and principal point (CSS px), written in place by `aim` */
+const DEG = Math.PI / 180;
+/** the camera above the floor and round the stack, left of its front */
+const ELEV = 32 * DEG;
+const YAW = -26 * DEG;
+/** its distance in page widths: a long lens, so the stack keeps its shape */
+const LENS = 3;
+/** the cell's least margin round the stack, a part of the stack's width on screen */
+const MARGIN = 0.06;
+
+/** a camera's basis and its principal point, CSS px */
 export interface Camera {
   eye: Vec3;
   fwd: Vec3;
@@ -214,50 +230,6 @@ export interface Camera {
   up: Vec3;
   focal: number;
   centre: [number, number];
-}
-
-const FOV = (30 * Math.PI) / 180;
-
-export function focalOf(height: number): number {
-  return height / 2 / Math.tan(FOV / 2);
-}
-
-export function createCamera(): Camera {
-  return {
-    eye: [0, 0, 0],
-    fwd: [0, 0, 0],
-    right: [0, 0, 0],
-    up: [0, 0, 0],
-    focal: 1,
-    centre: [0, 0],
-  };
-}
-
-/** `cam` looking from `view` on a canvas of `width` x `height`; `right` stays level, so straight down has no pole */
-export function aim(cam: Camera, view: View, width: number, height: number): Camera {
-  const ce = Math.cos(view.elev);
-  const sy = Math.sin(view.yaw);
-  const cy = Math.cos(view.yaw);
-  const ox = sy * ce;
-  const oy = Math.sin(view.elev);
-  const oz = cy * ce;
-  cam.eye[0] = view.target[0] + view.dist * ox;
-  cam.eye[1] = view.target[1] + view.dist * oy;
-  cam.eye[2] = view.target[2] + view.dist * oz;
-  cam.fwd[0] = -ox;
-  cam.fwd[1] = -oy;
-  cam.fwd[2] = -oz;
-  cam.right[0] = cy;
-  cam.right[1] = 0;
-  cam.right[2] = -sy;
-  // right x fwd
-  cam.up[0] = -cam.right[2] * cam.fwd[1];
-  cam.up[1] = cam.right[2] * cam.fwd[0] - cam.right[0] * cam.fwd[2];
-  cam.up[2] = cam.right[0] * cam.fwd[1];
-  cam.focal = view.focal;
-  cam.centre[0] = width / 2 + view.shift[0];
-  cam.centre[1] = height / 2 + view.shift[1];
-  return cam;
 }
 
 /** a world point in canvas CSS px into `out` */
@@ -299,69 +271,64 @@ export function quadMatrix(q: readonly number[], w: number, h: number): string {
   return `matrix3d(${num(a / w)},${num(d / w)},0,${num(g / w)},${num(b / h)},${num(e / h)},0,${num(k / h)},0,0,1,0,${num(q[0])},${num(q[1])},0,1)`;
 }
 
-const corner = [0, 0];
-
-/** the box `lo`..`hi` on the canvas */
-export function boundsOf(cam: Camera, lo: Vec3, hi: Vec3): Rect {
-  let x0 = Infinity;
-  let y0 = Infinity;
-  let x1 = -Infinity;
-  let y1 = -Infinity;
+/** the box across the stack from the floor to `top` on `cam`'s canvas */
+function bounds(cam: Camera, top: number) {
+  const point = [0, 0];
+  const box = { x0: Infinity, y0: Infinity, x1: -Infinity, y1: -Infinity };
   for (let i = 0; i < 8; i++) {
-    project(cam, i & 1 ? hi[0] : lo[0], i & 2 ? hi[1] : lo[1], i & 4 ? hi[2] : lo[2], corner);
-    x0 = Math.min(x0, corner[0]);
-    x1 = Math.max(x1, corner[0]);
-    y0 = Math.min(y0, corner[1]);
-    y1 = Math.max(y1, corner[1]);
+    project(cam, i & 1 ? W / 2 : -W / 2, i & 2 ? top : 0, i & 4 ? D / 2 : -D / 2, point);
+    box.x0 = Math.min(box.x0, point[0]);
+    box.x1 = Math.max(box.x1, point[0]);
+    box.y0 = Math.min(box.y0, point[1]);
+    box.y1 = Math.max(box.y1, point[1]);
   }
-  return { x: x0, y: y0, w: x1 - x0, h: y1 - y0 };
-}
-
-/** the view at `base`'s angles whose projection of `lo`..`hi` fits `slot`, centred in it */
-export function fitView(
-  base: Omit<View, 'dist' | 'shift'>,
-  lo: Vec3,
-  hi: Vec3,
-  width: number,
-  height: number,
-  slot: Rect,
-): View {
-  const cam = createCamera();
-  const view: View = { ...base, dist: 1, shift: [0, 0] };
-  let near = 1;
-  let far = 1e6;
-  for (let i = 0; i < 50; i++) {
-    view.dist = Math.sqrt(near * far);
-    const box = boundsOf(aim(cam, view, width, height), lo, hi);
-    if (box.w > slot.w || box.h > slot.h) near = view.dist;
-    else far = view.dist;
-  }
-  view.dist = far;
-  const box = boundsOf(aim(cam, view, width, height), lo, hi);
-  view.shift = [
-    slot.x + slot.w / 2 - (box.x + box.w / 2),
-    slot.y + slot.h / 2 - (box.y + box.h / 2),
-  ];
-  return view;
+  return box;
 }
 
 /**
- * The camera between the page straight on and the rest view, into `out`: `dolly` pulls back (log
- * distance), `tilt` orbits down from overhead, `swing` turns round and moves the framing
+ * The stack's one pose, framed for a cell 1 CSS px wide: the focal length and the principal point
+ * scale with the cell's width. The cell takes the aspect ratio of the stack's box on screen with an
+ * even margin round it, wide enough for the top layer settling in from above; `face` is a layer's
+ * width on screen, a part of the cell's.
  */
-export function viewAt(
-  out: View,
-  from: View,
-  to: View,
-  dolly: number,
-  tilt: number,
-  swing: number,
-) {
-  for (let i = 0; i < 3; i++) out.target[i] = mix(from.target[i], to.target[i], swing);
-  out.dist = Math.exp(mix(Math.log(from.dist), Math.log(to.dist), dolly));
-  out.elev = mix(from.elev, to.elev, tilt);
-  out.yaw = mix(from.yaw, to.yaw, swing);
-  out.focal = to.focal;
-  out.shift[0] = mix(from.shift[0], to.shift[0], swing);
-  out.shift[1] = mix(from.shift[1], to.shift[1], swing);
+function pose() {
+  const ce = Math.cos(ELEV);
+  const out: Vec3 = [Math.sin(YAW) * ce, Math.sin(ELEV), Math.cos(YAW) * ce];
+  const right: Vec3 = [Math.cos(YAW), 0, -Math.sin(YAW)];
+  const fwd: Vec3 = [-out[0], -out[1], -out[2]];
+  const cam: Camera = {
+    eye: [LENS * W * out[0], HEIGHT / 2 + LENS * W * out[1], LENS * W * out[2]],
+    fwd,
+    right,
+    // right x fwd
+    up: [-right[2] * fwd[1], right[2] * fwd[0] - right[0] * fwd[2], right[0] * fwd[1]],
+    focal: 1,
+    centre: [0, 0],
+  };
+  const rest = bounds(cam, HEIGHT);
+  const reach = bounds(cam, HEIGHT + DROP);
+  const margin = Math.max(
+    MARGIN * (rest.x1 - rest.x0),
+    rest.x0 - reach.x0,
+    rest.y0 - reach.y0,
+    reach.x1 - rest.x1,
+    reach.y1 - rest.y1,
+  );
+  const span = rest.x1 - rest.x0 + 2 * margin;
+  const point = [0, 0];
+  project(cam, -W / 2, HEIGHT / 2, D / 2, point);
+  const [ax, ay] = point;
+  project(cam, W / 2, HEIGHT / 2, D / 2, point);
+  return {
+    eye: cam.eye,
+    fwd,
+    right,
+    up: cam.up,
+    focal: 1 / span,
+    centre: [(margin - rest.x0) / span, (margin - rest.y0) / span] as const,
+    aspect: span / (rest.y1 - rest.y0 + 2 * margin),
+    face: Math.hypot(point[0] - ax, point[1] - ay) / span,
+  };
 }
+
+export const POSE = pose();
