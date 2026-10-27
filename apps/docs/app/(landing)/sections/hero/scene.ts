@@ -6,6 +6,8 @@ import { bayer8 } from '../../lib/dither';
  */
 export const REACH = 1.46;
 export const HORIZON = 0.76;
+/** the dither's cell at rest, CSS px: the moon's dots and the stars */
+export const CELL = 3;
 
 /**
  * The satellites in the order they pop: their layer, their prism's half sizes in moon radii, phase in
@@ -174,17 +176,20 @@ for (const { size } of SATELLITES) prisms += `${prisms ? ',' : ''}vec3(${size.jo
  * The Fumadocs icon as the moon with its layers in orbit, one depth-tested scene: the moon (an
  * analytic sphere with its near side's face), the ring (a hairline ellipse) and three toon prisms
  * (analytic boxes). Shading is per cell (`uCell` CSS px) and 1-bit through an ordered dither; rims,
- * edges, crater lines and the ring are drawn at device resolution. The canvas is the drawing's box
- * (`REACH`, `HORIZON`), empty over the moon's crown; at boot the moon rises from `uRise` radii lower.
+ * edges, crater lines and the ring are drawn at device resolution. The canvas is the sky: the moon
+ * sits on its bottom edge in the middle (`HORIZON`, `uRadius`), at boot rising from `uRise` radii
+ * lower, and its stars twinkle on `uTwinkle`, the tick.
  */
 export const moonFragment = `#version 300 es
 precision highp float;
 
 uniform vec2 uResolution;
 uniform float uDpr;
+uniform float uRadius;
 uniform float uCell;
 uniform float uOutline;
 uniform float uRise;
+uniform float uTwinkle;
 uniform float uDark;
 uniform vec3 uLight;
 uniform vec3 uLit;
@@ -207,27 +212,56 @@ ${bayer8}
 const vec3 PRISM[3] = vec3[](${prisms});
 const float REACH = ${REACH.toFixed(3)};
 const float HORIZON = ${HORIZON.toFixed(3)};
+const float CELL = ${CELL.toFixed(1)};
+// cells a side of the blocks that hold a star at most
+const uint BLOCK = 32u;
 const float TAU = 6.2831853;
 
 vec3 rotate(vec4 q, vec3 v) {
   return v + 2.0 * cross(q.xyz, cross(q.xyz, v) + q.w * v);
 }
 
+uint hash(uvec2 p) {
+  uint h = p.x * 0x9e3779b9u ^ p.y * 0x85ebca6bu;
+  h = (h ^ (h >> 16)) * 0x7feb352du;
+  h = (h ^ (h >> 15)) * 0x846ca68bu;
+  return h ^ (h >> 16);
+}
+
+// the sky's star in this cell's block, on the canvas's own grid so it stays while the moon rises: 7
+// blocks in 10 hold one, a glint clear of the block's edges; ink dots go out for a tick now and then,
+// one star in 5 is lit and glints, a plus for two ticks
+vec4 star(vec2 cell) {
+  uvec2 block = uvec2(cell) / BLOCK;
+  uint h = hash(block);
+  vec2 d = abs(cell - vec2(block * BLOCK + 2u + uvec2(h >> 4, h >> 9) % (BLOCK - 4u)));
+  float off = d.x + d.y;
+  if (off > 1.0 || h % 10u >= 7u) return vec4(0.0);
+  bool lit = (h >> 14) % 5u == 0u;
+  uint beat = (uint(uTwinkle) + (h >> 22)) % (12u + (h >> 17) % 20u);
+  if (off == 0.0 && (lit || beat != 0u)) return vec4(lit ? uLit : uInk, 1.0);
+  if (off == 1.0 && lit && beat < 2u) return vec4(uLit, 1.0);
+  return vec4(0.0);
+}
+
 void main() {
-  float radius = uResolution.x / (2.0 * REACH);
-  float cellPx = uCell * uDpr;
+  float radius = uRadius;
+  // the stars come out once the mosaic resolves
+  vec4 sky = uCell > CELL ? vec4(0.0) : star(floor(gl_FragCoord.xy / (CELL * uDpr)));
   vec2 frag = gl_FragCoord.xy - vec2(uResolution.x * 0.5, (HORIZON - uRise) * radius);
-  if (frag.y > radius) {
-    color = vec4(0.0);
+  // over the moon's crown and past the ring's reach: only stars
+  if (frag.y > radius || abs(frag.x) > REACH * radius) {
+    color = sky;
     return;
   }
+  float cellPx = uCell * uDpr;
   vec2 cell = floor(frag / cellPx);
   // the cell's centre and the pixel itself, in moon radii
   vec2 pc = (cell + 0.5) * cellPx / radius;
   vec2 pf = frag / radius;
   float threshold = bayer8(cell);
 
-  vec4 col = vec4(0.0);
+  vec4 col = sky;
   float depth = -1e9;
 
   // the moon: large cells (the mosaic) keep a blocky silhouette, small ones a true circle

@@ -12,7 +12,7 @@ import { createShaderCanvas, cssRgb } from '../../lib/gl';
 import { clamp, settle, TICK } from '../../lib/motion';
 import { report } from '../../lib/status';
 import { isDark, onTheme } from '../../lib/theme';
-import { CRATER_UNIFORMS, drawFace, HORIZON, moonFragment, REACH, SATELLITES } from './scene';
+import { CELL, CRATER_UNIFORMS, drawFace, HORIZON, moonFragment, REACH, SATELLITES } from './scene';
 
 /** boot beats, in ticks from the start */
 export const BEAT_AT = {
@@ -46,8 +46,7 @@ export function untilBeat(start: number, tick: number): number {
 }
 
 const ease = cubicBezier(...settle);
-/** the dither's cell at rest, CSS px, and the boot's mosaic coarsening down to it */
-const CELL = 3;
+/** the boot's mosaic, CSS px a cell, down to the dither's own */
 const MOSAIC = [64, 32, 16, 8, 4, CELL];
 /** at boot the moon rises from this many radii under its place */
 const RISE = 0.6;
@@ -73,10 +72,18 @@ let face: HTMLCanvasElement | null | undefined;
 
 /** the moon: it rises at boot, lit from the pointer, its satellites in orbit and her on its crown */
 export function createHero(stage: HTMLElement, reduced: boolean): (() => void) | undefined {
-  const drawing = stage.firstElementChild as HTMLElement;
-  const canvas = drawing.firstElementChild as HTMLCanvasElement;
-  const mate = canvas.nextElementSibling as HTMLCanvasElement;
-  const labels = drawing.lastElementChild!.children as HTMLCollectionOf<HTMLElement>;
+  const canvas = stage.firstElementChild;
+  const drawing = stage.lastElementChild;
+  const mate = drawing?.firstElementChild;
+  const labels = drawing?.lastElementChild?.children as HTMLCollectionOf<HTMLElement> | undefined;
+  // a Fast Refresh can pair this engine with other markup for a moment: no sky until they match
+  if (
+    !(canvas instanceof HTMLCanvasElement) ||
+    !(drawing instanceof HTMLElement) ||
+    !(mate instanceof HTMLCanvasElement) ||
+    labels?.length !== SATELLITES.length
+  )
+    return;
   // a page out of canvas memory gets no contexts: the hero is its text then
   const pen = mate.getContext('2d');
   face ??= drawFace(128);
@@ -84,7 +91,7 @@ export function createHero(stage: HTMLElement, reduced: boolean): (() => void) |
   const shader = createShaderCanvas(canvas, {
     fragment: moonFragment,
     onFrame: (time) => frame(time),
-    onResize: measure,
+    onResize: (dpr) => measure(dpr),
   });
   if (!shader) return;
   const hero = stage.parentElement!;
@@ -132,17 +139,18 @@ export function createHero(stage: HTMLElement, reduced: boolean): (() => void) |
   };
   const stopTheme = onTheme(readColors);
 
-  function measure() {
-    radius = canvas.clientWidth / (2 * REACH);
+  /** `dpr`: the canvas's pixels a CSS px */
+  const measure = (dpr: number) => {
+    radius = drawing.getBoundingClientRect().width / (2 * REACH);
+    shader.set('uRadius', radius * dpr);
     // her cell: an eighth of the moon's width over her 30, in whole device px, a CSS px at least
-    const dpr = window.devicePixelRatio;
-    const cell = Math.max(1, Math.round((radius * dpr) / CELLS) / dpr);
+    const cell = Math.max(1, Math.round((radius * devicePixelRatio) / CELLS) / devicePixelRatio);
     drawing.style.setProperty('--cell', `${cell}px`);
     // px a tick of the fastest satellite, crossing the moon's face
     const fastest = (ORBIT.a * radius * 2 * Math.PI * TICK) / (ORBIT.period * 1000);
     stride = TICK / Math.max(1, Math.ceil(fastest / CELL));
     centre = undefined;
-  }
+  };
 
   const onPointerMove = (e: PointerEvent) => {
     if (e.pointerType === 'touch') return;
@@ -204,6 +212,7 @@ export function createHero(stage: HTMLElement, reduced: boolean): (() => void) |
     shader.set('uOutline', cell < 4.5 && t >= BEAT_AT.outline * TICK ? 1 : 0);
     shader.set('uRise', rise);
     shader.set('uLight', light);
+    shader.set('uTwinkle', reduced ? 0 : Math.floor((clock * 1000) / TICK));
 
     // the ring strokes on as one pen line, the back half, then the front half
     vec4[0] = ORBIT.a;

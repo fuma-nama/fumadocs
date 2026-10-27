@@ -26,8 +26,8 @@ const mate: CSSProperties = {
 /** the labels' origin, the moon's centre */
 const centre: CSSProperties = { bottom: `calc(var(--r) * ${HORIZON})` };
 
-/** the sky over the horizon: the moon with its ring and prisms, her on its crown, the labels on
- * its centre */
+/** the sky over the horizon, its canvas the stars and the moon with its ring and prisms; the
+ * drawing's box holds her on the moon's crown and the labels on its centre */
 export function Stage() {
   const reduced = useReducedMotion() === true;
   const ref = useCallback(
@@ -40,10 +40,10 @@ export function Stage() {
       ref={ref}
       aria-hidden
       style={sky}
-      className="pointer-events-none flex items-end justify-center [container-type:size] max-lg:min-h-(--fit) [--moon-lit:var(--lp-sun)] dark:[--moon-lit:var(--lp-yellow)]"
+      className="pointer-events-none relative flex items-end justify-center [container-type:size] max-lg:min-h-(--fit) [--moon-lit:var(--lp-sun)] dark:[--moon-lit:var(--lp-yellow)]"
     >
+      <canvas className="absolute inset-0 size-full" />
       <div style={drawing} className="relative">
-        <canvas className="block size-full" />
         <canvas
           width={MATE_W}
           height={MATE_H}
