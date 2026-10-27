@@ -1,6 +1,14 @@
 import { cubicBezier } from 'motion/react';
 import { createShaderCanvas, cssRgb } from '../../lib/gl';
-import { camera, clamp, type Rect, rectIn, settleCss, TICK } from '../../lib/motion';
+import {
+  camera,
+  clamp,
+  type Rect,
+  rectIn,
+  settle as settleCurve,
+  settleCss,
+  TICK,
+} from '../../lib/motion';
 import { isDark, onTheme } from '../../lib/theme';
 import { LAYERS, SWAPS, type SwapLayer } from './data';
 import {
@@ -20,6 +28,8 @@ import {
 const easeCamera = cubicBezier(...camera);
 /** the tilt's own curve: it leaves overhead with the first px of scroll, so the depth reads at once */
 const easeTilt = cubicBezier(0.3, 0.1, 0.3, 1);
+/** the framing's: it leaves the page's place at once, so the header and the keys come in early */
+const easeSwing = cubicBezier(...settleCurve);
 const DEG = Math.PI / 180;
 const LIGHT: Vec3 = [0.44, 0.83, 0.34];
 /** the gap the layers part to, in layer thicknesses */
@@ -32,14 +42,18 @@ const PULL = 0.2;
 const HOLD = 8 * TICK;
 /** how long the camera stays still before the faces raster again at their own scale, ms */
 const STILL = 150;
+/** the least time the whole move takes, s: a snap or a flick plays at Start's pace, while a slow
+ * drag stays on the finger */
+const MOVE = 0.9;
 const UNIFORM_MIN = ['uMin[0]', 'uMin[1]', 'uMin[2]', 'uMin[3]'];
 const UNIFORM_MAX = ['uMax[0]', 'uMax[1]', 'uMax[2]', 'uMax[3]'];
-/** how close to its end the run counts as parted, and the margin it keeps once it is */
-const PARTED = 0.02;
-/** how near a rest, in parts of the run, a scroll coming to rest on its way there glides onto it */
-const REACH = 0.3;
-/** ms without a scroll before it counts as at rest, where the browser has no `scrollend` */
-const QUIET = 150;
+/** how long a keyboard scroll stays still before it counts as ended, ms, and how long after the
+ * key it is watched for */
+const KEY_QUIET = 120;
+const KEY_WATCH = 1000;
+/** the least of the run the camera moves before the full step, and the margin the step keeps */
+const STEP = 0.1;
+const STEP_MARGIN = 0.05;
 
 /**
  * The layouts of `parts.css`; `still` is reduced motion and landscape phones too small to pin: no
@@ -117,7 +131,6 @@ export function createStack(
   const wide = matchMedia('(min-width: 1024px)');
   const reduce = matchMedia('(prefers-reduced-motion: reduce)');
   const cramped = matchMedia('(max-width: 759px) and (max-height: 499px)');
-  const ends = 'onscrollend' in window;
 
   let mode: Mode = 'still';
   let width = 0;
@@ -137,15 +150,14 @@ export function createStack(
   let panelLeft = 0;
   let runFrom = 0;
   let runTo = 1;
-  /** where the stage's header has room, to come in and to go, and the parted rest's scroll */
-  let headIn = 0;
-  let headOut = 0;
-  let parted = false;
-  let rest2 = 0;
-  /** the last scroll's place and way */
+  /** where in the run the full step starts, and whether the page is still zoomed in */
+  let fullFrom = STEP;
+  let zoomed = true;
+  /** the scroll's last place and way, and when a key last went down */
   let lastY = 0;
-  let down = true;
-  let quiet = 0;
+  let way = 0;
+  let keyAt = -Infinity;
+  let keyQuiet = 0;
   /** the page straight on, and the stack at rest */
   const from: View = {
     target: [0, 0, 0],
@@ -256,32 +268,19 @@ export function createStack(
       rest,
     );
 
-    // it pins from the figure's top (never read from what is stuck), the stage or the phone's for
-    // its spacer, the column's canvas until the header and the keys have come in
+    // it pins from the figure's top (never read from what is stuck) for its spacer
     runFrom = root.getBoundingClientRect().top + scroll - menu;
     runTo = runFrom + spacer.offsetHeight;
-    rest2 = runTo;
-    if (mode === 'column') {
-      // the header comes in over the canvas' right part once the stack has left it, and the camera
-      // is parted before the keys come in; the parted rest has the header at the top
-      let clear = 0;
+    // the full step starts once the stack has left the header's and the keys' place for good; a
+    // phone's have a row of their own
+    let clear = 0;
+    if (mode === 'stage' || mode === 'column')
       for (let i = 100; i >= 0 && clear === 0; i--) {
         const stack = stackBox(aimAt(i / 100));
-        if (panelLeft - (stack.x + stack.w) < 24) clear = Math.min(1, (i + 1) / 100);
+        if (stack.x + stack.w > panelLeft - 24 || (mode === 'stage' && stack.y < headFoot + 16))
+          clear = Math.min(1, (i + 1) / 100);
       }
-      const keys = panel.getBoundingClientRect().top - spacer.getBoundingClientRect().top;
-      runTo = runFrom + Math.min(spacer.offsetHeight / Math.max(clear, 0.3), keys);
-      rest2 = Math.max(runTo, head.getBoundingClientRect().top + scroll - menu - gutter);
-    } else if (mode === 'stage') {
-      // the header shows once the stack is 16px clear of it, and goes before the stack reaches it
-      headIn = 0;
-      headOut = 0;
-      for (let i = 100; i >= 0 && headOut === 0; i--) {
-        const room = stackBox(aimAt(i / 100)).y - headFoot;
-        if (room < 16 && headIn === 0) headIn = (i + 1) / 100;
-        if (room < 0) headOut = (i + 1) / 100;
-      }
-    }
+    fullFrom = Math.max(STEP, clear);
     shader!.set('uCell', 2);
     shader!.set('uPost', [W / 2 - 0.05 * W, D / 2 - 0.07 * D, Math.max(3, 0.006 * W)]);
     shader!.set('uLight', [LIGHT[0] / length, LIGHT[1] / length, LIGHT[2] / length]);
@@ -302,24 +301,31 @@ export function createStack(
 
   function scrolled() {
     const y = window.scrollY;
-    target = mode === 'still' ? 1 : clamp((y - runFrom) / Math.max(1, runTo - runFrom));
-    if (y !== lastY) down = y > lastY;
+    if (y !== lastY) way = Math.sign(y - lastY);
     lastY = y;
-    if (!ends) {
-      clearTimeout(quiet);
-      quiet = window.setTimeout(arrive, QUIET);
+    if (performance.now() - keyAt < KEY_WATCH) {
+      clearTimeout(keyQuiet);
+      keyQuiet = window.setTimeout(onKeyScrollEnd, KEY_QUIET);
     }
+    target = mode === 'still' ? 1 : clamp((y - runFrom) / Math.max(1, runTo - runFrom));
+    // the page snaps only within the run: above the page zoomed in and past the full step, nothing
+    // pulls a reader in or back
+    root.toggleAttribute('data-snapping', y >= runFrom - 1 && y <= runTo + 1);
     shader!.invalidate();
   }
 
-  /** the camera at `p` of the run into `cam`; returns how far the layers have parted */
+  /**
+   * The camera at `p` of the run into `cam`; returns how far the layers have parted. The pull-back
+   * and the framing lead, so the stack clears the header's and the keys' place early; the tilt and
+   * the parting carry on to the run's end.
+   */
   function aimAt(p: number): number {
-    const dolly = 1 - (1 - clamp(p / 0.6)) ** 1.6;
-    const tilt = easeTilt(clamp(p / 0.7));
-    const swing = easeCamera(clamp((p - 0.05) / 0.55));
+    const dolly = 1 - (1 - clamp(p / 0.35)) ** 2;
+    const tilt = easeTilt(clamp(p / 0.9));
+    const swing = easeSwing(clamp(p / 0.5));
     viewAt(view, from, to, dolly, tilt, swing);
     aim(cam, view, width, height);
-    return easeCamera(clamp((p - 0.4) / 0.4));
+    return easeCamera(clamp((p - 0.2) / 0.8));
   }
 
   /** the box across the page's width from `y0` to `y1` and `z0` to `z1`, into `lo` and `hi` */
@@ -366,7 +372,7 @@ export function createStack(
     last = now;
     let moving = false;
 
-    progress += (target - progress) * (1 - Math.exp(-dt / 0.07));
+    progress += clamp((target - progress) * (1 - Math.exp(-dt / 0.07)), -dt / MOVE, dt / MOVE);
     if (Math.abs(target - progress) < 1e-4) progress = target;
     else moving = true;
 
@@ -445,19 +451,16 @@ export function createStack(
   }
 
   /**
-   * The header and the panel by the camera's state, both ways of the scroll. The layers count as
-   * parted near the run's end, with a margin so a reader resting there never flickers: the stage
-   * and the phone show the keys then (the phone's header gives way to them), and the stage's header
-   * holds the room the stack has left. A pick still on its way lands as the keys go, and focus in
-   * them moves to the figure.
+   * The header and the panel by the step, both ways of the scroll: the page zoomed in, or the full
+   * step from where the camera has cleared their place, with a margin so a move back and forth
+   * there never flickers. The full step shows the keys, the header with them, or on a phone giving
+   * way to them. A pick still on its way lands as the keys go, and focus in them moves to the
+   * figure.
    */
   function place(force = false) {
-    parted = progress >= 1 - (parted ? 2 : 1) * PARTED;
-    const docked = mode === 'stage' || mode === 'phone';
-    let headNext = true;
-    if (mode === 'stage') headNext = progress >= (headShown ? headOut : headIn);
-    else if (mode === 'phone') headNext = !parted;
-    const panelNext = !docked || parted;
+    zoomed = progress < fullFrom - (zoomed ? 0 : STEP_MARGIN);
+    const headNext = mode === 'phone' ? zoomed : !zoomed;
+    const panelNext = !zoomed;
     if (force || headNext !== headShown) show(head, headNext);
     if (force || panelNext !== panelShown) {
       if (panelShown && !panelNext) {
@@ -517,31 +520,33 @@ export function createStack(
     }
   }
 
-  /**
-   * The run's two rests, the page straight on and the stack parted: a scroll that comes to rest in
-   * the run near the one it was heading for glides onto it. Never back against the scroll's way, and
-   * never once it has left the run, so nothing can hold a scroll in the figure.
-   */
-  function arrive() {
-    const y = window.scrollY;
-    if (mode === 'still' || y <= runFrom || y >= rest2) return;
-    const goal = down ? rest2 : runFrom;
-    if (Math.abs(goal - y) < REACH * (rest2 - runFrom))
-      window.scrollTo({ top: goal, behavior: 'smooth' });
-  }
-
   function want(layer: SwapLayer, option: number) {
     const tray = trays.get(layer)!;
     tray.want = option;
-    // the drawer plays when the layers are parted and on the screen; elsewhere a pick lands at once
-    if (!seen || mode === 'still' || !parted) settle();
+    // the drawer plays in the full step with the stack on the screen; elsewhere a pick lands at once
+    if (!seen || mode === 'still' || zoomed) settle();
     else if (tray.out === 0) tray.unlatch = performance.now() + TICK;
     shader!.invalidate();
   }
 
+  /**
+   * Chrome leaves a keyboard scroll unsnapped, and fires no `scrollend` for it, when a second press
+   * extends it while it snaps: once such a scroll is still between the steps, it goes on to the one
+   * it was heading for. The stage is pinned there, so only the camera moves, at its own pace.
+   */
+  function onKeyScrollEnd() {
+    const y = window.scrollY;
+    if (mode === 'still' || y <= runFrom + 2 || y >= runTo - 2) return;
+    window.scrollTo({ top: way > 0 ? runTo : runFrom, behavior: 'instant' });
+  }
+
+  function onKey() {
+    keyAt = performance.now();
+  }
+
   function onFocusIn() {
-    // keyboard focus reaches the keys before they show: finish the move to the parted rest first
-    if (!panelShown) window.scrollTo({ top: rest2, behavior: 'instant' });
+    // keyboard focus reaches the keys before they show: finish the move to the full step first
+    if (!panelShown) window.scrollTo({ top: runTo, behavior: 'instant' });
   }
 
   const resize = new ResizeObserver(measure);
@@ -563,7 +568,7 @@ export function createStack(
   wide.addEventListener('change', measure);
   reduce.addEventListener('change', measure);
   panel.addEventListener('focusin', onFocusIn);
-  if (ends) window.addEventListener('scrollend', arrive);
+  window.addEventListener('keydown', onKey);
   colours();
   measure();
 
@@ -579,8 +584,8 @@ export function createStack(
       wide.removeEventListener('change', measure);
       reduce.removeEventListener('change', measure);
       panel.removeEventListener('focusin', onFocusIn);
-      window.removeEventListener('scrollend', arrive);
-      clearTimeout(quiet);
+      window.removeEventListener('keydown', onKey);
+      clearTimeout(keyQuiet);
       shader.destroy();
     },
   };

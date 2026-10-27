@@ -97,6 +97,11 @@ export function Stage({ header, page, headless, snippets }: StageProps) {
           </div>
         </div>
         <div data-run aria-hidden className="parts-run" />
+        {/* snap targets: the run's two ends, and one well beyond each */}
+        <i className="parts-snap" />
+        <i className="parts-snap" />
+        <i className="parts-snap" />
+        <i className="parts-snap" />
       </div>
       {/* a phone's stage has room for the keys alone: its code window follows the stage */}
       <div className="parts-after">{code}</div>

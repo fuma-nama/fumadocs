@@ -2,6 +2,7 @@
  * JS, no WebGL, which marks the figure `data-flat`, or a landscape phone too small to pin. */
 
 .parts-pin {
+  position: relative;
   padding: 32px var(--lp-gutter) 40px;
 }
 
@@ -36,7 +37,8 @@
 
 .parts-slot,
 .parts-run,
-.parts-after {
+.parts-after,
+.parts-snap {
   display: none;
 }
 
@@ -69,21 +71,19 @@
   }
 }
 
-/* every pinned layout */
+/* every pinned layout: the stage pins for a short run, and a scroll that ends in it snaps to an end,
+ * the page zoomed in or the full step. The run is short enough to be in snapping range of both
+ * ends, a third of the screen in Chrome and less in Safari, so nothing rests between them. The
+ * engine snaps the page only within the run, so nothing above or past it pulls a reader in or back;
+ * nothing else on the page snaps. */
 @media (prefers-reduced-motion: no-preference) and (scripting: enabled) and (min-width: 760px),
   (prefers-reduced-motion: no-preference) and (scripting: enabled) and (min-height: 500px) {
-  .parts-pin:not([data-flat]) .parts-cell {
-    aspect-ratio: auto;
+  html:has(.parts-pin[data-snapping]) {
+    scroll-snap-type: y proximity;
   }
 
-  .parts-pin:not([data-flat]) .parts-page {
-    inset: var(--lp-gutter);
-  }
-}
-
-/* the whole stage pins: the header and the panel come in on it once the camera clears their place */
-@media (min-width: 1348px) and (min-height: 884px) and (prefers-reduced-motion: no-preference) and (scripting: enabled) {
   .parts-pin:not([data-flat]) {
+    --run: 30svh;
     padding: 0;
   }
 
@@ -91,9 +91,73 @@
     position: sticky;
     top: var(--lp-menu-h);
     height: calc(100svh - var(--lp-menu-h) - var(--lp-status-h));
-    grid-template-rows: auto minmax(0, 1fr);
-    padding: 24px var(--lp-gutter);
     overflow: hidden;
+  }
+
+  .parts-pin:not([data-flat]) .parts-cell {
+    aspect-ratio: auto;
+  }
+
+  .parts-pin:not([data-flat]) .parts-page {
+    inset: var(--lp-gutter);
+  }
+
+  .parts-pin:not([data-flat]) .parts-run {
+    display: block;
+    height: var(--run);
+  }
+
+  .parts-pin:not([data-flat]) .parts-snap {
+    display: block;
+    position: absolute;
+    left: 0;
+    width: 1px;
+    height: 1px;
+    pointer-events: none;
+    scroll-snap-align: start;
+    scroll-margin-top: var(--lp-menu-h);
+  }
+
+  /* the page zoomed in and the full step; a target two screens beyond each, out of snapping reach,
+   * keeps them from being the page's first and last, where Safari holds the arrow keys */
+  .parts-pin:not([data-flat]) .parts-snap:nth-of-type(1) {
+    top: -200lvh;
+  }
+
+  .parts-pin:not([data-flat]) .parts-snap:nth-of-type(2) {
+    top: 0;
+  }
+
+  .parts-pin:not([data-flat]) .parts-snap:nth-of-type(3) {
+    top: var(--run);
+  }
+
+  .parts-pin:not([data-flat]) .parts-snap:nth-of-type(4) {
+    top: calc(var(--run) + 200lvh);
+  }
+
+  .parts-pin:not([data-flat]) .parts-head,
+  .parts-pin:not([data-flat]) .parts-panel {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* the keys wait for the full step; hidden, their boxes let the page under them take the pointer */
+  .parts-pin:not([data-flat]) .parts-panel [data-rise] {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .parts-pin:not([data-flat]) .parts-head:not([data-shown]),
+  .parts-pin:not([data-flat]) .parts-panel:not([data-shown]) {
+    pointer-events: none;
+  }
+}
+
+/* on a sheet the canvas fills the stage, and the header waits for the full step with the keys */
+@media (min-width: 1024px) and (prefers-reduced-motion: no-preference) and (scripting: enabled) {
+  .parts-pin:not([data-flat]) .parts-stage {
+    padding: 24px var(--lp-gutter);
   }
 
   .parts-pin:not([data-flat]) .parts-cell {
@@ -101,11 +165,21 @@
     inset: 0;
   }
 
-  /* the header over the stack's place, the panel the column's full height beside them */
+  .parts-pin:not([data-flat]) .parts-head [data-rise-group] > * {
+    opacity: 0;
+    pointer-events: none;
+  }
+}
+
+/* the whole stage: the header over the stack's place, the panel with the code window the right
+ * column's full height */
+@media (min-width: 1348px) and (min-height: 884px) and (prefers-reduced-motion: no-preference) and (scripting: enabled) {
+  .parts-pin:not([data-flat]) .parts-stage {
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+
   .parts-pin:not([data-flat]) .parts-head,
   .parts-pin:not([data-flat]) .parts-panel {
-    position: relative;
-    z-index: 1;
     grid-column: 1;
   }
 
@@ -117,83 +191,41 @@
     display: block;
     grid-area: 2 / 1;
   }
-
-  .parts-pin:not([data-flat]) .parts-run {
-    display: block;
-    height: 140svh;
-  }
-
-  .parts-pin:not([data-flat]) .parts-stage [data-rise],
-  .parts-pin:not([data-flat]) .parts-stage [data-rise-group] > * {
-    opacity: 0;
-    pointer-events: none;
-  }
-
-  /* hidden, their boxes let the page under them take the pointer and selection */
-  .parts-pin:not([data-flat]) .parts-head:not([data-shown]),
-  .parts-pin:not([data-flat]) .parts-panel:not([data-shown]) {
-    pointer-events: none;
-  }
 }
 
-/* the canvas pins across the sheet, the header and the panel passing over its right part */
+/* a shorter sheet: the header and the keys share the right column, at least 33rem so the keys take
+ * three columns, and the code window follows the stage */
 @media (min-width: 1024px) and (max-width: 1347px) and (prefers-reduced-motion: no-preference) and (scripting: enabled),
   (min-width: 1024px) and (max-height: 883px) and (prefers-reduced-motion: no-preference) and (scripting: enabled) {
-  .parts-pin:not([data-flat]) {
-    display: flex;
-    flex-direction: column;
-    padding: 0 0 40px;
-  }
-
   .parts-pin:not([data-flat]) .parts-stage {
-    display: contents;
-  }
-
-  .parts-pin:not([data-flat]) .parts-cell {
-    order: -1;
-    position: sticky;
-    top: var(--lp-menu-h);
-    height: calc(100svh - var(--lp-menu-h) - var(--lp-status-h));
-  }
-
-  /* the header comes in once the camera has cleared the right part, near the run's middle */
-  .parts-pin:not([data-flat]) .parts-run {
-    display: block;
-    height: calc((100svh - var(--lp-menu-h) - var(--lp-status-h)) * 0.54);
+    grid-template-columns: minmax(0, 7fr) minmax(33rem, 5fr);
+    align-content: start;
+    row-gap: 24px;
   }
 
   .parts-pin:not([data-flat]) .parts-head,
   .parts-pin:not([data-flat]) .parts-panel {
-    order: 1;
-    position: relative;
-    z-index: 1;
-    align-self: flex-end;
-    width: calc((100% - 2 * var(--lp-gutter) - 48px) * 5 / 12);
-    margin-right: var(--lp-gutter);
+    grid-column: 2;
   }
 
-  .parts-pin:not([data-flat]) .parts-panel {
-    order: 2;
-    margin-top: 32px;
+  .parts-pin:not([data-flat]) .parts-panel [data-window] {
+    display: none;
+  }
+
+  .parts-pin:not([data-flat]) + .parts-after {
+    display: block;
+    padding: 24px var(--lp-gutter) 40px;
   }
 }
 
-/* a phone's stage pins whole: the canvas, and below it, or beside it in landscape, the place the
- * header holds until the layers part and the keys take; the code window follows the stage */
+/* a phone's stage: the canvas, and below it, or beside it in landscape, one place the header holds
+ * while the page is zoomed in and the keys take in the full step; the code window follows the stage */
 @media (max-width: 1023px) and (min-height: 500px) and (prefers-reduced-motion: no-preference) and (scripting: enabled),
   (min-width: 760px) and (max-width: 1023px) and (prefers-reduced-motion: no-preference) and (scripting: enabled) {
-  .parts-pin:not([data-flat]) {
-    padding: 0;
-  }
-
   .parts-pin:not([data-flat]) .parts-stage {
-    position: sticky;
-    top: var(--lp-menu-h);
-    height: calc(100svh - var(--lp-menu-h) - var(--lp-status-h));
     grid-template-rows: minmax(0, 1fr) auto;
     gap: 16px;
     padding-bottom: 16px;
-    overflow: hidden;
   }
 
   .parts-pin:not([data-flat]) .parts-head,
@@ -204,21 +236,6 @@
 
   .parts-pin:not([data-flat]) .parts-panel [data-window] {
     display: none;
-  }
-
-  .parts-pin:not([data-flat]) .parts-panel [data-rise] {
-    opacity: 0;
-    pointer-events: none;
-  }
-
-  .parts-pin:not([data-flat]) .parts-head:not([data-shown]),
-  .parts-pin:not([data-flat]) .parts-panel:not([data-shown]) {
-    pointer-events: none;
-  }
-
-  .parts-pin:not([data-flat]) .parts-run {
-    display: block;
-    height: 100svh;
   }
 
   .parts-pin:not([data-flat]) + .parts-after {
@@ -240,7 +257,11 @@
     align-self: center;
     padding: 0 var(--lp-gutter) 0 0;
   }
+}
 
+/* a short stage's header takes the phone's title */
+@media (min-width: 760px) and (max-width: 1023px) and (max-height: 499px) and (prefers-reduced-motion: no-preference) and (scripting: enabled),
+  (min-width: 1024px) and (max-height: 649px) and (prefers-reduced-motion: no-preference) and (scripting: enabled) {
   .parts-pin:not([data-flat]) .parts-head h2 {
     font-size: 2.25rem;
   }
