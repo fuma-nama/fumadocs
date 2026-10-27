@@ -1,6 +1,6 @@
 import type { CSSProperties, ReactNode } from 'react';
 import { copy } from '../../content';
-import { Figure, FigureHeader } from '../../ui/figure';
+import { Figure, FigureHeader, Terms } from '../../ui/figure';
 import { FIRST, THEMES, type ThemeId } from './data';
 import { createHardware } from './hardware';
 import { loadInks, wire, type Wiring } from './presets';
@@ -13,21 +13,6 @@ import { Stage } from './stage';
  * on as its line comes up the screen, scrubbed by the scroll; without scroll timelines it is lit.
  */
 function Title() {
-  const opening: ReactNode[] = [];
-  for (const run of copy.style.title) {
-    opening.push(
-      typeof run === 'string' ? (
-        run
-      ) : (
-        <span
-          key={run.term}
-          className="font-pixel font-normal tracking-normal whitespace-nowrap text-lp-orange"
-        >
-          {run.term}
-        </span>
-      ),
-    );
-  }
   const claims: ReactNode[] = [];
   for (let i = 0; i < copy.style.claims.length; i++) {
     claims.push(
@@ -46,7 +31,9 @@ function Title() {
 
   return (
     <>
-      <span className="block max-w-[29em]">{opening}</span>{' '}
+      <span className="block max-w-[29em]">
+        <Terms runs={copy.style.title} />
+      </span>{' '}
       <span className="mt-[0.5em] block font-pixel text-[length:max(0.6em,16px)] leading-[1.25] font-normal tracking-normal">
         {claims}
       </span>

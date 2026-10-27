@@ -7,6 +7,7 @@ import { getContributorCount, getDownloads, getStars } from '../sections/proof/d
 import { LAYOUTS, TABS, THEME_NAMES, THEMES } from '../sections/style/data';
 import { blocks as buttonBlocks } from '../sections/automate/data';
 import { blocks, fileLines } from '../sections/write/data';
+import type { Run } from '../ui/figure';
 
 // the counters in it, like the page
 export const revalidate = 86400;
@@ -17,9 +18,21 @@ function url(path: string): string {
   return new URL(path, baseUrl).toString();
 }
 
+/** a title's text: its terms as plain words, a line break set in it as a space */
+function plain(title: string | readonly Run[]): string {
+  let text = '';
+  for (const run of typeof title === 'string' ? [title] : title)
+    text += typeof run === 'string' ? run : run.term;
+  return text.replaceAll('\n', ' ');
+}
+
 /** a figure's title and its line, if it has one, opening its section */
-function section(item: { lead: string; title: string; description?: string }): string[] {
-  const out = ['', `## ${item.lead} ${item.title}`, ''];
+function section(item: {
+  lead: string;
+  title: string | readonly Run[];
+  description?: string;
+}): string[] {
+  const out = ['', `## ${item.lead} ${plain(item.title)}`, ''];
   if (item.description) out.push(item.description, '');
   return out;
 }
@@ -59,8 +72,7 @@ async function landingMarkdown(): Promise<string> {
   for (const layout of LAYOUTS) layouts.push(layout.name);
   const themes: string[] = [];
   for (const id of THEMES) themes.push(`${THEME_NAMES[id]} (\`${id}\`)`);
-  let statement = '';
-  for (const run of copy.style.title) statement += typeof run === 'string' ? run : run.term;
+  let statement = plain(copy.style.title);
   for (const claim of copy.style.claims) statement += ` ${claim}`;
   out.push('', `## ${statement}`, '', '- Restyle any layout or theme with CSS variables.');
   for (const id of TABS) {

@@ -22,13 +22,7 @@ export function Start() {
   return (
     <Figure id="start" aria-label="Start" status="awaiting input">
       <Stage>
-        <FigureHeader
-          data-rise-group
-          // one line beside the terminal: shrinks with the column, ends clear of the controls' edge
-          className="lg:[&_h2]:text-[length:min(3.75rem,calc(100cqw/9.05))]"
-          lead={copy.start.lead}
-          title={copy.start.title}
-        />
+        <FigureHeader data-rise-group lead={copy.start.lead} title={copy.start.title} />
         <Command command={command} data-rise className="w-full" />
         {/* 24.75rem: three of the widest button ("Why Fumadocs") and the gaps */}
         <div data-rise className="grid grid-cols-2 gap-2 @min-[24.75rem]:grid-cols-3">

@@ -41,9 +41,33 @@ function Mark({ className }: { className: string }) {
   );
 }
 
+/** a run of a title's text, or a key term of it, set in the orange pixel type */
+export type Run = string | { term: string };
+
+/** a title's runs, its key terms in the orange pixel type */
+export function Terms({ runs }: { runs: readonly Run[] }) {
+  const out: ReactNode[] = [];
+  for (const run of runs) {
+    out.push(
+      typeof run === 'string' ? (
+        run
+      ) : (
+        <span
+          key={run.term}
+          className="font-pixel font-normal tracking-normal whitespace-nowrap text-lp-orange"
+        >
+          {run.term}
+        </span>
+      ),
+    );
+  }
+  return out;
+}
+
 interface FigureHeaderProps extends Omit<ComponentProps<'div'>, 'title'> {
-  /** the opening of the title, set in the orange pixel type; a title without one is a long one */
+  /** the opening of the title, set in the orange pixel type on its own line */
   lead?: ReactNode;
+  /** a line break in its text breaks the title there */
   title: ReactNode;
   description?: ReactNode;
 }
@@ -51,21 +75,8 @@ interface FigureHeaderProps extends Omit<ComponentProps<'div'>, 'title'> {
 export function FigureHeader({ lead, title, description, className, ...props }: FigureHeaderProps) {
   return (
     <div {...props} className={cn('flex flex-col gap-4', className)}>
-      <h2
-        className={cn(
-          'font-medium',
-          lead
-            ? 'text-4xl leading-[1.02] tracking-[-0.035em] text-balance md:text-6xl'
-            : 'text-[clamp(1.625rem,1rem+2vw,2.5rem)] leading-[1.1] tracking-[-0.028em] text-pretty',
-        )}
-      >
-        {lead ? (
-          <>
-            <Lead>{lead}</Lead> <span className="block max-w-[16ch]">{title}</span>
-          </>
-        ) : (
-          title
-        )}
+      <h2 className="text-[clamp(1.625rem,1rem+2vw,2.5rem)] leading-[1.1] font-medium tracking-[-0.028em] text-pretty whitespace-pre-line">
+        {lead && <Lead>{lead}</Lead>} {title}
       </h2>
       {description && (
         <p className="max-w-[46ch] text-lg leading-relaxed text-pretty text-lp-ink-2">

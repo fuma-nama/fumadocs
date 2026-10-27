@@ -5,7 +5,7 @@ import { TypeTable } from 'fumadocs-ui/components/type-table';
 import * as Twoslash from 'fumadocs-twoslash/ui';
 import { Mermaid } from '@/components/mdx/mermaid';
 import { copy } from '../../content';
-import { Figure, FigureHeader } from '../../ui/figure';
+import { Figure, FigureHeader, type Run, Terms } from '../../ui/figure';
 import { blocks, quickStart, steps } from './data';
 import { RailBed, RailColumn } from './rail';
 import { Stage } from './stage';
@@ -25,7 +25,7 @@ interface PressProps {
   id: string;
   label: string;
   lead: string;
-  title: string;
+  title: string | readonly Run[];
   description?: string;
   /** the MDX file, its blocks compiled and their sources */
   file: string;
@@ -62,7 +62,7 @@ export function Press({
     <Figure id={id} aria-label={label} status={`compiled ${file}`}>
       <FigureHeader
         lead={lead}
-        title={title}
+        title={typeof title === 'string' ? title : <Terms runs={title} />}
         description={description}
         className="p-(--lp-gutter) pb-8 md:pt-10"
       />

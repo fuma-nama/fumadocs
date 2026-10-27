@@ -16,7 +16,7 @@ export const copy = {
   },
   parts: {
     lead: 'Fits your stack.',
-    title: 'Swap one, keep the rest.',
+    title: 'Designed to be flexible.',
   },
   write: {
     lead: 'Write in Markdown.',
@@ -24,8 +24,13 @@ export const copy = {
   },
   automate: {
     lead: 'Always up to date.',
-    title: 'Content never go stale.',
-    description: 'Generate new content from your code, the single source-of-truth.',
+    title: [
+      'Generate content from your ',
+      { term: 'code' },
+      ',\nthe single ',
+      { term: 'source of truth' },
+      '.',
+    ],
   },
   style: {
     /** a long title with no lead: what Fumadocs is, its key terms in the orange pixel type */
@@ -75,8 +80,13 @@ export const copy = {
   },
   cli: {
     lead: 'Need more control?',
-    title: 'Own the source code.',
-    description: 'The Fumadocs CLI copies the UI into your codebase and rewires the imports.',
+    title: [
+      'Use ',
+      { term: 'Fumadocs CLI' },
+      ' to install the UI into your codebase, and own the ',
+      { term: 'source code' },
+      ' with full control.',
+    ],
   },
   integrations: {
     lead: 'Feature rich.',
