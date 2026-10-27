@@ -22,7 +22,7 @@ export function Chip({
     <span
       {...props}
       className={cn(
-        'inline-flex h-6 items-center gap-1.5 border border-lp-line-strong bg-lp-paper px-2 font-mono text-xs leading-none whitespace-nowrap',
+        'inline-flex h-6 items-center gap-1.5 border border-lp-line-strong bg-lp-paper px-2 text-xs leading-none font-medium whitespace-nowrap',
         className,
       )}
     >

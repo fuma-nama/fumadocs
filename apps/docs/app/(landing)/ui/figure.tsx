@@ -13,8 +13,6 @@ interface FigureProps extends ComponentProps<'section'> {
 export function Figure({ status, className, children, ...props }: FigureProps) {
   return (
     <section
-      // a hot reload can shift figures' props along the page: another id is another figure
-      key={props.id}
       {...props}
       ref={registerFigure}
       data-figure=""
@@ -41,10 +39,10 @@ function Mark({ className }: { className: string }) {
   );
 }
 
-/** a run of a title's text, or a key term of it in orange */
+/** a run of a title's text, or a key term of it in the orange voice (`.lp-voice`) */
 export type Run = string | { term: string };
 
-/** a title's runs, its key terms in orange */
+/** a title's runs, its key terms in the orange voice */
 export function Terms({ runs }: { runs: readonly Run[] }) {
   const out: ReactNode[] = [];
   for (const run of runs) {
@@ -52,7 +50,7 @@ export function Terms({ runs }: { runs: readonly Run[] }) {
       typeof run === 'string' ? (
         run
       ) : (
-        <span key={run.term} className="whitespace-nowrap text-lp-orange">
+        <span key={run.term} className="lp-voice whitespace-nowrap text-lp-orange">
           {run.term}
         </span>
       ),
@@ -62,7 +60,7 @@ export function Terms({ runs }: { runs: readonly Run[] }) {
 }
 
 interface FigureHeaderProps extends Omit<ComponentProps<'div'>, 'title'> {
-  /** the opening of the title, in orange on its own line */
+  /** the opening of the title, in the orange voice on its own line */
   lead?: ReactNode;
   /** a line break in its text breaks the title there */
   title: ReactNode;
@@ -72,11 +70,11 @@ interface FigureHeaderProps extends Omit<ComponentProps<'div'>, 'title'> {
 export function FigureHeader({ lead, title, description, className, ...props }: FigureHeaderProps) {
   return (
     <div {...props} className={cn('flex flex-col gap-4', className)}>
-      <h2 className="text-[clamp(1.625rem,1rem+2vw,2.5rem)] leading-[1.2] font-medium md:leading-[1.1] tracking-[-0.028em] text-pretty whitespace-pre-line">
+      <h2 className="text-[clamp(1.625rem,1rem+2vw,2.5rem)] leading-[1.2] font-medium tracking-[-0.03em] text-pretty whitespace-pre-line md:leading-[1.1]">
         {lead && <Lead>{lead}</Lead>} {title}
       </h2>
       {description && (
-        <p className="max-w-[46ch] text-lg leading-relaxed text-pretty text-lp-ink-2">
+        <p className="max-w-[46ch] text-lg leading-[1.45] text-pretty text-lp-ink-2">
           {description}
         </p>
       )}
@@ -84,7 +82,7 @@ export function FigureHeader({ lead, title, description, className, ...props }: 
   );
 }
 
-/** the opening of a title, in orange on its own line */
+/** the opening of a title, in the orange voice on its own line */
 export function Lead({ className, children }: { className?: string; children: ReactNode }) {
-  return <span className={cn('block text-lp-orange', className)}>{children}</span>;
+  return <span className={cn('lp-voice block text-lp-orange', className)}>{children}</span>;
 }

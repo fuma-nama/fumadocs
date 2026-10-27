@@ -6,7 +6,7 @@ import { Scramble } from './text';
 /** the bar itself never re-renders: the status and the figure links each subscribe */
 export function StatusBar() {
   return (
-    <div className="fixed inset-x-0 bottom-0 z-50 h-(--lp-status-h) border-t border-lp-line-strong bg-lp-paper font-mono text-xs">
+    <div className="fixed inset-x-0 bottom-0 z-50 h-(--lp-status-h) border-t border-lp-line-strong bg-lp-paper text-xs font-medium">
       <div className="mx-auto flex h-full max-w-(--lp-max) items-stretch">
         {/* decoration that follows the page, the figure links are the only part for assistive tech */}
         <p aria-hidden className="flex min-w-0 flex-1 items-center gap-2 ps-(--lp-gutter) pe-3">
