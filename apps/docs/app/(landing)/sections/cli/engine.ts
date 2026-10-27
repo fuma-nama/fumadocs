@@ -120,7 +120,6 @@ export function createCli(root: HTMLElement): () => void {
   function load(index: number) {
     const own = `[data-scene="${index}"]`;
     const cell = root.querySelector<HTMLElement>(`[data-tree-cell]${own}`)!;
-    const column = root.querySelector<HTMLElement>(`[data-column]${own}`)!;
     const tree = find('tree', cell);
     const rows = new Map<string, HTMLElement>();
     for (const el of tree.querySelectorAll<HTMLElement>('[data-path]'))
@@ -141,7 +140,7 @@ export function createCli(root: HTMLElement): () => void {
       const inlet = row(el.dataset.card!);
       cards.push({ el, w: 0, h: 0, scale: 1, slide: 0, inlet, reveals, at: '' });
     }
-    const editor = find('editor', column);
+    const editor = root.querySelector<HTMLElement>(`[data-editor]${own}`)!;
     const tabs = [...editor.querySelectorAll<HTMLButtonElement>('[data-tab]')];
     const panels = [...editor.querySelectorAll<HTMLElement>('[data-panel]')];
     const tabOf = (el: Element) => panels.indexOf(el.closest<HTMLElement>('[data-panel]')!);
@@ -159,7 +158,7 @@ export function createCli(root: HTMLElement): () => void {
     }
     const command = figure.querySelector<HTMLElement>(`[data-command]${own}`)!;
     const editLine = find('edit-line', editor);
-    const page = find('page', column);
+    const page = find('page', editor);
     return {
       index,
       command,
@@ -173,7 +172,8 @@ export function createCli(root: HTMLElement): () => void {
       tabs,
       panels,
       title: find('title', editor),
-      /** the tab of the file you edit, and the one shown */
+      /** the browser's tab, the tab of the file you edit, and the one shown */
+      browser: tabOf(page),
       open: tabOf(editLine),
       shown: tabs.findIndex((tab) => tab.ariaSelected === 'true'),
       tree,
@@ -184,9 +184,8 @@ export function createCli(root: HTMLElement): () => void {
       strikes,
       cables,
       editCut: find('cut', editLine),
-      preview: find('preview', column),
       page,
-      after: find('after', column),
+      after: find('after', editor),
       edited: page.hasAttribute('data-edited'),
     };
   }
@@ -390,6 +389,10 @@ export function createCli(root: HTMLElement): () => void {
     const edit = Math.max(free, t) + 120;
     // typed within the run's last beat: a long edit types faster
     const editFor = Math.min(scene.editCut.dataset.new!.length * 40, 240);
+    // the dev server reloads as your edit is saved, its tab flashing while the code still shows; the
+    // browser then shows the old page a moment before your change dithers in
+    const reload = edit + 300 + editFor + 60;
+    const page = reload + 2 * TICK;
     return {
       typed,
       latch,
@@ -406,8 +409,10 @@ export function createCli(root: HTMLElement): () => void {
       plugs,
       edit,
       editFor,
-      page: edit + 300 + editFor + 120,
-      end: edit + 980,
+      reload,
+      page,
+      change: page + 2 * TICK,
+      end: page + 5 * TICK + 200,
     };
   }
 
@@ -434,7 +439,7 @@ export function createCli(root: HTMLElement): () => void {
 
     // the crate's front face is its slot; a wide stage's bigger crate stays a box
     const slot = rectIn(crate, s);
-    const depth = desktop ? Math.max(92, Math.round(slot.w * 0.37)) : 80;
+    const depth = desktop ? Math.max(64, Math.round(slot.w * 0.37)) : 80;
     const a = unproject(slot.x, slot.y, CRATE_Z);
     const b = unproject(slot.x + slot.w, slot.y + slot.h, CRATE_Z);
     const floor = b[1];
@@ -617,7 +622,7 @@ export function createCli(root: HTMLElement): () => void {
         ? bounds([treeBox.x + treeBox.w - 12, editor.y, 0], [editor.x + 12, floor, 24])
         : [0, 0, 0, 0],
     );
-    const windows = [treeBox, editor, rectIn(scene.preview, s)];
+    const windows = [treeBox, editor];
     for (let i = 0; i < windows.length; i++) {
       const r = windows[i];
       gl.set(`uWindow[${i}]`, [r.x, r.y, r.x + r.w, r.y + r.h]);
@@ -774,11 +779,13 @@ export function createCli(root: HTMLElement): () => void {
     }
     if (flashRow && t >= flashUntil) flash(undefined, t);
 
+    // the page until the first rewrite, each file rewired, the one you edit, the page again
     if (live) {
-      let tab = scene.strikes[0].tab;
+      let tab = scene.browser;
       for (let i = 0; i < scene.strikes.length; i++)
         if (t >= b.strikes[i]) tab = scene.strikes[i].tab;
       if (t >= b.edit) tab = scene.open;
+      if (t >= b.page) tab = scene.browser;
       if (tab !== beatTab) {
         beatTab = tab;
         pick(tab);
@@ -851,7 +858,8 @@ export function createCli(root: HTMLElement): () => void {
         editCaret.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px)`;
       }
     }
-    const edited = !live || t >= b.page;
+    highlight(scene.tabs[scene.browser], live && t >= b.reload && t < b.page);
+    const edited = !live || t >= b.change;
     if (edited !== scene.edited) {
       scene.edited = edited;
       scene.page.toggleAttribute('data-edited', edited);
@@ -958,8 +966,7 @@ export function createCli(root: HTMLElement): () => void {
   function onScreen(i: number): boolean {
     if (i < 2) return arrived();
     if (desktopQuery.matches) return true;
-    if (i === 2) return (ratios.get(scene.editor) ?? 0) >= EDITOR;
-    return (ratios.get(scene.preview) ?? 0) >= PAGE;
+    return (ratios.get(scene.editor) ?? 0) >= (i === 2 ? EDITOR : PAGE);
   }
 
   function hold() {
@@ -1097,9 +1104,8 @@ export function createCli(root: HTMLElement): () => void {
   parts.observe(crate);
   parts.observe(commandBox);
   // both runs' windows: your project's list, whose folders move the rows the cables reach
-  for (const el of root.querySelectorAll('[data-tree], [data-editor], [data-preview]'))
-    resize.observe(el);
-  for (const el of root.querySelectorAll('[data-editor], [data-preview]')) parts.observe(el);
+  for (const el of root.querySelectorAll('[data-tree], [data-editor]')) resize.observe(el);
+  for (const el of root.querySelectorAll('[data-editor]')) parts.observe(el);
   for (const list of root.querySelectorAll('[data-list]')) {
     resize.observe(list.firstElementChild!);
     // a scroll event comes before this frame paints: the cables follow their rows in it

@@ -16,7 +16,7 @@ precision highp int;
 uniform vec2 uResolution, uFloor, uFrame;
 uniform float uDpr, uCell;
 uniform vec3 uEye, uLight, uLit, uShade, uPen, uLine, uAccent;
-uniform vec4 uBox[${GROUPS}], uWindow[3];
+uniform vec4 uBox[${GROUPS}], uWindow[2];
 
 uniform vec3 uCrate, uCrateSize, uLabelC, uLabelB, uSocket[2];
 uniform float uLidT, uLid;
@@ -380,7 +380,7 @@ void main() {
     if (front && (inside(px, uLabel) || inside(px, uCounter) || inside(px, uDrive))) col = vec4(0.0);
   } else if (gMask != 0) {
     bool clean = false;
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < 2; i++) {
       if (inside(px, uWindow[i])) clean = true;
     }
     vec3 p = ro + rd * tBack;

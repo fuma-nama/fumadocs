@@ -1,4 +1,5 @@
 import type { ComponentProps, ReactNode } from 'react';
+import { Globe } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { Window } from '../../ui/window';
 import type { Change, Source } from './data';
@@ -148,39 +149,70 @@ function Diff({ code, rewire }: { code: string; rewire: Change }) {
 }
 
 /**
- * Your project in an editor: the files the run changes as tabs, each showing its lines around the
- * change, an import rewired as a diff, your edit in place. It opens on the file you edit.
+ * Your project in an editor: the page in its browser tab first, then the files the run changes,
+ * each showing its lines around the change, an import rewired as a diff, your edit in place.
  */
 export function Editor({
   id,
   sources,
+  page,
   className,
-}: {
-  id: string;
-  sources: Source[];
-  className?: string;
-}) {
-  const open = sources.findIndex((source) => source.edit);
+  ...props
+}: Omit<ComponentProps<'div'>, 'title'> & { id: string; sources: Source[]; page: ReactNode }) {
   const tabs: ReactNode[] = [];
   const panels: ReactNode[] = [];
+  const tab = (i: number, path: string, label: ReactNode, target?: string) => (
+    <button
+      key={path}
+      type="button"
+      role="tab"
+      id={`${id}-tab-${i}`}
+      aria-controls={`${id}-panel-${i}`}
+      aria-selected={i === 0}
+      data-tab
+      data-file={path}
+      data-target={target}
+      className="relative flex h-7 min-w-0 items-center px-3 font-mono text-xs text-lp-ink-2 transition-none hover:text-lp-ink focus-visible:outline focus-visible:-outline-offset-2 focus-visible:outline-lp-ink aria-selected:bg-lp-paper-2 aria-selected:text-lp-ink md:h-8 md:shrink-0"
+    >
+      {label}
+    </button>
+  );
+  const panel = (i: number, className: string, children: ReactNode) => (
+    <div
+      key={i}
+      role="tabpanel"
+      id={`${id}-panel-${i}`}
+      aria-labelledby={`${id}-tab-${i}`}
+      data-panel
+      inert={i > 0}
+      className={cn('col-start-1 row-start-1 inert:invisible', className)}
+    >
+      {children}
+    </div>
+  );
+  // below 400px the browser's tab is a globe, so every file's name stays whole down to 360px; under
+  // that the names shrink like a browser's tabs
+  tabs.push(
+    tab(
+      0,
+      'localhost:3000/docs',
+      <>
+        <Globe aria-hidden className="size-3.5 min-[400px]:hidden" />
+        <span className="max-[400px]:sr-only">localhost</span>
+        {/* the page shows your edit: shown by display, so an inactive run's tab stays unseen */}
+        <span
+          aria-hidden
+          className="absolute top-1 right-1 hidden size-1.5 bg-lp-orange group-has-[[data-edited]]/window:block"
+        />
+      </>,
+    ),
+  );
+  // the page never sizes the window: it shows what the window's ratio or its code leaves room for
+  panels.push(panel(0, 'min-h-0 overflow-hidden contain-size', page));
   for (let i = 0; i < sources.length; i++) {
     const { file, target, hunks, rewires, edit } = sources[i];
-    tabs.push(
-      <button
-        key={file}
-        type="button"
-        role="tab"
-        id={`${id}-tab-${i}`}
-        aria-controls={`${id}-panel-${i}`}
-        aria-selected={i === open}
-        data-tab
-        data-file={file}
-        data-target={target}
-        className="flex h-7 shrink-0 items-center px-3 font-mono text-xs text-lp-ink-2 transition-none hover:text-lp-ink focus-visible:outline focus-visible:-outline-offset-2 focus-visible:outline-lp-ink aria-selected:bg-lp-paper-2 aria-selected:text-lp-ink md:h-8"
-      >
-        {file.slice(file.lastIndexOf('/') + 1)}
-      </button>,
-    );
+    const name = file.slice(file.lastIndexOf('/') + 1);
+    tabs.push(tab(i + 1, file, <span className="truncate">{name}</span>, target));
     const rows: ReactNode[] = [];
     for (let k = 0; k < hunks.length; k++) {
       // the lines in between, folded
@@ -207,37 +239,29 @@ export function Editor({
       }
     }
     panels.push(
-      <div
-        key={file}
-        role="tabpanel"
-        id={`${id}-panel-${i}`}
-        aria-labelledby={`${id}-tab-${i}`}
-        data-panel
-        inert={i !== open}
-        className="col-start-1 row-start-1 flex flex-col px-3 py-2 inert:invisible md:py-3 md:pe-4"
-      >
-        {rows}
-      </div>,
+      panel(
+        i + 1,
+        'flex flex-col px-3 py-2 font-mono text-[11px] leading-4 [font-variant-ligatures:none] md:py-3 md:pe-4 md:text-xs md:leading-5',
+        rows,
+      ),
     );
   }
   return (
     <Window
+      {...props}
       data-editor
-      title={<span data-title>{sources[open].file}</span>}
-      className={cn(
-        'font-mono text-[11px] leading-4 [font-variant-ligatures:none] md:text-xs md:leading-5',
-        className,
-      )}
+      title={<span data-title>localhost:3000/docs</span>}
+      className={cn('group/window', className)}
     >
-      <div className="flex min-h-0 flex-1 flex-col md:flex-row">
+      <div className="flex flex-1 flex-col md:flex-row">
         <div
           role="tablist"
-          aria-label="Files"
+          aria-label="Tabs"
           className="flex border-b border-lp-line-strong md:w-max md:shrink-0 md:flex-col md:border-e md:border-b-0"
         >
           {tabs}
         </div>
-        {/* every file in one place: the editor keeps the size of the longest */}
+        {/* every tab in one place: the window keeps the size of the largest */}
         <div className="grid min-w-0 flex-1">{panels}</div>
       </div>
     </Window>

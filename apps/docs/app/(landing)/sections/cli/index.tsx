@@ -163,7 +163,7 @@ function Counter({ scene, count, className }: { scene: number; count: number; cl
 
 export function Cli() {
   const cells: ReactNode[] = [];
-  const columns: ReactNode[] = [];
+  const editors: ReactNode[] = [];
   const counters: ReactNode[] = [];
   const cards: ReactNode[] = [];
   const chips: ReactNode[] = [];
@@ -213,29 +213,19 @@ export function Cli() {
         </Window>
       </div>,
     );
-    // its editor and its page each share their cell with the other run's: switching keeps them
-    columns.push(
-      <div
+    // its window shares its cell with the other run's: switching keeps it
+    editors.push(
+      <Editor
         key={plan.id}
-        data-column
+        id={`cli-${plan.id}`}
+        sources={plan.sources}
         data-scene={i}
         inert={i > 0}
-        className="contents inert:invisible"
-      >
-        <Editor id={`cli-${plan.id}`} sources={plan.sources} className="col-start-1 row-start-1" />
-        {/* a phone's window fits under the editor on one screen, the page cut off like a browser's */}
-        <Window
-          data-preview
-          title="localhost:3000/docs"
-          className="col-start-1 row-start-2 min-h-0 overflow-hidden max-sm:h-[376px]"
-        >
-          {/* the page before your edit and after it, `data-edited` says which shows: only ever
-              hidden, never forced visible, so an inactive run's page stays unseen */}
-          <div
-            data-page
-            data-edited
-            className="group grid min-h-0 flex-1 *:col-start-1 *:row-start-1"
-          >
+        className="col-start-1 row-start-3 mt-4 inert:invisible md:row-start-2 md:mt-6 lg:col-start-4 lg:row-start-1 lg:mt-0 lg:aspect-video lg:w-full lg:self-stretch"
+        page={
+          // the page before your edit and after it, `data-edited` says which shows: only ever
+          // hidden, never forced visible, so an inactive run's page stays unseen
+          <div data-page data-edited className="group grid h-full *:col-start-1 *:row-start-1">
             <div className="group-data-edited:invisible">
               <Preview {...previews[plan.id][0]} />
             </div>
@@ -243,8 +233,8 @@ export function Cli() {
               <Preview {...previews[plan.id][1]} />
             </div>
           </div>
-        </Window>
-      </div>,
+        }
+      />,
     );
     counters.push(
       <Counter
@@ -329,17 +319,17 @@ export function Cli() {
           <div
             data-crate
             className={machine(
-              'bottom-0 left-0.5 h-[160px] w-[min(180px,calc(50%-8px))] lg:right-[calc(100%_+_40px)] lg:left-auto lg:h-[180px] lg:w-[188px] xl:h-[190px] xl:w-[218px]',
+              'bottom-0 left-0.5 h-[160px] w-[min(180px,calc(50%-8px))] lg:right-[calc(100%_+_40px)] lg:left-auto lg:h-[136px] lg:w-[172px] xl:h-[150px] xl:w-[200px]',
             )}
           >
             <p
               data-label
-              className="absolute bottom-4 left-4 z-[6] flex flex-col gap-1 border border-lp-line-strong bg-lp-paper px-3 py-2 leading-none lg:bottom-[38px] lg:py-1 xl:bottom-[36px] xl:left-[22px] xl:py-1.5"
+              className="absolute bottom-4 left-4 z-[6] flex flex-col gap-1 border border-lp-line-strong bg-lp-paper px-3 py-2 leading-none lg:bottom-3 lg:left-3 lg:px-2 lg:py-1 xl:left-[18px] xl:px-3"
             >
-              <span className="font-mono text-[13px] lg:text-[10px] xl:text-[13px]">
+              <span className="font-mono text-[13px] lg:text-[10px] xl:text-[11px]">
                 fumadocs-ui
               </span>
-              <span className="font-pixel text-sm text-lp-orange lg:text-[11px] xl:text-sm">
+              <span className="font-pixel text-sm text-lp-orange lg:text-[11px] xl:text-xs">
                 {pkg.version}
               </span>
             </p>
@@ -355,9 +345,7 @@ export function Cli() {
           {counters}
         </div>
         {cells}
-        <div className="col-start-1 row-start-3 mt-4 grid min-h-0 grid-cols-[minmax(0,1fr)] grid-rows-[auto_minmax(0,1fr)] gap-4 md:row-start-2 md:mt-6 md:gap-6 lg:col-start-4 lg:row-start-1 lg:mt-0">
-          {columns}
-        </div>
+        {editors}
         <div data-cards aria-hidden className="pointer-events-none absolute inset-0 z-[5]">
           {cards}
         </div>
