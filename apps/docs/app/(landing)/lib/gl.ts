@@ -16,6 +16,8 @@ interface ShaderCanvasOptions {
   /** how much of the canvas is on screen, 0 to 1, each time that crosses 0 or one of `thresholds` */
   onVisible?: (ratio: number) => void;
   thresholds?: number[];
+  /** the most canvas pixels per CSS pixel it draws at */
+  density?: number;
 }
 
 export type ShaderCanvas = NonNullable<ReturnType<typeof createShaderCanvas>>;
@@ -29,7 +31,15 @@ export type ShaderCanvas = NonNullable<ReturnType<typeof createShaderCanvas>>;
  */
 export function createShaderCanvas(
   canvas: HTMLCanvasElement,
-  { fragment, loop = false, onFrame, onResize, onVisible, thresholds = [] }: ShaderCanvasOptions,
+  {
+    fragment,
+    loop = false,
+    onFrame,
+    onResize,
+    onVisible,
+    thresholds = [],
+    density = 2,
+  }: ShaderCanvasOptions,
 ) {
   const gl = canvas.getContext('webgl2', {
     antialias: false,
@@ -181,7 +191,7 @@ export function createShaderCanvas(
 
   // resizing clears the canvas, and a frame requested now would come after this one paints it blank
   const resize = new ResizeObserver(() => {
-    dpr = window.devicePixelRatio / Math.ceil(window.devicePixelRatio / 2);
+    dpr = window.devicePixelRatio / Math.ceil(window.devicePixelRatio / density);
     canvas.style.imageRendering = dpr < window.devicePixelRatio ? 'pixelated' : '';
     set('uDpr', dpr);
     fit();
