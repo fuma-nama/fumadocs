@@ -1,7 +1,8 @@
 /* the palette covers the whole document while the landing is mounted, portals included, and
-   `body`, where the docs' section class (`.framework`) sets its own primary */
-:root:has(.landing),
-:root:has(.landing) body {
+   `body`, where the docs' section class (`.framework`) sets its own primary. The landing is a child
+   of `body`: a `:has()` looking no deeper is matched again only when one of those changes */
+:root:has(> body > .landing),
+:root:has(> body > .landing) body {
   --lp-paper: #f2f0ea;
   --lp-paper-2: #e8e5dc;
   --lp-ink: #121210;
@@ -35,8 +36,8 @@
   --color-fd-info: var(--color-fd-primary);
 }
 
-:root.dark:has(.landing),
-:root.dark:has(.landing) body {
+:root.dark:has(> body > .landing),
+:root.dark:has(> body > .landing) body {
   --lp-paper: #0d0d0c;
   --lp-paper-2: #171715;
   --lp-ink: #eceae2;
@@ -54,7 +55,7 @@
 }
 
 /* layout only on the root, so the breakpoints below reach everything that inherits it */
-:root:has(.landing) {
+:root:has(> body > .landing) {
   /* the home layout's 1400px width and h-14 navbar; the gutter widens once the frame shows */
   --lp-max: 1400px;
   --lp-gutter: 16px;
@@ -64,7 +65,7 @@
 
 /* the sheet's frame lines show once it is narrower than the viewport, content keeps clear of them */
 @media (min-width: 1400px) {
-  :root:has(.landing) {
+  :root:has(> body > .landing) {
     --lp-gutter: 32px;
   }
 
@@ -74,7 +75,7 @@
   }
 }
 
-body:has(.landing),
+body:has(> .landing),
 .landing {
   background-color: var(--lp-paper);
   color: var(--lp-ink);
@@ -86,13 +87,13 @@ body:has(.landing),
 }
 
 /* the theme switch dithers the new frame in */
-:root:has(.landing)::view-transition-old(root),
-:root:has(.landing)::view-transition-new(root) {
+:root:has(> body > .landing)::view-transition-old(root),
+:root:has(> body > .landing)::view-transition-new(root) {
   animation: none;
   mix-blend-mode: normal;
 }
 
-:root:has(.landing)::view-transition-new(root) {
+:root:has(> body > .landing)::view-transition-new(root) {
   mask-size: 24px 24px;
   animation: lp-dither-in 560ms linear both;
 }
@@ -188,7 +189,7 @@ body:has(.landing),
 }
 
 @media (prefers-reduced-motion: reduce) {
-  :root:has(.landing)::view-transition-new(root) {
+  :root:has(> body > .landing)::view-transition-new(root) {
     animation: none;
   }
 }

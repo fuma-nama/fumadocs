@@ -224,7 +224,7 @@ export function createCli(root: HTMLElement): () => void {
       scene.tabs[k].ariaSelected = String(k === i);
       scene.panels[k].inert = k !== i;
     }
-    scene.title.textContent = scene.tabs[i].dataset.file!;
+    setText(scene.title, scene.tabs[i].dataset.file!);
   }
 
   function onTab(event: Event) {
@@ -881,7 +881,7 @@ export function createCli(root: HTMLElement): () => void {
       strike.state = state;
       strike.diff.toggleAttribute('data-diff', u >= STRIKE);
       highlight(strike.from, selected);
-      if (strike.cut.textContent !== text) strike.cut.textContent = text;
+      setText(strike.cut, text);
     }
 
     spin.fill(0);
@@ -916,7 +916,7 @@ export function createCli(root: HTMLElement): () => void {
     let value = live && e < WRITE ? cut.dataset.old! : next;
     if (live && e >= WRITE && e < WRITE + b.editFor)
       value = next.slice(0, 1 + Math.floor(((e - WRITE) / b.editFor) * next.length));
-    if (cut.textContent !== value) cut.textContent = value;
+    setText(cut, value);
     highlight(cut, live && e >= 2 * SELECT && e < WRITE);
     // the caret follows the text being typed in its own line
     const target = live && e >= 0 && e < WRITE + b.editFor + 200 ? cut : writing?.cut;
@@ -1158,6 +1158,15 @@ function names(array: string, length: number): string[] {
   return out;
 }
 
+/** `el`'s text, written into its one text node: a node put in would have the page match its
+ * `:has()` rules again */
+function setText(el: HTMLElement, text: string) {
+  const node = el.firstChild;
+  if (node instanceof Text && node === el.lastChild) {
+    if (node.data !== text) node.data = text;
+  } else el.textContent = text;
+}
+
 function highlight(el: HTMLElement, on: boolean) {
   const background = on ? 'var(--lp-yellow)' : '';
   if (el.style.background === background) return;
@@ -1252,9 +1261,9 @@ function createFlaps(root: HTMLElement) {
         cell.animations.length = 0;
         cell.el.firstChild!.textContent = text[i];
         if (!animate) continue;
-        cell.under.textContent = previous;
-        cell.top.textContent = previous;
-        cell.bottom.textContent = text[i];
+        setText(cell.under, previous);
+        setText(cell.top, previous);
+        setText(cell.bottom, text[i]);
         cell.animations.push(
           cell.top.animate(
             [
@@ -1276,7 +1285,7 @@ function createFlaps(root: HTMLElement) {
           }),
         );
       }
-      noun.textContent = value === 1 ? 'file' : 'files';
+      setText(noun, value === 1 ? 'file' : 'files');
     },
     destroy() {
       for (const cell of cells) {
