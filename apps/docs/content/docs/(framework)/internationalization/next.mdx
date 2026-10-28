@@ -41,6 +41,7 @@ Define your translations in `lib/layout.shared.tsx`, see [Translations](/docs/ui
 You can also add `locale` parameter to `baseOptions()` for localized layout options:
 
 ```tsx title="lib/layout.shared.tsx"
+// [!code ++:2]
 import { i18n } from '@/lib/i18n';
 import { uiTranslations } from 'fumadocs-ui/i18n';
 import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
@@ -58,8 +59,8 @@ export const translations = i18n
     },
   });
 
-// [!code highlight]
-export function baseOptions(locale: string): BaseLayoutProps {
+export function baseOptions(): BaseLayoutProps { // [!code --]
+export function baseOptions(locale: string): BaseLayoutProps { // [!code ++]
   return {
     // different props based on `locale`
   };
@@ -70,21 +71,19 @@ Pass translations to `<RootProvider />`:
 
 ```tsx title="app/[lang]/layout.tsx"
 import { RootProvider } from 'fumadocs-ui/provider/next';
-import { translations } from '@/lib/layout.shared';
+// [!code ++:2]
 import { i18nProvider } from 'fumadocs-ui/i18n';
+import { translations } from '@/lib/layout.shared';
 
-export default async function RootLayout({
-  params,
-  children,
-}: {
-  params: Promise<{ lang: string }>;
-  children: React.ReactNode;
-}) {
-  const lang = (await params).lang;
+export default function Layout({ children }: LayoutProps<'/'>) { // [!code --]
+// [!code ++:2]
+export default async function Layout({ params, children }: LayoutProps<'/[lang]'>) {
+  const { lang } = await params;
 
   return (
-    <html lang={lang}>
-      <body>
+    // [!code highlight]
+    <html lang={lang} suppressHydrationWarning>
+      <body className="flex flex-col min-h-screen">
         <RootProvider
           // [!code ++]
           i18n={i18nProvider(translations, lang)}
@@ -122,7 +121,7 @@ Create a `/app/[lang]` folder, and move your pages/layouts into it, except route
 Pass the locale to Fumadocs in your pages and layouts.
 
 ```ts tab="lib/source.ts"
-import { i18n } from '@/lib/i18n';
+import { i18n } from '@/lib/i18n'; // [!code ++]
 import { loader } from 'fumadocs-core/source';
 
 export const source = loader({
@@ -132,17 +131,9 @@ export const source = loader({
 ```
 
 ```tsx tab="Home Layout" title="app/[lang]/(home)/layout.tsx"
-import type { ReactNode } from 'react';
-import { HomeLayout } from 'fumadocs-ui/layouts/home';
-import { baseOptions } from '@/lib/layout.shared';
-
-export default async function Layout({
-  params,
-  children,
-}: {
-  params: Promise<{ lang: string }>;
-  children: ReactNode;
-}) {
+export default function Layout({ children }: LayoutProps<'/'>) { // [!code --]
+// [!code ++:2]
+export default async function Layout({ params, children }: LayoutProps<'/[lang]'>) {
   const { lang } = await params;
 
   return <HomeLayout {...baseOptions(lang)}>{children}</HomeLayout>; // [!code highlight]
@@ -150,18 +141,9 @@ export default async function Layout({
 ```
 
 ```tsx tab="Docs Layout" title="app/[lang]/docs/layout.tsx"
-import type { ReactNode } from 'react';
-import { source } from '@/lib/source';
-import { DocsLayout } from 'fumadocs-ui/layouts/docs';
-import { baseOptions } from '@/lib/layout.shared';
-
-export default async function Layout({
-  params,
-  children,
-}: {
-  params: Promise<{ lang: string }>;
-  children: ReactNode;
-}) {
+export default function Layout({ children }: LayoutProps<'/docs'>) { // [!code --]
+// [!code ++:2]
+export default async function Layout({ params, children }: LayoutProps<'/[lang]/docs'>) {
   const { lang } = await params;
 
   return (
@@ -173,22 +155,15 @@ export default async function Layout({
 }
 ```
 
-```ts tab="Docs Page" title="app/[lang]/docs/[[...slug]]/page.tsx"
-import { source } from '@/lib/source';
+```tsx tab="Docs Page" title="app/[lang]/docs/[[...slug]]/page.tsx"
+export default async function Page(props: PageProps<'/docs/[[...slug]]'>) { // [!code --]
+export default async function Page(props: PageProps<'/[lang]/docs/[[...slug]]'>) { // [!code ++]
+  const params = await props.params;
+  const page = source.getPage(params.slug); // [!code --]
+  const page = source.getPage(params.slug, params.lang); // [!code ++]
+  if (!page) notFound();
 
-export default async function Page({
-  params,
-}: {
-  params: Promise<{ lang: string; slug?: string[] }>;
-}) {
-  const { slug, lang } = await params;
-  // get page
-  source.getPage(slug); // [!code --]
-  source.getPage(slug, lang); // [!code ++]
-
-  // get pages
-  source.getPages(); // [!code --]
-  source.getPages(lang); // [!code ++]
+  // ...
 }
 ```
 
@@ -199,7 +174,7 @@ If you're using another name like `app/[locale]`, you also need to update `gener
 ```tsx
 export function generateStaticParams() {
   return source.generateParams(); // [!code --]
-  return source.generateParams('slug', 'locale'); // [!code ++] new param name
+  return source.generateParams('slug', 'locale'); // [!code ++]
 }
 ```
 

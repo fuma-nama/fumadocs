@@ -50,10 +50,14 @@ See [`createOpenAPI()`](/docs/integrations/openapi/server) & [`createOpenAPIPage
 
 Integrate into [Loader API](/docs/headless/source-api/source) to generate pages, without generating real files.
 
-```ts tab="Fumadocs MDX" title="lib/source.ts"
+```ts tab="Next.js" title="lib/source.ts"
 import { loader } from 'fumadocs-core/source';
-import { docs } from 'collections/server';
-import { openapi } from '@/lib/openapi';
+import { defineDocs } from 'fumadocs-mdx/macro';
+import { openapi } from '@/lib/openapi'; // [!code ++]
+
+const docs = defineDocs({
+  dir: 'content/docs',
+});
 
 export const source = loader(
   // [!code ++:6]
@@ -65,9 +69,119 @@ export const source = loader(
   },
   {
     baseUrl: '/docs',
-    // [!code ++] optional: adds a badge to each page item in page tree
+    // [!code ++:2] optional: adds a badge to each page item in page tree
     plugins: [openapi.loaderPlugin()],
-    // ...
+  },
+);
+```
+
+```ts tab="React Router" title="app/lib/source.ts"
+import { loader } from 'fumadocs-core/source';
+import { defineDocs } from 'fumadocs-mdx/macro'; // [!code --]
+// [!code ++:2]
+import { docs } from '@/lib/collections';
+import { openapi } from '@/lib/openapi';
+
+// [!code --:6]
+export const docs = defineDocs({
+  dir: 'content/docs',
+  docs: {
+    async: true,
+  },
+});
+
+// server-only now, as `staticSource()` reads files [!code ++]
+export const source = loader(
+  // [!code ++:6]
+  {
+    docs: docs.toFumadocsSource(),
+    openapi: await openapi.staticSource({
+      baseDir: 'openapi',
+    }),
+  },
+  {
+    baseUrl: '/docs',
+    // [!code ++:2] optional: adds a badge to each page item in page tree
+    plugins: [openapi.loaderPlugin()],
+  },
+);
+```
+
+```ts tab="React Router" title="app/lib/collections.ts"
+import { defineDocs } from 'fumadocs-mdx/macro';
+
+export const docs = defineDocs({
+  dir: 'content/docs',
+  docs: {
+    async: true,
+  },
+});
+```
+
+```ts tab="Tanstack Start" title="src/lib/source.ts"
+import { loader } from 'fumadocs-core/source';
+import { defineDocs } from 'fumadocs-mdx/macro'; // [!code --]
+// [!code ++:2]
+import { docs } from '@/lib/collections';
+import { openapi } from '@/lib/openapi';
+
+// [!code --:6]
+export const docs = defineDocs({
+  dir: 'content/docs',
+  docs: {
+    async: true,
+  },
+});
+
+// server-only now, as `staticSource()` reads files [!code ++]
+export const source = loader(
+  // [!code ++:6]
+  {
+    docs: docs.toFumadocsSource(),
+    openapi: await openapi.staticSource({
+      baseDir: 'openapi',
+    }),
+  },
+  {
+    baseUrl: '/docs',
+    // [!code ++:2] optional: adds a badge to each page item in page tree
+    plugins: [openapi.loaderPlugin()],
+  },
+);
+```
+
+```ts tab="Tanstack Start" title="src/lib/collections.ts"
+import { defineDocs } from 'fumadocs-mdx/macro';
+
+export const docs = defineDocs({
+  dir: 'content/docs',
+  docs: {
+    async: true,
+  },
+});
+```
+
+```ts tab="Waku" title="src/lib/source.ts"
+import { loader } from 'fumadocs-core/source';
+import { defineDocs } from 'fumadocs-mdx/macro';
+import { openapi } from '@/lib/openapi'; // [!code ++]
+
+const docs = defineDocs({
+  dir: 'content/docs',
+});
+
+export const source = loader(
+  // [!code ++:6]
+  {
+    docs: docs.toFumadocsSource(),
+    openapi: await openapi.staticSource({
+      baseDir: 'openapi',
+    }),
+  },
+  {
+    baseUrl: '/docs',
+    // [!code ++:2] optional: adds a badge to each page item in page tree
+    plugins: [openapi.loaderPlugin()],
   },
 );
 ```
@@ -76,7 +190,7 @@ export const source = loader(
 import { getCollection } from 'astro:content';
 import { loader } from 'fumadocs-core/source';
 import { toFumadocsSource } from '@fumadocs/astro/source';
-import { openapi } from '@/lib/openapi';
+import { openapi } from '@/lib/openapi'; // [!code ++]
 
 export const source = loader(
   // [!code ++:6]
@@ -88,7 +202,7 @@ export const source = loader(
   },
   {
     baseUrl: '/docs',
-    // [!code ++] optional: adds a badge to each page item in page tree
+    // [!code ++:2] optional: adds a badge to each page item in page tree
     plugins: [openapi.loaderPlugin()],
   },
 );
@@ -119,21 +233,19 @@ export const docsLlms = llms(source, {
 
 And update your page renderer:
 
-<Tabs items={["Server Components", "Without Server Components", "Astro"]}>
+```tsx tab="Next.js" title="app/docs/[[...slug]]/page.tsx"
+import { OpenAPIPage } from '@/components/api-page'; // [!code ++]
 
-<Tab>
+export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
+  const params = await props.params;
+  const page = source.getPage(params.slug);
+  if (!page) notFound();
 
-```tsx title="docs/[[...slug]]/page.tsx"
-import { OpenAPIPage } from '@/components/api-page';
-
-export default function Page({ slug }) {
-  const page = source.getPage(slug);
-
-  // for OpenAPI pages
+  // [!code ++:10]
   if (page.type === 'openapi') {
     return (
       <DocsPage full>
-        <h1 className="text-[1.75em] font-semibold">{page.data.title}</h1>
+        <DocsTitle>{page.data.title}</DocsTitle>
         <DocsBody>
           <OpenAPIPage {...page.data.getOpenAPIPageProps()} />
         </DocsBody>
@@ -141,27 +253,62 @@ export default function Page({ slug }) {
     );
   }
 
-  // your original flow below...
+  // ...
 }
 ```
 
-</Tab>
-
-<Tab>
-
-Pass a client payload from server, then render the page using the `<OpenAPIPage />` component you created above.
-
-For example, in Tanstack Start. Only import `source` on the server, `staticSource()` reads files: define [Macro API](/docs/mdx/macro) collections in another module, like `lib/collections.ts`.
-
-```tsx title="routes/docs/$.tsx"
-import { createFileRoute, notFound } from '@tanstack/react-router';
-import { DocsLayout } from 'fumadocs-ui/layouts/docs';
-import { createServerFn } from '@tanstack/react-start';
+```tsx tab="React Router" title="app/routes/docs.tsx"
+import { docs, source } from '@/lib/source'; // [!code --]
+// [!code ++:3]
 import { docs } from '@/lib/collections';
 import { source } from '@/lib/source';
-import { DocsBody, DocsPage, DocsTitle } from 'fumadocs-ui/layouts/docs/page';
-import { useFumadocsLoader } from 'fumadocs-core/source/client';
-import { type ReactNode, Suspense } from 'react';
+import { OpenAPIPage } from '@/components/api-page';
+
+export async function loader({ params }: Route.LoaderArgs) {
+  const slugs = params['*'].split('/').filter((v) => v.length > 0);
+  const page = source.getPage(slugs);
+  if (!page) throw new Response('Not found', { status: 404 });
+
+  // [!code ++:9]
+  const pageTree = await source.serializePageTree(source.getPageTree());
+  if (page.type === 'openapi') {
+    return {
+      type: 'openapi' as const,
+      title: page.data.title,
+      props: page.data.getOpenAPIPageProps(),
+      pageTree,
+    };
+  }
+
+  return { type: 'docs' as const, path: page.path, pageTree }; // [!code highlight]
+}
+
+export default function Page({ loaderData }: Route.ComponentProps) {
+  const data = useFumadocsLoader(loaderData);
+
+  return (
+    <DocsLayout {...baseOptions()} tree={data.pageTree}>
+      {/* [!code ++:8] */}
+      {data.type === 'openapi' && (
+        <DocsPage full>
+          <DocsTitle>{data.title}</DocsTitle>
+          <DocsBody>
+            <OpenAPIPage {...data.props} />
+          </DocsBody>
+        </DocsPage>
+      )}
+      {/* [!code highlight] */}
+      {data.type === 'docs' && <Content path={data.path} />}
+    </DocsLayout>
+  );
+}
+```
+
+```tsx tab="Tanstack Start" title="src/routes/docs/$.tsx"
+import { docs, source } from '@/lib/source'; // [!code --]
+// [!code ++:3]
+import { docs } from '@/lib/collections';
+import { source } from '@/lib/source';
 import { OpenAPIPage } from '@/components/api-page';
 
 export const Route = createFileRoute('/docs/$')({
@@ -169,11 +316,7 @@ export const Route = createFileRoute('/docs/$')({
   loader: async ({ params }) => {
     const slugs = params._splat?.split('/') ?? [];
     const data = await serverLoader({ data: slugs });
-
-    // Fumadocs MDX: only preload content for normal pages [!code highlight:3]
-    if (data.type === 'docs') {
-      await docs.getPage(data.path)?.preload();
-    }
+    if (data.type === 'docs') await docs.getPage(data.path)?.preload(); // [!code highlight]
     return data;
   },
 });
@@ -186,74 +329,76 @@ const serverLoader = createServerFn({
     const page = source.getPage(slugs);
     if (!page) throw notFound();
 
+    // [!code ++:9]
     const pageTree = await source.serializePageTree(source.getPageTree());
-    // different result for OpenAPI pages [!code ++:8]
     if (page.type === 'openapi') {
       return {
         type: 'openapi',
         title: page.data.title,
-        pageTree,
         props: page.data.getOpenAPIPageProps(),
+        pageTree,
       };
     }
 
-    return {
-      type: 'docs',
-      path: page.path,
-      pageTree,
-      // ...
-    };
+    return { type: 'docs', path: page.path, pageTree }; // [!code highlight]
   });
 
-// renders a page of your `docs` collection
-function Content({ path }: { path: string }) {
-  // ...
-}
-
 function Page() {
-  const page = useFumadocsLoader(Route.useLoaderData());
-  let content: ReactNode;
-
-  // render OpenAPI page content [!code ++:10]
-  if (page.type === 'openapi') {
-    content = (
-      <DocsPage full>
-        <DocsTitle>{page.title}</DocsTitle>
-        <DocsBody>
-          {/* pass the payload data */}
-          <OpenAPIPage {...page.props} />
-        </DocsBody>
-      </DocsPage>
-    );
-  } else {
-    content = <Content path={page.path} />;
-  }
+  const data = useFumadocsLoader(Route.useLoaderData());
 
   return (
-    <DocsLayout tree={page.pageTree}>
-      <Suspense>{content}</Suspense>
+    <DocsLayout {...baseOptions()} tree={data.pageTree}>
+      {/* [!code ++:8] */}
+      {data.type === 'openapi' && (
+        <DocsPage full>
+          <DocsTitle>{data.title}</DocsTitle>
+          <DocsBody>
+            <OpenAPIPage {...data.props} />
+          </DocsBody>
+        </DocsPage>
+      )}
+      <Suspense>
+        {/* [!code highlight] */}
+        {data.type === 'docs' && <Content path={data.path} />}
+      </Suspense>
     </DocsLayout>
   );
 }
 ```
 
-You can see the full [Tanstack Start example](https://github.com/fuma-nama/fumadocs/blob/dev/examples/tanstack-start-openapi).
+```tsx tab="Waku" title="src/pages/docs/[...slugs].tsx"
+import { OpenAPIPage } from '@/components/api-page'; // [!code ++]
 
-</Tab>
+export default function Page({ slugs }: PageProps<'/docs/[...slugs]'>) {
+  const page = source.getPage(slugs);
+  if (!page) unstable_notFound();
 
-<Tab>
+  // [!code ++:10]
+  if (page.type === 'openapi') {
+    return (
+      <DocsPage full>
+        <DocsTitle>{page.data.title}</DocsTitle>
+        <DocsBody>
+          <OpenAPIPage {...page.data.getOpenAPIPageProps()} />
+        </DocsBody>
+      </DocsPage>
+    );
+  }
 
-Render `<OpenAPIPage />` in place of the content, it hydrates as an island of its own and renders the description. Pass `full` to `DocsPage` of the [`Docs` island](/docs/manual-installation/astro#docs-page) for its layout:
+  // ...
+}
+```
 
-```astro title="src/pages/docs/[...slug].astro"
+```astro tab="Astro" title="src/pages/docs/[...slug].astro"
 ---
 // [!code ++:2]
 import { DocsBody } from 'fumadocs-ui/layouts/docs/page';
 import { OpenAPIPage } from '@/components/api-page';
 // ...
+// [!code word:page.type]
 const { page } = Astro.props;
-// [!code highlight]
 const { body: Content, toc } = page.type === 'docs' ? await page.data.load() : { body: undefined, toc: [] };
+const pageTree = await source.serializePageTree(source.getPageTree());
 ---
 
 <Layout title={page.data.title} description={page.data.description}>
@@ -282,7 +427,7 @@ const { body: Content, toc } = page.type === 'docs' ? await page.data.load() : {
 </Layout>
 ```
 
-```tsx title="src/components/docs.tsx"
+```tsx tab="Astro" title="src/components/docs.tsx"
 export interface DocsProps extends ProviderProps {
   // ...
   full?: boolean; // [!code ++]
@@ -293,10 +438,6 @@ export function Docs({ tree, title, description, toc, full, children, ...props }
   // ...
           <DocsPage toc={toc} full={full}>
 ```
-
-</Tab>
-
-</Tabs>
 
 <Callout type='warn' title="Ensure the migration is complete!">
 

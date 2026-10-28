@@ -34,7 +34,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const { lang = i18n.defaultLanguage } = useParams();
 
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang={lang} suppressHydrationWarning>
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />

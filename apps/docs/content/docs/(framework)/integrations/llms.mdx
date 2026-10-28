@@ -134,7 +134,7 @@ The Markdown of a single page, for AI agents.
 import { rewritePath } from 'fumadocs-core/negotiation';
 import type { Route } from './+types/root';
 
-// serve `/docs/page.md` [!code ++:11]
+// serve `/docs/page.md` [!code ++:14]
 const { rewrite: rewriteLLM } = rewritePath(
   '/docs{/*path}.md',
   '/llms.mdx/docs{/*path}/content.md',
@@ -154,7 +154,7 @@ export const middleware = [serverMiddleware];
 import type { Config } from '@react-router/dev/config';
 
 export default {
-  // enable middleware [!code ++:3]
+  // enable middleware [!code ++:4]
   future: {
     v8_middleware: true,
   },

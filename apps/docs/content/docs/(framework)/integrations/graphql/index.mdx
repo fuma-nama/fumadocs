@@ -57,10 +57,14 @@ See [`createGraphQL()`](/docs/integrations/graphql/server) & [`createGraphQLPage
 
 Integrate into [Loader API](/docs/headless/source-api/source) to generate pages, without generating real files.
 
-```ts tab="Fumadocs MDX" title="lib/source.ts"
+```ts tab="Next.js" title="lib/source.ts"
 import { loader } from 'fumadocs-core/source';
-import { docs } from 'collections/server';
-import { graphql } from '@/lib/graphql';
+import { defineDocs } from 'fumadocs-mdx/macro';
+import { graphql } from '@/lib/graphql'; // [!code ++]
+
+const docs = defineDocs({
+  dir: 'content/docs',
+});
 
 export const source = loader(
   // [!code ++:6]
@@ -72,9 +76,119 @@ export const source = loader(
   },
   {
     baseUrl: '/docs',
-    // [!code ++] optional: adds a query/mutation/subscription badge to each page item in page tree
+    // [!code ++:2] optional: adds a query/mutation/subscription badge to each page item in page tree
     plugins: [graphql.loaderPlugin()],
-    // ...
+  },
+);
+```
+
+```ts tab="React Router" title="app/lib/source.ts"
+import { loader } from 'fumadocs-core/source';
+import { defineDocs } from 'fumadocs-mdx/macro'; // [!code --]
+// [!code ++:2]
+import { docs } from '@/lib/collections';
+import { graphql } from '@/lib/graphql';
+
+// [!code --:6]
+export const docs = defineDocs({
+  dir: 'content/docs',
+  docs: {
+    async: true,
+  },
+});
+
+// server-only now, as `staticSource()` reads files [!code ++]
+export const source = loader(
+  // [!code ++:6]
+  {
+    docs: docs.toFumadocsSource(),
+    graphql: await graphql.staticSource({
+      baseDir: 'graphql',
+    }),
+  },
+  {
+    baseUrl: '/docs',
+    // [!code ++:2] optional: adds a query/mutation/subscription badge to each page item in page tree
+    plugins: [graphql.loaderPlugin()],
+  },
+);
+```
+
+```ts tab="React Router" title="app/lib/collections.ts"
+import { defineDocs } from 'fumadocs-mdx/macro';
+
+export const docs = defineDocs({
+  dir: 'content/docs',
+  docs: {
+    async: true,
+  },
+});
+```
+
+```ts tab="Tanstack Start" title="src/lib/source.ts"
+import { loader } from 'fumadocs-core/source';
+import { defineDocs } from 'fumadocs-mdx/macro'; // [!code --]
+// [!code ++:2]
+import { docs } from '@/lib/collections';
+import { graphql } from '@/lib/graphql';
+
+// [!code --:6]
+export const docs = defineDocs({
+  dir: 'content/docs',
+  docs: {
+    async: true,
+  },
+});
+
+// server-only now, as `staticSource()` reads files [!code ++]
+export const source = loader(
+  // [!code ++:6]
+  {
+    docs: docs.toFumadocsSource(),
+    graphql: await graphql.staticSource({
+      baseDir: 'graphql',
+    }),
+  },
+  {
+    baseUrl: '/docs',
+    // [!code ++:2] optional: adds a query/mutation/subscription badge to each page item in page tree
+    plugins: [graphql.loaderPlugin()],
+  },
+);
+```
+
+```ts tab="Tanstack Start" title="src/lib/collections.ts"
+import { defineDocs } from 'fumadocs-mdx/macro';
+
+export const docs = defineDocs({
+  dir: 'content/docs',
+  docs: {
+    async: true,
+  },
+});
+```
+
+```ts tab="Waku" title="src/lib/source.ts"
+import { loader } from 'fumadocs-core/source';
+import { defineDocs } from 'fumadocs-mdx/macro';
+import { graphql } from '@/lib/graphql'; // [!code ++]
+
+const docs = defineDocs({
+  dir: 'content/docs',
+});
+
+export const source = loader(
+  // [!code ++:6]
+  {
+    docs: docs.toFumadocsSource(),
+    graphql: await graphql.staticSource({
+      baseDir: 'graphql',
+    }),
+  },
+  {
+    baseUrl: '/docs',
+    // [!code ++:2] optional: adds a query/mutation/subscription badge to each page item in page tree
+    plugins: [graphql.loaderPlugin()],
   },
 );
 ```
@@ -83,7 +197,7 @@ export const source = loader(
 import { getCollection } from 'astro:content';
 import { loader } from 'fumadocs-core/source';
 import { toFumadocsSource } from '@fumadocs/astro/source';
-import { graphql } from '@/lib/graphql';
+import { graphql } from '@/lib/graphql'; // [!code ++]
 
 export const source = loader(
   // [!code ++:6]
@@ -95,32 +209,29 @@ export const source = loader(
   },
   {
     baseUrl: '/docs',
-    // [!code ++] optional: adds a query/mutation/subscription badge to each page item in page tree
+    // [!code ++:2] optional: adds a query/mutation/subscription badge to each page item in page tree
     plugins: [graphql.loaderPlugin()],
   },
 );
 ```
 
-It generates a page per operation by default, grouped into folders by their kind (e.g. `queries/`, `mutations/`). Operation pages show the types they use in place, pages of named types are [opt-in](/docs/integrations/graphql/server#includeoperations--includetypes).
+It generates a page per operation, grouped into folders by kind (e.g. `queries/`). Pages of named types are [opt-in](/docs/integrations/graphql/server#includeoperations--includetypes).
 
 **It will change the type of your pages**, make sure to update all references to your `source`, and update your page renderer:
 
-<Tabs items={["Server Components", "Astro"]}>
+```tsx tab="Next.js" title="app/docs/[[...slug]]/page.tsx"
+import { GraphQLPage } from '@/components/api-page'; // [!code ++]
 
-<Tab>
+export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
+  const params = await props.params;
+  const page = source.getPage(params.slug);
+  if (!page) notFound();
 
-```tsx title="docs/[[...slug]]/page.tsx"
-import { GraphQLPage } from '@/components/api-page';
-
-export default function Page({ slug }) {
-  const page = source.getPage(slug);
-
-  // for GraphQL pages
+  // [!code ++:10]
   if (page.type === 'graphql') {
     return (
-      <DocsPage toc={page.data.toc} full>
+      <DocsPage full>
         <DocsTitle>{page.data.title}</DocsTitle>
-        <DocsDescription>{page.data.description}</DocsDescription>
         <DocsBody>
           <GraphQLPage {...page.data.getGraphQLPageProps()} />
         </DocsBody>
@@ -128,25 +239,152 @@ export default function Page({ slug }) {
     );
   }
 
-  // your original flow below...
+  // ...
 }
 ```
 
-</Tab>
+```tsx tab="React Router" title="app/routes/docs.tsx"
+import { docs, source } from '@/lib/source'; // [!code --]
+// [!code ++:3]
+import { docs } from '@/lib/collections';
+import { source } from '@/lib/source';
+import { GraphQLPage } from '@/components/api-page';
 
-<Tab>
+export async function loader({ params }: Route.LoaderArgs) {
+  const slugs = params['*'].split('/').filter((v) => v.length > 0);
+  const page = source.getPage(slugs);
+  if (!page) throw new Response('Not found', { status: 404 });
 
-Render `<GraphQLPage />` in place of the content, it hydrates as an island of its own and renders the description. Pass `full` to `DocsPage` of the [`Docs` island](/docs/manual-installation/astro#docs-page) for its layout:
+  // [!code ++:9]
+  const pageTree = await source.serializePageTree(source.getPageTree());
+  if (page.type === 'graphql') {
+    return {
+      type: 'graphql' as const,
+      title: page.data.title,
+      props: page.data.getGraphQLPageProps(),
+      pageTree,
+    };
+  }
 
-```astro title="src/pages/docs/[...slug].astro"
+  return { type: 'docs' as const, path: page.path, pageTree }; // [!code highlight]
+}
+
+export default function Page({ loaderData }: Route.ComponentProps) {
+  const data = useFumadocsLoader(loaderData);
+
+  return (
+    <DocsLayout {...baseOptions()} tree={data.pageTree}>
+      {/* [!code ++:8] */}
+      {data.type === 'graphql' && (
+        <DocsPage full>
+          <DocsTitle>{data.title}</DocsTitle>
+          <DocsBody>
+            <GraphQLPage {...data.props} />
+          </DocsBody>
+        </DocsPage>
+      )}
+      {/* [!code highlight] */}
+      {data.type === 'docs' && <Content path={data.path} />}
+    </DocsLayout>
+  );
+}
+```
+
+```tsx tab="Tanstack Start" title="src/routes/docs/$.tsx"
+import { docs, source } from '@/lib/source'; // [!code --]
+// [!code ++:3]
+import { docs } from '@/lib/collections';
+import { source } from '@/lib/source';
+import { GraphQLPage } from '@/components/api-page';
+
+export const Route = createFileRoute('/docs/$')({
+  component: Page,
+  loader: async ({ params }) => {
+    const slugs = params._splat?.split('/') ?? [];
+    const data = await serverLoader({ data: slugs });
+    if (data.type === 'docs') await docs.getPage(data.path)?.preload(); // [!code highlight]
+    return data;
+  },
+});
+
+const serverLoader = createServerFn({
+  method: 'GET',
+})
+  .validator((slugs: string[]) => slugs)
+  .handler(async ({ data: slugs }) => {
+    const page = source.getPage(slugs);
+    if (!page) throw notFound();
+
+    // [!code ++:9]
+    const pageTree = await source.serializePageTree(source.getPageTree());
+    if (page.type === 'graphql') {
+      return {
+        type: 'graphql',
+        title: page.data.title,
+        props: page.data.getGraphQLPageProps(),
+        pageTree,
+      };
+    }
+
+    return { type: 'docs', path: page.path, pageTree }; // [!code highlight]
+  });
+
+function Page() {
+  const data = useFumadocsLoader(Route.useLoaderData());
+
+  return (
+    <DocsLayout {...baseOptions()} tree={data.pageTree}>
+      {/* [!code ++:8] */}
+      {data.type === 'graphql' && (
+        <DocsPage full>
+          <DocsTitle>{data.title}</DocsTitle>
+          <DocsBody>
+            <GraphQLPage {...data.props} />
+          </DocsBody>
+        </DocsPage>
+      )}
+      <Suspense>
+        {/* [!code highlight] */}
+        {data.type === 'docs' && <Content path={data.path} />}
+      </Suspense>
+    </DocsLayout>
+  );
+}
+```
+
+```tsx tab="Waku" title="src/pages/docs/[...slugs].tsx"
+import { GraphQLPage } from '@/components/api-page'; // [!code ++]
+
+export default function Page({ slugs }: PageProps<'/docs/[...slugs]'>) {
+  const page = source.getPage(slugs);
+  if (!page) unstable_notFound();
+
+  // [!code ++:10]
+  if (page.type === 'graphql') {
+    return (
+      <DocsPage full>
+        <DocsTitle>{page.data.title}</DocsTitle>
+        <DocsBody>
+          <GraphQLPage {...page.data.getGraphQLPageProps()} />
+        </DocsBody>
+      </DocsPage>
+    );
+  }
+
+  // ...
+}
+```
+
+```astro tab="Astro" title="src/pages/docs/[...slug].astro"
 ---
 // [!code ++:2]
 import { DocsBody } from 'fumadocs-ui/layouts/docs/page';
 import { GraphQLPage } from '@/components/api-page';
 // ...
+// [!code word:page.type]
 const { page } = Astro.props;
-// [!code highlight]
 const { body: Content, toc } = page.type === 'docs' ? await page.data.load() : { body: undefined, toc: [] };
+const pageTree = await source.serializePageTree(source.getPageTree());
 ---
 
 <Layout title={page.data.title} description={page.data.description}>
@@ -175,7 +413,7 @@ const { body: Content, toc } = page.type === 'docs' ? await page.data.load() : {
 </Layout>
 ```
 
-```tsx title="src/components/docs.tsx"
+```tsx tab="Astro" title="src/components/docs.tsx"
 export interface DocsProps extends ProviderProps {
   // ...
   full?: boolean; // [!code ++]
@@ -186,10 +424,6 @@ export function Docs({ tree, title, description, toc, full, children, ...props }
   // ...
           <DocsPage toc={toc} full={full}>
 ```
-
-</Tab>
-
-</Tabs>
 
 <Callout type='warn' title="Ensure the migration is complete!">
 

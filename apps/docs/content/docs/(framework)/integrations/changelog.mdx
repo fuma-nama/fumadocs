@@ -138,6 +138,40 @@ function Page() {
 }
 ```
 
+```tsx tab="Waku" title="src/pages/(home)/changelog/[page].tsx"
+import { unstable_notFound } from 'waku/router/server';
+import { githubReleases } from '@fumadocs/changelog/github';
+import { ChangelogPagination, ChangelogTimeline } from '@/components/changelog';
+
+export default async function Page({ page: param = '1' }: { page?: string }) {
+  const page = Number(param);
+  const { entries, nextPage } = await githubReleases({
+    owner: 'fuma-nama',
+    repo: 'fumadocs',
+    token: process.env.GITHUB_TOKEN,
+    page,
+  });
+  if (entries.length === 0) unstable_notFound();
+
+  return (
+    <div className="mx-auto flex w-full max-w-[900px] flex-col gap-10 px-4 py-12">
+      <ChangelogTimeline entries={entries} />
+      <ChangelogPagination
+        newer={page > 1 ? `/changelog/${page - 1}` : undefined}
+        older={nextPage ? `/changelog/${nextPage}` : undefined}
+      />
+    </div>
+  );
+}
+
+export const getConfig = async () => ({ render: 'dynamic' }) as const;
+```
+
+```tsx tab="Waku" title="src/pages/(home)/changelog/index.tsx"
+// the first page
+export { default, getConfig } from './[page]';
+```
+
 ```astro tab="Astro" title="src/pages/changelog/[...page].astro"
 ---
 import type { GetStaticPaths, InferGetStaticPropsType } from 'astro';
@@ -183,8 +217,6 @@ const href = (page: number) => (page > 1 ? `/changelog/${page}` : '/changelog');
   </Home>
 </Layout>
 ```
-
-The timeline groups entries by month, and renders their Markdown with code highlighting. With React Server Components, it renders on the server, otherwise also in the browser.
 
 On Astro, the pages are generated at build time. The timeline is a child of the island, it renders on the server only, without interactivity like copy buttons.
 

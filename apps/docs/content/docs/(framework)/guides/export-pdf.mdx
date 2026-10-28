@@ -20,7 +20,7 @@ import path from 'node:path';
 
 const browser = await puppeteer.launch();
 const outDir = 'pdfs';
-// update this [!code highlight]
+// update this [!code highlight:2]
 const urls = ['/docs/ui', '/docs/ui/customizations'];
 
 async function exportPdf(pathname: string) {
@@ -73,7 +73,7 @@ import defaultMdxComponents from 'fumadocs-ui/mdx';
 import type { MDXComponents } from 'mdx/types';
 import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
 
-// you may use environment variable here [!code highlight]
+// you may use environment variable here [!code highlight:2]
 const isPrinting = true;
 
 function PrintingAccordion(props: React.ComponentProps<typeof Accordion>) {

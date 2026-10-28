@@ -47,7 +47,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
   const { lang = i18n.defaultLanguage } = useParams({ strict: false });
 
   return (
-    <html suppressHydrationWarning>
+    <html lang={lang} suppressHydrationWarning>
       <head>
         <HeadContent />
       </head>

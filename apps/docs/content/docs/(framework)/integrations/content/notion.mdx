@@ -127,7 +127,7 @@ export default async function Page({ params }: PageProps<'/docs/[[...slug]]'>) {
   const page = source.getPage(slug);
   if (!page) notFound();
 
-  // [!code highlight] load the page body
+  // [!code highlight:2] load the page body
   const { blocks } = await page.data.load();
 
   return (

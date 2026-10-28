@@ -97,15 +97,6 @@ export async function generateStaticParams() {
 }
 ```
 
-```ts tab="Waku" title="src/pages/_api/api/openapi/[id].ts"
-import type { ApiContext } from 'waku/router';
-import { openapi } from '@/lib/openapi';
-
-export async function GET(_: Request, { params }: ApiContext<'/api/openapi/[id]'>) {
-  return Response.json((await openapi.getSchema(params.id)).bundled);
-}
-```
-
 ```ts tab="React Router" title="app/routes/openapi.ts"
 import type { Route } from './+types/openapi';
 import { openapi } from '@/lib/openapi';
@@ -123,6 +114,15 @@ export default [
   route('api/openapi/:id', 'routes/openapi.ts'),
   // ...
 ] satisfies RouteConfig;
+```
+
+```ts tab="Waku" title="src/pages/_api/api/openapi/[id].ts"
+import type { ApiContext } from 'waku/router';
+import { openapi } from '@/lib/openapi';
+
+export async function GET(_: Request, { params }: ApiContext<'/api/openapi/[id]'>) {
+  return Response.json((await openapi.getSchema(params.id)).bundled);
+}
 ```
 
 ```ts tab="Astro" title="src/pages/api/openapi/[id].ts"
@@ -202,7 +202,27 @@ import { openapi } from '@/lib/openapi';
 export const { GET, HEAD, PUT, POST, PATCH, DELETE } = openapi.createProxy();
 ```
 
-```ts tab="Tanstack Start" title="app/routes/api/proxy.ts"
+```ts tab="React Router" title="app/routes/proxy.ts"
+import type { Route } from './+types/proxy';
+import { openapi } from '@/lib/openapi';
+
+const proxy = openapi.createProxy();
+
+export const loader = ({ request }: Route.LoaderArgs) => proxy.handle(request);
+export const action = ({ request }: Route.ActionArgs) => proxy.handle(request);
+```
+
+```ts tab="React Router" title="app/routes.ts"
+import { route, type RouteConfig } from '@react-router/dev/routes';
+
+export default [
+  // [!code ++]
+  route('api/proxy', 'routes/proxy.ts'),
+  // ...
+] satisfies RouteConfig;
+```
+
+```ts tab="Tanstack Start" title="src/routes/api/proxy.ts"
 import { openapi } from '@/lib/openapi';
 import { createFileRoute } from '@tanstack/react-router';
 
@@ -287,7 +307,26 @@ import { openapi } from '@/lib/openapi';
 export const GET = openapi.createOAuthHandler();
 ```
 
-```ts tab="Tanstack Start" title="app/routes/api/oauth.ts"
+```ts tab="React Router" title="app/routes/oauth.ts"
+import type { Route } from './+types/oauth';
+import { openapi } from '@/lib/openapi';
+
+const handler = openapi.createOAuthHandler();
+
+export const loader = ({ request }: Route.LoaderArgs) => handler(request);
+```
+
+```ts tab="React Router" title="app/routes.ts"
+import { route, type RouteConfig } from '@react-router/dev/routes';
+
+export default [
+  // [!code ++]
+  route('api/oauth', 'routes/oauth.ts'),
+  // ...
+] satisfies RouteConfig;
+```
+
+```ts tab="Tanstack Start" title="src/routes/api/oauth.ts"
 import { openapi } from '@/lib/openapi';
 import { createFileRoute } from '@tanstack/react-router';
 

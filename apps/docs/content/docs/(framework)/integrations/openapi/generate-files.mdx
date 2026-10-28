@@ -202,60 +202,121 @@ bun ./scripts/generate-docs.ts
 
 Add the `OpenAPIPage` component to your MDX components.
 
-```tsx tab="Server Components" title="app/docs/[[...slug]]/page.tsx"
-import { source } from '@/lib/source';
+```tsx tab="Next.js" title="app/docs/[[...slug]]/page.tsx"
+// [!code ++:2]
 import { openapi } from '@/lib/openapi';
 import { OpenAPIPage } from '@/components/api-page';
-import { getMDXComponents } from '@/components/mdx';
 
-// e.g. in your page renderer
-export default function Page({ slug }) {
-  const page = source.getPage(slug);
-  const MdxContent = page.data.body;
+export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
+  // ...
+  <MDX
+    components={getMDXComponents({
+      // [!code ++:3]
+      OpenAPIPage: async (props) => (
+        <OpenAPIPage {...await openapi.preloadOpenAPIPage(page)} {...props} />
+      ),
+    })}
+  />;
+}
+```
+
+```tsx tab="React Router" title="app/routes/docs.tsx"
+// [!code ++:3]
+import type { MDXComponents } from 'mdx/types';
+import { openapi } from '@/lib/openapi';
+import { OpenAPIPage } from '@/components/api-page';
+
+export async function loader({ params }: Route.LoaderArgs) {
+  // ...
+  return {
+    path: page.path,
+    pageTree: await source.serializePageTree(source.getPageTree()),
+    ...(await openapi.preloadOpenAPIPage(page)), // [!code ++]
+  };
+}
+
+// [!code highlight]
+function Content({ path, components }: { path: string; components?: MDXComponents }) {
+  // ...
+  <MDX components={useMDXComponents(components)} />; // [!code highlight]
+}
+
+export default function Page({ loaderData }: Route.ComponentProps) {
+  const { path, pageTree, preloaded } = useFumadocsLoader(loaderData); // [!code highlight]
 
   return (
-    <MdxContent
-      components={getMDXComponents({
-        // [!code ++:3] add the MDX component
-        OpenAPIPage: async (props) => (
-          <OpenAPIPage {...await openapi.preloadOpenAPIPage(page)} {...props} />
-        ),
-      })}
-    />
+    <DocsLayout {...baseOptions()} tree={pageTree}>
+      <Content
+        path={path}
+        // [!code ++:3]
+        components={{
+          OpenAPIPage: (props) => <OpenAPIPage {...props} preloaded={preloaded} />,
+        }}
+      />
+    </DocsLayout>
   );
 }
 ```
 
-```tsx tab="Without Server Components" title="docs/[...slug]"
-import { source } from '@/lib/source';
+```tsx tab="Tanstack Start" title="src/routes/docs/$.tsx"
+// [!code ++:3]
+import type { MDXComponents } from 'mdx/types';
 import { openapi } from '@/lib/openapi';
 import { OpenAPIPage } from '@/components/api-page';
-import { getMDXComponents } from '@/components/mdx';
 
-// e.g. where you return server payload to client
-export async function loader({ slug }) {
-  const page = source.getPage(slug);
-
-  return {
-    // [!code ++]
-    openapiData: await openapi.preloadOpenAPIPage(page),
+const serverLoader = createServerFn({
+  method: 'GET',
+})
+  .validator((slugs: string[]) => slugs)
+  .handler(async ({ data: slugs }) => {
     // ...
-  };
+    return {
+      path: page.path,
+      pageTree: await source.serializePageTree(source.getPageTree()),
+      ...(await openapi.preloadOpenAPIPage(page)), // [!code ++]
+    };
+  });
+
+// [!code highlight]
+function Content({ path, components }: { path: string; components?: MDXComponents }) {
+  // ...
+  <MDX components={useMDXComponents(components)} />; // [!code highlight]
 }
 
-// e.g. where you render the MDX content of a page
-function Content({ MdxContent }) {
-  // consume loader data
-  const { openapiData } = useLoaderData();
+function Page() {
+  const { path, pageTree, preloaded } = useFumadocsLoader(Route.useLoaderData()); // [!code highlight]
 
   return (
-    <MdxContent
-      components={getMDXComponents({
-        // [!code ++] add the MDX component
-        OpenAPIPage: (props) => <OpenAPIPage {...openapiData} {...props} />,
-      })}
-    />
+    <DocsLayout {...baseOptions()} tree={pageTree}>
+      <Suspense>
+        <Content
+          path={path}
+          // [!code ++:3]
+          components={{
+            OpenAPIPage: (props) => <OpenAPIPage {...props} preloaded={preloaded} />,
+          }}
+        />
+      </Suspense>
+    </DocsLayout>
   );
+}
+```
+
+```tsx tab="Waku" title="src/pages/docs/[...slugs].tsx"
+// [!code ++:2]
+import { openapi } from '@/lib/openapi';
+import { OpenAPIPage } from '@/components/api-page';
+
+export default function Page({ slugs }: PageProps<'/docs/[...slugs]'>) {
+  // ...
+  <MDX
+    components={getMDXComponents({
+      // [!code ++:3]
+      OpenAPIPage: async (props) => (
+        <OpenAPIPage {...await openapi.preloadOpenAPIPage(page)} {...props} />
+      ),
+    })}
+  />;
 }
 ```
 
@@ -266,7 +327,7 @@ import { openapiPlugin } from 'fumadocs-openapi/server';
 import { loader } from 'fumadocs-core/source';
 
 export const source = loader({
-  // [!code ++] optional: adds a badge to each page item in page tree
+  // [!code ++:2] optional: adds a badge to each page item in page tree
   plugins: [openapiPlugin()],
 });
 ```

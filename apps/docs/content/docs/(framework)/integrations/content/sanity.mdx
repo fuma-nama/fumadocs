@@ -115,65 +115,59 @@ export async function getSource() {
 }
 ```
 
-With `sanityFetch`, queries are cached by Next.js and revalidated by `<SanityLive />` when content changes. The loader re-reads them on every render, so live updates and draft mode work without calling `invalidate()`.
+With `sanityFetch`, `<SanityLive />` revalidates queries when content changes, live updates and draft mode work without calling `invalidate()`.
 
 If you enabled [Cache Components](https://nextjs.org/docs/app/api-reference/config/next-config-js/cacheComponents), call `getSource()` inside a `'use cache'` scope (for example, a cached page) as `sanityFetch` requires one.
 
-Now update references to your `source` with the `getSource()` function like:
+Now render pages with the `getSource()` function:
 
-```tsx
+```tsx tab="Next.js" title="app/docs/[[...slug]]/page.tsx"
+import { notFound } from 'next/navigation';
+import { DocsBody, DocsDescription, DocsPage, DocsTitle } from 'fumadocs-ui/layouts/docs/page';
 import { getSource } from '@/lib/source';
 import { CustomPortableText } from '@/components/sanity';
-import { DocsPage, DocsBody, DocsDescription, DocsTitle } from 'fumadocs-ui/layouts/docs/page';
 
-// [!code highlight]
-const source = await getSource();
+export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
+  const params = await props.params;
+  const source = await getSource();
+  const page = source.getPage(params.slug);
+  if (!page) notFound();
 
-const page = source.getPage(['...']);
+  const { renderToc, body } = await page.data.load();
 
-// basic info
-console.log(page.data.title, page.data.description);
-
-// [!code highlight] load full info
-const { renderToc, body } = await page.data.load();
-
-// to render docs page content:
-return (
-  // `renderToc()` to render TOC items on server
-  <DocsPage toc={renderToc({ render: (body) => <CustomPortableText value={body} /> })}>
-    <DocsTitle>{page.data.title}</DocsTitle>
-    <DocsDescription>{page.data.description}</DocsDescription>
-    <DocsBody>
-      <CustomPortableText value={body!} />
-    </DocsBody>
-  </DocsPage>
-);
+  return (
+    <DocsPage toc={renderToc({ render: (block) => <CustomPortableText value={block} /> })}>
+      <DocsTitle>{page.data.title}</DocsTitle>
+      <DocsDescription>{page.data.description}</DocsDescription>
+      <DocsBody>
+        <CustomPortableText value={body!} />
+      </DocsBody>
+    </DocsPage>
+  );
+}
 ```
 
-If you are not using React Server Components, `renderToc` can be imported separately:
-
-```tsx
-import { getSource } from '@/lib/source';
+```tsx tab="React Router" title="app/routes/docs.tsx"
+import type { Route } from './+types/docs';
+import { DocsBody, DocsDescription, DocsPage, DocsTitle } from 'fumadocs-ui/layouts/docs/page';
 import { renderToc } from '@fumadocs/sanity/client';
+import { getSource } from '@/lib/source';
 import { CustomPortableText } from '@/components/sanity';
-import { DocsPage, DocsBody, DocsDescription, DocsTitle } from 'fumadocs-ui/layouts/docs/page';
 
-// where you return server payload
-export async function serverPayload(slugs: string[]) {
+export async function loader({ params }: Route.LoaderArgs) {
   const source = await getSource();
-  const page = source.getPage(slugs);
-  if (!page) throw new Error('not found');
+  const page = source.getPage(params['*'].split('/').filter((v) => v.length > 0));
+  if (!page) throw new Response('Not found', { status: 404 });
 
   const { title, description, _toc, body } = await page.data.load();
   return { title, description, toc: _toc, body };
 }
 
-export function Page() {
-  // receive server payload
-  const { toc, body, title, description } = useLoaderData();
+export default function Page({ loaderData }: Route.ComponentProps) {
+  const { title, description, toc, body } = loaderData;
 
   return (
-    <DocsPage toc={renderToc({ toc, render: (body) => <CustomPortableText value={body} /> })}>
+    <DocsPage toc={renderToc({ toc, render: (block) => <CustomPortableText value={block} /> })}>
       <DocsTitle>{title}</DocsTitle>
       <DocsDescription>{description}</DocsDescription>
       <DocsBody>
@@ -181,6 +175,81 @@ export function Page() {
       </DocsBody>
     </DocsPage>
   );
+}
+```
+
+```tsx tab="Tanstack Start" title="src/routes/docs/$.tsx"
+import { createFileRoute, notFound } from '@tanstack/react-router';
+import { createServerFn } from '@tanstack/react-start';
+import { DocsBody, DocsDescription, DocsPage, DocsTitle } from 'fumadocs-ui/layouts/docs/page';
+import { renderToc } from '@fumadocs/sanity/client';
+import { getSource } from '@/lib/source';
+import { CustomPortableText } from '@/components/sanity';
+
+export const Route = createFileRoute('/docs/$')({
+  component: Page,
+  loader: ({ params }) => serverLoader({ data: params._splat?.split('/') ?? [] }),
+});
+
+const serverLoader = createServerFn({
+  method: 'GET',
+})
+  .validator((slugs: string[]) => slugs)
+  .handler(async ({ data: slugs }) => {
+    const source = await getSource();
+    const page = source.getPage(slugs);
+    if (!page) throw notFound();
+
+    const { title, description, _toc, body } = await page.data.load();
+    return { title, description, toc: _toc, body };
+  });
+
+function Page() {
+  const { title, description, toc, body } = Route.useLoaderData();
+
+  return (
+    <DocsPage toc={renderToc({ toc, render: (block) => <CustomPortableText value={block} /> })}>
+      <DocsTitle>{title}</DocsTitle>
+      <DocsDescription>{description}</DocsDescription>
+      <DocsBody>
+        <CustomPortableText value={body!} />
+      </DocsBody>
+    </DocsPage>
+  );
+}
+```
+
+```tsx tab="Waku" title="src/pages/docs/[...slugs].tsx"
+import type { PageProps } from 'waku/router';
+import { unstable_notFound } from 'waku/router/server';
+import { DocsBody, DocsDescription, DocsPage, DocsTitle } from 'fumadocs-ui/layouts/docs/page';
+import { getSource } from '@/lib/source';
+import { CustomPortableText } from '@/components/sanity';
+
+export default async function Page({ slugs }: PageProps<'/docs/[...slugs]'>) {
+  const source = await getSource();
+  const page = source.getPage(slugs);
+  if (!page) unstable_notFound();
+
+  const { renderToc, body } = await page.data.load();
+
+  return (
+    <DocsPage toc={renderToc({ render: (block) => <CustomPortableText value={block} /> })}>
+      <DocsTitle>{page.data.title}</DocsTitle>
+      <DocsDescription>{page.data.description}</DocsDescription>
+      <DocsBody>
+        <CustomPortableText value={body!} />
+      </DocsBody>
+    </DocsPage>
+  );
+}
+
+export async function getConfig() {
+  const source = await getSource();
+  return {
+    render: 'static',
+    staticPaths: source.generateParams().map((item) => item.slug),
+  } as const;
 }
 ```
 
