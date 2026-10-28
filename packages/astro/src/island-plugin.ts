@@ -9,6 +9,11 @@ import type { Program } from 'estree-jsx';
 import { parse } from 'yuku-parser';
 
 const islandName = '_FumadocsIsland';
+/** the replacer of `JSON.stringify()`, functions would be lost */
+const serializeProps = `(key, value) => {
+  if (typeof value === 'function') throw new Error(\`The props of MDX components must be serializable, "\${key}" is a function.\`);
+  return value;
+}`;
 
 type JsxElement = MdxJsxFlowElementHast | MdxJsxTextElementHast;
 
@@ -46,7 +51,10 @@ export function islandPlugin(module: string): HastPluginDefinition {
           {
             type: 'mdxJsxAttribute',
             name: 'tree',
-            value: { type: 'mdxJsxAttributeValueExpression', value: `JSON.stringify([${tree}])` },
+            value: {
+              type: 'mdxJsxAttributeValueExpression',
+              value: `JSON.stringify([${tree}], ${serializeProps})`,
+            },
           },
           {
             type: 'mdxJsxAttribute',
@@ -118,6 +126,9 @@ function serialize(nodes: HastNode[], locals: Set<string>) {
       }
       case 'mdxFlowExpression':
       case 'mdxTextExpression':
+        if (/^(?:\s|\/\*[\s\S]*?\*\/|\/\/[^\n]*)*$/.test(node.value)) return;
+        if (node.value.includes('<'))
+          assertLocalComponents(parse(`(${node.value})`, { lang: 'jsx' }).program, locals);
         return slot([node]);
     }
   }
@@ -149,8 +160,10 @@ function serialize(nodes: HastNode[], locals: Set<string>) {
   function expression(source: string): string {
     if (!source.includes('<')) return source;
     const code = `(${source})`;
+    const { program } = parse(code, { lang: 'jsx' });
+    assertLocalComponents(program, locals);
     const nodes: Span[] = [];
-    collectJsx(parse(code, { lang: 'jsx' }).program, nodes);
+    collectJsx(program, nodes);
 
     nodes.sort((a, b) => a.start - b.start);
     let out = '';
@@ -195,6 +208,39 @@ interface Span {
   start: number;
   end: number;
 }
+
+/** JSX in expressions is rendered by Astro, which doesn't have the provided components */
+function assertLocalComponents(node: unknown, locals: Set<string>) {
+  if (typeof node !== 'object' || node === null) return;
+  if (Array.isArray(node)) {
+    for (const item of node) assertLocalComponents(item, locals);
+    return;
+  }
+
+  const { type, name } = node as { type?: string; name?: JsxName };
+  if (type === 'JSXOpeningElement' && name) {
+    let root = name;
+    while (root.type === 'JSXMemberExpression') root = root.object;
+    if (
+      root.type === 'JSXIdentifier' &&
+      (root !== name || /^[A-Z]/.test(root.name)) &&
+      root.name !== 'Fragment' &&
+      !locals.has(root.name)
+    )
+      throw new Error(
+        `<${root.name}> in a JavaScript expression is rendered by Astro, outside of the content island. Use it outside of expressions, or import it in the MDX file.`,
+      );
+  }
+
+  for (const key in node) {
+    if (key !== 'loc') assertLocalComponents((node as Record<string, unknown>)[key], locals);
+  }
+}
+
+type JsxName =
+  | { type: 'JSXIdentifier'; name: string }
+  | { type: 'JSXMemberExpression'; object: JsxName }
+  | { type: 'JSXNamespacedName' };
 
 /** outermost JSX, functions are skipped as their output isn't serializable anyway */
 function collectJsx(node: unknown, out: Span[]) {

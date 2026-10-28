@@ -12,7 +12,7 @@ Docs are MDX files of Astro content collections, the integration adds the Markdo
 ### Installation
 
 ```npm
-npm i fumadocs-core fumadocs-ui @fumadocs/astro @astrojs/react @astrojs/mdx react react-dom
+npm i fumadocs-core fumadocs-ui @fumadocs/astro @astrojs/react react react-dom @types/mdx
 ```
 
 ### Configuration
@@ -58,7 +58,7 @@ Define the collections of docs, and create a Fumadocs source from them:
   ../../examples/astro-min/src/lib/source.ts
 </include>
 
-`pageLoader()` loads the MDX files in `content/docs`, and `metaLoader()` loads its [meta files](/docs/page-conventions#meta). See [Collections](#collections) for other directories.
+`pageLoader()` loads the MDX files in `content/docs`, and `metaLoader()` loads its [meta files](/docs/page-conventions#meta). Their schemas are `pageSchema` and `metaSchema` from `fumadocs-core/source/schema`, pass `schema` to the collection to extend them. See [Collections](#collections) for other directories.
 
 Create the MDX components of docs, `wrapper` gives the content its prose styles:
 
@@ -94,7 +94,8 @@ Create the React island of docs pages, and the route rendering it:
   ../../examples/astro-min/src/pages/docs/[...slug].astro
 </include>
 
-With `transition:persist`, Astro keeps the island and its state (e.g. sidebar) across navigations, Fumadocs moves the content of the new page into it.
+- `transition:persist` keeps the island and its state (e.g. sidebar) across navigations, Fumadocs moves the content of the new page into it.
+- `prerender` keeps the pages static, also with `output: 'server'`.
 
 ### Search
 
@@ -125,22 +126,29 @@ The [full example](https://github.com/fuma-nama/fumadocs/tree/dev/examples/astro
 
 ## Rendering
 
-The MDX content of each page renders as one React island (`client:load`). Its components share a React tree and hydrate like on other frameworks, including JSX props like `icon={<Icon />}`.
+With `components`, the MDX content of each page renders as one React island (`client:load`). Its components share a React tree and hydrate like on other frameworks, including JSX props like `icon={<Icon />}`.
 
 Astro renders the parts React can't, inside the island:
 
 - Highlighted code.
 - Images, with the image pipeline of Astro.
 - Components imported in the MDX file, including Astro components. Framework components keep the rules of Astro, add `client:load` to hydrate them.
-- `{expressions}`.
+- `{expressions}`, they can't use the components of your `components` module.
 
 <Callout title="Good to know">
 
 - Props of the components in your `components` module are serialized into the island, they must be JSON-serializable (no functions).
 - The island is a React tree of its own, providers of your layout don't reach it. `wrapper` receives the props of `<Content />`, use it to add providers, like for [Internationalization](/docs/internationalization/astro).
 - The theme state isn't shared either, style light/dark mode with CSS (e.g. `dark:` variants) rather than `useTheme()`.
+- Only `.mdx` files are supported, Astro renders `.md` files into HTML.
 
 </Callout>
+
+Without `components`, the content renders as Astro MDX, without React and JavaScript. Pass components to `<Content />` like other Astro content:
+
+```astro
+<Content components={{ h2: Heading }} />
+```
 
 ## Options
 
@@ -148,22 +156,22 @@ Astro renders the parts React can't, inside the island:
 fumadocs({
   // module whose default export is the MDX components
   components: './src/components/mdx.tsx',
+  // enable `getText('processed')` on pages
+  includeProcessedMarkdown: false,
   // content directories, relative to the project root
   collections: {
     docs: { dir: 'content/docs' },
   },
-  // enable `getText('processed')` on pages
-  includeProcessedMarkdown: false,
 });
 ```
 
-Options other than `components` are optional, the values above are their defaults. The integration adds `@astrojs/react` and `@astrojs/mdx` with their default options, add them to `integrations` yourself to configure them.
+The values above are the defaults, except `components`. The integration adds `@astrojs/react` and `@astrojs/mdx` with their default options, add them to `integrations` yourself to configure them.
 
 ### Collections
 
 Fumadocs only processes the MDX files of its collections, other Markdown of your project is left to Astro.
 
-Add a collection for each content directory, like a blog with its own MDX components:
+Add a collection for each content directory. Collections take the same options as the integration, which are their defaults. For example, a blog with its own MDX components:
 
 ```js title="astro.config.mjs"
 fumadocs({
@@ -180,10 +188,10 @@ Load it by name, `pageLoader()` and `metaLoader()` load `docs` by default:
 
 ```ts title="src/content.config.ts"
 export const collections = {
-  docs: defineCollection({ loader: pageLoader(), schema: pageSchema }),
-  meta: defineCollection({ loader: metaLoader(), schema: metaSchema }),
+  docs: defineCollection({ loader: pageLoader() }),
+  meta: defineCollection({ loader: metaLoader() }),
   // [!code ++]
-  blog: defineCollection({ loader: pageLoader('blog'), schema: pageSchema }),
+  blog: defineCollection({ loader: pageLoader('blog') }),
 };
 ```
 

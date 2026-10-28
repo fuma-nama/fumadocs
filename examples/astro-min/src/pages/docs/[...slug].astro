@@ -4,6 +4,8 @@ import Layout from '@/layouts/Layout.astro';
 import { Docs } from '@/components/docs';
 import { pageTree, source } from '@/lib/source';
 
+export const prerender = true;
+
 export const getStaticPaths = (() => {
   return source.getPages().map((page) => ({
     params: { slug: page.slugs.join('/') || undefined },

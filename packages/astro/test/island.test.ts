@@ -172,6 +172,29 @@ describe('content island', () => {
     expect(render(island)).toBe('<p>Text with <mark>badge</mark>.</p>');
   });
 
+  it('ignores comments', async () => {
+    const { island } = await compile('{/* comment */}\n\nText {/* inline */}');
+
+    expect(render(island)).toBe('<p>Text </p>');
+    expect(island.slots).toEqual({});
+  });
+
+  it('throws on provided components in expressions', async () => {
+    await expect(compile("{['a'].map((v) => <Card title={v} />)}")).rejects.toThrow(
+      /<Card> in a JavaScript expression/,
+    );
+    await expect(compile('<Card title="a" icon={<UI.Badge />} />')).rejects.toThrow(/<UI>/);
+
+    const { island } = await compile("import { X } from './x';\n\n{[1].map(() => <X />)}");
+    expect(Object.keys(island.slots)).toEqual(['s0']);
+  });
+
+  it('throws on functions in props', async () => {
+    const { island } = await compile('<Card title="Card" onClick={() => {}} />');
+
+    expect(() => render(island)).toThrow(/"onClick" is a function/);
+  });
+
   it('throws on unknown components', async () => {
     const { island } = await compile('<Unknown />');
 

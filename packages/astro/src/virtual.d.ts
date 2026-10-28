@@ -1,6 +1,4 @@
 declare module 'virtual:fumadocs/config' {
-  import type { CollectionOptions } from '@/index';
-
-  /** the `collections` option */
-  export const collections: Record<string, CollectionOptions>;
+  /** the content directories of collections */
+  export const dirs: Record<string, string>;
 }

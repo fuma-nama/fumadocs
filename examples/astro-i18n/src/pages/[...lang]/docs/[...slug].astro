@@ -5,6 +5,8 @@ import { Docs } from '@/components/docs';
 import { i18n } from '@/lib/i18n';
 import { pageTrees, source } from '@/lib/source';
 
+export const prerender = true;
+
 export const getStaticPaths = (() => {
   const paths = [];
   for (const { language, pages } of source.getLanguages()) {

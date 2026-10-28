@@ -4,6 +4,8 @@ import Layout from '@/layouts/Layout.astro';
 import { Home } from '@/components/home';
 import { i18n } from '@/lib/i18n';
 
+export const prerender = true;
+
 export const getStaticPaths = (() => {
   return i18n.languages.map((lang) => ({
     // the default language has no prefix

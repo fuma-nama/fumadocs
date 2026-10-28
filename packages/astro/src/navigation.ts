@@ -3,32 +3,42 @@ import type { TransitionBeforeSwapEvent } from 'astro:transitions/client';
 /** islands with `transition:persist` keep their slots on navigation, move in the content of the new page */
 export function onBeforeSwap({ newDocument }: TransitionBeforeSwapEvent) {
   for (const island of document.querySelectorAll('astro-island[data-astro-transition-persist]')) {
+    // like props, kept with `transition:persist-props`
+    const persistProps = island.getAttribute('data-astro-transition-persist-props');
+    if (persistProps !== null && persistProps !== 'false') continue;
     const id = CSS.escape(island.getAttribute('data-astro-transition-persist')!);
     const next = newDocument.querySelector(`astro-island[data-astro-transition-persist="${id}"]`);
     if (!next) continue;
 
-    for (const slot of next.querySelectorAll('astro-slot')) {
-      if (
-        slot.closest('astro-island') !== next ||
-        !slot.querySelector('astro-island[component-export="FumadocsIsland"]')
-      )
-        continue;
-      const name = slot.getAttribute('name');
-      let target: Element | undefined;
-      for (const item of island.querySelectorAll('astro-slot')) {
-        if (item.closest('astro-island') === island && item.getAttribute('name') === name)
-          target = item;
-      }
+    const current = slotsOf(island);
+    const slots = slotsOf(next);
+    let same = current.size === slots.size;
+    for (const name of slots.keys()) if (!current.has(name)) same = false;
+    if (!same) {
+      // the island renders other slots, swap in the new island instead
+      island.removeAttribute('data-astro-transition-persist');
+      continue;
+    }
 
-      if (target) {
-        target.replaceChildren(...slot.childNodes);
-      } else {
-        // not rendered by the island yet, Astro reads such slots from templates
-        const template = document.createElement('template');
-        template.setAttribute('data-astro-template', name ?? '');
-        template.innerHTML = slot.innerHTML;
-        island.append(template);
+    for (const [name, slot] of slots) {
+      const target = current.get(name)!;
+      if (target.innerHTML === slot.innerHTML) continue;
+      target.replaceChildren(...slot.childNodes);
+      // scripts of the new document don't run when moved
+      for (const script of target.querySelectorAll('script')) {
+        const copy = document.createElement('script');
+        for (const { name, value } of script.attributes) copy.setAttribute(name, value);
+        copy.text = script.text;
+        script.replaceWith(copy);
       }
     }
   }
+}
+
+function slotsOf(island: Element): Map<string | null, Element> {
+  const out = new Map<string | null, Element>();
+  for (const slot of island.querySelectorAll('astro-slot')) {
+    if (slot.closest('astro-island') === island) out.set(slot.getAttribute('name'), slot);
+  }
+  return out;
 }

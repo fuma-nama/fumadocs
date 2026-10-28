@@ -1,8 +1,13 @@
 import defaultMdxComponents from 'fumadocs-ui/mdx';
 import { DocsBody } from 'fumadocs-ui/layouts/docs/page';
+import type { MDXComponents } from 'mdx/types';
 
-// MDX components of docs, they are rendered and hydrated by the Fumadocs integration
-export default {
-  ...defaultMdxComponents,
-  wrapper: DocsBody,
-};
+export function getMDXComponents(components?: MDXComponents) {
+  return {
+    ...defaultMdxComponents,
+    ...components,
+  } satisfies MDXComponents;
+}
+
+// for the Fumadocs integration, `wrapper` gives the content its prose styles
+export default getMDXComponents({ wrapper: DocsBody });

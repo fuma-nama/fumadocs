@@ -53,16 +53,16 @@ export const docs: Feature<{ i18n: boolean }> = {
     // the language pack of `cn`
     if (i18n) ctx.addDependencies({ '@fumadocs/language': null });
     if (framework === 'astro') {
-      // the integrations of Fumadocs, React and MDX, Tailwind CSS
+      // the integrations of Fumadocs and React, Tailwind CSS
       ctx.addDependencies({
         '@fumadocs/astro': null,
         '@astrojs/react': null,
-        '@astrojs/mdx': null,
         react: null,
         'react-dom': null,
       });
       ctx.addDependencies(
         {
+          '@types/mdx': null,
           '@types/react': null,
           '@types/react-dom': null,
           tailwindcss: null,

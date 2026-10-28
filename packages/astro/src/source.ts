@@ -57,7 +57,7 @@ function pageData<Entry extends PageEntry>(entry: Entry): AstroPageData<Entry> {
     const data = remarkPluginFrontmatter[dataKey] as FumadocsData | undefined;
     if (!data)
       throw new Error(
-        `"${entry.filePath ?? entry.id}" is not processed by Fumadocs, load it with \`pageLoader()\`.`,
+        `"${entry.filePath ?? entry.id}" is not processed by Fumadocs, which only processes the MDX files of its \`collections\`.`,
       );
     return { Content: Content as AstroComponentFactory, data };
   }
