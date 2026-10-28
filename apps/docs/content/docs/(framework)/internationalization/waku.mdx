@@ -149,6 +149,17 @@ export default function Page({ lang, slugs }: PageProps<'/[lang]/docs/[...slugs]
 
   // ...
 }
+
+export async function getConfig() {
+  const pages = source
+    .generateParams()
+    .map((item) => (item.lang ? [item.lang, ...item.slug] : item.slug)); // [!code highlight]
+
+  return {
+    render: 'static',
+    staticPaths: pages,
+  } as const;
+}
 ```
 
 ### Search

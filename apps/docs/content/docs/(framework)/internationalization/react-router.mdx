@@ -81,7 +81,7 @@ export const translations = i18n
   });
 
 export function baseOptions(): BaseLayoutProps { // [!code --]
-export function baseOptions(locale: string): BaseLayoutProps { // [!code ++]
+export function baseOptions(locale: string = i18n.defaultLanguage): BaseLayoutProps { // [!code ++]
   return {
     // different props based on `locale`
   };
