@@ -76,3 +76,10 @@ for (const file of files) {
     out.body({});
   });
 }
+
+test('compileFile: frontmatter', async () => {
+  const out = await compilerProduction.compileFile('---\ntitle: Hello\n---\n\n# Body\n');
+
+  expect(out.data.frontmatter).toEqual({ title: 'Hello' });
+  expect(String(out)).not.toContain('Hello');
+});

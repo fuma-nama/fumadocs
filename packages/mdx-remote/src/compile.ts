@@ -2,7 +2,7 @@ import * as Plugins from 'fumadocs-core/mdx-plugins';
 import { type CompileOptions, createProcessor } from '@mdx-js/mdx';
 import type { MDXComponents } from 'mdx/types';
 import { parseFrontmatter, pluginOption, type ResolvePlugins } from './utils';
-import type { Compatible, VFile } from 'vfile';
+import { type Compatible, VFile } from 'vfile';
 import type { TOCItemType } from 'fumadocs-core/toc';
 import { executeMdx, type MdxContent } from '@/render';
 import { pathToFileURL } from 'node:url';
@@ -72,40 +72,41 @@ export function createCompiler(mdxOptions?: CompilerOptions) {
     }));
   }
 
+  async function render(compiled: string, scope?: Record<string, unknown>, filePath?: string) {
+    return executeMdx(compiled, {
+      scope,
+      baseUrl: filePath ? pathToFileURL(filePath) : undefined,
+      jsxRuntime: mdxOptions?.development ? await import('react/jsx-dev-runtime') : undefined,
+    });
+  }
+
+  async function compileFile(from: Compatible): Promise<VFile> {
+    const file = from instanceof VFile ? from : new VFile(from);
+    const { frontmatter, content } = parseFrontmatter(String(file));
+    file.value = content;
+    file.data.frontmatter ??= frontmatter;
+
+    return getProcessor().process(file);
+  }
+
   return {
-    async render(compiled: string, scope?: Record<string, unknown>, filePath?: string) {
-      return executeMdx(compiled, {
-        scope,
-        baseUrl: filePath ? pathToFileURL(filePath) : undefined,
-        jsxRuntime: mdxOptions?.development ? await import('react/jsx-dev-runtime') : undefined,
-      });
-    },
+    render,
     /**
-     * Compile VFile
+     * Compile VFile, its frontmatter is parsed into `file.data.frontmatter` unless specified
      */
-    async compileFile(from: Compatible): Promise<VFile> {
-      return getProcessor().process(from);
-    },
+    compileFile,
     async compile<Frontmatter extends object = Record<string, unknown>>(
       options: CompileMDXOptions,
     ): Promise<CompileMDXResult<Frontmatter>> {
       const { scope = {}, skipRender } = options;
-      const { frontmatter, content } = parseFrontmatter(options.source);
-
-      const file = await this.compileFile({
-        value: content,
-        path: options.filePath,
-        data: {
-          frontmatter,
-        },
-      });
+      const file = await compileFile({ value: options.source, path: options.filePath });
       const compiled = String(file);
-      const exports = !skipRender ? await this.render(compiled, scope, options.filePath) : null;
+      const exports = !skipRender ? await render(compiled, scope, options.filePath) : null;
 
       return {
         vfile: file,
         compiled,
-        frontmatter: frontmatter as Frontmatter,
+        frontmatter: file.data.frontmatter as Frontmatter,
         async body(props) {
           if (!exports) throw new Error('Body cannot be rendered when `skipRender` is set to true');
 
