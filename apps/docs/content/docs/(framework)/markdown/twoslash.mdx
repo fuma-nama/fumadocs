@@ -12,19 +12,9 @@ Type information is resolved by the native TypeScript 7 compiler, from the worki
 fumadocs-twoslash
 ```
 
-For Next.js, you need to externalize the following deps:
-
-```js title="next.config.mjs (Next.js)"
-const config = {
-  reactStrictMode: true,
-  // [!code ++]
-  serverExternalPackages: ['typescript'],
-};
-```
-
 Add to your Shiki transformers.
 
-```ts title="source.config.ts (Fumadocs MDX)"
+```ts tab="Fumadocs MDX" title="source.config.ts"
 import { defineConfig } from 'fumadocs-mdx/config';
 import { transformerTwoslash } from 'fumadocs-twoslash';
 import { rehypeCodeDefaultOptions } from 'fumadocs-core/mdx-plugins';
@@ -41,6 +31,35 @@ export default defineConfig({
   },
 });
 ```
+
+```js tab="Astro" title="astro.config.mjs"
+import { transformerTwoslash } from 'fumadocs-twoslash';
+import { rehypeCodeDefaultOptions } from 'fumadocs-core/mdx-plugins';
+
+fumadocs({
+  rehypeCodeOptions: {
+    themes: {
+      light: 'github-light',
+      dark: 'github-dark',
+    },
+    transformers: [...(rehypeCodeDefaultOptions.transformers ?? []), transformerTwoslash()],
+  },
+});
+```
+
+<Callout title="Next.js">
+
+Externalize TypeScript:
+
+```js title="next.config.mjs"
+const config = {
+  reactStrictMode: true,
+  // [!code ++]
+  serverExternalPackages: ['typescript'],
+};
+```
+
+</Callout>
 
 Add styles, Tailwind CSS v4 is required.
 
