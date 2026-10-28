@@ -25,7 +25,9 @@ Add a `[lang]` prefix to all your pages.
 <Files>
   <Folder name="src/pages" defaultOpen>
     <Folder name="[lang]" defaultOpen>
-      <File name="index.tsx" />
+      <File name="(home)/_layout.tsx" />
+      <File name="(home)/index.tsx" />
+      <File name="docs/_layout.tsx" />
       <File name="docs/[...slugs].tsx" />
     </Folder>
     <Folder name="_api" defaultOpen>
@@ -40,7 +42,8 @@ Define your translations in `lib/layout.shared.tsx`, see [Translations](/docs/ui
 
 You can also add `locale` parameter to `baseOptions()` for localized layout options:
 
-```tsx title="lib/layout.shared.tsx"
+```tsx title="src/lib/layout.shared.tsx"
+// [!code ++:2]
 import { i18n } from '@/lib/i18n';
 import { uiTranslations } from 'fumadocs-ui/i18n';
 import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
@@ -58,114 +61,102 @@ export const translations = i18n
     },
   });
 
-// [!code highlight]
-export function baseOptions(locale: string): BaseLayoutProps {
+export function baseOptions(): BaseLayoutProps { // [!code --]
+export function baseOptions(locale: string): BaseLayoutProps { // [!code ++]
   return {
-    // different props based on `locale`
     nav: {
       title: 'My App',
-      url: `/${locale}`,
+      url: `/${locale}`, // [!code ++]
     },
   };
 }
 ```
 
-### Pages
-
-Waku does not expose route segment params from `useRouter()`. Extract the locale from the path, then pass translations to `<RootProvider />`:
+Pass translations to `<RootProvider />`:
 
 ```tsx title="src/components/provider.tsx"
 'use client';
 import type { ReactNode } from 'react';
 import { RootProvider } from 'fumadocs-ui/provider/waku';
+// [!code ++:4]
 import { i18nProvider } from 'fumadocs-ui/i18n';
 import { useRouter } from 'waku/router/client';
 import { i18n } from '@/lib/i18n';
 import { translations } from '@/lib/layout.shared';
 
 export function Provider({ children }: { children: ReactNode }) {
-  const router = useRouter();
-  // [!code highlight]
-  const lang = router.path.split('/')[1] ?? i18n.defaultLanguage;
+  // the first segment of path [!code ++:2]
+  const lang = useRouter().path.split('/')[1] || i18n.defaultLanguage;
 
-  return (
-    <RootProvider
-      // [!code ++]
-      i18n={i18nProvider(translations, lang)}
-    >
-      {children}
-    </RootProvider>
-  );
+  return <RootProvider>{children}</RootProvider>; // [!code --]
+  return <RootProvider i18n={i18nProvider(translations, lang)}>{children}</RootProvider>; // [!code ++]
 }
 ```
 
 ### Pass Locale
 
-Pass the locale to Fumadocs in your pages and layouts.
+Pass the locale to Fumadocs in your pages and layouts, layouts and pages under `[lang]` receive it as a prop.
 
 ```ts tab="src/lib/source.ts"
-import { i18n } from '@/lib/i18n';
-import { loader } from 'fumadocs-core/source';
+import { i18n } from '@/lib/i18n'; // [!code ++]
 
 export const source = loader({
+  source: docs.toFumadocsSource(),
+  baseUrl: '/docs',
   i18n, // [!code ++]
-  // other options
 });
 ```
 
-```tsx tab="Home Page" title="src/pages/[lang]/index.tsx"
-import { i18n } from '@/lib/i18n';
-import { HomeLayout } from 'fumadocs-ui/layouts/home';
-import { baseOptions } from '@/lib/layout.shared';
-import type { PageProps } from 'waku/router';
-
-export default function Home({ lang }: PageProps<'/[lang]'>) {
-  // [!code highlight]
-  return <HomeLayout {...baseOptions(lang)}></HomeLayout>;
+```tsx tab="Home Layout" title="src/pages/[lang]/(home)/_layout.tsx"
+export default function Layout({ children }: { children: ReactNode }) { // [!code --]
+export default function Layout({ lang, children }: { lang: string; children: ReactNode }) { // [!code ++]
+  return <HomeLayout {...baseOptions()}>{children}</HomeLayout>; // [!code --]
+  return <HomeLayout {...baseOptions(lang)}>{children}</HomeLayout>; // [!code ++]
 }
+```
 
-export const getConfig = async () => {
+```tsx tab="Home Page" title="src/pages/[lang]/(home)/index.tsx"
+import { i18n } from '@/lib/i18n'; // [!code ++]
+
+// ...
+
+export async function getConfig() {
   return {
-    render: 'static' as const,
-    staticPaths: i18n.languages.map((lang) => [lang]),
-  } as const;
-};
+    render: 'static',
+    staticPaths: i18n.languages, // [!code ++]
+  };
+}
+```
+
+```tsx tab="Docs Layout" title="src/pages/[lang]/docs/_layout.tsx"
+export default function Layout({ children }: { children: ReactNode }) { // [!code --]
+export default function Layout({ lang, children }: { lang: string; children: ReactNode }) { // [!code ++]
+  return (
+    // [!code highlight]
+    <DocsLayout {...baseOptions(lang)} tree={source.getPageTree(lang)}>
+      {children}
+    </DocsLayout>
+  );
+}
 ```
 
 ```tsx tab="Docs Page" title="src/pages/[lang]/docs/[...slugs].tsx"
-import { source } from '@/lib/source';
-import type { PageProps } from 'waku/router';
-import { DocsLayout } from 'fumadocs-ui/layouts/docs';
-import { baseOptions } from '@/lib/layout.shared';
+export default function Page({ slugs }: PageProps<'/docs/[...slugs]'>) { // [!code --]
+export default function Page({ lang, slugs }: PageProps<'/[lang]/docs/[...slugs]'>) { // [!code ++]
+  const page = source.getPage(slugs); // [!code --]
+  const page = source.getPage(slugs, lang); // [!code ++]
+  if (!page) unstable_notFound();
 
-export default function DocPage({ slugs, lang }: PageProps<'/[lang]/docs/[...slugs]'>) {
-  // [!code --]
-  const page = source.getPage(slugs);
-  // [!code ++]
-  const page = source.getPage(slugs, lang);
-  if (!page) return <div>Not Found</div>;
-
-  return (
-    <DocsLayout
-      // [!code highlight]
-      {...baseOptions(lang)}
-      // [!code --]
-      tree={source.getPageTree()}
-      // [!code ++]
-      tree={source.getPageTree(lang)}
-    >
-      {/* ... */}
-    </DocsLayout>
-  );
+  // ...
 }
 
 export async function getConfig() {
   const pages = source
     .generateParams()
-    .map((item) => (item.lang ? [item.lang, ...item.slug] : item.slug));
+    .map((item) => (item.lang ? [item.lang, ...item.slug] : item.slug)); // [!code highlight]
 
   return {
-    render: 'static' as const,
+    render: 'static',
     staticPaths: pages,
   } as const;
 }
@@ -196,7 +187,7 @@ const lang = router.path.split('/')[1];
 <Link to={`/${lang}/about`}>About Us</Link>;
 ```
 
-In addition, the [`fumadocs-core/dynamic-link`](/docs/headless/components/link#dynamic-hrefs) component supports dynamic hrefs, you can use it to attend the locale prefix.
+In addition, the [`fumadocs-core/dynamic-link`](/docs/headless/components/link#dynamic-hrefs) component supports dynamic hrefs, you can use it to prepend the locale prefix.
 It is useful for Markdown/MDX content.
 
 ```mdx title="content.mdx"

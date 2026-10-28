@@ -67,26 +67,185 @@ const docs = localMd({
 
 ## Usage
 
-The recommended integration is:
+`getSource()` returns a normal [content loader](/docs/headless/source-api), render pages with it:
 
-1. Create `localMd({ dir })` for your content directory.
-2. Pass `docs.dynamicSource()` to `dynamicLoader()`.
-3. Read the source in your route/layout and render it with Fumadocs UI.
-
-For example, in a docs layout:
-
-```tsx title="app/docs/layout.tsx"
+```tsx tab="Next.js" title="app/docs/layout.tsx"
 import { getSource } from '@/lib/source';
 import { DocsLayout } from 'fumadocs-ui/layouts/docs';
 
 export default async function Layout({ children }: LayoutProps<'/docs'>) {
-  const docs = await getSource();
+  const source = await getSource();
 
-  return <DocsLayout tree={docs.getPageTree()}>{children}</DocsLayout>;
+  return <DocsLayout tree={source.getPageTree()}>{children}</DocsLayout>;
 }
 ```
 
-The returned source from `docsLoader.get()` is a normal [content loader](/docs/headless/source-api) instance.
+```tsx tab="Next.js" title="app/docs/[[...slug]]/page.tsx"
+import { notFound } from 'next/navigation';
+import { DocsBody, DocsPage, DocsTitle } from 'fumadocs-ui/layouts/docs/page';
+import { getSource } from '@/lib/source';
+import { getMDXComponents } from '@/components/mdx';
+
+export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
+  const params = await props.params;
+  const source = await getSource();
+  const page = source.getPage(params.slug);
+  if (!page) notFound();
+
+  const { render } = await page.data.load();
+  const { body, toc } = await render(getMDXComponents());
+
+  return (
+    <DocsPage toc={toc}>
+      <DocsTitle>{page.data.title}</DocsTitle>
+      <DocsBody>{body}</DocsBody>
+    </DocsPage>
+  );
+}
+```
+
+```tsx tab="React Router" title="app/routes/docs.tsx"
+import type { Route } from './+types/docs';
+import { useMemo } from 'react';
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+import { DocsBody, DocsPage, DocsTitle } from 'fumadocs-ui/layouts/docs/page';
+import { useFumadocsLoader } from 'fumadocs-core/source/client';
+import { rendererFromSerialized } from '@fumadocs/local-md/client';
+import { getSource } from '@/lib/source';
+import { useMDXComponents } from '@/components/mdx';
+
+export async function loader({ params }: Route.LoaderArgs) {
+  const source = await getSource();
+  const page = source.getPage(params['*'].split('/').filter((v) => v.length > 0));
+  if (!page) throw new Response('Not found', { status: 404 });
+
+  const { serialize } = await page.data.load();
+  return {
+    title: page.data.title,
+    // the syntax tree, rendered on the client
+    render: serialize(),
+    pageTree: await source.serializePageTree(source.getPageTree()),
+  };
+}
+
+export default function Page({ loaderData }: Route.ComponentProps) {
+  const { title, render, pageTree } = useFumadocsLoader(loaderData);
+  const renderer = useMemo(() => rendererFromSerialized(render), [render]);
+  const { body, toc } = renderer.renderSync(useMDXComponents());
+
+  return (
+    <DocsLayout tree={pageTree}>
+      <DocsPage toc={toc}>
+        <DocsTitle>{title}</DocsTitle>
+        <DocsBody>{body}</DocsBody>
+      </DocsPage>
+    </DocsLayout>
+  );
+}
+```
+
+```tsx tab="Tanstack Start" title="src/routes/docs/$.tsx"
+import { createFileRoute, notFound } from '@tanstack/react-router';
+import { createServerFn } from '@tanstack/react-start';
+import { useMemo } from 'react';
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+import { DocsBody, DocsPage, DocsTitle } from 'fumadocs-ui/layouts/docs/page';
+import { useFumadocsLoader } from 'fumadocs-core/source/client';
+import { rendererFromSerialized } from '@fumadocs/local-md/client';
+import type { MarkdownRendererSerializedOptions } from '@fumadocs/local-md';
+import { getSource } from '@/lib/source';
+import { useMDXComponents } from '@/components/mdx';
+
+// the type-level check of server function results can't verify the syntax tree,
+// register it as serializable (install `@tanstack/router-core` if it isn't resolvable)
+declare module '@tanstack/router-core' {
+  interface SerializableExtensions {
+    fumadocsMarkdownRenderer: MarkdownRendererSerializedOptions;
+  }
+}
+
+export const Route = createFileRoute('/docs/$')({
+  component: Page,
+  loader: ({ params }) => serverLoader({ data: params._splat?.split('/') ?? [] }),
+});
+
+const serverLoader = createServerFn({
+  method: 'GET',
+})
+  .validator((slugs: string[]) => slugs)
+  .handler(async ({ data: slugs }) => {
+    const source = await getSource();
+    const page = source.getPage(slugs);
+    if (!page) throw notFound();
+
+    const { serialize } = await page.data.load();
+    return {
+      title: page.data.title,
+      // the syntax tree, rendered on the client
+      render: serialize(),
+      pageTree: await source.serializePageTree(source.getPageTree()),
+    };
+  });
+
+function Page() {
+  const { title, render, pageTree } = useFumadocsLoader(Route.useLoaderData());
+  const renderer = useMemo(() => rendererFromSerialized(render), [render]);
+  const { body, toc } = renderer.renderSync(useMDXComponents());
+
+  return (
+    <DocsLayout tree={pageTree}>
+      <DocsPage toc={toc}>
+        <DocsTitle>{title}</DocsTitle>
+        <DocsBody>{body}</DocsBody>
+      </DocsPage>
+    </DocsLayout>
+  );
+}
+```
+
+```tsx tab="Waku" title="src/pages/docs/_layout.tsx"
+import type { ReactNode } from 'react';
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+import { getSource } from '@/lib/source';
+
+export default async function Layout({ children }: { children: ReactNode }) {
+  const source = await getSource();
+
+  return <DocsLayout tree={source.getPageTree()}>{children}</DocsLayout>;
+}
+```
+
+```tsx tab="Waku" title="src/pages/docs/[...slugs].tsx"
+import type { PageProps } from 'waku/router';
+import { unstable_notFound } from 'waku/router/server';
+import { DocsBody, DocsPage, DocsTitle } from 'fumadocs-ui/layouts/docs/page';
+import { getSource } from '@/lib/source';
+import { getMDXComponents } from '@/components/mdx';
+
+export default async function Page({ slugs }: PageProps<'/docs/[...slugs]'>) {
+  const source = await getSource();
+  const page = source.getPage(slugs);
+  if (!page) unstable_notFound();
+
+  const { render } = await page.data.load();
+  const { body, toc } = await render(getMDXComponents());
+
+  return (
+    <DocsPage toc={toc}>
+      <DocsTitle>{page.data.title}</DocsTitle>
+      <DocsBody>{body}</DocsBody>
+    </DocsPage>
+  );
+}
+
+export async function getConfig() {
+  const source = await getSource();
+  return {
+    render: 'static',
+    staticPaths: source.generateParams().map((item) => item.slug),
+  } as const;
+}
+```
 
 ### Include
 
@@ -311,77 +470,3 @@ const { toc, body } = await (await page.data.load()).render(mdxComponents);
 
 return <div>{body}</div>;
 ```
-
-### Without RSC
-
-If your setup doesn't support RSC, unlike Fumadocs MDX's `collections/browser` API, `local-md` leverages server payload to send AST, then render Markdown at client-side.
-
-For example, in Tanstack Start:
-
-```tsx title="src/routes/docs/$.tsx"
-import { createFileRoute, notFound } from '@tanstack/react-router';
-import { DocsLayout } from 'fumadocs-ui/layouts/docs';
-import { createServerFn } from '@tanstack/react-start';
-import { getSource } from '@/lib/source';
-import { DocsBody, DocsPage } from 'fumadocs-ui/layouts/docs/page';
-import { useFumadocsLoader } from 'fumadocs-core/source/client';
-import { useMemo } from 'react';
-import { useMDXComponents } from '@/components/mdx';
-import { rendererFromSerialized } from '@fumadocs/local-md/client';
-import type { MarkdownRendererSerializedOptions } from '@fumadocs/local-md';
-
-// [!code highlight:5] register the payload as serializable (see below)
-declare module '@tanstack/router-core' {
-  interface SerializableExtensions {
-    fumadocsMarkdownRenderer: MarkdownRendererSerializedOptions;
-  }
-}
-
-export const Route = createFileRoute('/docs/$')({
-  component: Page,
-  loader: async ({ params }) => {
-    const slugs = params._splat?.split('/') ?? [];
-    return serverLoader({ data: slugs });
-  },
-});
-
-const serverLoader = createServerFn({
-  method: 'GET',
-})
-  .validator((slugs: string[]) => slugs)
-  .handler(async ({ data: slugs }) => {
-    const source = await getSource();
-    const page = source.getPage(slugs);
-    if (!page) throw notFound();
-
-    // compile
-    const { serialize } = await page.data.load();
-
-    return {
-      frontmatter: page.data.frontmatter,
-      // [!code highlight] pass it to payload
-      render: serialize(),
-      // ...
-    };
-  });
-
-function Page() {
-  const { pageTree, frontmatter, render } = useFumadocsLoader(Route.useLoaderData());
-  // [!code highlight:2] render under sync mode
-  const renderer = useMemo(() => rendererFromSerialized(render), [render]);
-  const { body, toc } = renderer.renderSync(useMDXComponents());
-
-  return (
-    <DocsLayout tree={pageTree}>
-      <DocsPage toc={toc}>
-        {/* ... */}
-        <DocsBody>{body}</DocsBody>
-      </DocsPage>
-    </DocsLayout>
-  );
-}
-```
-
-TanStack Start checks that the result of server functions is serializable.
-The serialized renderer contains a HAST tree, which is serializable but too complex for the type-level check to verify.
-Register it in `SerializableExtensions` from `@tanstack/router-core` (install it if it isn't resolvable) to skip the check for it.

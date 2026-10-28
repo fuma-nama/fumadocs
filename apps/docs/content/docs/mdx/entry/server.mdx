@@ -42,10 +42,10 @@ import { source } from '@/lib/source';
 const page = source.getPage(['slugs']);
 
 if (page) {
-  // access page data [!code highlight]
+  // access page data [!code highlight:2]
   console.log(page.data);
 
-  // frontmatter properties are also available [!code highlight]
+  // frontmatter properties are also available [!code highlight:2]
   console.log(page.data.title);
 }
 ```

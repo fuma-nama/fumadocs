@@ -19,16 +19,16 @@ export interface MetaEntry {
   data: MetaData;
 }
 
-export interface RenderedPage {
-  Content: AstroComponentFactory;
+export interface DocData {
+  /** the MDX content, as an Astro component */
+  body: AstroComponentFactory;
   toc: TOCItemType[];
   structuredData: StructuredData;
 }
 
 export type AstroPageData<Entry extends PageEntry = PageEntry> = Entry['data'] & {
-  entry: Entry;
-  /** render the page with `render()` of `astro:content` */
-  render: () => Promise<RenderedPage>;
+  /** the content, rendered with `render()` of `astro:content` */
+  load: () => Promise<DocData>;
   structuredData: () => Promise<StructuredData>;
   /**
    * Get the content of page:
@@ -52,29 +52,28 @@ export function toFumadocsSource<Page extends PageEntry, Meta extends MetaEntry>
 }
 
 function pageData<Entry extends PageEntry>(entry: Entry): AstroPageData<Entry> {
-  async function load() {
+  async function compile() {
     const { Content, remarkPluginFrontmatter } = await render(entry);
     const data = remarkPluginFrontmatter[dataKey] as FumadocsData | undefined;
     if (!data)
       throw new Error(
         `"${entry.filePath ?? entry.id}" is not processed by Fumadocs, which only processes the MDX files of its \`collections\`.`,
       );
-    return { Content: Content as AstroComponentFactory, data };
+    return { body: Content as AstroComponentFactory, data };
   }
 
   return {
     ...entry.data,
-    entry,
-    async render() {
-      const { Content, data } = await load();
-      return { Content, toc: data.toc, structuredData: data.structuredData };
+    async load() {
+      const { body, data } = await compile();
+      return { body, toc: data.toc, structuredData: data.structuredData };
     },
     async structuredData() {
-      return (await load()).data.structuredData;
+      return (await compile()).data.structuredData;
     },
     async getText(type) {
       if (type === 'raw') return entry.body ?? '';
-      const { markdown } = (await load()).data;
+      const { markdown } = (await compile()).data;
       if (markdown === undefined)
         throw new Error(
           "getText('processed') requires `includeProcessedMarkdown` in the options of the Fumadocs integration.",

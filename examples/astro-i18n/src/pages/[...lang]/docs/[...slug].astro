@@ -3,7 +3,7 @@ import type { GetStaticPaths, InferGetStaticPropsType } from 'astro';
 import Layout from '@/layouts/Layout.astro';
 import { Docs } from '@/components/docs';
 import { i18n } from '@/lib/i18n';
-import { pageTrees, source } from '@/lib/source';
+import { source } from '@/lib/source';
 
 export const prerender = true;
 
@@ -27,7 +27,8 @@ export const getStaticPaths = (() => {
 type Props = InferGetStaticPropsType<typeof getStaticPaths>;
 
 const { lang, page } = Astro.props;
-const { Content, toc } = await page.data.render();
+const { body: Content, toc } = await page.data.load();
+const pageTree = await source.serializePageTree(source.getPageTree(lang));
 const provider = { lang, pathname: Astro.url.pathname, params: Astro.params };
 ---
 
@@ -36,7 +37,7 @@ const provider = { lang, pathname: Astro.url.pathname, params: Astro.params };
     client:load
     transition:persist="docs"
     {...provider}
-    tree={pageTrees[lang]}
+    tree={pageTree}
     title={page.data.title}
     description={page.data.description}
     toc={toc}

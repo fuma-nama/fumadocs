@@ -171,15 +171,6 @@ export async function generateStaticParams() {
 }
 ```
 
-```ts tab="Waku" title="src/pages/_api/api/graphql-schema/[id].ts"
-import type { ApiContext } from 'waku/router';
-import { graphql } from '@/lib/graphql';
-
-export async function GET(_: Request, { params }: ApiContext<'/api/graphql-schema/[id]'>) {
-  return new Response((await graphql.getSchema(params.id)).sdl);
-}
-```
-
 ```ts tab="React Router" title="app/routes/graphql-schema.ts"
 import type { Route } from './+types/graphql-schema';
 import { graphql } from '@/lib/graphql';
@@ -197,6 +188,15 @@ export default [
   route('api/graphql-schema/:id', 'routes/graphql-schema.ts'),
   // ...
 ] satisfies RouteConfig;
+```
+
+```ts tab="Waku" title="src/pages/_api/api/graphql-schema/[id].ts"
+import type { ApiContext } from 'waku/router';
+import { graphql } from '@/lib/graphql';
+
+export async function GET(_: Request, { params }: ApiContext<'/api/graphql-schema/[id]'>) {
+  return new Response((await graphql.getSchema(params.id)).sdl);
+}
 ```
 
 ```ts tab="Astro" title="src/pages/api/graphql-schema/[id].ts"
