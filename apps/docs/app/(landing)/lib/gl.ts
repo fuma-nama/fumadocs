@@ -241,6 +241,7 @@ export function createShaderCanvas(
   // a canvas pixel a CSS pixel at most, a whole number of device pixels each: the figures draw
   // their dither and outlines in CSS pixels, a phone's 3x would only triple the work
   let dpr = 1;
+  canvas.style.imageRendering = 'pixelated';
 
   /** a drawing buffer the canvas's size, kept off screen: one made again each time it came back
    * cost a phone a buffer and a whole frame, where the last one still shows */
@@ -259,7 +260,6 @@ export function createShaderCanvas(
   // resizing clears the canvas, and a frame requested now would come after this one paints it blank
   const resize = new ResizeObserver(() => {
     dpr = window.devicePixelRatio / Math.ceil(window.devicePixelRatio);
-    canvas.style.imageRendering = dpr < window.devicePixelRatio ? 'pixelated' : '';
     set('uDpr', dpr);
     fit();
     onResize?.(dpr);

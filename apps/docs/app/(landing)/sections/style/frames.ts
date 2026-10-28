@@ -115,8 +115,6 @@ export function createFrames(
   const reduce = matchMedia('(prefers-reduced-motion: reduce)');
   let view: View | null = null;
   let frame: HTMLIFrameElement | null = null;
-  // Chrome latches a wheel to an iframe under the pointer, even an inert one
-  let shield: HTMLElement | null = null;
   let visible = false;
   /** the page on screen, rendered and inked, and the one the frame is on its way to */
   let shown: string | null = null;
@@ -148,21 +146,9 @@ export function createFrames(
     frame.setAttribute('scrolling', 'no');
     frame.className = 'absolute top-0 left-0 origin-top-left border-0 bg-transparent';
     frame.addEventListener('load', onLoad);
-    shield = document.createElement('div');
-    shield.className = 'absolute inset-0';
     fit();
     sync();
-    live.append(frame, shield);
-  }
-
-  function release() {
-    if (going) onBusy(false);
-    frame?.remove();
-    shield?.remove();
-    frame = shield = null;
-    shown = going = inked = null;
-    listening = false;
-    live.style.visibility = '';
+    live.append(frame);
   }
 
   /** sets the frame on its way to the view's page, hidden until that has rendered */
@@ -179,7 +165,6 @@ export function createFrames(
     const still = tab === 'layouts';
     frame.title = tab === 'layouts' ? 'Live layout' : DEMOS[tab];
     frame.inert = still;
-    shield!.hidden = !still;
     if (listening && still) {
       // the next story's arguments travel with it, so it renders as it lands
       post({ type: 'fumadocs-story:navigate', href: path, args: STORY_ARGS[view.layout] });
@@ -250,7 +235,9 @@ export function createFrames(
       else sync();
     },
     destroy() {
-      release();
+      if (going) onBusy(false);
+      frame?.remove();
+      live.style.visibility = '';
       resize.disconnect();
       near.disconnect();
       window.removeEventListener('message', onMessage);

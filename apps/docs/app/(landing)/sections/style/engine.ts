@@ -1,4 +1,5 @@
 import { DITHER_MASKS } from '../../lib/dither';
+import { steer } from '../../lib/motion';
 import {
   cableEnds,
   centre,
@@ -99,6 +100,8 @@ export function createDesk(board: HTMLElement, hung: Hung) {
 
   let raf = 0;
   const clock = { last: 0, acc: 0 };
+  /** the windows and the hub move on layers of their own till they settle */
+  let release: (() => void)[] = [];
 
   function sync(jump: boolean) {
     for (let i = 0; i < SLOTS.length; i++) {
@@ -173,11 +176,19 @@ export function createDesk(board: HTMLElement, hung: Hung) {
     write();
     // settled to the eye once no cable point moves a tenth of a unit in a step
     if (energy > 0.004 || moved > 0.1 || paying > 0.1) schedule();
-    else clock.last = clock.acc = 0;
+    else settle();
   }
 
   function schedule() {
-    if (raf === 0) raf = requestAnimationFrame(frame);
+    if (raf !== 0) return;
+    if (release.length === 0) release = [...windows, hub].map(steer);
+    raf = requestAnimationFrame(frame);
+  }
+
+  function settle() {
+    clock.last = clock.acc = 0;
+    for (const r of release) r();
+    release = [];
   }
 
   return {
@@ -198,6 +209,7 @@ export function createDesk(board: HTMLElement, hung: Hung) {
     },
     destroy() {
       cancelAnimationFrame(raf);
+      settle();
     },
   };
 }

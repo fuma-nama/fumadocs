@@ -45,8 +45,6 @@ out vec4 color;
 ${bayer8}
 
 int gMask;
-/** a zero the compiler can't see: a loop from it stays a loop, so the scene in it compiles in once */
-#define ZERO min(int(uCell), 0)
 
 float sdBox(vec3 p, vec3 b) {
   vec3 q = abs(p) - b;
@@ -254,7 +252,7 @@ vec2 map(vec3 p) {
 
 vec3 normalAt(vec3 p, float e) {
   vec3 n = vec3(0.0);
-  for (int i = ZERO; i < 4; i++) {
+  for (int i = 0; i < 4; i++) {
     vec3 k = vec3(((i + 1) & 2) == 0 ? 1.0 : -1.0, (i & 2) == 0 ? -1.0 : 1.0, (i & 1) == 0 ? -1.0 : 1.0);
     n += k * map(p + k * e).x;
   }
@@ -267,7 +265,7 @@ float bend(vec3 p, vec3 n, float w, float d) {
   vec3 t2 = cross(n, t1);
   float c = 2.0 * d;
   float s[4];
-  for (int i = ZERO; i < 4; i++) s[i] = map(p + (i < 2 ? t1 : t2) * ((i & 1) == 0 ? w : -w)).x;
+  for (int i = 0; i < 4; i++) s[i] = map(p + (i < 2 ? t1 : t2) * ((i & 1) == 0 ? w : -w)).x;
   float a = s[0] + s[1] - c;
   float b = s[2] + s[3] - c;
   return max(abs(a), abs(b)) / w;
@@ -341,7 +339,7 @@ void main() {
         float b = t;
         float f = 0.0;
         // six golden-section steps of two probes each, then the middle
-        for (int j = ZERO; j < 13; j++) {
+        for (int j = 0; j < 13; j++) {
           float m = j == 12 ? 0.5 * (a + b) : mix(a, b, (j & 1) == 0 ? 0.382 : 0.618);
           float v = map(ro + rd * m).x;
           if (j == 12) {

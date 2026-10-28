@@ -158,7 +158,7 @@ export function createProjector(
   }
 
   function write() {
-    reel.style.transform = `translate3d(${(-position * pitch).toFixed(2)}px, 0, 0)`;
+    reel.style.transform = `translateX(${(-position * pitch).toFixed(2)}px)`;
     wheel.setAttribute('transform', rotate(-90 * indexed, WHEEL));
     driver.setAttribute('transform', rotate((alpha * 180) / Math.PI, DRIVER));
   }

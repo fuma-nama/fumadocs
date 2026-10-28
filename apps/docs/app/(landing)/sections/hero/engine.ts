@@ -143,8 +143,6 @@ export function createHero(stage: HTMLElement, reduced: boolean): (() => void) |
   let stride = TICK;
   /** the next move's frame */
   let wake = 0;
-  /** the moon's centre in the viewport at a scroll, read once the mouse moves over the hero */
-  let centre: { x: number; y: number; scroll: number } | undefined;
   /** px from the moon's centre to the pointer */
   let pointerX = Number.NaN;
   // uniform values written every frame, reused
@@ -180,9 +178,8 @@ export function createHero(stage: HTMLElement, reduced: boolean): (() => void) |
 
   /** `dpr`: the canvas's pixels a CSS px */
   const measure = (dpr: number) => {
-    // the sky's box (Chromium reads 0 for its 100cqh where its min-height sets its height): the
-    // moon as large as it fits the drawing, and her over the crown at a px a cell, the least she is
-    // drawn at
+    // the moon as large as it fits the sky's box, and her over the crown at a px a cell, the least
+    // she is drawn at
     const width = canvas.clientWidth;
     const height = canvas.clientHeight;
     radius = Math.min(width / (2 * REACH), height / SKY, (height - (MATE_H - LEGS)) / CROWN);
@@ -200,23 +197,14 @@ export function createHero(stage: HTMLElement, reduced: boolean): (() => void) |
     // px a tick of the fastest satellite, crossing the moon's face
     const fastest = (ORBIT.a * radius * 2 * Math.PI * TICK) / (ORBIT.period * 1000);
     stride = TICK / Math.max(1, Math.ceil(fastest / CELL));
-    centre = undefined;
   };
 
   const onPointerMove = (e: PointerEvent) => {
     if (e.pointerType !== 'mouse') return;
-    // read again after a scroll, which sets the moon
-    if (centre?.scroll !== window.scrollY) {
-      const rect = drawing.getBoundingClientRect();
-      centre = {
-        x: rect.left + rect.width / 2,
-        y: rect.bottom - HORIZON * radius,
-        scroll: window.scrollY,
-      };
-    }
-    pointerX = e.clientX - centre.x;
+    const rect = drawing.getBoundingClientRect();
+    pointerX = e.clientX - rect.left - rect.width / 2;
     sunX.set(pointerX / radius);
-    sunY.set((e.clientY - centre.y) / radius);
+    sunY.set((e.clientY - rect.bottom) / radius + HORIZON);
     shader.invalidate();
   };
   const onPointerLeave = (e: PointerEvent) => {

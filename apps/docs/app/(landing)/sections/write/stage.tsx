@@ -85,7 +85,7 @@ interface StageProps {
 export function Stage({ file, steps, sources, slots, bed, column }: StageProps) {
   return (
     <div className="px-(--lp-gutter) pb-(--lp-gutter)">
-      {/* Chrome takes what moves here to cover anything painted after it: clipped, that's the stage */}
+      {/* what moves here gets a layer, and so does all painted over it: the clip keeps them to the stage */}
       <div ref={mount} data-file={file} className="relative flex overflow-clip">
         <Window
           data-doc
