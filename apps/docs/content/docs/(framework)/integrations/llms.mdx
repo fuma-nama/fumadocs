@@ -42,9 +42,15 @@ ${page.data.content}`,
 
 With `getSource`, `index()` and `indexNode()` return a promise instead of a string.
 
-It requires `includeProcessedMarkdown` in **Fumadocs MDX**:
+It requires `includeProcessedMarkdown`:
 
-<feature title="source.config.ts">llms/source.config.ts</feature>
+<feature tab="Fumadocs MDX" title="source.config.ts">
+  llms/source.config.ts
+</feature>
+
+<feature tab="Astro" title="astro.config.mjs">
+  llms/astro/astro.config.mjs
+</feature>
 
 MDX components appear as JSX syntax by default, you can render them into meaningful Markdown with the [`output` option](/docs/headless/mdx/remark-llms#output).
 
@@ -72,6 +78,10 @@ An index of all pages, generated from the page tree.
   llms/waku/pages/_api/llms.txt.ts
 </feature>
 
+<feature tab="Astro" title="src/pages/llms.txt.ts">
+  llms/astro/pages/llms.txt.ts
+</feature>
+
 ### `llms-full.txt`
 
 The content of all pages in a single file.
@@ -90,6 +100,10 @@ The content of all pages in a single file.
 
 <feature tab="Waku" title="pages/_api/llms-full.txt.ts">
   llms/waku/pages/_api/llms-full.txt.ts
+</feature>
+
+<feature tab="Astro" title="src/pages/llms-full.txt.ts">
+  llms/astro/pages/llms-full.txt.ts
 </feature>
 
 ### `*.md` [#md-extension]
@@ -120,7 +134,7 @@ The Markdown of a single page, for AI agents.
 import { rewritePath } from 'fumadocs-core/negotiation';
 import type { Route } from './+types/root';
 
-// serve `/docs/page.md` [!code ++:11]
+// serve `/docs/page.md` [!code ++:14]
 const { rewrite: rewriteLLM } = rewritePath(
   '/docs{/*path}.md',
   '/llms.mdx/docs{/*path}/content.md',
@@ -140,7 +154,7 @@ export const middleware = [serverMiddleware];
 import type { Config } from '@react-router/dev/config';
 
 export default {
-  // enable middleware [!code ++:3]
+  // enable middleware [!code ++:4]
   future: {
     v8_middleware: true,
   },
@@ -159,6 +173,14 @@ export default {
 
 <feature tab="Waku" title="pages/_api/llms.mdx/docs/[...slug]/content.md.ts">
   llms/waku/pages/_api/llms.mdx/docs/[...slug]/content.md.ts
+</feature>
+
+<feature tab="Astro" title="src/lib/shared.ts">
+  llms/astro/lib/shared.ts
+</feature>
+
+<feature tab="Astro" title="src/pages/llms.mdx/docs/[...slug]/content.md.ts">
+  llms/astro/pages/llms.mdx/docs/[...slug]/content.md.ts
 </feature>
 
 #### `Accept`
@@ -225,7 +247,7 @@ Expose your docs to AI agents through a [MCP](https://modelcontextprotocol.io) s
 npx @fumadocs/cli feature mcp
 ```
 
-It creates a `/api/mcp` route with the streamable HTTP transport, on top of the [LLM routes](#docs-for-llm) above.
+It creates a `/api/mcp` route with the streamable HTTP transport, on top of the [LLM routes](#docs-for-llm) above. On Astro, it requires `output: 'server'`.
 
 The tools come from [`fumadocs-core/mcp`](/docs/headless/utils/mcp), see linked docs for details.
 
@@ -243,6 +265,10 @@ The tools come from [`fumadocs-core/mcp`](/docs/headless/utils/mcp), see linked 
 
 <feature tab="Waku" title="pages/_api/api/mcp.ts">
   mcp/waku/pages/_api/api/mcp.ts
+</feature>
+
+<feature tab="Astro" title="src/pages/api/mcp.ts">
+  mcp/astro/pages/api/mcp.ts
 </feature>
 
 Connect an agent to it with:

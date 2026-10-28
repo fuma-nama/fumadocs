@@ -209,9 +209,15 @@ export function addElements(file: SourceFile, container: Container, items: strin
   const multiline = code.slice(container.start, container.end).includes('\n');
 
   if (!last) {
+    let inner = items.join(', ');
+    // e.g. `defineConfig({})`, properties go on their own lines
+    if (container.type === 'ObjectExpression') {
+      const indent = lineIndent(code, container.start);
+      inner = `${items.map((item) => `\n${indent}  ${item.replaceAll('\n', `\n${indent}  `)},`).join('')}\n${indent}`;
+    }
     // `[]` is a zero-length range which cannot be overwritten
-    if (container.end - container.start === 2) s.appendLeft(container.end - 1, items.join(', '));
-    else s.overwrite(container.start + 1, container.end - 1, items.join(', '));
+    if (container.end - container.start === 2) s.appendLeft(container.end - 1, inner);
+    else s.overwrite(container.start + 1, container.end - 1, inner);
     return;
   }
 

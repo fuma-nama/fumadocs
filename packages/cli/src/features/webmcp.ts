@@ -2,7 +2,7 @@ import path from 'node:path';
 import type { Feature } from '@/features';
 import { addImport, appendJsxChildren, findJsxElement } from '@/codemod';
 import { llms } from './llms';
-import { findSource, reactFramework, requiresMarkdown } from './utils';
+import { findSource, requiresMarkdown } from './utils';
 
 interface Input {
   static: boolean;
@@ -122,8 +122,7 @@ export const webmcp: Feature = {
   requires: [llms],
   supports: requiresMarkdown,
   async apply(ctx) {
-    const { cwd, baseDir, i18n } = ctx.project;
-    const framework = reactFramework(ctx.project);
+    const { cwd, baseDir, i18n, framework } = ctx.project;
     await ctx.write(
       path.join(baseDir, 'components/webmcp.tsx'),
       component({

@@ -144,6 +144,57 @@ return (
 );
 ```
 
+```ts tab="Astro" title="src/lib/shared.ts"
+import { createGetUrl } from 'fumadocs-core/source';
+
+// [!code ++:7]
+const getImageUrl = createGetUrl('/og/docs');
+
+export function getPageImageUrl(page: { slugs: string[]; locale?: string }) {
+  const segments = [...page.slugs, 'image.webp'];
+
+  return { segments, url: getImageUrl(segments, page.locale) };
+}
+```
+
+```astro tab="Astro" title="src/layouts/Layout.astro"
+---
+interface Props {
+  title: string;
+  // [!code ++]
+  image?: string;
+}
+
+const { title, image } = Astro.props;
+---
+
+<html lang="en">
+  <head>
+    <title>{title}</title>
+    <!-- [!code ++] -->
+    {image && <meta property="og:image" content={image} />}
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>
+```
+
+```astro tab="Astro" title="src/pages/docs/[...slug].astro"
+---
+import Layout from '@/layouts/Layout.astro';
+// [!code ++]
+import { getPageImageUrl } from '@/lib/shared';
+
+const { page } = Astro.props;
+---
+
+<!-- [!code highlight] -->
+<Layout title={page.data.title} image={getPageImageUrl(page).url}>
+  <!-- your docs page -->
+</Layout>
+```
+
 > We append `image.webp` to the end of slugs so that we can access it via `/og/docs/my-page/image.webp`, which results in smaller image sizes. You could use `image.png` if you prefer.
 
 Finally, create a route handler to generate images:
@@ -316,6 +367,30 @@ export default {
     return paths;
   },
 } satisfies Config;
+```
+
+```ts tab="Astro" title="src/pages/og/docs/[...slug]/image.webp.ts"
+import type { APIRoute, GetStaticPaths, InferGetStaticPropsType } from 'astro';
+import { generateOGImage } from 'fumadocs-ui/og/takumi';
+import { source } from '@/lib/source';
+
+export const getStaticPaths = (() => {
+  return source.getPages().map((page) => ({
+    params: { slug: page.slugs.join('/') || undefined },
+    props: { page },
+  }));
+}) satisfies GetStaticPaths;
+
+export const GET: APIRoute<InferGetStaticPropsType<typeof getStaticPaths>> = ({
+  props: { page },
+}) => {
+  return generateOGImage({
+    title: page.data.title,
+    description: page.data.description,
+    site: 'My App',
+    format: 'webp',
+  });
+};
 ```
 
 > Takumi comes with pre-bundled full-axis (100-900) [`Geist`](https://vercel.com/font) and `Geist Mono` fonts, so you don't need to worry about it.

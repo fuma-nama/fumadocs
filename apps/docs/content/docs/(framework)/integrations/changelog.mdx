@@ -13,9 +13,9 @@ npx @fumadocs/cli@latest add changelog
 
 ## Usage
 
-Fetch a page of entries, render them with `ChangelogTimeline`, and link to the other pages with `ChangelogPagination`:
+Create a page under your [Home Layout](/docs/ui/layouts/home-layout). Fetch a page of entries, render them with `ChangelogTimeline`, and link to the other pages with `ChangelogPagination`:
 
-```tsx tab="Next.js" title="app/changelog/[[...page]]/page.tsx"
+```tsx tab="Next.js" title="app/(home)/changelog/[[...page]]/page.tsx"
 import { notFound } from 'next/navigation';
 import { githubReleases } from '@fumadocs/changelog/github';
 import { ChangelogPagination, ChangelogTimeline } from '@/components/changelog';
@@ -34,20 +34,22 @@ export default async function Page(props: PageProps<'/changelog/[[...page]]'>) {
   if (entries.length === 0) notFound();
 
   return (
-    <>
+    <div className="mx-auto flex w-full max-w-[900px] flex-col gap-10 px-4 py-12">
       <ChangelogTimeline entries={entries} />
       <ChangelogPagination
         newer={page > 1 ? `/changelog/${page - 1}` : undefined}
         older={nextPage ? `/changelog/${nextPage}` : undefined}
       />
-    </>
+    </div>
   );
 }
 ```
 
 ```tsx tab="React Router" title="app/routes/changelog.tsx"
 import type { Route } from './+types/changelog';
+import { HomeLayout } from 'fumadocs-ui/layouts/home';
 import { githubReleases } from '@fumadocs/changelog/github';
+import { baseOptions } from '@/lib/layout.shared';
 import { ChangelogPagination, ChangelogTimeline } from '@/components/changelog';
 
 export async function loader({ params }: Route.LoaderArgs) {
@@ -67,13 +69,15 @@ export default function Page({ loaderData }: Route.ComponentProps) {
   const { page, entries, nextPage } = loaderData;
 
   return (
-    <>
-      <ChangelogTimeline entries={entries} />
-      <ChangelogPagination
-        newer={page > 1 ? `/changelog/${page - 1}` : undefined}
-        older={nextPage ? `/changelog/${nextPage}` : undefined}
-      />
-    </>
+    <HomeLayout {...baseOptions()}>
+      <div className="mx-auto flex w-full max-w-[900px] flex-col gap-10 px-4 py-12">
+        <ChangelogTimeline entries={entries} />
+        <ChangelogPagination
+          newer={page > 1 ? `/changelog/${page - 1}` : undefined}
+          older={nextPage ? `/changelog/${nextPage}` : undefined}
+        />
+      </div>
+    </HomeLayout>
   );
 }
 ```
@@ -90,7 +94,9 @@ export default [
 ```tsx tab="Tanstack Start" title="src/routes/changelog.{-$page}.tsx"
 import { createFileRoute, notFound } from '@tanstack/react-router';
 import { createServerFn } from '@tanstack/react-start';
+import { HomeLayout } from 'fumadocs-ui/layouts/home';
 import { githubReleases } from '@fumadocs/changelog/github';
+import { baseOptions } from '@/lib/layout.shared';
 import { ChangelogPagination, ChangelogTimeline } from '@/components/changelog';
 
 const getReleases = createServerFn({ method: 'GET' })
@@ -119,18 +125,100 @@ function Page() {
   const { page, entries, nextPage } = Route.useLoaderData();
 
   return (
-    <>
+    <HomeLayout {...baseOptions()}>
+      <div className="mx-auto flex w-full max-w-[900px] flex-col gap-10 px-4 py-12">
+        <ChangelogTimeline entries={entries} />
+        <ChangelogPagination
+          newer={page > 1 ? `/changelog/${page - 1}` : undefined}
+          older={nextPage ? `/changelog/${nextPage}` : undefined}
+        />
+      </div>
+    </HomeLayout>
+  );
+}
+```
+
+```tsx tab="Waku" title="src/pages/(home)/changelog/[page].tsx"
+import { unstable_notFound } from 'waku/router/server';
+import { githubReleases } from '@fumadocs/changelog/github';
+import { ChangelogPagination, ChangelogTimeline } from '@/components/changelog';
+
+export default async function Page({ page: param = '1' }: { page?: string }) {
+  const page = Number(param);
+  const { entries, nextPage } = await githubReleases({
+    owner: 'fuma-nama',
+    repo: 'fumadocs',
+    token: process.env.GITHUB_TOKEN,
+    page,
+  });
+  if (entries.length === 0) unstable_notFound();
+
+  return (
+    <div className="mx-auto flex w-full max-w-[900px] flex-col gap-10 px-4 py-12">
       <ChangelogTimeline entries={entries} />
       <ChangelogPagination
         newer={page > 1 ? `/changelog/${page - 1}` : undefined}
         older={nextPage ? `/changelog/${nextPage}` : undefined}
       />
-    </>
+    </div>
   );
 }
+
+export const getConfig = async () => ({ render: 'dynamic' }) as const;
 ```
 
-The timeline groups entries by month, and renders their Markdown with code highlighting. With React Server Components, it renders on the server, otherwise also in the browser.
+```tsx tab="Waku" title="src/pages/(home)/changelog/index.tsx"
+// the first page
+export { default, getConfig } from './[page]';
+```
+
+```astro tab="Astro" title="src/pages/changelog/[...page].astro"
+---
+import type { GetStaticPaths, InferGetStaticPropsType } from 'astro';
+import { githubReleases } from '@fumadocs/changelog/github';
+import Layout from '@/layouts/Layout.astro';
+// the island of your Home Layout
+import { Home } from '@/components/home';
+import { ChangelogPagination, ChangelogTimeline } from '@/components/changelog';
+
+export const getStaticPaths = (async () => {
+  const paths = [];
+  for (let page: number | undefined = 1; page; ) {
+    const releases = await githubReleases({
+      owner: 'fuma-nama',
+      repo: 'fumadocs',
+      token: import.meta.env.GITHUB_TOKEN,
+      page,
+    });
+    paths.push({
+      params: { page: page > 1 ? String(page) : undefined },
+      props: { page, ...releases },
+    });
+    page = releases.nextPage;
+  }
+  return paths;
+}) satisfies GetStaticPaths;
+
+type Props = InferGetStaticPropsType<typeof getStaticPaths>;
+
+const { page, entries, nextPage } = Astro.props;
+const href = (page: number) => (page > 1 ? `/changelog/${page}` : '/changelog');
+---
+
+<Layout title="Changelog">
+  <Home client:load pathname={Astro.url.pathname} params={Astro.params}>
+    <div class="mx-auto flex w-full max-w-[900px] flex-col gap-10 px-4 py-12">
+      <ChangelogTimeline entries={entries} />
+      <ChangelogPagination
+        newer={page > 1 ? href(page - 1) : undefined}
+        older={nextPage ? href(nextPage) : undefined}
+      />
+    </div>
+  </Home>
+</Layout>
+```
+
+On Astro, the pages are generated at build time. The timeline is a child of the island, it renders on the server only, without interactivity like copy buttons.
 
 ## Sources
 
@@ -153,7 +241,7 @@ Entries are plain objects, create them from any source:
 
 For example, a collection of MDX files. Pass `body` to render the content yourself:
 
-```tsx title="app/changelog/page.tsx"
+```tsx title="app/(home)/changelog/page.tsx"
 import { changelogSource } from '@/lib/source';
 import { getMDXComponents } from '@/components/mdx';
 import { ChangelogTimeline, type ChangelogTimelineEntry } from '@/components/changelog';
@@ -170,6 +258,10 @@ export default function Page() {
     };
   });
 
-  return <ChangelogTimeline entries={entries} />;
+  return (
+    <div className="mx-auto w-full max-w-[900px] px-4 py-12">
+      <ChangelogTimeline entries={entries} />
+    </div>
+  );
 }
 ```

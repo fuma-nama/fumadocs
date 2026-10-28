@@ -12,14 +12,14 @@ Don't add Fumadocs to an existing marketing or product app unless the user expli
 - Waku: https://fumadocs.dev/docs/manual-installation/waku.mdx (Recommended if user prefer Vite)
 - React Router: https://fumadocs.dev/docs/manual-installation/react-router.mdx
 - Tanstack Start: https://fumadocs.dev/docs/manual-installation/tanstack-start.mdx
-- Astro: https://fumadocs.dev/docs/manual-installation/astro.mdx (Not recommended, some features and syntax are not supported due to framework limitations)
+- Astro: https://fumadocs.dev/docs/manual-installation/astro.mdx
 
 ## 2. Scaffold with create-fumadocs-app
 
 Use the official scaffolder, it produces the reference project structure with search, `llms.txt` and OG images configured. Templates:
 
 - `+next+fuma-docs-mdx` (Next.js): the default, use it unless the user prefers another framework.
-- `waku`, `react-router`, `tanstack-start`: when the user already uses that framework.
+- `waku`, `react-router`, `tanstack-start`, `astro`: when the user already uses that framework.
 - `+next+fuma-docs-mdx+static`, `react-router-spa`, `tanstack-start-spa`: when the site must be fully static (hosted on a CDN).
 
 Run it non-interactively (requires Node.js 22+), `--yes` uses defaults for unspecified options and `--pm` selects the package manager:
@@ -34,7 +34,7 @@ Don't hand-write the setup from memory or pin older versions, the generated proj
 
 ## 3. Verify
 
-Run `npm run dev`, open http://localhost:3000/docs and make sure pages render. Run `npm run build` before you finish, fix build errors by reading the docs of the relevant feature rather than removing it.
+Run `npm run dev`, open `/docs` on the local URL it prints and make sure pages render. Run `npm run build` before you finish, fix build errors by reading the docs of the relevant feature rather than removing it.
 
 ## 4. Add content
 

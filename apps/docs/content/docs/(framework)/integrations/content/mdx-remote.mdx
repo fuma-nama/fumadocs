@@ -36,24 +36,30 @@ Since it doesn't use a bundler, there's some limitations:
 - Images have to be optimized at runtime.
 - No imports and exports in MDX files.
 
-### With RSC
+### Usage
 
-It's compatible with Server Components. For example:
+Create a compiler:
 
-```tsx
+```ts title="lib/compiler.ts"
 import { createCompiler } from '@fumadocs/mdx-remote';
-import { getPage } from './my-content-source';
-import { DocsBody, DocsPage } from 'fumadocs-ui/layouts/docs/page';
-import { getMDXComponents } from '@/components/mdx';
 
-const compiler = createCompiler({
+export const compiler = createCompiler({
   // options
 });
+```
 
-export default async function Page({ params }: PageProps<'/docs/[[...slug]]'>) {
-  const { slug } = await params;
+Compile the content of your pages, `@/lib/source` stands for your content source:
+
+```tsx tab="Next.js" title="app/docs/[[...slug]]/page.tsx"
+import { DocsBody, DocsPage } from 'fumadocs-ui/layouts/docs/page';
+import { compiler } from '@/lib/compiler';
+import { getPage } from '@/lib/source';
+import { getMDXComponents } from '@/components/mdx';
+
+export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
+  const { slug } = await props.params;
   const page = getPage(slug);
-  const { toc, body: MdxContent } = await compiler.compile({
+  const { body: MdxContent, toc } = await compiler.compile({
     source: page.content,
   });
 
@@ -67,37 +73,102 @@ export default async function Page({ params }: PageProps<'/docs/[[...slug]]'>) {
 }
 ```
 
-### Without RSC
-
-Without Server Components, you can enable `skipRender` and pass the compiled code to client instead:
-
-```tsx
-import { createCompiler } from '@fumadocs/mdx-remote';
-import { executeMdxSync } from '@fumadocs/mdx-remote/client';
-import { DocsBody, DocsPage } from 'fumadocs-ui/layouts/docs/page';
-import { getPage } from './my-content-source';
+```tsx tab="React Router" title="app/routes/docs.tsx"
+import type { Route } from './+types/docs';
 import { useMemo } from 'react';
+import { executeMdxSync } from '@fumadocs/mdx-remote/client';
+import { useFumadocsLoader } from 'fumadocs-core/source/client';
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+import { DocsBody, DocsPage } from 'fumadocs-ui/layouts/docs/page';
+import { compiler } from '@/lib/compiler';
+import { getPage, source } from '@/lib/source';
 import { getMDXComponents } from '@/components/mdx';
 
-const compiler = createCompiler({
-  // options
-});
+export async function loader({ params }: Route.LoaderArgs) {
+  const page = getPage(params['*'].split('/').filter((v) => v.length > 0));
 
-// e.g. where you generate loader data
-async function serverPayload(slugs?: string[]) {
-  const page = getPage(slugs);
-  const { compiled, frontmatter } = await compiler.compile({
-    source: page.content,
-    skipRender: true,
-  });
-
-  return { compiled, frontmatter };
+  return {
+    // compile to JavaScript, it runs on the client
+    compiled: String(await compiler.compileFile(page.content)),
+    pageTree: await source.serializePageTree(source.getPageTree()),
+  };
 }
 
-function Page() {
-  // read compiled code from server payload
-  const { compiled } = useLoaderData();
+export default function Page({ loaderData }: Route.ComponentProps) {
+  const { compiled, pageTree } = useFumadocsLoader(loaderData);
   const { default: MdxContent, toc } = useMemo(() => executeMdxSync(compiled), [compiled]);
+
+  return (
+    <DocsLayout tree={pageTree}>
+      <DocsPage toc={toc}>
+        <DocsBody>
+          <MdxContent components={getMDXComponents()} />
+        </DocsBody>
+      </DocsPage>
+    </DocsLayout>
+  );
+}
+```
+
+```tsx tab="Tanstack Start" title="src/routes/docs/$.tsx"
+import { createFileRoute } from '@tanstack/react-router';
+import { createServerFn } from '@tanstack/react-start';
+import { useMemo } from 'react';
+import { executeMdxSync } from '@fumadocs/mdx-remote/client';
+import { useFumadocsLoader } from 'fumadocs-core/source/client';
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+import { DocsBody, DocsPage } from 'fumadocs-ui/layouts/docs/page';
+import { compiler } from '@/lib/compiler';
+import { getPage, source } from '@/lib/source';
+import { getMDXComponents } from '@/components/mdx';
+
+export const Route = createFileRoute('/docs/$')({
+  component: Page,
+  loader: ({ params }) => serverLoader({ data: params._splat?.split('/') ?? [] }),
+});
+
+const serverLoader = createServerFn({
+  method: 'GET',
+})
+  .validator((slugs: string[]) => slugs)
+  .handler(async ({ data: slugs }) => {
+    const page = getPage(slugs);
+
+    return {
+      // compile to JavaScript, it runs on the client
+      compiled: String(await compiler.compileFile(page.content)),
+      pageTree: await source.serializePageTree(source.getPageTree()),
+    };
+  });
+
+function Page() {
+  const { compiled, pageTree } = useFumadocsLoader(Route.useLoaderData());
+  const { default: MdxContent, toc } = useMemo(() => executeMdxSync(compiled), [compiled]);
+
+  return (
+    <DocsLayout tree={pageTree}>
+      <DocsPage toc={toc}>
+        <DocsBody>
+          <MdxContent components={getMDXComponents()} />
+        </DocsBody>
+      </DocsPage>
+    </DocsLayout>
+  );
+}
+```
+
+```tsx tab="Waku" title="src/pages/docs/[...slugs].tsx"
+import type { PageProps } from 'waku/router';
+import { DocsBody, DocsPage } from 'fumadocs-ui/layouts/docs/page';
+import { compiler } from '@/lib/compiler';
+import { getPage } from '@/lib/source';
+import { getMDXComponents } from '@/components/mdx';
+
+export default async function Page({ slugs }: PageProps<'/docs/[...slugs]'>) {
+  const page = getPage(slugs);
+  const { body: MdxContent, toc } = await compiler.compile({
+    source: page.content,
+  });
 
   return (
     <DocsPage toc={toc}>
@@ -106,6 +177,14 @@ function Page() {
       </DocsBody>
     </DocsPage>
   );
+}
+
+export async function getConfig() {
+  return {
+    render: 'static',
+    // the slugs of all pages
+    staticPaths: [[], ['getting-started']],
+  } as const;
 }
 ```
 

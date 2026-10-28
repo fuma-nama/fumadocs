@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import type { Project, ReactFramework } from '@/project';
+import type { Project } from '@/project';
 import type { FormattedRoute } from '@/project/route';
 import type { FeatureContext, PackageJson } from '@/features';
 import { addImport, addReactRouterRoute } from '@/codemod';
@@ -29,14 +29,6 @@ export async function findSource(
 
 export function scripts(json: PackageJson, scripts: Record<string, string>) {
   Object.assign((json.scripts ??= {}), scripts);
-}
-
-export const reactOnly = (project: Project) =>
-  project.framework !== 'astro' || 'Astro is not supported by this feature';
-
-export function reactFramework(project: Project): ReactFramework {
-  if (project.framework === 'astro') throw new Error('Astro is not supported by this feature');
-  return project.framework;
 }
 
 /** POSIX path for generated code and route configs */
@@ -105,13 +97,11 @@ export async function registerReactRouterRoutes(
   return added;
 }
 
-/** features reading page Markdown need Fumadocs MDX collections, or a runtime source exposing `page.data.content` */
+/** features reading page Markdown need the collections of Fumadocs MDX or `@fumadocs/astro`, or a runtime source exposing `page.data.content` */
 export const requiresMarkdown = (project: Project) =>
-  project.framework === 'astro'
-    ? 'Astro is not supported by this feature'
-    : project.source.collections !== null ||
-      project.source.dynamic ||
-      'requires Fumadocs MDX or a runtime content source';
+  project.source.collections !== null ||
+  project.source.dynamic ||
+  'requires Fumadocs MDX, `@fumadocs/astro` or a runtime content source';
 
 /** how generated code refers to the loader of `lib/source.ts` */
 export interface SourceRef {

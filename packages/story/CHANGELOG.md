@@ -1,3 +1,10 @@
+## @fumadocs/story@1.5.3
+
+### Story panel refinements
+
+- Inset the preview panel, without separators between the header, preview and controls.
+- Hide the fullscreen button when the browser doesn't support fullscreen.
+
 ## @fumadocs/story@1.5.2
 
 ### Faster story controls in dev servers

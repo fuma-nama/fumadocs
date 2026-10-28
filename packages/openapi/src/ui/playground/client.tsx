@@ -27,7 +27,7 @@ import {
 } from '@/playground/use-playground';
 import { UrlBar } from './components/url-bar';
 import { builtinAuthProviders } from './components/auth';
-import { RequestPanel } from './components/request-panel';
+import { type ParameterFieldContext, RequestPanel } from './components/request-panel';
 import { ResponsePanel } from './components/response-panel';
 
 export interface PlaygroundClientProps extends ComponentProps<'div'>, PlaygroundClientOptions {
@@ -46,7 +46,7 @@ export interface FormValues extends Record<string, unknown> {
   body: unknown;
 }
 
-export type { ResultDisplayProps };
+export type { ParameterFieldContext, ResultDisplayProps };
 export { DefaultResultDisplay };
 
 export interface PlaygroundClientOptions extends PlaygroundOptions {
@@ -57,12 +57,18 @@ export interface PlaygroundClientOptions extends PlaygroundOptions {
   /**
    * render the parameter inputs of API endpoint, return `undefined` to keep the default input of a parameter.
    *
+   * `ctx.renderDefault(schema)` renders the default input with another schema, like an `enum` of values loaded at runtime.
+   *
    * for updating values, use:
    * - the `Custom.useController()` from `fumadocs-openapi/ui/playground/client`.
    *
    * Recommended types packages: `json-schema-typed`.
    */
-  renderParameterField?: (fieldName: FieldKey, param: ParameterObject) => ReactNode;
+  renderParameterField?: (
+    fieldName: FieldKey,
+    param: ParameterObject,
+    ctx: ParameterFieldContext,
+  ) => ReactNode;
 
   /**
    * render the input for API endpoint body.

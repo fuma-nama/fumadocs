@@ -4,7 +4,14 @@ import { cn } from '@/utils/cn';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from './components/select';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { CircleAlert, Maximize } from 'lucide-react';
-import { type RefObject, Suspense, useCallback, useRef, useState } from 'react';
+import {
+  type RefObject,
+  Suspense,
+  useCallback,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { Controls } from './controls';
 import {
@@ -28,21 +35,30 @@ export function WithControl(props: WithControlProps) {
   );
 }
 
+// fullscreen support never changes, it is read once hydrated
+const subscribeNever = () => () => {};
+
 function Content() {
   const t = useTranslations({ note: 'story controls' });
   const { presets, displayName, frame, preset, variant, setVariant } = useStory();
   const frameRef = useRef<HTMLIFrameElement>(null);
+  const fullscreenEnabled = useSyncExternalStore(
+    subscribeNever,
+    () => document.fullscreenEnabled,
+    () => false,
+  );
+  const canFullscreen = frame !== undefined && fullscreenEnabled;
   const reset = () => setVariant(variant);
 
   return (
     <div className="not-prose overflow-hidden rounded-xl border bg-fd-card text-fd-card-foreground">
-      {(displayName || presets.length > 1 || frame) && (
-        <div className="flex h-10 items-center justify-end gap-1 border-b ps-4 pe-1.5">
+      {(displayName || presets.length > 1 || canFullscreen) && (
+        <div className="flex h-10 items-center justify-end gap-1 ps-4 pe-1.5">
           {displayName && (
             <p className="me-auto truncate text-[0.8125rem] font-medium">{displayName}</p>
           )}
           {presets.length > 1 && <VariantSelect />}
-          {frame && (
+          {canFullscreen && (
             <button
               type="button"
               aria-label={t('Fullscreen')}
@@ -58,7 +74,9 @@ function Content() {
           )}
         </div>
       )}
-      {frame ? <FramePreview {...frame} ref={frameRef} /> : <Preview onReset={reset} />}
+      <div className="p-1.5 not-first:pt-0">
+        {frame ? <FramePreview {...frame} ref={frameRef} /> : <Preview onReset={reset} />}
+      </div>
       {preset && hasControls(preset.controls) && (
         <Controls key={variant} node={preset.controls} onReset={reset} />
       )}
@@ -103,7 +121,7 @@ function Preview({ onReset }: { onReset: () => void }) {
   const args = useStoryArgs();
 
   return (
-    <div className="bg-fd-background p-4 not-last:border-b">
+    <div className="rounded-md border bg-fd-background px-2.25 py-4">
       <ErrorBoundary
         // recover once the arguments change
         resetKeys={[args]}
@@ -188,7 +206,7 @@ function FramePreview({
   );
 
   return (
-    <div className="not-last:border-b">
+    <div className="overflow-hidden rounded-md border">
       {Container ? <Container>{viewport}</Container> : viewport}
     </div>
   );

@@ -74,7 +74,7 @@ export const asyncapi = createAsyncAPI({
 });
 ```
 
-On Next.js, Waku and React Router, `<AsyncAPIPage />` loads each document once per browser session with `loadDocument`, it also runs during server rendering:
+On Next.js, Waku, React Router and Astro, `<AsyncAPIPage />` loads each document once per browser session with `loadDocument`, it also runs during server rendering:
 
 ```tsx title="components/api-page.tsx"
 'use client';
@@ -83,7 +83,7 @@ import { createAsyncAPIPage } from '@fumadocs/asyncapi/ui';
 
 export const AsyncAPIPage = createAsyncAPIPage({
   async loadDocument(id) {
-    // `import.meta.env.SSR` on Waku and React Router
+    // `import.meta.env.SSR` on Waku, React Router and Astro
     if (typeof window === 'undefined') {
       // the browser starts downloading it with the page
       preload(`/api/asyncapi/${id}`, { as: 'fetch', crossOrigin: 'anonymous' });
@@ -110,15 +110,6 @@ export async function generateStaticParams() {
 }
 ```
 
-```ts tab="Waku" title="src/pages/_api/api/asyncapi/[id].ts"
-import type { ApiContext } from 'waku/router';
-import { asyncapi } from '@/lib/asyncapi';
-
-export async function GET(_: Request, { params }: ApiContext<'/api/asyncapi/[id]'>) {
-  return Response.json((await asyncapi.getSchema(params.id)).bundled);
-}
-```
-
 ```ts tab="React Router" title="app/routes/asyncapi.ts"
 import type { Route } from './+types/asyncapi';
 import { asyncapi } from '@/lib/asyncapi';
@@ -136,6 +127,28 @@ export default [
   route('api/asyncapi/:id', 'routes/asyncapi.ts'),
   // ...
 ] satisfies RouteConfig;
+```
+
+```ts tab="Waku" title="src/pages/_api/api/asyncapi/[id].ts"
+import type { ApiContext } from 'waku/router';
+import { asyncapi } from '@/lib/asyncapi';
+
+export async function GET(_: Request, { params }: ApiContext<'/api/asyncapi/[id]'>) {
+  return Response.json((await asyncapi.getSchema(params.id)).bundled);
+}
+```
+
+```ts tab="Astro" title="src/pages/api/asyncapi/[id].ts"
+import type { APIRoute, GetStaticPaths } from 'astro';
+import { asyncapi } from '@/lib/asyncapi';
+
+export const getStaticPaths = (async () => {
+  return Object.keys(await asyncapi.getSchemas()).map((id) => ({ params: { id } }));
+}) satisfies GetStaticPaths;
+
+export const GET: APIRoute = async ({ params }) => {
+  return Response.json((await asyncapi.getSchema(params.id!)).bundled);
+};
 ```
 
 On Tanstack Start, route loaders run on both sides, call a server function only when the browser doesn't have the document yet:

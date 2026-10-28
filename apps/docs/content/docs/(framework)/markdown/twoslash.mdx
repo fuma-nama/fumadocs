@@ -24,7 +24,7 @@ const config = {
 
 Add to your Shiki transformers.
 
-```ts title="source.config.ts (Fumadocs MDX)"
+```ts tab="Fumadocs MDX" title="source.config.ts"
 import { defineConfig } from 'fumadocs-mdx/config';
 import { transformerTwoslash } from 'fumadocs-twoslash';
 import { rehypeCodeDefaultOptions } from 'fumadocs-core/mdx-plugins';
@@ -38,6 +38,21 @@ export default defineConfig({
       },
       transformers: [...(rehypeCodeDefaultOptions.transformers ?? []), transformerTwoslash()],
     },
+  },
+});
+```
+
+```js tab="Astro" title="astro.config.mjs"
+import { transformerTwoslash } from 'fumadocs-twoslash';
+import { rehypeCodeDefaultOptions } from 'fumadocs-core/mdx-plugins';
+
+fumadocs({
+  rehypeCodeOptions: {
+    themes: {
+      light: 'github-light',
+      dark: 'github-dark',
+    },
+    transformers: [...(rehypeCodeDefaultOptions.transformers ?? []), transformerTwoslash()],
   },
 });
 ```

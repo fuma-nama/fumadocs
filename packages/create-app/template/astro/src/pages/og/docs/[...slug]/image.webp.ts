@@ -1,25 +1,24 @@
-import type { APIRoute } from 'astro';
+import type { APIRoute, GetStaticPaths, InferGetStaticPropsType } from 'astro';
 import { generateOGImage } from 'fumadocs-ui/og/takumi';
 import { source } from '@/lib/source';
+import { appName } from '@/lib/shared';
 
-export function getStaticPaths() {
+export const prerender = true;
+
+export const getStaticPaths = (() => {
   return source.getPages().map((page) => ({
-    params: {
-      slug: page.slugs.length > 0 ? page.slugs.join('/') : undefined,
-    },
+    params: { slug: page.slugs.join('/') || undefined },
+    props: { page },
   }));
-}
+}) satisfies GetStaticPaths;
 
-export const GET: APIRoute = ({ params }) => {
-  const slugs = params.slug?.split('/').filter((item) => item.length > 0) ?? [];
-  const page = source.getPage(slugs);
-
-  if (!page) return new Response(undefined, { status: 404 });
-
+export const GET: APIRoute<InferGetStaticPropsType<typeof getStaticPaths>> = ({
+  props: { page },
+}) => {
   return generateOGImage({
     title: page.data.title,
     description: page.data.description,
-    site: 'Astro',
+    site: appName,
     format: 'webp',
   });
 };

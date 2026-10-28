@@ -15,7 +15,7 @@ You can change the output paths of components in the config.
 
 ### Init
 
-Set up Fumadocs on an existing app, it supports Next.js, React Router, Tanstack Start and Waku.
+Set up Fumadocs on an existing app, it supports Next.js, React Router, Tanstack Start, Waku and Astro.
 
 ```package-install
 npx @fumadocs/cli init
@@ -27,6 +27,8 @@ To avoid conflicts with your app, the docs pages are added in a dedicated route 
 - Fumadocs UI styles in your global CSS.
 - `suppressHydrationWarning` on the `<html>` element of your root layout, for the theme switch.
 - `.source` in `.gitignore`.
+
+On Astro, it adds the Fumadocs integration and Tailwind CSS to your Astro config, and the docs collections to `src/content.config.ts`.
 
 Pass `--i18n` to set up [internationalization](/docs/internationalization): the docs routes get a locale segment (optional for the default locale where the router supports it), a `lib/i18n.ts` config and, on Next.js, a proxy scoped to the docs routes. Other features follow the i18n config of your project.
 
@@ -55,7 +57,8 @@ npx @fumadocs/cli feature ai --provider openrouter
 
 Features adapt to your setup:
 
-- Fumadocs MDX with the [Macro API](/docs/mdx/macro) or a `source.config.ts`, other content sources can't use `llms`, `mcp` and `epub`.
+- Fumadocs MDX with the [Macro API](/docs/mdx/macro) or a `source.config.ts`, or the collections of `@fumadocs/astro`, other content sources can't use `llms`, `mcp` and `epub`.
+- Astro: `ai` is unavailable, `mcp` and `epub` require `output: 'server'`.
 - The `baseUrl` of your docs, `src/` directory, `next.config.ts`, i18n, static export and SPA modes.
 - React Router with file-based routes: the routes to register are printed instead.
 

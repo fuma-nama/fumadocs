@@ -3,6 +3,7 @@ import versionPkg from '../../create-app-versions/package.json';
 import * as corePkg from '../../core/package.json';
 import * as mdxPkg from '../../mdx/package.json';
 import * as basePkg from '../../base-ui/package.json';
+import * as astroPkg from '../../astro/package.json';
 
 export const sourceDir = fileURLToPath(new URL(`../`, import.meta.url).href);
 
@@ -80,14 +81,13 @@ export const templates: TemplateInfo[] = [
   },
   {
     value: 'astro',
-    label: 'Astro: React Islands',
-    hint: 'partial support only, uses Astro Content Collections.',
+    label: 'Astro: Content Collections',
     appDir: 'src',
-    rootProviderPath: 'components/docs.tsx',
+    rootProviderPath: 'components/provider.tsx',
   },
 ];
 
-const workspaces = [corePkg, mdxPkg, basePkg];
+const workspaces = [corePkg, mdxPkg, basePkg, astroPkg];
 
 export const depVersions = versionPkg.dependencies;
 

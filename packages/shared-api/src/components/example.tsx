@@ -154,6 +154,7 @@ export function ExampleSelect({
   onValueChange,
   align = 'end',
   className,
+  'aria-label': ariaLabel,
 }: {
   /** `description` goes under the label in options, like rendered Markdown */
   items: { value: string; label: ReactNode; description?: ReactNode }[];
@@ -161,6 +162,8 @@ export function ExampleSelect({
   onValueChange: (value: string) => void;
   align?: 'start' | 'end';
   className?: string;
+  /** name of the select, as it shows the selected item only */
+  'aria-label'?: string;
 }) {
   if (items.length === 1)
     return <span className="px-2 text-fd-muted-foreground">{items[0].label}</span>;
@@ -168,6 +171,7 @@ export function ExampleSelect({
   return (
     <Select items={items} value={value} onValueChange={(v) => v !== null && onValueChange(v)}>
       <SelectTrigger
+        aria-label={ariaLabel}
         className={cn(
           'h-7 w-fit max-w-40 shrink-0 gap-1.5 border-0 bg-transparent px-2 py-0 text-[0.8125rem] font-medium text-fd-muted-foreground hover:text-fd-accent-foreground focus:ring-0 focus-visible:ring-2 data-popup-open:bg-fd-accent data-popup-open:text-fd-accent-foreground',
           className,

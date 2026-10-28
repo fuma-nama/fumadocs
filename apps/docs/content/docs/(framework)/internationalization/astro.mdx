@@ -1,0 +1,331 @@
+---
+title: Astro
+description: Support i18n routing on your Astro + Fumadocs app.
+---
+
+## Setup
+
+Define the i18n configurations in a file, we will import it with `@/lib/i18n` in this guide.
+
+```ts title="src/lib/i18n.ts"
+import { defineI18n } from 'fumadocs-core/i18n';
+
+export const i18n = defineI18n({
+  defaultLanguage: 'en',
+  hideLocale: 'default-locale',
+  languages: ['en', 'cn'],
+});
+```
+
+> See [available options](/docs/headless/internationalization/config) for i18n config.
+
+### Routing
+
+Move your pages into a `[...lang]` folder. With `hideLocale: 'default-locale'`, the parameter is empty for the default language (e.g. `/docs`), and the locale for others (e.g. `/cn/docs`).
+
+<Files>
+  <Folder name="src/pages" defaultOpen>
+    <Folder name="[...lang]" defaultOpen>
+      <File name="index.astro" />
+      <File name="docs/[...slug].astro" />
+    </Folder>
+    <Folder name="api" defaultOpen>
+      <File name="search.ts" />
+    </Folder>
+  </Folder>
+</Files>
+
+To always prefix the locale, remove `hideLocale` and use a `[lang]` folder instead.
+
+### Translations
+
+Define your translations in `lib/layout.shared.tsx`, see [Translations](/docs/ui/translations) for more details (including official language packs).
+
+You can also add `locale` parameter to `baseOptions()` for localized layout options:
+
+```tsx title="src/lib/layout.shared.tsx"
+// [!code ++:2]
+import { i18n } from '@/lib/i18n';
+import { uiTranslations } from 'fumadocs-ui/i18n';
+import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
+
+// [!code ++:11]
+export const translations = i18n
+  .translations()
+  .extend(uiTranslations())
+  .add({
+    en: {
+      displayName: 'English',
+    },
+    cn: {
+      displayName: 'Chinese',
+    },
+  });
+
+export function baseOptions(): BaseLayoutProps { // [!code --]
+export function baseOptions(locale: string): BaseLayoutProps { // [!code ++]
+  return {
+    nav: {
+      title: 'Astro',
+      url: locale === i18n.defaultLanguage ? '/' : `/${locale}`, // [!code ++]
+    },
+  };
+}
+```
+
+### Provider
+
+Pass translations to `<RootProvider />`. The MDX content renders in an island of its own, add a provider for it too, without theme and search:
+
+```tsx title="src/components/provider.tsx"
+import { navigate } from 'astro:transitions/client';
+import type { ReactNode } from 'react';
+import { RootProvider } from 'fumadocs-ui/provider/astro';
+import { i18nProvider } from 'fumadocs-ui/i18n'; // [!code ++]
+import SearchDialog from '@/components/search';
+import { translations } from '@/lib/layout.shared'; // [!code ++]
+
+export interface ProviderProps {
+  lang: string; // [!code ++]
+  /** `Astro.url.pathname` */
+  pathname: string;
+  /** `Astro.params` */
+  params: Record<string, string | undefined>;
+  children?: ReactNode;
+}
+
+export function Provider({ pathname, params, children }: ProviderProps) { // [!code --]
+export function Provider({ lang, pathname, params, children }: ProviderProps) { // [!code ++]
+  return (
+    <RootProvider
+      pathname={pathname}
+      params={params}
+      navigate={navigate}
+      // [!code ++]
+      i18n={i18nProvider(translations, lang)}
+      search={{ SearchDialog }}
+    >
+      {children}
+    </RootProvider>
+  );
+}
+
+// [!code ++:14]
+export function ContentProvider({ lang, pathname, params, children }: ProviderProps) {
+  return (
+    <RootProvider
+      pathname={pathname}
+      params={params}
+      navigate={navigate}
+      i18n={i18nProvider(translations, lang)}
+      theme={{ enabled: false }}
+      search={{ enabled: false }}
+    >
+      {children}
+    </RootProvider>
+  );
+}
+```
+
+The `wrapper` of your MDX components receives the props of `<Content />`, wrap the content with `ContentProvider`:
+
+```tsx title="src/components/mdx.tsx"
+import { ContentProvider, type ProviderProps } from '@/components/provider'; // [!code ++]
+
+// ...
+
+export default getMDXComponents({ wrapper: DocsBody }); // [!code --]
+// [!code ++:7]
+export default getMDXComponents({
+  wrapper: ({ children, ...props }: ProviderProps) => (
+    <ContentProvider {...props}>
+      <DocsBody>{children}</DocsBody>
+    </ContentProvider>
+  ),
+});
+```
+
+### Pass Locale
+
+Pass the locale to Fumadocs in your pages and layouts.
+
+```ts tab="src/lib/source.ts"
+import { i18n } from '@/lib/i18n'; // [!code ++]
+
+export const source = loader({
+  source: toFumadocsSource(await getCollection('docs'), await getCollection('meta')),
+  baseUrl: '/docs',
+  i18n, // [!code ++]
+});
+```
+
+```astro tab="Docs Page" title="src/pages/[...lang]/docs/[...slug].astro"
+---
+import { i18n } from '@/lib/i18n'; // [!code ++]
+// ...
+
+export const getStaticPaths = (() => {
+  // [!code --:4]
+  return source.getPages().map((page) => ({
+    params: { slug: page.slugs.join('/') || undefined },
+    props: { page },
+  }));
+  // [!code ++:14]
+  const paths = [];
+  for (const { language, pages } of source.getLanguages()) {
+    for (const page of pages) {
+      paths.push({
+        params: {
+          // the default language has no prefix
+          lang: language === i18n.defaultLanguage ? undefined : language,
+          slug: page.slugs.join('/') || undefined,
+        },
+        props: { lang: language, page },
+      });
+    }
+  }
+  return paths;
+}) satisfies GetStaticPaths;
+
+type Props = InferGetStaticPropsType<typeof getStaticPaths>;
+
+const { page } = Astro.props; // [!code --]
+const { lang, page } = Astro.props; // [!code ++]
+const { body: Content, toc } = await page.data.load();
+const pageTree = await source.serializePageTree(source.getPageTree()); // [!code --]
+const pageTree = await source.serializePageTree(source.getPageTree(lang)); // [!code ++]
+const provider = { lang, pathname: Astro.url.pathname, params: Astro.params }; // [!code ++]
+// [!code word:lang={lang}]
+// [!code word:{...provider}]
+---
+
+<Layout lang={lang} title={page.data.title} description={page.data.description}>
+  <Docs
+    client:load
+    transition:persist="docs"
+    {...provider}
+    tree={pageTree}
+    title={page.data.title}
+    description={page.data.description}
+    toc={toc}
+  >
+    <Content {...provider} />
+  </Docs>
+</Layout>
+```
+
+```tsx tab="Docs Island" title="src/components/docs.tsx"
+export function Docs({ tree, title, description, toc, children, ...props }: DocsProps) {
+  // ...
+  return (
+    <Provider {...props}>
+      {/* [!code highlight] */}
+      <DocsLayout {...baseOptions(props.lang)} tree={data.tree}>
+        {/* ... */}
+      </DocsLayout>
+    </Provider>
+  );
+}
+```
+
+```astro tab="Layout" title="src/layouts/Layout.astro"
+---
+interface Props {
+  lang: string; // [!code ++]
+  title: string;
+  description?: string;
+}
+
+const { title, description } = Astro.props; // [!code --]
+const { lang, title, description } = Astro.props; // [!code ++]
+---
+
+<!-- [!code highlight] -->
+<html lang={lang} transition:animate="none">
+  <!-- ... -->
+</html>
+```
+
+```astro tab="Home Page" title="src/pages/[...lang]/index.astro"
+---
+import Layout from '@/layouts/Layout.astro';
+// [!code ++:15]
+import type { GetStaticPaths, InferGetStaticPropsType } from 'astro';
+import { i18n } from '@/lib/i18n';
+
+export const prerender = true;
+
+export const getStaticPaths = (() => {
+  return i18n.languages.map((lang) => ({
+    params: { lang: lang === i18n.defaultLanguage ? undefined : lang },
+    props: { lang },
+  }));
+}) satisfies GetStaticPaths;
+
+type Props = InferGetStaticPropsType<typeof getStaticPaths>;
+
+const { lang } = Astro.props;
+---
+
+<!-- [!code highlight] -->
+<Layout lang={lang} title="Fumadocs on Astro">
+  <!-- ... -->
+</Layout>
+```
+
+### Search
+
+The search endpoint indexes every language, the [search dialog](/docs/manual-installation/astro#search) searches the current one:
+
+```tsx tab="src/components/search.tsx"
+import { useI18n } from 'fumadocs-ui/contexts/i18n'; // [!code ++]
+
+export default function DefaultSearchDialog(props: SharedProps) {
+  const search = useStaticSearch(); // [!code --]
+  // [!code ++:2]
+  const { locale } = useI18n();
+  const search = useStaticSearch({ locale });
+  // ...
+}
+```
+
+```ts tab="src/pages/api/search.ts"
+// [!code --:4]
+const server = createFromSource(source, {
+  // https://docs.orama.com/docs/orama-js/supported-languages
+  language: 'english',
+});
+// the default `multilingual` mode works for every language [!code ++:2]
+const server = createFromSource(source);
+```
+
+See [Internationalization](/docs/headless/search/orama#internationalization) for the tokenizers of other languages, like Chinese and Japanese.
+
+## Writing Documents
+
+See [i18n routing](/docs/page-conventions#i18n-routing) to learn how to create pages for specific locales.
+
+### Navigation
+
+Fumadocs only handles navigation for its own layouts (e.g. sidebar).
+For other places, prepend the locale to links.
+
+In MDX content, register `DynamicLink` in your MDX components, it fills `[lang]` with the locale:
+
+```tsx title="src/components/mdx.tsx"
+import { DynamicLink } from 'fumadocs-core/dynamic-link'; // [!code ++]
+
+export function getMDXComponents(components?: MDXComponents) {
+  return {
+    ...defaultMdxComponents,
+    DynamicLink, // [!code ++]
+    ...components,
+  } satisfies MDXComponents;
+}
+```
+
+```mdx title="content.mdx"
+<DynamicLink href="/[lang]/another-page">This is a link</DynamicLink>
+```
+
+Components imported in MDX files are rendered by Astro, outside the providers of content.

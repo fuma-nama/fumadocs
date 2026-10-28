@@ -11,10 +11,8 @@ You can decide the Mermaid renderer to configure:
 
 ### Official Renderer
 
-Install the required dependencies, `next-themes` is used with Fumadocs to manage the light/dark mode.
-
 ```npm
-npm install mermaid next-themes
+npm install mermaid
 ```
 
 Create the Mermaid component:
@@ -23,7 +21,6 @@ Create the Mermaid component:
 'use client';
 
 import { use, useId, useSyncExternalStore } from 'react';
-import { useTheme } from 'next-themes';
 
 export function Mermaid({ chart }: { chart: string }) {
   // `false` on the server and during hydration
@@ -48,9 +45,18 @@ function cachePromise<T>(key: string, setPromise: () => Promise<T>): Promise<T> 
   return promise;
 }
 
+// `useTheme()` doesn't reach the content island of Astro, observe `<html>` instead
+function subscribeTheme(onChange: () => void) {
+  const observer = new MutationObserver(onChange);
+  observer.observe(document.documentElement, { attributeFilter: ['class'] });
+  return () => observer.disconnect();
+}
+
 function MermaidContent({ chart }: { chart: string }) {
   const id = useId();
-  const { resolvedTheme } = useTheme();
+  const theme = useSyncExternalStore(subscribeTheme, () =>
+    document.documentElement.classList.contains('dark') ? 'dark' : 'default',
+  );
   const { default: mermaid } = use(cachePromise('mermaid', () => import('mermaid')));
 
   mermaid.initialize({
@@ -58,11 +64,11 @@ function MermaidContent({ chart }: { chart: string }) {
     securityLevel: 'loose',
     fontFamily: 'inherit',
     themeCSS: 'margin: 1.5rem auto 0;',
-    theme: resolvedTheme === 'dark' ? 'dark' : 'default',
+    theme,
   });
 
   const { svg, bindFunctions } = use(
-    cachePromise(`${chart}-${resolvedTheme}`, () => {
+    cachePromise(`${chart}-${theme}`, () => {
       return mermaid.render(id, chart.replaceAll('\\n', '\n'));
     }),
   );
@@ -108,7 +114,7 @@ npm install beautiful-mermaid
 import { CodeBlock, Pre } from 'fumadocs-ui/components/codeblock';
 import { renderMermaidSVG } from 'beautiful-mermaid';
 
-export async function Mermaid({ chart }: { chart: string }) {
+export function Mermaid({ chart }: { chart: string }) {
   try {
     const svg = renderMermaidSVG(chart, {
       bg: 'var(--color-fd-background)',
@@ -222,7 +228,7 @@ Sit down: 5: Me
 
 ### As CodeBlock
 
-You can convert `mermaid` codeblocks into the MDX usage with the `remarkMdxMermaid` remark plugin.
+You can convert `mermaid` codeblocks into the MDX usage with the `remarkMdxMermaid` plugin.
 
 ```tsx tab="Fumadocs MDX" title="source.config.ts"
 import { remarkMdxMermaid } from 'fumadocs-core/mdx-plugins';
@@ -232,6 +238,18 @@ export default defineConfig({
   mdxOptions: {
     remarkPlugins: [remarkMdxMermaid],
   },
+});
+```
+
+```npm tab="Astro"
+npm i @fumadocs/satteri
+```
+
+```js tab="Astro" title="astro.config.mjs"
+import { remarkMdxMermaid } from '@fumadocs/satteri/remark-mdx-mermaid';
+
+fumadocs({
+  mdastPlugins: [remarkMdxMermaid()],
 });
 ```
 

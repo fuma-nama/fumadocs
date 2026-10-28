@@ -106,7 +106,7 @@ To support usage with static site, use `staticGET` from search server and make t
 import { source } from '@/lib/source';
 import { flexsearchFromSource } from 'fumadocs-core/search/flexsearch';
 
-// statically cached [!code highlight:2]
+// statically cached [!code highlight:3]
 export const revalidate = false;
 export const { staticGET: GET } = flexsearchFromSource(source);
 ```

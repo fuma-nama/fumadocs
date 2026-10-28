@@ -245,6 +245,28 @@ describe('Generate documents', () => {
     expect(index).toContain('<Card href="/docs/unknown" ');
   });
 
+  test('Generate Files - with index resolved against content directory', async () => {
+    vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const out = await generateFilesOnly({
+      input: createOpenAPI({
+        input: {
+          store: path.join(cwd, './fixtures/tag-hierarchy.yaml'),
+        },
+      }),
+      output: './content/docs/api',
+      per: 'tag',
+      index: {
+        url: { baseUrl: '/docs', contentDir: './content/docs' },
+        items: [{ path: 'index' }],
+      },
+    });
+
+    const index = out.find((file) => file.path === 'index.mdx')?.content;
+    expect(index).toContain('<Card href="/docs/api/store/products" ');
+    expect(index).toContain('<Card href="/docs/api/store/inventory" ');
+    expect(index).toContain('<Card href="/docs/api/unknown" ');
+  });
+
   test('Generate Files - with meta', async () => {
     const out = await generateFilesOnly({
       input: createOpenAPI({

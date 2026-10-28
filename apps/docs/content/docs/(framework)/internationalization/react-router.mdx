@@ -20,26 +20,25 @@ export const i18n = defineI18n({
 
 ### Routing
 
-Add `:lang` prefix to all your pages.
+Add a `:lang` prefix to your pages:
 
 ```ts title="app/routes.ts"
-import { route, type RouteConfig } from '@react-router/dev/routes';
+import { index, route, type RouteConfig } from '@react-router/dev/routes'; // [!code --]
+import { route, type RouteConfig } from '@react-router/dev/routes'; // [!code ++]
 
 export default [
-  // [!code highlight:2]
+  index('routes/home.tsx'), // [!code --]
+  route('docs/*', 'routes/docs.tsx'), // [!code --]
+  // [!code ++:2]
   route(':lang', 'routes/home.tsx'),
   route(':lang/docs/*', 'routes/docs.tsx'),
   route('api/search', 'routes/search.ts'),
 ] satisfies RouteConfig;
 ```
 
-#### Make locale optional
-
-You can also use `:lang?` prefix, and update the i18n config:
+To serve the default language without a prefix (e.g. `/docs`), make the parameter optional and enable `hideLocale`:
 
 ```ts tab="app/routes.ts"
-import { route, type RouteConfig } from '@react-router/dev/routes';
-
 export default [
   // [!code highlight:2]
   route(':lang?', 'routes/home.tsx'),
@@ -49,13 +48,10 @@ export default [
 ```
 
 ```ts tab="app/lib/i18n.ts"
-import { defineI18n } from 'fumadocs-core/i18n';
-
 export const i18n = defineI18n({
   defaultLanguage: 'en',
   languages: ['cn', 'en'],
-  // [!code ++]
-  hideLocale: 'default-locale',
+  hideLocale: 'default-locale', // [!code ++]
 });
 ```
 
@@ -65,7 +61,8 @@ Define your translations in `lib/layout.shared.tsx`, see [Translations](/docs/ui
 
 You can also add `locale` parameter to `baseOptions()` for localized layout options:
 
-```tsx title="lib/layout.shared.tsx"
+```tsx title="app/lib/layout.shared.tsx"
+// [!code ++:2]
 import { i18n } from '@/lib/i18n';
 import { uiTranslations } from 'fumadocs-ui/i18n';
 import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
@@ -83,36 +80,39 @@ export const translations = i18n
     },
   });
 
-// [!code highlight]
-export function baseOptions(locale: string): BaseLayoutProps {
+export function baseOptions(): BaseLayoutProps { // [!code --]
+export function baseOptions(locale: string = i18n.defaultLanguage): BaseLayoutProps { // [!code ++]
   return {
     // different props based on `locale`
   };
 }
 ```
 
-### Pages
-
 Pass translations to `<RootProvider />`:
 
 ```tsx title="app/root.tsx"
-import { Links, Meta, Scripts, ScrollRestoration, useParams } from 'react-router';
+import {
+  isRouteErrorResponse,
+  Links,
+  Meta,
+  Outlet,
+  Scripts,
+  ScrollRestoration,
+  useParams, // [!code ++]
+} from 'react-router';
 import { RootProvider } from 'fumadocs-ui/provider/react-router';
-import { translations } from '@/lib/layout.shared';
+// [!code ++:3]
 import { i18nProvider } from 'fumadocs-ui/i18n';
-import './app.css';
+import { i18n } from '@/lib/i18n';
+import { translations } from '@/lib/layout.shared';
 
 export function Layout({ children }: { children: React.ReactNode }) {
-  const { lang = i18nUI.defaultLanguage } = useParams();
+  const { lang = i18n.defaultLanguage } = useParams(); // [!code ++]
 
   return (
-    <html lang="en" suppressHydrationWarning>
-      <head>
-        <meta charSet="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <Meta />
-        <Links />
-      </head>
+    // [!code highlight]
+    <html lang={lang} suppressHydrationWarning>
+      <head>{/* ... */}</head>
       <body className="flex flex-col min-h-screen">
         <RootProvider
           // [!code ++]
@@ -133,61 +133,50 @@ export function Layout({ children }: { children: React.ReactNode }) {
 Pass the locale to Fumadocs in your pages and layouts.
 
 ```ts tab="app/lib/source.ts"
-import { i18n } from '@/lib/i18n';
-import { loader } from 'fumadocs-core/source';
+import { i18n } from '@/lib/i18n'; // [!code ++]
 
 export const source = loader({
+  source: docs.toFumadocsSource(),
+  baseUrl: '/docs',
   i18n, // [!code ++]
-  // other options
 });
 ```
 
-```tsx tab="Home Layout" title="app/routes/home.tsx"
-import type { Route } from './+types/home';
-import { HomeLayout } from 'fumadocs-ui/layouts/home';
-import { baseOptions } from '@/lib/layout.shared';
-
-export default function Home({ params }: Route.ComponentProps) {
+```tsx tab="Home Page" title="app/routes/home.tsx"
+export default function Home() { // [!code --]
+export default function Home({ params }: Route.ComponentProps) { // [!code ++]
   return (
     // [!code highlight]
-    <HomeLayout {...baseOptions(params.lang)}></HomeLayout>
+    <HomeLayout {...baseOptions(params.lang)}>
+      {/* ... */}
+    </HomeLayout>
   );
 }
 ```
 
 ```tsx tab="Docs Page" title="app/routes/docs.tsx"
-import type { Route } from './+types/docs';
-import { DocsLayout } from 'fumadocs-ui/layouts/docs';
-import { source } from '@/lib/source';
-import type * as PageTree from 'fumadocs-core/page-tree';
-import { baseOptions } from '@/lib/layout.shared';
-
 export async function loader({ params }: Route.LoaderArgs) {
   const slugs = params['*'].split('/').filter((v) => v.length > 0);
-  // [!code --]
-  const page = source.getPage(slugs);
-  // [!code ++]
-  const page = source.getPage(slugs, params.lang);
+  const page = source.getPage(slugs); // [!code --]
+  const page = source.getPage(slugs, params.lang); // [!code ++]
   if (!page) throw new Response('Not found', { status: 404 });
 
   return {
     path: page.path,
-    // [!code --]
-    tree: source.getPageTree(),
-    // [!code ++]
-    tree: source.getPageTree(params.lang),
+    pageTree: await source.serializePageTree(source.getPageTree()), // [!code --]
+    pageTree: await source.serializePageTree(source.getPageTree(params.lang)), // [!code ++]
   };
 }
 
-export default function Page({ loaderData, params }: Route.ComponentProps) {
-  const { tree, path } = loaderData;
+export default function Page({ loaderData }: Route.ComponentProps) { // [!code --]
+export default function Page({ loaderData, params }: Route.ComponentProps) { // [!code ++]
+  const { path, pageTree } = useFumadocsLoader(loaderData);
 
   return (
-    <DocsLayout
-      // [!code highlight]
-      {...baseOptions(params.lang)}
-      tree={tree as PageTree.Root}
-    ></DocsLayout>
+    // [!code highlight]
+    <DocsLayout {...baseOptions(params.lang)} tree={pageTree}>
+      <Content path={path} />
+    </DocsLayout>
   );
 }
 ```
@@ -216,7 +205,7 @@ const { lang } = useParams();
 <Link to={`/${lang}/about`}>About Us</Link>;
 ```
 
-In addition, the [`fumadocs-core/dynamic-link`](/docs/headless/components/link#dynamic-hrefs) component supports dynamic hrefs, you can use it to attend the locale prefix.
+In addition, the [`fumadocs-core/dynamic-link`](/docs/headless/components/link#dynamic-hrefs) component supports dynamic hrefs, you can use it to prepend the locale prefix.
 It is useful for Markdown/MDX content.
 
 ```mdx title="content.mdx"

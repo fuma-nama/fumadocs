@@ -44,114 +44,20 @@ import { createOpenAPIPage } from 'fumadocs-openapi/ui';
 export const OpenAPIPage = createOpenAPIPage();
 ```
 
-```ts tab="lib/source.ts"
-import { openapiPlugin } from 'fumadocs-openapi/server';
-import { loader } from 'fumadocs-core/source';
-
-export const source = loader({
-  // [!code ++] optional: adds a badge to each page item in page tree
-  plugins: [openapiPlugin()],
-});
-```
-
 See [`createOpenAPI()`](/docs/integrations/openapi/server) & [`createOpenAPIPage()`](/docs/integrations/openapi/api-page) for available options.
 
 ### Generate Pages
 
-<Tabs items={["MDX Files", "Virtual Files"]}>
-<Tab>
+Integrate into [Loader API](/docs/headless/source-api/source) to generate pages, without generating real files.
 
-You can generate MDX files directly from your OpenAPI schema.
-
-Create a script:
-
-```js title="scripts/generate-docs.ts"
-import { generateFiles } from 'fumadocs-openapi';
-import { openapi } from '@/lib/openapi';
-
-void generateFiles({
-  input: openapi,
-  output: './content/docs',
-  // we recommend to enable it
-  // make sure your endpoint description doesn't break MDX syntax.
-  includeDescription: true,
-});
-```
-
-Generate docs with the script:
-
-```bash
-bun ./scripts/generate-docs.ts
-```
-
-Add the `OpenAPIPage` component to your MDX components.
-
-```tsx tab="Server Components" title="app/docs/[[...slug]]/page.tsx"
-import { source } from '@/lib/source';
-import { openapi } from '@/lib/openapi';
-import { OpenAPIPage } from '@/components/api-page';
-import { getMDXComponents } from '@/components/mdx';
-
-// e.g. in your page renderer
-export default function Page({ slug }) {
-  const page = source.getPage(slug);
-  const MdxContent = page.data.body;
-
-  return (
-    <MdxContent
-      components={getMDXComponents({
-        // [!code ++:3] add the MDX component
-        OpenAPIPage: async (props) => (
-          <OpenAPIPage {...await openapi.preloadOpenAPIPage(page)} {...props} />
-        ),
-      })}
-    />
-  );
-}
-```
-
-```tsx tab="Without Server Components" title="docs/[...slug]"
-import { source } from '@/lib/source';
-import { openapi } from '@/lib/openapi';
-import { OpenAPIPage } from '@/components/api-page';
-import { getMDXComponents } from '@/components/mdx';
-
-// e.g. where you return server payload to client
-export function loader({ slug }) {
-  const page = source.getPage(slug);
-
-  return {
-    // [!code ++]
-    openapiData: await openapi.preloadOpenAPIPage(page),
-    // ...
-  };
-}
-
-// e.g. in your page renderer
-export default function Page() {
-  // consume loader data
-  const { openapiData } = useLoaderData();
-
-  return (
-    <MdxContent
-      components={getMDXComponents({
-        // [!code ++] add the MDX component
-        OpenAPIPage: (props) => <OpenAPIPage {...openapiData} {...props} />,
-      })}
-    />
-  );
-}
-```
-
-</Tab>
-<Tab>
-
-You can also use it without generating real files by integrating into [Loader API](/docs/headless/source-api/source).
-
-```ts title="lib/source.ts"
+```ts tab="Next.js" title="lib/source.ts"
 import { loader } from 'fumadocs-core/source';
-import { docs } from 'collections/server';
-import { openapi } from '@/lib/openapi';
+import { defineDocs } from 'fumadocs-mdx/macro';
+import { openapi } from '@/lib/openapi'; // [!code ++]
+
+const docs = defineDocs({
+  dir: 'content/docs',
+});
 
 export const source = loader(
   // [!code ++:6]
@@ -163,13 +69,146 @@ export const source = loader(
   },
   {
     baseUrl: '/docs',
+    // [!code ++:2] optional: adds a badge to each page item in page tree
     plugins: [openapi.loaderPlugin()],
-    // ...
   },
 );
 ```
 
-`staticSource()` is a server-side API that generates pages directly to your `loader()`, hence it allows dynamic content generation, such as re-generating page tree as schema changes.
+```ts tab="React Router" title="app/lib/source.ts"
+import { loader } from 'fumadocs-core/source';
+import { defineDocs } from 'fumadocs-mdx/macro'; // [!code --]
+// [!code ++:2]
+import { docs } from '@/lib/collections';
+import { openapi } from '@/lib/openapi';
+
+// [!code --:6]
+export const docs = defineDocs({
+  dir: 'content/docs',
+  docs: {
+    async: true,
+  },
+});
+
+// server-only now, as `staticSource()` reads files [!code ++]
+export const source = loader(
+  // [!code ++:6]
+  {
+    docs: docs.toFumadocsSource(),
+    openapi: await openapi.staticSource({
+      baseDir: 'openapi',
+    }),
+  },
+  {
+    baseUrl: '/docs',
+    // [!code ++:2] optional: adds a badge to each page item in page tree
+    plugins: [openapi.loaderPlugin()],
+  },
+);
+```
+
+```ts tab="React Router" title="app/lib/collections.ts"
+import { defineDocs } from 'fumadocs-mdx/macro';
+
+export const docs = defineDocs({
+  dir: 'content/docs',
+  docs: {
+    async: true,
+  },
+});
+```
+
+```ts tab="Tanstack Start" title="src/lib/source.ts"
+import { loader } from 'fumadocs-core/source';
+import { defineDocs } from 'fumadocs-mdx/macro'; // [!code --]
+// [!code ++:2]
+import { docs } from '@/lib/collections';
+import { openapi } from '@/lib/openapi';
+
+// [!code --:6]
+export const docs = defineDocs({
+  dir: 'content/docs',
+  docs: {
+    async: true,
+  },
+});
+
+// server-only now, as `staticSource()` reads files [!code ++]
+export const source = loader(
+  // [!code ++:6]
+  {
+    docs: docs.toFumadocsSource(),
+    openapi: await openapi.staticSource({
+      baseDir: 'openapi',
+    }),
+  },
+  {
+    baseUrl: '/docs',
+    // [!code ++:2] optional: adds a badge to each page item in page tree
+    plugins: [openapi.loaderPlugin()],
+  },
+);
+```
+
+```ts tab="Tanstack Start" title="src/lib/collections.ts"
+import { defineDocs } from 'fumadocs-mdx/macro';
+
+export const docs = defineDocs({
+  dir: 'content/docs',
+  docs: {
+    async: true,
+  },
+});
+```
+
+```ts tab="Waku" title="src/lib/source.ts"
+import { loader } from 'fumadocs-core/source';
+import { defineDocs } from 'fumadocs-mdx/macro';
+import { openapi } from '@/lib/openapi'; // [!code ++]
+
+const docs = defineDocs({
+  dir: 'content/docs',
+});
+
+export const source = loader(
+  // [!code ++:6]
+  {
+    docs: docs.toFumadocsSource(),
+    openapi: await openapi.staticSource({
+      baseDir: 'openapi',
+    }),
+  },
+  {
+    baseUrl: '/docs',
+    // [!code ++:2] optional: adds a badge to each page item in page tree
+    plugins: [openapi.loaderPlugin()],
+  },
+);
+```
+
+```ts tab="Astro" title="src/lib/source.ts"
+import { getCollection } from 'astro:content';
+import { loader } from 'fumadocs-core/source';
+import { toFumadocsSource } from '@fumadocs/astro/source';
+import { openapi } from '@/lib/openapi'; // [!code ++]
+
+export const source = loader(
+  // [!code ++:6]
+  {
+    docs: toFumadocsSource(await getCollection('docs'), await getCollection('meta')),
+    openapi: await openapi.staticSource({
+      baseDir: 'openapi',
+    }),
+  },
+  {
+    baseUrl: '/docs',
+    // [!code ++:2] optional: adds a badge to each page item in page tree
+    plugins: [openapi.loaderPlugin()],
+  },
+);
+```
+
+It generates a page per operation by default, see [Generating Pages](/docs/integrations/openapi/generate-files) to customize them.
 
 **It will change the type of your pages**, make sure to update all references to your `source`.
 
@@ -194,21 +233,19 @@ export const docsLlms = llms(source, {
 
 And update your page renderer:
 
-<Tabs items={["Server Components", "Without Server Components"]}>
+```tsx tab="Next.js" title="app/docs/[[...slug]]/page.tsx"
+import { OpenAPIPage } from '@/components/api-page'; // [!code ++]
 
-<Tab>
+export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
+  const params = await props.params;
+  const page = source.getPage(params.slug);
+  if (!page) notFound();
 
-```tsx title="docs/[[...slug]]/page.tsx"
-import { OpenAPIPage } from '@/components/api-page';
-
-export default function Page({ slug }) {
-  const page = source.getPage(slug);
-
-  // for OpenAPI pages
+  // [!code ++:10]
   if (page.type === 'openapi') {
     return (
       <DocsPage full>
-        <h1 className="text-[1.75em] font-semibold">{page.data.title}</h1>
+        <DocsTitle>{page.data.title}</DocsTitle>
         <DocsBody>
           <OpenAPIPage {...page.data.getOpenAPIPageProps()} />
         </DocsBody>
@@ -216,27 +253,62 @@ export default function Page({ slug }) {
     );
   }
 
-  // your original flow below...
+  // ...
 }
 ```
 
-</Tab>
-
-<Tab>
-
-Pass a client payload from server, then render the page using the `<OpenAPIPage />` component you created above.
-
-For example, in Tanstack Start. Only import `source` on the server, `staticSource()` reads files: define [Macro API](/docs/mdx/macro) collections in another module, like `lib/collections.ts`.
-
-```tsx title="routes/docs/$.tsx"
-import { createFileRoute, notFound } from '@tanstack/react-router';
-import { DocsLayout } from 'fumadocs-ui/layouts/docs';
-import { createServerFn } from '@tanstack/react-start';
+```tsx tab="React Router" title="app/routes/docs.tsx"
+import { docs, source } from '@/lib/source'; // [!code --]
+// [!code ++:3]
 import { docs } from '@/lib/collections';
 import { source } from '@/lib/source';
-import { DocsBody, DocsPage, DocsTitle } from 'fumadocs-ui/layouts/docs/page';
-import { useFumadocsLoader } from 'fumadocs-core/source/client';
-import { type ReactNode, Suspense } from 'react';
+import { OpenAPIPage } from '@/components/api-page';
+
+export async function loader({ params }: Route.LoaderArgs) {
+  const slugs = params['*'].split('/').filter((v) => v.length > 0);
+  const page = source.getPage(slugs);
+  if (!page) throw new Response('Not found', { status: 404 });
+
+  // [!code ++:9]
+  const pageTree = await source.serializePageTree(source.getPageTree());
+  if (page.type === 'openapi') {
+    return {
+      type: 'openapi' as const,
+      title: page.data.title,
+      props: page.data.getOpenAPIPageProps(),
+      pageTree,
+    };
+  }
+
+  return { type: 'docs' as const, path: page.path, pageTree }; // [!code highlight]
+}
+
+export default function Page({ loaderData }: Route.ComponentProps) {
+  const data = useFumadocsLoader(loaderData);
+
+  return (
+    <DocsLayout {...baseOptions()} tree={data.pageTree}>
+      {/* [!code ++:8] */}
+      {data.type === 'openapi' && (
+        <DocsPage full>
+          <DocsTitle>{data.title}</DocsTitle>
+          <DocsBody>
+            <OpenAPIPage {...data.props} />
+          </DocsBody>
+        </DocsPage>
+      )}
+      {/* [!code highlight] */}
+      {data.type === 'docs' && <Content path={data.path} />}
+    </DocsLayout>
+  );
+}
+```
+
+```tsx tab="Tanstack Start" title="src/routes/docs/$.tsx"
+import { docs, source } from '@/lib/source'; // [!code --]
+// [!code ++:3]
+import { docs } from '@/lib/collections';
+import { source } from '@/lib/source';
 import { OpenAPIPage } from '@/components/api-page';
 
 export const Route = createFileRoute('/docs/$')({
@@ -244,11 +316,7 @@ export const Route = createFileRoute('/docs/$')({
   loader: async ({ params }) => {
     const slugs = params._splat?.split('/') ?? [];
     const data = await serverLoader({ data: slugs });
-
-    // Fumadocs MDX: only preload content for normal pages [!code highlight:3]
-    if (data.type === 'docs') {
-      await docs.getPage(data.path)?.preload();
-    }
+    if (data.type === 'docs') await docs.getPage(data.path)?.preload(); // [!code highlight]
     return data;
   },
 });
@@ -261,62 +329,115 @@ const serverLoader = createServerFn({
     const page = source.getPage(slugs);
     if (!page) throw notFound();
 
+    // [!code ++:9]
     const pageTree = await source.serializePageTree(source.getPageTree());
-    // different result for OpenAPI pages [!code ++:8]
     if (page.type === 'openapi') {
       return {
         type: 'openapi',
         title: page.data.title,
-        pageTree,
         props: page.data.getOpenAPIPageProps(),
+        pageTree,
       };
     }
 
-    return {
-      type: 'docs',
-      path: page.path,
-      pageTree,
-      // ...
-    };
+    return { type: 'docs', path: page.path, pageTree }; // [!code highlight]
   });
 
-// renders a page of your `docs` collection
-function Content({ path }: { path: string }) {
-  // ...
-}
-
 function Page() {
-  const page = useFumadocsLoader(Route.useLoaderData());
-  let content: ReactNode;
-
-  // render OpenAPI page content [!code ++:10]
-  if (page.type === 'openapi') {
-    content = (
-      <DocsPage full>
-        <DocsTitle>{page.title}</DocsTitle>
-        <DocsBody>
-          {/* pass the payload data */}
-          <OpenAPIPage {...page.props} />
-        </DocsBody>
-      </DocsPage>
-    );
-  } else {
-    content = <Content path={page.path} />;
-  }
+  const data = useFumadocsLoader(Route.useLoaderData());
 
   return (
-    <DocsLayout tree={page.pageTree}>
-      <Suspense>{content}</Suspense>
+    <DocsLayout {...baseOptions()} tree={data.pageTree}>
+      {/* [!code ++:8] */}
+      {data.type === 'openapi' && (
+        <DocsPage full>
+          <DocsTitle>{data.title}</DocsTitle>
+          <DocsBody>
+            <OpenAPIPage {...data.props} />
+          </DocsBody>
+        </DocsPage>
+      )}
+      <Suspense>
+        {/* [!code highlight] */}
+        {data.type === 'docs' && <Content path={data.path} />}
+      </Suspense>
     </DocsLayout>
   );
 }
 ```
 
-You can see the full [Tanstack Start example](https://github.com/fuma-nama/fumadocs/blob/dev/examples/tanstack-start-openapi).
+```tsx tab="Waku" title="src/pages/docs/[...slugs].tsx"
+import { OpenAPIPage } from '@/components/api-page'; // [!code ++]
 
-</Tab>
+export default function Page({ slugs }: PageProps<'/docs/[...slugs]'>) {
+  const page = source.getPage(slugs);
+  if (!page) unstable_notFound();
 
-</Tabs>
+  // [!code ++:10]
+  if (page.type === 'openapi') {
+    return (
+      <DocsPage full>
+        <DocsTitle>{page.data.title}</DocsTitle>
+        <DocsBody>
+          <OpenAPIPage {...page.data.getOpenAPIPageProps()} />
+        </DocsBody>
+      </DocsPage>
+    );
+  }
+
+  // ...
+}
+```
+
+```astro tab="Astro" title="src/pages/docs/[...slug].astro"
+---
+// [!code ++:2]
+import { DocsBody } from 'fumadocs-ui/layouts/docs/page';
+import { OpenAPIPage } from '@/components/api-page';
+// ...
+// [!code word:page.type]
+const { page } = Astro.props;
+const { body: Content, toc } = page.type === 'docs' ? await page.data.load() : { body: undefined, toc: [] };
+const pageTree = await source.serializePageTree(source.getPageTree());
+---
+
+<Layout title={page.data.title} description={page.data.description}>
+  <Docs
+    client:load
+    transition:persist="docs"
+    pathname={Astro.url.pathname}
+    params={Astro.params}
+    tree={pageTree}
+    title={page.data.title}
+    description={page.type === 'docs' ? page.data.description : undefined}
+    toc={toc}
+    full={page.type === 'openapi'}
+  >
+    <!-- [!code highlight:9] -->
+    {
+      page.type === 'openapi' ? (
+        <DocsBody>
+          <OpenAPIPage client:load {...page.data.getOpenAPIPageProps()} />
+        </DocsBody>
+      ) : (
+        Content && <Content />
+      )
+    }
+  </Docs>
+</Layout>
+```
+
+```tsx tab="Astro" title="src/components/docs.tsx"
+export interface DocsProps extends ProviderProps {
+  // ...
+  full?: boolean; // [!code ++]
+}
+
+// [!code word:full]
+export function Docs({ tree, title, description, toc, full, children, ...props }: DocsProps) {
+  // ...
+          <DocsPage toc={toc} full={full}>
+```
 
 <Callout type='warn' title="Ensure the migration is complete!">
 
@@ -328,8 +449,7 @@ npm run types:check
 
 </Callout>
 
-</Tab>
-</Tabs>
+To write MDX files into your content directory instead, see [MDX Files](/docs/integrations/openapi/generate-files#mdx-files).
 
 ## Features
 

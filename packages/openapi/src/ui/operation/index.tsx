@@ -114,7 +114,7 @@ function OperationContent({
             <MediaContent
               schema={content.schema}
               required={requestBody.required}
-              selector={<SelectTabTrigger items={items} />}
+              selector={<SelectTabTrigger aria-label={t('Media type')} items={items} />}
               request
             />
           </SelectTab>
@@ -198,7 +198,7 @@ function OperationContent({
         <SectionHeader id="authorization" depth={headingLevel} title={t('Authorization')} />
         <div className="overflow-hidden rounded-xl border bg-fd-card">
           <div className="flex h-9 items-center border-b ps-1.5 pe-1 text-[0.8125rem] not-prose">
-            <SelectTabTrigger items={items} />
+            <SelectTabTrigger aria-label={t('Security scheme')} items={items} />
           </div>
           {security.map((requirement, i) => (
             <SelectTab key={i} value={items[i].value} className="px-3">
@@ -410,6 +410,7 @@ function ResponseContent({
   item: OperationResponse;
   onLink: () => void;
 }) {
+  const t = useTranslations({ note: 'operation page' });
   const segments = ['response', status];
   const ref = useAnchorLink(segments, onLink);
   const contentTypes = Object.entries(content);
@@ -429,7 +430,10 @@ function ResponseContent({
           )}
           {contentTypes.map(([mediaType, media]) => (
             <SelectTab key={mediaType} value={mediaType} anchorSegments={[mediaType]}>
-              <MediaContent schema={media.schema} selector={<SelectTabTrigger items={items} />} />
+              <MediaContent
+                schema={media.schema}
+                selector={<SelectTabTrigger aria-label={t('Media type')} items={items} />}
+              />
             </SelectTab>
           ))}
         </SelectTabs>

@@ -139,9 +139,9 @@ import { loader } from 'fumadocs-core/source';
 
 export const blog = loader({
   baseUrl: '/blog',
-  // [!code --] for Next.js
+  // [!code --:2] for Next.js
   source: createMDXSource(blogPosts, []),
-  // [!code --] for Vite
+  // [!code --:2] for Vite
   source: await create.sourceAsync(blogPosts, []),
   // [!code ++]
   source: toFumadocsSource(blogPosts, []),
@@ -158,7 +158,7 @@ import { defineDocs } from 'fumadocs-mdx/config';
 export const docs = defineDocs({
   dir: 'content/docs',
   docs: {
-    // This no longer forces dynamic compilation! [!code ++]
+    // This no longer forces dynamic compilation! [!code ++:2]
     async: true,
   },
 });

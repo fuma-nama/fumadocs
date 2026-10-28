@@ -1,44 +1,53 @@
+import { type SerializedPageTree, useFumadocsLoader } from 'fumadocs-core/source/client';
+import type { TOCItemType } from 'fumadocs-core/toc';
 import { DocsLayout } from 'fumadocs-ui/layouts/docs';
-import { DocsPage, type DocsPageProps } from 'fumadocs-ui/layouts/docs/page';
-import type { Root } from 'fumadocs-core/page-tree';
-import type { ReactNode } from 'react';
-import { navigate } from 'astro:transitions/client';
-import { RootProvider } from 'fumadocs-ui/provider/astro';
-import type { AstroProviderProps } from 'fumadocs-core/framework/astro';
-import SearchDialog from './search';
+import {
+  DocsDescription,
+  DocsPage,
+  DocsTitle,
+  MarkdownCopyButton,
+  ViewOptionsPopover,
+} from 'fumadocs-ui/layouts/docs/page';
+import { Provider, type ProviderProps } from '@/components/provider';
+import { baseOptions } from '@/lib/layout.shared';
 
+export interface DocsProps extends ProviderProps {
+  tree: SerializedPageTree;
+  title: string;
+  description?: string;
+  toc: TOCItemType[];
+  markdownUrl: string;
+  githubUrl: string;
+}
+
+/**
+ * The React island of docs pages, the content is passed as children.
+ */
 export function Docs({
   tree,
+  title,
+  description,
+  toc,
+  markdownUrl,
+  githubUrl,
   children,
-  pathname,
-  params,
-  page,
-}: {
-  tree: Root;
-  children: ReactNode;
-  pathname: string;
-  params: AstroProviderProps['params'];
-  page?: DocsPageProps;
-}) {
+  ...props
+}: DocsProps) {
+  const data = useFumadocsLoader({ tree });
+
   return (
-    <RootProvider
-      pathname={pathname}
-      params={params}
-      navigate={navigate}
-      theme={{ enabled: false }}
-      search={{ SearchDialog }}
-    >
-      <DocsLayout
-        tree={tree}
-        themeSwitch={{
-          enabled: false,
-        }}
-        nav={{
-          title: 'Fumadocs on Astro',
-        }}
-      >
-        <DocsPage {...page}>{children}</DocsPage>
+    <Provider {...props}>
+      <DocsLayout {...baseOptions()} tree={data.tree}>
+        <DocsPage toc={toc}>
+          <DocsTitle>{title}</DocsTitle>
+          <DocsDescription>{description}</DocsDescription>
+          <div className="flex flex-row gap-2 items-center border-b -mt-4 pb-6">
+            <MarkdownCopyButton markdownUrl={markdownUrl} />
+            <ViewOptionsPopover markdownUrl={markdownUrl} githubUrl={githubUrl} />
+          </div>
+          {children}
+        </DocsPage>
       </DocsLayout>
-    </RootProvider>
+    </Provider>
   );
 }

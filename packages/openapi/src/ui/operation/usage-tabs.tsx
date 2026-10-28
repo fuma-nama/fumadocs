@@ -64,6 +64,7 @@ export function UsageTabs() {
 }
 
 function UsageTabsSelector() {
+  const t = useTranslations({ note: 'operation page' });
   const { items, selected, select } = useExampleRequests();
 
   function renderItem(item: ExampleRequest) {
@@ -79,7 +80,10 @@ function UsageTabsSelector() {
   const options = items.map((item) => ({ value: item.id, label: renderItem(item) }));
   return (
     <Select items={options} value={selected} onValueChange={(v) => v !== null && select(v)}>
-      <SelectTrigger className="not-prose mb-4 rounded-xl bg-fd-card px-3">
+      <SelectTrigger
+        aria-label={t('Example request')}
+        className="not-prose mb-4 rounded-xl bg-fd-card px-3"
+      >
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
@@ -108,6 +112,7 @@ export function CodeUsages({
   className?: string;
   viewportClassName?: string;
 }) {
+  const t = useTranslations({ note: 'operation page' });
   const generators = useOperation().codeUsages.map();
   const examples = useExampleRequests();
   const selected = useCodeUsageId(storageKey);
@@ -138,6 +143,7 @@ export function CodeUsages({
             }))}
             value={example.id}
             onValueChange={examples.select}
+            aria-label={t('Example request')}
             align="start"
             className="-ms-2 max-w-full text-fd-foreground"
           />
@@ -149,6 +155,7 @@ export function CodeUsages({
             items={items}
             value={id}
             onValueChange={(value) => selectCodeUsage(storageKey, value)}
+            aria-label={t('Code language')}
           />,
         ),
         className: cn(exampleCodeBlock.className, className),
@@ -198,6 +205,7 @@ function ResponseTabsDefaultContent({ tabs }: { tabs: ResponseTab[] }) {
                 items={examples.map((item, i) => ({ value: String(i), label: item.label }))}
                 value={String(index)}
                 onValueChange={(v) => setIndex(Number(v))}
+                aria-label={t('Example')}
                 align="start"
                 className="-ms-2"
               />
@@ -246,6 +254,7 @@ function ResponseTabsDefaultContent({ tabs }: { tabs: ResponseTab[] }) {
             setCode(v);
             setIndex(0);
           }}
+          aria-label={t('Response status')}
         />
       </ExampleHeader>
       {body}
@@ -290,6 +299,7 @@ function RequestTabsDefaultContent() {
             }))}
             value={item.id}
             onValueChange={select}
+            aria-label={t('Example request')}
           />
         )}
       </ExampleHeader>

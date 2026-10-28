@@ -180,6 +180,26 @@ describe('Generate AsyncAPI documents', () => {
     );
   });
 
+  test('Streetlights (with index resolved against content directory)', async () => {
+    const out = await generateFilesOnly({
+      input: createAsyncAPI({
+        input: {
+          streetlights: path.join(cwd, './fixtures/streetlights.yaml'),
+        },
+      }),
+      output: './content/docs/events',
+      per: 'operation',
+      index: {
+        url: { baseUrl: '/docs', contentDir: './content/docs' },
+        items: [{ path: 'index' }],
+      },
+    });
+
+    const index = out.find((file) => file.path === 'index.mdx')?.content;
+    expect(index).toContain('<Card href="/docs/events/receiveLightMeasurement" ');
+    expect(index).toContain('<Card href="/docs/events/sendLightMeasurement" ');
+  });
+
   test('throws error when no input files found', async () => {
     await expect(
       generateFilesOnly({

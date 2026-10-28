@@ -1,3 +1,14 @@
+## @fumadocs/asyncapi@0.5.4
+
+### Unions of `const` members render as a labelled select
+
+- In the playground, a `oneOf`/`anyOf` whose members are all `const` is one select labelled by each member's `title`, instead of a switch between members.
+
+### Index card links with `contentDir`
+
+- `index.url.contentDir` of `generateFiles()` resolves the generated pages from the `output` directory, card links no longer start with `../`.
+- Card links use forward slashes on Windows.
+
 ## @fumadocs/asyncapi@0.5.3
 
 ### Bring your own highlighter

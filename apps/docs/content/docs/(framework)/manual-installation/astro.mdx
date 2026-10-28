@@ -1,30 +1,40 @@
 ---
 title: Astro
-description: Setup Fumadocs on Astro with React islands.
+description: Setup Fumadocs on Astro.
 ---
 
 ## Getting Started
 
 Before continuing, make sure to configure:
 
-- Astro with `@astrojs/react`.
+- Astro 7.
 - Tailwind CSS 4.
 
-Fumadocs UI is a React library. On Astro, render it inside a React island and pass the current route information from your `.astro` page.
+Docs are MDX files loaded by Astro content collections. `@fumadocs/astro` adds the Markdown features of Fumadocs to them, and Fumadocs UI renders in React islands.
 
 ### Installation
 
 ```npm
-npm i fumadocs-core fumadocs-ui @astrojs/react @astrojs/mdx @astrojs/markdown-remark react react-dom takumi-js sharp
+npm i fumadocs-core fumadocs-ui @fumadocs/astro @astrojs/react react react-dom @types/mdx
 ```
 
 ### Configuration
 
-Configure Astro, MDX, React, and Tailwind CSS:
+Add the Fumadocs integration, it runs on Sätteri, the default Markdown processor of Astro 7, and adds the React and MDX integrations:
 
 <include cwd meta='title="astro.config.mjs"'>
-  ../../examples/astro/astro.config.mjs
+  ../../examples/astro-min/astro.config.mjs
 </include>
+
+See [Options](#options) for `components` and `includeProcessedMarkdown`.
+
+The code in this guide imports `src/*` from `@/*`, add the alias to your `tsconfig.json`:
+
+<include cwd meta='title="tsconfig.json"'>
+  ../../examples/astro-min/tsconfig.json
+</include>
+
+### Styles
 
 Add the following to your Tailwind CSS file:
 
@@ -37,49 +47,77 @@ Add the following to your Tailwind CSS file:
 
 ### Content Collections
 
-Create content collections for docs and meta files:
+Docs pages are MDX files, define their collections with the loaders of Fumadocs:
 
 <include cwd meta='title="src/content.config.ts"'>
-  ../../examples/astro/src/content.config.ts
+  ../../examples/astro-min/src/content.config.ts
 </include>
 
-Create a Fumadocs source from Astro content collections:
+`pageLoader()` loads the MDX files in `content/docs`, `metaLoader()` loads its [meta files](/docs/page-conventions#meta). They apply `pageSchema` and `metaSchema` from `fumadocs-core/source/schema`. A `schema` on the collection replaces them, add fields with `pageSchema.extend({ ... })`.
+
+### Source
+
+Create a Fumadocs source from the collections:
 
 <include cwd meta='title="src/lib/source.ts"'>
-  ../../examples/astro/src/lib/source.ts
+  ../../examples/astro-min/src/lib/source.ts
 </include>
 
-### Create Pages
+### MDX Components
 
-Create the shared Astro document layout:
+Register the components of your MDX files:
 
-<include cwd meta='tab="src/components/layout.astro"'>
-  ../../examples/astro/src/components/layout.astro
+<include cwd meta='title="src/components/mdx.tsx"'>
+  ../../examples/astro-min/src/components/mdx.tsx
 </include>
 
-Create the React island that renders Fumadocs UI:
+The integration renders them for docs pages, so don't pass them to `<Content />`. `wrapper` wraps the content of pages, `DocsBody` gives it the prose styles.
+
+### Layout
+
+Fumadocs UI renders in React islands. Create a provider for them, with the route info of Astro:
+
+<include cwd meta='title="src/components/provider.tsx"'>
+  ../../examples/astro-min/src/components/provider.tsx
+</include>
+
+`navigate` lets Fumadocs navigate with the client router of Astro, enable it with `<ClientRouter />` in your HTML layout (`transition:animate="none"` turns off its fade):
+
+<include cwd meta='title="src/layouts/Layout.astro"'>
+  ../../examples/astro-min/src/layouts/Layout.astro
+</include>
+
+### Docs Page
+
+Create the React island of docs pages, the content is passed as children:
 
 <include cwd meta='tab="src/components/docs.tsx"'>
-  ../../examples/astro/src/components/docs.tsx
+  ../../examples/astro-min/src/components/docs.tsx
+</include>
+<include cwd meta='tab="src/lib/layout.shared.tsx"'>
+  ../../examples/astro-min/src/lib/layout.shared.tsx
 </include>
 
-Create a search dialog:
+Create the route of docs pages:
+
+<include cwd meta='title="src/pages/docs/[...slug].astro"'>
+  ../../examples/astro-min/src/pages/docs/[...slug].astro
+</include>
+
+With `transition:persist` on every page, Astro keeps the island and its state (e.g. sidebar, search) across navigations, Fumadocs moves the content of the new page into it. `prerender` keeps the pages static, also with `output: 'server'`.
+
+### Search
+
+Create the search dialog and the search endpoint:
 
 <include cwd meta='tab="src/components/search.tsx"'>
-  ../../examples/astro/src/components/search.tsx
-</include>
-
-Create the docs route, search endpoint, and metadata image endpoint:
-
-<include cwd meta='tab="src/pages/[...slug].astro"'>
-  ../../examples/astro/src/pages/[...slug].astro
+  ../../examples/astro-min/src/components/search.tsx
 </include>
 <include cwd meta='tab="src/pages/api/search.ts"'>
-  ../../examples/astro/src/pages/api/search.ts
+  ../../examples/astro-min/src/pages/api/search.ts
 </include>
-<include cwd meta='tab="src/pages/og/docs/[...slug]/image.webp.ts"'>
-  ../../examples/astro/src/pages/og/docs/[...slug]/image.webp.ts
-</include>
+
+Astro builds a static site by default, the endpoint outputs the search indexes at build time and the dialog searches them in the browser. Learn more about [Document Search](/docs/headless/search).
 
 ### Done
 
@@ -88,8 +126,112 @@ You can start writing documents at `content/docs`:
 ```mdx title="content/docs/index.mdx"
 ---
 title: Hello World
-description: Your first document
 ---
 
-I love Fumadocs.
+I love Fumadocs
+```
+
+See the [full example](https://github.com/fuma-nama/fumadocs/tree/dev/examples/astro) for the home and 404 pages, [LLM routes](/docs/integrations/llms) and [OG images](/docs/integrations/og/takumi).
+
+## Rendering
+
+With `components`, the MDX content of each page renders as one React island (`client:load`). Its components share a React tree and hydrate like on other frameworks: interactive code blocks, tabs, accordions and heading anchors work, and so do JSX props like `icon={<Icon />}`.
+
+Parts that React can't render are rendered by Astro, inside the island:
+
+- Highlighted code.
+- Images, with the image pipeline of Astro.
+- Components imported in the MDX file, including Astro components. Framework components keep the rules of Astro, add `client:load` to hydrate them.
+- `{expressions}`, they can't use the components of your `components` module.
+
+Props of the components in your `components` module are serialized into the island, they must be JSON-serializable (no functions).
+
+The island is a React tree of its own, providers of your layout don't reach it. `wrapper` receives the props of `<Content />`, use it to add providers, like for [Internationalization](/docs/internationalization/astro). The theme state isn't shared either, style light/dark mode with CSS (e.g. `dark:` variants) rather than `useTheme()`.
+
+Without `components`, the content renders as Astro MDX, without React. Pass components to `<Content />` like other Astro content:
+
+```astro
+<Content components={{ h2: Heading }} />
+```
+
+## Options
+
+```js title="astro.config.mjs"
+fumadocs({
+  // module whose default export is the MDX components
+  components: './src/components/mdx.tsx',
+  // enable `getText('processed')` on pages
+  includeProcessedMarkdown: false,
+  // content directories, relative to the project root
+  collections: {
+    docs: { dir: 'content/docs' },
+  },
+});
+```
+
+The values above are the defaults, except `components`. Fumadocs only processes the MDX files of `collections`, other Markdown of your project is left to Astro.
+
+The integration adds `@astrojs/react` and `@astrojs/mdx` with their default options, add them to `integrations` yourself to configure them.
+
+### Collections
+
+Collections take the options above, the options of the integration are their defaults. For example, a blog with its own MDX components:
+
+```js title="astro.config.mjs"
+fumadocs({
+  components: './src/components/mdx.tsx',
+  collections: {
+    docs: { dir: 'content/docs' },
+    // [!code ++]
+    blog: { dir: 'content/blog', components: './src/components/blog-mdx.tsx' },
+  },
+});
+```
+
+Load it with `pageLoader('blog')`, and create a source with `toFumadocsSource(await getCollection('blog'))`.
+
+### Plugins
+
+Add Sätteri plugins to docs with `mdastPlugins` and `hastPlugins`, as an array or a function receiving the default plugins. For example, to render `mermaid` code blocks with the [`Mermaid` component](/docs/markdown/mermaid) of your MDX components:
+
+```npm
+npm i @fumadocs/satteri
+```
+
+```js title="astro.config.mjs"
+import { remarkMdxMermaid } from '@fumadocs/satteri/remark-mdx-mermaid';
+
+fumadocs({
+  mdastPlugins: [remarkMdxMermaid()],
+});
+```
+
+They only run on docs, while plugins of the `satteri()` processor of Astro apply to every Markdown file.
+
+The built-in plugins take the same options as [Fumadocs MDX](/docs/mdx/mdx#customize-built-in-plugins): `remarkHeadingOptions`, `remarkCodeTabOptions`, `remarkNpmOptions`, `remarkStructureOptions`, `rehypeCodeOptions` and `rehypeKatexOptions`.
+
+Fumadocs highlights the code blocks of docs, configure it with `rehypeCodeOptions`. The `markdown.shikiConfig` of Astro only applies to other Markdown.
+
+```js title="astro.config.mjs"
+fumadocs({
+  rehypeCodeOptions: {
+    themes: { light: 'catppuccin-latte', dark: 'catppuccin-mocha' },
+  },
+});
+```
+
+## Page Data
+
+Pages of `toFumadocsSource()` have:
+
+```ts
+// the MDX content, table of contents and structured data (for search)
+const { body, toc, structuredData } = await page.data.load();
+
+// structured data only
+await page.data.structuredData();
+
+// the source file, or the Markdown processed by Fumadocs (requires `includeProcessedMarkdown`)
+await page.data.getText('raw');
+await page.data.getText('processed');
 ```

@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import type { Feature, FeatureContext } from '@/features';
-import type { ReactFramework, SourceInfo } from '@/project';
+import type { Framework, SourceInfo } from '@/project';
 import { formatRoute, routeModule } from '@/project/route';
 import {
   addImport,
@@ -15,7 +15,6 @@ import { docs } from './docs';
 import {
   findSource,
   posix,
-  reactFramework,
   registerReactRouterRoutes,
   scripts,
   type SourceRef,
@@ -28,10 +27,11 @@ interface Env {
   read: string;
 }
 
-const publicEnv = (next: boolean): Env =>
-  next
-    ? { prefix: 'NEXT_PUBLIC_', read: 'process.env.NEXT_PUBLIC_' }
-    : { prefix: 'VITE_', read: 'import.meta.env.VITE_' };
+function publicEnv(framework: Framework): Env {
+  if (framework === 'next') return { prefix: 'NEXT_PUBLIC_', read: 'process.env.NEXT_PUBLIC_' };
+  const prefix = framework === 'astro' ? 'PUBLIC_' : 'VITE_';
+  return { prefix, read: `import.meta.env.${prefix}` };
+}
 
 const dialogImports = `import {
   SearchDialog,
@@ -95,7 +95,7 @@ async function getDocuments() {
   return documents;
 }`;
 
-/** `scripts/sync-content.ts`, syncing the search indexes pre-rendered to `output` */
+/** `scripts/sync-content.ts`, syncing the search indexes pre-rendered to `output`, the first match of a glob pattern (Next.js) */
 export const syncScript = (
   output: string,
   imports: string,
@@ -103,7 +103,13 @@ export const syncScript = (
 ) => `import * as fs from 'node:fs/promises';
 ${imports}
 
-const records = JSON.parse(await fs.readFile('${output}', 'utf-8')) as DocumentRecord[];
+${
+  output.includes('*')
+    ? `// Next.js writes it under \`route-cache\` when built with an adapter, like on Vercel
+const [file] = await Array.fromAsync(fs.glob('${output}'));
+const records = JSON.parse(await fs.readFile(file, 'utf-8')) as DocumentRecord[];`
+    : `const records = JSON.parse(await fs.readFile('${output}', 'utf-8')) as DocumentRecord[];`
+}
 
 ${body}
 console.log(\`search updated: \${records.length} records\`);
@@ -132,7 +138,7 @@ interface Provider {
   /** `scripts/sync-content.ts`, run after build */
   sync?: (env: Env, paths: { output: string }) => string;
   /** server-side search, replaces the default search route */
-  searchRoute?: Record<ReactFramework, string>;
+  searchRoute?: Record<Framework, string>;
 }
 
 const providers = {
@@ -362,26 +368,29 @@ import Mixedbread from '@mixedbread/sdk';`,
 `,
       ),
     searchRoute: (() => {
-      const server = `import { createMixedbreadSearchAPI } from 'fumadocs-core/search/mixedbread';
-import Mixedbread from '@mixedbread/sdk';
+      // Astro inlines `import.meta.env` at build time, `getSecret()` reads secrets at runtime
+      const server = (
+        astro = false,
+      ) => `import { createMixedbreadSearchAPI } from 'fumadocs-core/search/mixedbread';
+import Mixedbread from '@mixedbread/sdk';${astro ? "\nimport { getSecret } from 'astro:env/server';" : ''}
 
 const server = createMixedbreadSearchAPI({
-  client: new Mixedbread(),
-  storeIdentifier: process.env.MIXEDBREAD_STORE_ID!,
+  client: new Mixedbread(${astro ? "{ apiKey: getSecret('MXBAI_API_KEY') }" : ''}),
+  storeIdentifier: ${astro ? "getSecret('MIXEDBREAD_STORE_ID')" : 'process.env.MIXEDBREAD_STORE_ID'}!,
 });
 `;
       return {
-        next: `${server}
+        next: `${server()}
 export const { GET } = server;
 `,
         'react-router': `import type { Route } from './+types/search';
-${server}
+${server()}
 export async function loader({ request }: Route.LoaderArgs) {
   return server.GET(request);
 }
 `,
         'tanstack-start': `import { createFileRoute } from '@tanstack/react-router';
-${server}
+${server()}
 export const Route = createFileRoute('/api/search')({
   server: {
     handlers: {
@@ -390,8 +399,12 @@ export const Route = createFileRoute('/api/search')({
   },
 });
 `,
-        waku: `${server}
+        waku: `${server()}
 export const { GET } = server;
+`,
+        astro: `import type { APIRoute } from 'astro';
+${server(true)}
+export const GET: APIRoute = ({ request }) => server.GET(request);
 `,
       };
     })(),
@@ -401,10 +414,10 @@ export const { GET } = server;
 export type SearchProvider = keyof typeof providers;
 
 /** pre-rendered on build to export the search indexes */
-export const staticJson = (framework: ReactFramework) =>
+export const staticJson = (framework: Framework) =>
   formatRoute({ segments: ['static.json'] }, framework, null);
 
-export const staticRoute = (framework: ReactFramework, head: string, documents: string) =>
+export const staticRoute = (framework: Framework, head: string, documents: string) =>
   routeModule(framework, staticJson(framework), {
     imports: head,
     body: `Response.json(await ${documents})`,
@@ -413,10 +426,10 @@ export const staticRoute = (framework: ReactFramework, head: string, documents: 
   });
 
 /** where `static.json` is pre-rendered on build, `config` is the Vite config of TanStack Start */
-export function staticOutput(framework: ReactFramework, config = ''): string {
+export function staticOutput(framework: Framework, config = '', isStatic = true): string {
   switch (framework) {
     case 'next':
-      return '.next/server/app/static.json.body';
+      return '.next/server/{app,route-cache/*/*/$}/static.json.body';
     case 'react-router':
       return 'build/client/static.json';
     case 'waku':
@@ -425,6 +438,9 @@ export function staticOutput(framework: ReactFramework, config = ''): string {
       // Nitro moves the client output to the directory of its preset
       if (/preset:\s*['"]vercel['"]/.test(config)) return '.vercel/output/static/static.json';
       return /\bnitro\(/.test(config) ? '.output/public/static.json' : 'dist/client/static.json';
+    case 'astro':
+      // with routes rendered on demand, prerendered files are in the client output
+      return isStatic ? 'dist/static.json' : 'dist/client/static.json';
   }
 }
 
@@ -434,12 +450,12 @@ export const syncCommand = 'node --env-file-if-exists=.env.local scripts/sync-co
 /** the files written by a provider, relative to the project, `output` is where `static.json` is pre-rendered */
 export function templates(
   name: SearchProvider,
-  framework: ReactFramework,
+  framework: Framework,
   { baseDir, source }: { baseDir: string; source: Pick<SourceInfo, 'dynamic' | 'async'> },
   output: string,
 ): [file: string, content: string][] {
   const provider: Provider = providers[name];
-  const env = publicEnv(framework === 'next');
+  const env = publicEnv(framework);
   const files: [string, string][] = [
     [path.posix.join(baseDir, 'components/search.tsx'), provider.dialog(env)],
   ];
@@ -476,8 +492,7 @@ export const search: Feature<{ provider: SearchProvider }> = {
   },
   async apply(ctx, { provider: name }) {
     const { project } = ctx;
-    const { baseDir } = project;
-    const framework = reactFramework(project);
+    const { baseDir, framework } = project;
     const provider: Provider = providers[name];
     if (project.static && !provider.static)
       throw new Error(`${provider.label} requires a server at runtime`);
@@ -486,7 +501,7 @@ export const search: Feature<{ provider: SearchProvider }> = {
       framework === 'tanstack-start' && project.configFile
         ? await fs.readFile(path.join(project.cwd, project.configFile), 'utf-8')
         : '';
-    const output = staticOutput(framework, config);
+    const output = staticOutput(framework, config, project.static);
 
     ctx.addDependencies(provider.dependencies);
     for (const [file, content] of templates(name, framework, project, output))
@@ -540,7 +555,7 @@ export const search: Feature<{ provider: SearchProvider }> = {
       });
     }
 
-    const env = publicEnv(framework === 'next');
+    const env = publicEnv(framework);
     for (const key of provider.publicEnv) ctx.env(env.prefix + key, '');
     for (const key of provider.privateEnv) ctx.env(key, '');
     ctx.note(

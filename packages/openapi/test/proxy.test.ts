@@ -92,9 +92,27 @@ test('trusts allowed origins', async () => {
 
 test('forwards request bodies', async () => {
   const proxy = createProxy({ allowedOrigins: [`http://localhost:${port}`] });
-  // no `content-length`, like streamed bodies
-  const res = await request(proxy, `http://localhost:${port}`, { method: 'POST', body: 'hello' });
 
+  // streamed bodies have no `content-length`
+  for (const headers of [undefined, { 'content-length': '5' }]) {
+    const res = await request(proxy, `http://localhost:${port}`, {
+      method: 'POST',
+      headers,
+      body: 'hello',
+    });
+    expect(await res.json()).toEqual({ body: 'hello' });
+  }
+});
+
+test('keeps the dispatcher of `fetch()`', async () => {
+  // imports undici
+  await request(createProxy(), `http://localhost:${port}`);
+
+  const res = await fetch(`http://localhost:${port}`, {
+    method: 'POST',
+    headers: { 'content-length': '5' },
+    body: 'hello',
+  });
   expect(await res.json()).toEqual({ body: 'hello' });
 });
 
@@ -121,4 +139,19 @@ test('sends credentials to the same origin only', async () => {
 
   const cross = await request(proxy, `http://localhost:${port}/cross`, init);
   expect(await cross.json()).toEqual({});
+});
+
+// last, it changes the global dispatcher
+test('works with the global dispatcher of undici', async () => {
+  const { Agent, setGlobalDispatcher } = await import('undici');
+  // like `EnvHttpProxyAgent` installed by apps
+  setGlobalDispatcher(new Agent());
+  const proxy = createProxy({ allowedOrigins: [`http://localhost:${port}`] });
+  const res = await request(proxy, `http://localhost:${port}`, {
+    method: 'POST',
+    headers: { 'content-length': '5' },
+    body: 'hello',
+  });
+
+  expect(await res.json()).toEqual({ body: 'hello' });
 });

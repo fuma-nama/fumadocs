@@ -1,3 +1,22 @@
+## @fumadocs/cli@1.7.6
+
+### Search sync on Vercel
+
+- The Next.js sync script of `feature search` finds `static.json` when Next.js builds with an adapter, like on Vercel.
+
+### Astro support
+
+- `init`, `feature docs`, `og`, `llms`, `search`, `webmcp` and `feedback` support Astro projects, including `init --i18n`.
+- `mcp` and `epub` support Astro projects with `output: 'server'`, `export epub --framework astro` fetches from the running server.
+- `og`, `llms` and `search` follow the i18n routes of Astro projects.
+- `ai` refuses Astro projects.
+
+### Fixes
+
+- `init --i18n` names the languages of the language switch, and translates the UI of `cn` with `@fumadocs/language`.
+- Properties added to an empty config object, like `defineConfig({})`, go on their own lines.
+- With `hideLocale: 'default-locale'`, `baseOptions()` links the home of the default language to `/`.
+
 ## @fumadocs/cli@1.7.5
 
 ### OG images in every template

@@ -13,31 +13,31 @@ It asks for the template and features to configure, you can also pass them as op
 
 ### Options
 
-| Option              | Description                                                                               |
-| ------------------- | ----------------------------------------------------------------------------------------- |
-| `--template <name>` | The template to use, see [Templates](#templates).                                         |
-| `--src`             | (Next.js only) Use the `src/` directory.                                                  |
-| `--linter <name>`   | Configure a linter: `eslint` (Next.js only), `oxlint` or `biome`.                         |
-| `--search <name>`   | Search solution: `orama` (default, local search) or `orama-cloud`.                        |
-| `--og-image <name>` | OG image: `next-og` (Next.js only) or `takumi`, others use Takumi.                        |
-| `--ai-chat <name>`  | AI chat: `openrouter`, `llmgateway` or `inkeep`, not available on static & SPA templates. |
-| `--install`         | Install dependencies automatically.                                                       |
-| `--no-git`          | Skip Git repository initialization.                                                       |
-| `--pm <name>`       | Package manager: `npm`, `pnpm`, `yarn` or `bun`, detected from how the CLI is invoked.    |
-| `-y, --yes`         | Skip prompts, use defaults for options not specified.                                     |
+| Option              | Description                                                                                      |
+| ------------------- | ------------------------------------------------------------------------------------------------ |
+| `--template <name>` | The template to use, see [Templates](#templates).                                                |
+| `--src`             | (Next.js only) Use the `src/` directory.                                                         |
+| `--linter <name>`   | Configure a linter: `eslint` (Next.js only), `oxlint` or `biome`.                                |
+| `--search <name>`   | Search solution: `orama` (default, local search) or `orama-cloud`.                               |
+| `--og-image <name>` | OG image: `next-og` (Next.js only) or `takumi`, others use Takumi.                               |
+| `--ai-chat <name>`  | AI chat: `openrouter`, `llmgateway` or `inkeep`, not available on Astro, static & SPA templates. |
+| `--install`         | Install dependencies automatically.                                                              |
+| `--no-git`          | Skip Git repository initialization.                                                              |
+| `--pm <name>`       | Package manager: `npm`, `pnpm`, `yarn` or `bun`, detected from how the CLI is invoked.           |
+| `-y, --yes`         | Skip prompts, use defaults for options not specified.                                            |
 
 ### Templates
 
-| Value                        | Description                                |
-| ---------------------------- | ------------------------------------------ |
-| `+next+fuma-docs-mdx`        | Next.js (default)                          |
-| `+next+fuma-docs-mdx+static` | Next.js with static export                 |
-| `waku`                       | Waku                                       |
-| `react-router`               | React Router                               |
-| `react-router-spa`           | React Router in SPA mode                   |
-| `tanstack-start`             | Tanstack Start                             |
-| `tanstack-start-spa`         | Tanstack Start in SPA mode                 |
-| `astro`                      | Astro with React islands (partial support) |
+| Value                        | Description                |
+| ---------------------------- | -------------------------- |
+| `+next+fuma-docs-mdx`        | Next.js (default)          |
+| `+next+fuma-docs-mdx+static` | Next.js with static export |
+| `waku`                       | Waku                       |
+| `react-router`               | React Router               |
+| `react-router-spa`           | React Router in SPA mode   |
+| `tanstack-start`             | Tanstack Start             |
+| `tanstack-start-spa`         | Tanstack Start in SPA mode |
+| `astro`                      | Astro                      |
 
 ### Non-interactive
 

@@ -1,3 +1,10 @@
+## @fumadocs/mdx-remote@1.5.3
+
+### `compileFile()` parses frontmatter
+
+- `compileFile()` strips the frontmatter from the content and parses it into `file.data.frontmatter`, unless the file already has it. Content compiled for the client no longer renders its frontmatter.
+- `compile()` works when destructured from the compiler.
+
 ## @fumadocs/mdx-remote@1.5.2
 
 ### Mark packages side-effect free

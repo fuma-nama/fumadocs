@@ -1,5 +1,5 @@
-import type { I18nInfo, ReactFramework } from '@/project';
-import { localeSegment } from '@/project/route';
+import type { Framework, I18nInfo } from '@/project';
+import { astroPagePaths, localeSegment } from '@/project/route';
 
 export interface TemplateInput {
   static: boolean;
@@ -41,19 +41,20 @@ export const source = loader({
 });
 `;
 
-const layoutShared = (i18n: boolean) =>
+const layoutShared = (i18n: I18nInfo | null) =>
   i18n
     ? `import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
 import { uiTranslations } from 'fumadocs-ui/i18n';
+import { zhTW } from '@fumadocs/language/zh-tw';
 import { i18n } from '@/lib/i18n';
 
-export const translations = i18n.translations().extend(uiTranslations());
+export const translations = i18n.translations().extend(uiTranslations()).preset('cn', zhTW());
 
 export function baseOptions(locale: string = i18n.defaultLanguage): BaseLayoutProps {
   return {
     nav: {
       title: 'My App',
-      url: \`/\${locale}\`,
+      url: ${i18n.optionalLocale ? "locale === i18n.defaultLanguage ? '/' : `/${locale}`" : '`/${locale}`'},
     },
   };
 }
@@ -124,7 +125,7 @@ function shared(input: TemplateInput, async: boolean): Record<string, string> {
   return {
     'lib/shared.ts': sharedConstants,
     'lib/source.ts': source(async, i18n),
-    'lib/layout.shared.tsx': layoutShared(i18n),
+    'lib/layout.shared.tsx': layoutShared(input.i18n),
     'components/mdx.tsx': mdx,
     ...(input.static ? { 'components/search.tsx': search(i18n) } : {}),
     ...(input.i18n ? { 'lib/i18n.ts': i18nConfig(input.i18n.optionalLocale) } : {}),
@@ -141,10 +142,11 @@ ${searchImport(input)}${
     input.i18n
       ? `import { i18nProvider } from 'fumadocs-ui/i18n';
 import { translations } from '@/lib/layout.shared';
-import { i18n } from '@/lib/i18n';
 `
       : ''
   }`;
+
+const i18nImport = "import { i18n } from '@/lib/i18n';\n";
 
 const providerProps = (input: TemplateInput) =>
   `${input.i18n ? ' i18n={i18nProvider(translations, lang)}' : ''}${input.providerProps}`;
@@ -181,7 +183,7 @@ export const { GET } = createFromSource(source);
 `,
 };
 
-export const templates: Record<ReactFramework, Template> = {
+export const templates: Record<Framework, Template> = {
   next: (input) => {
     const i18n = input.i18n !== null;
     // route group with `[lang]` segment for i18n
@@ -277,7 +279,7 @@ export async function generateMetadata(props: PageProps<'${route}/docs/[[...slug
     return {
       ...shared(input, true),
       'routes/docs/layout.tsx': `import { Outlet${i18n ? ', useParams' : ''} } from 'react-router';
-${providerImports(input)}
+${providerImports(input)}${i18n ? i18nImport : ''}
 export default function Layout() {
 ${i18n ? '  const { lang = i18n.defaultLanguage } = useParams();\n\n' : ''}  return (
     <RootProvider${providerProps(input)}>
@@ -338,7 +340,7 @@ export async function loader(${input.static ? '' : '{ request }: Route.LoaderArg
     return {
       ...shared(input, true),
       'routes/_docs.tsx': `import { createFileRoute, Outlet${i18n ? ', useParams' : ''} } from '@tanstack/react-router';
-${providerImports(input)}
+${providerImports(input)}${i18n ? i18nImport : ''}
 export const Route = createFileRoute('/_docs')({
   component: Layout,
 });
@@ -498,7 +500,7 @@ export default function Layout({ children }: { children: ReactNode }) {
             'components/provider.tsx': `'use client';
 import type { ReactNode } from 'react';
 import { useRouter } from 'waku/router/client';
-${providerImports(input)}
+${providerImports(input)}${i18nImport}
 export function Provider({ children }: { children: ReactNode }) {
   const router = useRouter();
   const lang = router.path.split('/')[1] || i18n.defaultLanguage;
@@ -527,7 +529,169 @@ export default function Layout({ children }: { children: ReactNode }) {
       'pages/_api/api/search.ts': searchRoute.waku,
     };
   },
+
+  astro: (input) => {
+    const i18n = input.i18n !== null;
+    return {
+      ...shared(input, false),
+      'lib/source.ts': `import { getCollection } from 'astro:content';
+import { loader } from 'fumadocs-core/source';
+import { toFumadocsSource } from '@fumadocs/astro/source';
+import { docsRoute } from './shared';
+${i18n ? i18nImport : ''}
+export const source = loader({
+  source: toFumadocsSource(await getCollection('docs'), await getCollection('meta')),
+  baseUrl: docsRoute,${i18n ? '\n  i18n,' : ''}
+});
+`,
+      'components/mdx.tsx': `import defaultMdxComponents from 'fumadocs-ui/mdx';
+${i18n ? "import { DynamicLink } from 'fumadocs-core/dynamic-link';\n" : ''}import { DocsBody } from 'fumadocs-ui/layouts/docs/page';
+import type { MDXComponents } from 'mdx/types';
+${i18n ? "import { ContentProvider, type ProviderProps } from '@/components/provider';\n" : ''}
+export function getMDXComponents(components?: MDXComponents) {
+  return {
+    ...defaultMdxComponents,${i18n ? '\n    // links with the locale, like `/[lang]/docs`\n    DynamicLink,' : ''}
+    ...components,
+  } satisfies MDXComponents;
+}
+
+${
+  i18n
+    ? `// for the Fumadocs integration, \`wrapper\` receives the props of \`<Content />\`
+export default getMDXComponents({
+  wrapper: ({ children, ...props }: ProviderProps) => (
+    <ContentProvider {...props}>
+      <DocsBody>{children}</DocsBody>
+    </ContentProvider>
+  ),
+});`
+    : `// for the Fumadocs integration, \`wrapper\` gives the content its prose styles
+export default getMDXComponents({ wrapper: DocsBody });`
+}
+`,
+      'components/provider.tsx': `import { navigate } from 'astro:transitions/client';
+import type { ReactNode } from 'react';
+${providerImports(input)}
+export interface ProviderProps {${i18n ? '\n  lang: string;' : ''}
+  /** \`Astro.url.pathname\` */
+  pathname: string;
+  /** \`Astro.params\` */
+  params: Record<string, string | undefined>;
+  children?: ReactNode;
+}
+
+export function Provider({ ${i18n ? 'lang, ' : ''}pathname, params, children }: ProviderProps) {
+  return (
+    <RootProvider pathname={pathname} params={params} navigate={navigate}${providerProps(input)}>
+      {children}
+    </RootProvider>
+  );
+}
+${
+  i18n
+    ? `
+/**
+ * For the MDX content, which is an island of its own.
+ */
+export function ContentProvider({ lang, pathname, params, children }: ProviderProps) {
+  return (
+    <RootProvider
+      pathname={pathname}
+      params={params}
+      navigate={navigate}
+      i18n={i18nProvider(translations, lang)}
+      theme={{ enabled: false }}
+      search={{ enabled: false }}
+    >
+      {children}
+    </RootProvider>
+  );
+}
+`
+    : ''
+}`,
+      'components/docs.tsx': `import { type SerializedPageTree, useFumadocsLoader } from 'fumadocs-core/source/client';
+import type { TOCItemType } from 'fumadocs-core/toc';
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+import { DocsDescription, DocsPage, DocsTitle } from 'fumadocs-ui/layouts/docs/page';
+import { Provider, type ProviderProps } from '@/components/provider';
+import { baseOptions } from '@/lib/layout.shared';
+
+export interface DocsProps extends ProviderProps {
+  tree: SerializedPageTree;
+  title: string;
+  description?: string;
+  toc: TOCItemType[];
+}
+
+export function Docs({ tree, title, description, toc, children, ...props }: DocsProps) {
+  const data = useFumadocsLoader({ tree });
+
+  return (
+    <Provider {...props}>
+      <DocsLayout {...baseOptions(${i18n ? 'props.lang' : ''})} tree={data.tree}>
+        <DocsPage toc={toc}>
+          <DocsTitle>{title}</DocsTitle>
+          <DocsDescription>{description}</DocsDescription>
+          {children}
+        </DocsPage>
+      </DocsLayout>
+    </Provider>
+  );
+}
+`,
+      [`pages/${localeSegment('astro', input.i18n)}docs/[...slug].astro`]: `---
+import type { GetStaticPaths, InferGetStaticPropsType } from 'astro';
+import Layout from '@/layouts/Layout.astro';
+import { Docs } from '@/components/docs';
+${input.i18n?.optionalLocale ? i18nImport : ''}import { source } from '@/lib/source';
+
+${astroPagePaths(input.i18n)}
+
+type Props = InferGetStaticPropsType<typeof getStaticPaths>;
+
+const { ${i18n ? 'lang, ' : ''}page } = Astro.props;
+const { body: Content, toc } = await page.data.load();
+const pageTree = await source.serializePageTree(source.getPageTree(${i18n ? 'lang' : ''}));
+${i18n ? 'const provider = { lang, pathname: Astro.url.pathname, params: Astro.params };\n' : ''}---
+
+<Layout
+  title={page.data.title}
+  description={page.data.description}${i18n ? '\n  lang={lang}' : ''}
+>
+  <Docs
+    client:load
+    transition:persist="docs"
+    ${i18n ? '{...provider}' : 'pathname={Astro.url.pathname}\n    params={Astro.params}'}
+    tree={pageTree}
+    title={page.data.title}
+    description={page.data.description}
+    toc={toc}
+  >
+    <Content${i18n ? ' {...provider}' : ''} />
+  </Docs>
+</Layout>
+`,
+      'pages/api/search.ts': `import type { APIRoute } from 'astro';
+import { createFromSource } from 'fumadocs-core/search/server';
+import { source } from '@/lib/source';
+
+const server = createFromSource(source);
+
+export const GET: APIRoute = ${input.static ? '() => server.staticGET()' : '({ request }) => server.GET(request)'};
+`,
+    };
+  },
 };
+
+export const astroContentConfig = `import { defineCollection } from 'astro:content';
+import { metaLoader, pageLoader } from '@fumadocs/astro/loaders';
+
+export const collections = {
+  docs: defineCollection({ loader: pageLoader() }),
+  meta: defineCollection({ loader: metaLoader() }),
+};
+`;
 
 export const nextProxy = `import { createI18nMiddleware } from 'fumadocs-core/i18n/middleware';
 import { i18n } from '@/lib/i18n';

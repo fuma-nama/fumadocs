@@ -196,6 +196,99 @@ test('add vite plugin: nested path & skip existing', () => {
   expect(file.s.hasChanged()).toBe(false);
 });
 
+test('add astro integrations', () => {
+  const file = parseSourceFile(
+    'astro.config.mjs',
+    `import { defineConfig } from 'astro/config';
+import react from '@astrojs/react';
+import tailwindcss from '@tailwindcss/vite';
+
+export default defineConfig({
+  integrations: [react()],
+  vite: {
+    plugins: [tailwindcss()],
+  },
+});
+`,
+  );
+  for (const plugin of [
+    { name: 'react', from: '@astrojs/react' },
+    {
+      name: 'fumadocs',
+      from: '@fumadocs/astro',
+      call: "fumadocs({ components: './src/components/mdx.tsx' })",
+    },
+  ])
+    expect(addVitePlugin(file, { ...plugin, default: true }, ['integrations'])).toBe(true);
+  expect(
+    addVitePlugin(file, { name: 'tailwindcss', from: '@tailwindcss/vite', default: true }, [
+      'vite',
+      'plugins',
+    ]),
+  ).toBe(true);
+  expect(file.s.toString()).toMatchInlineSnapshot(`
+    "import { defineConfig } from 'astro/config';
+    import react from '@astrojs/react';
+    import tailwindcss from '@tailwindcss/vite';
+    import fumadocs from '@fumadocs/astro';
+
+    export default defineConfig({
+      integrations: [react(), fumadocs({ components: './src/components/mdx.tsx' })],
+      vite: {
+        plugins: [tailwindcss()],
+      },
+    });
+    "
+  `);
+});
+
+test('add vite plugin: empty config of Astro', () => {
+  const file = parseSourceFile(
+    'astro.config.mjs',
+    `import { defineConfig } from 'astro/config';
+
+export default defineConfig({});
+`,
+  );
+  expect(
+    addVitePlugin(file, { name: 'react', from: '@astrojs/react', default: true }, ['integrations']),
+  ).toBe(true);
+  expect(file.s.toString()).toMatchInlineSnapshot(`
+    "import { defineConfig } from 'astro/config';
+    import react from '@astrojs/react';
+
+    export default defineConfig({
+      integrations: [react()],
+    });
+    "
+  `);
+});
+
+test('add vite plugin: create missing objects', () => {
+  const file = parseSourceFile(
+    'astro.config.mjs',
+    `export default defineConfig({
+  integrations: [react()],
+});
+`,
+  );
+  expect(
+    addVitePlugin(file, { name: 'tailwindcss', from: '@tailwindcss/vite', default: true }, [
+      'vite',
+      'plugins',
+    ]),
+  ).toBe(true);
+  expect(file.s.toString()).toMatchInlineSnapshot(`
+    "import tailwindcss from '@tailwindcss/vite';
+
+    export default defineConfig({
+      integrations: [react()],
+      vite: { plugins: [tailwindcss()] },
+    });
+    "
+  `);
+});
+
 test('wrap next config', () => {
   const file = parseSourceFile(
     'next.config.mjs',
@@ -246,6 +339,32 @@ test('enable processed markdown', () => {
     "
   `);
   expect(enableProcessedMarkdown(parseSourceFile('source.ts', file.s.toString()))).toBe(true);
+});
+
+test('enable processed markdown: astro integration', () => {
+  const config = (integration: string) =>
+    parseSourceFile(
+      'astro.config.mjs',
+      `import fumadocs from '@fumadocs/astro';
+
+export default defineConfig({
+  integrations: [${integration}],
+});
+`,
+    );
+  const options = config("fumadocs({ components: './src/components/mdx.tsx' })");
+  expect(enableProcessedMarkdown(options)).toBe(true);
+  expect(options.s.toString()).toContain(
+    "fumadocs({ components: './src/components/mdx.tsx', includeProcessedMarkdown: true })",
+  );
+
+  const empty = config('fumadocs()');
+  expect(enableProcessedMarkdown(empty)).toBe(true);
+  expect(empty.s.toString()).toContain('fumadocs({ includeProcessedMarkdown: true })');
+
+  const disabled = config('fumadocs({ includeProcessedMarkdown: false })');
+  expect(enableProcessedMarkdown(disabled)).toBe(true);
+  expect(disabled.s.toString()).toContain('fumadocs({ includeProcessedMarkdown: true })');
 });
 
 test('transform react router config: add exclude', async () => {
