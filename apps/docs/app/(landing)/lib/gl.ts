@@ -16,8 +16,6 @@ interface ShaderCanvasOptions {
   /** how much of the canvas is on screen, 0 to 1, each time that crosses 0 or one of `thresholds` */
   onVisible?: (ratio: number) => void;
   thresholds?: number[];
-  /** the most canvas pixels per CSS pixel it draws at */
-  density?: number;
   /** keeps what it drew, so a change shown in a box of the canvas redraws that box alone */
   preserve?: boolean;
 }
@@ -40,7 +38,6 @@ export function createShaderCanvas(
     onResize,
     onVisible,
     thresholds = [],
-    density = 2,
     preserve = false,
   }: ShaderCanvasOptions,
 ) {
@@ -241,13 +238,15 @@ export function createShaderCanvas(
     raf = 0;
   }
 
-  // whole device pixels per canvas pixel, so a 3x screen's pixels stretch evenly over 1.5x
+  // a canvas pixel a CSS pixel at most, a whole number of device pixels each: the figures draw
+  // their dither and outlines in CSS pixels, a phone's 3x would only triple the work
   let dpr = 1;
 
-  /** a drawing buffer the canvas's size while it's on screen, none off screen */
+  /** a drawing buffer the canvas's size, kept off screen: one made again each time it came back
+   * cost a phone a buffer and a whole frame, where the last one still shows */
   function fit() {
-    const width = onScreen ? Math.max(1, Math.round(canvas.clientWidth * dpr)) : 1;
-    const height = onScreen ? Math.max(1, Math.round(canvas.clientHeight * dpr)) : 1;
+    const width = Math.max(1, Math.round(canvas.clientWidth * dpr));
+    const height = Math.max(1, Math.round(canvas.clientHeight * dpr));
     if (canvas.width === width && canvas.height === height) return;
     // resizing clears it
     stale = true;
@@ -259,7 +258,7 @@ export function createShaderCanvas(
 
   // resizing clears the canvas, and a frame requested now would come after this one paints it blank
   const resize = new ResizeObserver(() => {
-    dpr = window.devicePixelRatio / Math.ceil(window.devicePixelRatio / density);
+    dpr = window.devicePixelRatio / Math.ceil(window.devicePixelRatio);
     canvas.style.imageRendering = dpr < window.devicePixelRatio ? 'pixelated' : '';
     set('uDpr', dpr);
     fit();
@@ -272,7 +271,7 @@ export function createShaderCanvas(
       const entry = entries[entries.length - 1];
       if (entry.isIntersecting !== onScreen) {
         onScreen = entry.isIntersecting;
-        fit();
+        // back on screen it draws only what changed while it was away
         if (onScreen) draw();
         else pause();
       }

@@ -1540,8 +1540,7 @@ export function createPress(stage: HTMLElement): () => void {
     if (b && (!begun || clock >= b.typed)) press(b);
   }
 
-  /** the arm's canvas and context, made as the stage first comes on screen and kept: off screen
-   * its drawing buffer shrinks away */
+  /** the arm's canvas and context, made as the stage first comes on screen and kept */
   function show() {
     canvas = document.createElement('canvas');
     canvas.className = 'pointer-events-none absolute inset-0 z-2 size-full';
@@ -1550,7 +1549,6 @@ export function createPress(stage: HTMLElement): () => void {
     shader = createShaderCanvas(canvas, {
       fragment,
       onFrame,
-      density: 1,
       onResize(dpr) {
         density = dpr;
         refresh();

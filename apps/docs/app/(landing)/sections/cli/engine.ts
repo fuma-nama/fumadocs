@@ -254,8 +254,6 @@ export function createCli(root: HTMLElement): () => void {
     fragment,
     onResize: layout,
     onVisible,
-    // the dither and the outlines are whole CSS px, one canvas px each
-    density: 1,
     preserve: true,
   });
   if (!shader) {
