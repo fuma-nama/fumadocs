@@ -281,11 +281,11 @@ function createSand(host: HTMLElement): () => void {
     const dt = Math.min(250, now - (last || now));
     last = now;
     steps += (dt * RATE) / 1000;
-    while (steps >= 1) {
-      step(now);
-      steps--;
+    // a 60 or 120 Hz screen has frames between steps, with nothing new to draw
+    if (steps >= 1) {
+      for (; steps >= 1; steps--) step(now);
+      draw();
     }
-    draw();
     raf = requestAnimationFrame(frame);
   }
 
