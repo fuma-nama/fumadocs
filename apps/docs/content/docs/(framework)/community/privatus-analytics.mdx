@@ -1,0 +1,94 @@
+---
+title: Privatus Analytics
+description: See how many people read your docs, without cookies.
+---
+
+> This is a community-maintained integration.
+
+You want to know which docs pages people read and where they come from. Many analytics tools use cookies, so in many countries you must show a cookie pop-up first. Many visitors click no, and they never show up in your numbers.
+
+[Privatus Analytics](https://privatusanalytics.com) counts visits without cookies and keeps no IP addresses. Known bots are left out. The [`@privatus-analytics/next`](https://www.npmjs.com/package/@privatus-analytics/next) package adds its script to your Fumadocs site with one tag. There is a free plan with 10,000 events a month on up to 3 sites, and it needs no card.
+
+## Setup
+
+You need a Privatus Analytics site id. It starts with `pa_`, and you find it under **Site settings**, **Tracking**.
+
+### 1. Install the package
+
+```package-install
+@privatus-analytics/next
+```
+
+### 2. Set your site id
+
+```bash title=".env"
+PRIVATUS_SITE_ID=pa_YOURSITEID
+```
+
+Set it where you run `next build`, not only where the site runs. Pages that Next.js renders at build time read it then, so a value that only exists at run time leaves those pages without the tracker. You can also pass it to the tag as `siteId`.
+
+### 3. Add the tag
+
+Put `<PrivatusAnalyticsTag />` in the `<head>` of your root layout. It works in Server Components. Keep the rest of your layout as it is.
+
+```tsx title="app/layout.tsx"
+import { RootProvider } from 'fumadocs-ui/provider/next';
+import { PrivatusAnalyticsTag } from '@privatus-analytics/next/server';
+import type { ReactNode } from 'react';
+
+export default function Layout({ children }: { children: ReactNode }) {
+  return (
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <PrivatusAnalyticsTag modules={['engage', 'auto', 'vitals', 'clicks', 'ask']} />
+      </head>
+      <body className="flex flex-col min-h-screen">
+        <RootProvider>{children}</RootProvider>
+      </body>
+    </html>
+  );
+}
+```
+
+The tag only prints in production (`next build` and `next start`). It prints nothing in `next dev`, so your own visits while you write are not counted. Fumadocs changes pages without a full reload, and the script notices each page change by itself.
+
+## Without the package
+
+You can add the script tag by hand instead:
+
+```tsx title="app/layout.tsx"
+<head>
+  <script
+    defer
+    src="https://privatusstats.com/js/pa.js"
+    data-site="pa_YOURSITEID"
+    data-modules="engage,auto,vitals,clicks,ask"
+  />
+</head>
+```
+
+## Track events
+
+To count an action, like a download, call `usePrivatus()` in a Client Component. This needs the package:
+
+```tsx
+'use client';
+import { usePrivatus } from '@privatus-analytics/next';
+
+export function DownloadButton() {
+  const privatus = usePrivatus();
+  return (
+    <button onClick={() => privatus.track('Download', { file: 'guide.pdf' })}>Download</button>
+  );
+}
+```
+
+If you added the script tag by hand, you can add an attribute instead. The script reads it in the browser:
+
+```tsx
+<a href="/guide.pdf" data-privatus-event="Download" data-privatus-prop-file="guide.pdf">
+  Download
+</a>
+```
+
+See the [package README](https://github.com/Privatus-Analytics/js/tree/main/next) for every setting, and the [Privatus Analytics docs](https://privatusanalytics.com/docs) for the dashboard.
