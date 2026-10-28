@@ -74,9 +74,9 @@
   }
 }
 
-/* nothing plays while the board is off screen */
+/* nothing plays off screen, so no layer is kept for it */
 [data-paused] :is(.bt-a, .bt-marquee) {
-  animation-play-state: paused;
+  animation: none;
 }
 
 @media (prefers-reduced-motion: reduce) {

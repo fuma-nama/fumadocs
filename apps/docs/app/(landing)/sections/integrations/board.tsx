@@ -143,12 +143,12 @@ export function Keyed({ className, children }: { className: string; children: Re
   );
 }
 
-/** the board plays while some of it is on screen */
+/** a card plays its mechanism, and the row under the board rolls, only while it is on screen */
 function playOnScreen(board: HTMLDivElement) {
-  const observer = new IntersectionObserver(([entry]) => {
-    board.toggleAttribute('data-paused', !entry.isIntersecting);
+  const observer = new IntersectionObserver((entries) => {
+    for (const entry of entries) entry.target.toggleAttribute('data-paused', !entry.isIntersecting);
   });
-  observer.observe(board);
+  for (const el of board.querySelectorAll('.bt-cell, .bt-more')) observer.observe(el);
   return () => observer.disconnect();
 }
 

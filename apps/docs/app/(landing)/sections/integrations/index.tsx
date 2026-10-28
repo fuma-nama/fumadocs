@@ -46,7 +46,7 @@ function More() {
   }
 
   return (
-    <Keyed className="group/more flex">
+    <Keyed className="bt-more group/more flex">
       <p className="flex shrink-0 items-center border-e border-lp-line px-(--lp-gutter) font-pixel text-sm text-lp-orange">
         +{more.length} more
       </p>
