@@ -227,8 +227,8 @@ export function Cli() {
   for (let i = 0; i < plans.length; i++) {
     const plan = plans[i];
     for (const delivery of deliveries(plan)) {
-      // each file a layer of its own, moved without a repaint; a later file always stands nearer
-      // the viewer, so the order they come in stacks them
+      // each file a layer of its own while it's carried (the engine's), moved without a repaint; a
+      // later file always stands nearer the viewer, so the order they come in stacks them
       cards.push(
         <div
           key={`${plan.id}:${delivery.path}`}
@@ -236,7 +236,7 @@ export function Cli() {
           data-scene={i}
           data-reveals={delivery.reveals.join(' ')}
           inert={i > 0}
-          className="invisible absolute top-0 left-0 flex h-6 origin-top-left items-center gap-1.5 border border-lp-line-strong bg-lp-paper px-2 font-mono text-xs whitespace-nowrap will-change-transform"
+          className="invisible absolute top-0 left-0 flex h-6 origin-top-left items-center gap-1.5 border border-lp-line-strong bg-lp-paper px-2 font-mono text-xs whitespace-nowrap"
         >
           <FileIcon className="size-3.5 text-lp-ink-2" />
           {delivery.name}
