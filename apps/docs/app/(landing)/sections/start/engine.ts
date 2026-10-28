@@ -11,6 +11,7 @@ import {
   createAtlas,
   fragment,
   framedView,
+  GLASS,
   insideView,
   paint,
   terminalRect,
@@ -39,6 +40,8 @@ export function createStart(pin: HTMLElement): () => void {
     onResize: layout,
     onVisible,
     thresholds: [0.5],
+    // the session's text changes only the glass
+    preserve: true,
   });
   if (!shader) return () => {};
   const gl = shader;
@@ -53,6 +56,8 @@ export function createStart(pin: HTMLElement): () => void {
   let height = 0;
   let inside: View | undefined;
   let final: View | undefined;
+  /** the camera the canvas last drew from */
+  let drawn: View | undefined;
   let moon: Vec3 = [0, -100, -400];
   let moonRadius = 1;
   let horizonX = 0;
@@ -168,6 +173,7 @@ export function createStart(pin: HTMLElement): () => void {
     const dolly = 1 - (1 - clamp(progress / 0.7)) ** 1.6;
     const e = swing(progress);
     const view = pinned ? viewAt(inside, final, dolly, e) : final;
+    drawn = view;
     gl.set('uEye', view.eye);
     gl.set('uYaw', view.yaw);
     gl.set('uFocal', view.focal);
@@ -207,7 +213,7 @@ export function createStart(pin: HTMLElement): () => void {
 
   function render(frame: Frame) {
     paint(frame, chars.data, density!);
-    gl.texture('uChars', chars);
+    gl.texture('uChars', chars, drawn && terminalRect(drawn, width, height, GLASS));
     if (frame.status) report(pin, frame.status);
   }
 

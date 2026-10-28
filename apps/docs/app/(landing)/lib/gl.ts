@@ -1,3 +1,5 @@
+import type { Rect } from './motion';
+
 type Uniform = number | readonly number[];
 
 const VERTEX = `#version 300 es
@@ -16,6 +18,8 @@ interface ShaderCanvasOptions {
   thresholds?: number[];
   /** the most canvas pixels per CSS pixel it draws at */
   density?: number;
+  /** keeps what it drew, so a texture shown in a box of the canvas redraws that box alone */
+  preserve?: boolean;
 }
 
 export type ShaderCanvas = NonNullable<ReturnType<typeof createShaderCanvas>>;
@@ -30,9 +34,18 @@ export type ShaderCanvas = NonNullable<ReturnType<typeof createShaderCanvas>>;
  */
 export function createShaderCanvas(
   canvas: HTMLCanvasElement,
-  { fragment, onFrame, onResize, onVisible, thresholds = [], density = 2 }: ShaderCanvasOptions,
+  {
+    fragment,
+    onFrame,
+    onResize,
+    onVisible,
+    thresholds = [],
+    density = 2,
+    preserve = false,
+  }: ShaderCanvasOptions,
 ) {
   const gl = canvas.getContext('webgl2', {
+    preserveDrawingBuffer: preserve,
     antialias: false,
     depth: false,
     stencil: false,
@@ -70,8 +83,9 @@ export function createShaderCanvas(
   /** each uniform as last written, and those set before the link, written then */
   const written = new Map<string, number | number[]>();
   const pending = new Map<string, Uniform>();
-  /** what the canvas shows changed since it last drew */
-  let stale = true;
+  /** what the canvas shows changed since it last drew: all of it, a box of canvas px from its
+   * bottom left, or nothing */
+  let stale: boolean | [x: number, y: number, w: number, h: number] = true;
 
   function write(name: string, value: Uniform) {
     let location = locations.get(name);
@@ -111,8 +125,9 @@ export function createShaderCanvas(
   }
 
   const textures = new Map<string, { tex: WebGLTexture; unit: number }>();
-  /** uploads an image or canvas to a `sampler2D` uniform, again after drawing to it */
-  function texture(name: string, source: TexImageSource) {
+  /** uploads an image or canvas to a `sampler2D` uniform, again after drawing to it; `box`, CSS px,
+   * is where it shows, when the canvas `preserve`s what it drew */
+  function texture(name: string, source: TexImageSource, box?: Rect) {
     const known = textures.get(name);
     const entry = known ?? { tex: gl!.createTexture(), unit: textures.size };
     gl!.activeTexture(gl!.TEXTURE0 + entry.unit);
@@ -127,7 +142,16 @@ export function createShaderCanvas(
     }
     gl!.pixelStorei(gl!.UNPACK_FLIP_Y_WEBGL, true);
     gl!.texImage2D(gl!.TEXTURE_2D, 0, gl!.RGBA, gl!.RGBA, gl!.UNSIGNED_BYTE, source);
-    stale = true;
+    if (stale === false && box && preserve) {
+      const x = Math.floor(box.x * dpr);
+      const y = Math.floor(canvas.height - (box.y + box.h) * dpr);
+      stale = [
+        x,
+        y,
+        Math.ceil((box.x + box.w) * dpr) - x,
+        Math.ceil(canvas.height - box.y * dpr) - y,
+      ];
+    } else stale = true;
     invalidate();
   }
 
@@ -167,7 +191,12 @@ export function createShaderCanvas(
     }
     onFrame?.((now - start) / 1000);
     if (!linked || !stale) return;
+    if (stale !== true) {
+      gl!.enable(gl!.SCISSOR_TEST);
+      gl!.scissor(stale[0], stale[1], stale[2], stale[3]);
+    }
     gl!.drawArrays(gl!.TRIANGLES, 0, 3);
+    gl!.disable(gl!.SCISSOR_TEST);
     stale = false;
   }
 

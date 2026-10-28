@@ -14,8 +14,14 @@ const SCREEN = { c: [0, 2.2, 1.3], b: [1.89, 1.08] } as const;
 const GRID = [1.38, 0.8625] as const;
 /** the glass bulges out to this z at its centre */
 const GLASS_Z = 1.22;
+type Box = { readonly min: readonly number[]; readonly max: readonly number[] };
 /** visible extent, for framing */
-const BOUNDS = { min: [-2.3, 0, -2.35], max: [2.3, 3.6, 1.3] } as const;
+const BOUNDS: Box = { min: [-2.3, 0, -2.35], max: [2.3, 3.6, 1.3] };
+/** the screen's recess: the glass, where the session shows */
+export const GLASS: Box = {
+  min: [SCREEN.c[0] - SCREEN.b[0], SCREEN.c[1] - SCREEN.b[1], SCREEN.c[2] - 0.3],
+  max: [SCREEN.c[0] + SCREEN.b[0], SCREEN.c[1] + SCREEN.b[1], SCREEN.c[2] + 0.3],
+};
 
 export const fragment = `#version 300 es
 precision highp float;
@@ -404,8 +410,8 @@ function project(view: View, x: number, y: number, z: number): [x: number, y: nu
   return [((vx * c - vz * s) / depth) * view.focal, ((view.eye[1] - y) / depth) * view.focal];
 }
 
-/** projected bounds of the terminal in stage CSS px */
-export function terminalRect(view: View, width: number, height: number): Rect {
+/** projected bounds of the terminal, or a part of it, in stage CSS px */
+export function terminalRect(view: View, width: number, height: number, box = BOUNDS): Rect {
   let minX = Infinity;
   let minY = Infinity;
   let maxX = -Infinity;
@@ -413,9 +419,9 @@ export function terminalRect(view: View, width: number, height: number): Rect {
   for (let i = 0; i < 8; i++) {
     const [x, y] = project(
       view,
-      i & 1 ? BOUNDS.max[0] : BOUNDS.min[0],
-      i & 2 ? BOUNDS.max[1] : BOUNDS.min[1],
-      i & 4 ? BOUNDS.max[2] : BOUNDS.min[2],
+      i & 1 ? box.max[0] : box.min[0],
+      i & 2 ? box.max[1] : box.min[1],
+      i & 4 ? box.max[2] : box.min[2],
     );
     minX = Math.min(minX, x);
     minY = Math.min(minY, y);
