@@ -74,11 +74,7 @@ export const asyncapi = createAsyncAPI({
 });
 ```
 
-Then load each document once per browser session:
-
-<Tabs items={['Next.js', 'React Router', 'Tanstack Start', 'Waku', 'Astro']}>
-
-<Tab value="Next.js">
+On Next.js, Waku, React Router and Astro, `<AsyncAPIPage />` loads each document once per browser session with `loadDocument`, it also runs during server rendering:
 
 ```tsx title="components/api-page.tsx"
 'use client';
@@ -87,6 +83,7 @@ import { createAsyncAPIPage } from '@fumadocs/asyncapi/ui';
 
 export const AsyncAPIPage = createAsyncAPIPage({
   async loadDocument(id) {
+    // `import.meta.env.SSR` on Waku, React Router and Astro
     if (typeof window === 'undefined') {
       // the browser starts downloading it with the page
       preload(`/api/asyncapi/${id}`, { as: 'fetch', crossOrigin: 'anonymous' });
@@ -98,7 +95,9 @@ export const AsyncAPIPage = createAsyncAPIPage({
 });
 ```
 
-```ts title="app/api/asyncapi/[id]/route.ts"
+And serve documents to the browser:
+
+```ts tab="Next.js" title="app/api/asyncapi/[id]/route.ts"
 import { asyncapi } from '@/lib/asyncapi';
 
 export async function GET(_req: Request, { params }: RouteContext<'/api/asyncapi/[id]'>) {
@@ -111,29 +110,16 @@ export async function generateStaticParams() {
 }
 ```
 
-</Tab>
+```ts tab="Waku" title="src/pages/_api/api/asyncapi/[id].ts"
+import type { ApiContext } from 'waku/router';
+import { asyncapi } from '@/lib/asyncapi';
 
-<Tab value="React Router">
-
-```tsx title="app/components/api-page.tsx"
-'use client';
-import { preload } from 'react-dom';
-import { createAsyncAPIPage } from '@fumadocs/asyncapi/ui';
-
-export const AsyncAPIPage = createAsyncAPIPage({
-  async loadDocument(id) {
-    if (import.meta.env.SSR) {
-      // the browser starts downloading it with the page
-      preload(`/api/asyncapi/${id}`, { as: 'fetch', crossOrigin: 'anonymous' });
-      const { asyncapi } = await import('@/lib/asyncapi');
-      return (await asyncapi.getSchema(id)).bundled;
-    }
-    return (await fetch(`/api/asyncapi/${id}`)).json();
-  },
-});
+export async function GET(_: Request, { params }: ApiContext<'/api/asyncapi/[id]'>) {
+  return Response.json((await asyncapi.getSchema(params.id)).bundled);
+}
 ```
 
-```ts title="app/routes/asyncapi.ts"
+```ts tab="React Router" title="app/routes/asyncapi.ts"
 import type { Route } from './+types/asyncapi';
 import { asyncapi } from '@/lib/asyncapi';
 
@@ -142,7 +128,7 @@ export async function loader({ params }: Route.LoaderArgs) {
 }
 ```
 
-```ts title="app/routes.ts"
+```ts tab="React Router" title="app/routes.ts"
 import { route, type RouteConfig } from '@react-router/dev/routes';
 
 export default [
@@ -152,11 +138,20 @@ export default [
 ] satisfies RouteConfig;
 ```
 
-</Tab>
+```ts tab="Astro" title="src/pages/api/asyncapi/[id].ts"
+import type { APIRoute, GetStaticPaths } from 'astro';
+import { asyncapi } from '@/lib/asyncapi';
 
-<Tab value="Tanstack Start">
+export const getStaticPaths = (async () => {
+  return Object.keys(await asyncapi.getSchemas()).map((id) => ({ params: { id } }));
+}) satisfies GetStaticPaths;
 
-Route loaders run on both sides, call a server function only when the browser doesn't have the document yet:
+export const GET: APIRoute = async ({ params }) => {
+  return Response.json((await asyncapi.getSchema(params.id!)).bundled);
+};
+```
+
+On Tanstack Start, route loaders run on both sides, call a server function only when the browser doesn't have the document yet:
 
 ```tsx title="src/routes/docs/$.tsx"
 import { createServerFn } from '@tanstack/react-start';
@@ -191,73 +186,6 @@ function Page() {
 }
 ```
 
-With generated MDX files, put documents in `preloaded.docs` instead.
-
-</Tab>
-
-<Tab value="Waku">
-
-```tsx title="src/components/api-page.tsx"
-'use client';
-import { preload } from 'react-dom';
-import { createAsyncAPIPage } from '@fumadocs/asyncapi/ui';
-
-export const AsyncAPIPage = createAsyncAPIPage({
-  async loadDocument(id) {
-    if (import.meta.env.SSR) {
-      // the browser starts downloading it with the page
-      preload(`/api/asyncapi/${id}`, { as: 'fetch', crossOrigin: 'anonymous' });
-      const { asyncapi } = await import('@/lib/asyncapi');
-      return (await asyncapi.getSchema(id)).bundled;
-    }
-    return (await fetch(`/api/asyncapi/${id}`)).json();
-  },
-});
-```
-
-```ts title="src/pages/_api/api/asyncapi/[id].ts"
-import type { ApiContext } from 'waku/router';
-import { asyncapi } from '@/lib/asyncapi';
-
-export async function GET(_: Request, { params }: ApiContext<'/api/asyncapi/[id]'>) {
-  return Response.json((await asyncapi.getSchema(params.id)).bundled);
-}
-```
-
-</Tab>
-
-<Tab value="Astro">
-
-```tsx title="src/components/api-page.tsx"
-import { createAsyncAPIPage } from '@fumadocs/asyncapi/ui';
-
-export const AsyncAPIPage = createAsyncAPIPage({
-  async loadDocument(id) {
-    if (import.meta.env.SSR) {
-      const { asyncapi } = await import('@/lib/asyncapi');
-      return (await asyncapi.getSchema(id)).bundled;
-    }
-    return (await fetch(`/api/asyncapi/${id}`)).json();
-  },
-});
-```
-
-```ts title="src/pages/api/asyncapi/[id].ts"
-import type { APIRoute, GetStaticPaths } from 'astro';
-import { asyncapi } from '@/lib/asyncapi';
-
-export const getStaticPaths = (async () => {
-  return Object.keys(await asyncapi.getSchemas()).map((id) => ({ params: { id } }));
-}) satisfies GetStaticPaths;
-
-export const GET: APIRoute = async ({ params }) => {
-  return Response.json((await asyncapi.getSchema(params.id!)).bundled);
-};
-```
-
-</Tab>
-
-</Tabs>
-
+- With generated MDX files, only Tanstack Start needs a change: put documents in `preloaded.docs` instead.
 - For the [UI installed by Fumadocs CLI](/docs/integrations/asyncapi/api-page#full-ui), pass `loadDocument` to `createAsyncAPIRenderer()`.
 - Browsers keep each document until a reload. With [`disableCache`](#disablecache), leave `includeDocument` on.

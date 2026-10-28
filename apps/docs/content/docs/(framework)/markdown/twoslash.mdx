@@ -12,6 +12,16 @@ Type information is resolved by the native TypeScript 7 compiler, from the worki
 fumadocs-twoslash
 ```
 
+For Next.js, you need to externalize the following deps:
+
+```js title="next.config.mjs (Next.js)"
+const config = {
+  reactStrictMode: true,
+  // [!code ++]
+  serverExternalPackages: ['typescript'],
+};
+```
+
 Add to your Shiki transformers.
 
 ```ts tab="Fumadocs MDX" title="source.config.ts"
@@ -46,20 +56,6 @@ fumadocs({
   },
 });
 ```
-
-<Callout title="Next.js">
-
-Externalize TypeScript:
-
-```js title="next.config.mjs"
-const config = {
-  reactStrictMode: true,
-  // [!code ++]
-  serverExternalPackages: ['typescript'],
-};
-```
-
-</Callout>
 
 Add styles, Tailwind CSS v4 is required.
 

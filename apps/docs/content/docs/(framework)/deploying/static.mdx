@@ -28,7 +28,7 @@ Since the search functionality is powered by remote servers, static export works
 
 <Tab value="Next.js">
 
-Enable static export, it outputs the app as a static HTML site without a Node.js server.
+You can enable Next.js static export, it allows you to export the app as a static HTML site without a Node.js server.
 
 ```js title="next.config.mjs"
 /**
@@ -51,7 +51,7 @@ See [Next.js docs](https://nextjs.org/docs/app/guides/static-exports) for limita
 
 <Tab value="React Router">
 
-Configure SPA mode, and serve the `build/client` directory as a static website.
+By configuring SPA mode, you can serve the `build/client` directory as a static website.
 
 <Callout type="warning" title="Don't forget to pre-render">
 
@@ -89,7 +89,7 @@ export default {
 
 <Tab value="Tanstack Start">
 
-Configure SPA mode and pre-rendering, see [SPA Mode](https://tanstack.com/start/latest/docs/framework/react/guide/spa-mode) for details.
+Configure SPA mode and pre-rendering, refer to [SPA Mode](https://tanstack.com/start/latest/docs/framework/react/guide/spa-mode) for deploying SPA apps with Tanstack Start.
 
 ```ts title="vite.config.ts"
 import { tanstackStart } from '@tanstack/react-start/plugin/vite';
@@ -121,7 +121,7 @@ export default defineConfig({
 
 <Tab value="Waku">
 
-Waku serves your site statically when all pages are configured with `static` render mode.
+Waku can serve your site statically when all pages are configured with `static` render mode.
 
 See [Deployment](https://waku.gg/#deployment) for details.
 

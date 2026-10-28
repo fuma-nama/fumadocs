@@ -20,6 +20,7 @@ Move your pages into a `[...lang]` folder. With `hideLocale: 'default-locale'`, 
 <Files>
   <Folder name="src/pages" defaultOpen>
     <Folder name="[...lang]" defaultOpen>
+      <File name="index.astro" />
       <File name="docs/[...slug].astro" />
     </Folder>
     <Folder name="api" defaultOpen>
@@ -56,24 +57,26 @@ The `wrapper` of your MDX components receives the props of `<Content />`, wrap t
 
 ### Pass Locale
 
-Pass the locale to Fumadocs in your pages and islands:
+Pass the locale to Fumadocs in your pages and layouts.
 
 <include cwd meta='tab="src/lib/source.ts"'>
   ../../examples/astro-i18n/src/lib/source.ts
 </include>
-<include cwd meta='tab="src/pages/[...lang]/docs/[...slug].astro"'>
+<include cwd meta='tab="Home Page" title="src/pages/[...lang]/index.astro"'>
+  ../../examples/astro-i18n/src/pages/[...lang]/index.astro
+</include>
+<include cwd meta='tab="Docs Page" title="src/pages/[...lang]/docs/[...slug].astro"'>
   ../../examples/astro-i18n/src/pages/[...lang]/docs/[...slug].astro
 </include>
-<include cwd meta='tab="src/components/docs.tsx"'>
+<include cwd meta='tab="Docs Island" title="src/components/docs.tsx"'>
   ../../examples/astro-i18n/src/components/docs.tsx
 </include>
 
-- Your HTML layout can set `<html lang={lang}>` from the `lang` prop.
-- Other islands need `lang` too, like the [home page](https://github.com/fuma-nama/fumadocs/blob/dev/examples/astro-i18n/src/pages/%5B...lang%5D/index.astro) of the example.
+Your HTML layout can set `<html lang={lang}>` from the `lang` prop.
 
 ### Search
 
-The search endpoint indexes every language, pass the locale to the search dialog to search the current one:
+The search endpoint indexes every language, the [search dialog](/docs/manual-installation/astro#search) searches the current one with `useI18n()`:
 
 <include cwd meta='tab="src/components/search.tsx"'>
   ../../examples/astro-i18n/src/components/search.tsx
