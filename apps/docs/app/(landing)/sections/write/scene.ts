@@ -55,6 +55,8 @@ precision highp float;
 
 uniform vec2 uResolution;
 uniform float uDpr;
+/** a zero the compiler can't see: a loop from it stays a loop, so the rig in it compiles in once */
+#define ZERO min(int(uDpr), 0)
 uniform vec3 uCam;
 uniform vec2 uB;
 uniform float uS;
@@ -438,11 +440,12 @@ vec3 local(vec3 p) { return vec3((p.xy - uB) / uS, p.z / uS); }
 float sdf(vec3 p) { return rig(local(p)) * uS; }
 
 vec3 normalAt(vec3 p, float e0) {
-  const vec2 k = vec2(1.0, -1.0);
-  return normalize(
-    k.xyy * sdf(p + k.xyy * e0) + k.yyx * sdf(p + k.yyx * e0) +
-    k.yxy * sdf(p + k.yxy * e0) + k.xxx * sdf(p + k.xxx * e0)
-  );
+  vec3 n = vec3(0.0);
+  for (int i = ZERO; i < 4; i++) {
+    vec3 k = vec3(((i + 1) & 2) == 0 ? 1.0 : -1.0, (i & 2) == 0 ? -1.0 : 1.0, (i & 1) == 0 ? -1.0 : 1.0);
+    n += k * sdf(p + k * e0);
+  }
+  return normalize(n);
 }
 
 /** whether her outline covers screen point px */

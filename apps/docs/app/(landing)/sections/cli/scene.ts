@@ -45,6 +45,8 @@ out vec4 color;
 ${bayer8}
 
 int gMask;
+/** a zero the compiler can't see: a loop from it stays a loop, so the scene in it compiles in once */
+#define ZERO min(int(uCell), 0)
 
 float sdBox(vec3 p, vec3 b) {
   vec3 q = abs(p) - b;
@@ -251,11 +253,12 @@ vec2 map(vec3 p) {
 }
 
 vec3 normalAt(vec3 p, float e) {
-  const vec2 k = vec2(1.0, -1.0);
-  return normalize(
-    k.xyy * map(p + k.xyy * e).x + k.yyx * map(p + k.yyx * e).x +
-    k.yxy * map(p + k.yxy * e).x + k.xxx * map(p + k.xxx * e).x
-  );
+  vec3 n = vec3(0.0);
+  for (int i = ZERO; i < 4; i++) {
+    vec3 k = vec3(((i + 1) & 2) == 0 ? 1.0 : -1.0, (i & 2) == 0 ? -1.0 : 1.0, (i & 1) == 0 ? -1.0 : 1.0);
+    n += k * map(p + k * e).x;
+  }
+  return normalize(n);
 }
 
 /** how sharply the surface bends within w of p, d from it */
@@ -263,8 +266,10 @@ float bend(vec3 p, vec3 n, float w, float d) {
   vec3 t1 = normalize(cross(n, abs(n.y) < 0.9 ? vec3(0.0, 1.0, 0.0) : vec3(1.0, 0.0, 0.0)));
   vec3 t2 = cross(n, t1);
   float c = 2.0 * d;
-  float a = map(p + t1 * w).x + map(p - t1 * w).x - c;
-  float b = map(p + t2 * w).x + map(p - t2 * w).x - c;
+  float s[4];
+  for (int i = ZERO; i < 4; i++) s[i] = map(p + (i < 2 ? t1 : t2) * ((i & 1) == 0 ? w : -w)).x;
+  float a = s[0] + s[1] - c;
+  float b = s[2] + s[3] - c;
   return max(abs(a), abs(b)) / w;
 }
 
@@ -316,6 +321,8 @@ void main() {
   float tBack = onFloor ? tFloor : tWall;
 
   float hit = -1.0;
+  // the scene where the march stops: at the hit, when it hits
+  vec2 m = vec2(0.0);
   float edge = 1e9;
   float edgeT = 1e9;
   if (gMask != 0) {
@@ -325,21 +332,25 @@ void main() {
     float d1 = 1e9;
     float t1 = t;
     for (int i = 0; i < 96; i++) {
-      float d = map(ro + rd * t).x;
+      m = map(ro + rd * t);
+      float d = m.x;
       if (d < 0.25 * t * pixel) { hit = t; break; }
       // a ray grazing a silhouette: an outline at its nearest approach
       if (d > d1 && d1 < d0 && d1 < 3.0 * t1 * pixel) {
         float a = t0;
         float b = t;
-        for (int j = 0; j < 6; j++) {
-          float m1 = mix(a, b, 0.382);
-          float m2 = mix(a, b, 0.618);
-          if (map(ro + rd * m1).x < map(ro + rd * m2).x) b = m2;
-          else a = m1;
+        float f = 0.0;
+        // six golden-section steps of two probes each, then the middle
+        for (int j = ZERO; j < 13; j++) {
+          float m = j == 12 ? 0.5 * (a + b) : mix(a, b, (j & 1) == 0 ? 0.382 : 0.618);
+          float v = map(ro + rd * m).x;
+          if (j == 12) {
+            float e = v / (m * pixel);
+            if (e < edge) { edge = e; edgeT = m; }
+          } else if ((j & 1) == 0) f = v;
+          else if (f < v) b = m;
+          else a = mix(a, b, 0.382);
         }
-        float m = 0.5 * (a + b);
-        float e = map(ro + rd * m).x / (m * pixel);
-        if (e < edge) { edge = e; edgeT = m; }
       }
       d0 = d1;
       t0 = t1;
@@ -356,7 +367,6 @@ void main() {
     depth = hit;
     vec3 p = ro + rd * hit;
     float w = hit * pixel;
-    vec2 m = map(p);
     vec3 n = normalAt(p, 0.5 * w);
     vec3 q = p - uCrate;
     bool hold = (gMask & 1) != 0 && abs(q.x) < uCrateSize.x - 8.5 && abs(q.z) < uCrateSize.z - 8.5 && q.y > -uCrateSize.y - 2.0;
