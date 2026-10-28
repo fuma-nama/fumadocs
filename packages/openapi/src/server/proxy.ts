@@ -121,6 +121,8 @@ export function createProxy(options: CreateProxyOptions = {}): Proxy {
     let method = initial.method;
     let url = new URL(initial.url);
     const headers = new Headers(initial.headers);
+    // set by `fetch()` from the body, Node.js appends it to a forwarded one (e.g. "5, 5")
+    headers.delete('content-length');
     let body: ArrayBuffer | undefined =
       initial.body && methodsWithBody.has(method.toUpperCase())
         ? await initial.arrayBuffer()
@@ -161,7 +163,6 @@ export function createProxy(options: CreateProxyOptions = {}): Proxy {
         case 303:
           method = 'GET';
           body = undefined;
-          headers.delete('content-length');
           headers.delete('content-type');
           break;
       }
@@ -300,8 +301,14 @@ async function createPublicFetch(): Promise<Fetch> {
       500,
     );
 
+  // importing undici replaces the dispatcher of the built-in `fetch()`, restore it
+  const key = Symbol.for('undici.globalDispatcher.1');
+  const builtin: unknown = Reflect.get(globalThis, key);
   const [{ Agent, fetch }, dns, { BlockList, isIP }] = await Promise.all([
-    import('undici'),
+    import('undici').then((undici) => {
+      Reflect.set(globalThis, key, builtin);
+      return undici;
+    }),
     import('node:dns'),
     import('node:net'),
   ]);

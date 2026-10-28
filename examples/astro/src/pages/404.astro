@@ -1,14 +1,8 @@
 ---
 import Layout from '@/layouts/Layout.astro';
-import { App } from '@/components/app';
+import { NotFound } from '@/components/home';
 ---
 
 <Layout title="Not Found">
-  <App
-    client:load
-    transition:persist="app"
-    page="not-found"
-    pathname={Astro.url.pathname}
-    params={Astro.params}
-  />
+  <NotFound client:load pathname={Astro.url.pathname} params={Astro.params} />
 </Layout>

@@ -1,9 +1,11 @@
 ---
 import type { GetStaticPaths, InferGetStaticPropsType } from 'astro';
 import Layout from '@/layouts/Layout.astro';
-import { App } from '@/components/app';
+import { Docs } from '@/components/docs';
 import { i18n } from '@/lib/i18n';
 import { pageTrees, source } from '@/lib/source';
+
+export const prerender = true;
 
 export const getStaticPaths = (() => {
   const paths = [];
@@ -30,10 +32,9 @@ const provider = { lang, pathname: Astro.url.pathname, params: Astro.params };
 ---
 
 <Layout lang={lang} title={page.data.title} description={page.data.description}>
-  <App
+  <Docs
     client:load
-    transition:persist="app"
-    page="docs"
+    transition:persist="docs"
     {...provider}
     tree={pageTrees[lang]}
     title={page.data.title}
@@ -41,5 +42,5 @@ const provider = { lang, pathname: Astro.url.pathname, params: Astro.params };
     toc={toc}
   >
     <Content {...provider} />
-  </App>
+  </Docs>
 </Layout>

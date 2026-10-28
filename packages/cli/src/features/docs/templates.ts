@@ -556,23 +556,28 @@ export const pageTree = await source.serializePageTree(source.getPageTree());`
 `,
       'components/mdx.tsx': `import defaultMdxComponents from 'fumadocs-ui/mdx';
 ${i18n ? "import { DynamicLink } from 'fumadocs-core/dynamic-link';\n" : ''}import { DocsBody } from 'fumadocs-ui/layouts/docs/page';
+import type { MDXComponents } from 'mdx/types';
 ${i18n ? "import { ContentProvider, type ProviderProps } from '@/components/provider';\n" : ''}
-// MDX components of docs, they are rendered and hydrated by the Fumadocs integration
-export default {
-  ...defaultMdxComponents,
+export function getMDXComponents(components?: MDXComponents) {
+  return {
+    ...defaultMdxComponents,${i18n ? '\n    // links with the locale, like `/[lang]/docs`\n    DynamicLink,' : ''}
+    ...components,
+  } satisfies MDXComponents;
+}
+
 ${
   i18n
-    ? `  // links with the locale, like \`/[lang]/docs\`
-  DynamicLink,
-  // receives the props of \`<Content />\`
+    ? `// for the Fumadocs integration, \`wrapper\` receives the props of \`<Content />\`
+export default getMDXComponents({
   wrapper: ({ children, ...props }: ProviderProps) => (
     <ContentProvider {...props}>
       <DocsBody>{children}</DocsBody>
     </ContentProvider>
-  ),`
-    : '  wrapper: DocsBody,'
+  ),
+});`
+    : `// for the Fumadocs integration, \`wrapper\` gives the content its prose styles
+export default getMDXComponents({ wrapper: DocsBody });`
 }
-};
 `,
       'components/provider.tsx': `import { navigate } from 'astro:transitions/client';
 import type { ReactNode } from 'react';
@@ -689,12 +694,11 @@ export const GET: APIRoute = ${input.static ? '() => server.staticGET()' : '({ r
 };
 
 export const astroContentConfig = `import { defineCollection } from 'astro:content';
-import { docsLoader, metaLoader } from '@fumadocs/astro/loaders';
-import { metaSchema, pageSchema } from 'fumadocs-core/source/schema';
+import { metaLoader, pageLoader } from '@fumadocs/astro/loaders';
 
 export const collections = {
-  docs: defineCollection({ loader: docsLoader(), schema: pageSchema }),
-  meta: defineCollection({ loader: metaLoader(), schema: metaSchema }),
+  docs: defineCollection({ loader: pageLoader() }),
+  meta: defineCollection({ loader: metaLoader() }),
 };
 `;
 

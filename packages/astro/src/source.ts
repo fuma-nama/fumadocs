@@ -5,8 +5,8 @@ import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure'
 import type { TOCItemType } from 'fumadocs-core/toc';
 import { dataKey, type FumadocsData } from './shared';
 
-/** an entry of `docsLoader()` */
-export interface DocEntry {
+/** an entry of `pageLoader()` */
+export interface PageEntry {
   id: string;
   data: PageData;
   filePath?: string;
@@ -25,7 +25,7 @@ export interface RenderedPage {
   structuredData: StructuredData;
 }
 
-export type AstroPageData<Entry extends DocEntry = DocEntry> = Entry['data'] & {
+export type AstroPageData<Entry extends PageEntry = PageEntry> = Entry['data'] & {
   entry: Entry;
   /** render the page with `render()` of `astro:content` */
   render: () => Promise<RenderedPage>;
@@ -39,25 +39,25 @@ export type AstroPageData<Entry extends DocEntry = DocEntry> = Entry['data'] & {
 };
 
 /**
- * Create a Fumadocs source from Astro content collections, loaded by `docsLoader()` and `metaLoader()`.
+ * Create a Fumadocs source from Astro content collections, loaded by `pageLoader()` and `metaLoader()`.
  */
-export function toFumadocsSource<Doc extends DocEntry, Meta extends MetaEntry>(
-  docs: Doc[],
-  meta: Meta[],
-): StaticSource<{ pageData: AstroPageData<Doc>; metaData: Meta['data'] }> {
-  const files: VirtualFile<{ pageData: AstroPageData<Doc>; metaData: Meta['data'] }>[] = [];
-  for (const entry of docs) files.push({ type: 'page', path: entry.id, data: pageData(entry) });
+export function toFumadocsSource<Page extends PageEntry, Meta extends MetaEntry>(
+  pages: Page[],
+  meta: Meta[] = [],
+): StaticSource<{ pageData: AstroPageData<Page>; metaData: Meta['data'] }> {
+  const files: VirtualFile<{ pageData: AstroPageData<Page>; metaData: Meta['data'] }>[] = [];
+  for (const entry of pages) files.push({ type: 'page', path: entry.id, data: pageData(entry) });
   for (const entry of meta) files.push({ type: 'meta', path: entry.id, data: entry.data });
   return { files };
 }
 
-function pageData<Entry extends DocEntry>(entry: Entry): AstroPageData<Entry> {
+function pageData<Entry extends PageEntry>(entry: Entry): AstroPageData<Entry> {
   async function load() {
     const { Content, remarkPluginFrontmatter } = await render(entry);
     const data = remarkPluginFrontmatter[dataKey] as FumadocsData | undefined;
     if (!data)
       throw new Error(
-        `"${entry.filePath ?? entry.id}" is not processed by Fumadocs, make sure it is in the \`dir\` of the integration.`,
+        `"${entry.filePath ?? entry.id}" is not processed by Fumadocs, which only processes the MDX files of its \`collections\`.`,
       );
     return { Content: Content as AstroComponentFactory, data };
   }

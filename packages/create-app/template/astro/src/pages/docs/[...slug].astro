@@ -1,9 +1,11 @@
 ---
 import type { GetStaticPaths, InferGetStaticPropsType } from 'astro';
 import Layout from '@/layouts/Layout.astro';
-import { App } from '@/components/app';
+import { Docs } from '@/components/docs';
 import { pageTree, source } from '@/lib/source';
 import { getPageImageUrl, getPageMarkdownUrl, gitConfig } from '@/lib/shared';
+
+export const prerender = true;
 
 export const getStaticPaths = (() => {
   return source.getPages().map((page) => ({
@@ -23,10 +25,9 @@ const { Content, toc } = await page.data.render();
   description={page.data.description}
   image={getPageImageUrl(page).url}
 >
-  <App
+  <Docs
     client:load
-    transition:persist="app"
-    page="docs"
+    transition:persist="docs"
     pathname={Astro.url.pathname}
     params={Astro.params}
     tree={pageTree}
@@ -34,8 +35,8 @@ const { Content, toc } = await page.data.render();
     description={page.data.description}
     toc={toc}
     markdownUrl={getPageMarkdownUrl(page).url}
-    githubUrl={`https://github.com/${gitConfig.user}/${gitConfig.repo}/blob/${gitConfig.branch}/content/docs/${page.path}`}
+    githubUrl={`https://github.com/${gitConfig.user}/${gitConfig.repo}/blob/${gitConfig.branch}/${page.data.entry.filePath}`}
   >
     <Content />
-  </App>
+  </Docs>
 </Layout>

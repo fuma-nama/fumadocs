@@ -101,11 +101,18 @@ export async function getConfig() {
 }
 ```
 
-### Next.js Metadata
+```ts tab="Astro" title="src/pages/rss.xml.ts"
+import type { APIRoute } from 'astro';
+import { getRSS } from '@/lib/rss';
 
-You can add an alternates object to the metadata object with your feed’s title and URL.
+export const GET: APIRoute = () => new Response(getRSS());
+```
 
-```ts title="app/layout.tsx"
+### Link the Feed
+
+Link it from your pages, so feed readers can discover it:
+
+```ts tab="Next.js" title="app/layout.tsx"
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -114,10 +121,40 @@ export const metadata: Metadata = {
       'application/rss+xml': [
         {
           title: 'Fumadocs Blog',
-          url: 'https://fumadocs.dev/blog/index.xml',
+          url: 'https://fumadocs.dev/rss.xml',
         },
       ],
     },
   },
 };
+```
+
+```ts tab="React Router" title="app/root.tsx"
+import type { Route } from './+types/root';
+
+export const links: Route.LinksFunction = () => [
+  { rel: 'alternate', type: 'application/rss+xml', title: 'Fumadocs Blog', href: '/rss.xml' },
+];
+```
+
+```tsx tab="Tanstack Start" title="src/routes/__root.tsx"
+export const Route = createRootRoute({
+  head: () => ({
+    links: [
+      { rel: 'alternate', type: 'application/rss+xml', title: 'Fumadocs Blog', href: '/rss.xml' },
+    ],
+  }),
+  // ...
+});
+```
+
+```tsx tab="Waku" title="pages/_layout.tsx"
+// React hoists it into `<head>`
+<link rel="alternate" type="application/rss+xml" title="Fumadocs Blog" href="/rss.xml" />
+```
+
+```astro tab="Astro" title="src/layouts/Layout.astro"
+<head>
+  <link rel="alternate" type="application/rss+xml" title="Fumadocs Blog" href="/rss.xml" />
+</head>
 ```

@@ -1,6 +1,8 @@
 import type { APIRoute, GetStaticPaths, InferGetStaticPropsType } from 'astro';
 import { docsLlms, source } from '@/lib/source';
 
+export const prerender = true;
+
 export const getStaticPaths = (() => {
   return source.getPages().map((page) => ({
     params: { slug: page.slugs.join('/') || undefined },

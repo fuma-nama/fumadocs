@@ -52,7 +52,7 @@ export const source = loader({ baseUrl: docsRoute, source: docs.toFumadocsSource
 test('project: Astro', async () => {
   const files = {
     'package.json': JSON.stringify({ dependencies: { astro: '7.4.2' } }),
-    'astro.config.mjs': `export default defineConfig({ integrations: [fumadocs({ dir: 'content/guide' })] });`,
+    'astro.config.mjs': `export default defineConfig({ integrations: [fumadocs({ collections: { docs: { dir: 'content/guide' } } })] });`,
     'src/pages/index.astro': '',
     'src/lib/shared.ts': `export const docsRoute = '/guide';`,
     'src/lib/source.ts': `import { toFumadocsSource } from '@fumadocs/astro/source';

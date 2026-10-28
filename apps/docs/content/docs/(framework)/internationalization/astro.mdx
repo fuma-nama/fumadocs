@@ -68,8 +68,8 @@ Pass the locale to Fumadocs in your pages and layouts.
 <include cwd meta='tab="Docs Page" title="src/pages/[...lang]/docs/[...slug].astro"'>
   ../../examples/astro-i18n/src/pages/[...lang]/docs/[...slug].astro
 </include>
-<include cwd meta='tab="App Island" title="src/components/app.tsx"'>
-  ../../examples/astro-i18n/src/components/app.tsx
+<include cwd meta='tab="Docs Island" title="src/components/docs.tsx"'>
+  ../../examples/astro-i18n/src/components/docs.tsx
 </include>
 
 Your HTML layout can set `<html lang={lang}>` from the `lang` prop.
@@ -78,7 +78,10 @@ Your HTML layout can set `<html lang={lang}>` from the `lang` prop.
 
 The search endpoint indexes every language, the [search dialog](/docs/manual-installation/astro#search) searches the current one with `useI18n()`:
 
-<include cwd meta='title="src/pages/api/search.ts"'>
+<include cwd meta='tab="src/components/search.tsx"'>
+  ../../examples/astro-i18n/src/components/search.tsx
+</include>
+<include cwd meta='tab="src/pages/api/search.ts"'>
   ../../examples/astro-i18n/src/pages/api/search.ts
 </include>
 

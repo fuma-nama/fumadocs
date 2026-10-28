@@ -75,14 +75,10 @@ const searchProviders = [
 ] as const;
 
 const astroConfig = `import { defineConfig } from 'astro/config';
-import mdx from '@astrojs/mdx';
-import react from '@astrojs/react';
 import fumadocs from '@fumadocs/astro';
 
 export default defineConfig({
   integrations: [
-    react(),
-    mdx(),
     fumadocs({
       components: './src/components/mdx.tsx',
     }),

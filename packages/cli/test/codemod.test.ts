@@ -213,7 +213,6 @@ export default defineConfig({
   );
   for (const plugin of [
     { name: 'react', from: '@astrojs/react' },
-    { name: 'mdx', from: '@astrojs/mdx' },
     {
       name: 'fumadocs',
       from: '@fumadocs/astro',
@@ -231,11 +230,10 @@ export default defineConfig({
     "import { defineConfig } from 'astro/config';
     import react from '@astrojs/react';
     import tailwindcss from '@tailwindcss/vite';
-    import mdx from '@astrojs/mdx';
     import fumadocs from '@fumadocs/astro';
 
     export default defineConfig({
-      integrations: [react(), mdx(), fumadocs({ components: './src/components/mdx.tsx' })],
+      integrations: [react(), fumadocs({ components: './src/components/mdx.tsx' })],
       vite: {
         plugins: [tailwindcss()],
       },
@@ -350,7 +348,7 @@ test('enable processed markdown: astro integration', () => {
       `import fumadocs from '@fumadocs/astro';
 
 export default defineConfig({
-  integrations: [react(), mdx(), ${integration}],
+  integrations: [${integration}],
 });
 `,
     );

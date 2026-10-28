@@ -62,9 +62,9 @@ Validate the feedback before storing or sending it, anyone can call a server act
 
 You can also configure block-level feedback (e.g. a feedback popover as user select text).
 
-Add the `remark-block-id` Remark plugin:
+Add the `remark-block-id` plugin:
 
-```tsx title="source.config.ts (Fumadocs MDX)"
+```tsx tab="Fumadocs MDX" title="source.config.ts"
 import {
   remarkBlockId,
   type RemarkBlockIdOptions,
@@ -82,6 +82,18 @@ export default defineConfig({
       [remarkBlockId, blockIdOptions],
     ],
   },
+});
+```
+
+```npm tab="Astro"
+npm i @fumadocs/satteri
+```
+
+```js tab="Astro" title="astro.config.mjs"
+import { remarkBlockId } from '@fumadocs/satteri/remark-block-id';
+
+fumadocs({
+  mdastPlugins: [remarkBlockId({ addDataAttribute: 'feedback' })],
 });
 ```
 

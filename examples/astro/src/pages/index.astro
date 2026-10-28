@@ -1,14 +1,20 @@
 ---
 import Layout from '@/layouts/Layout.astro';
-import { App } from '@/components/app';
+import { Home } from '@/components/home';
+import { docsRoute } from '@/lib/shared';
 ---
 
 <Layout title="Fumadocs on Astro" description="The truly flexible docs framework on React.js.">
-  <App
-    client:load
-    transition:persist="app"
-    page="home"
-    pathname={Astro.url.pathname}
-    params={Astro.params}
-  />
+  <Home client:load pathname={Astro.url.pathname} params={Astro.params}>
+    <div class="p-4 flex flex-col items-center justify-center text-center flex-1">
+      <h1 class="text-xl font-bold mb-2">Fumadocs on Astro.</h1>
+      <p class="text-fd-muted-foreground mb-4">The truly flexible docs framework on React.js.</p>
+      <a
+        class="text-sm bg-fd-primary text-fd-primary-foreground rounded-full font-medium px-4 py-2.5"
+        href={docsRoute}
+      >
+        Open Docs
+      </a>
+    </div>
+  </Home>
 </Layout>

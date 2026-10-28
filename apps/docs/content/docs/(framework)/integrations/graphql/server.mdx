@@ -135,7 +135,7 @@ export const graphql = createGraphQL({
 });
 ```
 
-On Next.js, Waku and React Router, `<GraphQLPage />` loads the SDL of each schema once per browser session with `loadSchema`, it also runs during server rendering:
+On Next.js, Waku, React Router and Astro, `<GraphQLPage />` loads the SDL of each schema once per browser session with `loadSchema`, it also runs during server rendering:
 
 ```tsx title="components/api-page.tsx"
 'use client';
@@ -144,7 +144,7 @@ import { createGraphQLPage } from '@fumadocs/graphql/ui';
 
 export const GraphQLPage = createGraphQLPage({
   async loadSchema(id) {
-    // `import.meta.env.SSR` on Waku and React Router
+    // `import.meta.env.SSR` on Waku, React Router and Astro
     if (typeof window === 'undefined') {
       // the browser starts downloading it with the page
       preload(`/api/graphql-schema/${id}`, { as: 'fetch', crossOrigin: 'anonymous' });
@@ -197,6 +197,19 @@ export default [
   route('api/graphql-schema/:id', 'routes/graphql-schema.ts'),
   // ...
 ] satisfies RouteConfig;
+```
+
+```ts tab="Astro" title="src/pages/api/graphql-schema/[id].ts"
+import type { APIRoute, GetStaticPaths } from 'astro';
+import { graphql } from '@/lib/graphql';
+
+export const getStaticPaths = (async () => {
+  return Object.keys(await graphql.getSchemas()).map((id) => ({ params: { id } }));
+}) satisfies GetStaticPaths;
+
+export const GET: APIRoute = async ({ params }) => {
+  return new Response((await graphql.getSchema(params.id!)).sdl);
+};
 ```
 
 On Tanstack Start, route loaders run on both sides, call a server function only when the browser doesn't have the schema yet:

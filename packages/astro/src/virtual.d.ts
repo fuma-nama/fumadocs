@@ -1,4 +1,4 @@
-declare module 'virtual:fumadocs/mdx-components' {
-  const components: Record<string, unknown>;
-  export default components;
+declare module 'virtual:fumadocs/config' {
+  /** the content directories of collections */
+  export const dirs: Record<string, string>;
 }

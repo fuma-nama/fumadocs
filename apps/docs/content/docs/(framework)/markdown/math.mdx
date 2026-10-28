@@ -5,13 +5,17 @@ description: Writing math equations in Markdown/MDX.
 
 ## Getting Started
 
-```package-install
+```package-install tab="Fumadocs MDX"
 remark-math rehype-katex katex
+```
+
+```package-install tab="Astro"
+katex @astrojs/markdown-satteri
 ```
 
 ### Add Plugins
 
-Add the required remark/rehype plugins, the code might be vary depending on your content source.
+Parse the math syntax and render it with KaTeX, the code varies by content source:
 
 ```ts title="source.config.ts" tab="Fumadocs MDX"
 import rehypeKatex from 'rehype-katex';
@@ -23,6 +27,17 @@ export default defineConfig({
     remarkPlugins: [remarkMath],
     // Place it at first, it should be executed before the syntax highlighter
     rehypePlugins: (v) => [rehypeKatex, ...v],
+  },
+});
+```
+
+```js title="astro.config.mjs" tab="Astro"
+import { defineConfig } from 'astro/config';
+import { satteri } from '@astrojs/markdown-satteri';
+
+export default defineConfig({
+  markdown: {
+    processor: satteri({ features: { math: true } }),
   },
 });
 ```

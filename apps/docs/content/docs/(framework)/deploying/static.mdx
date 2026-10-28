@@ -7,7 +7,7 @@ description: Output static website with Fumadocs.
 
 By default, Fumadocs use a server-first approach which always requires a running server to serve.
 
-You can output a static build by configuring your React framework.
+You can output a static build by configuring your framework.
 
 ### Search [step]
 
@@ -24,7 +24,9 @@ Since the search functionality is powered by remote servers, static export works
 
 ### Deployment [step]
 
-#### Next.js
+<Tabs items={['Next.js', 'React Router', 'Tanstack Start', 'Waku', 'Astro']}>
+
+<Tab value="Next.js">
 
 You can enable Next.js static export, it allows you to export the app as a static HTML site without a Node.js server.
 
@@ -45,7 +47,9 @@ const nextConfig = {
 
 See [Next.js docs](https://nextjs.org/docs/app/guides/static-exports) for limitations and details.
 
-#### React Router
+</Tab>
+
+<Tab value="React Router">
 
 By configuring SPA mode, you can serve the `build/client` directory as a static website.
 
@@ -81,7 +85,9 @@ export default {
 } satisfies Config;
 ```
 
-#### Tanstack Start
+</Tab>
+
+<Tab value="Tanstack Start">
 
 Configure SPA mode and pre-rendering, refer to [SPA Mode](https://tanstack.com/start/latest/docs/framework/react/guide/spa-mode) for deploying SPA apps with Tanstack Start.
 
@@ -111,14 +117,22 @@ export default defineConfig({
 });
 ```
 
-#### Waku
+</Tab>
+
+<Tab value="Waku">
 
 Waku can serve your site statically when all pages are configured with `static` render mode.
 
 See [Deployment](https://waku.gg/#deployment) for details.
 
-#### Astro
+</Tab>
+
+<Tab value="Astro">
 
 Astro builds a static site by default, the routes of the [setup guide](/docs/manual-installation/astro) are pre-rendered, including the search indexes.
 
 See [Deploy your Astro Site](https://docs.astro.build/en/guides/deploy) for details.
+
+</Tab>
+
+</Tabs>

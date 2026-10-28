@@ -3,6 +3,8 @@ import { generateOGImage } from 'fumadocs-ui/og/takumi';
 import { source } from '@/lib/source';
 import { appName } from '@/lib/shared';
 
+export const prerender = true;
+
 export const getStaticPaths = (() => {
   return source.getPages().map((page) => ({
     params: { slug: page.slugs.join('/') || undefined },

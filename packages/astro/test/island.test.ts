@@ -3,7 +3,10 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import { type HastNode, type HastPluginDefinition, mdxToJs } from 'satteri';
 import { islandPlugin } from '@/island-plugin';
-import { FumadocsIsland } from '@/island';
+import { createIsland } from '@/island';
+import components from './fixtures/components';
+
+const FumadocsIsland = createIsland(components);
 
 interface Captured {
   tree: string;
@@ -12,7 +15,7 @@ interface Captured {
   slots: Record<string, HastNode[]>;
 }
 
-async function compile(source: string) {
+async function compile(source: string, plugins: HastPluginDefinition[] = []) {
   let island: Captured | undefined;
   const capture: HastPluginDefinition = {
     name: 'capture',
@@ -39,7 +42,7 @@ async function compile(source: string) {
   };
 
   const { code } = await mdxToJs(source, {
-    hastPlugins: [islandPlugin(), capture],
+    hastPlugins: [...plugins, islandPlugin('/island.js'), capture],
     jsxImportSource: 'astro',
   });
   return { code, island: island! };
@@ -65,9 +68,7 @@ describe('content island', () => {
       "import { X } from './x';\n\nexport const y = 1;\n\n# Hello\n\nWorld",
     );
 
-    expect(code).toContain(
-      'import { FumadocsIsland as _FumadocsIsland } from "@fumadocs/astro/island"',
-    );
+    expect(code).toContain('import { FumadocsIsland as _FumadocsIsland } from "/island.js"');
     expect(code).toContain('"client:load": true');
     expect(code).toContain('import { X } from "./x"');
     expect(render(island)).toBe('<h1>Hello</h1><p>World</p>');
@@ -112,6 +113,29 @@ describe('content island', () => {
     expect(code.match(/1 \+ 1/g)).toHaveLength(1);
   });
 
+  it('keeps code with components in the island', async () => {
+    const popup: HastPluginDefinition = {
+      name: 'popup',
+      element: {
+        filter: ['code'],
+        visit(node, ctx) {
+          ctx.appendChild(node, {
+            type: 'element',
+            tagName: 'Card',
+            properties: { title: 'type' },
+            children: [],
+          });
+        },
+      },
+    };
+    const { island } = await compile('```js\nconst a = 1;\n```', [popup]);
+
+    expect(render(island)).toBe(
+      '<pre data-codeblock=""><code class="language-js">const a = 1;\n<a data-card="type"></a></code></pre>',
+    );
+    expect(island.slots).toEqual({});
+  });
+
   it('moves JSX in props into slots', async () => {
     const { island } = await compile(
       `<Card title="Card" icon={<span>icon</span>} {...{ children: 'text' }} />`,
@@ -146,6 +170,29 @@ describe('content island', () => {
     const { island } = await compile('Text with <UI.Badge>badge</UI.Badge>.');
 
     expect(render(island)).toBe('<p>Text with <mark>badge</mark>.</p>');
+  });
+
+  it('ignores comments', async () => {
+    const { island } = await compile('{/* comment */}\n\nText {/* inline */}');
+
+    expect(render(island)).toBe('<p>Text </p>');
+    expect(island.slots).toEqual({});
+  });
+
+  it('throws on provided components in expressions', async () => {
+    await expect(compile("{['a'].map((v) => <Card title={v} />)}")).rejects.toThrow(
+      /<Card> in a JavaScript expression/,
+    );
+    await expect(compile('<Card title="a" icon={<UI.Badge />} />')).rejects.toThrow(/<UI>/);
+
+    const { island } = await compile("import { X } from './x';\n\n{[1].map(() => <X />)}");
+    expect(Object.keys(island.slots)).toEqual(['s0']);
+  });
+
+  it('throws on functions in props', async () => {
+    const { island } = await compile('<Card title="Card" onClick={() => {}} />');
+
+    expect(() => render(island)).toThrow(/"onClick" is a function/);
   });
 
   it('throws on unknown components', async () => {

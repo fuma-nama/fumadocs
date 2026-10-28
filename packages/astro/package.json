@@ -20,7 +20,6 @@
   "sideEffects": false,
   "exports": {
     ".": "./dist/index.js",
-    "./island": "./dist/island.js",
     "./loaders": "./dist/loaders.js",
     "./source": "./dist/source.js",
     "./package.json": "./package.json"
@@ -37,11 +36,13 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
+    "@astrojs/mdx": "^8.1.1",
     "@fumadocs/satteri": "workspace:^",
     "yuku-parser": "^0.19.0"
   },
   "devDependencies": {
     "@astrojs/markdown-satteri": "^0.4.5",
+    "@astrojs/react": "^7.1.1",
     "@types/estree-jsx": "^1.0.5",
     "@types/hast": "^3.0.5",
     "@types/node": "26.6.5",
@@ -58,7 +59,6 @@
     "vitest": "^5.0.5"
   },
   "peerDependencies": {
-    "@astrojs/mdx": "^8.0.0",
     "@astrojs/react": "^7.0.0",
     "astro": "^7.4.0",
     "fumadocs-core": "^16.17.8",

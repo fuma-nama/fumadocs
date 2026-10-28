@@ -75,7 +75,7 @@ npm create fumadocs-app
 It will ask you the built-in template to use:
 
 - **Framework**: Next.js, Waku, React Router, Tanstack Start, Astro.
-- **Content source**: Fumadocs MDX.
+- **Content source**: Fumadocs MDX, or content collections on Astro.
 
 A new fumadocs app should be initialized, with following features configured by default:
 
@@ -179,6 +179,17 @@ export default defineConfig({
   },
 });
 ```
+
+  </Accordion>
+</Accordions>
+
+### For Astro
+
+<Accordions>
+  <Accordion id='astro-custom-docs-page' title='How to create a page in /docs without docs layout?'>
+
+    Remove the MDX file from the content directory (`/content/docs`), and create the page as a route, like `src/pages/docs/test.astro` to replace `/docs/test`.
+    Astro prioritizes it over `src/pages/docs/[...slug].astro`.
 
   </Accordion>
 </Accordions>
