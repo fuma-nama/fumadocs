@@ -378,11 +378,6 @@ export function createPress(stage: HTMLElement): () => void {
   const point: [number, number, number] = [0, 0, 1];
   let caretMode = '';
   const caretAt: Vec2 = [-1, -1];
-  /** the character the caret was last measured at, since the last layout, and its line's clip */
-  let measuredBlock: Block | undefined;
-  let measuredLine = -1;
-  let measuredKeys = -1;
-  let caretClip = '';
   const caretSize: Vec2 = [0, 0];
   let said = '';
   /** the shader's vectors, written in place */
@@ -430,7 +425,6 @@ export function createPress(stage: HTMLElement): () => void {
     foot = [page.x + page.w / 2, s.height * 0.3];
     chainAt = -1;
     mateAt = '';
-    measuredBlock = undefined;
     if (along === 0) {
       deck = BED_DECK;
       bay = band;
@@ -1037,15 +1031,9 @@ export function createPress(stage: HTMLElement): () => void {
     }
     const caretOff = blocks[blocks.length - 1].typed + 600;
     const mode = !begun || t >= caretOff || phase !== 'play' ? 'none' : typing ? 'solid' : 'blink';
-    // the caret's character, measured as the caret moves: a long line wraps, its rows before the
-    // caret's show whole
-    const measure =
-      caretBlock !== measuredBlock || caretLine !== measuredLine || caretKeys !== measuredKeys;
-    if (caretBlock && mode !== 'none' && measure) {
-      measuredBlock = caretBlock;
-      measuredLine = caretLine;
-      measuredKeys = caretKeys;
-      caretClip = '';
+    // the caret's character, measured: a long line wraps, its rows before the caret's show whole
+    let clip = '';
+    if (caretBlock && mode !== 'none') {
       const line = caretBlock.lines[caretLine];
       const length = caretBlock.lengths[caretLine];
       const s = stage.getBoundingClientRect();
@@ -1056,7 +1044,7 @@ export function createPress(stage: HTMLElement): () => void {
       const x = char ? (caretKeys < length ? char.left : char.right) - box.left : 0;
       const top = char ? char.top - box.top - (caretSize[1] - char.height) / 2 : 0;
       if (caretKeys > 0 && caretKeys < length)
-        caretClip = `polygon(0 0, 100% 0, 100% ${top}px, ${x}px ${top}px, ${x}px ${top + caretSize[1]}px, 0 ${top + caretSize[1]}px)`;
+        clip = `polygon(0 0, 100% 0, 100% ${top}px, ${x}px ${top}px, ${x}px ${top + caretSize[1]}px, 0 ${top + caretSize[1]}px)`;
       const caretX = box.left - s.left + x;
       const caretY = box.top - s.top + top;
       if (caretX !== caretAt[0] || caretY !== caretAt[1]) {
@@ -1067,7 +1055,6 @@ export function createPress(stage: HTMLElement): () => void {
         caret.style.height = `${caretSize[1]}px`;
       }
     }
-    const clip = mode === 'none' ? '' : caretClip;
     for (const b of blocks) {
       const want = b === caretBlock ? clip : '';
       if (want !== b.clip) {
