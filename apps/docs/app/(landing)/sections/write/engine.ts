@@ -22,7 +22,7 @@ import {
   SPRITE_W,
 } from '@/components/mascot/sprite';
 import { createShaderCanvas, cssRgba, type ShaderCanvas } from '../../lib/gl';
-import { camera, clamp, type Rect, rectIn, settle, TICK } from '../../lib/motion';
+import { camera, clamp, type Rect, rectIn, settle, steer, TICK } from '../../lib/motion';
 import { onActive, report } from '../../lib/status';
 import { isDark, onTheme } from '../../lib/theme';
 import {
@@ -182,7 +182,9 @@ interface Leg {
 interface Block {
   el: HTMLElement;
   src: HTMLElement;
+  /** the window its output shows through, and the output's page in it */
   out: HTMLElement;
+  print: HTMLElement;
   tab: HTMLElement;
   label: string;
   lines: HTMLElement[];
@@ -205,8 +207,6 @@ interface Block {
   type: number;
   typed: number;
   /** what is on screen, so a frame writes only what changed */
-  shownLines: number;
-  clip: string;
   tabState: number;
   framed: boolean;
   wipe: number;
@@ -243,6 +243,7 @@ export function createPress(stage: HTMLElement): () => void {
   const doc = stage.querySelector<HTMLElement>('[data-doc]')!;
   const bed = stage.querySelector<HTMLElement>('[data-bay]')!;
   const column = stage.querySelector<HTMLElement>('[data-bay-phone]')!;
+  const runs = stage.querySelector<HTMLElement>('[data-chain="runs"]')!;
   const fixedRun = stage.querySelector<HTMLElement>('[data-chain="fixed"]')!;
   const pulledRun = stage.querySelector<HTMLElement>('[data-chain="pulled"]')!;
   const bend = stage.querySelector<SVGElement>('[data-chain="bend"]')!;
@@ -255,6 +256,10 @@ export function createPress(stage: HTMLElement): () => void {
   mate.style.height = `${MATE_H * CELL}px`;
   const typingLine = `typing ${stage.dataset.file}`;
   const caret = stage.querySelector<HTMLElement>('[data-caret]')!;
+  const veil = stage.querySelector<HTMLElement>('[data-veil]')!;
+  const [past, after] = veil.children as HTMLCollectionOf<HTMLElement>;
+  // what the frames move, they move by transform
+  const steered = [runs, fixedRun, pulledRun, bend, mate, caret, past, after].map(steer);
   const button = stage.querySelector<HTMLButtonElement>('[data-replay]')!;
   const voice = stage.querySelector<HTMLElement>('[data-voice]')!;
   const figure = stage.closest<HTMLElement>('[data-figure]');
@@ -275,10 +280,14 @@ export function createPress(stage: HTMLElement): () => void {
       keys += line.textContent!.length;
     }
     const tab = el.querySelector<HTMLElement>('[data-tab]')!;
+    const out = el.querySelector<HTMLElement>('[data-out]')!;
+    const print = out.firstElementChild as HTMLElement;
+    steered.push(steer(out), steer(print));
     blocks.push({
       el,
       src: el.querySelector('[data-src]')!,
-      out: el.querySelector('[data-out]')!,
+      out,
+      print,
       tab,
       label: tab.textContent!,
       lines,
@@ -296,8 +305,6 @@ export function createPress(stage: HTMLElement): () => void {
       bend: -1,
       type: 0,
       typed: 0,
-      shownLines: lines.length,
-      clip: '',
       tabState: 2,
       framed: false,
       wipe: 1,
@@ -378,7 +385,7 @@ export function createPress(stage: HTMLElement): () => void {
   const point: [number, number, number] = [0, 0, 1];
   let caretMode = '';
   const caretAt: Vec2 = [-1, -1];
-  const caretSize: Vec2 = [0, 0];
+  let veiled = false;
   let said = '';
   /** the shader's vectors, written in place */
   const v2: [number, number] = [0, 0];
@@ -999,7 +1006,7 @@ export function createPress(stage: HTMLElement): () => void {
       lineY = Math.round(point[1] * density) / density;
     }
 
-    // the source typed so far; the caret's line shows once a key of it is typed
+    // the source typed so far: the veil covers the block being typed from the caret on
     let typing = false;
     let caretBlock: Block | undefined;
     let caretLine = 0;
@@ -1007,60 +1014,45 @@ export function createPress(stage: HTMLElement): () => void {
     for (const b of blocks) {
       let keys = !begun || t < b.type ? -1 : Math.min(b.keys, Math.floor((t - b.type) / CHAR));
       if (keys >= 0 && keys < b.keys) typing = true;
-      let shown = 0;
       for (let i = 0; i < b.lines.length && keys >= 0; i++) {
         if (keys <= b.lengths[i]) {
-          if (keys > 0) shown = i + 1;
           caretBlock = b;
           caretLine = i;
           caretKeys = keys;
           keys = -1;
-        } else {
-          shown = i + 1;
-          keys -= b.lengths[i] + 1;
-        }
-      }
-      if (shown !== b.shownLines) {
-        for (let i = 0; i < b.lines.length; i++) {
-          b.lines[i].style.visibility = !begun || i < shown ? '' : 'hidden';
-          b.lines[i].style.clipPath = '';
-        }
-        b.shownLines = shown;
-        b.clip = '';
+        } else keys -= b.lengths[i] + 1;
       }
     }
     const caretOff = blocks[blocks.length - 1].typed + 600;
     const mode = !begun || t >= caretOff || phase !== 'play' ? 'none' : typing ? 'solid' : 'blink';
     // the caret's character, measured: a long line wraps, its rows before the caret's show whole
-    let clip = '';
-    if (caretBlock && mode !== 'none') {
+    if (caretBlock && (typing || mode !== 'none')) {
       const line = caretBlock.lines[caretLine];
       const length = caretBlock.lengths[caretLine];
       const s = stage.getBoundingClientRect();
       const box = line.getBoundingClientRect();
+      const src = caretBlock.src.getBoundingClientRect();
       const char = charBox(line, caretKeys);
-      if (char) caretSize[0] = char.width;
-      caretSize[1] = caretBlock.leading || char?.height || box.height;
-      const x = char ? (caretKeys < length ? char.left : char.right) - box.left : 0;
-      const top = char ? char.top - box.top - (caretSize[1] - char.height) / 2 : 0;
-      if (caretKeys > 0 && caretKeys < length)
-        clip = `polygon(0 0, 100% 0, 100% ${top}px, ${x}px ${top}px, ${x}px ${top + caretSize[1]}px, 0 ${top + caretSize[1]}px)`;
-      const caretX = box.left - s.left + x;
-      const caretY = box.top - s.top + top;
-      if (caretX !== caretAt[0] || caretY !== caretAt[1]) {
-        caretAt[0] = caretX;
-        caretAt[1] = caretY;
-        caret.style.transform = `translate(${caretX}px, ${caretY}px)`;
-        caret.style.width = `${caretSize[0]}px`;
-        caret.style.height = `${caretSize[1]}px`;
+      const lead = caretBlock.leading || char?.height || box.height;
+      const x = char ? (caretKeys < length ? char.left : char.right) : box.left;
+      const y = char ? char.top - (lead - char.height) / 2 : box.top;
+      if (x - s.left !== caretAt[0] || y - s.top !== caretAt[1]) {
+        caretAt[0] = x - s.left;
+        caretAt[1] = y - s.top;
+        caret.style.transform = `translate(${caretAt[0]}px, ${caretAt[1]}px)`;
+      }
+      if (typing) {
+        veil.style.left = `${src.left - s.left}px`;
+        veil.style.top = `${src.top - s.top}px`;
+        veil.style.width = `${src.width}px`;
+        veil.style.height = `${src.height}px`;
+        past.style.transform = `translate(${x - src.left}px, ${y - src.top}px)`;
+        after.style.transform = `translateY(${y + lead - src.top}px)`;
       }
     }
-    for (const b of blocks) {
-      const want = b === caretBlock ? clip : '';
-      if (want !== b.clip) {
-        b.lines[b.shownLines - 1].style.clipPath = want;
-        b.clip = want;
-      }
+    if (typing !== veiled) {
+      veiled = typing;
+      veil.style.visibility = typing ? 'visible' : '';
     }
     if (mode !== caretMode) {
       caretMode = mode;
@@ -1110,9 +1102,13 @@ export function createPress(stage: HTMLElement): () => void {
       if (flip && t < flip.hit && sliding === b) wipe = clamp((lineY - b.cell.y) / b.cell.h);
       if (wipe !== b.wipe) {
         b.wipe = wipe;
+        // the window rises off its page, which holds still: the page shows down to the line, its
+        // paper over the source
+        const rise = wipe > 0 && wipe < 1 ? (1 - wipe) * 100 : 0;
         b.out.style.visibility = wipe <= 0 ? 'hidden' : '';
-        b.out.style.clipPath = wipe > 0 && wipe < 1 ? `inset(0 0 ${(1 - wipe) * 100}% 0)` : '';
-        b.src.style.clipPath = wipe > 0 && wipe < 1 ? `inset(${wipe * 100}% 0 0 0)` : '';
+        b.out.style.overflow = rise ? 'clip' : '';
+        b.out.style.transform = rise ? `translateY(${-rise}%)` : '';
+        b.print.style.transform = rise ? `translateY(${rise}%)` : '';
       }
       const src = wipe < 1 && (!begun || t >= b.type);
       if (src !== b.srcShown) {
@@ -1225,15 +1221,16 @@ export function createPress(stage: HTMLElement): () => void {
     shader.set('uMateZ', seat[2]);
   }
 
+  /** the drag chain's bend rolls half the carriage's way from home: both runs show from it, the
+   * pulled one up to the carriage */
   function chain(c: number) {
     const at = Math.round(c);
     if (at === chainAt) return;
     chainAt = at;
     const b = Math.round((at + BED.start) / 2);
-    const end = band.w - BED.anchor;
-    fixedRun.style.clipPath = `inset(0 0 0 ${b}px)`;
-    pulledRun.style.clipPath = `inset(0 ${end - at}px 0 ${b}px)`;
-    pulledRun.style.backgroundPositionX = `${at}px`;
+    runs.style.transform = `translateX(${b}px)`;
+    fixedRun.style.transform = `translateX(${-b}px)`;
+    pulledRun.style.transform = `translateX(${at - b}px) translateX(-100%)`;
     bend.style.transform = `translateX(${b - 9}px)`;
   }
 
@@ -1627,6 +1624,7 @@ export function createPress(stage: HTMLElement): () => void {
     near.disconnect();
     stopActive();
     stopTheme();
+    for (const release of steered) release();
     shader?.destroy();
     // a remount makes its own canvas, so this one's context goes now
     canvas?.getContext('webgl2')?.getExtension('WEBGL_lose_context')?.loseContext();

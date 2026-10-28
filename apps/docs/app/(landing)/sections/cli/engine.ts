@@ -1,7 +1,7 @@
 import { cubicBezier } from 'motion/react';
 import { ditherKeyframes } from '../../lib/dither';
 import { createShaderCanvas, cssRgb } from '../../lib/gl';
-import { clamp, mix, type Rect, rectIn, settle, TICK } from '../../lib/motion';
+import { clamp, mix, type Rect, rectIn, settle, steer, TICK } from '../../lib/motion';
 import { report } from '../../lib/status';
 import { isDark, onTheme } from '../../lib/theme';
 import {
@@ -92,6 +92,8 @@ interface Card {
   inlet: HTMLElement | undefined;
   reveals: HTMLElement[];
   at: string;
+  /** set while it is carried */
+  release: (() => void) | undefined;
 }
 
 /** an import rewired: the old line struck, the new one typed */
@@ -157,6 +159,7 @@ export function createCli(root: HTMLElement): () => void {
         inlet,
         reveals,
         at: '',
+        release: undefined,
       });
     }
     const editor = root.querySelector<HTMLElement>(`[data-editor]${own}`)!;
@@ -764,11 +767,16 @@ export function createCli(root: HTMLElement): () => void {
       const out = t - b.release[i];
       if (live && t >= b.landed[i]) landed++;
       if (!live || s <= -lift || t >= b.landed[i]) {
-        if (card.el.style.visibility !== '') {
+        if (card.release) {
+          card.release();
+          card.release = undefined;
           card.el.style.visibility = '';
-          card.el.style.willChange = '';
         }
         continue;
+      }
+      if (!card.release) {
+        card.release = steer(card.el);
+        card.el.style.visibility = 'visible';
       }
       // where its top middle is, how deep, and how much of its size it shows
       let x: number;
@@ -804,11 +812,6 @@ export function createCli(root: HTMLElement): () => void {
       if (transform !== card.at) {
         card.at = transform;
         card.el.style.transform = transform;
-      }
-      if (card.el.style.visibility !== 'visible') {
-        card.el.style.visibility = 'visible';
-        // a layer of its own only while it is carried
-        card.el.style.willChange = 'transform';
       }
       if (holes < CARDS) {
         hole[0] = left;
@@ -1120,6 +1123,7 @@ export function createCli(root: HTMLElement): () => void {
     rows.disconnect();
     stopTheme();
     for (const flaps of counters.values()) flaps.destroy();
+    for (const card of scene.cards) card.release?.();
     caretLine?.removeAttribute('data-typing');
     gl.destroy();
   };

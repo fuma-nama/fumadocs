@@ -7,16 +7,23 @@ import { createPress } from './engine';
 import { BED } from './scene';
 
 const TONES = ['text-lp-ink', 'text-lp-ink-2', 'text-lp-orange'];
+/** the source's type, which sizes the caret a character by a line */
+const SOURCE = 'font-mono text-[13px]/5 md:text-xs/[18px]';
 
 /** syntax in ink-2, numbers in orange, the rest in ink */
 const SYNTAX =
   /(---|^#{1,6}(?= )|```\w*|<\/?|\/?>|[{}[\]()=:;,"']|\/\/.*$|\/\*.*?\*\/|\b(?:import|from|const|export|async|function|await|return|interface)\b)|(\b\d+\b)/g;
 
-/** a plate a block: a row of 4 from xl, 2 rows round the rail band from md, tabs facing the rail */
+/** a plate a block: a row of 4 from xl, 2 rows round the rail band from md, tabs facing the rail;
+ * its frame reaches over its border */
 const PLATES = [
-  { place: 'md:col-start-1 md:row-start-1 md:border-r', foot: true },
-  { place: 'md:col-start-2 md:row-start-1 xl:border-r', foot: true },
-  { place: 'md:col-start-1 md:row-start-3 md:border-r xl:col-start-3 xl:row-start-1', foot: false },
+  { place: 'md:col-start-1 md:row-start-1 md:border-r md:before:-right-px', foot: true },
+  { place: 'md:col-start-2 md:row-start-1 xl:border-r xl:before:-right-px', foot: true },
+  {
+    place:
+      'md:col-start-1 md:row-start-3 md:border-r md:before:-right-px xl:col-start-3 xl:row-start-1',
+    foot: false,
+  },
   { place: 'md:col-start-2 md:row-start-3 xl:col-start-4 xl:row-start-1', foot: false },
 ];
 
@@ -78,7 +85,8 @@ interface StageProps {
 export function Stage({ file, steps, sources, slots, bed, column }: StageProps) {
   return (
     <div className="px-(--lp-gutter) pb-(--lp-gutter)">
-      <div ref={mount} data-file={file} className="relative flex">
+      {/* Chrome takes what moves here to cover anything painted after it: clipped, that's the stage */}
+      <div ref={mount} data-file={file} className="relative flex overflow-clip">
         <Window
           data-doc
           title={file}
@@ -101,8 +109,9 @@ export function Stage({ file, steps, sources, slots, bed, column }: StageProps) 
                 data-block
                 data-status={steps[i].status}
                 className={cn(
-                  // framed while held for a press, where the card the canvas draws stands
-                  'relative -mx-2 -my-2 grid grid-cols-1 gap-2 border-lp-line bg-lp-paper px-2 py-2 data-framed:outline data-framed:-outline-offset-5 data-framed:outline-lp-line-strong md:m-0 md:gap-3 md:p-3',
+                  // framed while held for a press, where the card the canvas draws stands: the frame
+                  // is a box of its own, as an outlined one repaints whenever anything in it moves
+                  'relative -mx-2 -my-2 grid grid-cols-1 gap-2 border-lp-line bg-lp-paper px-2 py-2 before:pointer-events-none before:absolute before:inset-0 data-framed:before:outline data-framed:before:-outline-offset-5 data-framed:before:outline-lp-line-strong md:m-0 md:gap-3 md:p-3',
                   PLATES[i].place,
                   PLATES[i].foot
                     ? 'md:grid-rows-[minmax(0,1fr)_auto]'
@@ -128,10 +137,7 @@ export function Stage({ file, steps, sources, slots, bed, column }: StageProps) 
                     PLATES[i].foot ? 'md:row-start-1' : 'xl:row-start-1',
                   )}
                 >
-                  <div
-                    data-src
-                    className="invisible font-mono text-[13px]/5 [font-variant-ligatures:none] md:text-xs/[18px]"
-                  >
+                  <div data-src className={`invisible ${SOURCE} [font-variant-ligatures:none]`}>
                     {sources[i].split('\n').map((line, j) => (
                       <div
                         key={j}
@@ -142,12 +148,12 @@ export function Stage({ file, steps, sources, slots, bed, column }: StageProps) 
                       </div>
                     ))}
                   </div>
-                  <div
-                    data-out
-                    // a stacking context keeps popovers like Twoslash's under the arm
-                    className="prose isolate bg-lp-paper [&_.twoslash-completion-list]:w-56! [&_.twoslash-completion-list]:select-text! [&>:first-child]:mt-0 [&>:last-child]:mb-0"
-                  >
-                    {slot}
+                  {/* a stacking context keeps popovers like Twoslash's under the arm; the window
+                   the press shows its page through, over the source */}
+                  <div data-out className="isolate">
+                    <div className="prose h-full bg-lp-paper [&_.twoslash-completion-list]:w-56! [&_.twoslash-completion-list]:select-text! [&>:first-child]:mt-0 [&>:last-child]:mb-0">
+                      {slot}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -164,10 +170,19 @@ export function Stage({ file, steps, sources, slots, bed, column }: StageProps) 
         <div data-bay-phone className="relative w-18 shrink-0 md:hidden">
           {column}
         </div>
+        {/* paper over the block being typed, from the caret on */}
+        <div
+          data-veil
+          aria-hidden
+          className="pointer-events-none invisible absolute overflow-clip *:absolute *:inset-0 *:bg-lp-paper"
+        >
+          <span />
+          <span />
+        </div>
         <span
           data-caret
           aria-hidden
-          className="pointer-events-none invisible absolute top-0 left-0 bg-lp-ink motion-reduce:animate-none"
+          className={`pointer-events-none invisible absolute top-0 left-0 h-lh w-[1ch] bg-lp-ink motion-reduce:animate-none ${SOURCE}`}
         />
         <canvas
           data-mate

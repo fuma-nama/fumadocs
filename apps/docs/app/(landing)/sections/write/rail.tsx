@@ -77,21 +77,24 @@ export function RailBed({ stops }: { stops: number }) {
         <circle cx="12.5" cy="8.5" r="1.8" className={PART} />
       </svg>
       <span className={`absolute top-6.5 left-2.5 h-6 w-2.5 ${STRIPES}`} />
-      {/* the drag chain: its fixed run, the run the carriage pulls, the bend between them */}
+      {/* the drag chain: from the bend on, its fixed run and the run the carriage pulls, its
+       links riding with the carriage; the bend between them */}
       <span
-        data-chain="fixed"
-        className={`absolute top-2 left-0 h-1.5 ${LINKS}`}
-        style={{ right: BED.anchor, clipPath: `inset(0 0 0 ${BED.start}px)` }}
-      />
-      <span
-        data-chain="pulled"
-        className={`absolute top-4.5 left-0 h-1.5 ${LINKS}`}
-        style={{
-          right: BED.anchor,
-          clipPath: `inset(0 calc(100% - ${BED.start}px) 0 ${BED.start}px)`,
-          backgroundPositionX: BED.start,
-        }}
-      />
+        data-chain="runs"
+        className="absolute inset-y-0 left-0 overflow-clip *:absolute *:left-0 *:h-1.5 *:w-full"
+        style={{ right: BED.anchor, transform: `translateX(${BED.start}px)` }}
+      >
+        <span
+          data-chain="fixed"
+          className={`top-2 ${LINKS}`}
+          style={{ transform: `translateX(-${BED.start}px)` }}
+        />
+        <span
+          data-chain="pulled"
+          className={`top-4.5 bg-right ${LINKS}`}
+          style={{ transform: 'translateX(-100%)' }}
+        />
+      </span>
       <svg
         data-chain="bend"
         viewBox="0 0 9 16"

@@ -227,8 +227,8 @@ export function Cli() {
   for (let i = 0; i < plans.length; i++) {
     const plan = plans[i];
     for (const delivery of deliveries(plan)) {
-      // each file a layer of its own while it's carried (the engine's), moved without a repaint; a
-      // later file always stands nearer the viewer, so the order they come in stacks them
+      // each file moved by the engine while it's carried, without a repaint; a later file always
+      // stands nearer the viewer, so the order they come in stacks them
       cards.push(
         <div
           key={`${plan.id}:${delivery.path}`}
@@ -388,7 +388,12 @@ export function Cli() {
         </div>
         {cells}
         {editors}
-        <div data-cards aria-hidden className="pointer-events-none absolute inset-0 z-5">
+        {/* clipped, the carried files can't take the rest of the page into layers (see steer) */}
+        <div
+          data-cards
+          aria-hidden
+          className="pointer-events-none absolute inset-0 z-5 overflow-clip"
+        >
           {cards}
         </div>
       </Stage>

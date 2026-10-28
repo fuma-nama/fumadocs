@@ -34,3 +34,15 @@ export function rectIn(el: Element, origin: DOMRect): Rect {
   const r = el.getBoundingClientRect();
   return { x: r.left - origin.left, y: r.top - origin.top, w: r.width, h: r.height };
 }
+
+/**
+ * Lets a script steer `el` by its `transform` each frame as cheaply as an animation, till the
+ * returned release: Chrome lays the whole page out in layers again for each change, unless an
+ * animation is current on it, as this paused one that adds nothing stays. It then takes `el` to
+ * cover anything painted after it, so a clip round it keeps that to the clip.
+ */
+export function steer(el: Element): () => void {
+  const animation = el.animate({ transform: ['none', 'none'] }, { duration: 1, composite: 'add' });
+  animation.pause();
+  return () => animation.cancel();
+}
