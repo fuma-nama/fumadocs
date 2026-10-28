@@ -6,8 +6,6 @@ void main() { gl_Position = vec4(p, 0.0, 1.0); }`;
 
 interface ShaderCanvasOptions {
   fragment: string;
-  /** draw every frame while on screen, not only after `invalidate()` */
-  loop?: boolean;
   /** sets animated uniforms before each draw */
   onFrame?: (time: number) => void;
   /** after the canvas's box changed size, before the frame that shows it, with the canvas pixels
@@ -23,23 +21,16 @@ interface ShaderCanvasOptions {
 export type ShaderCanvas = NonNullable<ReturnType<typeof createShaderCanvas>>;
 
 /**
- * A full-canvas GLSL ES 3.00 fragment shader that only renders while the canvas is on screen: after
- * `invalidate()`, or every frame with `loop`. It gets `vec2 uResolution` (device px), `float uDpr`
- * and `float uTime` (seconds since creation), and writes `out vec4 color`. The program compiles
- * while the page goes on: frames before it's ready draw nothing, and never wait for the GPU where
- * the browser can tell when it's done (`KHR_parallel_shader_compile`).
+ * A full-canvas GLSL ES 3.00 fragment shader that only renders while the canvas is on screen, in
+ * the frame after `invalidate()`, and only when a uniform, a texture or the canvas's size changed
+ * since it last drew. It gets `vec2 uResolution` (device px) and `float uDpr`, and writes
+ * `out vec4 color`. The program compiles while the page goes on: frames before it's ready draw
+ * nothing, and never wait for the GPU where the browser can tell when it's done
+ * (`KHR_parallel_shader_compile`).
  */
 export function createShaderCanvas(
   canvas: HTMLCanvasElement,
-  {
-    fragment,
-    loop = false,
-    onFrame,
-    onResize,
-    onVisible,
-    thresholds = [],
-    density = 2,
-  }: ShaderCanvasOptions,
+  { fragment, onFrame, onResize, onVisible, thresholds = [], density = 2 }: ShaderCanvasOptions,
 ) {
   const gl = canvas.getContext('webgl2', {
     antialias: false,
@@ -76,8 +67,11 @@ export function createShaderCanvas(
   /** `null` until a frame finds the program compiled */
   let linked: boolean | null = null;
   const locations = new Map<string, WebGLUniformLocation | null>();
-  /** uniforms set before that, written then */
+  /** each uniform as last written, and those set before the link, written then */
+  const written = new Map<string, number | number[]>();
   const pending = new Map<string, Uniform>();
+  /** what the canvas shows changed since it last drew */
+  let stale = true;
 
   function write(name: string, value: Uniform) {
     let location = locations.get(name);
@@ -85,11 +79,29 @@ export function createShaderCanvas(
       location = gl!.getUniformLocation(program, name);
       locations.set(name, location);
     }
-    if (!location) return;
+    if (!location || !changed(name, value)) return;
+    stale = true;
     if (typeof value === 'number') gl!.uniform1f(location, value);
     else if (value.length === 2) gl!.uniform2f(location, value[0], value[1]);
     else if (value.length === 3) gl!.uniform3f(location, value[0], value[1], value[2]);
     else gl!.uniform4f(location, value[0], value[1], value[2], value[3]);
+  }
+
+  /** whether `value` differs from `name`'s last write, which it then becomes */
+  function changed(name: string, value: Uniform): boolean {
+    const last = written.get(name);
+    if (typeof value === 'number' || typeof last !== 'object') {
+      if (last === value) return false;
+      written.set(name, typeof value === 'number' ? value : [...value]);
+      return true;
+    }
+    let same = true;
+    for (let i = 0; i < value.length; i++) {
+      if (last[i] === value[i]) continue;
+      last[i] = value[i];
+      same = false;
+    }
+    return !same;
   }
 
   function set(name: string, value: Uniform) {
@@ -115,6 +127,7 @@ export function createShaderCanvas(
     }
     gl!.pixelStorei(gl!.UNPACK_FLIP_Y_WEBGL, true);
     gl!.texImage2D(gl!.TEXTURE_2D, 0, gl!.RGBA, gl!.RGBA, gl!.UNSIGNED_BYTE, source);
+    stale = true;
     invalidate();
   }
 
@@ -152,11 +165,10 @@ export function createShaderCanvas(
       }
       link();
     }
-    const time = (now - start) / 1000;
-    set('uTime', time);
-    onFrame?.(time);
-    if (linked) gl!.drawArrays(gl!.TRIANGLES, 0, 3);
-    if (loop) invalidate();
+    onFrame?.((now - start) / 1000);
+    if (!linked || !stale) return;
+    gl!.drawArrays(gl!.TRIANGLES, 0, 3);
+    stale = false;
   }
 
   function invalidate() {
@@ -183,6 +195,8 @@ export function createShaderCanvas(
     const width = onScreen ? Math.max(1, Math.round(canvas.clientWidth * dpr)) : 1;
     const height = onScreen ? Math.max(1, Math.round(canvas.clientHeight * dpr)) : 1;
     if (canvas.width === width && canvas.height === height) return;
+    // resizing clears it
+    stale = true;
     canvas.width = width;
     canvas.height = height;
     gl!.viewport(0, 0, width, height);
