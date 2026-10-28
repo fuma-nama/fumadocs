@@ -77,6 +77,8 @@ for (const frame of MARK) frame.opacity = 1;
 const CARD = names('uCard', CARDS);
 const CARD_Z = names('uCardZ', CARDS / 4);
 const ROPE = names('uRope', ROPE_POINTS * 2);
+/** a box with nothing in it: a change that shows nowhere else */
+const NONE = [0, 0, 0, 0];
 
 interface Card {
   el: HTMLElement;
@@ -252,8 +254,9 @@ export function createCli(root: HTMLElement): () => void {
     fragment,
     onResize: layout,
     onVisible,
-    // the dither and the outlines are whole CSS px: a 2x screen draws one canvas px for each
-    density: 1.5,
+    // the dither and the outlines are whole CSS px, one canvas px each
+    density: 1,
+    preserve: true,
   });
   if (!shader) {
     // no machine to run: the figure rests on its end state, as it does without script
@@ -310,8 +313,16 @@ export function createCli(root: HTMLElement): () => void {
   let status = '';
   /** the tab the play last turned to: a tab you pick mid-play stays until the next beat */
   let beatTab = -1;
-  /** each cable's rope as last uploaded */
-  const ropes: { route?: Route; end: number }[] = [{ end: -1 }, { end: -1 }];
+  /** each cable's rope as last uploaded, and its box */
+  const ropes: { route?: Route; end: number; box: number[] }[] = [
+    { end: -1, box: [0, 0, 0, 0] },
+    { end: -1, box: [0, 0, 0, 0] },
+  ];
+  /** each group's screen box, all that a change to it redraws */
+  const groups = Array.from({ length: 4 }, () => [0, 0, 0, 0]);
+  /** each carried file's box as last drawn, and the box a change redraws: the last and the new */
+  const drawn = Array.from({ length: CARDS }, () => [0, 0, 0, 0]);
+  const redraw = [0, 0, 0, 0];
   const scratch: Vec3 = [0, 0, 0];
   const point: Vec3 = [0, 0, 0];
   /** a carried file's box, the reels' turns and the jacks plugged in, set each frame */
@@ -631,35 +642,24 @@ export function createCli(root: HTMLElement): () => void {
 
     wire(s);
 
-    gl.set(
-      'uBox[0]',
-      bounds(
-        [centre[0] - size[0] - 20, top - LID_T - 2 * size[2] - 10, 0],
-        [centre[0] + size[0] + 24, floor, CRATE_Z + 10],
-      ),
+    groups[0] = bounds(
+      [centre[0] - size[0] - 20, top - LID_T - 2 * size[2] - 10, 0],
+      [centre[0] + size[0] + 24, floor, CRATE_Z + 10],
     );
     // the chain runs right or up from its tail, the plate's housing above it
     const housed = unproject(sign.x - 10, sign.y - 10, 0);
-    gl.set(
-      'uBox[1]',
-      bounds(
-        [Math.min(housed[0], tail[0] - FRAME), Math.min(housed[1], head[1] - FRAME), 0],
-        [head[0] + FRAME, tail[1] + FRAME, CHAIN_Z + 42],
-      ),
+    groups[1] = bounds(
+      [Math.min(housed[0], tail[0] - FRAME), Math.min(housed[1], head[1] - FRAME), 0],
+      [head[0] + FRAME, tail[1] + FRAME, CHAIN_Z + 42],
     );
-    gl.set(
-      'uBox[2]',
-      bounds(
-        [hopper[0] - halfWidth - 6, hopper[1] - 8, 0],
-        [hopper[0] + halfWidth + 6, neck[1] + 8, HOPPER_Z + 30],
-      ),
+    groups[2] = bounds(
+      [hopper[0] - halfWidth - 6, hopper[1] - 8, 0],
+      [hopper[0] + halfWidth + 6, neck[1] + 8, HOPPER_Z + 30],
     );
-    gl.set(
-      'uBox[3]',
-      wires.length
-        ? bounds([treeBox.x + treeBox.w - 12, editor.y, 0], [editor.x + 12, floor, 24])
-        : [0, 0, 0, 0],
-    );
+    groups[3] = wires.length
+      ? bounds([treeBox.x + treeBox.w - 12, editor.y, 0], [editor.x + 12, floor, 24])
+      : [0, 0, 0, 0];
+    for (let g = 0; g < groups.length; g++) gl.set(`uBox[${g}]`, groups[g]);
     const windows = [treeBox, editor];
     for (let i = 0; i < windows.length; i++) {
       const r = windows[i];
@@ -749,15 +749,19 @@ export function createCli(root: HTMLElement): () => void {
       caret.style.transform = at;
     }
 
-    gl.set('uLatch', [
-      live ? LATCH_OPEN * spring(clamp((t - b.latch[0]) / 260)) : LATCH_OPEN,
-      live ? LATCH_OPEN * spring(clamp((t - b.latch[1]) / 260)) : LATCH_OPEN,
-    ]);
-    gl.set('uLid', live ? lidAngle(t - b.lid) : LID_OPEN);
+    gl.set(
+      'uLatch',
+      [
+        live ? LATCH_OPEN * spring(clamp((t - b.latch[0]) / 260)) : LATCH_OPEN,
+        live ? LATCH_OPEN * spring(clamp((t - b.latch[1]) / 260)) : LATCH_OPEN,
+      ],
+      groups[0],
+    );
+    gl.set('uLid', live ? lidAngle(t - b.lid) : LID_OPEN, groups[0]);
 
     const distance = live ? travel(t) : b.travel;
-    gl.set('uPhase', distance);
-    gl.set('uSpin', distance / 13);
+    gl.set('uPhase', distance, groups[1]);
+    gl.set('uSpin', distance / 13, groups[1]);
     let holes = 0;
     let landed = 0;
     for (let i = 0; i < scene.cards.length; i++) {
@@ -818,13 +822,20 @@ export function createCli(root: HTMLElement): () => void {
         hole[1] = sy;
         hole[2] = left + card.w * k;
         hole[3] = sy + card.h * k;
-        gl.set(CARD[holes], hole);
-        depths[Math.floor(holes / 4)][holes % 4] = z;
+        cover(drawn[holes], hole);
+        gl.set(CARD[holes], hole, redraw);
+        const quad = holes >> 2;
+        depths[quad][holes % 4] = z;
+        gl.set(CARD_Z[quad], depths[quad], redraw);
         holes++;
       }
     }
-    for (let i = 0; i < depths.length; i++) gl.set(CARD_Z[i], depths[i]);
-    gl.set('uCards', holes);
+    // the boxes files were carried in, without them
+    for (let i = holes; i < CARDS && drawn[i][2] > drawn[i][0]; i++) {
+      gl.set(CARD[i], NONE, drawn[i]);
+      drawn[i].fill(0);
+    }
+    gl.set('uCards', holes, NONE);
 
     if (landed !== landedShown) {
       // the rows of the files landed since; all of them again after a reset
@@ -896,8 +907,8 @@ export function createCli(root: HTMLElement): () => void {
       }
       if (u >= wind + 150 && u < wind + 150 + TICK) flash(scene.cables[i].row, t);
     }
-    gl.set('uReelSpin', spin);
-    gl.set('uJackOn', plugged);
+    gl.set('uReelSpin', spin, groups[3]);
+    gl.set('uJackOn', plugged, groups[3]);
 
     const e = t - b.edit;
     const cut = scene.editCut;
@@ -955,29 +966,41 @@ export function createCli(root: HTMLElement): () => void {
   }
 
   function upload(i: number, r: Route, end: number) {
-    let n = 0;
-    let x0 = Infinity;
-    let y0 = Infinity;
-    let x1 = -Infinity;
-    let y1 = -Infinity;
+    const points: number[][] = [];
+    const box = [Infinity, Infinity, -Infinity, -Infinity];
     const put = (p: Vec3, plug: boolean) => {
       const [sx, sy, k] = project(p[0], p[1], p[2]);
       const radius = (plug ? 6 : RADIUS) * k;
-      gl.set(ROPE[i * ROPE_POINTS + n], [sx, sy, p[2], radius]);
-      n++;
-      x0 = Math.min(x0, sx - radius - 2);
-      y0 = Math.min(y0, sy - radius - 2);
-      x1 = Math.max(x1, sx + radius + 2);
-      y1 = Math.max(y1, sy + radius + 2);
+      points.push([sx, sy, p[2], radius]);
+      box[0] = Math.min(box[0], sx - radius - 2);
+      box[1] = Math.min(box[1], sy - radius - 2);
+      box[2] = Math.max(box[2], sx + radius + 2);
+      box[3] = Math.max(box[3], sy + radius + 2);
     };
-    for (let j = 0; j < r.points.length && r.at[j] < end - PLUG && n < ROPE_POINTS - 2; j++) {
+    for (
+      let j = 0;
+      j < r.points.length && r.at[j] < end - PLUG && points.length < ROPE_POINTS - 2;
+      j++
+    ) {
       put(r.points[j], false);
     }
     put(pointAt(r, end - PLUG, point), true);
     put(pointAt(r, end, point), true);
-    gl.set(`uRopeCount[${i}]`, n);
-    gl.set(`uRopeBox[${i * 2}]`, [x0, y0]);
-    gl.set(`uRopeBox[${i * 2 + 1}]`, [x1, y1]);
+    cover(ropes[i].box, box);
+    for (let n = 0; n < points.length; n++) gl.set(ROPE[i * ROPE_POINTS + n], points[n], redraw);
+    gl.set(`uRopeCount[${i}]`, points.length, redraw);
+    gl.set(`uRopeBox[${i * 2}]`, [box[0], box[1]], redraw);
+    gl.set(`uRopeBox[${i * 2 + 1}]`, [box[2], box[3]], redraw);
+  }
+
+  /** `redraw` becomes the box round `box` and `last`, which then becomes `box` */
+  function cover(last: number[], box: readonly number[]) {
+    const empty = last[2] <= last[0];
+    redraw[0] = empty ? box[0] : Math.min(last[0], box[0]);
+    redraw[1] = empty ? box[1] : Math.min(last[1], box[1]);
+    redraw[2] = empty ? box[2] : Math.max(last[2], box[2]);
+    redraw[3] = empty ? box[3] : Math.max(last[3], box[3]);
+    for (let i = 0; i < 4; i++) last[i] = box[i];
   }
 
   function flash(row: HTMLElement | undefined, t: number) {

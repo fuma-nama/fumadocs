@@ -18,7 +18,7 @@ interface ShaderCanvasOptions {
   thresholds?: number[];
   /** the most canvas pixels per CSS pixel it draws at */
   density?: number;
-  /** keeps what it drew, so a texture shown in a box of the canvas redraws that box alone */
+  /** keeps what it drew, so a change shown in a box of the canvas redraws that box alone */
   preserve?: boolean;
 }
 
@@ -83,18 +83,39 @@ export function createShaderCanvas(
   /** each uniform as last written, and those set before the link, written then */
   const written = new Map<string, number | number[]>();
   const pending = new Map<string, Uniform>();
-  /** what the canvas shows changed since it last drew: all of it, a box of canvas px from its
-   * bottom left, or nothing */
-  let stale: boolean | [x: number, y: number, w: number, h: number] = true;
+  /** all the canvas shows changed since it last drew, or only within `dirty`'s boxes, CSS px
+   * corners four by four */
+  let stale = true;
+  const dirty: number[] = [];
 
-  function write(name: string, value: Uniform) {
+  /** a change shown within `box`, CSS px `[x0, y0, x1, y1]`, or anywhere */
+  function mark(box?: readonly number[]) {
+    if (stale) return;
+    if (!box || !preserve) {
+      stale = true;
+      return;
+    }
+    if (box[2] <= box[0] || box[3] <= box[1]) return;
+    for (let i = 0; i < dirty.length; i += 4) {
+      if (
+        box[0] >= dirty[i] &&
+        box[1] >= dirty[i + 1] &&
+        box[2] <= dirty[i + 2] &&
+        box[3] <= dirty[i + 3]
+      )
+        return;
+    }
+    dirty.push(box[0], box[1], box[2], box[3]);
+  }
+
+  function write(name: string, value: Uniform, box?: readonly number[]) {
     let location = locations.get(name);
     if (location === undefined) {
       location = gl!.getUniformLocation(program, name);
       locations.set(name, location);
     }
     if (!location || !changed(name, value)) return;
-    stale = true;
+    mark(box);
     if (typeof value === 'number') gl!.uniform1f(location, value);
     else if (value.length === 2) gl!.uniform2f(location, value[0], value[1]);
     else if (value.length === 3) gl!.uniform3f(location, value[0], value[1], value[2]);
@@ -118,8 +139,10 @@ export function createShaderCanvas(
     return !same;
   }
 
-  function set(name: string, value: Uniform) {
-    if (linked) write(name, value);
+  /** `box`, CSS px `[x0, y0, x1, y1]`, holds all that a change to it shows, when the canvas
+   * `preserve`s what it drew */
+  function set(name: string, value: Uniform, box?: readonly number[]) {
+    if (linked) write(name, value, box);
     // callers reuse their arrays between uniforms
     else if (linked === null) pending.set(name, typeof value === 'number' ? value : [...value]);
   }
@@ -142,16 +165,7 @@ export function createShaderCanvas(
     }
     gl!.pixelStorei(gl!.UNPACK_FLIP_Y_WEBGL, true);
     gl!.texImage2D(gl!.TEXTURE_2D, 0, gl!.RGBA, gl!.RGBA, gl!.UNSIGNED_BYTE, source);
-    if (stale === false && box && preserve) {
-      const x = Math.floor(box.x * dpr);
-      const y = Math.floor(canvas.height - (box.y + box.h) * dpr);
-      stale = [
-        x,
-        y,
-        Math.ceil((box.x + box.w) * dpr) - x,
-        Math.ceil(canvas.height - box.y * dpr) - y,
-      ];
-    } else stale = true;
+    mark(box && [box.x, box.y, box.x + box.w, box.y + box.h]);
     invalidate();
   }
 
@@ -190,14 +204,25 @@ export function createShaderCanvas(
       link();
     }
     onFrame?.((now - start) / 1000);
-    if (!linked || !stale) return;
-    if (stale !== true) {
+    if (!linked) return;
+    if (stale) gl!.drawArrays(gl!.TRIANGLES, 0, 3);
+    else if (dirty.length > 0) {
       gl!.enable(gl!.SCISSOR_TEST);
-      gl!.scissor(stale[0], stale[1], stale[2], stale[3]);
+      for (let i = 0; i < dirty.length; i += 4) {
+        const x = Math.floor(dirty[i] * dpr);
+        const y = Math.floor(canvas.height - dirty[i + 3] * dpr);
+        gl!.scissor(
+          x,
+          y,
+          Math.ceil(dirty[i + 2] * dpr) - x,
+          Math.ceil(canvas.height - dirty[i + 1] * dpr) - y,
+        );
+        gl!.drawArrays(gl!.TRIANGLES, 0, 3);
+      }
+      gl!.disable(gl!.SCISSOR_TEST);
     }
-    gl!.drawArrays(gl!.TRIANGLES, 0, 3);
-    gl!.disable(gl!.SCISSOR_TEST);
     stale = false;
+    dirty.length = 0;
   }
 
   function invalidate() {

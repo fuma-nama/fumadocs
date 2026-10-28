@@ -258,11 +258,11 @@ vec3 normalAt(vec3 p, float e) {
   );
 }
 
-/** how sharply the surface bends within w of p */
-float bend(vec3 p, vec3 n, float w) {
+/** how sharply the surface bends within w of p, d from it */
+float bend(vec3 p, vec3 n, float w, float d) {
   vec3 t1 = normalize(cross(n, abs(n.y) < 0.9 ? vec3(0.0, 1.0, 0.0) : vec3(1.0, 0.0, 0.0)));
   vec3 t2 = cross(n, t1);
-  float c = 2.0 * map(p).x;
+  float c = 2.0 * d;
   float a = map(p + t1 * w).x + map(p - t1 * w).x - c;
   float b = map(p + t2 * w).x + map(p - t2 * w).x - c;
   return max(abs(a), abs(b)) / w;
@@ -368,12 +368,12 @@ void main() {
       tone = clamp((lambert - 0.1) / 0.35, 0.0, 1.0);
       if (m.y == DARK) tone *= 0.45;
       // a part in another's shadow keeps its tone under sparse dots, like the wall's
-      shadowed = lambert > 0.1 && lit(p + n * 2.0 * w, 120.0) < 0.5;
+      shadowed = lambert > 0.1 && tone > threshold && threshold < 0.22 && lit(p + n * 2.0 * w, 120.0) < 0.5;
     }
     vec3 c = tone > threshold ? uLit : uShade;
     if (shadowed && c == uLit && threshold < 0.22) c = uLine;
     if (m.y == ACCENT && tone > 0.2) c = uAccent;
-    if (bend(p, n, 1.2 * w) > 0.35) c = tone > 0.55 ? uShade : uLit;
+    if (bend(p, n, 1.2 * w, m.x) > 0.35) c = tone > 0.55 ? uShade : uLit;
     col = vec4(c, 1.0);
     // windows cut into front faces show the page's text under them
     bool front = abs(n.z) > 0.9;
