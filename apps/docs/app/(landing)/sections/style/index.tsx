@@ -29,7 +29,7 @@ export async function Style() {
   return (
     <Figure id="style" aria-label="Style" status={`layout: ${FIRST}`} className="pb-16">
       <div className="px-(--lp-gutter) pt-16 pb-10 md:pb-12">
-        <FigureHeader title={copy.style.title} />
+        <FigureHeader title={copy.style.title} className="max-w-6xl! text-pretty!" />
         <ul className="mt-6 flex flex-col gap-3 text-base font-light tracking-tight text-pretty">
           {claims}
         </ul>

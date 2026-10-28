@@ -52,9 +52,9 @@ export const copy = {
     title: [
       'Fumadocs is a\u00a0',
       { term: 'React' },
-      ' documentation\u00a0framework for\u00a0',
+      ' documentation framework for\u00a0',
       { term: 'developers' },
-      ', beautifully\u00a0designed by\u00a0',
+      ', beautifully designed by\u00a0',
       { term: 'Fuma Nama' },
       '.',
     ],
