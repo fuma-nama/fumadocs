@@ -229,6 +229,22 @@ function Content({ MdxContent }) {
 }
 ```
 
+```tsx tab="Astro" title="src/components/mdx.tsx"
+import defaultMdxComponents from 'fumadocs-ui/mdx';
+import { DocsBody } from 'fumadocs-ui/layouts/docs/page';
+import type { AsyncAPIPageProps_Preloaded } from '@fumadocs/asyncapi/ui';
+import { AsyncAPIPage } from '@/components/api-page';
+
+export default {
+  ...defaultMdxComponents,
+  // documents are loaded by `loadDocument` [!code ++:4]
+  AsyncAPIPage: (props: Omit<AsyncAPIPageProps_Preloaded, 'preloaded'>) => (
+    <AsyncAPIPage {...props} preloaded={{ docs: {} }} />
+  ),
+  wrapper: DocsBody,
+};
+```
+
 Add the plugin to your `loader()`:
 
 ```ts title="lib/source.ts"

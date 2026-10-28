@@ -50,7 +50,7 @@ See [`createOpenAPI()`](/docs/integrations/openapi/server) & [`createOpenAPIPage
 
 Integrate into [Loader API](/docs/headless/source-api/source) to generate pages, without generating real files.
 
-```ts title="lib/source.ts"
+```ts tab="Fumadocs MDX" title="lib/source.ts"
 import { loader } from 'fumadocs-core/source';
 import { docs } from 'collections/server';
 import { openapi } from '@/lib/openapi';
@@ -68,6 +68,28 @@ export const source = loader(
     // [!code ++] optional: adds a badge to each page item in page tree
     plugins: [openapi.loaderPlugin()],
     // ...
+  },
+);
+```
+
+```ts tab="Astro" title="src/lib/source.ts"
+import { getCollection } from 'astro:content';
+import { loader } from 'fumadocs-core/source';
+import { toFumadocsSource } from '@fumadocs/astro/source';
+import { openapi } from '@/lib/openapi';
+
+export const source = loader(
+  // [!code ++:6]
+  {
+    docs: toFumadocsSource(await getCollection('docs'), await getCollection('meta')),
+    openapi: await openapi.staticSource({
+      baseDir: 'openapi',
+    }),
+  },
+  {
+    baseUrl: '/docs',
+    // [!code ++] optional: adds a badge to each page item in page tree
+    plugins: [openapi.loaderPlugin()],
   },
 );
 ```
@@ -97,7 +119,7 @@ export const docsLlms = llms(source, {
 
 And update your page renderer:
 
-<Tabs items={["Server Components", "Without Server Components"]}>
+<Tabs items={["Server Components", "Without Server Components", "Astro"]}>
 
 <Tab>
 
@@ -216,6 +238,81 @@ function Page() {
 ```
 
 You can see the full [Tanstack Start example](https://github.com/fuma-nama/fumadocs/blob/dev/examples/tanstack-start-openapi).
+
+</Tab>
+
+<Tab>
+
+Pass the props of OpenAPI pages to the [`Docs` island](/docs/manual-installation/astro#docs-page), it renders `<OpenAPIPage />` in place of the content:
+
+```tsx title="src/components/docs.tsx"
+// [!code highlight]
+import { DocsBody, DocsDescription, DocsPage, DocsTitle } from 'fumadocs-ui/layouts/docs/page';
+// [!code ++:2]
+import type { OpenAPIPageProps } from 'fumadocs-openapi/ui';
+import { OpenAPIPage } from '@/components/api-page';
+
+export interface DocsProps extends ProviderProps {
+  // ...
+  // [!code ++]
+  openapi?: OpenAPIPageProps;
+}
+
+// [!code highlight]
+export function Docs({ tree, title, description, toc, openapi, children, ...props }: DocsProps) {
+  const data = useFumadocsLoader({ tree });
+
+  return (
+    <Provider {...props}>
+      <DocsLayout {...baseOptions()} tree={data.tree}>
+        {/* [!code ++:8] */}
+        {openapi ? (
+          <DocsPage toc={toc} full>
+            <DocsTitle>{title}</DocsTitle>
+            <DocsBody>
+              <OpenAPIPage {...openapi} />
+            </DocsBody>
+          </DocsPage>
+        ) : (
+          <DocsPage toc={toc}>
+            <DocsTitle>{title}</DocsTitle>
+            <DocsDescription>{description}</DocsDescription>
+            {children}
+          </DocsPage>
+        )}
+      </DocsLayout>
+    </Provider>
+  );
+}
+```
+
+```astro title="src/pages/docs/[...slug].astro"
+---
+// ...
+const { page } = Astro.props;
+// [!code highlight]
+const { Content, toc } = page.type === 'docs' ? await page.data.render() : { toc: page.data.toc };
+// [!code ++]
+const openapi = page.type === 'openapi' ? page.data.getOpenAPIPageProps() : undefined;
+---
+
+<Layout title={page.data.title} description={page.data.description}>
+  <Docs
+    client:load
+    transition:persist="docs"
+    pathname={Astro.url.pathname}
+    params={Astro.params}
+    tree={pageTree}
+    title={page.data.title}
+    description={page.data.description}
+    toc={toc}
+    openapi={openapi}
+  >
+    <!-- [!code highlight] -->
+    {Content && <Content />}
+  </Docs>
+</Layout>
+```
 
 </Tab>
 
