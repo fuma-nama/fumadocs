@@ -3,12 +3,24 @@ import { type Framework, FrameworkProvider } from '@/framework/index';
 import { useParams, Link, useRouter, useRouterState } from '@tanstack/react-router';
 
 const framework: Framework = {
-  Link({ href, prefetch = true, ...props }) {
+  Link({ href = '', prefetch = true, ...props }) {
+    const router = useRouter();
     // Tanstack Router drops the hash of same-page anchors, use a native anchor instead
-    if (href?.startsWith('#')) return <a href={href} {...props} />;
+    if (href.startsWith('#')) return <a href={href} {...props} />;
+
+    // `to` only accepts a path, search params and hash are passed separately
+    const hashIdx = href.indexOf('#');
+    const path = hashIdx === -1 ? href : href.slice(0, hashIdx);
+    const searchIdx = path.indexOf('?');
 
     return (
-      <Link to={href} preload={prefetch ? 'intent' : false} {...props}>
+      <Link
+        to={searchIdx === -1 ? path : path.slice(0, searchIdx)}
+        search={searchIdx === -1 ? undefined : router.options.parseSearch(path.slice(searchIdx))}
+        hash={hashIdx === -1 ? undefined : href.slice(hashIdx + 1)}
+        preload={prefetch ? 'intent' : false}
+        {...props}
+      >
         {props.children}
       </Link>
     );
