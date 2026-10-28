@@ -17,8 +17,10 @@ type JsxElement = MdxJsxFlowElementHast | MdxJsxTextElementHast;
  * the parts React can't (code content, images, imported components, expressions) into slots.
  *
  * The tree is serialized as {@link import('./shared').IslandNode}, evaluated by the MDX module.
+ *
+ * @param module - specifier of the island module (`island.tsx`)
  */
-export function islandPlugin(): HastPluginDefinition {
+export function islandPlugin(module: string): HastPluginDefinition {
   // names declared by the ESM of document, rendered by Astro
   const locals = new Set<string>();
 
@@ -61,7 +63,7 @@ export function islandPlugin(): HastPluginDefinition {
       for (const node of body) ctx.removeNode(node);
       ctx.prependChild(root, {
         type: 'mdxjsEsm',
-        value: `import { FumadocsIsland as ${islandName} } from "@fumadocs/astro/island";`,
+        value: `import { FumadocsIsland as ${islandName} } from ${JSON.stringify(module)};`,
       });
     },
   };

@@ -1,6 +1,8 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { AstroIntegration } from 'astro';
+import react from '@astrojs/react';
+import mdx from '@astrojs/mdx';
 import type { SatteriResolvedOptions } from '@astrojs/markdown-satteri';
 import type { HastPluginDefinition, MdastPluginDefinition, PluginFactoryContext } from 'satteri';
 import { applySatteriPreset, type DefaultSatteriOptions } from '@fumadocs/satteri/preset';
@@ -21,7 +23,7 @@ export interface FumadocsOptions extends Pick<
   | 'rehypeKatexOptions'
 > {
   /**
-   * Content directory, relative to the project root. Fumadocs only processes the MDX files in it.
+   * Content directory, relative to the project root. Fumadocs only processes the MDX files in it, `docsLoader()` and `metaLoader()` load from it.
    *
    * @defaultValue 'content/docs'
    */
@@ -29,10 +31,8 @@ export interface FumadocsOptions extends Pick<
 
   /**
    * Module whose default export is the MDX components, like `./src/components/mdx.tsx`.
-   *
-   * @defaultValue 'fumadocs-ui/mdx'
    */
-  components?: string;
+  components: string;
 
   /**
    * Enable `getText('processed')` on pages.
@@ -42,7 +42,6 @@ export interface FumadocsOptions extends Pick<
   includeProcessedMarkdown?: boolean;
 }
 
-const componentsId = 'virtual:fumadocs/mdx-components';
 /** code blocks are renamed in mdast, so the syntax highlighter of Astro skips them */
 const hiddenPre = 'fumadocs-pre';
 
@@ -82,13 +81,15 @@ const exportData: HastPluginDefinition = {
 
 /**
  * The Astro integration of Fumadocs, it runs the MDX features of Fumadocs on the Sätteri processor of Astro.
+ *
+ * It adds the React and MDX integrations of Astro, unless they are already configured.
  */
 export default function fumadocs({
   dir = 'content/docs',
-  components = 'fumadocs-ui/mdx',
+  components,
   includeProcessedMarkdown = false,
   ...options
-}: FumadocsOptions = {}): AstroIntegration {
+}: FumadocsOptions): AstroIntegration {
   return {
     name: '@fumadocs/astro',
     hooks: {
@@ -101,12 +102,9 @@ export default function fumadocs({
         }
 
         const names = new Set(config.integrations.map((integration) => integration.name));
-        for (const name of ['react', 'mdx']) {
-          if (!names.has(`@astrojs/${name}`))
-            throw new Error(
-              `Fumadocs requires \`@astrojs/${name}\`, add it with \`npx astro add ${name}\`.`,
-            );
-        }
+        const integrations: AstroIntegration[] = [];
+        if (!names.has('@astrojs/react')) integrations.push(react());
+        if (!names.has('@astrojs/mdx')) integrations.push(mdx());
 
         const root = fileURLToPath(config.root);
         const contentDir = path.resolve(root, dir);
@@ -140,23 +138,33 @@ export default function fumadocs({
         );
         satteri.hastPlugins.push(
           (ctx) =>
-            isContent(ctx) && [restoreCode, ...preset.hastPlugins!, exportData, islandPlugin()],
+            isContent(ctx) && [
+              restoreCode,
+              ...preset.hastPlugins!,
+              exportData,
+              islandPlugin(internalModule('island')),
+            ],
         );
 
         // on every page, as persisted islands can move to pages without content
         injectScript(
           'page',
-          `import { onBeforeSwap } from ${JSON.stringify(fileURLToPath(new URL('./navigation.js', import.meta.url)))};
+          `import { onBeforeSwap } from ${JSON.stringify(internalModule('navigation'))};
 document.addEventListener('astro:before-swap', onBeforeSwap);`,
         );
         updateConfig({
+          integrations,
           vite: {
             plugins: [
-              componentsPlugin(
-                components.startsWith('.')
-                  ? path.resolve(root, components).replaceAll(path.sep, '/')
-                  : components,
-              ),
+              virtualPlugin({
+                // resolved from the project rather than this package
+                'virtual:fumadocs/mdx-components': `export { default } from ${JSON.stringify(
+                  components.startsWith('.')
+                    ? path.resolve(root, components).replaceAll(path.sep, '/')
+                    : components,
+                )};`,
+                'virtual:fumadocs/config': `export const dir = ${JSON.stringify(dir)};`,
+              }),
             ],
             optimizeDeps: { exclude: ['@fumadocs/astro'] },
             ssr: { noExternal: ['@fumadocs/astro'] },
@@ -167,19 +175,21 @@ document.addEventListener('astro:before-swap', onBeforeSwap);`,
   };
 }
 
-/** a virtual module, so the components module resolves from the project rather than this package */
-function componentsPlugin(module: string) {
-  const resolved = `\0${componentsId}`;
+/** a module of this package for the generated code, not a public export */
+function internalModule(name: string): string {
+  return fileURLToPath(new URL(`./${name}.js`, import.meta.url)).replaceAll(path.sep, '/');
+}
 
+function virtualPlugin(modules: Record<string, string>) {
   return {
-    name: '@fumadocs/astro:components',
+    name: '@fumadocs/astro:virtual',
     resolveId: {
-      filter: { id: new RegExp(`^${componentsId}$`) },
-      handler: () => resolved,
+      filter: { id: /^virtual:fumadocs\// },
+      handler: (id: string) => (id in modules ? `\0${id}` : undefined),
     },
     load: {
-      filter: { id: new RegExp(`^\\0${componentsId}$`) },
-      handler: () => `export { default } from ${JSON.stringify(module)};`,
+      filter: { id: /^\0virtual:fumadocs\// },
+      handler: (id: string) => modules[id.slice(1)],
     },
   };
 }

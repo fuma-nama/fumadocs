@@ -524,6 +524,49 @@ importers:
         specifier: ^7.0.2
         version: 7.0.2
 
+  examples/astro-min:
+    dependencies:
+      '@astrojs/mdx':
+        specifier: ^8.1.1
+        version: 8.1.1(@astrojs/markdown-remark@7.3.4(supports-color@8.1.1))(@astrojs/markdown-satteri@0.4.5)(astro@7.4.2(@astrojs/markdown-remark@7.3.4(supports-color@8.1.1))(@types/node@26.6.5)(db0@0.4.1)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(yaml@2.9.1))
+      '@astrojs/react':
+        specifier: ^7.1.1
+        version: 7.1.1(@rolldown/plugin-babel@0.2.4(@babel/core@7.29.7(supports-color@8.1.1))(@babel/runtime@7.29.7)(rolldown@1.2.15)(vite@8.3.5(@types/node@26.6.5)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(yaml@2.9.1)))(@types/node@26.6.5)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(esbuild@0.28.2)(jiti@2.7.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(terser@5.51.2)(yaml@2.9.1)
+      '@fumadocs/astro':
+        specifier: workspace:*
+        version: link:../../packages/astro
+      astro:
+        specifier: ^7.4.2
+        version: 7.4.2(@astrojs/markdown-remark@7.3.4(supports-color@8.1.1))(@types/node@26.6.5)(db0@0.4.1)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(yaml@2.9.1)
+      fumadocs-core:
+        specifier: workspace:*
+        version: link:../../packages/core
+      fumadocs-ui:
+        specifier: workspace:@fumadocs/base-ui@*
+        version: link:../../packages/base-ui
+      react:
+        specifier: ^19.3.1
+        version: 19.3.1
+      react-dom:
+        specifier: ^19.3.1
+        version: 19.3.1(react@19.3.1)
+    devDependencies:
+      '@tailwindcss/vite':
+        specifier: ^4.3.3
+        version: 4.3.3(vite@8.3.5(@types/node@26.6.5)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(yaml@2.9.1))
+      '@types/react':
+        specifier: ^19.3.0
+        version: 19.3.0
+      '@types/react-dom':
+        specifier: ^19.3.0
+        version: 19.3.0(@types/react@19.3.0)
+      tailwindcss:
+        specifier: ^4.3.3
+        version: 4.3.3
+      typescript:
+        specifier: ^7.0.2
+        version: 7.0.2
+
   examples/asyncapi:
     dependencies:
       '@fumadocs/asyncapi':
@@ -2230,12 +2273,6 @@ importers:
 
   packages/astro:
     dependencies:
-      '@astrojs/mdx':
-        specifier: ^8.0.0
-        version: 8.1.1(@astrojs/markdown-remark@7.3.4(supports-color@8.1.1))(@astrojs/markdown-satteri@0.4.5)(astro@7.4.2(@astrojs/markdown-remark@7.3.4(supports-color@8.1.1))(@types/node@26.6.5)(db0@0.4.1)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(yaml@2.9.1))
-      '@astrojs/react':
-        specifier: ^7.0.0
-        version: 7.1.1(@rolldown/plugin-babel@0.2.4(@babel/core@7.29.7(supports-color@8.1.1))(@babel/runtime@7.29.7)(rolldown@1.2.15)(vite@8.3.5(@types/node@26.6.5)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(yaml@2.9.1)))(@types/node@26.6.5)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(esbuild@0.28.2)(jiti@2.7.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(terser@5.51.2)(yaml@2.9.1)
       '@fumadocs/satteri':
         specifier: workspace:^
         version: link:../satteri
@@ -2246,6 +2283,12 @@ importers:
       '@astrojs/markdown-satteri':
         specifier: ^0.4.5
         version: 0.4.5
+      '@astrojs/mdx':
+        specifier: ^8.1.1
+        version: 8.1.1(@astrojs/markdown-remark@7.3.4(supports-color@8.1.1))(@astrojs/markdown-satteri@0.4.5)(astro@7.4.2(@astrojs/markdown-remark@7.3.4(supports-color@8.1.1))(@types/node@26.6.5)(db0@0.4.1)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(yaml@2.9.1))
+      '@astrojs/react':
+        specifier: ^7.1.1
+        version: 7.1.1(@rolldown/plugin-babel@0.2.4(@babel/core@7.29.7(supports-color@8.1.1))(@babel/runtime@7.29.7)(rolldown@1.2.15)(vite@8.3.5(@types/node@26.6.5)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(yaml@2.9.1)))(@types/node@26.6.5)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(esbuild@0.28.2)(jiti@2.7.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(terser@5.51.2)(yaml@2.9.1)
       '@types/estree-jsx':
         specifier: ^1.0.5
         version: 1.0.5

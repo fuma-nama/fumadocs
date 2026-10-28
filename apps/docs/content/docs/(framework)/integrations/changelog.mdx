@@ -138,7 +138,55 @@ function Page() {
 }
 ```
 
+```astro tab="Astro" title="src/pages/changelog/[...page].astro"
+---
+import type { GetStaticPaths, InferGetStaticPropsType } from 'astro';
+import { githubReleases } from '@fumadocs/changelog/github';
+import Layout from '@/layouts/Layout.astro';
+// the island of your Home Layout
+import { Home } from '@/components/home';
+import { ChangelogPagination, ChangelogTimeline } from '@/components/changelog';
+
+export const getStaticPaths = (async () => {
+  const paths = [];
+  for (let page: number | undefined = 1; page; ) {
+    const releases = await githubReleases({
+      owner: 'fuma-nama',
+      repo: 'fumadocs',
+      token: import.meta.env.GITHUB_TOKEN,
+      page,
+    });
+    paths.push({
+      params: { page: page > 1 ? String(page) : undefined },
+      props: { page, ...releases },
+    });
+    page = releases.nextPage;
+  }
+  return paths;
+}) satisfies GetStaticPaths;
+
+type Props = InferGetStaticPropsType<typeof getStaticPaths>;
+
+const { page, entries, nextPage } = Astro.props;
+const href = (page: number) => (page > 1 ? `/changelog/${page}` : '/changelog');
+---
+
+<Layout title="Changelog">
+  <Home client:load pathname={Astro.url.pathname} params={Astro.params}>
+    <div class="mx-auto flex w-full max-w-[900px] flex-col gap-10 px-4 py-12">
+      <ChangelogTimeline entries={entries} />
+      <ChangelogPagination
+        newer={page > 1 ? href(page - 1) : undefined}
+        older={nextPage ? href(nextPage) : undefined}
+      />
+    </div>
+  </Home>
+</Layout>
+```
+
 The timeline groups entries by month, and renders their Markdown with code highlighting. With React Server Components, it renders on the server, otherwise also in the browser.
+
+On Astro, the pages are generated at build time. The timeline is a child of the island, it renders on the server only, without interactivity like copy buttons.
 
 ## Sources
 

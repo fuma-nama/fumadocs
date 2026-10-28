@@ -53,7 +53,7 @@ export const docs: Feature<{ i18n: boolean }> = {
     // the language pack of `cn`
     if (i18n) ctx.addDependencies({ '@fumadocs/language': null });
     if (framework === 'astro') {
-      // the integrations and Tailwind CSS of the Astro config
+      // the integrations of Fumadocs, React and MDX, Tailwind CSS
       ctx.addDependencies({
         '@fumadocs/astro': null,
         '@astrojs/react': null,
@@ -163,17 +163,19 @@ async function configureProxy(ctx: FeatureContext) {
 function bundlerEdits({ framework, baseDir }: Project): ((file: SourceFile) => boolean)[] {
   if (framework === 'next') return [wrapNextConfig];
   if (framework === 'astro') {
-    const integration = (name: string, from: string, call?: string) => (file: SourceFile) =>
-      addVitePlugin(file, { name, from, call, default: true }, ['integrations']);
-
     return [
-      integration('react', '@astrojs/react'),
-      integration('mdx', '@astrojs/mdx'),
-      integration(
-        'fumadocs',
-        '@fumadocs/astro',
-        `fumadocs({ components: './${path.posix.join(baseDir, 'components/mdx.tsx')}' })`,
-      ),
+      // it adds the React and MDX integrations
+      (file) =>
+        addVitePlugin(
+          file,
+          {
+            name: 'fumadocs',
+            from: '@fumadocs/astro',
+            call: `fumadocs({ components: './${path.posix.join(baseDir, 'components/mdx.tsx')}' })`,
+            default: true,
+          },
+          ['integrations'],
+        ),
       (file) =>
         addVitePlugin(file, { name: 'tailwindcss', from: '@tailwindcss/vite', default: true }, [
           'vite',

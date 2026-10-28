@@ -122,26 +122,35 @@ return {
 };
 ```
 
-```tsx tab="Vite Based Framework" title="app/lib/source.ts"
-// [!code ++:5]
-export function getPageImageUrl(page: (typeof source)['$inferPage']) {
+```ts tab="Waku" title="src/lib/shared.ts"
+import { createGetUrl } from 'fumadocs-core/source';
+
+// [!code ++:7]
+const getImageUrl = createGetUrl('/og/docs');
+
+export function getPageImageUrl(page: { slugs: string[]; locale?: string }) {
   const segments = [...page.slugs, 'image.webp'];
 
-  return '/' + [page.locale, 'og', 'docs', ...segments].filter(Boolean).join('/');
+  return { segments, url: getImageUrl(segments, page.locale) };
 }
 ```
 
-```tsx tab="Vite Based Framework" title="app/routes/docs.tsx"
+```tsx tab="Waku" title="src/pages/docs/[...slugs].tsx"
 // [!code ++]
-import { getPageImageUrl } from '@/lib/source';
+import { getPageImageUrl } from '@/lib/shared';
 
-// Somewhere in your component or client loader
-return (
-  <>
-    {/* [!code ++] */}
-    <meta property="og:image" content={getPageImageUrl(page)} />
-  </>
-);
+export default function Page({ slugs }: PageProps<'/docs/[...slugs]'>) {
+  const page = source.getPage(slugs);
+  // ...
+
+  return (
+    <DocsPage toc={page.data.toc}>
+      {/* [!code ++] */}
+      <meta property="og:image" content={getPageImageUrl(page).url} />
+      {/* ... */}
+    </DocsPage>
+  );
+}
 ```
 
 ```ts tab="Astro" title="src/lib/shared.ts"

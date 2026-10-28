@@ -8,8 +8,8 @@ export default defineConfig({
   target: 'es2023',
   format: 'esm',
   entry: ['src/index.ts', 'src/island.tsx', 'src/loaders.ts', 'src/source.ts', 'src/navigation.ts'],
-  // injected by the integration
-  exports: { enabled: true, exclude: ['./navigation'] },
+  // imported by the generated code
+  exports: { enabled: true, exclude: ['./island', './navigation'] },
   deps: {
     onlyBundle: [],
     neverBundle: [/^astro:/, /^virtual:/],

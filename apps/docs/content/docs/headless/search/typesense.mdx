@@ -15,7 +15,7 @@ typesense typesense-fumadocs-adapter
 
 ### Start Typesense Server
 
-You can either self-host the Typesense server or use their cloud service. Follow their [getting started guide](https://typesense.org/docs/guide/install-typesense.html) to set up your server, and store its credentials in `.env.local` (`VITE_` instead of `NEXT_PUBLIC_` outside Next.js):
+You can either self-host the Typesense server or use their cloud service. Follow their [getting started guide](https://typesense.org/docs/guide/install-typesense.html) to set up your server, and store its credentials in `.env.local` (`NEXT_PUBLIC_` is `PUBLIC_` on Astro, `VITE_` on other Vite frameworks):
 
 ```dotenv
 NEXT_PUBLIC_TYPESENSE_URL="server URL"

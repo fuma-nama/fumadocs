@@ -1,24 +1,16 @@
 import { glob, type Loader } from 'astro/loaders';
-
-export interface LoaderOptions {
-  /**
-   * Content directory, relative to the project root.
-   *
-   * @defaultValue 'content/docs'
-   */
-  dir?: string;
-}
+import { dir } from 'virtual:fumadocs/config';
 
 /**
- * Load the MDX files of a content directory, entry IDs are the file paths.
+ * Load the MDX files in the `dir` of the Fumadocs integration, entry IDs are the file paths.
  */
-export function docsLoader({ dir = 'content/docs' }: LoaderOptions = {}): Loader {
+export function docsLoader(): Loader {
   return glob({ base: dir, pattern: '**/*.mdx', generateId: ({ entry }) => entry });
 }
 
 /**
- * Load the meta files (`meta.json`) of a content directory, entry IDs are the file paths.
+ * Load the meta files (`meta.json`) in the `dir` of the Fumadocs integration, entry IDs are the file paths.
  */
-export function metaLoader({ dir = 'content/docs' }: LoaderOptions = {}): Loader {
+export function metaLoader(): Loader {
   return glob({ base: dir, pattern: '**/*.{json,yaml}', generateId: ({ entry }) => entry });
 }

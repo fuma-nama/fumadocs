@@ -1,14 +1,12 @@
 ---
 import Layout from '@/layouts/Layout.astro';
-import { App } from '@/components/app';
+import { NotFound } from '@/components/home';
 import { i18n } from '@/lib/i18n';
 ---
 
 <Layout lang={i18n.defaultLanguage} title="Not Found">
-  <App
+  <NotFound
     client:load
-    transition:persist="app"
-    page="not-found"
     lang={i18n.defaultLanguage}
     pathname={Astro.url.pathname}
     params={Astro.params}

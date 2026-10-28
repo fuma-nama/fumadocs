@@ -20,7 +20,6 @@
   "sideEffects": false,
   "exports": {
     ".": "./dist/index.js",
-    "./island": "./dist/island.js",
     "./loaders": "./dist/loaders.js",
     "./source": "./dist/source.js",
     "./package.json": "./package.json"
@@ -42,6 +41,8 @@
   },
   "devDependencies": {
     "@astrojs/markdown-satteri": "^0.4.5",
+    "@astrojs/mdx": "^8.1.1",
+    "@astrojs/react": "^7.1.1",
     "@types/estree-jsx": "^1.0.5",
     "@types/hast": "^3.0.5",
     "@types/node": "26.6.5",

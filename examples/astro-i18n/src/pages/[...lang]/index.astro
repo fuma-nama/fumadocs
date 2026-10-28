@@ -1,7 +1,7 @@
 ---
 import type { GetStaticPaths, InferGetStaticPropsType } from 'astro';
 import Layout from '@/layouts/Layout.astro';
-import { App } from '@/components/app';
+import { Home } from '@/components/home';
 import { i18n } from '@/lib/i18n';
 
 export const getStaticPaths = (() => {
@@ -18,12 +18,16 @@ const { lang } = Astro.props;
 ---
 
 <Layout lang={lang} title="Fumadocs on Astro">
-  <App
-    client:load
-    transition:persist="app"
-    page="home"
-    lang={lang}
-    pathname={Astro.url.pathname}
-    params={Astro.params}
-  />
+  <Home client:load lang={lang} pathname={Astro.url.pathname} params={Astro.params}>
+    <div class="p-4 flex flex-col items-center justify-center text-center flex-1">
+      <h1 class="text-xl font-bold mb-2">Fumadocs on Astro.</h1>
+      <p class="text-fd-muted-foreground mb-4">The truly flexible docs framework on React.js.</p>
+      <a
+        class="text-sm bg-fd-primary text-fd-primary-foreground rounded-full font-medium px-4 py-2.5"
+        href={lang === i18n.defaultLanguage ? '/docs' : `/${lang}/docs`}
+      >
+        Open Docs
+      </a>
+    </div>
+  </Home>
 </Layout>

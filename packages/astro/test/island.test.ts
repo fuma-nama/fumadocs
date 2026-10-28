@@ -39,7 +39,7 @@ async function compile(source: string) {
   };
 
   const { code } = await mdxToJs(source, {
-    hastPlugins: [islandPlugin(), capture],
+    hastPlugins: [islandPlugin('/island.js'), capture],
     jsxImportSource: 'astro',
   });
   return { code, island: island! };
@@ -65,9 +65,7 @@ describe('content island', () => {
       "import { X } from './x';\n\nexport const y = 1;\n\n# Hello\n\nWorld",
     );
 
-    expect(code).toContain(
-      'import { FumadocsIsland as _FumadocsIsland } from "@fumadocs/astro/island"',
-    );
+    expect(code).toContain('import { FumadocsIsland as _FumadocsIsland } from "/island.js"');
     expect(code).toContain('"client:load": true');
     expect(code).toContain('import { X } from "./x"');
     expect(render(island)).toBe('<h1>Hello</h1><p>World</p>');
