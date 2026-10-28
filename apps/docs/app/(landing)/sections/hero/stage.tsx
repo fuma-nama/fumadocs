@@ -61,7 +61,7 @@ export function Stage() {
                 key={s.layer}
                 layer={s.layer}
                 data-state="off"
-                className="absolute top-0 left-0 data-[state=off]:invisible data-[state=pop]:bg-lp-ink data-[state=pop]:text-lp-paper"
+                className="absolute top-0 left-0 will-change-[translate] data-[state=off]:invisible data-[state=pop]:bg-lp-ink data-[state=pop]:text-lp-paper"
               />
             ))}
           </div>

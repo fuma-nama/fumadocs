@@ -126,20 +126,8 @@ export function createHero(stage: HTMLElement, reduced: boolean): (() => void) |
     fragment: moonFragment,
     onFrame: (time) => frame(time),
     onResize: (dpr) => measure(dpr),
-    // the labels ride while the sky shows, back in step with the shader's clock
-    onVisible: reduced
-      ? undefined
-      : (ratio) => {
-          for (const r of rides) {
-            if (ratio > 0) r.startTime = origin;
-            else r.pause();
-          }
-        },
   });
   if (!shader) return;
-  /** the shader's clock's start, `performance.now()` time */
-  const origin = performance.now();
-  const rides: Animation[] = [];
   const hero = stage.parentElement!;
   const mateImage = new ImageData(MATE_W, MATE_H);
   // the light follows a mouse, on touch screens it circles on its own
@@ -168,6 +156,8 @@ export function createHero(stage: HTMLElement, reduced: boolean): (() => void) |
   let popInk: MateInk | undefined;
   let mateShown = -1;
   const mateLight: [number, number, number] = [0, 0, 0];
+  /** each label's place as last set */
+  const placed: string[] = [];
 
   shader.texture('uFace', face);
   for (let k = 0; k < CRATER_UNIFORMS.length; k++) shader.set(`uCrater[${k}]`, CRATER_UNIFORMS[k]);
@@ -211,34 +201,6 @@ export function createHero(stage: HTMLElement, reduced: boolean): (() => void) |
     const fastest = (ORBIT.a * radius * 2 * Math.PI * TICK) / (ORBIT.period * 1000);
     stride = TICK / Math.max(1, Math.ceil(fastest / CELL));
     centre = undefined;
-    ride();
-  };
-
-  /** each label rides on its prism inside the drawing a move at a time, off while the moon hides
-   * the prism: a turn of composited keyframes on the shader's clock, laid out per size */
-  const ride = () => {
-    const moves = reduced ? 1 : Math.round((ORBIT.period * 1000) / stride);
-    const reach = REACH * radius;
-    for (let i = 0; i < SATELLITES.length; i++) {
-      const s = SATELLITES[i];
-      const above = Math.hypot(...s.size);
-      const frames: Keyframe[] = [];
-      for (let k = 0; k <= moves; k++) {
-        const [x, y, depth] = onRing(s.phase, ((k % moves) * stride) / 1000);
-        frames.push({
-          offset: k / moves,
-          easing: 'step-end',
-          translate: `clamp(${-reach}px, calc(${x * radius}px - 50%), calc(${reach}px - 100%)) calc(${(y - above) * radius}px - 100%)`,
-          opacity: depth < 0 && x * x + y * y < 1 ? 0 : 1,
-        });
-      }
-      rides[i]?.cancel();
-      rides[i] = labels[i].animate(
-        frames,
-        reduced ? { fill: 'forwards' } : { duration: ORBIT.period * 1000, iterations: Infinity },
-      );
-      rides[i].startTime = origin;
-    }
   };
 
   const onPointerMove = (e: PointerEvent) => {
@@ -366,6 +328,16 @@ export function createHero(stage: HTMLElement, reduced: boolean): (() => void) |
 
       const state = t < at ? 'off' : t < at + POP_MS ? 'pop' : 'on';
       if (labels[i].dataset.state !== state) labels[i].dataset.state = state;
+      // its label rides over it inside the drawing, off while the moon hides it
+      const reach = REACH * radius;
+      const above = Math.hypot(...s.size);
+      const translate = `clamp(${-reach}px, calc(${x * radius}px - 50%), calc(${reach}px - 100%)) calc(${(y - above) * radius}px - 100%)`;
+      const opacity = depth < 0 && x * x + y * y < 1 ? '0' : '1';
+      if (placed[i] !== translate + opacity) {
+        placed[i] = translate + opacity;
+        labels[i].style.translate = translate;
+        labels[i].style.opacity = opacity;
+      }
     }
 
     // her: she Pops in on her tick, blinks now and then, looks toward the pointer, her moon steps
@@ -391,7 +363,6 @@ export function createHero(stage: HTMLElement, reduced: boolean): (() => void) |
   return () => {
     shader.destroy();
     moonset?.cancel();
-    for (const r of rides) r.cancel();
     stopTheme();
     clearTimeout(wake);
     clearTimeout(readyTimer);
