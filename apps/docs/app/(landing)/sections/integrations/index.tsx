@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { Figure, FigureHeader } from '../../ui/figure';
 import { copy } from '../../content';
-import { Board } from './board';
+import { Board, Keyed } from './board';
 import { modules, more } from './data';
 import { mechanisms } from './mechanisms';
 import './integrations.css';
@@ -16,7 +16,7 @@ export function Integrations() {
       <Board
         modules={modules}
         mechanisms={mechanisms}
-        header={<FigureHeader lead={copy.integrations.lead} title={copy.integrations.title} />}
+        header={<FigureHeader title={copy.integrations.title} />}
       >
         <More />
       </Board>
@@ -24,7 +24,11 @@ export function Integrations() {
   );
 }
 
-/** the further integrations, each line starting on the gutter, its highlight bleeding past it */
+/**
+ * The board's last row: the further integrations rolling by after their count, a copy of the list
+ * behind it. Pointed at, it holds still; a link focused from the keyboard brings it back to its
+ * start, scrolled to show the link. A wrap with reduced motion.
+ */
 function More() {
   const items = [];
   for (const item of more) {
@@ -33,7 +37,7 @@ function More() {
         <Link
           href={item.href}
           prefetch={false}
-          className="flex h-9 items-center px-3 text-sm text-lp-ink-2 pointer-coarse:h-11 hover:bg-lp-ink hover:text-lp-paper focus-visible:bg-lp-ink focus-visible:text-lp-paper focus-visible:outline-none"
+          className="flex h-11 items-center px-3 text-sm text-lp-ink-2 hover:bg-lp-ink hover:text-lp-paper focus-visible:bg-lp-ink focus-visible:text-lp-paper focus-visible:outline-none"
         >
           {item.name}
         </Link>
@@ -42,13 +46,18 @@ function More() {
   }
 
   return (
-    <div className="px-(--lp-gutter) py-3">
-      <ul className="-mx-3 flex flex-wrap">
-        <li className="flex h-9 items-center gap-2 px-3 text-sm font-mono font-medium text-lp-orange pointer-coarse:h-11">
-          +{more.length} more
-        </li>
-        {items}
-      </ul>
-    </div>
+    <Keyed className="group/more flex">
+      <p className="flex shrink-0 items-center border-e border-lp-line px-(--lp-gutter) font-pixel text-sm text-lp-orange">
+        +{more.length} more
+      </p>
+      <div className="me-(--lp-gutter) min-w-0 flex-1 overflow-x-clip group-data-keyed/more:overflow-x-hidden">
+        <div className="bt-marquee flex w-max group-hover/more:paused group-data-keyed/more:animate-none motion-reduce:w-auto">
+          <ul className="flex motion-reduce:flex-wrap">{items}</ul>
+          <ul aria-hidden inert className="flex motion-reduce:hidden">
+            {items}
+          </ul>
+        </div>
+      </div>
+    </Keyed>
   );
 }

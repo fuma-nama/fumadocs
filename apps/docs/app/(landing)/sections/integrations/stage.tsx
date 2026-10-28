@@ -1,11 +1,13 @@
 import type { CSSProperties, ReactNode } from 'react';
 import { cn } from '@/lib/cn';
-import { BAYER4, DITHER_MASKS } from '../../lib/dither';
+import { BAYER4 } from '../../lib/dither';
 import { TICK } from '../../lib/motion';
 
 /*
  * The stage of a mechanism: 96x40 cells of 3px. Parts are SVG paths and labels placed in cells,
- * posed by tracks on the 125 ms tick grid.
+ * posed by tracks on the 125 ms tick grid. Tracks move only transform and opacity, so the
+ * compositor plays them: a part with several looks is a strip of pre-drawn frames, and parts that
+ * come in one after another are uncovered by a sheet of paper sliding off them.
  */
 const CELL = 3;
 
@@ -116,17 +118,6 @@ export function show(...ticks: number[]): Poses {
   return poses;
 }
 
-/** like `show`, its first ticks through an ordered dither keeping each of `levels` of 16 cells */
-export function pop(from: number, to: number, levels = [8]): Poses {
-  const poses: Record<number, string> = { ...show(from, to) };
-  for (let i = 0; i < levels.length; i++) {
-    const mask = `mask-image:${DITHER_MASKS[levels[i]]};mask-size:${4 * CELL}px ${4 * CELL}px`;
-    poses[from + i] = `opacity:1;${mask}`;
-  }
-  poses[from + levels.length] = 'mask-image:none';
-  return poses;
-}
-
 /** moves a strip up by `cells` */
 export function up(cells: number): string {
   return `transform:translateY(${-cells * CELL}px)`;
@@ -145,6 +136,20 @@ export function cycle(h: number, every: number, count: number): Track {
   return { poses, ticks: every * count };
 }
 
+/** `<Frames>` of `h` cells showing frame `at[tick]` from each tick on, frame `base` at rest */
+export function roll(h: number, at: Readonly<Record<number, number>>, base: number): Track {
+  const poses: Record<number, string> = {};
+  for (const tick in at) poses[tick] = up(at[tick] * h);
+  return { base: up(base * h), poses };
+}
+
+/** a `<Cover>` slid down by `at[tick]` cells from each tick on, off its part at rest */
+export function uncover(h: number, at: Readonly<Record<number, number>>): Track {
+  const poses: Record<number, string> = {};
+  for (const tick in at) poses[tick] = `transform:translateY(${at[tick] * CELL}px)`;
+  return { base: `transform:translateY(${h * CELL}px)`, poses };
+}
+
 /** a line drawn from its left end in `count` steps from tick `from`, gone on `to` */
 export function draw(from: number, count: number, to: number): Track {
   return {
@@ -158,21 +163,24 @@ export function draw(from: number, count: number, to: number): Track {
   };
 }
 
-function box(x: number, y: number, w: number | undefined, h: number): CSSProperties {
+function box(x: number, y: number, w: number | undefined, h: number | undefined): CSSProperties {
   return {
     left: x * CELL,
     top: y * CELL,
     width: w === undefined ? undefined : w * CELL,
-    height: h * CELL,
+    height: h === undefined ? undefined : h * CELL,
   };
 }
 
-/** a 96x40 cell stage running one choreography */
+/**
+ * A 96x40 cell stage running one choreography. Its parts draw still ones first: the compositor
+ * takes a moving part to cover anything drawn after it in its clip, the stage at most.
+ */
 export function Stage({ c, children }: { c: Choreography; children: ReactNode }) {
   return (
     <span
       aria-hidden
-      className="bt-stage relative block h-[120px] w-(--bt-stage) text-(--bt-ink) *:absolute"
+      className="relative block h-30 w-(--bt-stage) overflow-clip text-(--bt-ink) *:absolute"
       style={{ '--bt-dur': `${c.dur}ms` } as CSSProperties}
     >
       <style href={`bt-${c.name}`} precedence="default">
@@ -230,7 +238,10 @@ interface PartProps {
 /** a label in the middle of its row of `h` cells, its parts laid out in a line */
 export function Text({ x, y, w, h, className, children }: PartProps) {
   return (
-    <span className={cn('bt-text flex items-center', className)} style={box(x, y, w, h)}>
+    <span
+      className={cn('flex items-center text-xs leading-none font-medium whitespace-pre', className)}
+      style={box(x, y, w, h)}
+    >
       {children}
     </span>
   );
@@ -245,9 +256,53 @@ export function Clip({ x, y, w, h, className, children }: PartProps & { w: numbe
   );
 }
 
-/** a group of parts that animates together */
-export function Layer({ className, children }: { className?: string; children: ReactNode }) {
-  return <span className={cn('inset-0 *:absolute', className)}>{children}</span>;
+/** a sheet of the card's paper over the part under it, slid off by an `uncover` track */
+export function Cover({ x, y, w, h, className }: Omit<PartProps, 'children'> & { w: number }) {
+  return (
+    <Clip x={x} y={y} w={w} h={h}>
+      <span className={cn('inset-0 bg-(--bt-paper)', className)} />
+    </Clip>
+  );
+}
+
+/** a group of parts that animates together, over the stage or over its own box */
+export function Layer({
+  x,
+  y,
+  w,
+  h,
+  className,
+  children,
+}: Partial<Omit<PartProps, 'children'>> & { children: ReactNode }) {
+  return (
+    <span
+      className={cn(x === undefined && 'inset-0', '*:absolute', className)}
+      style={x === undefined ? undefined : box(x, y ?? 0, w, h)}
+    >
+      {children}
+    </span>
+  );
+}
+
+/** pre-drawn frames `h` cells tall, stacked; a `roll` track shows one at a time */
+export function Frames({
+  h,
+  className,
+  children,
+}: {
+  h: number;
+  className: string;
+  children: ReactNode[];
+}) {
+  const rows = [];
+  for (let i = 0; i < children.length; i++) {
+    rows.push(
+      <span key={i} className="relative shrink-0 *:absolute" style={{ height: h * CELL }}>
+        {children[i]}
+      </span>,
+    );
+  }
+  return <span className={cn('flex w-full flex-col', className)}>{rows}</span>;
 }
 
 interface StripProps {
@@ -265,7 +320,9 @@ export function Strip({ items, h, loop = false, itemClassName, className }: Stri
   for (let i = 0; i < (loop ? items.length + 1 : items.length); i++) {
     rows.push(
       <span key={i} className="flex shrink-0 items-center" style={{ height: h * CELL }}>
-        <span className={cn('bt-text', itemClassName)}>{items[i % items.length]}</span>
+        <span className={cn('text-xs leading-none font-medium whitespace-pre', itemClassName)}>
+          {items[i % items.length]}
+        </span>
       </span>,
     );
   }

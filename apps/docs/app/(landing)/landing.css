@@ -80,36 +80,9 @@ body:has(.landing),
   color: var(--lp-ink);
 }
 
-/* a heading's size, as a length its smaller lead can measure against */
-@property --lp-heading {
-  syntax: '<length>';
-  inherits: true;
-  initial-value: 0px;
-}
-
-.landing :is(h1, h2) {
-  --lp-heading: 1em;
-}
-
-/* the page's light voice over its titles' medium, for a lead on its own line and big numbers. Only
-   set at 24px and up, where a light stroke still reads; a layer under the utilities, which adjust it */
-@layer components {
-  .lp-voice {
-    font-weight: 300;
-    letter-spacing: -0.025em;
-  }
-
-  /* Geist's straight stems sit 0.086em in at the titles' medium and 0.093em at the light voice: a
-     lead set smaller than its heading (the hero's) moves in by the difference, so its first stem and
-     the heading's share one line */
-  .lp-lead {
-    margin-inline-start: max(0px, 0.086 * var(--lp-heading) - 0.093em);
-  }
-}
-
 .landing ::selection {
   background-color: var(--lp-yellow);
-  color: #121210;
+  color: var(--color-lp-on-yellow);
 }
 
 /* the theme switch dithers the new frame in */
@@ -194,21 +167,27 @@ body:has(.landing),
   background-repeat: no-repeat;
 }
 
-.lp-caret {
-  animation: lp-caret 1s steps(1, end) infinite;
-}
-
 @keyframes lp-caret {
   50% {
     opacity: 0;
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .lp-caret {
-    animation: none;
+/* a new status line prints in, left to right: the paper over it steps off to the right */
+@keyframes lp-print {
+  from {
+    translate: 0;
   }
+}
 
+/* a `Roller` cell's strip, from its first character to the one it rests on */
+@keyframes lp-roll {
+  from {
+    translate: 0 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
   :root:has(.landing)::view-transition-new(root) {
     animation: none;
   }

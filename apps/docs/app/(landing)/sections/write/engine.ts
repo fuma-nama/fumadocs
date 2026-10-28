@@ -311,6 +311,11 @@ export function createPress(stage: HTMLElement): () => void {
   let canvas: HTMLCanvasElement | null = null;
   /** the stage shows */
   let visible = false;
+  /** the caret blinks only while it shows on screen: one infinite animation anywhere off screen
+   * keeps the page's whole animation timeline on the main thread */
+  function blink() {
+    caret.classList.toggle('animate-lp-caret', visible && caretMode === 'blink');
+  }
   /** the figure has been the one read, so the writer starts once the arm can draw */
   let seen = false;
   /** canvas px per CSS px */
@@ -1059,8 +1064,7 @@ export function createPress(stage: HTMLElement): () => void {
     if (mode !== caretMode) {
       caretMode = mode;
       caret.style.visibility = mode === 'none' ? 'hidden' : 'visible';
-      // it blinks only while it shows, so a hidden or typing caret runs no animation
-      caret.classList.toggle('lp-caret', mode === 'blink');
+      blink();
     }
 
     let gauge = GAUGE[0];
@@ -1350,9 +1354,14 @@ export function createPress(stage: HTMLElement): () => void {
   }
 
   function refresh() {
-    aiming = false;
-    following = false;
+    const was = along;
     layout();
+    // a resize inside the page (a props table opening) leaves her in the reader's hands, her springs
+    // aimed anew; only a move between the bed and the column puts her back on the plan
+    if (along !== was) {
+      aiming = false;
+      following = false;
+    } else if (aiming && !following) for (let i = 0; i < 4; i++) aimAt[i] = park[i];
     apply();
     shader?.invalidate();
   }
@@ -1515,14 +1524,14 @@ export function createPress(stage: HTMLElement): () => void {
   }
 
   function onMove(event: PointerEvent) {
-    if (event.pointerType === 'touch') return;
+    if (event.pointerType !== 'mouse') return;
     pointer[0] = event.clientX;
     pointer[1] = event.clientY;
     follow();
   }
 
   function onLeave(event: PointerEvent) {
-    if (event.pointerType !== 'touch' && following) goBack();
+    if (event.pointerType === 'mouse' && following) goBack();
   }
 
   function onClick(event: MouseEvent) {
@@ -1549,6 +1558,7 @@ export function createPress(stage: HTMLElement): () => void {
       },
       onVisible(ratio) {
         visible = ratio > 0;
+        blink();
         listen();
         // an empty file till the stage comes back into view
         if (!visible && !begun && !reduced) ready();

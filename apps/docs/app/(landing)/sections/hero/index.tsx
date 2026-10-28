@@ -20,7 +20,8 @@ export function Hero() {
       className="grid min-h-[calc(100svh-var(--lp-menu-h))] grid-rows-[auto_1fr_auto] gap-x-12 px-(--lp-gutter) pb-(--lp-status-h) @container lg:grid-cols-2 lg:grid-rows-[1fr_auto]"
     >
       <div className="py-8 lg:self-center">
-        <h1 className="text-[clamp(2.5rem,7.2vw,5rem)] leading-tight text-nowrap tracking-tight">
+        {/* below about 342px, "Build better docs," (7.7em) shrinks to fit inside the gutters */}
+        <h1 className="text-[clamp(min(2.5rem,100cqw/7.75),7.2vw,5rem)] leading-tight text-nowrap tracking-tight">
           Build{' '}
           <span className="text-lp-orange font-medium">
             <Glitch>better docs</Glitch>
@@ -63,8 +64,8 @@ export function Hero() {
         aria-hidden
         className="relative col-span-full -mx-(--lp-gutter) h-10 border-t border-lp-line-strong"
       >
-        <div className="h-1.5 bg-[repeating-linear-gradient(to_right,var(--lp-line-strong)_0_1px,transparent_1px_24px)] bg-position-[var(--lp-gutter)_0]" />
-        <div className="absolute inset-x-0 top-0 h-2.5 bg-[repeating-linear-gradient(to_right,var(--lp-line-strong)_0_1px,transparent_1px_240px)] bg-position-[var(--lp-gutter)_0]" />
+        <div className="h-1.5 bg-[repeating-linear-gradient(to_right,var(--lp-line-strong)_0_1px,transparent_1px_24px)] bg-position-(--lp-gutter)" />
+        <div className="absolute inset-x-0 top-0 h-2.5 bg-[repeating-linear-gradient(to_right,var(--lp-line-strong)_0_1px,transparent_1px_240px)] bg-position-(--lp-gutter)" />
       </div>
     </Figure>
   );

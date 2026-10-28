@@ -70,7 +70,13 @@ function Changed({ code, change, added }: { code: string; change: Change; added?
       </span>
       <span>
         {tone(before)}
-        <span data-cut data-old={old} data-new={next}>
+        {/* the caret after the text being typed (`data-typing`), a cell wide, never moving the line */}
+        <span
+          data-cut
+          data-old={old}
+          data-new={next}
+          className="relative data-typing:after:absolute data-typing:after:start-full data-typing:after:bottom-0 data-typing:after:h-[1.1em] data-typing:after:w-[1ch] data-typing:after:bg-lp-ink"
+        >
           {next}
         </span>
         {after}
@@ -128,7 +134,7 @@ function Diff({ code, rewire }: { code: string; rewire: Change }) {
         n={rewire.line}
         code={was}
         sign="-"
-        className="group-data-diff:text-lp-ink-2 group-data-diff:[&_code]:line-through group-[:not([data-diff])]:[&_[data-sign]]:invisible"
+        className="group-data-diff:text-lp-ink-2 group-data-diff:[&_code]:line-through group-not-data-diff:[&_[data-sign]]:invisible"
       >
         <code>
           {tone(before)}
@@ -140,7 +146,7 @@ function Diff({ code, rewire }: { code: string; rewire: Change }) {
         n={rewire.line}
         code={code}
         sign="+"
-        className="bg-lp-yellow/40 group-[:not([data-diff])]:invisible dark:bg-lp-yellow/15"
+        className="bg-lp-yellow/40 group-not-data-diff:invisible dark:bg-lp-yellow/15"
       >
         <Changed code={was.trimStart()} change={rewire} added />
       </Line>
@@ -247,7 +253,7 @@ export function Editor({
     panels.push(
       panel(
         i + 1,
-        'flex flex-col overflow-y-auto px-3 py-2 font-mono text-[11px] leading-4 [font-variant-ligatures:none] [scrollbar-color:var(--lp-ink)_var(--lp-paper)] [scrollbar-width:thin] md:py-3 md:pe-4 md:text-xs md:leading-5',
+        'flex flex-col overflow-y-auto px-3 py-2 font-mono text-xs leading-4 [font-variant-ligatures:none] [scrollbar-color:var(--lp-ink)_var(--lp-paper)] [scrollbar-width:thin] md:py-3 md:pe-4 md:leading-5',
         rows,
       ),
     );

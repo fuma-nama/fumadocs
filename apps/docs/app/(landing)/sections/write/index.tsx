@@ -4,8 +4,8 @@ import defaultMdxComponents from 'fumadocs-ui/mdx';
 import { TypeTable } from 'fumadocs-ui/components/type-table';
 import * as Twoslash from 'fumadocs-twoslash/ui';
 import { Mermaid } from '@/components/mdx/mermaid';
-import { copy } from '../../content';
-import { Figure, FigureHeader, type Run, Terms } from '../../ui/figure';
+import { copy, type Run } from '../../content';
+import { Figure, FigureHeader } from '../../ui/figure';
 import { blocks, quickStart, steps } from './data';
 import { RailBed, RailColumn } from './rail';
 import { Stage } from './stage';
@@ -24,9 +24,9 @@ const components: MDXComponents = {
 interface PressProps {
   id: string;
   label: string;
-  lead: ReactNode;
-  title: string | readonly Run[];
-  description?: string;
+  /** set over the title */
+  lead?: ReactNode;
+  title: readonly Run[];
   /** the MDX file, its blocks compiled and their sources */
   file: string;
   entries: typeof quickStart.entries;
@@ -35,17 +35,7 @@ interface PressProps {
 }
 
 /** a figure that types an MDX file block by block, and presses each into its page */
-export function Press({
-  id,
-  label,
-  lead,
-  title,
-  description,
-  file,
-  entries,
-  sources,
-  steps,
-}: PressProps) {
+export function Press({ id, label, lead, title, file, entries, sources, steps }: PressProps) {
   const slots: ReactNode[] = [];
   for (const entry of entries) {
     const Body = entry.body;
@@ -66,8 +56,7 @@ export function Press({
     <Figure id={id} aria-label={label} status={`compiled ${file}`}>
       <FigureHeader
         lead={lead}
-        title={typeof title === 'string' ? title : <Terms runs={title} />}
-        description={description}
+        title={title}
         className="px-(--lp-gutter) pt-16 pb-10 md:pt-10 md:pb-8"
       />
       <Stage

@@ -74,7 +74,7 @@ export interface StackEngine {
 }
 
 /**
- * The stack in its one pose, every layer a key: hover lifts the layer under the pointer, a press
+ * The stack in its one pose, every layer a key: a mouse lifts the layer under it, a press
  * takes it down its posts, and a click, a tap or a key on its button reports it to `onPress`. It
  * draws only while something moves: a layer, or the layers settling in as the stack comes on screen
  * or dithering out as it leaves. The real page and the layers' fronts are DOM under the canvas,
@@ -332,14 +332,15 @@ export function createStack(root: HTMLElement, onPress: (layer: Layer) => void):
     }
   }
 
-  /** the layer under the pointer lifts; a finger or the mouse sliding off the one it holds lets it
-   * go. The cell is the pointer's only target in it, so its offset is the canvas point */
+  /** the layer under a mouse lifts; any pointer sliding off the one it holds lets it go. The cell
+   * is the pointer's only target in it, so its offset is the canvas point */
   function onMove(event: PointerEvent) {
     const under = pick(event.offsetX, event.offsetY);
-    if (under === hover && (held < 0 || held === under)) return;
-    hover = under;
+    const lifted = event.pointerType === 'mouse' ? under : -1;
+    if (lifted === hover && (held < 0 || held === under)) return;
+    hover = lifted;
     if (held !== under) held = -1;
-    cell.style.cursor = under >= 0 ? 'pointer' : '';
+    cell.style.cursor = lifted >= 0 ? 'pointer' : '';
     shader.invalidate();
   }
 

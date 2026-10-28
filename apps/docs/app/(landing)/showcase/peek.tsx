@@ -22,10 +22,10 @@ export function Peek({ className, children }: { className: string; children: Rea
       className={className}
       onPointerOver={(event) => {
         const link = (event.target as Element).closest('a');
-        if (event.pointerType !== 'touch' && link && link !== peeked.current) enter(link);
+        if (event.pointerType === 'mouse' && link && link !== peeked.current) enter(link);
       }}
       onPointerLeave={(event) => {
-        if (event.pointerType !== 'touch') leave();
+        if (event.pointerType === 'mouse') leave();
       }}
       onFocus={(event) => {
         const link = event.target.closest('a');

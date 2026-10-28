@@ -1,5 +1,5 @@
 'use client';
-import { type FocusEvent, type ReactNode, useState } from 'react';
+import { type FocusEvent, type PointerEvent, type ReactNode, useState } from 'react';
 import Link from 'next/link';
 import { Check, Clipboard } from 'lucide-react';
 import { useSearchContext } from 'fumadocs-ui/contexts/search';
@@ -41,9 +41,14 @@ export function Board({
     commands.push(module.install);
     const props = {
       className:
-        'bt-cell group relative flex flex-col border-e border-b border-lp-line p-(--lp-gutter) text-start text-lp-ink transition-none',
-      onPointerEnter: () => enter(i),
-      onPointerLeave: restore,
+        'bt-cell group relative flex flex-col border-e border-b border-lp-line p-(--lp-gutter) text-start text-lp-ink transition-none hover:bg-lp-ink hover:text-lp-paper focus-visible:bg-lp-ink focus-visible:text-lp-paper focus-visible:outline-none',
+      // a mouse points at a card; a tap opens it
+      onPointerEnter: (event: PointerEvent) => {
+        if (event.pointerType === 'mouse') enter(i);
+      },
+      onPointerLeave: (event: PointerEvent) => {
+        if (event.pointerType === 'mouse') restore();
+      },
       onFocus: (event: FocusEvent<HTMLElement>) => {
         if (event.currentTarget.matches(':focus-visible')) enter(i);
       },
@@ -53,7 +58,7 @@ export function Board({
       <>
         {/* as wide as the mechanism, so the hotkeys end on its right edge */}
         <span className="flex max-w-(--bt-stage) items-start justify-between gap-4">
-          <span className="bt-name -ms-[3px] px-[3px] text-[28px] leading-none tracking-[-0.02em]">
+          <span className="-ms-0.75 px-0.75 text-[28px] leading-none tracking-[-0.02em] group-hover:bg-lp-yellow group-hover:text-lp-on-yellow group-focus-visible:bg-lp-yellow group-focus-visible:text-lp-on-yellow">
             {module.title}
           </span>
           {!module.href && (
@@ -101,7 +106,7 @@ export function Board({
   }
 
   return (
-    <div className="flex flex-col overflow-x-clip [--bt-stage:288px]">
+    <div ref={playOnScreen} className="flex flex-col overflow-x-clip">
       <div className="flex flex-col gap-10 p-(--lp-gutter) pt-16 pb-12 lg:flex-row lg:items-end lg:justify-between">
         {header}
         <Install commands={commands} command={modules[inspected].install} />
@@ -113,6 +118,38 @@ export function Board({
       {children}
     </div>
   );
+}
+
+/**
+ * A row marked `data-keyed` while one of its links has focus from the keyboard, the link scrolled
+ * fully into view once the mark has stopped the row
+ */
+export function Keyed({ className, children }: { className: string; children: ReactNode }) {
+  return (
+    <div
+      onFocus={(event) => {
+        const keyed = event.target.matches(':focus-visible');
+        event.currentTarget.toggleAttribute('data-keyed', keyed);
+        if (keyed) event.target.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+      }}
+      onBlur={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget))
+          event.currentTarget.removeAttribute('data-keyed');
+      }}
+      className={className}
+    >
+      {children}
+    </div>
+  );
+}
+
+/** the board plays while some of it is on screen */
+function playOnScreen(board: HTMLDivElement) {
+  const observer = new IntersectionObserver(([entry]) => {
+    board.toggleAttribute('data-paused', !entry.isIntersecting);
+  });
+  observer.observe(board);
+  return () => observer.disconnect();
 }
 
 function Install({ commands, command }: { commands: string[]; command: string }) {
@@ -129,10 +166,7 @@ function Install({ commands, command }: { commands: string[]; command: string })
 
   return (
     // below 1024 each cell shows its own command: the window would sit screens above most cells
-    <Window
-      title={<span className="font-sans font-medium">install</span>}
-      className="shrink-0 max-lg:hidden"
-    >
+    <Window title={<span className="font-pixel">install</span>} className="shrink-0 max-lg:hidden">
       <div className="flex items-center gap-3 px-3 py-2.5 font-mono text-sm">
         <span aria-hidden className="text-lp-ink-2">
           $

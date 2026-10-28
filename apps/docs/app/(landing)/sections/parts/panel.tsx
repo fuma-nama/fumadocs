@@ -14,7 +14,7 @@ export type Picks = Record<SwapLayer, number>;
 /**
  * A select for each layer that swaps, in the stack's order beside its label, naming the module in
  * use: a pick presses the layer on the stack too. Its list drops under it, the option in use filled
- * as the page's pickers fill theirs, the one under the pointer or the keys inverted.
+ * as the page's pickers fill theirs, the one under a mouse or the keys inverted.
  */
 export const Selects = memo(function Selects({
   picks,
@@ -32,7 +32,7 @@ export const Selects = memo(function Selects({
         <Select.Item
           key={options[i].name}
           value={i}
-          className="flex h-8 cursor-pointer items-center px-3 text-sm font-medium whitespace-nowrap outline-none select-none data-highlighted:not-data-selected:bg-lp-ink data-highlighted:not-data-selected:text-lp-paper data-selected:bg-lp-yellow data-selected:text-[#121210] data-selected:data-highlighted:shadow-[inset_0_0_0_1.5px_#121210]"
+          className="flex h-8 cursor-pointer items-center px-3 text-sm font-medium whitespace-nowrap outline-none select-none not-data-selected:hover:bg-lp-ink not-data-selected:hover:text-lp-paper not-data-selected:focus-visible:bg-lp-ink not-data-selected:focus-visible:text-lp-paper data-selected:bg-lp-yellow data-selected:text-lp-on-yellow data-selected:hover:inset-ring-2 data-selected:focus-visible:inset-ring-2 inset-ring-lp-on-yellow"
         >
           <Select.ItemText>{options[i].title}</Select.ItemText>
         </Select.Item>,
@@ -101,7 +101,7 @@ export const CodeWindow = memo(function CodeWindow({
     <Window
       title={
         <span className="flex min-w-0 items-center gap-2">
-          <span className="truncate font-sans font-medium">{info.title}</span>
+          <span className="truncate font-pixel">{info.title}</span>
           <span className="shrink-0 text-lp-ink-2">{info.file}</span>
         </span>
       }
@@ -110,7 +110,7 @@ export const CodeWindow = memo(function CodeWindow({
       <DitherSwap
         swapKey={`${layer}:${option}:${core ? 'core' : 'ui'}`}
         opaque
-        className="min-h-0 flex-1 grid-rows-[minmax(0,1fr)] *:overflow-y-auto"
+        className="min-h-0 flex-1 grid-rows-1 *:overflow-y-auto"
       >
         {info.command && (
           <p className="border-b border-lp-line px-4 py-2 font-mono text-xs">

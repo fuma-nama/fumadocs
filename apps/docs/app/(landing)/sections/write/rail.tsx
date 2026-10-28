@@ -10,6 +10,10 @@ const LINKS =
 /** a bracket every twelfth of the band: one under each plate's seam, two in each plate */
 const BRACKETS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
 
+/** an end stop's hazard stripes */
+const STRIPES =
+  'border border-lp-ink-2 bg-[repeating-linear-gradient(-45deg,var(--lp-ink-2)_0_2px,var(--lp-paper)_2px_4px)]';
+
 function Bolt({ x, y }: { x: number; y: number }) {
   return (
     <path
@@ -25,7 +29,7 @@ function Bracket({ at }: { at: number }) {
     <svg
       viewBox="0 0 24 36"
       shapeRendering="crispEdges"
-      className={`absolute top-[40px] h-[36px] w-[24px] ${at % 2 === 1 ? 'md:max-xl:hidden' : ''}`}
+      className={`absolute top-10 h-9 w-6 ${at % 2 === 1 ? 'md:max-xl:hidden' : ''}`}
       style={{ left: `calc(${(at * 100) / 12}% - 12px)` }}
     >
       <path d="M6.5 7V29.5H0.5V35.5H23.5V29.5H17.5V7" className={PART} />
@@ -40,7 +44,7 @@ function Station({ className, ...props }: ComponentProps<'svg'>) {
   return (
     <svg
       viewBox="0 0 16 7"
-      className={`absolute top-[25px] h-[7px] w-[16px] ${className ?? ''}`}
+      className={`absolute top-6.25 h-1.75 w-4 ${className ?? ''}`}
       {...props}
     >
       <path d="M0.5 0.5H15.5V6.5H10L8 4.5L6 6.5H0.5Z" className={PART} />
@@ -56,32 +60,32 @@ export function RailBed({ stops }: { stops: number }) {
   return (
     <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
       {/* the extrusion, its two T-slots */}
-      <span className="absolute top-[28px] right-0 left-[6px] h-[20px] border border-lp-ink-2 bg-lp-paper before:absolute before:inset-x-0 before:top-[3px] before:h-px before:bg-lp-line-strong/40 after:absolute after:inset-x-0 after:bottom-[3px] after:h-px after:bg-lp-line-strong/40" />
+      <span className="absolute top-7 right-0 left-1.5 h-5 border border-lp-ink-2 bg-lp-paper before:absolute before:inset-x-0 before:top-0.75 before:h-px before:bg-lp-line-strong/40 after:absolute after:inset-x-0 after:bottom-0.75 after:h-px after:bg-lp-line-strong/40" />
       {BRACKETS.map((at) => (
         <Bracket key={at} at={at} />
       ))}
       {/* the rack, the rail and its groove */}
-      <span className="absolute top-[32px] right-0 left-[20px] h-[3px] bg-[repeating-linear-gradient(to_right,var(--lp-ink-2)_0_1px,transparent_1px_3px)]" />
-      <span className="absolute top-[35px] right-0 left-[20px] h-[6px] bg-[linear-gradient(to_bottom,var(--lp-ink-2)_2px,var(--lp-paper)_2px_4px,var(--lp-ink-2)_4px)]" />
+      <span className="absolute top-8 right-0 left-5 h-0.75 bg-[repeating-linear-gradient(to_right,var(--lp-ink-2)_0_1px,transparent_1px_3px)]" />
+      <span className="absolute top-8.75 right-0 left-5 h-1.5 bg-[linear-gradient(to_bottom,var(--lp-ink-2)_2px,var(--lp-paper)_2px_4px,var(--lp-ink-2)_4px)]" />
       {Array.from({ length: stops + 1 }, (_, i) => (
         <Station key={i} data-station className="invisible" />
       ))}
       {/* the limit switch it trips at home, and the end stop behind it */}
-      <svg className="absolute top-[22px] h-[11px] w-[14px] left-[22px]" viewBox="0 0 14 11">
+      <svg className="absolute top-5.5 left-5.5 h-2.75 w-3.5" viewBox="0 0 14 11">
         <rect x="0.5" y="0.5" width="8" height="6" className={PART} />
         <path d="M8.5 3.5L12.5 8.5" className="stroke-lp-ink-2" />
         <circle cx="12.5" cy="8.5" r="1.8" className={PART} />
       </svg>
-      <span className="absolute top-[26px] left-[10px] h-[24px] w-[10px] border border-lp-ink-2 bg-[repeating-linear-gradient(-45deg,var(--lp-ink-2)_0_2px,var(--lp-paper)_2px_4px)]" />
+      <span className={`absolute top-6.5 left-2.5 h-6 w-2.5 ${STRIPES}`} />
       {/* the drag chain: its fixed run, the run the carriage pulls, the bend between them */}
       <span
         data-chain="fixed"
-        className={`absolute top-[8px] left-0 h-[6px] ${LINKS}`}
+        className={`absolute top-2 left-0 h-1.5 ${LINKS}`}
         style={{ right: BED.anchor, clipPath: `inset(0 0 0 ${BED.start}px)` }}
       />
       <span
         data-chain="pulled"
-        className={`absolute top-[18px] left-0 h-[6px] ${LINKS}`}
+        className={`absolute top-4.5 left-0 h-1.5 ${LINKS}`}
         style={{
           right: BED.anchor,
           clipPath: `inset(0 calc(100% - ${BED.start}px) 0 ${BED.start}px)`,
@@ -91,7 +95,7 @@ export function RailBed({ stops }: { stops: number }) {
       <svg
         data-chain="bend"
         viewBox="0 0 9 16"
-        className="absolute top-[8px] left-0 h-[16px] w-[9px] overflow-visible"
+        className="absolute top-2 left-0 h-4 w-2.25 overflow-visible"
         style={{ transform: `translateX(${BED.start - 9}px)` }}
       >
         <path d="M9 0.5A7.5 7.5 0 0 0 9 15.5V10.5A2.5 2.5 0 0 1 9 5.5Z" className={PART} />
@@ -99,11 +103,11 @@ export function RailBed({ stops }: { stops: number }) {
       </svg>
       {/* its anchor, and the cable out through the frame */}
       <span
-        className="absolute top-[10px] h-[2px] bg-lp-ink-2"
+        className="absolute top-2.5 h-0.5 bg-lp-ink-2"
         style={{ right: 0, width: BED.anchor - 4 }}
       />
       <svg
-        className="absolute top-[3px] h-[18px] w-[14px]"
+        className="absolute top-0.75 h-4.5 w-3.5"
         style={{ right: BED.anchor - 7 }}
         viewBox="0 0 14 18"
       >
@@ -120,10 +124,7 @@ export function RailBed({ stops }: { stops: number }) {
 export function RailColumn({ id }: { id: string }) {
   return (
     <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
-      <svg
-        className="absolute top-[24px] left-0 h-[calc(100%-48px)] w-[26px]"
-        shapeRendering="crispEdges"
-      >
+      <svg className="absolute top-6 left-0 h-[calc(100%-48px)] w-6.5" shapeRendering="crispEdges">
         <defs>
           <pattern id={`${id}-bracket-y`} width="26" height="96" patternUnits="userSpaceOnUse">
             <path d="M27 42.5H6.5V36.5H0.5V59.5H6.5V53.5H27" className={PART} />
@@ -133,11 +134,11 @@ export function RailColumn({ id }: { id: string }) {
         </defs>
         <rect width="26" height="100%" fill={`url(#${id}-bracket-y)`} />
       </svg>
-      <span className="absolute inset-y-[6px] left-[26px] w-[20px] border border-lp-ink-2 bg-lp-paper" />
-      <span className="absolute inset-y-[12px] left-[30px] w-[3px] bg-[repeating-linear-gradient(to_bottom,var(--lp-ink-2)_0_1px,transparent_1px_3px)]" />
-      <span className="absolute inset-y-[12px] left-[33px] w-[6px] bg-[linear-gradient(to_right,var(--lp-ink-2)_2px,var(--lp-paper)_2px_4px,var(--lp-ink-2)_4px)]" />
-      <span className="absolute top-[2px] left-[28px] h-[8px] w-[16px] border border-lp-ink-2 bg-[repeating-linear-gradient(45deg,var(--lp-ink-2)_0_2px,var(--lp-paper)_2px_4px)]" />
-      <span className="absolute bottom-[2px] left-[28px] h-[8px] w-[16px] border border-lp-ink-2 bg-[repeating-linear-gradient(-45deg,var(--lp-ink-2)_0_2px,var(--lp-paper)_2px_4px)]" />
+      <span className="absolute inset-y-1.5 left-6.5 w-5 border border-lp-ink-2 bg-lp-paper" />
+      <span className="absolute inset-y-3 left-7.5 w-0.75 bg-[repeating-linear-gradient(to_bottom,var(--lp-ink-2)_0_1px,transparent_1px_3px)]" />
+      <span className="absolute inset-y-3 left-8.25 w-1.5 bg-[linear-gradient(to_right,var(--lp-ink-2)_2px,var(--lp-paper)_2px_4px,var(--lp-ink-2)_4px)]" />
+      <span className={`absolute top-0.5 left-7 h-2 w-4 -scale-x-100 ${STRIPES}`} />
+      <span className={`absolute bottom-0.5 left-7 h-2 w-4 ${STRIPES}`} />
     </div>
   );
 }

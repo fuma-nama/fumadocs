@@ -37,6 +37,25 @@
   --color-lp-orange: var(--lp-orange);
   --color-lp-sun: var(--lp-sun);
   --color-lp-yellow: var(--lp-yellow);
+  /* ink on the yellow, the same in both themes */
+  --color-lp-on-yellow: #121210;
+  /* the machine's voice, loaded by the landing layout; the sans stands in until it arrives, its
+     widths within a few percent, so no label wraps or jumps at the swap */
+  --font-pixel: var(--font-geist-pixel), var(--font-sans);
+  /* a caret's blink; its keyframes are in app/(landing)/landing.css */
+  --animate-lp-caret: lp-caret 1s steps(1, end) infinite;
+  --animate-lp-print: lp-print 0.3s steps(12);
+  /* the sheet's width (`--lp-max`): from here its frame lines and corner marks show */
+  --breakpoint-sheet: 87.5rem;
+  /* a link preview's ratio, that of every site screenshot */
+  --aspect-og: 1.91 / 1;
+  /* a mark set over a title (the CLI's bubble, Automate's plate): half the title, 16px at least, a
+     line as tall as the bubble's padded one */
+  --text-mark: max(1rem, 0.5em);
+  --text-mark--line-height: 1.8;
+  /* a title's measure, in its own characters at any size: a long sentence wraps into two or three
+     balanced lines at its phrases, a short one stays on one */
+  --container-title: 30ch;
 }
 
 @theme inline {

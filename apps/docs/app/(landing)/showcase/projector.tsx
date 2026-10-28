@@ -4,7 +4,6 @@ import {
   type KeyboardEvent,
   type ReactNode,
   useCallback,
-  useLayoutEffect,
   useRef,
   useState,
 } from 'react';
@@ -113,7 +112,6 @@ export function Projector({ sites, back, front }: ProjectorProps) {
   const [on, setOn] = useState(true);
   const engine = useRef<ProjectorEngine | null>(null);
   const screen = useRef<HTMLSpanElement>(null);
-  const arrived = useRef(false);
   const site = sites[current];
   const checked = picked ?? current;
   /** the name on the base, and the frame the screen has ready next */
@@ -143,7 +141,12 @@ export function Projector({ sites, back, front }: ProjectorProps) {
           const at = leaves;
           const show = () => {
             if (at !== leaves) return;
-            arrived.current = true;
+            // the frame in the gate develops on the screen, the others go back to their colours
+            const developing = layer(index);
+            for (const other of screen.current?.querySelectorAll('[data-layer]') ?? []) {
+              if (other !== developing) hidePrint(other);
+            }
+            if (!reduced) dither(developing, 0, DEVELOP);
             setCurrent(index);
             // a pick queued past this frame stays checked
             setPicked((pick) => (pick === index ? null : pick));
@@ -164,15 +167,6 @@ export function Projector({ sites, back, front }: ProjectorProps) {
     },
     [sites, reduced],
   );
-
-  // the frame in the gate develops on the screen, the one before it goes back to its colours
-  useLayoutEffect(() => {
-    if (!arrived.current) return;
-    for (const layer of screen.current!.querySelectorAll<HTMLElement>('[data-layer]')) {
-      if (layer.dataset.layer !== String(current) || reduced) hidePrint(layer);
-      else dither(layer, 0, DEVELOP);
-    }
-  }, [current, reduced]);
 
   function pick(index: number) {
     setPicked(index);
@@ -299,7 +293,7 @@ export function Projector({ sites, back, front }: ProjectorProps) {
           }
         >
           <span className="sr-only">{site.name}</span>
-          <span ref={screen} className="relative block aspect-[1.91/1] overflow-hidden">
+          <span ref={screen} className="relative block aspect-og overflow-hidden">
             {layers}
           </span>
         </Window>
@@ -353,10 +347,10 @@ export function Projector({ sites, back, front }: ProjectorProps) {
       {/* the base: the name of the site in the gate, the run switch and its lamp */}
       <div className="flex h-12 items-center gap-3 border border-lp-line-strong bg-lp-paper px-4">
         {/* a name longer than the gate fades out at its edge */}
-        <p className="lp-voice min-w-0 flex-1 overflow-hidden text-2xl leading-none whitespace-nowrap [mask-image:linear-gradient(to_right,#000_calc(100%-2rem),transparent)]">
+        <p className="min-w-0 flex-1 overflow-hidden font-pixel text-2xl leading-none whitespace-nowrap [mask-image:linear-gradient(to_right,#000_calc(100%-2rem),transparent)]">
           <Roller value={name} step={ROLL_STEP} stagger={stagger} />
         </p>
-        <span className="text-xs leading-none font-medium text-lp-ink-2 motion-reduce:hidden">
+        <span className="font-pixel text-xs leading-none text-lp-ink-2 motion-reduce:hidden">
           run
         </span>
         <button

@@ -84,12 +84,12 @@ export function Counters({ items }: { items: Counter[] }) {
             takes the source under the name, a path after its slash, the hairline staying with
             the name, and the reading keeps to the cell's foot, so a row's readings stay level */}
         <dt className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs">
-          <span className="flex flex-1 items-center gap-2 font-medium after:h-px after:min-w-4 after:flex-1 after:bg-lp-line-strong">
+          <span className="flex flex-1 items-center gap-2 font-pixel after:h-px after:min-w-2 after:flex-1 after:bg-lp-line-strong">
             {item.label}
           </span>
           <span className="font-mono text-lp-ink-2">{breakable(item.source)}</span>
         </dt>
-        <dd className="mt-auto pt-2 font-mono text-[28px] leading-none font-light tracking-[-0.05em] text-lp-orange md:pt-4 md:text-5xl lg:text-[56px] xl:text-[64px] min-[87.5rem]:text-7xl">
+        <dd className="mt-auto pt-2 font-pixel text-[28px] leading-none text-lp-orange md:pt-4 md:text-5xl lg:text-[56px] xl:text-[64px] min-[87.5rem]:text-7xl">
           <Roller
             key={printed === null ? 'rest' : 'roll'}
             value={shown ? text : text.replace(/\d/g, '0')}

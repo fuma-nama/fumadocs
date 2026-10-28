@@ -6,6 +6,8 @@ import { bayer8 } from '../../lib/dither';
  */
 export const REACH = 1.46;
 export const HORIZON = 0.76;
+/** the moon's crown over the horizon, her seat */
+export const CROWN = HORIZON + 1;
 /** the dither's cell at rest, CSS px: the moon's dots and the stars */
 export const CELL = 3;
 

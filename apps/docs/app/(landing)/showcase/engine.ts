@@ -304,23 +304,45 @@ export function createProjector(
     mateShown = -1;
     paintHer(performance.now());
   });
-  const listeners = new AbortController();
-  const hold = () => {
-    held = true;
+  // the reader's hands on the reel: a mouse over it, or focus from the keyboard in it; let go, it
+  // waits a beat
+  let pointed = false;
+  let focused = false;
+  const hands = () => {
+    const was = held;
+    held = pointed || focused;
+    if (was && !held) due = Math.max(due, performance.now() + BEAT);
     schedule();
   };
-  const release = () => {
-    held = root.matches(':hover') || root.contains(document.activeElement);
-    due = Math.max(due, performance.now() + BEAT);
-    schedule();
+  const listeners = new AbortController();
+  const listen = { signal: listeners.signal };
+  const point = (event: PointerEvent) => {
+    if (event.pointerType !== 'mouse') return;
+    pointed = event.type === 'pointerenter';
+    hands();
   };
 
   view.observe(root);
   resize.observe(track);
-  root.addEventListener('pointerenter', hold, { signal: listeners.signal });
-  root.addEventListener('pointerleave', release, { signal: listeners.signal });
-  root.addEventListener('focusin', hold, { signal: listeners.signal });
-  root.addEventListener('focusout', release, { signal: listeners.signal });
+  root.addEventListener('pointerenter', point, listen);
+  root.addEventListener('pointerleave', point, listen);
+  root.addEventListener(
+    'focusin',
+    (event) => {
+      focused = (event.target as Element).matches(':focus-visible');
+      hands();
+    },
+    listen,
+  );
+  root.addEventListener(
+    'focusout',
+    (event) => {
+      if (root.contains(event.relatedTarget as Node | null)) return;
+      focused = false;
+      hands();
+    },
+    listen,
+  );
 
   return {
     seek,

@@ -80,7 +80,7 @@ export function Monitor({
         onClick={() => onTab(id)}
         className={cn(
           'cursor-pointer border-e border-lp-line-strong px-2 text-xs leading-4 font-medium outline-none focus-visible:outline focus-visible:-outline-offset-4 focus-visible:outline-current sm:px-3',
-          on ? 'bg-lp-yellow text-[#121210]' : 'hover:bg-lp-ink hover:text-lp-paper',
+          on ? 'bg-lp-yellow text-lp-on-yellow' : 'hover:bg-lp-ink hover:text-lp-paper',
         )}
       >
         {copy.style.tabs[id].label}
@@ -120,7 +120,7 @@ export function Monitor({
             <a
               href={docs.href}
               aria-label={`${docs.label} docs`}
-              className="relative flex size-3.5 items-center justify-center bg-lp-paper text-lp-ink transition-none after:absolute after:-inset-[5px] hover:bg-lp-ink hover:text-lp-paper focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-lp-ink"
+              className="relative flex size-3.5 items-center justify-center bg-lp-paper text-lp-ink transition-none after:absolute after:-inset-1.25 hover:bg-lp-ink hover:text-lp-paper focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-lp-ink"
             >
               <ArrowUpRight aria-hidden className="size-3.5" />
             </a>
@@ -134,7 +134,7 @@ export function Monitor({
         role="tabpanel"
         id="style-panel"
         aria-labelledby={`style-tab-${tab}`}
-        className="lp-dots relative aspect-[10/16] min-h-0 overflow-hidden bg-lp-paper sm:aspect-[16/10]"
+        className="lp-dots relative aspect-10/16 min-h-0 overflow-hidden bg-lp-paper sm:aspect-16/10"
       >
         {tab === 'layouts' && (
           <div

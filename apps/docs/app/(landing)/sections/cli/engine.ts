@@ -119,7 +119,6 @@ export function createCli(root: HTMLElement): () => void {
   const replay = find('replay', figure);
   const commandBox = replay.parentElement!;
   const chips = figure.querySelectorAll<HTMLButtonElement>('[data-play]');
-  const editCaret = find('edit-caret');
   /** each run's counter, made the first time it shows, after the stage is measured */
   const counters = new Map<HTMLElement, Flaps>();
 
@@ -246,10 +245,17 @@ export function createCli(root: HTMLElement): () => void {
   // the editor's tabs work with or without the machine
   root.addEventListener('click', onTab, { signal });
   root.addEventListener('keydown', onTab, { signal });
+  /** a uniform changed since the canvas last drew */
+  let stale = false;
   const shader = createShaderCanvas(root.querySelector('canvas')!, {
     fragment,
-    onFrame,
+    onFrame: () => {
+      stale = false;
+    },
     onResize: layout,
+    onVisible,
+    // the dither and the outlines are whole CSS px: a 2x screen draws one canvas px for each
+    density: 1.5,
   });
   if (!shader) {
     // no machine to run: the figure rests on its end state, as it does without script
@@ -260,6 +266,28 @@ export function createCli(root: HTMLElement): () => void {
     };
   }
   const gl = shader;
+  /** each uniform as last set */
+  const uniforms = new Map<string, number | number[]>();
+
+  /** sets a uniform, and marks the canvas for a draw when its value changed */
+  function uniform(name: string, value: number | readonly number[]) {
+    const old = uniforms.get(name);
+    if (typeof value === 'number') {
+      if (old === value) return;
+      uniforms.set(name, value);
+    } else if (Array.isArray(old) && old.length === value.length) {
+      let same = true;
+      for (let i = 0; i < value.length; i++) {
+        if (old[i] !== value[i]) {
+          old[i] = value[i];
+          same = false;
+        }
+      }
+      if (same) return;
+    } else uniforms.set(name, [...value]);
+    gl.set(name, value);
+    stale = true;
+  }
 
   // world points are stage px, z toward the viewer; the camera is level with the stage's top
   let footX = 0;
@@ -287,6 +315,13 @@ export function createCli(root: HTMLElement): () => void {
   let phase: 'rest' | 'ready' | 'play' | 'hold' = 'rest';
   let clock = 0;
   let last = -1;
+  let frame = 0;
+  /** some of the stage is on screen */
+  let onScreen = false;
+  /** your project's rows moved during the play: the cables follow them on its next frame */
+  let rewire = false;
+  /** the line being typed into, the caret after its text */
+  let caretLine: HTMLElement | undefined;
   /** the parts in the middle half of the screen, and whether this run's editor has been there */
   const seen = new Set<Element>();
   let met = false;
@@ -297,7 +332,6 @@ export function createCli(root: HTMLElement): () => void {
   let caretMode = '';
   let caretAt = '';
   let typedShown = -1;
-  let editCaretKey = '';
   let status = '';
   /** the tab the play last turned to: a tab you pick mid-play stays until the next beat */
   let beatTab = -1;
@@ -305,6 +339,10 @@ export function createCli(root: HTMLElement): () => void {
   const ropes: { route?: Route; end: number }[] = [{ end: -1 }, { end: -1 }];
   const scratch: Vec3 = [0, 0, 0];
   const point: Vec3 = [0, 0, 0];
+  /** a carried file's box, the reels' turns and the jacks plugged in, set each frame */
+  const hole = [0, 0, 0, 0];
+  const spin = [0, 0];
+  const plugged = [0, 0];
   /** the carried files' depths, four to a uniform */
   const depths: [number, number, number, number][] = [];
   for (let i = 0; i < CARDS / 4; i++) depths.push([0, 0, 0, 0]);
@@ -344,11 +382,11 @@ export function createCli(root: HTMLElement): () => void {
 
   /** a box whose front face, at z, frames `rect`; the shader leaves `rect` open */
   function housing(name: string, rect: Rect, z: number, depth: number, border: number) {
-    gl.set(name, [rect.x, rect.y, rect.x + rect.w, rect.y + rect.h]);
+    uniform(name, [rect.x, rect.y, rect.x + rect.w, rect.y + rect.h]);
     const a = unproject(rect.x - border, rect.y - border, z);
     const b = unproject(rect.x + rect.w + border, rect.y + rect.h + border, z);
-    gl.set(`${name}C`, [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2, z - depth]);
-    gl.set(`${name}B`, [(b[0] - a[0]) / 2, (b[1] - a[1]) / 2, depth]);
+    uniform(`${name}C`, [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2, z - depth]);
+    uniform(`${name}B`, [(b[0] - a[0]) / 2, (b[1] - a[1]) / 2, depth]);
   }
 
   function colours() {
@@ -356,17 +394,17 @@ export function createCli(root: HTMLElement): () => void {
     const night = isDark();
     const paper = cssRgb(style.getPropertyValue('--lp-paper'));
     const ink = cssRgb(style.getPropertyValue('--lp-ink'));
-    gl.set('uLit', night ? ink : paper);
-    gl.set('uShade', night ? paper : ink);
-    gl.set('uPen', ink);
+    uniform('uLit', night ? ink : paper);
+    uniform('uShade', night ? paper : ink);
+    uniform('uPen', ink);
     // shadows are dots in the tone of the sheet's lines
     const line = night ? 0.75 : 0.82;
-    gl.set('uLine', [
+    uniform('uLine', [
       mix(paper[0], ink[0], line),
       mix(paper[1], ink[1], line),
       mix(paper[2], ink[2], line),
     ]);
-    gl.set('uAccent', cssRgb(style.getPropertyValue(night ? '--lp-orange' : '--lp-sun')));
+    uniform('uAccent', cssRgb(style.getPropertyValue(night ? '--lp-orange' : '--lp-sun')));
     gl.invalidate();
   }
 
@@ -454,9 +492,9 @@ export function createCli(root: HTMLElement): () => void {
     const s = root.getBoundingClientRect();
     if (s.width === 0) return;
     footX = s.width / 2;
-    gl.set('uEye', [footX, 0, CAM]);
-    gl.set('uLight', LIGHT);
-    gl.set('uCell', 2);
+    uniform('uEye', [footX, 0, CAM]);
+    uniform('uLight', LIGHT);
+    uniform('uCell', 2);
     const chars = scene.command.children as HTMLCollectionOf<HTMLElement>;
     const caretHeight = caret.offsetHeight;
     for (let i = 0; i <= chars.length; i++) {
@@ -478,10 +516,10 @@ export function createCli(root: HTMLElement): () => void {
     const size: Vec3 = [(b[0] - a[0]) / 2, (b[1] - a[1] - LID_T) / 2, Math.round(slot.h / 4)];
     const centre: Vec3 = [(a[0] + b[0]) / 2, floor - size[1], CRATE_Z - size[2]];
     const top = floor - 2 * size[1];
-    gl.set('uFloor', [floor, CRATE_Z + 24]);
-    gl.set('uCrate', centre);
-    gl.set('uCrateSize', size);
-    gl.set('uLidT', LID_T);
+    uniform('uFloor', [floor, CRATE_Z + 24]);
+    uniform('uCrate', centre);
+    uniform('uCrateSize', size);
+    uniform('uLidT', LID_T);
     const tag = rectIn(label, s);
     housing('uLabel', tag, CRATE_Z + 3, 3, 6);
     // the sockets stand above the corner caps, right of the label; the right one's cable clears it
@@ -489,8 +527,8 @@ export function createCli(root: HTMLElement): () => void {
     const beside = unproject(tag.x + tag.w + 6, 0, CRATE_Z)[0] + 15;
     sockets[0] = [socket, floor - 37, CRATE_Z];
     sockets[1] = [Math.max(socket - 30, beside), floor - 37, CRATE_Z];
-    gl.set('uSocket[0]', sockets[0]);
-    gl.set('uSocket[1]', sockets[1]);
+    uniform('uSocket[0]', sockets[0]);
+    uniform('uSocket[1]', sockets[1]);
     inside = [centre[0], top + 30, centre[2]];
     // the top of the lid, standing open behind the crate
     const lid = project(centre[0], top - 2 * size[2] - 6, centre[2] - size[2])[1];
@@ -509,7 +547,7 @@ export function createCli(root: HTMLElement): () => void {
     const treeBox = rectIn(scene.tree, s);
     const editor = rectIn(scene.editor, s);
     const gutter = Number.parseFloat(getComputedStyle(root).paddingLeft);
-    gl.set('uFrame', [gutter, s.width - gutter]);
+    uniform('uFrame', [gutter, s.width - gutter]);
 
     // the chain carries files from over the crate to the hopper: up beside it when the hopper's
     // mouth stands above the crate, across over it otherwise. Its drive gear hangs under the
@@ -533,12 +571,12 @@ export function createCli(root: HTMLElement): () => void {
     // a file hangs beside an upright chain from its jaw's top, under a level one from its middle
     hang.share = (1 + chain.side[0]) / 2;
     hang.top = upright ? 1 - JAW_HALF : 2;
-    gl.set('uChain', [tail[0], tail[1], chain.dir[0], chain.dir[1]]);
-    gl.set('uChainLength', [span, CHAIN_Z]);
-    gl.set('uChainSide', chain.side);
-    gl.set('uDriveGear', drive);
-    gl.set('uJaw', JAW);
-    gl.set('uJawBox', upright ? [2.5, JAW_HALF] : [JAW_HALF, 2.5]);
+    uniform('uChain', [tail[0], tail[1], chain.dir[0], chain.dir[1]]);
+    uniform('uChainLength', [span, CHAIN_Z]);
+    uniform('uChainSide', chain.side);
+    uniform('uDriveGear', drive);
+    uniform('uJaw', JAW);
+    uniform('uJawBox', upright ? [2.5, JAW_HALF] : [JAW_HALF, 2.5]);
 
     // the hopper on your project's window, its counter on its front, its mouth as wide as it can be
     // inside the gutters and clear of the machine to its left
@@ -556,8 +594,8 @@ export function createCli(root: HTMLElement): () => void {
       hopper[0] - unproject(Math.max(gutter, left + 8), 0, rim)[0] - 4,
     );
     const spout = Math.min(counter.w / 2 + 6, halfWidth);
-    gl.set('uHopper', hopper);
-    gl.set('uHopperSize', [halfWidth, spout, neck[1] - hopper[1], 22]);
+    uniform('uHopper', hopper);
+    uniform('uHopperSize', [halfWidth, spout, neck[1] - hopper[1], 22]);
 
     // wide files shrink to stay inside the gutters, on the chain and rising out of the crate
     const lo = gutter + 4;
@@ -601,7 +639,7 @@ export function createCli(root: HTMLElement): () => void {
     grip(0);
     const queue = Math.hypot(point[0] - inside[0], point[1] + pop - inside[1]);
     lift = Math.max(1, Math.floor((queue + pop) / pitch)) * pitch;
-    gl.set('uPitch', pitch);
+    uniform('uPitch', pitch);
 
     // let go, a file lands in the middle of the hopper's front, narrow enough for its spout
     const atDrop = CAM / (CAM - DROP_Z);
@@ -616,12 +654,9 @@ export function createCli(root: HTMLElement): () => void {
       card.drop = (Math.sqrt(FALL * FALL + 2 * PULL * card.way) - FALL) / PULL;
     }
 
-    const range = document.createRange();
-    range.selectNodeContents(scene.editCut);
-    const cut = range.getBoundingClientRect();
     wire(s);
 
-    gl.set(
+    uniform(
       'uBox[0]',
       bounds(
         [centre[0] - size[0] - 20, top - LID_T - 2 * size[2] - 10, 0],
@@ -630,21 +665,21 @@ export function createCli(root: HTMLElement): () => void {
     );
     // the chain runs right or up from its tail, the plate's housing above it
     const housed = unproject(sign.x - 10, sign.y - 10, 0);
-    gl.set(
+    uniform(
       'uBox[1]',
       bounds(
         [Math.min(housed[0], tail[0] - FRAME), Math.min(housed[1], head[1] - FRAME), 0],
         [head[0] + FRAME, tail[1] + FRAME, CHAIN_Z + 42],
       ),
     );
-    gl.set(
+    uniform(
       'uBox[2]',
       bounds(
         [hopper[0] - halfWidth - 6, hopper[1] - 8, 0],
         [hopper[0] + halfWidth + 6, neck[1] + 8, HOPPER_Z + 30],
       ),
     );
-    gl.set(
+    uniform(
       'uBox[3]',
       wires.length
         ? bounds([treeBox.x + treeBox.w - 12, editor.y, 0], [editor.x + 12, floor, 24])
@@ -653,17 +688,15 @@ export function createCli(root: HTMLElement): () => void {
     const windows = [treeBox, editor];
     for (let i = 0; i < windows.length; i++) {
       const r = windows[i];
-      gl.set(`uWindow[${i}]`, [r.x, r.y, r.x + r.w, r.y + r.h]);
+      uniform(`uWindow[${i}]`, [r.x, r.y, r.x + r.w, r.y + r.h]);
     }
-    // written once the stage is read, so reading it never waits for a layout
-    editCaret.style.width = `${cut.width / Math.max(scene.editCut.textContent!.length, 1)}px`;
-    editCaret.style.height = `${cut.height}px`;
 
     beats = schedule();
     // a run waiting for the editor waits where its rewrites now start
     if (phase === 'hold') clock = beats.strikes[0] - 1;
     landedShown = -1;
     render(phase === 'rest' ? beats.end : clock);
+    gl.invalidate();
   }
 
   /** the cables from the editor's reels into your project's rows, down the gap between them */
@@ -697,18 +730,22 @@ export function createCli(root: HTMLElement): () => void {
             target,
           }),
         );
-        gl.set(`uReel[${i}]`, reel);
-        gl.set(`uJack[${i}]`, [target[0] - 3, target[1], WALL]);
+        uniform(`uReel[${i}]`, reel);
+        uniform(`uJack[${i}]`, [target[0] - 3, target[1], WALL]);
       }
     }
-    gl.set('uCables', wires.length);
+    uniform('uCables', wires.length);
   }
 
   /** your project's rows moved under the cables, its list scrolled or a folder opened: re-plug */
   function replug() {
     if (!wires.length) return;
+    if (phase === 'play') {
+      rewire = true;
+      return;
+    }
     wire(root.getBoundingClientRect());
-    if (phase !== 'play') render(phase === 'rest' ? beats.end : clock);
+    render(phase === 'rest' ? beats.end : clock);
     gl.draw();
   }
 
@@ -729,7 +766,7 @@ export function createCli(root: HTMLElement): () => void {
       caretMode = typing;
       caret.style.visibility = typing === 'none' ? 'hidden' : 'visible';
       // a hidden caret's animation would still tick
-      caret.classList.toggle('lp-caret', typing === 'blink');
+      caret.classList.toggle('animate-lp-caret', onScreen && typing === 'blink');
     }
     const at = `translate(${scene.ends[shown * 2].toFixed(1)}px, ${scene.ends[shown * 2 + 1].toFixed(1)}px)`;
     if (at !== caretAt) {
@@ -737,15 +774,15 @@ export function createCli(root: HTMLElement): () => void {
       caret.style.transform = at;
     }
 
-    gl.set('uLatch', [
+    uniform('uLatch', [
       live ? LATCH_OPEN * spring(clamp((t - b.latch[0]) / 260)) : LATCH_OPEN,
       live ? LATCH_OPEN * spring(clamp((t - b.latch[1]) / 260)) : LATCH_OPEN,
     ]);
-    gl.set('uLid', live ? lidAngle(t - b.lid) : LID_OPEN);
+    uniform('uLid', live ? lidAngle(t - b.lid) : LID_OPEN);
 
     const distance = live ? travel(t) : b.travel;
-    gl.set('uPhase', distance);
-    gl.set('uSpin', distance / 13);
+    uniform('uPhase', distance);
+    uniform('uSpin', distance / 13);
     let holes = 0;
     let landed = 0;
     for (let i = 0; i < scene.cards.length; i++) {
@@ -794,29 +831,31 @@ export function createCli(root: HTMLElement): () => void {
         card.el.style.transform = transform;
       }
       if (card.el.style.visibility !== 'visible') card.el.style.visibility = 'visible';
-      // a file let go of passes in front of the chain
-      const layer = String(Math.round(z));
-      if (card.el.style.zIndex !== layer) card.el.style.zIndex = layer;
       if (holes < CARDS) {
-        gl.set(CARD[holes], [left, sy, left + card.w * k, sy + card.h * k]);
+        hole[0] = left;
+        hole[1] = sy;
+        hole[2] = left + card.w * k;
+        hole[3] = sy + card.h * k;
+        uniform(CARD[holes], hole);
         depths[Math.floor(holes / 4)][holes % 4] = z;
         holes++;
       }
     }
-    for (let i = 0; i < depths.length; i++) gl.set(CARD_Z[i], depths[i]);
-    gl.set('uCards', holes);
+    for (let i = 0; i < depths.length; i++) uniform(CARD_Z[i], depths[i]);
+    uniform('uCards', holes);
 
     if (landed !== landedShown) {
-      const animate = live && landedShown >= 0 && landed > landedShown;
-      landedShown = landed;
-      if (!counters.has(scene.counter)) counters.set(scene.counter, createFlaps(scene.counter));
-      counters.get(scene.counter)!.set(live ? landed : scene.cards.length, animate);
-      for (const el of scene.added) el.style.display = live ? 'none' : '';
+      // the rows of the files landed since; all of them again after a reset
+      const more = live && landedShown >= 0 && landed > landedShown;
+      if (!more) for (const el of scene.added) el.style.display = live ? 'none' : '';
       if (live) {
-        for (let i = 0; i < landed; i++) {
+        for (let i = more ? landedShown : 0; i < landed; i++) {
           for (const row of scene.cards[i].reveals) row.style.display = '';
         }
       }
+      landedShown = landed;
+      if (!counters.has(scene.counter)) counters.set(scene.counter, createFlaps(scene.counter));
+      counters.get(scene.counter)!.set(live ? landed : scene.cards.length, more);
       if (live && landed > 0 && landed - 1 !== flashed) {
         flashed = landed - 1;
         flash(scene.cards[landed - 1].inlet, t);
@@ -852,8 +891,8 @@ export function createCli(root: HTMLElement): () => void {
       if (strike.cut.textContent !== text) strike.cut.textContent = text;
     }
 
-    const spin = [0, 0];
-    const plugged = [0, 0];
+    spin.fill(0);
+    plugged.fill(0);
     for (let i = 0; i < wires.length; i++) {
       const c = wires[i];
       const u = live ? t - b.plugs[i] : Infinity;
@@ -875,8 +914,8 @@ export function createCli(root: HTMLElement): () => void {
       }
       if (u >= wind + 150 && u < wind + 150 + TICK) flash(scene.cables[i].row, t);
     }
-    gl.set('uReelSpin', spin);
-    gl.set('uJackOn', plugged);
+    uniform('uReelSpin', spin);
+    uniform('uJackOn', plugged);
 
     const e = t - b.edit;
     const cut = scene.editCut;
@@ -886,26 +925,12 @@ export function createCli(root: HTMLElement): () => void {
       value = next.slice(0, 1 + Math.floor(((e - WRITE) / b.editFor) * next.length));
     if (cut.textContent !== value) cut.textContent = value;
     highlight(cut, live && e >= 2 * SELECT && e < WRITE);
-    // the caret after the text being typed, found again whenever its line reflows
-    const editing = live && e >= 0 && e < WRITE + b.editFor + 200;
-    const target = editing ? cut : writing?.cut;
-    const caretKey = target ? `${editing ? 'edit' : writing!.tab}|${target.textContent}` : '';
-    if (caretKey !== editCaretKey) {
-      editCaretKey = caretKey;
-      editCaret.style.visibility = target ? 'visible' : '';
-      // solid while it types, like an editor's; it blinks while the run waits, never hidden
-      editCaret.classList.toggle('lp-caret', !!target && phase === 'hold');
-      if (target) {
-        // a layout read, so only when its text changed
-        const origin = root.getBoundingClientRect();
-        const range = document.createRange();
-        range.selectNodeContents(target);
-        const rects = range.getClientRects();
-        const end = rects[rects.length - 1] ?? target.getBoundingClientRect();
-        const x = end.right - origin.left;
-        const y = end.top - origin.top;
-        editCaret.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px)`;
-      }
+    // the caret follows the text being typed in its own line
+    const target = live && e >= 0 && e < WRITE + b.editFor + 200 ? cut : writing?.cut;
+    if (target !== caretLine) {
+      caretLine?.removeAttribute('data-typing');
+      target?.setAttribute('data-typing', '');
+      caretLine = target;
     }
     const browser = scene.tabs[scene.browser];
     const reloading = live && t >= b.reload && t < b.change;
@@ -938,7 +963,6 @@ export function createCli(root: HTMLElement): () => void {
       status = line;
       report(root, line);
     }
-    gl.invalidate();
   }
 
   /** a jaw's grip `s` along the chain: where the top of the file it holds hangs from it */
@@ -957,7 +981,7 @@ export function createCli(root: HTMLElement): () => void {
     const put = (p: Vec3, plug: boolean) => {
       const [sx, sy, k] = project(p[0], p[1], p[2]);
       const radius = (plug ? 6 : RADIUS) * k;
-      gl.set(ROPE[i * ROPE_POINTS + n], [sx, sy, p[2], radius]);
+      uniform(ROPE[i * ROPE_POINTS + n], [sx, sy, p[2], radius]);
       n++;
       x0 = Math.min(x0, sx - radius - 2);
       y0 = Math.min(y0, sy - radius - 2);
@@ -969,9 +993,9 @@ export function createCli(root: HTMLElement): () => void {
     }
     put(pointAt(r, end - PLUG, point), true);
     put(pointAt(r, end, point), true);
-    gl.set(`uRopeCount[${i}]`, n);
-    gl.set(`uRopeBox[${i * 2}]`, [x0, y0]);
-    gl.set(`uRopeBox[${i * 2 + 1}]`, [x1, y1]);
+    uniform(`uRopeCount[${i}]`, n);
+    uniform(`uRopeBox[${i * 2}]`, [x0, y0]);
+    uniform(`uRopeBox[${i * 2 + 1}]`, [x1, y1]);
   }
 
   function flash(row: HTMLElement | undefined, t: number) {
@@ -982,24 +1006,43 @@ export function createCli(root: HTMLElement): () => void {
     if (row) highlight(row, true);
   }
 
-  function onFrame(time: number) {
-    if (phase !== 'play') return;
-    const now = time * 1000;
+  /** a frame of the play: the page's parts that moved, the canvas only when one of its uniforms did */
+  function tick(now: number) {
+    frame = 0;
+    if (phase !== 'play' || !onScreen) return;
     clock += last < 0 ? 0 : Math.min(50, now - last);
     last = now;
+    if (rewire) {
+      rewire = false;
+      wire(root.getBoundingClientRect());
+    }
     // the rewrites wait just before their start until the reader has seen the editor
     if (!met && clock >= beats.strikes[0]) {
       clock = beats.strikes[0] - 1;
       hold();
-      return;
-    }
-    if (clock < beats.end) render(clock);
-    else rest();
+    } else if (clock < beats.end) {
+      render(clock);
+      frame = requestAnimationFrame(tick);
+    } else rest();
+    if (stale) gl.draw();
+  }
+
+  /** the play goes on from its clock, on the next frame */
+  function wake() {
+    if (phase !== 'play' || !onScreen) return;
+    last = -1;
+    if (frame === 0) frame = requestAnimationFrame(tick);
+  }
+
+  /** the canvas covers the stage: the play and the caret's blink pause while none of it is on screen */
+  function onVisible(ratio: number) {
+    onScreen = ratio > 0;
+    caret.classList.toggle('animate-lp-caret', onScreen && caretMode === 'blink');
+    wake();
   }
 
   function hold() {
     phase = 'hold';
-    editCaretKey = '';
     render(clock);
     flash(undefined, clock);
   }
@@ -1009,8 +1052,7 @@ export function createCli(root: HTMLElement): () => void {
     if (phase === 'ready' && seen.has(crate)) arrive();
     else if (phase === 'hold' && met) {
       phase = 'play';
-      last = -1;
-      gl.invalidate();
+      wake();
     }
   }
 
@@ -1028,6 +1070,7 @@ export function createCli(root: HTMLElement): () => void {
     flash(undefined, 0);
     landedShown = -1;
     render(beats.end);
+    if (stale) gl.invalidate();
   }
 
   function play() {
@@ -1035,16 +1078,13 @@ export function createCli(root: HTMLElement): () => void {
       rest();
       return;
     }
-    // the first frame comes with the canvas's next one, so files and machine start together
     phase = 'play';
     clock = 0;
-    last = -1;
     met = seen.has(scene.editor);
     landedShown = -1;
     flashed = -1;
-    editCaretKey = '';
     beatTab = -1;
-    gl.invalidate();
+    wake();
   }
 
   function show(index: number) {
@@ -1095,11 +1135,13 @@ export function createCli(root: HTMLElement): () => void {
   if (!reduce.matches) phase = 'ready';
 
   return () => {
+    cancelAnimationFrame(frame);
     listeners.abort();
     watch.disconnect();
     rows.disconnect();
     stopTheme();
     for (const flaps of counters.values()) flaps.destroy();
+    caretLine?.removeAttribute('data-typing');
     gl.destroy();
   };
 }

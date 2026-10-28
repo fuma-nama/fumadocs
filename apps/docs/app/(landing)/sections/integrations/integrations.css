@@ -1,46 +1,35 @@
 .bt-cell {
+  --bt-stage: 18rem;
+  /* the mechanism's palette, inverted while the card is pointed at or focused */
   --bt-ink: var(--lp-ink);
   --bt-paper: var(--lp-paper);
   --bt-orange: var(--lp-orange);
-  --bt-speed: 1;
   /* orange over ink-filled cards: vivid while the ink is dark */
   --bt-on-ink: var(--lp-sun);
+  --bt-speed: 1;
   /* content starts on the gutter; the end, inside the cell's 1px line, gives way so a mechanism
      always fits */
   padding-inline-end: min(var(--lp-gutter), calc(100% - 1px - var(--lp-gutter) - var(--bt-stage)));
-}
 
-.bt-cell:hover,
-.bt-cell:focus-visible {
-  --bt-ink: var(--lp-paper);
-  --bt-paper: var(--lp-ink);
-  --bt-speed: 2;
-  --bt-orange: var(--lp-orange-on-ink);
-  --bt-on-ink: var(--lp-orange);
-  background-color: var(--lp-ink);
-  color: var(--lp-paper);
-  outline: none;
+  @variant hover {
+    --bt-ink: var(--lp-paper);
+    --bt-paper: var(--lp-ink);
+    --bt-orange: var(--lp-orange-on-ink);
+    --bt-on-ink: var(--lp-orange);
+    --bt-speed: 2;
+  }
+
+  &:focus-visible {
+    --bt-ink: var(--lp-paper);
+    --bt-paper: var(--lp-ink);
+    --bt-orange: var(--lp-orange-on-ink);
+    --bt-on-ink: var(--lp-orange);
+    --bt-speed: 2;
+  }
 }
 
 .bt-ink-card {
   --bt-orange: var(--bt-on-ink);
-}
-
-/* a card's name: ink, dark on the yellow highlight while it's pointed at or focused */
-.bt-name {
-  color: var(--lp-ink);
-}
-
-.bt-cell:is(:hover, :focus-visible) .bt-name {
-  background-color: var(--lp-yellow);
-  color: #121210;
-}
-
-.bt-text {
-  font-size: 12px;
-  font-weight: 500;
-  line-height: 1;
-  white-space: pre;
 }
 
 .bt-code {
@@ -49,23 +38,10 @@
   font-size: 10px;
 }
 
-/* a split-flap face, the bottom half shows the lower part */
-.bt-flap-face {
-  display: flex;
-  width: 100%;
-  height: 100%;
-  align-items: center;
-  justify-content: center;
-  background-color: var(--bt-ink);
-  color: var(--bt-paper);
-  font-size: 22px;
-  font-weight: 500;
-}
-
-/* content on the yellow highlight is always dark */
+/* content on the yellow highlight is always dark, as `text-lp-on-yellow` */
 .bt-on-hi {
   --bt-ink: #121210;
-  color: #121210;
+  color: var(--bt-ink);
 }
 
 /* a dashed line on the cell grid: two cells drawn, one skipped */
@@ -85,8 +61,26 @@
   animation-delay: calc(125ms / var(--bt-speed));
 }
 
+/* the further integrations roll by, a copy of the list after it; under the utilities, which hold it */
+@layer components {
+  .bt-marquee {
+    animation: bt-marquee 80s linear infinite;
+  }
+}
+
+@keyframes bt-marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* nothing plays while the board is off screen */
+[data-paused] :is(.bt-a, .bt-marquee) {
+  animation-play-state: paused;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .bt-a {
+  :is(.bt-a, .bt-marquee) {
     animation: none;
   }
 }

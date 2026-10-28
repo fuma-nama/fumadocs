@@ -1,13 +1,12 @@
 import { baseUrl } from '@/lib/metadata';
 import { showcases, vercel } from '@/lib/showcases';
-import { command, copy, frameworks, quotes } from '../content';
+import { command, copy, frameworks, plain, quotes, type Run } from '../content';
 import { modules, more } from '../sections/integrations/data';
 import { CORE, LAYERS, OPTIONS } from '../sections/parts/data';
 import { getContributorCount, getDownloads, getStars } from '../sections/proof/data';
 import { LAYOUTS, TABS, THEME_NAMES, THEMES } from '../sections/style/data';
 import { blocks as buttonBlocks } from '../sections/automate/data';
 import { blocks, fileLines } from '../sections/write/data';
-import type { Run } from '../ui/figure';
 
 // the counters in it, like the page
 export const revalidate = 86400;
@@ -18,23 +17,9 @@ function url(path: string): string {
   return new URL(path, baseUrl).toString();
 }
 
-/** a title's text: its terms as plain words, a line break set in it as a space */
-function plain(title: string | readonly Run[]): string {
-  let text = '';
-  for (const run of typeof title === 'string' ? [title] : title)
-    text += typeof run === 'string' ? run : run.term;
-  return text.replaceAll('\n', ' ');
-}
-
-/** a figure's title and its line, if it has one, opening its section */
-function section(item: {
-  lead: string;
-  title: string | readonly Run[];
-  description?: string;
-}): string[] {
-  const out = ['', `## ${item.lead} ${plain(item.title)}`, ''];
-  if (item.description) out.push(item.description, '');
-  return out;
+/** a figure's title opening its section, read as its heading is: the words of its mark first */
+function section(item: { lead?: string; title: readonly Run[] }): string[] {
+  return ['', `## ${item.lead ? `${item.lead} ` : ''}${plain(item.title)}`, ''];
 }
 
 /** a code fence longer than any backtick run in the lines it wraps, so their own fences stay inside */
@@ -58,7 +43,7 @@ async function landingMarkdown(): Promise<string> {
   const out = [
     '# Fumadocs',
     '',
-    `> ${copy.hero.lead} ${copy.hero.title}`,
+    `> ${plain(copy.hero.title)}`,
     '',
     `- Get started: ${url('/docs')}`,
     `- Create a project: \`${command}\``,
@@ -70,9 +55,14 @@ async function landingMarkdown(): Promise<string> {
   for (const layout of LAYOUTS) layouts.push(layout.name);
   const themes: string[] = [];
   for (const id of THEMES) themes.push(`${THEME_NAMES[id]} (\`${id}\`)`);
-  let statement = plain(copy.style.title);
-  for (const claim of copy.style.claims) statement += ` ${claim}`;
-  out.push('', `## ${statement}`, '', '- Restyle any layout or theme with CSS variables.');
+  out.push(
+    '',
+    `## ${plain(copy.style.title)}`,
+    '',
+    plain([copy.style.claims.join(' ')]),
+    '',
+    '- Restyle any layout or theme with CSS variables.',
+  );
   for (const id of TABS) {
     const tab = copy.style.tabs[id];
     out.push(`- [${tab.label}](${url(tab.href)}): ${tab.line}`);

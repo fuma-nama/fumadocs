@@ -252,8 +252,8 @@ export function Dial({ table, value, onChange }: DialProps) {
           onChange(theme, false);
         }}
         className={cn(
-          'col-start-1 row-start-1 self-start px-1.5 text-xs leading-5 font-medium whitespace-nowrap transition-none',
-          i === index ? 'bg-lp-yellow text-[#121210]' : 'hover:bg-lp-ink hover:text-lp-paper',
+          'col-start-1 row-start-1 self-start px-1.5 font-pixel text-xs leading-5 whitespace-nowrap transition-none',
+          i === index ? 'bg-lp-yellow text-lp-on-yellow' : 'hover:bg-lp-ink hover:text-lp-paper',
         )}
         style={
           lx < 0
@@ -270,7 +270,7 @@ export function Dial({ table, value, onChange }: DialProps) {
 
   return (
     // the names on each side make the dial as wide as they are; the axle is where the sides meet
-    <div ref={ref} className="mx-auto grid w-max grid-cols-[max-content_max-content]">
+    <div ref={ref} className="mx-auto grid w-max grid-flow-col auto-cols-max">
       <div className="relative grid" style={{ minWidth: REACH }}>
         {names.left}
         <svg

@@ -7,35 +7,26 @@ import { setStatus } from '../lib/status';
 
 interface CommandProps extends ComponentProps<'div'> {
   command: string;
-  /** a blinking caret after the command */
-  caret?: boolean;
 }
 
 /** a shell command with a copy button */
-export function Command({ command, caret = false, className, ...props }: CommandProps) {
+export function Command({ command, className, ...props }: CommandProps) {
   const [copied, onCopy] = useCopyButton(async () => {
     await navigator.clipboard.writeText(command);
     setStatus(`copied ${command}`);
   });
 
   // a box too narrow for the command wraps it between its words, never inside one, the lines hung
-  // after the prompt; the caret stays on the last word
+  // after the prompt
   const words: ReactNode[] = [];
   const parts = command.split(' ');
   for (let i = 0; i < parts.length; i++) {
-    const last = i === parts.length - 1;
+    if (i > 0) words.push(' ');
     words.push(
       <span key={i} className="whitespace-nowrap">
         {parts[i]}
-        {last && caret && (
-          <span
-            aria-hidden
-            className="lp-caret ms-0.5 inline-block h-[1.1em] w-[0.55em] align-text-bottom bg-current"
-          />
-        )}
       </span>,
     );
-    if (!last) words.push(' ');
   }
 
   return (
@@ -46,7 +37,7 @@ export function Command({ command, caret = false, className, ...props }: Command
         className,
       )}
     >
-      <code className="flex min-w-0 flex-1 items-baseline gap-2 px-3 py-[11px] font-mono text-sm leading-5">
+      <code className="flex min-w-0 flex-1 items-baseline gap-2 self-center px-3 py-2.5 font-mono text-sm leading-5">
         <span aria-hidden className="text-lp-ink-2 select-none">
           $
         </span>

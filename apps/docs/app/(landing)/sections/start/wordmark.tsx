@@ -296,8 +296,9 @@ function createSand(host: HTMLElement): () => void {
     }
   }
 
+  /** a mouse pushes the grains; a touch or a pen leaves them be */
   function onPointer(event: PointerEvent) {
-    if (!ready) return;
+    if (!ready || event.pointerType !== 'mouse') return;
     const box = canvas.getBoundingClientRect();
     const x = Math.floor((event.clientX - box.left) / cellW);
     const y = Math.floor((event.clientY - box.top) / cellH);
@@ -367,7 +368,7 @@ export function Wordmark() {
       ref={mount}
       role="img"
       aria-label="Fumadocs"
-      className="mx-(--lp-gutter) h-[clamp(96px,22vw,320px)] touch-pan-y overflow-hidden"
+      className="mx-(--lp-gutter) h-[clamp(96px,22vw,320px)] overflow-hidden"
     >
       <canvas className="block" />
     </div>

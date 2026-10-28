@@ -102,7 +102,7 @@ export function Stage({ file, steps, sources, slots, bed, column }: StageProps) 
                 data-status={steps[i].status}
                 className={cn(
                   // framed while held for a press, where the card the canvas draws stands
-                  'relative -mx-2 -my-2 grid grid-cols-[minmax(0,1fr)] gap-2 border-lp-line bg-lp-paper px-2 py-2 data-[framed]:shadow-[inset_0_0_0_4px_var(--lp-paper),inset_0_0_0_5px_var(--lp-line-strong)] md:m-0 md:gap-3 md:p-3',
+                  'relative -mx-2 -my-2 grid grid-cols-1 gap-2 border-lp-line bg-lp-paper px-2 py-2 data-framed:outline data-framed:-outline-offset-5 data-framed:outline-lp-line-strong md:m-0 md:gap-3 md:p-3',
                   PLATES[i].place,
                   PLATES[i].foot
                     ? 'md:grid-rows-[minmax(0,1fr)_auto]'
@@ -116,7 +116,7 @@ export function Stage({ file, steps, sources, slots, bed, column }: StageProps) 
                   aria-label={`${steps[i].tab} Markdown`}
                   aria-pressed="false"
                   className={cn(
-                    'relative inline-flex h-7 cursor-pointer items-center justify-self-start border border-lp-line bg-lp-paper px-3 text-xs font-medium tracking-normal whitespace-pre text-lp-ink-2 transition-none before:absolute before:top-1/2 before:left-1 before:hidden before:size-1 before:-translate-y-1/2 before:bg-current after:absolute after:-inset-y-2 after:inset-x-0 hover:bg-lp-ink hover:text-lp-paper focus-visible:bg-lp-ink focus-visible:text-lp-paper focus-visible:outline-none data-inverted:bg-lp-ink data-inverted:text-lp-paper aria-pressed:bg-lp-yellow aria-pressed:text-[#121210] data-queued:bg-lp-ink data-queued:text-lp-paper data-queued:before:block data-queued:before:animate-[lp-caret_1s_steps(1,end)_infinite] [@media(scripting:none)]:pointer-events-none',
+                    'relative inline-flex h-7 cursor-pointer items-center justify-self-start border border-lp-line bg-lp-paper px-3 text-xs font-medium tracking-normal whitespace-pre text-lp-ink-2 transition-none before:absolute before:top-1/2 before:left-1 before:hidden before:size-1 before:-translate-y-1/2 before:bg-current after:absolute after:-inset-y-2 after:inset-x-0 hover:bg-lp-ink hover:text-lp-paper focus-visible:bg-lp-ink focus-visible:text-lp-paper focus-visible:outline-none data-inverted:bg-lp-ink data-inverted:text-lp-paper aria-pressed:bg-lp-yellow aria-pressed:text-lp-on-yellow data-queued:bg-lp-ink data-queued:text-lp-paper data-queued:before:block data-queued:before:animate-lp-caret motion-reduce:data-queued:before:animate-none [@media(scripting:none)]:pointer-events-none',
                     PLATES[i].foot ? 'md:row-start-2' : 'xl:row-start-2',
                   )}
                 >
@@ -124,7 +124,7 @@ export function Stage({ file, steps, sources, slots, bed, column }: StageProps) 
                 </button>
                 <div
                   className={cn(
-                    'grid grid-cols-[minmax(0,1fr)] *:col-start-1 *:row-start-1',
+                    'grid grid-cols-1 *:col-start-1 *:row-start-1',
                     PLATES[i].foot ? 'md:row-start-1' : 'xl:row-start-1',
                   )}
                 >
@@ -136,7 +136,7 @@ export function Stage({ file, steps, sources, slots, bed, column }: StageProps) 
                       <div
                         key={j}
                         data-line
-                        className="min-h-[1lh] wrap-anywhere whitespace-break-spaces"
+                        className="min-h-lh wrap-anywhere whitespace-break-spaces"
                       >
                         {words(line)}
                       </div>
@@ -161,13 +161,13 @@ export function Stage({ file, steps, sources, slots, bed, column }: StageProps) 
             </div>
           </div>
         </Window>
-        <div data-bay-phone className="relative w-[72px] shrink-0 md:hidden">
+        <div data-bay-phone className="relative w-18 shrink-0 md:hidden">
           {column}
         </div>
         <span
           data-caret
           aria-hidden
-          className="pointer-events-none invisible absolute top-0 left-0 bg-lp-ink"
+          className="pointer-events-none invisible absolute top-0 left-0 bg-lp-ink motion-reduce:animate-none"
         />
         <canvas
           data-mate

@@ -23,7 +23,7 @@ export function Stage({ children }: { children: ReactNode }) {
       >
         <canvas aria-hidden className="absolute inset-0 size-full" />
         <div className="relative grid flex-1 gap-10 px-(--lp-gutter) pt-8 pb-12 md:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] md:gap-8 md:pt-[10svh] md:pb-[14svh]">
-          <div data-slot aria-hidden className="aspect-[4/3] md:aspect-auto" />
+          <div data-slot aria-hidden className="aspect-4/3 md:aspect-auto" />
           {/* hidden while the camera is in the glass, never while it holds the keyboard's focus */}
           <div
             data-cta

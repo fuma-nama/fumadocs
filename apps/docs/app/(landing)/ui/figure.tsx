@@ -1,6 +1,7 @@
 'use client';
 import type { ComponentProps, ReactNode } from 'react';
 import { cn } from '@/lib/cn';
+import type { Run } from '../content';
 import { DITHER_MASKS } from '../lib/dither';
 import { registerFigure } from '../lib/status';
 
@@ -20,8 +21,8 @@ export function Figure({ status, className, children, ...props }: FigureProps) {
       data-status={status}
       className={cn('relative scroll-mt-(--lp-menu-h) border-t border-lp-line', className)}
     >
-      <Mark className="-top-[5.5px] -left-[5.5px]" />
-      <Mark className="-top-[5.5px] -right-[5.5px]" />
+      <Mark className="left-0 -translate-x-1/2" />
+      <Mark className="right-0 translate-x-1/2" />
       {children}
     </section>
   );
@@ -33,7 +34,10 @@ function Mark({ className }: { className: string }) {
       aria-hidden
       data-mark=""
       viewBox="0 0 11 11"
-      className={cn('absolute z-10 size-[11px] text-lp-line-strong max-[1400px]:hidden', className)}
+      className={cn(
+        'absolute top-0 z-10 size-2.75 -translate-y-1/2 text-lp-line-strong max-sheet:hidden',
+        className,
+      )}
     >
       <path d="M5.5 0v11M0 5.5h11" stroke="currentColor" />
     </svg>
@@ -41,43 +45,34 @@ function Mark({ className }: { className: string }) {
 }
 
 /**
- * A lead set as a status plate of the status bar's machine: a lamp lit in a square cell, the line in
- * the next, one hairline between, over the dithered shadow of the CLI's bubble. Half the title's
- * size (16px at least); the plate and its shadow's drop fill the lead's own line, so the title below
- * starts where it does after a plain lead.
+ * A status plate of the status bar's machine set over a title: a lamp lit in a square cell, the line
+ * in the next, one hairline between, over the dithered shadow of the CLI's bubble; a line of the
+ * marks' type tall, as the bubble is.
  */
 export function Status({ children }: { children: ReactNode }) {
   return (
     // as much air under it as the CLI bubble's tail leaves its title
-    <span className="mb-[0.25em] flex h-[1lh] [--drop:4px]">
-      <span className="relative isolate flex h-[calc(100%-var(--drop))] text-[length:max(1rem,0.5em)] leading-none font-medium tracking-[-0.01em] text-lp-ink">
-        <span
-          aria-hidden
-          className="absolute inset-0 translate-x-[3px] translate-y-(--drop) bg-lp-ink-2"
-          style={{ maskImage: DITHER_MASKS[6], maskSize: '4px 4px' }}
-        />
-        <span
-          aria-hidden
-          className="relative flex aspect-square h-full items-center justify-center border border-lp-ink bg-lp-paper"
-        >
-          <span className="size-[0.55em] rounded-full border border-lp-ink bg-lp-sun" />
-        </span>
-        {/* the cap height trimmed, so the line sits optically centred in its cell */}
-        <span className="relative flex items-center border border-s-0 border-lp-ink bg-lp-paper px-[0.75em]">
-          <span className="[text-box:trim-both_cap_alphabetic]">{children}</span>
-        </span>
+    <span className="relative isolate mb-[0.5em] flex h-lh w-fit font-pixel text-mark font-normal tracking-normal text-lp-ink">
+      <span
+        aria-hidden
+        className="absolute inset-0 translate-x-0.75 translate-y-1 bg-lp-ink-2"
+        style={{ maskImage: DITHER_MASKS[6], maskSize: '4px 4px' }}
+      />
+      <span
+        aria-hidden
+        className="relative flex aspect-square h-full items-center justify-center border border-lp-ink bg-lp-paper"
+      >
+        <span className="size-[0.55em] rounded-full border border-lp-ink bg-lp-sun" />
+      </span>
+      {/* the cap height trimmed, so the line sits optically centred in its cell */}
+      <span className="relative flex items-center border border-s-0 border-lp-ink bg-lp-paper px-[0.75em]">
+        <span className="[text-box:trim-both_cap_alphabetic]">{children}</span>
       </span>
     </span>
   );
 }
 
-/** a run of a title's text, or a key term of it */
-export type Run = string | { term: string };
-
-/**
- * A title with key terms, set as a statement in one family: light, its terms a step up in medium
- * and in orange, so each is the strongest word on its line.
- */
+/** a title's runs in the light voice it sits in, its key terms a step up in medium and in orange */
 export function Terms({ runs }: { runs: readonly Run[] }) {
   const out: ReactNode[] = [];
   for (const run of runs) {
@@ -91,33 +86,30 @@ export function Terms({ runs }: { runs: readonly Run[] }) {
       ),
     );
   }
-  return <span className="font-light">{out}</span>;
+  return out;
 }
 
-interface FigureHeaderProps extends Omit<ComponentProps<'div'>, 'title'> {
-  /** the opening of the title, in the orange voice on its own line */
+interface FigureHeaderProps extends Omit<ComponentProps<'h2'>, 'title' | 'children'> {
+  /** set over the title: the CLI's question bubble, Automate's status plate */
   lead?: ReactNode;
-  /** a line break in its text breaks the title there */
-  title: ReactNode;
-  description?: ReactNode;
+  /** one sentence */
+  title: readonly Run[];
 }
 
-export function FigureHeader({ lead, title, description, className, ...props }: FigureHeaderProps) {
+/**
+ * A figure's title: one sentence in the light voice, balanced within the titles' measure; the
+ * measure counts the text alone, whatever padding the figure gives the heading.
+ */
+export function FigureHeader({ lead, title, className, ...props }: FigureHeaderProps) {
   return (
-    <div {...props} className={cn('flex flex-col gap-4', className)}>
-      <h2 className="text-[clamp(1.625rem,1rem+2vw,2.5rem)] leading-[1.2] font-medium tracking-tight text-pretty whitespace-pre-line md:leading-[1.1]">
-        {lead && <Lead>{lead}</Lead>} {title}
-      </h2>
-      {description && (
-        <p className="max-w-[46ch] text-lg leading-[1.45] text-pretty text-lp-ink-2">
-          {description}
-        </p>
+    <h2
+      {...props}
+      className={cn(
+        'box-content max-w-title text-[clamp(1.625rem,1rem+2vw,2.5rem)] leading-tight font-light tracking-tight text-balance',
+        className,
       )}
-    </div>
+    >
+      {lead} <Terms runs={title} />
+    </h2>
   );
-}
-
-/** the opening of a title, in the orange voice on its own line, its first stem on the title's */
-export function Lead({ className, children }: { className?: string; children: ReactNode }) {
-  return <span className={cn('lp-voice lp-lead block text-lp-orange', className)}>{children}</span>;
 }

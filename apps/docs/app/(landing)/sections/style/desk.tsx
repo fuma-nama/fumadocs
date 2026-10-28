@@ -47,6 +47,9 @@ interface DeskProps {
   className: string;
 }
 
+/** a switch's or a relay's click: two steps over a tick */
+const CLICK = 'transition-transform duration-125 ease-[steps(2,end)] motion-reduce:transition-none';
+
 /** one switch per layout, the patched one's up */
 function DipBank({ on, className, style }: PartProps & { on: number }) {
   const slots = [];
@@ -62,10 +65,7 @@ function DipBank({ on, className, style }: PartProps & { on: number }) {
           y={15}
           width={8}
           height={8}
-          className={cn(
-            'stroke-none transition-transform duration-[120ms] ease-[steps(2,end)] motion-reduce:transition-none',
-            i === on ? 'fill-lp-ink' : 'fill-lp-ink-2',
-          )}
+          className={cn(CLICK, 'stroke-none', i === on ? 'fill-lp-ink' : 'fill-lp-ink-2')}
           style={{ transform: i === on ? undefined : 'translateY(10px)' }}
         />
       </g>,
@@ -91,7 +91,7 @@ function Relay({ flip, className, style }: PartProps & { flip: boolean }) {
       <path d="M16.5 14.5V8.5h30" className="fill-none" />
       <circle cx={46.5} cy={8.5} r={1.8} className="fill-lp-ink-2 stroke-none" />
       <g
-        className="transition-transform duration-[120ms] ease-[steps(2,end)] [transform-origin:46.5px_8.5px] motion-reduce:transition-none"
+        className={cn(CLICK, 'origin-[46.5px_8.5px]')}
         style={{ transform: flip ? 'rotate(-14deg)' : 'rotate(14deg)' }}
       >
         <path d="M46.5 8.5V34" strokeWidth={2} />
@@ -272,8 +272,8 @@ export const Desk = memo(function Desk({
           className={cn(
             'absolute left-0 -ms-1',
             slot.row === 0
-              ? 'bottom-[calc(100%+var(--plate)+8px)] origin-[6px_100%]'
-              : 'top-[calc(100%+var(--plate)+8px)] origin-[6px_0]',
+              ? 'bottom-full mb-(--stamp) origin-[6px_100%]'
+              : 'top-full mt-(--stamp) origin-[6px_0]',
           )}
           style={{ transform: `scale(${(1 / w[i * 3 + 1]).toFixed(4)})` }}
         >
@@ -287,11 +287,11 @@ export const Desk = memo(function Desk({
 
   return (
     <Window title={`fumadocs-ui/layouts/${selected}`} className={className}>
-      <div className="@container flex [--plate:max(6px,1.4cqw)] xl:min-h-0 xl:flex-1">
+      <div className="@container flex [--plate:max(6px,1.4cqw)] [--stamp:calc(var(--plate)+8px)] xl:min-h-0 xl:flex-1">
         {/* A chosen window's plate stands out of the board by `--plate`, its stamp over its edge at
             the overshoot, a line tall: both keep the stamps' gap to the frame. Under the browser
             the board takes the width, beside it the height it is given. */}
-        <div className="grid flex-1 place-items-center px-[calc(var(--plate)+8px)] py-[calc(1.5*(var(--plate)+8px)+1lh+3px)] leading-4 [container-type:inline-size] xl:[container-type:size]">
+        <div className="grid flex-1 place-items-center px-(--stamp) py-[calc(1.5*var(--stamp)+1lh+3px)] leading-4 [container-type:inline-size] xl:[container-type:size]">
           <div
             ref={ref}
             role="radiogroup"
@@ -331,7 +331,13 @@ export const Desk = memo(function Desk({
               />
               <span className="absolute inset-0 border border-lp-ink bg-lp-paper" />
               {hardware.junction}
-              <Led on className={cn('top-[31%] left-[50%]', busy && 'lp-caret')} />
+              <Led
+                on
+                className={cn(
+                  'top-[31%] left-1/2',
+                  busy && 'animate-lp-caret motion-reduce:animate-none',
+                )}
+              />
             </div>
             {/* the cables run over the desk and behind the windows, their plugs over both */}
             <svg

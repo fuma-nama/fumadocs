@@ -2,17 +2,20 @@ import type { ShowcaseObject } from '@/lib/showcases';
 
 export const suggest = 'https://github.com/fuma-nama/fumadocs/discussions/30';
 
-/** the showcase's copy, shared with `/showcase.md`: a title reads `lead`, then `title` */
+/** the showcase's copy, shared with `/showcase.md`: a title is one sentence, its key terms marked */
 export const copy = {
   header: {
-    lead: 'Built with Fumadocs.',
-    title: 'Loved by teams and developers.',
+    title: [
+      'Docs built with\u00a0',
+      { term: 'Fumadocs' },
+      ', loved\u00a0by\u00a0teams and\u00a0developers.',
+    ],
     /** for search results, link previews and the Markdown */
     summary:
       'Docs built with Fumadocs, from UI libraries and auth frameworks to databases and AI platforms.',
   },
   vercel: 'Fumadocs powers the docs of its open source SDKs.',
-  blogs: { lead: 'Beyond docs.', title: 'Fumadocs can power your blogs.' },
+  blogs: { title: ['Fumadocs can power your ', { term: 'blog' }, ' too.'] },
 };
 
 /** the featured projects by URL, and what they are in their own words */

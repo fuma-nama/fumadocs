@@ -53,7 +53,7 @@ export function Front({ layer, title, option, count, active }: FrontProps) {
         <span className="relative flex h-[64cqh] min-w-0 flex-1">
           {/* the stamp's second strike, a hair off its line */}
           <span className="absolute inset-0 translate-[4cqh] border-[1.5px] border-lp-ink-2" />
-          <span className="relative flex min-w-0 flex-1 items-center overflow-hidden border-[1.5px] border-lp-ink bg-lp-paper-2 px-[22cqh] text-[40cqh] leading-none font-medium group-data-active/front:bg-lp-yellow group-data-active/front:text-[#121210]">
+          <span className="relative flex min-w-0 flex-1 items-center overflow-hidden border-[1.5px] border-lp-ink bg-lp-paper-2 px-[22cqh] font-pixel text-[40cqh] leading-none group-data-active/front:bg-lp-yellow group-data-active/front:text-lp-on-yellow">
             <Roller value={title} />
           </span>
         </span>

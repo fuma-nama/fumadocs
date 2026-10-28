@@ -60,7 +60,7 @@ export function Stamp({ children, tilt, active, className }: StampProps) {
   return (
     <span
       className={cn(
-        'relative inline-block text-xs leading-4 font-medium whitespace-nowrap',
+        'relative inline-block font-pixel text-xs leading-4 whitespace-nowrap',
         className,
       )}
       style={{ rotate: `${tilt}deg` }}
@@ -73,7 +73,7 @@ export function Stamp({ children, tilt, active, className }: StampProps) {
         className={cn(
           'relative block border border-lp-ink px-1.5',
           active
-            ? 'bg-lp-yellow text-[#121210]'
+            ? 'bg-lp-yellow text-lp-on-yellow'
             : 'bg-lp-paper group-hover/window:bg-lp-ink group-hover/window:text-lp-paper',
         )}
       >

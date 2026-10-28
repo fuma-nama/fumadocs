@@ -2,30 +2,47 @@
 export const summary =
   'Fumadocs is a React documentation framework for developers, beautifully designed by Fuma Nama.';
 
+/** a run of a title's text, or a key term of it */
+export type Run = string | { term: string };
+
+/** a title's text, its terms as plain words and its no-break spaces as plain ones */
+export function plain(title: readonly Run[]): string {
+  let text = '';
+  for (const run of title) text += typeof run === 'string' ? run : run.term;
+  return text.replaceAll('\u00a0', ' ');
+}
+
 /**
- * The copy of every figure, shared by the page and its Markdown version (`/index.md`). A title
- * reads `lead` then `title`, the lead in orange, with a line under it only for what its figure
- * can't show.
+ * The copy of every figure, shared by the page and its Markdown version (`/index.md`). A title is
+ * one sentence with its key terms marked; a `lead` is set over it as a mark of its own. A no-break
+ * space (\u00a0) holds a phrase on one line, so no width breaks it apart.
  */
 export const copy = {
+  /** the hero sets it itself, around its glitch; here for the Markdown */
   hero: {
-    lead: 'Build better docs.',
-    title: 'Fumadocs turns your Markdown into a beautiful React documentation site, in seconds.',
+    title: ['Build ', { term: 'better docs' }, ', in seconds.'],
   },
   parts: {
-    lead: 'Fits your stack.',
-    title: 'Designed to be flexible.',
+    title: [
+      'Fit Fumadocs to\u00a0',
+      { term: 'your stack' },
+      ', one\u00a0layer at\u00a0a\u00a0time.',
+    ],
   },
   write: {
-    lead: 'Write in Markdown.',
-    title: 'Express more in fewer words.',
+    title: [
+      'Express more in\u00a0fewer\u00a0words, with\u00a0the\u00a0',
+      { term: 'Markdown' },
+      ' you\u00a0already\u00a0know.',
+    ],
   },
   automate: {
+    /** on the status plate */
     lead: 'Always up to date.',
     title: [
-      'Generate content from your ',
+      'Generate content from\u00a0your\u00a0',
       { term: 'code' },
-      ',\nthe single ',
+      ', the\u00a0single ',
       { term: 'source of truth' },
       '.',
     ],
@@ -33,17 +50,17 @@ export const copy = {
   style: {
     /** a long title with no lead: what Fumadocs is, its key terms in orange */
     title: [
-      'Fumadocs is a ',
+      'Fumadocs is a\u00a0',
       { term: 'React' },
-      ' documentation framework for ',
+      ' documentation\u00a0framework for\u00a0',
       { term: 'developers' },
-      ', beautifully designed by ',
+      ', beautifully\u00a0designed by\u00a0',
       { term: 'Fuma Nama' },
       '.',
     ],
     /** the rest of the title, a line each */
     claims: [
-      'Brings powerful features for your docs workflows.',
+      'Brings powerful features for\u00a0your\u00a0docs\u00a0workflows.',
       'High customizability to fit your preferences.',
       'Works seamlessly with any React framework, Astro, CMS, anything.',
     ],
@@ -77,20 +94,28 @@ export const copy = {
     },
   },
   cli: {
+    /** asked in the bubble the title answers */
     lead: 'Need more control?',
-    title: ['Use ', { term: 'Fumadocs CLI' }, ',\ninstall & own the UI as ', { term: 'code' }, '.'],
+    title: [
+      'Use ',
+      { term: 'Fumadocs CLI' },
+      ' to\u00a0install and own the\u00a0UI as\u00a0',
+      { term: 'code' },
+      '.',
+    ],
   },
   integrations: {
-    lead: 'Feature rich.',
-    title: 'Build with integrations.',
+    title: [
+      'From search to\u00a0API\u00a0references, ',
+      { term: 'feature-rich integrations' },
+      ' that\u00a0just\u00a0work.',
+    ],
   },
   proof: {
-    lead: 'Built in the open.',
-    title: 'Running in production.',
+    title: [{ term: 'Teams you know' }, ' already run their docs on Fumadocs.'],
   },
   start: {
-    lead: 'Your turn.',
-    title: 'Start in 1 command.',
+    title: ['Your docs are\u00a0', { term: '1 command' }, ' away.'],
   },
 };
 

@@ -1,4 +1,5 @@
 import { blogs, showcases, vercel } from '@/lib/showcases';
+import { plain } from '../content';
 import { arrange, copy, kinds, suggest } from '../showcase/data';
 
 export const dynamic = 'force-static';
@@ -8,7 +9,7 @@ export function GET() {
   const out = [
     '# Showcase',
     '',
-    `> ${copy.header.lead} ${copy.header.title}`,
+    `> ${plain(copy.header.title)}`,
     '',
     copy.header.summary,
     '',
@@ -24,7 +25,7 @@ export function GET() {
   for (const site of vercel) out.push(`  - [${site.name}](${site.url}): ${kinds[site.url]}`);
   for (const site of [...shots, ...blank]) out.push(`- [${site.name}](${site.url})`);
 
-  out.push('', `## ${copy.blogs.lead} ${copy.blogs.title}`, '');
+  out.push('', `## ${plain(copy.blogs.title)}`, '');
   for (const site of blogs) out.push(`- [${site.name}](${site.url})`);
   out.push('');
   return new Response(out.join('\n'), {

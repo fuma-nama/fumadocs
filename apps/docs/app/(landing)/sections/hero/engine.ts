@@ -12,7 +12,16 @@ import { createShaderCanvas, cssRgb } from '../../lib/gl';
 import { clamp, settle, TICK } from '../../lib/motion';
 import { report } from '../../lib/status';
 import { isDark, onTheme } from '../../lib/theme';
-import { CELL, CRATER_UNIFORMS, drawFace, HORIZON, moonFragment, REACH, SATELLITES } from './scene';
+import {
+  CELL,
+  CRATER_UNIFORMS,
+  CROWN,
+  drawFace,
+  HORIZON,
+  moonFragment,
+  REACH,
+  SATELLITES,
+} from './scene';
 
 /** boot beats, in ticks from the start */
 export const BEAT_AT = {
@@ -65,9 +74,22 @@ const GLANCE = 60;
 /** her cells a moon radius: she is an eighth of its width */
 const CELLS = 120;
 /** the drawing's height over the horizon in moon radii: the moon, and her on its crown */
-export const SKY = HORIZON + 1 + (MATE_H - LEGS) / CELLS;
+export const SKY = CROWN + (MATE_H - LEGS) / CELLS;
 /** a shooting star: ticks between two, about, ticks one lasts, dither cells a tick */
 const SHOOT = { every: 100, ticks: 6, speed: 14 };
+
+/** a satellite `clock` s into its turns: x right and y down from the moon's centre in moon radii,
+ * and its depth toward the viewer */
+function onRing(phase: number, clock: number): [x: number, y: number, depth: number] {
+  const angle = phase * Math.PI * 2 - (clock / ORBIT.period) * Math.PI * 2;
+  const ex = ORBIT.a * Math.cos(angle);
+  const ey = ORBIT.b * Math.sin(angle);
+  return [
+    ex * Math.cos(ORBIT.tilt) - ey * Math.sin(ORBIT.tilt),
+    ex * Math.sin(ORBIT.tilt) + ey * Math.cos(ORBIT.tilt),
+    Math.sqrt(ORBIT.a * ORBIT.a - ORBIT.b * ORBIT.b) * Math.sin(angle),
+  ];
+}
 
 /** a 32-bit integer's bits mixed (lowbias32) */
 function mix32(n: number): number {
@@ -79,14 +101,17 @@ function mix32(n: number): number {
 /** the moon's face, drawn once a page */
 let face: HTMLCanvasElement | null | undefined;
 
-/** the moon: it rises at boot, lit from the pointer, its satellites in orbit and her on its crown */
+/** the moon: it rises at boot, lit from the pointer, its satellites in orbit and her on its crown;
+ * it sets as its sky leaves */
 export function createHero(stage: HTMLElement, reduced: boolean): (() => void) | undefined {
-  const canvas = stage.firstElementChild;
-  const drawing = stage.lastElementChild;
+  const scene = stage.firstElementChild;
+  const canvas = scene?.firstElementChild;
+  const drawing = scene?.lastElementChild;
   const mate = drawing?.firstElementChild;
   const labels = drawing?.lastElementChild?.children as HTMLCollectionOf<HTMLElement> | undefined;
   // a Fast Refresh can pair this engine with other markup for a moment: no sky until they match
   if (
+    !(scene instanceof HTMLElement) ||
     !(canvas instanceof HTMLCanvasElement) ||
     !(drawing instanceof HTMLElement) ||
     !(mate instanceof HTMLCanvasElement) ||
@@ -101,8 +126,20 @@ export function createHero(stage: HTMLElement, reduced: boolean): (() => void) |
     fragment: moonFragment,
     onFrame: (time) => frame(time),
     onResize: (dpr) => measure(dpr),
+    // the labels ride while the sky shows, back in step with the shader's clock
+    onVisible: reduced
+      ? undefined
+      : (ratio) => {
+          for (const r of rides) {
+            if (ratio > 0) r.startTime = origin;
+            else r.pause();
+          }
+        },
   });
   if (!shader) return;
+  /** the shader's clock's start, `performance.now()` time */
+  const origin = performance.now();
+  const rides: Animation[] = [];
   const hero = stage.parentElement!;
   const mateImage = new ImageData(MATE_W, MATE_H);
   // the light follows a mouse, on touch screens it circles on its own
@@ -118,8 +155,8 @@ export function createHero(stage: HTMLElement, reduced: boolean): (() => void) |
   let stride = TICK;
   /** the next move's frame */
   let wake = 0;
-  /** the moon's centre on the page, read once the pointer moves over the hero */
-  let centre: { x: number; y: number } | undefined;
+  /** the moon's centre in the viewport at a scroll, read once the mouse moves over the hero */
+  let centre: { x: number; y: number; scroll: number } | undefined;
   /** px from the moon's centre to the pointer */
   let pointerX = Number.NaN;
   // uniform values written every frame, reused
@@ -140,7 +177,7 @@ export function createHero(stage: HTMLElement, reduced: boolean): (() => void) |
     const style = getComputedStyle(stage);
     const paper = style.getPropertyValue('--lp-paper');
     if (paper === '') return;
-    shader.set('uLit', cssRgb(style.getPropertyValue('--moon-lit')));
+    shader.set('uLit', cssRgb(style.getPropertyValue(isDark() ? '--lp-yellow' : '--lp-sun')));
     shader.set('uPaper', cssRgb(paper));
     shader.set('uInk', cssRgb(style.getPropertyValue('--lp-ink')));
     shader.set('uDark', isDark() ? 1 : 0);
@@ -153,43 +190,102 @@ export function createHero(stage: HTMLElement, reduced: boolean): (() => void) |
 
   /** `dpr`: the canvas's pixels a CSS px */
   const measure = (dpr: number) => {
-    radius = drawing.getBoundingClientRect().width / (2 * REACH);
+    // the sky's box (Chromium reads 0 for its 100cqh where its min-height sets its height): the
+    // moon as large as it fits the drawing, and her over the crown at a px a cell, the least she is
+    // drawn at
+    const width = canvas.clientWidth;
+    const height = canvas.clientHeight;
+    radius = Math.min(width / (2 * REACH), height / SKY, (height - (MATE_H - LEGS)) / CROWN);
+    scene.style.setProperty('--r', `${radius}px`);
     shader.set('uRadius', radius * dpr);
-    cells = { x: Math.floor(canvas.clientWidth / CELL), y: Math.floor(canvas.clientHeight / CELL) };
-    // her cell: an eighth of the moon's width over her 30, in whole device px, a CSS px at least
-    const cell = Math.max(1, Math.round((radius * devicePixelRatio) / CELLS) / devicePixelRatio);
-    drawing.style.setProperty('--cell', `${cell}px`);
+    cells = { x: Math.floor(width / CELL), y: Math.floor(height / CELL) };
+    // her cell: an eighth of the moon's width over her 30, in whole device px, a CSS px at least,
+    // and her canvas no taller than the sky over the moon's crown
+    const room = height - CROWN * radius;
+    const cell = Math.min(
+      Math.round((radius * devicePixelRatio) / CELLS),
+      Math.floor((room * devicePixelRatio) / (MATE_H - LEGS)),
+    );
+    scene.style.setProperty('--cell', `${Math.max(1, cell / devicePixelRatio)}px`);
     // px a tick of the fastest satellite, crossing the moon's face
     const fastest = (ORBIT.a * radius * 2 * Math.PI * TICK) / (ORBIT.period * 1000);
     stride = TICK / Math.max(1, Math.ceil(fastest / CELL));
     centre = undefined;
+    ride();
+  };
+
+  /** each label rides on its prism inside the drawing a move at a time, off while the moon hides
+   * the prism: a turn of composited keyframes on the shader's clock, laid out per size */
+  const ride = () => {
+    const moves = reduced ? 1 : Math.round((ORBIT.period * 1000) / stride);
+    const reach = REACH * radius;
+    for (let i = 0; i < SATELLITES.length; i++) {
+      const s = SATELLITES[i];
+      const above = Math.hypot(...s.size);
+      const frames: Keyframe[] = [];
+      for (let k = 0; k <= moves; k++) {
+        const [x, y, depth] = onRing(s.phase, ((k % moves) * stride) / 1000);
+        frames.push({
+          offset: k / moves,
+          easing: 'step-end',
+          translate: `clamp(${-reach}px, calc(${x * radius}px - 50%), calc(${reach}px - 100%)) calc(${(y - above) * radius}px - 100%)`,
+          opacity: depth < 0 && x * x + y * y < 1 ? 0 : 1,
+        });
+      }
+      rides[i]?.cancel();
+      rides[i] = labels[i].animate(
+        frames,
+        reduced ? { fill: 'forwards' } : { duration: ORBIT.period * 1000, iterations: Infinity },
+      );
+      rides[i].startTime = origin;
+    }
   };
 
   const onPointerMove = (e: PointerEvent) => {
-    if (e.pointerType === 'touch') return;
-    if (!centre) {
+    if (e.pointerType !== 'mouse') return;
+    // read again after a scroll, which sets the moon
+    if (centre?.scroll !== window.scrollY) {
       const rect = drawing.getBoundingClientRect();
       centre = {
-        x: rect.left + rect.width / 2 + window.scrollX,
-        y: rect.bottom - HORIZON * radius + window.scrollY,
+        x: rect.left + rect.width / 2,
+        y: rect.bottom - HORIZON * radius,
+        scroll: window.scrollY,
       };
     }
-    pointerX = e.pageX - centre.x;
+    pointerX = e.clientX - centre.x;
     sunX.set(pointerX / radius);
-    sunY.set((e.pageY - centre.y) / radius);
+    sunY.set((e.clientY - centre.y) / radius);
     shader.invalidate();
   };
-  const onPointerLeave = () => {
+  const onPointerLeave = (e: PointerEvent) => {
+    if (e.pointerType !== 'mouse') return;
     sunX.set(REST.x);
     sunY.set(REST.y);
     pointerX = Number.NaN;
-    centre = undefined;
     shader.invalidate();
   };
   if (!reduced) {
     hero.addEventListener('pointermove', onPointerMove, { passive: true });
     hero.addEventListener('pointerleave', onPointerLeave);
   }
+
+  // the moon sets as its sky leaves under the menu, from the sky's top at the menu's edge to the
+  // horizon there, by when it has sunk the height of her feet: she never sinks behind the horizon
+  const moonset =
+    reduced || !('ViewTimeline' in window)
+      ? undefined
+      : scene.animate(
+          { translate: ['0 0', '0 var(--feet)'] },
+          {
+            timeline: new ViewTimeline({
+              subject: stage,
+              inset: `${getComputedStyle(stage).getPropertyValue('--lp-menu-h')} 0px`,
+            }),
+            rangeStart: 'exit-crossing 0%',
+            rangeEnd: 'exit-crossing 100%',
+            fill: 'both',
+          },
+        );
 
   let readyTimer = 0;
   if (start !== null) {
@@ -250,14 +346,9 @@ export function createHero(stage: HTMLElement, reduced: boolean): (() => void) |
 
     for (let i = 0; i < SATELLITES.length; i++) {
       const s = SATELLITES[i];
-      const angle = s.phase * Math.PI * 2 - (reduced ? 0 : (clock / ORBIT.period) * Math.PI * 2);
-      const ex = ORBIT.a * Math.cos(angle);
-      const ey = ORBIT.b * Math.sin(angle);
-      const x = ex * Math.cos(ORBIT.tilt) - ey * Math.sin(ORBIT.tilt);
-      const y = ex * Math.sin(ORBIT.tilt) + ey * Math.cos(ORBIT.tilt);
-      const depth = Math.sqrt(ORBIT.a * ORBIT.a - ORBIT.b * ORBIT.b) * Math.sin(angle);
+      const [x, y, depth] = onRing(s.phase, reduced ? 0 : clock);
 
-      // it Pops in on its beat
+      // it Pops in on its beat, with its label
       const at = (BEAT_AT.satellites + i) * TICK;
       vec4[0] = x;
       vec4[1] = -y;
@@ -273,16 +364,8 @@ export function createHero(stage: HTMLElement, reduced: boolean): (() => void) |
       vec4[3] = Math.cos(turn);
       shader.set(ROTATION_UNIFORMS[i], vec4);
 
-      // its label rides on the prism inside the drawing, off while the moon hides the prism
-      const label = labels[i];
-      const state =
-        t < at ? 'off' : t < at + POP_MS ? 'pop' : depth < 0 && x * x + y * y < 1 ? 'off' : 'on';
-      if (label.dataset.state !== state) label.dataset.state = state;
-      if (state === 'off') continue;
-      const [w, h, d] = s.size;
-      const reach = REACH * radius;
-      const top = (y + rise - Math.hypot(w, h, d)) * radius;
-      label.style.translate = `clamp(${-reach}px, calc(${x * radius}px - 50%), calc(${reach}px - 100%)) calc(${top}px - 100%)`;
+      const state = t < at ? 'off' : t < at + POP_MS ? 'pop' : 'on';
+      if (labels[i].dataset.state !== state) labels[i].dataset.state = state;
     }
 
     // her: she Pops in on her tick, blinks now and then, looks toward the pointer, her moon steps
@@ -307,6 +390,8 @@ export function createHero(stage: HTMLElement, reduced: boolean): (() => void) |
 
   return () => {
     shader.destroy();
+    moonset?.cancel();
+    for (const r of rides) r.cancel();
     stopTheme();
     clearTimeout(wake);
     clearTimeout(readyTimer);

@@ -22,11 +22,11 @@ export function Start() {
   return (
     <Figure id="start" aria-label="Start" status="awaiting input">
       <Stage>
-        <FigureHeader lead={copy.start.lead} title={copy.start.title} />
+        <FigureHeader title={copy.start.title} />
         <Command command={command} className="w-full" />
         {/* a row of equal buttons, the last on a row of its own when they don't fit */}
         <div className="flex flex-wrap gap-2 *:min-w-max *:flex-1">
-          <Link href="/docs" className={cn(button, 'bg-lp-yellow text-[#121210]')}>
+          <Link href="/docs" className={cn(button, 'bg-lp-yellow text-lp-on-yellow')}>
             Get started
           </Link>
           <Link href="/docs/what-is-fumadocs" className={cn(button, 'bg-lp-paper')}>

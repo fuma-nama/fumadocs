@@ -36,13 +36,9 @@ function Featured({ site }: { site: Required<ShowcaseObject> }) {
         )}
       >
         <TitleBar
-          title={
-            <span className={cn('-mx-2 block px-2 font-sans font-medium', invert)}>
-              {site.name}
-            </span>
-          }
+          title={<span className={cn('-mx-2 block px-2 font-pixel', invert)}>{site.name}</span>}
         />
-        <span className="relative block aspect-[1.91/1] overflow-hidden">
+        <span className="relative block aspect-og overflow-hidden">
           <Image src={site.image} alt="" fill sizes={featuredSizes} className="object-cover" />
         </span>
         {/* what it is, a dotted leader on the baseline, where it lives */}
@@ -66,7 +62,20 @@ function Featured({ site }: { site: Required<ShowcaseObject> }) {
   );
 }
 
-function Vercel() {
+/** Vercel's mark and name, the title of its SDKs on both walls */
+export function VercelTitle({ className }: { className?: string }) {
+  return (
+    <span className={cn('inline-flex items-center gap-1.5', className)}>
+      <svg aria-hidden viewBox="0 0 74 64" className="h-2.5 w-3 fill-current">
+        <path d="M37.59.25 74.54 64.25H.64L37.59.25Z" />
+      </svg>
+      Vercel
+    </span>
+  );
+}
+
+/** a row for the docs of each of Vercel's SDKs: its name, a dotted leader, what it is */
+export function VercelLinks() {
   const rows: ReactNode[] = [];
   for (const item of vercel) {
     rows.push(
@@ -89,20 +98,17 @@ function Vercel() {
       </li>,
     );
   }
+  return rows;
+}
+
+function Vercel() {
   return (
     <li className={cn('col-span-2 flex flex-col border border-lp-line-strong bg-lp-paper', cell)}>
-      <TitleBar
-        title={
-          <span className="inline-flex items-center gap-1.5 font-sans font-medium">
-            <svg aria-hidden viewBox="0 0 74 64" className="h-2.5 w-3 fill-current">
-              <path d="M37.59.25 74.54 64.25H.64L37.59.25Z" />
-            </svg>
-            Vercel
-          </span>
-        }
-      />
+      <TitleBar title={<VercelTitle className="font-pixel" />} />
       <p className="p-3 text-sm leading-normal text-pretty">{copy.vercel}</p>
-      <ul className="flex flex-1 flex-col border-t border-lp-line-strong">{rows}</ul>
+      <ul className="flex flex-1 flex-col border-t border-lp-line-strong">
+        <VercelLinks />
+      </ul>
     </li>
   );
 }
@@ -128,7 +134,7 @@ function Slot() {
         )}
       >
         <span aria-hidden className="h-5" />
-        <span aria-hidden className="aspect-[1.91/1]" />
+        <span aria-hidden className="aspect-og" />
         <span className="absolute inset-2 flex items-center justify-center gap-1.5 border border-dashed border-lp-line-strong px-3 text-center text-sm font-medium group-hover:border-solid group-hover:bg-lp-ink group-hover:text-lp-paper group-focus-visible:bg-lp-ink group-focus-visible:text-lp-paper">
           Suggest yours
           <ArrowUpRight aria-hidden className="size-4" />
