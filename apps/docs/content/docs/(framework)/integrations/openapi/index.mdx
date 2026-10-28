@@ -243,57 +243,17 @@ You can see the full [Tanstack Start example](https://github.com/fuma-nama/fumad
 
 <Tab>
 
-Pass the props of OpenAPI pages to the [`Docs` island](/docs/manual-installation/astro#docs-page), it renders `<OpenAPIPage />` in place of the content:
-
-```tsx title="src/components/docs.tsx"
-// [!code highlight]
-import { DocsBody, DocsDescription, DocsPage, DocsTitle } from 'fumadocs-ui/layouts/docs/page';
-// [!code ++:2]
-import type { OpenAPIPageProps } from 'fumadocs-openapi/ui';
-import { OpenAPIPage } from '@/components/api-page';
-
-export interface DocsProps extends ProviderProps {
-  // ...
-  // [!code ++]
-  openapi?: OpenAPIPageProps;
-}
-
-// [!code highlight]
-export function Docs({ tree, title, description, toc, openapi, children, ...props }: DocsProps) {
-  const data = useFumadocsLoader({ tree });
-
-  return (
-    <Provider {...props}>
-      <DocsLayout {...baseOptions()} tree={data.tree}>
-        {/* [!code ++:8] */}
-        {openapi ? (
-          <DocsPage toc={toc} full>
-            <DocsTitle>{title}</DocsTitle>
-            <DocsBody>
-              <OpenAPIPage {...openapi} />
-            </DocsBody>
-          </DocsPage>
-        ) : (
-          <DocsPage toc={toc}>
-            <DocsTitle>{title}</DocsTitle>
-            <DocsDescription>{description}</DocsDescription>
-            {children}
-          </DocsPage>
-        )}
-      </DocsLayout>
-    </Provider>
-  );
-}
-```
+Render `<OpenAPIPage />` in place of the content, it hydrates as an island of its own and renders the description. Pass `full` to `DocsPage` of the [`Docs` island](/docs/manual-installation/astro#docs-page) for its layout:
 
 ```astro title="src/pages/docs/[...slug].astro"
 ---
+// [!code ++:2]
+import { DocsBody } from 'fumadocs-ui/layouts/docs/page';
+import { OpenAPIPage } from '@/components/api-page';
 // ...
 const { page } = Astro.props;
 // [!code highlight]
 const { Content, toc } = page.type === 'docs' ? await page.data.render() : { toc: page.data.toc };
-// [!code ++]
-const openapi = page.type === 'openapi' ? page.data.getOpenAPIPageProps() : undefined;
 ---
 
 <Layout title={page.data.title} description={page.data.description}>
@@ -304,14 +264,34 @@ const openapi = page.type === 'openapi' ? page.data.getOpenAPIPageProps() : unde
     params={Astro.params}
     tree={pageTree}
     title={page.data.title}
-    description={page.data.description}
+    description={page.type === 'docs' ? page.data.description : undefined}
     toc={toc}
-    openapi={openapi}
+    full={page.type === 'openapi'}
   >
-    <!-- [!code highlight] -->
-    {Content && <Content />}
+    <!-- [!code highlight:9] -->
+    {
+      page.type === 'openapi' ? (
+        <DocsBody>
+          <OpenAPIPage client:load {...page.data.getOpenAPIPageProps()} />
+        </DocsBody>
+      ) : (
+        Content && <Content />
+      )
+    }
   </Docs>
 </Layout>
+```
+
+```tsx title="src/components/docs.tsx"
+export interface DocsProps extends ProviderProps {
+  // ...
+  full?: boolean; // [!code ++]
+}
+
+// [!code word:full]
+export function Docs({ tree, title, description, toc, full, children, ...props }: DocsProps) {
+  // ...
+          <DocsPage toc={toc} full={full}>
 ```
 
 </Tab>

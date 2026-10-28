@@ -136,55 +136,17 @@ export default function Page({ slug }) {
 
 <Tab>
 
-Pass the props of GraphQL pages to the [`Docs` island](/docs/manual-installation/astro#docs-page), it renders `<GraphQLPage />` in place of the content:
-
-```tsx title="src/components/docs.tsx"
-// [!code highlight]
-import { DocsBody, DocsDescription, DocsPage, DocsTitle } from 'fumadocs-ui/layouts/docs/page';
-// [!code ++:2]
-import type { GraphQLPageProps } from '@fumadocs/graphql/ui';
-import { GraphQLPage } from '@/components/api-page';
-
-export interface DocsProps extends ProviderProps {
-  // ...
-  // [!code ++]
-  graphql?: GraphQLPageProps;
-}
-
-// [!code highlight]
-export function Docs({ tree, title, description, toc, graphql, children, ...props }: DocsProps) {
-  const data = useFumadocsLoader({ tree });
-
-  return (
-    <Provider {...props}>
-      <DocsLayout {...baseOptions()} tree={data.tree}>
-        {/* [!code highlight] */}
-        <DocsPage toc={toc} full={graphql !== undefined}>
-          <DocsTitle>{title}</DocsTitle>
-          <DocsDescription>{description}</DocsDescription>
-          {/* [!code ++:7] */}
-          {graphql ? (
-            <DocsBody>
-              <GraphQLPage {...graphql} />
-            </DocsBody>
-          ) : (
-            children
-          )}
-        </DocsPage>
-      </DocsLayout>
-    </Provider>
-  );
-}
-```
+Render `<GraphQLPage />` in place of the content, it hydrates as an island of its own and renders the description. Pass `full` to `DocsPage` of the [`Docs` island](/docs/manual-installation/astro#docs-page) for its layout:
 
 ```astro title="src/pages/docs/[...slug].astro"
 ---
+// [!code ++:2]
+import { DocsBody } from 'fumadocs-ui/layouts/docs/page';
+import { GraphQLPage } from '@/components/api-page';
 // ...
 const { page } = Astro.props;
 // [!code highlight]
 const { Content, toc } = page.type === 'docs' ? await page.data.render() : { toc: page.data.toc };
-// [!code ++]
-const graphql = page.type === 'graphql' ? page.data.getGraphQLPageProps() : undefined;
 ---
 
 <Layout title={page.data.title} description={page.data.description}>
@@ -195,14 +157,34 @@ const graphql = page.type === 'graphql' ? page.data.getGraphQLPageProps() : unde
     params={Astro.params}
     tree={pageTree}
     title={page.data.title}
-    description={page.data.description}
+    description={page.type === 'docs' ? page.data.description : undefined}
     toc={toc}
-    graphql={graphql}
+    full={page.type === 'graphql'}
   >
-    <!-- [!code highlight] -->
-    {Content && <Content />}
+    <!-- [!code highlight:9] -->
+    {
+      page.type === 'graphql' ? (
+        <DocsBody>
+          <GraphQLPage client:load {...page.data.getGraphQLPageProps()} />
+        </DocsBody>
+      ) : (
+        Content && <Content />
+      )
+    }
   </Docs>
 </Layout>
+```
+
+```tsx title="src/components/docs.tsx"
+export interface DocsProps extends ProviderProps {
+  // ...
+  full?: boolean; // [!code ++]
+}
+
+// [!code word:full]
+export function Docs({ tree, title, description, toc, full, children, ...props }: DocsProps) {
+  // ...
+          <DocsPage toc={toc} full={full}>
 ```
 
 </Tab>

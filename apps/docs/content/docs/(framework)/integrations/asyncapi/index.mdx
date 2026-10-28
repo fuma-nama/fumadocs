@@ -243,57 +243,17 @@ You can see the full [AsyncAPI example](https://github.com/fuma-nama/fumadocs/bl
 
 <Tab>
 
-Pass the props of AsyncAPI pages to the [`Docs` island](/docs/manual-installation/astro#docs-page), it renders `<AsyncAPIPage />` in place of the content:
-
-```tsx title="src/components/docs.tsx"
-// [!code highlight]
-import { DocsBody, DocsDescription, DocsPage, DocsTitle } from 'fumadocs-ui/layouts/docs/page';
-// [!code ++:2]
-import type { AsyncAPIPageProps } from '@fumadocs/asyncapi/ui';
-import { AsyncAPIPage } from '@/components/api-page';
-
-export interface DocsProps extends ProviderProps {
-  // ...
-  // [!code ++]
-  asyncapi?: AsyncAPIPageProps;
-}
-
-// [!code highlight]
-export function Docs({ tree, title, description, toc, asyncapi, children, ...props }: DocsProps) {
-  const data = useFumadocsLoader({ tree });
-
-  return (
-    <Provider {...props}>
-      <DocsLayout {...baseOptions()} tree={data.tree}>
-        {/* [!code ++:8] */}
-        {asyncapi ? (
-          <DocsPage toc={toc} full>
-            <DocsTitle>{title}</DocsTitle>
-            <DocsBody>
-              <AsyncAPIPage {...asyncapi} />
-            </DocsBody>
-          </DocsPage>
-        ) : (
-          <DocsPage toc={toc}>
-            <DocsTitle>{title}</DocsTitle>
-            <DocsDescription>{description}</DocsDescription>
-            {children}
-          </DocsPage>
-        )}
-      </DocsLayout>
-    </Provider>
-  );
-}
-```
+Render `<AsyncAPIPage />` in place of the content, it hydrates as an island of its own and renders the description. Pass `full` to `DocsPage` of the [`Docs` island](/docs/manual-installation/astro#docs-page) for its layout:
 
 ```astro title="src/pages/docs/[...slug].astro"
 ---
+// [!code ++:2]
+import { DocsBody } from 'fumadocs-ui/layouts/docs/page';
+import { AsyncAPIPage } from '@/components/api-page';
 // ...
 const { page } = Astro.props;
 // [!code highlight]
 const { Content, toc } = page.type === 'docs' ? await page.data.render() : { toc: page.data.toc };
-// [!code ++]
-const asyncapi = page.type === 'asyncapi' ? page.data.getAsyncAPIPageProps() : undefined;
 ---
 
 <Layout title={page.data.title} description={page.data.description}>
@@ -304,14 +264,34 @@ const asyncapi = page.type === 'asyncapi' ? page.data.getAsyncAPIPageProps() : u
     params={Astro.params}
     tree={pageTree}
     title={page.data.title}
-    description={page.data.description}
+    description={page.type === 'docs' ? page.data.description : undefined}
     toc={toc}
-    asyncapi={asyncapi}
+    full={page.type === 'asyncapi'}
   >
-    <!-- [!code highlight] -->
-    {Content && <Content />}
+    <!-- [!code highlight:9] -->
+    {
+      page.type === 'asyncapi' ? (
+        <DocsBody>
+          <AsyncAPIPage client:load {...page.data.getAsyncAPIPageProps()} />
+        </DocsBody>
+      ) : (
+        Content && <Content />
+      )
+    }
   </Docs>
 </Layout>
+```
+
+```tsx title="src/components/docs.tsx"
+export interface DocsProps extends ProviderProps {
+  // ...
+  full?: boolean; // [!code ++]
+}
+
+// [!code word:full]
+export function Docs({ tree, title, description, toc, full, children, ...props }: DocsProps) {
+  // ...
+          <DocsPage toc={toc} full={full}>
 ```
 
 </Tab>
