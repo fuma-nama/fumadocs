@@ -8,9 +8,6 @@ export const source = loader({
   baseUrl: docsRoute,
 });
 
-// the same for every page, serialize it once
-export const pageTree = await source.serializePageTree(source.getPageTree());
-
 export const docsLlms = llms(source, {
   renderPage: async (page) => `# ${page.data.title} (${page.url})
 

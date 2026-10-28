@@ -226,7 +226,7 @@ Pages of `toFumadocsSource()` have:
 
 ```ts
 // the MDX content, table of contents and structured data (for search)
-const { Content, toc, structuredData } = await page.data.render();
+const { body, toc, structuredData } = await page.data.load();
 
 // structured data only
 await page.data.structuredData();
@@ -234,7 +234,4 @@ await page.data.structuredData();
 // the source file, or the Markdown processed by Fumadocs (requires `includeProcessedMarkdown`)
 await page.data.getText('raw');
 await page.data.getText('processed');
-
-// the entry of Astro content collections
-page.data.entry;
 ```

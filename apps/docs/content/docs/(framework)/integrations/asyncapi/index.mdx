@@ -253,7 +253,7 @@ import { AsyncAPIPage } from '@/components/api-page';
 // ...
 const { page } = Astro.props;
 // [!code highlight]
-const { Content, toc } = page.type === 'docs' ? await page.data.render() : { toc: page.data.toc };
+const { body: Content, toc } = page.type === 'docs' ? await page.data.load() : { body: undefined, toc: [] };
 ---
 
 <Layout title={page.data.title} description={page.data.description}>
