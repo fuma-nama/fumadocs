@@ -53,7 +53,7 @@ Docs pages are MDX files, define their collections with the loaders of Fumadocs:
   ../../examples/astro-min/src/content.config.ts
 </include>
 
-`pageLoader()` loads the MDX files in `content/docs`, `metaLoader()` loads its [meta files](/docs/page-conventions#meta). They apply the schemas of Fumadocs, pass `schema` to a collection to extend them.
+`pageLoader()` loads the MDX files in `content/docs`, `metaLoader()` loads its [meta files](/docs/page-conventions#meta). They apply `pageSchema` and `metaSchema` from `fumadocs-core/source/schema`. A `schema` on the collection replaces them, add fields with `pageSchema.extend({ ... })`.
 
 ### Source
 
