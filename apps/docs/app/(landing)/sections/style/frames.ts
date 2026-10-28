@@ -100,10 +100,10 @@ function pathOf({ tab, layout }: View): string {
 }
 
 /**
- * The screen's one frame, made when the screen comes into view and dropped once it leaves. It shows
- * the view's page once that has rendered in the theme, dithered in over the screen; until then the
- * screen shows the layout's plan. A layout story moves to the next layout in place, through the
- * story's router; anything else loads in full.
+ * The screen's one frame, made when the screen comes into view and dropped once it is a screen away.
+ * It shows the view's page once that has rendered in the theme, dithered in over the screen; until
+ * then the screen shows the layout's plan. A layout story moves to the next layout in place, through
+ * the story's router; anything else loads in full.
  */
 export function createFrames(
   screen: HTMLElement,
@@ -231,10 +231,17 @@ export function createFrames(
   const near = new IntersectionObserver((entries) => {
     visible = entries[entries.length - 1].isIntersecting;
     if (visible && !frame && view) create();
-    else if (!visible && frame) release();
   });
+  // dropped only a screen away, so a reader scrolling about it doesn't load its page again
+  const far = new IntersectionObserver(
+    (entries) => {
+      if (!entries[entries.length - 1].isIntersecting && frame) release();
+    },
+    { rootMargin: '100% 0px' },
+  );
   resize.observe(screen);
   near.observe(screen);
+  far.observe(screen);
   window.addEventListener('message', onMessage);
   // shadcn borrows this page's palette, so it inks again with the page's theme
   const stopTheme = onTheme(() => {
@@ -253,6 +260,7 @@ export function createFrames(
       release();
       resize.disconnect();
       near.disconnect();
+      far.disconnect();
       window.removeEventListener('message', onMessage);
       stopTheme();
     },
