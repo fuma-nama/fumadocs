@@ -2,7 +2,6 @@ import type { ComponentType, ReactNode } from 'react';
 import type { Expression, Program } from 'estree-jsx';
 import type { Nodes } from 'hast';
 import { type Evaluator, toJsx } from 'fumadocs-core/utils/hast-to-jsx';
-import components from 'virtual:fumadocs/mdx-components';
 import type { IslandNode } from './shared';
 
 export interface FumadocsIslandProps {
@@ -15,16 +14,16 @@ export interface FumadocsIslandProps {
 }
 
 /**
- * The MDX body of a page, created by the Fumadocs integration.
+ * Create the island rendering the MDX body of pages, with the MDX components of a collection.
  */
-export function FumadocsIsland({ tree, props, ...slots }: FumadocsIslandProps) {
+export function createIsland(components: Record<string, unknown>) {
   const evaluator: Evaluator = {
     evaluateExpression(expression) {
       if (expression.type === 'Literal') return expression.value;
       if (expression.type === 'Identifier') {
         if (!(expression.name in components))
           throw new Error(
-            `Component "${expression.name}" is not in the MDX components of Fumadocs, add it to the \`components\` module of the integration.`,
+            `Component "${expression.name}" is not in the MDX components of Fumadocs, add it to the \`components\` module of the collection.`,
           );
         return components[expression.name];
       }
@@ -45,16 +44,18 @@ export function FumadocsIsland({ tree, props, ...slots }: FumadocsIslandProps) {
       throw new Error('ESM is not supported in island');
     },
   };
-
-  const nodes: IslandNode[] = JSON.parse(tree, (_, value) =>
-    typeof value?.$slot === 'string' ? slots[value.$slot] : value,
-  );
-  const children: unknown[] = [];
-  for (const node of nodes) children.push(decode(node));
-  const content = toJsx({ type: 'root', children } as Nodes, { components, evaluator });
   // like MDX, `wrapper` is the layout of content
   const Wrapper = components.wrapper as ComponentType<{ children: ReactNode }> | undefined;
-  return Wrapper ? <Wrapper {...props}>{content}</Wrapper> : content;
+
+  return function FumadocsIsland({ tree, props, ...slots }: FumadocsIslandProps) {
+    const nodes: IslandNode[] = JSON.parse(tree, (_, value) =>
+      typeof value?.$slot === 'string' ? slots[value.$slot] : value,
+    );
+    const children: unknown[] = [];
+    for (const node of nodes) children.push(decode(node));
+    const content = toJsx({ type: 'root', children } as Nodes, { components, evaluator });
+    return Wrapper ? <Wrapper {...props}>{content}</Wrapper> : content;
+  };
 }
 
 /** the estree of a value, evaluated by the evaluator */

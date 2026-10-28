@@ -10,5 +10,5 @@ packages:
 - MDX content renders as one React island, Fumadocs UI components work in full.
 - The `wrapper` component receives the props of `<Content />`, for providers like i18n.
 - Islands with `transition:persist` keep their state on navigation, the content of the new page moves into them.
-- Content collection loaders, reading the content directory from the integration, and `toFumadocsSource()` for the source of Fumadocs.
+- The `collections` option defines the content directories of Fumadocs, each with its own MDX components. `pageLoader()` and `metaLoader()` load them by name into Astro content collections, and `toFumadocsSource()` creates the source of Fumadocs.
 - The Astro template uses `@fumadocs/astro`.

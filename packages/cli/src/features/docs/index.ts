@@ -233,7 +233,7 @@ async function configureCollections(ctx: FeatureContext) {
   const content = await fs.readFile(path.join(ctx.project.cwd, file), 'utf-8').catch(() => null);
   if (content === null) {
     await ctx.write(file, astroContentConfig);
-  } else if (!content.includes('docsLoader(')) {
+  } else if (!content.includes('pageLoader(')) {
     ctx.note(
       `A content config already exists at ${file}, add the collections of docs to it:\n${astroContentConfig}`,
     );

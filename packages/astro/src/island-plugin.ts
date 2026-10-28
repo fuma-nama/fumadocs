@@ -18,7 +18,7 @@ type JsxElement = MdxJsxFlowElementHast | MdxJsxTextElementHast;
  *
  * The tree is serialized as {@link import('./shared').IslandNode}, evaluated by the MDX module.
  *
- * @param module - specifier of the island module (`island.tsx`)
+ * @param module - the module exporting `FumadocsIsland` of the collection
  */
 export function islandPlugin(module: string): HastPluginDefinition {
   // names declared by the ESM of document, rendered by Astro
@@ -185,7 +185,8 @@ function htmlProperties(element: JsxElement): Element['properties'] | undefined 
 
 function isStatic(node: HastNode): boolean {
   if (node.type === 'text') return true;
-  if (node.type !== 'element') return false;
+  // elements named like components, e.g. the popups of Twoslash
+  if (node.type !== 'element' || /^[A-Z]/.test(node.tagName)) return false;
   for (const child of node.children) if (!isStatic(child)) return false;
   return true;
 }

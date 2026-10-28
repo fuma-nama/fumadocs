@@ -23,16 +23,16 @@ export interface FumadocsOptions extends Pick<
   | 'rehypeKatexOptions'
 > {
   /**
-   * Content directory, relative to the project root. Fumadocs only processes the MDX files in it, `docsLoader()` and `metaLoader()` load from it.
-   *
-   * @defaultValue 'content/docs'
-   */
-  dir?: string;
-
-  /**
    * Module whose default export is the MDX components, like `./src/components/mdx.tsx`.
    */
   components: string;
+
+  /**
+   * The content collections of Fumadocs, `pageLoader()` and `metaLoader()` load them by name.
+   *
+   * @defaultValue `{ docs: { dir: 'content/docs' } }`
+   */
+  collections?: Record<string, CollectionOptions>;
 
   /**
    * Enable `getText('processed')` on pages.
@@ -40,6 +40,18 @@ export interface FumadocsOptions extends Pick<
    * @defaultValue false
    */
   includeProcessedMarkdown?: boolean;
+}
+
+export interface CollectionOptions {
+  /**
+   * Content directory, relative to the project root. Fumadocs only processes the MDX files in it.
+   */
+  dir: string;
+
+  /**
+   * Module whose default export is the MDX components, defaults to the `components` of the integration.
+   */
+  components?: string;
 }
 
 /** code blocks are renamed in mdast, so the syntax highlighter of Astro skips them */
@@ -85,8 +97,8 @@ const exportData: HastPluginDefinition = {
  * It adds the React and MDX integrations of Astro, unless they are already configured.
  */
 export default function fumadocs({
-  dir = 'content/docs',
   components,
+  collections = { docs: { dir: 'content/docs' } },
   includeProcessedMarkdown = false,
   ...options
 }: FumadocsOptions): AstroIntegration {
@@ -107,7 +119,25 @@ export default function fumadocs({
         if (!names.has('@astrojs/mdx')) integrations.push(mdx());
 
         const root = fileURLToPath(config.root);
-        const contentDir = path.resolve(root, dir);
+        const islandFile = internalModule('island');
+        const modules: Record<string, string> = {
+          'virtual:fumadocs/config': `export const collections = ${JSON.stringify(collections)};`,
+        };
+        const resolved: { dir: string; island: string }[] = [];
+        for (const [name, collection] of Object.entries(collections)) {
+          const id = `virtual:fumadocs/island/${name}`;
+          // resolved from the project rather than this package
+          const specifier = collection.components ?? components;
+          modules[id] = `import components from ${JSON.stringify(
+            specifier.startsWith('.')
+              ? path.resolve(root, specifier).replaceAll(path.sep, '/')
+              : specifier,
+          )};
+import { createIsland } from ${JSON.stringify(islandFile)};
+export const FumadocsIsland = createIsland(components);`;
+          resolved.push({ dir: path.resolve(root, collection.dir), island: id });
+        }
+
         const satteri = processor.options as SatteriResolvedOptions;
         const preset = await applySatteriPreset({
           ...options,
@@ -121,30 +151,35 @@ export default function fumadocs({
         })('bundler');
 
         // the Markdown pipeline of Astro renders `.md` into HTML, which can't have components
-        const isContent = ({ fileURL, sourceFormat }: PluginFactoryContext): boolean => {
-          if (!fileURL || sourceFormat !== 'mdx') return false;
-          const relative = path.relative(contentDir, fileURLToPath(fileURL));
-          return !relative.startsWith('..') && !path.isAbsolute(relative);
+        const collectionOf = ({ fileURL, sourceFormat }: PluginFactoryContext) => {
+          if (!fileURL || sourceFormat !== 'mdx') return;
+          const file = fileURLToPath(fileURL);
+          return resolved.find(({ dir }) => {
+            const relative = path.relative(dir, file);
+            return !relative.startsWith('..') && !path.isAbsolute(relative);
+          });
         };
 
         satteri.mdastPlugins.push(
           (ctx) =>
-            isContent(ctx) && [
+            collectionOf(ctx) !== undefined && [
               remarkInclude({ cwd: root }),
               ...preset.mdastPlugins!,
               includeProcessedMarkdown && remarkLlms({ as: '' }),
               hideCode,
             ],
         );
-        satteri.hastPlugins.push(
-          (ctx) =>
-            isContent(ctx) && [
+        satteri.hastPlugins.push((ctx) => {
+          const collection = collectionOf(ctx);
+          return (
+            collection !== undefined && [
               restoreCode,
               ...preset.hastPlugins!,
               exportData,
-              islandPlugin(internalModule('island')),
-            ],
-        );
+              islandPlugin(collection.island),
+            ]
+          );
+        });
 
         // on every page, as persisted islands can move to pages without content
         injectScript(
@@ -155,17 +190,7 @@ document.addEventListener('astro:before-swap', onBeforeSwap);`,
         updateConfig({
           integrations,
           vite: {
-            plugins: [
-              virtualPlugin({
-                // resolved from the project rather than this package
-                'virtual:fumadocs/mdx-components': `export { default } from ${JSON.stringify(
-                  components.startsWith('.')
-                    ? path.resolve(root, components).replaceAll(path.sep, '/')
-                    : components,
-                )};`,
-                'virtual:fumadocs/config': `export const dir = ${JSON.stringify(dir)};`,
-              }),
-            ],
+            plugins: [virtualPlugin(modules)],
             optimizeDeps: { exclude: ['@fumadocs/astro'] },
             ssr: { noExternal: ['@fumadocs/astro'] },
           },
@@ -180,16 +205,19 @@ function internalModule(name: string): string {
   return fileURLToPath(new URL(`./${name}.js`, import.meta.url)).replaceAll(path.sep, '/');
 }
 
+/** the islands are hydrated by their IDs, Astro doesn't support the `\0` prefix of virtual modules there */
 function virtualPlugin(modules: Record<string, string>) {
+  const filter = { id: /^virtual:fumadocs\// };
+
   return {
     name: '@fumadocs/astro:virtual',
     resolveId: {
-      filter: { id: /^virtual:fumadocs\// },
-      handler: (id: string) => (id in modules ? `\0${id}` : undefined),
+      filter,
+      handler: (id: string) => (id in modules ? id : undefined),
     },
     load: {
-      filter: { id: /^\0virtual:fumadocs\// },
-      handler: (id: string) => modules[id.slice(1)],
+      filter,
+      handler: (id: string) => modules[id],
     },
   };
 }

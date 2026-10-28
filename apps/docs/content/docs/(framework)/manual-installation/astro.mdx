@@ -23,15 +23,12 @@ Add the Fumadocs integration, it adds the React and MDX integrations for you:
   ../../examples/astro-min/astro.config.mjs
 </include>
 
-Configure JSX for React, the code in this guide also imports `src/*` from `@/*`:
+The code in this guide imports `src/*` from `@/*`, add the alias to your `tsconfig.json`:
 
 ```json title="tsconfig.json"
 {
-  "extends": "astro/tsconfigs/strict",
   "compilerOptions": {
-    // [!code ++:5]
-    "jsx": "react-jsx",
-    "jsxImportSource": "react",
+    // [!code ++:3]
     "paths": {
       "@/*": ["./src/*"]
     }
@@ -61,7 +58,7 @@ Define the collections of docs, and create a Fumadocs source from them:
   ../../examples/astro-min/src/lib/source.ts
 </include>
 
-`docsLoader()` loads the MDX files in `content/docs`, and `metaLoader()` loads its [meta files](/docs/page-conventions#meta).
+`pageLoader()` loads the MDX files in `content/docs`, and `metaLoader()` loads its [meta files](/docs/page-conventions#meta). See [Collections](#collections) for other directories.
 
 Create the MDX components of docs, `wrapper` gives the content its prose styles:
 
@@ -151,20 +148,57 @@ Astro renders the parts React can't, inside the island:
 fumadocs({
   // module whose default export is the MDX components
   components: './src/components/mdx.tsx',
-  // content directory, relative to the project root (default: 'content/docs')
-  dir: 'content/docs',
-  // enable `getText('processed')` on pages (default: false)
+  // content directories, relative to the project root
+  collections: {
+    docs: { dir: 'content/docs' },
+  },
+  // enable `getText('processed')` on pages
   includeProcessedMarkdown: false,
 });
 ```
 
-Fumadocs only processes the MDX files in `dir`, other Markdown of your project is left to Astro.
+Options other than `components` are optional, the values above are their defaults. The integration adds `@astrojs/react` and `@astrojs/mdx` with their default options, add them to `integrations` yourself to configure them.
 
-The integration adds `@astrojs/react` and `@astrojs/mdx` with their default options, add them to `integrations` yourself to configure them.
+### Collections
+
+Fumadocs only processes the MDX files of its collections, other Markdown of your project is left to Astro.
+
+Add a collection for each content directory, like a blog with its own MDX components:
+
+```js title="astro.config.mjs"
+fumadocs({
+  components: './src/components/mdx.tsx',
+  collections: {
+    docs: { dir: 'content/docs' },
+    // [!code ++]
+    blog: { dir: 'content/blog', components: './src/components/blog-mdx.tsx' },
+  },
+});
+```
+
+Load it by name, `pageLoader()` and `metaLoader()` load `docs` by default:
+
+```ts title="src/content.config.ts"
+export const collections = {
+  docs: defineCollection({ loader: pageLoader(), schema: pageSchema }),
+  meta: defineCollection({ loader: metaLoader(), schema: metaSchema }),
+  // [!code ++]
+  blog: defineCollection({ loader: pageLoader('blog'), schema: pageSchema }),
+};
+```
+
+And create a source from it, meta files are optional:
+
+```ts title="src/lib/source.ts"
+export const blog = loader({
+  source: toFumadocsSource(await getCollection('blog')),
+  baseUrl: '/blog',
+});
+```
 
 ### Plugins
 
-Add Sätteri plugins to docs with `mdastPlugins` and `hastPlugins`, as an array or a function receiving the default plugins. For example, to render `mermaid` code blocks with the [`Mermaid` component](/docs/markdown/mermaid) of your MDX components:
+Add Sätteri plugins with `mdastPlugins` and `hastPlugins`, as an array or a function receiving the default plugins. For example, to render `mermaid` code blocks with the [`Mermaid` component](/docs/markdown/mermaid) of your MDX components:
 
 ```npm
 npm i @fumadocs/satteri
@@ -178,11 +212,11 @@ fumadocs({
 });
 ```
 
-They only run on docs, while plugins of the `satteri()` processor of Astro apply to every Markdown file.
+They only run on the collections of Fumadocs, while plugins of the `satteri()` processor of Astro apply to every Markdown file.
 
 The built-in plugins take the same options as [Fumadocs MDX](/docs/mdx/mdx#customize-built-in-plugins): `remarkHeadingOptions`, `remarkCodeTabOptions`, `remarkNpmOptions`, `remarkStructureOptions`, `rehypeCodeOptions` and `rehypeKatexOptions`.
 
-Fumadocs highlights the code blocks of docs, configure it with `rehypeCodeOptions`. The `markdown.shikiConfig` of Astro only applies to other Markdown.
+Fumadocs highlights the code blocks of its collections, configure it with `rehypeCodeOptions`. The `markdown.shikiConfig` of Astro only applies to other Markdown.
 
 ```js title="astro.config.mjs"
 fumadocs({
