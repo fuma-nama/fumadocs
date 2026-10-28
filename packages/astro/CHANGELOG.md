@@ -1,8 +1,4 @@
----
-packages:
-  '@fumadocs/astro': patch
-  'create-fumadocs-app': patch
----
+## @fumadocs/astro@0.1.1
 
 ### Official Astro support
 
