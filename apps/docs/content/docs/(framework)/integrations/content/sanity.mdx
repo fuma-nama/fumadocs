@@ -149,6 +149,8 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
 
 ```tsx tab="React Router" title="app/routes/docs.tsx"
 import type { Route } from './+types/docs';
+import { useFumadocsLoader } from 'fumadocs-core/source/client';
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
 import { DocsBody, DocsDescription, DocsPage, DocsTitle } from 'fumadocs-ui/layouts/docs/page';
 import { renderToc } from '@fumadocs/sanity/client';
 import { getSource } from '@/lib/source';
@@ -160,20 +162,28 @@ export async function loader({ params }: Route.LoaderArgs) {
   if (!page) throw new Response('Not found', { status: 404 });
 
   const { title, description, _toc, body } = await page.data.load();
-  return { title, description, toc: _toc, body };
+  return {
+    title,
+    description,
+    toc: _toc,
+    body,
+    pageTree: await source.serializePageTree(source.getPageTree()),
+  };
 }
 
 export default function Page({ loaderData }: Route.ComponentProps) {
-  const { title, description, toc, body } = loaderData;
+  const { title, description, toc, body, pageTree } = useFumadocsLoader(loaderData);
 
   return (
-    <DocsPage toc={renderToc({ toc, render: (block) => <CustomPortableText value={block} /> })}>
-      <DocsTitle>{title}</DocsTitle>
-      <DocsDescription>{description}</DocsDescription>
-      <DocsBody>
-        <CustomPortableText value={body!} />
-      </DocsBody>
-    </DocsPage>
+    <DocsLayout tree={pageTree}>
+      <DocsPage toc={renderToc({ toc, render: (block) => <CustomPortableText value={block} /> })}>
+        <DocsTitle>{title}</DocsTitle>
+        <DocsDescription>{description}</DocsDescription>
+        <DocsBody>
+          <CustomPortableText value={body!} />
+        </DocsBody>
+      </DocsPage>
+    </DocsLayout>
   );
 }
 ```
@@ -181,10 +191,21 @@ export default function Page({ loaderData }: Route.ComponentProps) {
 ```tsx tab="Tanstack Start" title="src/routes/docs/$.tsx"
 import { createFileRoute, notFound } from '@tanstack/react-router';
 import { createServerFn } from '@tanstack/react-start';
+import { useFumadocsLoader } from 'fumadocs-core/source/client';
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
 import { DocsBody, DocsDescription, DocsPage, DocsTitle } from 'fumadocs-ui/layouts/docs/page';
 import { renderToc } from '@fumadocs/sanity/client';
 import { getSource } from '@/lib/source';
 import { CustomPortableText } from '@/components/sanity';
+import type { PortableTextBlock } from '@portabletext/react';
+
+// the type-level check of server function results can't verify Portable Text,
+// register it as serializable (install `@tanstack/router-core` if it isn't resolvable)
+declare module '@tanstack/router-core' {
+  interface SerializableExtensions {
+    portableTextBlock: PortableTextBlock;
+  }
+}
 
 export const Route = createFileRoute('/docs/$')({
   component: Page,
@@ -201,20 +222,28 @@ const serverLoader = createServerFn({
     if (!page) throw notFound();
 
     const { title, description, _toc, body } = await page.data.load();
-    return { title, description, toc: _toc, body };
+    return {
+      title,
+      description,
+      toc: _toc,
+      body,
+      pageTree: await source.serializePageTree(source.getPageTree()),
+    };
   });
 
 function Page() {
-  const { title, description, toc, body } = Route.useLoaderData();
+  const { title, description, toc, body, pageTree } = useFumadocsLoader(Route.useLoaderData());
 
   return (
-    <DocsPage toc={renderToc({ toc, render: (block) => <CustomPortableText value={block} /> })}>
-      <DocsTitle>{title}</DocsTitle>
-      <DocsDescription>{description}</DocsDescription>
-      <DocsBody>
-        <CustomPortableText value={body!} />
-      </DocsBody>
-    </DocsPage>
+    <DocsLayout tree={pageTree}>
+      <DocsPage toc={renderToc({ toc, render: (block) => <CustomPortableText value={block} /> })}>
+        <DocsTitle>{title}</DocsTitle>
+        <DocsDescription>{description}</DocsDescription>
+        <DocsBody>
+          <CustomPortableText value={body!} />
+        </DocsBody>
+      </DocsPage>
+    </DocsLayout>
   );
 }
 ```

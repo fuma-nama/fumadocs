@@ -292,10 +292,20 @@ export default function Page({ loaderData }: Route.ComponentProps) {
 
 ```tsx tab="Tanstack Start" title="src/routes/docs/$.tsx"
 import { docs, source } from '@/lib/source'; // [!code --]
-// [!code ++:3]
+// [!code ++:4]
 import { docs } from '@/lib/collections';
 import { source } from '@/lib/source';
 import { GraphQLPage } from '@/components/api-page';
+import type { OperationExample } from '@fumadocs/graphql';
+
+// [!code ++:7]
+// the type-level check of server function results can't verify the examples of operations,
+// register them as serializable (install `@tanstack/router-core` if it isn't resolvable)
+declare module '@tanstack/router-core' {
+  interface SerializableExtensions {
+    graphqlExample: OperationExample;
+  }
+}
 
 export const Route = createFileRoute('/docs/$')({
   component: Page,

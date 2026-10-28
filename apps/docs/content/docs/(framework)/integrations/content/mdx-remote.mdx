@@ -48,11 +48,12 @@ export const compiler = createCompiler({
 });
 ```
 
-Compile the content of your pages, `getPage()` is from your content source:
+Compile the content of your pages, `@/lib/source` stands for your content source:
 
 ```tsx tab="Next.js" title="app/docs/[[...slug]]/page.tsx"
 import { DocsBody, DocsPage } from 'fumadocs-ui/layouts/docs/page';
 import { compiler } from '@/lib/compiler';
+import { getPage } from '@/lib/source';
 import { getMDXComponents } from '@/components/mdx';
 
 export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
@@ -76,25 +77,35 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
 import type { Route } from './+types/docs';
 import { useMemo } from 'react';
 import { executeMdxSync } from '@fumadocs/mdx-remote/client';
+import { useFumadocsLoader } from 'fumadocs-core/source/client';
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
 import { DocsBody, DocsPage } from 'fumadocs-ui/layouts/docs/page';
 import { compiler } from '@/lib/compiler';
+import { getPage, source } from '@/lib/source';
 import { getMDXComponents } from '@/components/mdx';
 
 export async function loader({ params }: Route.LoaderArgs) {
   const page = getPage(params['*'].split('/').filter((v) => v.length > 0));
-  // compile to JavaScript, it runs on the client
-  return { compiled: String(await compiler.compileFile(page.content)) };
+
+  return {
+    // compile to JavaScript, it runs on the client
+    compiled: String(await compiler.compileFile(page.content)),
+    pageTree: await source.serializePageTree(source.getPageTree()),
+  };
 }
 
-export default function Page({ loaderData: { compiled } }: Route.ComponentProps) {
+export default function Page({ loaderData }: Route.ComponentProps) {
+  const { compiled, pageTree } = useFumadocsLoader(loaderData);
   const { default: MdxContent, toc } = useMemo(() => executeMdxSync(compiled), [compiled]);
 
   return (
-    <DocsPage toc={toc}>
-      <DocsBody>
-        <MdxContent components={getMDXComponents()} />
-      </DocsBody>
-    </DocsPage>
+    <DocsLayout tree={pageTree}>
+      <DocsPage toc={toc}>
+        <DocsBody>
+          <MdxContent components={getMDXComponents()} />
+        </DocsBody>
+      </DocsPage>
+    </DocsLayout>
   );
 }
 ```
@@ -104,8 +115,11 @@ import { createFileRoute } from '@tanstack/react-router';
 import { createServerFn } from '@tanstack/react-start';
 import { useMemo } from 'react';
 import { executeMdxSync } from '@fumadocs/mdx-remote/client';
+import { useFumadocsLoader } from 'fumadocs-core/source/client';
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
 import { DocsBody, DocsPage } from 'fumadocs-ui/layouts/docs/page';
 import { compiler } from '@/lib/compiler';
+import { getPage, source } from '@/lib/source';
 import { getMDXComponents } from '@/components/mdx';
 
 export const Route = createFileRoute('/docs/$')({
@@ -119,20 +133,26 @@ const serverLoader = createServerFn({
   .validator((slugs: string[]) => slugs)
   .handler(async ({ data: slugs }) => {
     const page = getPage(slugs);
-    // compile to JavaScript, it runs on the client
-    return { compiled: String(await compiler.compileFile(page.content)) };
+
+    return {
+      // compile to JavaScript, it runs on the client
+      compiled: String(await compiler.compileFile(page.content)),
+      pageTree: await source.serializePageTree(source.getPageTree()),
+    };
   });
 
 function Page() {
-  const { compiled } = Route.useLoaderData();
+  const { compiled, pageTree } = useFumadocsLoader(Route.useLoaderData());
   const { default: MdxContent, toc } = useMemo(() => executeMdxSync(compiled), [compiled]);
 
   return (
-    <DocsPage toc={toc}>
-      <DocsBody>
-        <MdxContent components={getMDXComponents()} />
-      </DocsBody>
-    </DocsPage>
+    <DocsLayout tree={pageTree}>
+      <DocsPage toc={toc}>
+        <DocsBody>
+          <MdxContent components={getMDXComponents()} />
+        </DocsBody>
+      </DocsPage>
+    </DocsLayout>
   );
 }
 ```
@@ -141,6 +161,7 @@ function Page() {
 import type { PageProps } from 'waku/router';
 import { DocsBody, DocsPage } from 'fumadocs-ui/layouts/docs/page';
 import { compiler } from '@/lib/compiler';
+import { getPage } from '@/lib/source';
 import { getMDXComponents } from '@/components/mdx';
 
 export default async function Page({ slugs }: PageProps<'/docs/[...slugs]'>) {
