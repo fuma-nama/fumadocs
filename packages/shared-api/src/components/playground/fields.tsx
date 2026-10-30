@@ -787,7 +787,7 @@ function CellAutocomplete({
       </Autocomplete.InputGroup>
       <Autocomplete.Portal>
         <Autocomplete.Positioner align="start" sideOffset={4} className="z-50">
-          <Autocomplete.Popup className="max-h-[min(var(--available-height),20rem)] min-w-[calc(var(--anchor-width)+--spacing(2))] overflow-y-auto rounded-lg border bg-fd-popover p-1 text-fd-popover-foreground shadow-md empty:hidden">
+          <Autocomplete.Popup className="max-h-[min(var(--available-height),20rem)] min-w-[calc(var(--anchor-width)+--spacing(2))] overflow-y-auto rounded-lg border bg-fd-popover p-1 text-fd-popover-foreground shadow-md data-empty:hidden">
             <Autocomplete.List>
               {(item: Suggestion) => (
                 <Autocomplete.Item
