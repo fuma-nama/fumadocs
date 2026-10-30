@@ -443,7 +443,7 @@ test('OAuth handler sends users back to the page that started the flow', () => {
   const request = (page?: string) =>
     handler(
       new Request('https://docs.example.com/api/oauth?code=abc&state=xyz', {
-        headers: page ? { cookie: `fumadocs-openapi-oauth=${encodeURIComponent(page)}` } : {},
+        headers: page ? { cookie: `__Host-fumadocs-openapi-oauth=${encodeURIComponent(page)}` } : {},
       }),
     );
 

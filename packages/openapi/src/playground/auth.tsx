@@ -54,9 +54,9 @@ const pendingFlowKey = 'fumadocs-openapi-flow';
 
 function leavePage(url: string | URL, flow: PendingFlow, redirectUrl?: string) {
   sessionStorage.setItem(pendingFlowKey, JSON.stringify(flow));
-  // where `createOAuthHandler()` sends users back to
+  // where `createOAuthHandler()` sends users back to, `__Host-` keeps other subdomains from setting it
   if (redirectUrl)
-    document.cookie = `fumadocs-openapi-oauth=${encodeURIComponent(window.location.pathname)}; path=/`;
+    document.cookie = `__Host-fumadocs-openapi-oauth=${encodeURIComponent(window.location.pathname)}; path=/; secure`;
   window.location.replace(url);
 }
 

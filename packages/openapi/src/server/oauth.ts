@@ -3,7 +3,7 @@
  */
 export function createOAuthHandler(): (req: Request) => Response {
   return (req) => {
-    const page = /(?:^|;\s*)fumadocs-openapi-oauth=([^;]+)/.exec(req.headers.get('cookie') ?? '');
+    const page = /(?:^|;\s*)__Host-fumadocs-openapi-oauth=([^;]+)/.exec(req.headers.get('cookie') ?? '');
     // only allow paths of the same origin
     const target = page && URL.parse(decodeURIComponent(page[1]), 'http://localhost');
     if (!target || target.origin !== 'http://localhost') return new Response(null, { status: 400 });
