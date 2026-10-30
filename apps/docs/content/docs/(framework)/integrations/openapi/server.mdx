@@ -366,3 +366,9 @@ export const OpenAPIPage = createOpenAPIPage({
   oauthRedirectUrl: '/api/oauth', // [!code ++]
 });
 ```
+
+<Callout title="Content Security Policy">
+
+The handler sends users back with a script served from its own route. If a Content Security Policy covers the route, it must allow `'self'` scripts. Policies with `'strict-dynamic'` ignore `'self'`, leave the route out of them instead.
+
+</Callout>
