@@ -1,5 +1,5 @@
 'use client';
-import { Fragment, type ReactNode, useState } from 'react';
+import { Fragment, lazy, type ReactNode, Suspense, useState } from 'react';
 import { Dialog } from '@base-ui/react/dialog';
 import type { MediaTypeObject, SecuritySchemeObject } from '@/types';
 import { RequestTabs, UsageTabs } from '@/ui/operation/usage-tabs';
@@ -24,10 +24,11 @@ import { Markdown } from '../components/markdown';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { ChevronRight, Plus, X } from 'lucide-react';
 import { CopyTypeScript } from 'shared-api/components/copy-typescript';
-import PlaygroundClient from '@/ui/playground/client';
 import { EndpointBar } from '@/ui/components/endpoint';
 import { Segmented, SegmentedList, SegmentedPanel } from 'shared-api/components/segmented';
 import { DialogPopup } from 'shared-api/components/dialog';
+
+const PlaygroundClient = lazy(() => import('@/ui/playground/client'));
 
 export interface OperationProps extends PageOperationProps {
   headingLevel?: number;
@@ -228,17 +229,16 @@ function OperationContent({
 
   if (type === 'operation') {
     const playground = ctx.playground;
-    let apiPlayground: ReactNode;
+    const endpoint = <EndpointBar method={method} route={path} deprecated={operation.deprecated} />;
+    let apiPlayground: ReactNode = endpoint;
     if (playground?.enabled ?? true) {
       const { enabled: _, render, ...options } = playground ?? {};
       apiPlayground = render ? (
         render({ path, method, operation, pathItem })
       ) : (
-        <PlaygroundClient {...options} />
-      );
-    } else {
-      apiPlayground = (
-        <EndpointBar method={method} route={path} deprecated={operation.deprecated} />
+        <Suspense fallback={endpoint}>
+          <PlaygroundClient {...options} />
+        </Suspense>
       );
     }
 

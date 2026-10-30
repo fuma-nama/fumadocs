@@ -24,8 +24,8 @@ interface ServerContextType {
    * The URL of `pathname` on the selected server, with the server variables resolved.
    *
    * Relative server URLs are resolved against the page origin, which also serves the request when
-   * no server is selected. On the server and during hydration the origin is unknown, so
-   * `https://example.com` takes its place.
+   * no server is selected or its URL is invalid. On the server and during hydration the origin is
+   * unknown, so `https://example.com` takes its place.
    */
   resolveUrl: (pathname?: string) => string;
   setServer: (value: string) => void;
@@ -75,9 +75,10 @@ export function ServerProvider({
   );
   const resolveUrl = useCallback(
     (pathname = '') => {
-      const base = new URL(
-        server ? resolveServerUrl(server.url, server.variables) : '/',
-        isClient ? window.location.origin : 'https://example.com',
+      const origin = isClient ? window.location.origin : 'https://example.com';
+      const base = (
+        (server && URL.parse(resolveServerUrl(server.url, server.variables), origin)) ||
+        new URL(origin)
       ).href;
 
       return pathname ? joinURL(base, pathname) : base;

@@ -1,9 +1,7 @@
 'use client';
-import { useOpenAPI } from '@/utils/create-page';
+import { type OpenAPIRuntime, useOpenAPI } from '@/utils/create-page';
 import { useServer } from '@/utils/use-server';
-import { useQuery } from 'shared-api/utils/use-query';
 import {
-  createContext,
   type FC,
   type ReactNode,
   use,
@@ -13,7 +11,7 @@ import {
   useState,
   useSyncExternalStore,
 } from 'react';
-import { type DataEngine, type FieldKey, type Stf, useListener, useStf } from '@fumari/stf';
+import { DataEngine, type FieldKey, type Stf, useListener } from '@fumari/stf';
 import { arrayStartsWith, objectGet } from '@fumari/stf/lib/utils';
 import type { JsonSchema } from '@fumadocs/json-schema';
 import type { OAuthFlows, OperationObject, SecuritySchemeObject } from '@/types';
@@ -55,8 +53,7 @@ const pendingFlowKey = 'fumadocs-openapi-flow';
 function leavePage(url: string | URL, flow: PendingFlow, redirectUrl?: string) {
   sessionStorage.setItem(pendingFlowKey, JSON.stringify(flow));
   // where `createOAuthHandler()` sends users back to
-  if (redirectUrl)
-    document.cookie = `fumadocs-openapi-oauth=${encodeURIComponent(window.location.pathname)}; path=/`;
+  if (redirectUrl) sessionStorage.setItem('fumadocs-openapi-oauth', window.location.pathname);
   window.location.replace(url);
 }
 
@@ -448,13 +445,7 @@ function endReturnedFlow(flow: ReturnedFlow): boolean {
 /** returned OAuth flows the page is finishing */
 const finishing = new WeakSet<ReturnedFlow>();
 
-interface PlaygroundAuthState {
-  /** the values of security schemes, shared by the playgrounds of page */
-  stf: Stf;
-  /** the flow that returned to the page, until it is handled */
-  returned?: ReturnedFlow;
-  /** `origin` of the flow that returned to the page */
-  origin?: string;
+interface OAuthFlowState {
   /** the page is finishing the returned OAuth flow */
   isLoading: boolean;
   error?: unknown;
@@ -462,64 +453,86 @@ interface PlaygroundAuthState {
   store: Record<string, TokenInfo | undefined>;
 }
 
-const AuthContext = createContext<PlaygroundAuthState | null>(null);
+interface PlaygroundAuthState extends OAuthFlowState {
+  /** the values of security schemes, shared by the playgrounds of page */
+  stf: Stf;
+  /** the flow that returned to the page, until it is handled */
+  returned?: ReturnedFlow;
+  /** `origin` of the flow that returned to the page */
+  origin?: string;
+}
+
+/** the auth of a page, created by its first playground */
+class PageAuth {
+  readonly stf: Stf = { dataEngine: new DataEngine({ auth: {} }) };
+  private state: OAuthFlowState = { isLoading: false, store: {} };
+  private readonly listeners = new Set<() => void>();
+
+  readonly getState = () => this.state;
+
+  readonly subscribe = (listener: () => void) => {
+    this.listeners.add(listener);
+    // the page finishes OAuth flows started without `redirect`
+    const returned = getReturnedFlow();
+    if (returned?.oauth && !finishing.has(returned)) {
+      finishing.add(returned);
+      void this.finish(returned);
+    }
+    return () => {
+      this.listeners.delete(listener);
+    };
+  };
+
+  private set(state: OAuthFlowState) {
+    this.state = state;
+    for (const listener of this.listeners) listener();
+  }
+
+  private async finish(flow: ReturnedFlow) {
+    this.set({ isLoading: true, store: {} });
+    try {
+      const result = finishOAuthFlow(flow.url, flow.data);
+      if (result !== undefined) window.history.replaceState(null, '', window.location.pathname);
+      // users may come back without finishing it
+      const token = await result;
+      const store: OAuthFlowState['store'] = {};
+      if (token !== undefined) {
+        this.stf.dataEngine.update(['auth', flow.scheme], token);
+        const { client_id, client_secret, client_auth } = flow.data as OAuthFlowData;
+        store[flow.scheme] =
+          typeof result === 'string'
+            ? { type: 'implicit', client_id, token }
+            : { type: 'authorization_code', client_id, client_secret, client_auth, token };
+      }
+      this.set({ isLoading: false, store });
+    } catch (error) {
+      this.set({ isLoading: false, error, store: {} });
+    } finally {
+      endReturnedFlow(flow);
+    }
+  }
+}
+
+const pages = new WeakMap<OpenAPIRuntime, PageAuth>();
 
 /**
  * The auth of page: the values of security schemes, and the flow that returned to it.
  */
 export function usePlaygroundAuth(): PlaygroundAuthState {
-  const ctx = use(AuthContext);
-  if (!ctx) throw new Error('Component must be used under <OpenAPIProvider />');
-  return ctx;
-}
-
-export function PlaygroundAuthProvider({ children }: { children: ReactNode }) {
-  const stf = useStf({ defaultValues: { auth: {} } });
+  const runtime = useOpenAPI();
+  let page = pages.get(runtime);
+  if (!page) {
+    page = new PageAuth();
+    pages.set(runtime, page);
+  }
   // the server renders without it
   const returned = useSyncExternalStore(subscribeNever, getReturnedFlow, () => undefined);
-  const query = useQuery(async (flow: ReturnedFlow) => {
-    const result = finishOAuthFlow(flow.url, flow.data);
-    if (result !== undefined) window.history.replaceState(null, '', window.location.pathname);
+  const state = useSyncExternalStore(page.subscribe, page.getState, page.getState);
+  const { stf } = page;
 
-    try {
-      // users may come back without finishing it
-      const token = await result;
-      if (token === undefined) return;
-      stf.dataEngine.update(['auth', flow.scheme], token);
-
-      const { client_id, client_secret, client_auth } = flow.data as OAuthFlowData;
-      const info: TokenInfo =
-        typeof result === 'string'
-          ? { type: 'implicit', client_id, token }
-          : { type: 'authorization_code', client_id, client_secret, client_auth, token };
-      return { [flow.scheme]: info };
-    } finally {
-      endReturnedFlow(flow);
-    }
-  });
-
-  // the page finishes OAuth flows started without `redirect`
-  if (returned?.oauth && !finishing.has(returned)) {
-    finishing.add(returned);
-    void query.start(returned);
-  }
-
-  return (
-    <AuthContext
-      value={useMemo(
-        () => ({
-          stf,
-          returned,
-          origin: returned?.origin,
-          isLoading: query.isLoading,
-          error: query.error,
-          store: query.data ?? {},
-        }),
-        [stf, returned, query.isLoading, query.error, query.data],
-      )}
-    >
-      {children}
-    </AuthContext>
+  return useMemo(
+    () => ({ ...state, stf, returned, origin: returned?.origin }),
+    [state, stf, returned],
   );
 }
 

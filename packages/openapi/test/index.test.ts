@@ -438,19 +438,33 @@ test('leaves documents out of page props with `includeDocument: false`', async (
   expect((await server.preloadOpenAPIPage(generated)).preloaded.docs).toEqual({});
 });
 
-test('OAuth handler sends users back to the page that started the flow', () => {
+test('OAuth handler sends users back to the page that started the flow', async () => {
   const handler = createOpenAPI().createOAuthHandler();
-  const request = (page?: string) =>
-    handler(
-      new Request('https://docs.example.com/api/oauth?code=abc&state=xyz', {
-        headers: page ? { cookie: `fumadocs-openapi-oauth=${encodeURIComponent(page)}` } : {},
-      }),
-    );
+  const page = handler(new Request('https://docs.example.com/api/oauth?code=abc'));
+  expect(page.headers.get('content-type')).toBe('text/html');
+  expect(page.headers.get('referrer-policy')).toBe('no-referrer');
+  expect(await page.text()).toBe('<script src="?script"></script>');
 
-  const res = request('/docs/Get%20A%20Thing');
-  expect(res.status).toBe(302);
-  expect(res.headers.get('location')).toBe('/docs/Get%20A%20Thing?code=abc&state=xyz');
-  expect(request().status).toBe(400);
-  expect(request('//evil.example').status).toBe(400);
-  expect(request('https://evil.example/docs').status).toBe(400);
+  expect(
+    handler(new Request('https://docs.example.com/api/oauth?script')).headers.get('content-type'),
+  ).toBe('text/javascript');
+  // Next.js passes `?script` as `?script=`
+  const res = handler(new Request('https://docs.example.com/api/oauth?script='));
+  expect(res.headers.get('content-type')).toBe('text/javascript');
+  const script = new Function('sessionStorage', 'location', await res.text());
+  const run = (page: string | null) => {
+    const location = {
+      origin: 'https://docs.example.com',
+      search: '?code=abc',
+      hash: '#x',
+      replace: vi.fn(),
+    };
+    script({ getItem: () => page }, location);
+    return location.replace.mock.calls;
+  };
+
+  expect(run('/docs/a')).toEqual([['https://docs.example.com/docs/a?code=abc#x']]);
+  // stays on the site, even for a path that looks like a protocol-relative URL
+  expect(run('//evil.example')).toEqual([['https://docs.example.com//evil.example?code=abc#x']]);
+  expect(run(null)).toEqual([]);
 });
