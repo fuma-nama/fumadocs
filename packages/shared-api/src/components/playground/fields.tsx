@@ -1,9 +1,11 @@
 'use client';
 import { Fragment, type MouseEventHandler, type ReactNode, useId, useMemo, useState } from 'react';
+import { Autocomplete } from '@base-ui/react/autocomplete';
 import { Popover } from '@base-ui/react/popover';
 import { Select as SelectPrimitive } from '@base-ui/react/select';
 import {
   Check,
+  ChevronDown,
   ChevronRight,
   ChevronsUpDown,
   Copy,
@@ -102,6 +104,28 @@ function getOptions(field: Schema): { value: unknown; label: string }[] | undefi
   return values?.map((value) => ({ value, label: valueLabel(value) }));
 }
 
+interface Suggestion {
+  value: string;
+  label: string;
+}
+
+/** a union of `const` strings and `string`: values to suggest, while any string is allowed */
+function getSuggestions(field: Schema): Suggestion[] | undefined {
+  const union = field.anyOf ?? field.oneOf;
+  if (!union) return;
+  const suggestions: Suggestion[] = [];
+  let open = false;
+  for (const item of union) {
+    if (typeof item !== 'object') return;
+    if (typeof item.const === 'string')
+      suggestions.push({ value: item.const, label: item.title ?? item.const });
+    else if (item.type === 'string' && item.const === undefined && item.enum === undefined)
+      open = true;
+    else return;
+  }
+  if (open && suggestions.length > 0) return suggestions;
+}
+
 function valueLabel(value: unknown): string {
   return typeof value === 'string' ? value : JSON.stringify(value);
 }
@@ -170,8 +194,9 @@ function SchemaSwitch({
     if (types) return { ...field, type: info.selectedType ?? types[0] };
   }, [field, union, types, info.oneOf, info.selectedType]);
 
-  // a union of `const` members is one select, not a switch between them
-  if (member === undefined || isConstUnion(union)) return children(field, null);
+  // a union of `const` members is one select, and with `string` one input, not a switch between them
+  if (member === undefined || isConstUnion(union) || getSuggestions(field))
+    return children(field, null);
 
   let selector: ReactNode = null;
   if (union && union.length > 1) {
@@ -461,7 +486,8 @@ export function ValueRow({
 function cellType(field: Schema, selector: ReactNode): ReactNode {
   if (selector) return selector;
   // the options of selects and `null` tell the type already
-  if (field.type !== 'null' && !getOptions(field)) return typeLabel(field);
+  if (field.type !== 'null' && !getOptions(field) && !getSuggestions(field))
+    return typeLabel(field);
 }
 
 /** the input of a primitive field */
@@ -503,6 +529,19 @@ function FieldValue({
           }}
         />
       </label>
+    );
+  }
+
+  const suggestions = getSuggestions(field);
+  if (suggestions) {
+    return (
+      <CellAutocomplete
+        id={id}
+        items={suggestions}
+        value={value == null ? '' : String(value)}
+        onValueChange={(v) => setValue(v)}
+        placeholder={t('Enter value')}
+      />
     );
   }
 
@@ -697,6 +736,76 @@ export function CellSelect({
         ))}
       </SelectContent>
     </Select>
+  );
+}
+
+function matchesSuggestion(item: Suggestion, query: string): boolean {
+  const q = query.toLowerCase();
+  return item.value.toLowerCase().includes(q) || item.label.toLowerCase().includes(q);
+}
+
+/** an input filling a cell, suggesting `items` while it takes any text */
+function CellAutocomplete({
+  id,
+  items,
+  value,
+  onValueChange,
+  placeholder,
+}: {
+  id: string;
+  items: Suggestion[];
+  value: string;
+  onValueChange: (value: string) => void;
+  placeholder?: string;
+}) {
+  const t = useTranslations({ note: 'playground' });
+  // a suggested value fills the input, the list keeps showing the others to switch to
+  const filled = items.some((item) => item.value === value);
+
+  return (
+    <Autocomplete.Root
+      items={items}
+      value={value}
+      onValueChange={onValueChange}
+      itemToStringValue={(item) => item.value}
+      filter={filled ? null : matchesSuggestion}
+      openOnInputClick
+    >
+      <Autocomplete.InputGroup className="flex min-w-0 flex-1 items-center">
+        <Autocomplete.Input
+          id={id}
+          spellCheck={false}
+          placeholder={placeholder}
+          className="min-w-0 flex-1 self-stretch bg-transparent px-3 text-fd-foreground outline-none placeholder:text-fd-muted-foreground/70"
+        />
+        <Autocomplete.Trigger
+          aria-label={t('Suggestions')}
+          className="flex shrink-0 items-center pe-1 text-fd-muted-foreground"
+        >
+          <ChevronDown className="size-3.5" />
+        </Autocomplete.Trigger>
+      </Autocomplete.InputGroup>
+      <Autocomplete.Portal>
+        <Autocomplete.Positioner align="start" sideOffset={4} className="z-50">
+          <Autocomplete.Popup className="max-h-[min(var(--available-height),20rem)] min-w-[calc(var(--anchor-width)+--spacing(2))] overflow-y-auto rounded-lg border bg-fd-popover p-1 text-fd-popover-foreground shadow-md empty:hidden">
+            <Autocomplete.List>
+              {(item: Suggestion) => (
+                <Autocomplete.Item
+                  key={item.value}
+                  value={item}
+                  className="flex select-none items-center gap-2 rounded-md px-2 py-1.5 text-[0.8125rem] outline-none data-highlighted:bg-fd-accent data-highlighted:text-fd-accent-foreground"
+                >
+                  {item.label}
+                  {item.value === value && (
+                    <Check className="ms-auto size-3.5 shrink-0 text-fd-primary" />
+                  )}
+                </Autocomplete.Item>
+              )}
+            </Autocomplete.List>
+          </Autocomplete.Popup>
+        </Autocomplete.Positioner>
+      </Autocomplete.Portal>
+    </Autocomplete.Root>
   );
 }
 
