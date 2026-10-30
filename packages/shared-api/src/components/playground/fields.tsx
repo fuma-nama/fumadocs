@@ -194,7 +194,7 @@ function SchemaSwitch({
     if (types) return { ...field, type: info.selectedType ?? types[0] };
   }, [field, union, types, info.oneOf, info.selectedType]);
 
-  // a union of `const` members is one select, and with `string` one input, not a switch between them
+  // a union of `const` members, alone or with `string`, is one input, not a switch between them
   if (member === undefined || isConstUnion(union) || getSuggestions(field))
     return children(field, null);
 
@@ -759,7 +759,7 @@ function CellAutocomplete({
   placeholder?: string;
 }) {
   const t = useTranslations({ note: 'playground' });
-  // a suggested value fills the input, the list keeps showing the others to switch to
+  // with a suggested value in the input, list them all to switch between
   const filled = items.some((item) => item.value === value);
 
   return (
