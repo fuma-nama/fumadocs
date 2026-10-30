@@ -6,7 +6,9 @@ export function createOAuthHandler(): (req: Request) => Response {
     const page = /(?:^|;\s*)fumadocs-openapi-oauth=([^;]+)/.exec(req.headers.get('cookie') ?? '');
     // only allow paths of the same origin
     const target = page && URL.parse(decodeURIComponent(page[1]), 'http://localhost');
-    if (!target || target.origin !== 'http://localhost') return new Response(null, { status: 400 });
+    // a path starting with `//` would be a protocol-relative URL to another origin
+    if (!target || target.origin !== 'http://localhost' || target.pathname.startsWith('//'))
+      return new Response(null, { status: 400 });
 
     return new Response(null, {
       status: 302,

@@ -452,5 +452,7 @@ test('OAuth handler sends users back to the page that started the flow', () => {
   expect(res.headers.get('location')).toBe('/docs/Get%20A%20Thing?code=abc&state=xyz');
   expect(request().status).toBe(400);
   expect(request('//evil.example').status).toBe(400);
+  expect(request('http://localhost//evil.example').status).toBe(400);
+  expect(request('http://localhost/\\/evil.example').status).toBe(400);
   expect(request('https://evil.example/docs').status).toBe(400);
 });
