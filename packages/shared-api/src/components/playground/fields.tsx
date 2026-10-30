@@ -109,7 +109,6 @@ interface Suggestion {
   label: string;
 }
 
-/** a union of `const` strings and `string`: values to suggest, while any string is allowed */
 function getSuggestions(field: Schema): Suggestion[] | undefined {
   const union = field.anyOf ?? field.oneOf;
   if (!union) return;
@@ -194,7 +193,7 @@ function SchemaSwitch({
     if (types) return { ...field, type: info.selectedType ?? types[0] };
   }, [field, union, types, info.oneOf, info.selectedType]);
 
-  // a union of `const` members, alone or with `string`, is one input, not a switch between them
+  // a union of `const` members is one select, not a switch between them
   if (member === undefined || isConstUnion(union) || getSuggestions(field))
     return children(field, null);
 
@@ -744,7 +743,6 @@ function matchesSuggestion(item: Suggestion, query: string): boolean {
   return item.value.toLowerCase().includes(q) || item.label.toLowerCase().includes(q);
 }
 
-/** an input filling a cell, suggesting `items` while it takes any text */
 function CellAutocomplete({
   id,
   items,
@@ -759,7 +757,6 @@ function CellAutocomplete({
   placeholder?: string;
 }) {
   const t = useTranslations({ note: 'playground' });
-  // with a suggested value in the input, list them all to switch between
   const filled = items.some((item) => item.value === value);
 
   return (
