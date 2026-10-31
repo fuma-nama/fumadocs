@@ -1,3 +1,9 @@
+## @fumadocs/asyncapi@0.5.5
+
+### Unions of `const` members and `string` suggest their values
+
+- In the playground, a `oneOf`/`anyOf` of `const` strings and `string` is one input that suggests the `const` members, labelled by their `title` and filtered as you type, while it still takes any string, instead of a switch between members.
+
 ## @fumadocs/asyncapi@0.5.4
 
 ### Unions of `const` members render as a labelled select
