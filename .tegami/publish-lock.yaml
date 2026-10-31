@@ -1,16 +1,23 @@
 core:changelogs:
-  - content: "---\npackages:\n  fumadocs-openapi:\n    type: patch\n---\n\n### Fix OAuth handler redirects that other subdomains could control\n\n`createOAuthHandler()` read the page to return to from a cookie, which other subdomains could set to send authorization codes and tokens to another site. The page is now kept in `sessionStorage`, and the handler sends users back from the browser.\n\nIt loads its script from the same route, Content Security Policies need to allow `'self'` scripts there (without `'strict-dynamic'`), or leave the route out.\n"
-    filename: 2026-10-30-openapi-oauth-handler-session-storage.md
+  - content: "---\npackages:\n  fumadocs-openapi:\n    type: patch\n  \"@fumadocs/asyncapi\":\n    type: patch\n  \"@fumadocs/language\":\n    type: patch\n---\n\n### Unions of `const` members and `string` suggest their values\n\n- In the playground, a `oneOf`/`anyOf` of `const` strings and `string` is one input that suggests the `const` members, labelled by their `title` and filtered as you type, while it still takes any string, instead of a switch between members.\n"
+    filename: 2026-10-30-openapi-suggested-values.md
+    v: 0.0.0
+  - content: "---\npackages:\n  npm:@fumadocs/base-ui:\n    type: patch\n---\n\n## Use `ScrollArea.Content` for Base UI\n"
+    filename: 2026-10-31-mvvynku6.md
     v: 0.0.0
 core:packages:
   - id: npm:@fumadocs/ai-chat
     updated: false
   - id: npm:@fumadocs/astro
     updated: false
-  - id: npm:@fumadocs/asyncapi
-    updated: false
-  - id: npm:@fumadocs/base-ui
-    updated: false
+  - changelogIds:
+      - 2026-10-30-openapi-suggested-values.md
+    id: npm:@fumadocs/asyncapi
+    updated: true
+  - changelogIds:
+      - 2026-10-31-mvvynku6.md
+    id: npm:@fumadocs/base-ui
+    updated: true
   - id: npm:@fumadocs/basehub
     updated: false
   - id: npm:@fumadocs/changelog
@@ -22,13 +29,13 @@ core:packages:
   - id: npm:@fumadocs/content-collections
     updated: false
   - id: npm:fumadocs-core
-    updated: false
+    updated: true
   - id: npm:create-fumadocs-app
-    updated: false
-  - id: npm:create-fumadocs-versions
-    updated: false
+    updated: true
   - id: npm:fumadocs-docgen
     updated: false
+  - id: npm:create-fumadocs-versions
+    updated: true
   - id: npm:fumadocs-epub
     updated: false
   - id: npm:@fumadocs/graphql
@@ -37,8 +44,10 @@ core:packages:
     updated: false
   - id: npm:@fumadocs/json-schema
     updated: false
-  - id: npm:@fumadocs/language
-    updated: false
+  - changelogIds:
+      - 2026-10-30-openapi-suggested-values.md
+    id: npm:@fumadocs/language
+    updated: true
   - id: npm:@fumadocs/local-content
     updated: false
   - id: npm:@fumadocs/local-html
@@ -53,18 +62,18 @@ core:packages:
     updated: false
   - id: npm:fumadocs-obsidian
     updated: false
-  - changelogIds:
-      - 2026-10-30-openapi-oauth-handler-session-storage.md
-    id: npm:fumadocs-openapi
-    updated: true
   - id: npm:@fumadocs/openapi-standalone
     updated: false
+  - changelogIds:
+      - 2026-10-30-openapi-suggested-values.md
+    id: npm:fumadocs-openapi
+    updated: true
   - id: npm:fumadocs-preview
     updated: false
   - id: npm:fumadocs-python
     updated: false
   - id: npm:fumadocs-ui
-    updated: false
+    updated: true
   - id: npm:@fumadocs/sanity
     updated: false
   - id: npm:@fumadocs/satteri
@@ -97,8 +106,8 @@ npm:packages:
   - id: npm:@fumadocs/content-collections
   - id: npm:fumadocs-core
   - id: npm:create-fumadocs-app
-  - id: npm:create-fumadocs-versions
   - id: npm:fumadocs-docgen
+  - id: npm:create-fumadocs-versions
   - id: npm:fumadocs-epub
   - id: npm:@fumadocs/graphql
   - id: npm:@fumari/image-size
@@ -111,8 +120,8 @@ npm:packages:
   - id: npm:@fumadocs/mdx-remote
   - id: npm:@fumadocs/notion
   - id: npm:fumadocs-obsidian
-  - id: npm:fumadocs-openapi
   - id: npm:@fumadocs/openapi-standalone
+  - id: npm:fumadocs-openapi
   - id: npm:fumadocs-preview
   - id: npm:fumadocs-python
   - id: npm:fumadocs-ui
@@ -128,3 +137,34 @@ npm:packages:
   - id: npm:@fumadocs/vite
   - id: npm:example-openapi
   - id: npm:example-tanstack-start-openapi
+  - id: npm:docs
+  - id: npm:example-asyncapi
+  - id: npm:example-astro-i18n
+  - id: npm:example-i18n
+  - id: npm:example-react-router-i18n
+  - id: npm:example-tanstack-start-i18n
+  - id: npm:example-waku-i18n
+  - id: npm:example-astro
+  - id: npm:example-astro-min
+  - id: npm:example-base-ui
+  - id: npm:example-content-collections
+  - id: npm:example-graphql
+  - id: npm:example-marble-cms
+  - id: npm:example-next
+  - id: npm:example-next-local-html
+  - id: npm:example-next-local-md
+  - id: npm:example-next-shadcn
+  - id: npm:example-next-min
+  - id: npm:example-next-static
+  - id: npm:example-obsidian
+  - id: npm:example-python
+  - id: npm:example-react-router
+  - id: npm:example-react-router-min
+  - id: npm:example-react-router-rsc
+  - id: npm:example-react-router-spa
+  - id: npm:example-tanstack-start
+  - id: npm:example-tanstack-start-local-md
+  - id: npm:example-tanstack-start-min
+  - id: npm:example-tanstack-start-spa
+  - id: npm:example-tanstack-start-story
+  - id: npm:example-waku

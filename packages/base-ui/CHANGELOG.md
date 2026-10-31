@@ -1,3 +1,7 @@
+## @fumadocs/base-ui@16.17.10
+
+### Use `ScrollArea.Content` for Base UI
+
 ## @fumadocs/base-ui@16.17.9
 
 ### Keep the theme on Astro navigations
