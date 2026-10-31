@@ -1,4 +1,3 @@
-// #region props
 export interface ButtonProps {
   /** The text inside the button. */
   label: string;
@@ -9,19 +8,23 @@ export interface ButtonProps {
   /** Called when it is pressed. */
   onPress?: () => void;
 }
-// #endregion props
+
+const base = 'inline-flex rounded-full border px-4 py-1.5 text-sm font-medium no-underline';
 
 export function Button({ label, href, onPress }: ButtonProps) {
-  const className =
-    'inline-flex rounded-full bg-fd-primary px-4 py-1.5 text-sm font-medium text-fd-primary-foreground no-underline';
+  // a link is the secondary form, an action the primary one
   if (href)
     return (
-      <a href={href} className={className}>
+      <a href={href} className={`${base} bg-fd-secondary text-fd-secondary-foreground`}>
         {label}
       </a>
     );
   return (
-    <button type="button" className={className} onClick={onPress}>
+    <button
+      type="button"
+      className={`${base} border-fd-primary bg-fd-primary text-fd-primary-foreground`}
+      onClick={onPress}
+    >
       {label}
     </button>
   );

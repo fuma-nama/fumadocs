@@ -4,7 +4,7 @@ import { BAYER4 } from '../../lib/dither';
 import { TICK } from '../../lib/motion';
 
 /*
- * The stage of a mechanism: 96x40 cells of 3px. Parts are SVG paths and labels placed in cells,
+ * The stage of a mechanism: 96x40 cells of 3px in a 120x56 unit. Parts are SVG paths and labels placed in cells,
  * posed by tracks on the 125 ms tick grid. Tracks move only transform and opacity, so the
  * compositor plays them: a part with several looks is a strip of pre-drawn frames, and parts that
  * come in one after another are uncovered by a sheet of paper sliding off them.
@@ -63,104 +63,94 @@ export function dashes(x: number, y: number, w: number, on: number, off: number)
 }
 
 /** the CSS a track holds from each tick on */
-export type Poses = Readonly<Record<number, string>>;
+type Poses = Readonly<Record<number, string>>;
 
-export interface Track {
-  /** the key pose, kept with reduced motion */
+interface Track {
+  /** its style before its first pose, and under its pose at rest */
   base?: string;
   poses: Poses;
-  /** a longer cycle for this track, e.g. a flap that changes once per loop */
-  ticks?: number;
 }
 
-export interface Choreography<K extends string = string> {
+interface Choreography<K extends string = string> {
   name: string;
-  /** loop length in ms */
+  /** its ticks in ms */
   dur: number;
   css: string;
   /** class name of each track */
   cls: Record<K, string>;
 }
 
-/** keyframes of a mechanism: every track loops over `ticks` ticks, `steps(1, end)` from `.bt-a` */
+/**
+ * keyframes of a mechanism, played once through while its card is `[data-play]`: every track runs
+ * over `ticks` ticks, each pose held till the next (`steps(1, end)` from `.bt-a`) unless it
+ * `glide`s, and stops on its pose at tick `rest`, its payoff, which it also holds at rest. A card
+ * `[data-queued]` for its turn holds its first pose.
+ */
 export function choreograph<T extends Record<string, Track>>(
   name: string,
   ticks: number,
+  rest: number,
   tracks: T,
 ): Choreography<keyof T & string> {
   let css = '';
   const cls = {} as Record<keyof T & string, string>;
   for (const key in tracks) {
     const id = `bt-${name}-${key}`;
-    const { base = '', poses, ticks: length = ticks } = tracks[key];
+    const { base = '', poses } = tracks[key];
     cls[key] = `bt-a ${id}`;
-    let rule = `${base};animation-name:${id}`;
-    if (length !== ticks) rule += `;--bt-dur:${length * TICK}ms`;
-    css += `.${id}{${rule}}@keyframes ${id}{`;
+    let held = '';
+    let frames = 0 in poses ? '' : `0%{${base}}`;
     // integer keys come in ascending order
     for (const [tick, pose] of Object.entries(poses)) {
-      css += `${+((Number(tick) / length) * 100).toFixed(4)}%{${pose}}`;
+      if (Number(tick) <= rest) held = pose.replace(LINEAR, '');
+      frames += `${+((Number(tick) / ticks) * 100).toFixed(4)}%{${pose}}`;
     }
-    css += '}';
+    const first = 0 in poses ? poses[0].replace(LINEAR, '') : '';
+    // just short of the tick after `rest`, still on its pose
+    const count = +((rest + 0.999) / ticks).toFixed(5);
+    css += `.${id}{${base};${held}}[data-queued] .${id}{${base};${first}}[data-play] .${id}{animation-name:${id};animation-iteration-count:${count}}@keyframes ${id}{${frames}}`;
   }
   return { name, dur: ticks * TICK, css, cls };
 }
 
-/** `css`, moving on to the next pose in `count` steps */
-export function steps(count: number, css: string): string {
-  return `${css};animation-timing-function:steps(${count},end)`;
-}
+const LINEAR = ';animation-timing-function:linear';
 
-/** visible from the first tick, then hidden and shown in turn on the next ones */
-export function show(...ticks: number[]): Poses {
-  const poses: Record<number, string> = { 0: 'opacity:0' };
-  for (let i = 0; i < ticks.length; i++) poses[ticks[i]] = i % 2 === 0 ? 'opacity:1' : 'opacity:0';
-  return poses;
-}
-
-/** moves a strip up by `cells` */
-export function up(cells: number): string {
-  return `transform:translateY(${-cells * CELL}px)`;
+/** `css`, moving on to the next pose steadily */
+export function glide(css: string): string {
+  return css + LINEAR;
 }
 
 /**
- * a strip of `count` rows `h` cells tall plus a copy of the first, rolling to the next row
- * every `every` ticks with one half-way frame
+ * hidden from the first tick, then shown and hidden in turn on the next ones: by `visibility`, which
+ * swaps in place and keeps no layer between swaps
  */
-export function cycle(h: number, every: number, count: number): Track {
-  const poses: Record<number, string> = {};
-  for (let i = 0; i < count; i++) {
-    poses[i * every] = up((i === 0 ? count : i) * h - h / 2);
-    poses[i * every + 1] = up(i * h);
-  }
-  return { poses, ticks: every * count };
+export function show(...ticks: number[]): Poses {
+  const poses: Record<number, string> = { 0: 'visibility:hidden' };
+  for (let i = 0; i < ticks.length; i++)
+    poses[ticks[i]] = i % 2 === 0 ? 'visibility:visible' : 'visibility:hidden';
+  return poses;
 }
 
-/** `<Frames>` of `h` cells showing frame `at[tick]` from each tick on, frame `base` at rest */
-export function roll(h: number, at: Readonly<Record<number, number>>, base: number): Track {
-  const poses: Record<number, string> = {};
-  for (const tick in at) poses[tick] = up(at[tick] * h);
-  return { base: up(base * h), poses };
+/** a strip `cells` up behind its clip, held there: by `top`, which keeps no layer */
+function at(cells: number): string {
+  return `top:${-cells * CELL}px`;
 }
 
-/** a `<Cover>` slid down by `at[tick]` cells from each tick on, off its part at rest */
+/** `<Frames>` of `h` cells showing frame `frames[tick]` from each tick on, frame `base` at rest */
+export function roll(h: number, frames: Readonly<Record<number, number>>, base: number): Track {
+  const poses: Record<number, string> = {};
+  for (const tick in frames) poses[tick] = at(frames[tick] * h);
+  return { base: at(base * h), poses };
+}
+
+/**
+ * a `<Cover>` from `at[tick]` cells down from each tick on, off its part at rest: by its `top`, the
+ * paper under it the same, which keeps no layer
+ */
 export function uncover(h: number, at: Readonly<Record<number, number>>): Track {
   const poses: Record<number, string> = {};
-  for (const tick in at) poses[tick] = `transform:translateY(${at[tick] * CELL}px)`;
-  return { base: `transform:translateY(${h * CELL}px)`, poses };
-}
-
-/** a line drawn from its left end in `count` steps from tick `from`, gone on `to` */
-export function draw(from: number, count: number, to: number): Track {
-  return {
-    base: 'transform-origin:left',
-    poses: {
-      0: 'transform:scaleX(0)',
-      [from]: steps(count, 'transform:scaleX(0)'),
-      [from + count]: 'transform:scaleX(1)',
-      [to]: 'transform:scaleX(0)',
-    },
-  };
+  for (const tick in at) poses[tick] = `top:${at[tick] * CELL}px`;
+  return { base: `top:${h * CELL}px`, poses };
 }
 
 function box(x: number, y: number, w: number | undefined, h: number | undefined): CSSProperties {
@@ -172,21 +162,70 @@ function box(x: number, y: number, w: number | undefined, h: number | undefined)
   };
 }
 
+/** a slotted screw head, 3x3 cells */
+const SCREW = ['###', '#.#', '###'];
+
+interface StageProps {
+  c: Choreography;
+  /** the unit's readout: a status a frame, rolled by `status`, the lamp lit by `lamp` */
+  states: readonly string[];
+  status: string;
+  lamp: string;
+  /** set at the readout's end: what the unit runs on */
+  spec: string;
+  children: ReactNode;
+}
+
 /**
- * A 96x40 cell stage running one choreography. Its parts draw still ones first: the compositor
- * takes a moving part to cover anything drawn after it in its clip, the stage at most.
+ * A mechanism's unit, 120x56 cells: its 96x40 cell stage on a plate screwed at its corners, a
+ * ruler down either side, and under it the readout, a lamp lit while it works, its status in the
+ * machine's voice and what it runs on. Its parts draw still ones first: the compositor takes a
+ * moving part to cover anything drawn after it in its clip, the unit at most.
  */
-export function Stage({ c, children }: { c: Choreography; children: ReactNode }) {
+export function Stage({ c, states, status, lamp, spec, children }: StageProps) {
+  let rulers = rect(4, 8, 1, 40) + rect(115, 8, 1, 40);
+  for (let y = 8; y <= 48; y += 4) {
+    const tick = y % 8 === 0 ? 3 : 2;
+    rulers += rect(5 - tick, y, tick, 1) + rect(115, y, tick, 1);
+  }
   return (
     <span
       aria-hidden
-      className="relative block h-30 w-(--bt-stage) overflow-clip text-(--bt-ink) *:absolute"
+      className="bt-stage relative block h-42 w-(--bt-stage) overflow-clip text-(--bt-ink) *:absolute"
       style={{ '--bt-dur': `${c.dur}ms` } as CSSProperties}
     >
       <style href={`bt-${c.name}`} precedence="default">
         {c.css}
       </style>
-      {children}
+      <Px
+        w={120}
+        h={56}
+        ink={
+          art(SCREW, 0, 0) +
+          art(SCREW, 117, 0) +
+          art(SCREW, 0, 53) +
+          art(SCREW, 117, 53) +
+          rulers +
+          rect(12, 50, 96, 1)
+        }
+        className="opacity-55"
+      />
+      <Layer x={12} y={6} w={96} h={40}>
+        {children}
+      </Layer>
+      <Px x={12} y={52} w={3} h={3} ink={frame(0, 0, 3, 3)} />
+      <Px x={12} y={52} w={3} h={3} orange={rect(0, 0, 3, 3)} className={lamp} />
+      <Clip x={17} y={51} w={60} h={5}>
+        <Strip
+          items={states}
+          h={5}
+          itemClassName="font-pixel font-normal text-(--bt-ink) opacity-75"
+          className={status}
+        />
+      </Clip>
+      <Text x={60} y={51} w={48} h={5} className="justify-end font-pixel font-normal opacity-55">
+        {spec}
+      </Text>
     </span>
   );
 }
@@ -207,14 +246,15 @@ interface PxProps {
   className?: string;
 }
 
-/** pixel art, one path per tone */
+/** pixel art, one path per tone; posed by `className` in an HTML box, which the compositor can
+ * move, as it can't an svg */
 export function Px({ x = 0, y = 0, w = 96, h = 40, className, ...tones }: PxProps) {
-  return (
+  const svg = (
     <svg
       viewBox={`0 0 ${w} ${h}`}
       shapeRendering="crispEdges"
-      className={className}
-      style={box(x, y, w, h)}
+      className={className && 'block size-full'}
+      style={className ? undefined : box(x, y, w, h)}
     >
       {tones.paper && <path d={tones.paper} className="fill-(--bt-paper)" />}
       {tones.hi && <path d={tones.hi} className="fill-lp-yellow" />}
@@ -222,6 +262,12 @@ export function Px({ x = 0, y = 0, w = 96, h = 40, className, ...tones }: PxProp
       {tones.knock && <path d={tones.knock} className="fill-(--bt-paper)" />}
       {tones.orange && <path d={tones.orange} className="fill-(--bt-orange)" />}
     </svg>
+  );
+  if (!className) return svg;
+  return (
+    <span className={className} style={box(x, y, w, h)}>
+      {svg}
+    </span>
   );
 }
 
@@ -308,20 +354,18 @@ export function Frames({
 interface StripProps {
   items: readonly string[];
   h: number;
-  /** end with a copy of the first row, for strips that roll forward with `cycle()` */
-  loop?: boolean;
   itemClassName?: string;
   className?: string;
 }
 
 /** values stacked in rows of `h` cells, moved by a track to show one at a time */
-export function Strip({ items, h, loop = false, itemClassName, className }: StripProps) {
+export function Strip({ items, h, itemClassName, className }: StripProps) {
   const rows = [];
-  for (let i = 0; i < (loop ? items.length + 1 : items.length); i++) {
+  for (let i = 0; i < items.length; i++) {
     rows.push(
       <span key={i} className="flex shrink-0 items-center" style={{ height: h * CELL }}>
         <span className={cn('text-xs leading-none font-medium whitespace-pre', itemClassName)}>
-          {items[i % items.length]}
+          {items[i]}
         </span>
       </span>,
     );

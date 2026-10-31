@@ -4,7 +4,7 @@ import defaultMdxComponents from 'fumadocs-ui/mdx';
 import { TypeTable } from 'fumadocs-ui/components/type-table';
 import * as Twoslash from 'fumadocs-twoslash/ui';
 import { Mermaid } from '@/components/mdx/mermaid';
-import { copy, type Run } from '../../content';
+import { copy } from '../../content';
 import { Figure, FigureHeader } from '../../ui/figure';
 import { blocks, quickStart, steps } from './data';
 import { RailBed, RailColumn } from './rail';
@@ -21,30 +21,20 @@ const components: MDXComponents = {
   h2: (props) => <H2 {...props} aria-level={4} />,
 };
 
-interface PressProps {
-  id: string;
-  label: string;
-  /** set over the title */
-  lead?: ReactNode;
-  title: readonly Run[];
-  /** the MDX file, its blocks compiled and their sources */
-  file: string;
-  entries: typeof quickStart.entries;
-  sources: string[];
-  steps: { tab: string; status: string }[];
-}
+const FILE = 'quick-start.mdx';
 
 /** a figure that types an MDX file block by block, and presses each into its page */
-export function Press({ id, label, lead, title, file, entries, sources, steps }: PressProps) {
+export function Write() {
   const slots: ReactNode[] = [];
-  for (const entry of entries) {
+  for (const entry of quickStart.entries) {
     const Body = entry.body;
     slots.push(
       // a block of frontmatter renders as the page's title
       entry.title === undefined ? (
         <Body key={entry.info.path} components={components} />
       ) : (
-        <div key={entry.info.path} className="not-prose">
+        // the docs page's own gap between its title and description
+        <div key={entry.info.path} className="not-prose flex flex-col gap-4">
           <h3 className="text-[1.75em] font-semibold">{entry.title}</h3>
           <p className="text-lg text-fd-muted-foreground">{entry.description}</p>
         </div>
@@ -53,34 +43,19 @@ export function Press({ id, label, lead, title, file, entries, sources, steps }:
   }
 
   return (
-    <Figure id={id} aria-label={label} status={`compiled ${file}`}>
+    <Figure id="write" aria-label="Write" status={`compiled ${FILE}`}>
       <FigureHeader
-        lead={lead}
-        title={title}
-        className="px-(--lp-gutter) pt-16 pb-10 md:pt-10 md:pb-8"
+        title={copy.write.title}
+        className="px-(--lp-gutter) pt-(--lp-section) pb-10 md:pb-12"
       />
       <Stage
-        file={file}
+        file={FILE}
         steps={steps}
-        sources={sources}
+        sources={blocks}
         slots={slots}
         bed={<RailBed stops={steps.length} />}
-        column={<RailColumn id={id} />}
+        column={<RailColumn id="write" />}
       />
     </Figure>
-  );
-}
-
-export function Write() {
-  return (
-    <Press
-      id="write"
-      label="Write"
-      {...copy.write}
-      file="quick-start.mdx"
-      entries={quickStart.entries}
-      sources={blocks}
-      steps={steps}
-    />
   );
 }

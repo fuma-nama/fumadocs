@@ -1,5 +1,6 @@
 import type { ComponentProps, ReactNode } from 'react';
 import { cn } from '@/lib/cn';
+import { DITHER_MASKS } from '../lib/dither';
 
 interface TitleBarProps {
   title?: ReactNode;
@@ -39,5 +40,17 @@ export function Window({ title, actions, children, className, ...props }: Window
       <TitleBar title={title} actions={actions} />
       {children}
     </div>
+  );
+}
+
+/** the dithered shadow under a window on a desk, 3px right and 4px down: put it first in an
+ * `isolate` box round the window */
+export function Shadow() {
+  return (
+    <span
+      aria-hidden
+      className="absolute inset-0 -z-10 translate-x-0.75 translate-y-1 bg-lp-ink-2"
+      style={{ maskImage: DITHER_MASKS[6], maskSize: '4px 4px' }}
+    />
   );
 }

@@ -1,42 +1,40 @@
-import { defineCollections } from 'fumadocs-mdx/macro';
-import type { SatteriPresetOptions } from '@fumadocs/satteri/preset';
-import { rehypeCodeFromHighlighter } from '@fumadocs/satteri/rehype-code';
-import { remarkAutoTypeTable } from '@fumadocs/satteri/remark-auto-type-table';
-import { createFileSystemGeneratorCache, createGenerator } from 'fumadocs-typescript';
-import { apiHighlighter, highlighter } from '@/lib/highlighter';
-import { frontmatter, remarkRaw, sourcesOf } from '../write/data';
+/** the source the figure edits: a component's props, `color` deprecated by the edit */
+export const FILE = 'button.tsx';
+export const EDIT = '  /** @deprecated Use `className`. */';
+export const SOURCE = `export interface ButtonProps {
+  /** The text inside the button. */
+  label: string;
+  /** Renders a link instead. */
+  href?: string;
+${EDIT}
+  color?: string;
+  /** Called when it is pressed. */
+  onPress?: () => void;
+}`;
 
-/** each block of `button.mdx`: what its tab calls it, the status line while it's pressed */
-export const steps = [
-  { tab: 'Preview', status: 'rendering <Button>' },
-  { tab: 'Props type', status: 'including button.tsx' },
-  { tab: 'Props table', status: 'generating ButtonProps' },
-  { tab: 'Releases', status: 'running <Releases>' },
+/** the source as it was before the edit, and the line the edit adds */
+export const BEFORE = SOURCE.replace(`${EDIT}\n`, '');
+export const EDIT_LINE = SOURCE.split('\n').indexOf(EDIT);
+
+/** the page the source documents */
+export const PAGE = { title: 'Button', description: 'A button, or a link with href.' };
+
+/** the component's releases, newest first: the first ships the edit */
+export const RELEASES = [
+  { title: '2.0.0', description: 'Deprecates color, use className.' },
+  { title: '1.2.0', description: 'Adds href, to render a link.' },
 ];
 
-/** the blocks of `button.mdx`, a file each for a plate each, compiled like the docs */
-export const button = defineCollections({
-  type: 'doc',
-  dir: 'app/(landing)/sections/automate/content',
-  compiler: 'satteri',
-  schema: frontmatter,
-  postprocess: { valueToExport: ['raw'] },
-  satteriOptions(): SatteriPresetOptions {
-    return {
-      rehypeCodeOptions: false,
-      mdastPlugins: [
-        remarkRaw(),
-        // as the docs make their type tables
-        remarkAutoTypeTable({
-          generator: createGenerator({
-            cache: createFileSystemGeneratorCache('.next/cache/fumadocs-typescript'),
-          }),
-          highlighter: apiHighlighter,
-        }),
-      ],
-      hastPlugins: [rehypeCodeFromHighlighter(highlighter)],
-    };
-  },
-});
+/**
+ * What the source makes, in the order its thread reaches them, one clockwise loop round the desk:
+ * each window, its title, and the status it reports as it pops.
+ */
+export const OUTPUTS = [
+  { id: 'props', title: 'ButtonProps', status: 'generating ButtonProps' },
+  { id: 'page', title: 'button.mdx', status: 'rendering button.mdx' },
+  { id: 'og', title: 'og.png', status: 'drawing og.png' },
+  { id: 'llms', title: 'llms.txt', status: 'writing llms.txt' },
+  { id: 'releases', title: 'releases', status: 'reading releases' },
+] as const;
 
-export const blocks = sourcesOf(button.entries);
+export type Output = (typeof OUTPUTS)[number]['id'];

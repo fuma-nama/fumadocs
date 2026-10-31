@@ -1,0 +1,190 @@
+/* Automate's desk: from 1024px three columns of two windows, each column stacked on its own; from
+ * 768px two columns of three, the rows snaking; below, one column, the windows inset by turns, a
+ * gap a clip's run long between them. The cables under them are routed from their boxes, so they
+ * follow any of these. */
+.am-desk {
+  position: relative;
+  padding-bottom: 20px;
+}
+
+.am-window {
+  position: relative;
+}
+
+@media (width < 768px) {
+  .am-desk {
+    display: flex;
+    flex-direction: column;
+    gap: 56px;
+  }
+
+  .am-stack {
+    display: contents;
+  }
+
+  .am-window {
+    width: calc(100% - 24px);
+  }
+
+  /* in the thread's order, by turns on the left and the right */
+  .am-source {
+    order: 1;
+  }
+
+  .am-props {
+    order: 2;
+    align-self: flex-end;
+  }
+
+  .am-page {
+    order: 3;
+  }
+
+  .am-og {
+    order: 4;
+    align-self: flex-end;
+  }
+
+  .am-llms {
+    order: 5;
+  }
+
+  .am-releases {
+    order: 6;
+    align-self: flex-end;
+  }
+}
+
+@media (768px <= width < 1024px) {
+  .am-desk {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: max(4%, 40px);
+    row-gap: 56px;
+    align-items: start;
+  }
+
+  .am-stack {
+    display: contents;
+  }
+
+  /* left to right, right to left, left to right; the right column a step lower */
+  .am-source {
+    grid-area: 1 / 1;
+  }
+
+  .am-props {
+    grid-area: 1 / 2;
+    margin-top: 32px;
+  }
+
+  .am-page {
+    grid-area: 2 / 2;
+    margin-top: 32px;
+  }
+
+  .am-og {
+    grid-area: 2 / 1;
+  }
+
+  .am-llms {
+    grid-area: 3 / 1;
+  }
+
+  .am-releases {
+    grid-area: 3 / 2;
+    margin-top: 32px;
+  }
+}
+
+/* each window's left edge and width as shares of the desk; the first row's tops and the gaps over
+ * the second as at 1440px, scaled with the desk but never under 0.8 of that (vertical margins in %
+ * are shares of the width) */
+@media (width >= 1024px) {
+  .am-desk {
+    display: grid;
+  }
+
+  .am-stack {
+    grid-area: 1 / 1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .am-source {
+    width: 32%;
+    margin-top: max(35.2px, 3.298%);
+  }
+
+  .am-releases {
+    width: 28.5%;
+    margin: max(80px, 7.496%) 0 0 1.6%;
+  }
+
+  .am-props {
+    width: 34%;
+    margin-left: 34.5%;
+  }
+
+  .am-llms {
+    width: 29%;
+    margin: max(63.2px, 5.922%) 0 0 32.7%;
+  }
+
+  .am-page {
+    width: 29%;
+    margin: max(22.4px, 2.099%) 0 0 71%;
+  }
+
+  .am-og {
+    width: 31%;
+    margin: max(41.6px, 3.898%) 0 0 67%;
+  }
+}
+
+/* what the edit changed: over a solid yellow flash, framed as the CLI frames a change, its text in
+ * the highlight's ink, then its own styles again by its bar; with none of its own transitions */
+.am-desk [data-mark] {
+  position: relative;
+  isolation: isolate;
+}
+
+.am-desk [data-mark],
+.am-desk [data-mark] * {
+  transition: none;
+}
+
+.am-desk [data-frame] {
+  border-radius: inherit;
+}
+
+/* a prop's row, inside its item's round corners */
+.am-props [data-frame] {
+  border-radius: 11px;
+}
+
+/* over the code's own colours, in either theme */
+.am-desk .am-window [data-pop] [data-mark='on'],
+.am-desk .am-window [data-pop] [data-mark='on'] * {
+  color: var(--color-lp-on-yellow);
+}
+
+/* the source's new line: a + in its gutter */
+.am-source .line[data-mark]::before {
+  content: '+';
+  position: absolute;
+  left: 3px;
+}
+
+/* below 1024 the page's code is its excerpt round the edit; before the edit its line's room is kept
+ * under the rest, as button.tsx keeps it */
+@media (width < 1024px) {
+  .am-page .line:not([data-excerpt]) {
+    display: none;
+  }
+
+  .am-page code {
+    min-height: 3lh;
+  }
+}

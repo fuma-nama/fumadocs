@@ -3,6 +3,7 @@ import { type ReactNode, useCallback, useId, useRef, useState } from 'react';
 import { cn } from '@/lib/cn';
 import { ditherPath } from '../../lib/dither';
 import { clamp } from '../../lib/motion';
+import { reduce } from '../../lib/script';
 import { paint, THEME_NAMES, THEMES, type ThemeId } from './data';
 import { createSprings, due, settleSprings, stepSprings } from './engine';
 import type { InkTable } from './presets';
@@ -64,7 +65,6 @@ function createKnob(
   const face = root.querySelector<SVGGElement>('[data-face]')!;
   const side = root.querySelector<SVGGElement>('[data-side]')!;
   const handle = root.querySelector<HTMLElement>('[role="slider"]')!;
-  const reduce = matchMedia('(prefers-reduced-motion: reduce)');
   const turn = createSprings(1, angleOf(initial));
   const clock = { last: 0, acc: 0 };
   let value = initial;
@@ -89,7 +89,7 @@ function createKnob(
 
   function settle() {
     turn.target[0] = angleOf(value);
-    if (reduce.matches) {
+    if (reduce()) {
       settleSprings(turn);
       draw();
     } else if (raf === 0) raf = requestAnimationFrame(frame);

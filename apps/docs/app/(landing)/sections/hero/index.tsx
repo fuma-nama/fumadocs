@@ -20,8 +20,9 @@ export function Hero() {
       className="grid min-h-[calc(100svh-var(--lp-menu-h))] grid-rows-[auto_1fr_auto] gap-x-12 px-(--lp-gutter) pb-(--lp-status-h) @container lg:grid-cols-2 lg:grid-rows-[1fr_auto]"
     >
       <div className="py-8 lg:self-center">
-        {/* below about 342px, "Build better docs," (7.7em) shrinks to fit inside the gutters */}
-        <h1 className="text-[clamp(min(2.5rem,100cqw/7.75),7.2vw,5rem)] leading-tight text-nowrap tracking-tight">
+        {/* "Build better docs," (7.7em) shrinks to fit: below about 342px inside the gutters,
+            beside the sky inside its column */}
+        <h1 className="text-[clamp(min(2.5rem,100cqw/7.75),7.2vw,5rem)] leading-tight text-nowrap tracking-tight lg:text-[min(7.2vw,(100cqw-3rem)/15.5,5rem)]">
           Build{' '}
           <span className="text-lp-orange font-medium">
             <Glitch>better docs</Glitch>

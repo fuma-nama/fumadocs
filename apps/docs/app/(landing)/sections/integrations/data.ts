@@ -25,20 +25,6 @@ export const modules: Module[] = [
     install: 'npm i fumadocs-openapi shiki',
   },
   {
-    title: 'AsyncAPI',
-    line: 'Docs for your event-driven APIs.',
-    pkg: '@fumadocs/asyncapi',
-    href: '/docs/integrations/asyncapi',
-    install: 'npm i @fumadocs/asyncapi shiki',
-  },
-  {
-    title: 'GraphQL',
-    line: 'Types, operations and a playground.',
-    pkg: '@fumadocs/graphql',
-    href: '/docs/integrations/graphql',
-    install: 'npm i @fumadocs/graphql graphql',
-  },
-  {
     title: 'AI Chat',
     line: 'Ask AI, answered from your docs.',
     pkg: '@fumadocs/ai-chat',
@@ -66,38 +52,16 @@ export const modules: Module[] = [
     href: '/docs/integrations/og',
     install: 'npx @fumadocs/cli feature og',
   },
-  {
-    title: 'Twoslash',
-    line: 'Compiler types on hover in code blocks.',
-    pkg: 'fumadocs-twoslash',
-    href: '/docs/markdown/twoslash',
-    install: 'npm i fumadocs-twoslash',
-  },
-  {
-    title: 'Type Table',
-    line: 'Props tables from your TypeScript types.',
-    pkg: 'fumadocs-typescript',
-    href: '/docs/ui/components/auto-type-table',
-    install: 'npm i fumadocs-typescript',
-  },
-  {
-    title: 'Story',
-    line: 'Component previews with prop controls.',
-    pkg: '@fumadocs/story',
-    href: '/docs/integrations/story',
-    install: 'npm i @fumadocs/story',
-  },
-  {
-    title: 'Obsidian',
-    line: 'Render an Obsidian vault as docs.',
-    pkg: 'fumadocs-obsidian',
-    href: '/docs/integrations/content/obsidian',
-    install: 'npm i fumadocs-obsidian shiki',
-  },
 ];
 
 /** further integrations, in the row under the board */
 export const more: { name: string; href: string }[] = [
+  { name: 'AsyncAPI', href: '/docs/integrations/asyncapi' },
+  { name: 'GraphQL', href: '/docs/integrations/graphql' },
+  { name: 'Twoslash', href: '/docs/markdown/twoslash' },
+  { name: 'Type Table', href: '/docs/ui/components/auto-type-table' },
+  { name: 'Story', href: '/docs/integrations/story' },
+  { name: 'Obsidian', href: '/docs/integrations/content/obsidian' },
   { name: 'Changelog', href: '/docs/integrations/changelog' },
   { name: 'Blog', href: '/docs/integrations/blog' },
   { name: 'Feedback', href: '/docs/integrations/feedback' },

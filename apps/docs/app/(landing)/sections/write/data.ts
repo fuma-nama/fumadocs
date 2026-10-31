@@ -14,41 +14,42 @@ declare module 'satteri' {
   }
 }
 
-/** each block of `quick-start.mdx`: what its tab calls it, the status line while it's pressed */
-export const steps = [
+/** a block on the press: what its tab calls it, the status line while it's pressed */
+export interface Step {
+  tab: string;
+  status: string;
+}
+
+/** each block of `quick-start.mdx` */
+export const steps: Step[] = [
   { tab: 'Frontmatter', status: 'rendering <DocsTitle>' },
   { tab: 'Install command', status: 'rendering <CodeBlockTabs>' },
   { tab: 'Type hints', status: 'running Twoslash' },
   { tab: 'Diagram', status: 'rendering <Mermaid>' },
 ];
 
-/** keeps a file's authored source, so the editor shows what was compiled */
-export function remarkRaw(): MdastPluginDefinition {
-  return {
-    name: 'remark-raw',
-    before(_root, ctx) {
-      ctx.data.raw = ctx.source.trim();
-    },
-  };
-}
-
-/** a file on the press: its first block is the page's frontmatter */
-export const frontmatter = z.object({
-  title: z.string().optional(),
-  description: z.string().optional(),
-});
-
 /** the blocks of `quick-start.mdx`, a file each for a plate each, compiled like the docs */
 export const quickStart = defineCollections({
   type: 'doc',
   dir: 'app/(landing)/sections/write/content',
   compiler: 'satteri',
-  schema: frontmatter,
+  schema: z.object({
+    title: z.string().optional(),
+    description: z.string().optional(),
+  }),
   postprocess: { valueToExport: ['raw'] },
   satteriOptions(): SatteriPresetOptions {
     return {
       rehypeCodeOptions: false,
-      mdastPlugins: [remarkRaw()],
+      // keeps a file's authored source, so the editor shows what was compiled
+      mdastPlugins: [
+        {
+          name: 'remark-raw',
+          before(_root, ctx) {
+            ctx.data.raw = ctx.source.trim();
+          },
+        } satisfies MdastPluginDefinition,
+      ],
       hastPlugins: [
         rehypeCodeFromHighlighter(
           ({ transformers }) => highlighter.override({ shikiTransformers: transformers }),
@@ -71,21 +72,16 @@ export const quickStart = defineCollections({
 });
 
 /** each block's authored source; the frontmatter is parsed apart, so it comes back from its data */
-export function sourcesOf(entries: typeof quickStart.entries): string[] {
-  const out: string[] = [];
-  for (const entry of entries) {
-    let source = '';
-    if (entry.title !== undefined) source += `title: ${entry.title}\n`;
-    if (entry.description !== undefined) source += `description: ${entry.description}\n`;
-    if (source) source = `---\n${source}---`;
-    const raw = entry._exports.raw;
-    if (typeof raw === 'string' && raw) source += (source ? '\n\n' : '') + raw;
-    out.push(source);
-  }
-  return out;
+export const blocks: string[] = [];
+for (const entry of quickStart.entries) {
+  let source = '';
+  if (entry.title !== undefined) source += `title: ${entry.title}\n`;
+  if (entry.description !== undefined) source += `description: ${entry.description}\n`;
+  if (source) source = `---\n${source}---`;
+  const raw = entry._exports.raw;
+  if (typeof raw === 'string' && raw) source += (source ? '\n\n' : '') + raw;
+  blocks.push(source);
 }
-
-export const blocks = sourcesOf(quickStart.entries);
 
 /** the sources as one file, a blank line between blocks */
 export function fileLines(sources: string[]): string[] {

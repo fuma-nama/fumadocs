@@ -7,6 +7,7 @@ import { Automate } from './sections/automate';
 import { Parts } from './sections/parts';
 import { Integrations } from './sections/integrations';
 import { Cli } from './sections/cli';
+import { Feedback, Wires } from './sections/feedback';
 import { Proof } from './sections/proof';
 import { Start } from './sections/start';
 import { summary } from './content';
@@ -28,7 +29,10 @@ export default function Page() {
       <Parts />
       <Integrations />
       <Cli />
-      <Proof />
+      <Wires>
+        <Proof />
+        <Feedback />
+      </Wires>
       <Start />
     </>
   );

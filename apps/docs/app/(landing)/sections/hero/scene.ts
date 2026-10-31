@@ -1,4 +1,5 @@
 import { bayer8 } from '../../lib/dither';
+import { distance, MATERIAL } from '../../lib/mesh';
 
 /**
  * The drawing's box, in moon radii: the ring and its prisms reach `REACH` either side of the moon's
@@ -66,167 +67,295 @@ const MARIA = [
   [60, -45, 3.5],
 ];
 
-/** craters, larger than life: latitude, longitude and radius in degrees, how far their rays reach
- * in radii (0: none). Tycho, Copernicus, Kepler, Aristarchus, Plato, Clavius, Langrenus,
- * Theophilus, Grimaldi */
+/** the named craters, larger than life: latitude, longitude and radius in degrees. Tycho,
+ * Copernicus, Kepler, Aristarchus, Plato, Clavius, Langrenus, Theophilus, Grimaldi */
 const CRATERS = [
-  [-43, -11, 4.5, 11],
-  [10, -20, 4.5, 7],
-  [8, -38, 2.5, 0],
-  [24, -47, 2.4, 0],
-  [52, -9, 3.8, 0],
-  [-58, -14, 6, 0],
-  [-9, 61, 4, 0],
-  [-11, 26, 3.6, 0],
-  [-5, -68, 4, 0],
-];
+  [-43, -11, 4.5],
+  [10, -20, 4.5],
+  [8, -38, 2.5],
+  [24, -47, 2.4],
+  [52, -9, 3.8],
+  [-58, -14, 6],
+  [-9, 61, 4],
+  [-11, 26, 3.6],
+  [-5, -68, 4],
+] as const;
+/** the rest, seeded over the near side largest first: how many, and their least and most radius in
+ * degrees; the smallest still reads as a hole at `CELL` */
+const FIELD = [
+  [4, 5, 7],
+  [20, 2.5, 4],
+  [80, 1.6, 2.2],
+] as const;
+/** how far Tycho's rays reach, in its radii */
+const RAYS = 11;
+/** the relief's texels a side, over the disc, and the slope it stores at full scale: the steeper
+ * slopes of foreshortened craters near the limb are clipped */
+const RELIEF = 256;
+const SLOPE = 2;
+
+type Point = [x: number, y: number, z: number];
 
 /** a point on the moon's near side: x right, y up, z toward the viewer */
-function onMoon(lat: number, lon: number): [number, number, number] {
+function onMoon(lat: number, lon: number): Point {
   const a = (lat * Math.PI) / 180;
   const b = (lon * Math.PI) / 180;
   return [Math.cos(a) * Math.sin(b), Math.sin(a), Math.cos(a) * Math.cos(b)];
 }
 
-/** each crater for the shader's `uCrater`: its centre and the sine of its radius */
-export const CRATER_UNIFORMS: [number, number, number, number][] = [];
-for (const [lat, lon, r] of CRATERS) {
-  CRATER_UNIFORMS.push([...onMoon(lat, lon), Math.sin((r * Math.PI) / 180)]);
+/** the chord across the sphere that `degrees` of arc spans */
+function chord(degrees: number): number {
+  return 2 * Math.sin((degrees * Math.PI) / 360);
+}
+
+/** the maria's blobs on the sphere, each radius as a chord */
+const MARE_BLOBS: { at: Point; across: number }[] = [];
+for (const [lat, lon, r] of MARIA) MARE_BLOBS.push({ at: onMoon(lat, lon), across: chord(r) });
+
+/** how much of a mare a point is in: its blobs' fields, merged */
+function mareAt(at: Point): number {
+  let field = 0;
+  for (const { at: centre, across } of MARE_BLOBS)
+    field += Math.max(0, 1 - (distance(at, centre) / across) ** 2);
+  return field;
 }
 
 /**
- * The moon's face over its disc, `size` px square, for the shader's `uFace`: R the maria's merging
- * field, G the rays, B the crater within 2 of its radii (16 a step, so a colour conversion can't
- * change it; 255: none). Drawn on a 2D canvas, so it costs well under a millisecond; `null` when the
- * page has no canvas memory left for it.
+ * Visits each texel of the relief (over the disc, row 0 its top) within `reach` of `at` on the
+ * sphere, with `u` its distance over `across` and `i` its index
  */
-export function drawFace(size: number): HTMLCanvasElement | null {
-  const canvas = document.createElement('canvas');
-  canvas.width = size;
-  canvas.height = size;
-  const ctx = canvas.getContext('2d');
-  if (!ctx) return null;
-  const half = size / 2;
-  ctx.fillStyle = 'rgb(0 0 255)';
-  ctx.fillRect(0, 0, size, size);
-  /** traces a cap of `r` degrees round (lat, lon), the ellipse it shows as; false past the limb */
-  const cap = (lat: number, lon: number, r: number, scale = 1): boolean => {
-    const [x, y, z] = onMoon(lat, lon);
-    if (z <= 0.05) return false;
-    const across = Math.sin((r * Math.PI) / 180) * half;
-    ctx.setTransform(1, 0, 0, 1, (x + 1) * half, (1 - y) * half);
-    ctx.rotate(Math.atan2(-y, x));
-    ctx.scale(z, 1);
-    ctx.beginPath();
-    ctx.arc(0, 0, across * scale, 0, Math.PI * 2);
-    return true;
+function stamp(at: Point, across: number, reach: number, visit: (u: number, i: number) => void) {
+  const half = RELIEF / 2;
+  const extent = across * reach;
+  const left = Math.max(0, Math.floor((at[0] - extent + 1) * half));
+  const right = Math.min(RELIEF - 1, Math.ceil((at[0] + extent + 1) * half));
+  const top = Math.max(0, Math.floor((1 - at[1] - extent) * half));
+  const bottom = Math.min(RELIEF - 1, Math.ceil((1 - at[1] + extent) * half));
+  for (let row = top; row <= bottom; row++) {
+    const y = 1 - (row + 0.5) / half;
+    for (let col = left; col <= right; col++) {
+      const x = (col + 0.5) / half - 1;
+      const zz = 1 - x * x - y * y;
+      if (zz <= 0) continue;
+      const dz = Math.sqrt(zz) - at[2];
+      const u = Math.sqrt((x - at[0]) ** 2 + (y - at[1]) ** 2 + dz * dz) / across;
+      if (u < reach) visit(u, row * RELIEF + col);
+    }
+  }
+}
+
+/**
+ * The moon's near side for the shader's `uRelief`, `RELIEF` texels square over the disc: RG the
+ * slope of its height field across the disc (x right, y up, 0.5 flat, `SLOPE` at full scale), B
+ * the surface's albedo over 1.25 (the maria darker, Tycho's rays brighter), A where a crater's
+ * bowl is. Craters are only relief: bowls, flat floors on the large ones and raised rims, sized to
+ * their radius so every one tilts as steeply. Baked once, in a few ms.
+ */
+export function bakeRelief(): ImageData {
+  const size = RELIEF;
+  const height = new Float32Array(size * size);
+  const bowl = new Uint8Array(size * size);
+  const maria = new Float32Array(size * size);
+  const rays = new Float32Array(size * size);
+
+  for (const { at, across } of MARE_BLOBS) {
+    stamp(at, across, 1, (u, i) => {
+      maria[i] += 1 - u * u;
+    });
+  }
+
+  // the named craters where they are, the rest seeded over the near side, within 80° of its middle
+  // and fewer on the maria, no centre in another's bowl
+  const craters: { at: Point; r: number; across: number }[] = [];
+  for (const [lat, lon, r] of CRATERS) craters.push({ at: onMoon(lat, lon), r, across: chord(r) });
+  let seed = 0x2f6b9d1;
+  const random = () => {
+    seed = (seed + 0x6d2b79f5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
-  for (let k = 0; k < CRATERS.length; k++) {
-    const [lat, lon, r] = CRATERS[k];
-    if (!cap(lat, lon, r * 2)) continue;
-    ctx.fillStyle = `rgb(0 0 ${k * 16 + 8})`;
-    ctx.fill();
-  }
-  // the channels add up from here: maria in red, rays in green
-  ctx.globalCompositeOperation = 'lighter';
-  for (const [lat, lon, r] of MARIA) {
-    if (!cap(lat, lon, r)) continue;
-    // (cos d - cos r) / (1 - cos r), nearly 1 - (d / r)^2
-    const across = Math.sin((r * Math.PI) / 180) * half;
-    const field = ctx.createRadialGradient(0, 0, 0, 0, 0, across);
-    for (const t of [0, 0.25, 0.5, 0.7, 0.85, 1]) {
-      field.addColorStop(t, `rgb(${Math.round((1 - t * t) * 255)} 0 0)`);
-    }
-    ctx.fillStyle = field;
-    ctx.fill();
-  }
-  ctx.setTransform(1, 0, 0, 1, 0, 0);
-  ctx.lineWidth = size / 64;
-  ctx.lineCap = 'round';
-  for (let k = 0; k < CRATERS.length; k++) {
-    const [lat, lon, r, reach] = CRATERS[k];
-    if (reach === 0) continue;
-    const [x, y] = onMoon(lat, lon);
-    const cx = (x + 1) * half;
-    const cy = (1 - y) * half;
-    const length = Math.sin((r * reach * Math.PI) / 180) * half;
-    for (let i = 0; i < 64; i++) {
-      const phi = (i / 64) * Math.PI * 2;
-      // uneven rays: where two waves round the crater crest together
-      const streak = Math.sin(phi * 7 + k * 2.1) + 0.7 * Math.sin(phi * 12 + k * 4.3);
-      if (streak < 1) continue;
-      const ex = cx + Math.cos(phi) * length;
-      const ey = cy + Math.sin(phi) * length;
-      const ray = ctx.createLinearGradient(cx, cy, ex, ey);
-      ray.addColorStop(0, 'rgb(0 0 0)');
-      ray.addColorStop(0.12, `rgb(0 ${Math.round(Math.min(1, streak - 0.9) * 255)} 0)`);
-      ray.addColorStop(1, 'rgb(0 0 0)');
-      ctx.strokeStyle = ray;
-      ctx.beginPath();
-      ctx.moveTo(cx, cy);
-      ctx.lineTo(ex, ey);
-      ctx.stroke();
+  const limb = Math.cos((80 * Math.PI) / 180);
+  for (const [count, least, most] of FIELD) {
+    for (let placed = 0, tries = 0; placed < count && tries < count * 50; tries++) {
+      const z = limb + random() * (1 - limb);
+      const angle = random() * Math.PI * 2;
+      const at: Point = [
+        Math.sqrt(1 - z * z) * Math.cos(angle),
+        Math.sqrt(1 - z * z) * Math.sin(angle),
+        z,
+      ];
+      const r = least + random() * (most - least);
+      const across = chord(r);
+      if (craters.some((o) => distance(o.at, at) < 1.2 * Math.max(o.across, across))) continue;
+      if (mareAt(at) > 0.35 && random() >= 0.25) continue;
+      craters.push({ at, r, across });
+      placed++;
     }
   }
-  return canvas;
+  for (const { at, r, across } of craters) {
+    const floor = r > 5 ? -0.45 : -0.6;
+    stamp(at, across, 1.5, (u, i) => {
+      if (u < 1) {
+        height[i] += across * Math.max(-0.6 * (1 - u * u), floor);
+        bowl[i] = 255;
+      } else height[i] += across * 0.25 * (1 - (u - 1) / 0.5) ** 2;
+    });
+  }
+
+  // Tycho's rays: streaks from its centre where two waves round it crest together, brightest near
+  // it, fading out by their reach; each drawn along and across in half texels
+  const half = size / 2;
+  const [tycho] = CRATERS;
+  const [tx, ty] = onMoon(tycho[0], tycho[1]);
+  const length = Math.sin((tycho[2] * RAYS * Math.PI) / 180) * half;
+  const width = half / 64;
+  for (let k = 0; k < 64; k++) {
+    const phi = (k / 64) * Math.PI * 2;
+    const streak = Math.sin(phi * 7) + 0.7 * Math.sin(phi * 12);
+    if (streak < 1) continue;
+    const peak = Math.min(1, streak - 0.9);
+    const ux = Math.cos(phi);
+    const uy = Math.sin(phi);
+    for (let along = 0; along < length; along += 0.5) {
+      const t = along / length;
+      const ray = (t < 0.12 ? t / 0.12 : (1 - t) / 0.88) * peak;
+      for (let across = -width; across <= width; across += 0.5) {
+        const col = Math.floor((tx + 1) * half + ux * along - uy * across);
+        const row = Math.floor((1 - ty) * half + uy * along + ux * across);
+        if (col < 0 || row < 0 || col >= size || row >= size) continue;
+        const i = row * size + col;
+        rays[i] = Math.max(rays[i], ray);
+      }
+    }
+  }
+
+  // RG the slope, across two texels and over its full scale, B the albedo, A the bowls: one
+  // little-endian word a texel
+  const image = new ImageData(size, size);
+  const texels = new Uint32Array(image.data.buffer);
+  texels.fill(128 | (128 << 8) | (204 << 16));
+  const per = size / 4 / SLOPE;
+  for (let row = 1; row < size - 1; row++) {
+    for (let col = 1; col < size - 1; col++) {
+      const i = row * size + col;
+      const gx = Math.max(-1, Math.min(1, (height[i + 1] - height[i - 1]) * per));
+      const gy = Math.max(-1, Math.min(1, (height[i - size] - height[i + size]) * per));
+      const mare = Math.max(0, Math.min(1, (maria[i] - 0.32) / 0.06));
+      const albedo = 1 - 0.38 * mare * mare * (3 - 2 * mare) + 0.15 * rays[i];
+      const red = (128.5 + 127 * gx) | 0;
+      const green = (128.5 + 127 * gy) | 0;
+      const blue = ((albedo / 1.25) * 255 + 0.5) | 0;
+      texels[i] = red | (green << 8) | (blue << 16) | (bowl[i] << 24);
+    }
+  }
+  return image;
 }
 
-let prisms = '';
-for (const { size } of SATELLITES) prisms += `${prisms ? ',' : ''}vec3(${size.join(',')})`;
+/** the moon's and the ring's materials, the figure's own */
+export const MOON = MATERIAL.figure;
+export const RING = MATERIAL.figure + 1;
 
 /**
- * The Fumadocs icon as the moon with its layers in orbit, one depth-tested scene: the moon (an
- * analytic sphere with its near side's face), the ring (a hairline ellipse) and three toon prisms
- * (analytic boxes). Shading is per cell (`uCell` CSS px) and 1-bit through an ordered dither; rims,
- * edges, crater lines and the ring are drawn at device resolution. The canvas is the sky: the moon
- * sits on its bottom edge in the middle (`HORIZON`, `uRadius`), at boot rising from `uRise` radii
- * lower, and its stars twinkle on `uTwinkle`, the tick.
+ * The moon's and the ring's materials, in the scene's moon radii (x right, y up, z toward the
+ * viewer, the moon's centre at the origin). The moon: a true circle with a pen a dot wide round it,
+ * its day side lit by the primary yellow, its night side the sky, shaded on cells counted from its
+ * middle so they rise with it: 2 dots at rest, `uCell` in the boot's mosaic. The ring: a hairline
+ * round the orbit's plane, drawn on to `uOrbit.w` of a turn.
  */
-export const moonFragment = `#version 300 es
-precision highp float;
-
-uniform vec2 uResolution;
-uniform float uDpr;
+export const figureShader = `
+uniform sampler2D uRelief;
 uniform float uRadius;
 uniform float uCell;
-uniform float uOutline;
-uniform float uRise;
+uniform float uDark;
+uniform vec4 uOrbit;
+uniform vec3 uInk, uPaper;
+
+const float SLOPE = ${SLOPE.toFixed(1)};
+// how far the relief's slope tilts the sphere's normal
+const float TILT = 1.2;
+const float TAU = 6.2831853;
+
+/** the moon's face at disc point at, on its dots counted from its middle, so they ride its rise */
+vec3 surface(vec2 at) {
+  vec2 cell = floor(at * uRadius / ((uCell < 2.5 ? 2.0 : uCell) * uDot));
+  vec2 pc = uCell < 2.5 ? at : (cell + 0.5) * uCell * uDot / uRadius;
+  float threshold = bayer8(cell);
+  vec2 p = pc / max(1.0, length(pc));
+  vec3 n = vec3(p, sqrt(max(0.0, 1.0 - dot(p, p))));
+  // row 0 of the relief is its top
+  vec4 near = textureLod(uRelief, vec2(p.x, -p.y) * 0.5 + 0.5, 0.0);
+  // the disc's slope back on the sphere: the screen's axes on its tangent plane, unnormalised,
+  // undo the limb's foreshortening
+  vec2 slope = (near.rg * 2.0 - 1.0) * SLOPE;
+  vec3 lean = slope.x * (vec3(1.0, 0.0, 0.0) - n * n.x) + slope.y * (vec3(0.0, 1.0, 0.0) - n * n.y);
+  vec3 normal = normalize(n - TILT * lean);
+  float sun = dot(n, uLight);
+  // out of the bowls, the relief only catches the sun: a rim's sunlit arc, never a dark ring
+  float facing = near.a > 0.5 ? dot(normal, uLight) : max(dot(normal, uLight), sun);
+  // brightness: the surface's albedo, the relief's light and a crisp terminator, the only way
+  // into the night side; a bowl's wall turned from the sun is in shade
+  bool hollow = near.a > 0.5 && sun > 0.15 && facing < 0.05;
+  float day = smoothstep(-0.04, 0.22, sun);
+  float b = hollow ? 0.0 : near.b * 1.25 * clamp(facing, 0.0, 1.0) * day;
+  // dark: one ramp from the night sky to the pale surface, then to the sun
+  if (uDark > 0.5)
+    return b < 0.6 ? (b / 0.6 > threshold ? uInk : uPaper) : ((b - 0.6) / 0.4 > threshold ? uYellow : uInk);
+  // light: the day side yellow with ink dots for shade, paper only across the terminator
+  if (hollow) return uInk;
+  float shade = 0.5 * clamp(1.0 - b / 0.6, 0.0, 1.0) * day;
+  return threshold < shade ? uInk : threshold >= 1.0 - day * (1.0 - shade) ? uYellow : uPaper;
+}
+
+vec4 moon(vec2 at) {
+  // canvas px past its rim: its edge and the dot of pen inside it blended across the px
+  float rim = (length(at) - 1.0) * uRadius;
+  if (rim > 0.5) discard;
+  float cover = clamp(0.5 - rim, 0.0, 1.0);
+  vec3 pen = uDark > 0.5 ? uYellow : uInk;
+  vec3 c = mix(surface(at), pen, clamp(rim + uDot + 0.5, 0.0, 1.0));
+  return vec4(c * cover, cover);
+}
+
+vec4 ring(vec2 at) {
+  float c = cos(uOrbit.z), s = sin(uOrbit.z);
+  vec2 screen = vec2(at.x, -at.y);
+  vec2 e = vec2(screen.x * c + screen.y * s, -screen.x * s + screen.y * c);
+  vec2 u = e / uOrbit.xy;
+  // dots off the ellipse
+  vec2 g = 2.0 * e / (uOrbit.xy * uOrbit.xy);
+  float gap = abs(dot(u, u) - 1.0) / length(g) * uRadius / uDot;
+  // the pen a dot wide starts at the right end and runs the way the satellites go; a dot of paper
+  // either side cuts the ring out of whatever it crosses
+  if (gap >= 1.5 || mod(-atan(u.y, u.x), TAU) > uOrbit.w * TAU) discard;
+  return vec4(mix(uPaper, uInk, clamp((0.5 - gap) * uDot + 0.5, 0.0, 1.0)), 1.0);
+}
+
+bool figure(int material, vec3 world, vec3 normal, vec2 px, inout vec4 color) {
+  color = material == ${MOON} ? moon(world.xy) : ring(world.xy);
+  return true;
+}
+`;
+
+/**
+ * The star field over the sky's `CELL` px cells, counted from its top left, where nothing else is
+ * drawn: bright stars rest as lit pluses and every few seconds sparkle up to a star, some to a
+ * burst, and back; faint ink dots thin out toward the horizon and glint for a tick now and then;
+ * every so often a shooting star crosses the upper sky, its trail dithering away behind it.
+ * Stepped on `uTwinkle`, ticks; none while the boot's mosaic is coarser than its cells.
+ */
+export const skyShader = `
+${bayer8}
 uniform float uTwinkle;
 // a shooting star: its head on the sky's cells, its side (0: none) and slope
 uniform vec4 uShoot;
-uniform float uDark;
-uniform vec3 uLight;
-uniform vec3 uLit;
-uniform vec3 uPaper;
-uniform vec3 uInk;
-// the face (drawFace): maria, rays, the nearest crater's index
-uniform sampler2D uFace;
-// centre, sine of the radius
-uniform vec4 uCrater[${CRATERS.length}];
-// a, b (moon radii), in-plane tilt (radians), drawn fraction
-uniform vec4 uOrbit;
-// centre (moon radii, y up, z toward the viewer), w: 0 hidden, 1 shown, 2 inverted
-uniform vec4 uPrism[3];
-uniform vec4 uPrismRotation[3];
+uniform float uCell;
+uniform vec3 uInk, uSun;
 
-out vec4 color;
-
-${bayer8}
-
-const vec3 PRISM[3] = vec3[](${prisms});
-const float REACH = ${REACH.toFixed(3)};
-const float HORIZON = ${HORIZON.toFixed(3)};
-const float CELL = ${CELL.toFixed(1)};
-// the star field's blocks, cells a side, a star at most in each, inside it
 const uint BLOCK = 26u;
 // a shooting star's trail, cells, and its solid start
 const float SHOOT_TRAIL = 30.0;
 const float SHOOT_SOLID = 5.0;
-const float TAU = 6.2831853;
-
-vec3 rotate(vec4 q, vec3 v) {
-  return v + 2.0 * cross(q.xyz, cross(q.xyz, v) + q.w * v);
-}
 
 uint hash(uvec2 p) {
   uint h = p.x * 0x9e3779b9u ^ p.y * 0x85ebca6bu;
@@ -244,23 +373,19 @@ int sparkle(vec2 d, int level) {
   return level == 3 && a.x == 2.0 && a.y == 2.0 ? 2 : 0;
 }
 
-/**
- * The star field over the sky's cells, counted from its top left: bright stars rest as lit pluses
- * and every few seconds sparkle up to a star, some to a burst, and back; faint ink dots thin out
- * toward the horizon and glint for a tick now and then; every so often a shooting star crosses the
- * upper sky, its trail dithering away behind it. Stepped on \`uTwinkle\`, ticks.
- */
-vec4 stars(vec2 cell, vec2 grid) {
+vec4 backdrop(vec2 px) {
+  if (uCell > ${CELL.toFixed(1)}) return vec4(0.0);
+  vec2 cell = floor(px / (${CELL.toFixed(1)} * uDot));
+  vec2 grid = floor(uBuf / (${CELL.toFixed(1)} * uDot));
   // a shooting star, its head a lit plus, its trail a staircase one cell thick
   if (uShoot.z != 0.0) {
-    if (sparkle(cell - uShoot.xy, 1) != 0) return vec4(uLit, 1.0);
+    if (sparkle(cell - uShoot.xy, 1) != 0) return vec4(uSun, 1.0);
     float behind = (uShoot.x - cell.x) * uShoot.z;
     if (behind > 0.0 && behind < SHOOT_TRAIL && cell.y == floor(uShoot.y - behind * uShoot.w + 0.5)) {
       float fade = (behind - SHOOT_SOLID) / (SHOOT_TRAIL - SHOOT_SOLID);
       return bayer8(cell) > fade ? vec4(uInk, 1.0) : vec4(0.0);
     }
   }
-
   // fewer toward the horizon, one in 7 bright; a burst's reach clear of the block's edges
   uvec2 block = uvec2(cell) / BLOCK;
   uint h = hash(block);
@@ -277,124 +402,6 @@ vec4 stars(vec2 cell, vec2 grid) {
   int level = !bright ? (at == 0u ? 1 : 0)
     : at == 1u && burst ? 3 : at == 0u || (at == 2u && burst) ? 2 : 1;
   int s = sparkle(d, level);
-  return s == 0 ? vec4(0.0) : vec4(s == 1 && bright ? uLit : uInk, 1.0);
-}
-
-/** the sky behind everything: its stars, once the boot's mosaic resolves */
-vec4 sky() {
-  float px = CELL * uDpr;
-  if (uCell > CELL) return vec4(0.0);
-  vec2 cell = floor(vec2(gl_FragCoord.x, uResolution.y - gl_FragCoord.y) / px);
-  return stars(cell, floor(uResolution / px));
-}
-
-void main() {
-  float radius = uRadius;
-  vec2 frag = gl_FragCoord.xy - vec2(uResolution.x * 0.5, (HORIZON - uRise) * radius);
-  // over the moon's crown and past the ring's reach: only the sky
-  if (frag.y > radius || abs(frag.x) > REACH * radius) {
-    color = sky();
-    return;
-  }
-  float cellPx = uCell * uDpr;
-  vec2 cell = floor(frag / cellPx);
-  // the cell's centre and the pixel itself, in moon radii
-  vec2 pc = (cell + 0.5) * cellPx / radius;
-  vec2 pf = frag / radius;
-  float threshold = bayer8(cell);
-
-  vec4 col = vec4(0.0);
-  float depth = -1e9;
-
-  // the moon: large cells (the mosaic) keep a blocky silhouette, small ones a true circle
-  float rim = length(frag) - radius;
-  if (uCell > 4.5 ? dot(pc, pc) <= 1.0 : rim <= 0.0) {
-    depth = sqrt(max(0.0, 1.0 - dot(pf, pf)));
-    if (uOutline > 0.5 && rim > -uDpr) {
-      col = vec4(uLit, 1.0);
-    } else {
-      vec2 p = pc / max(1.0, length(pc));
-      vec3 n = vec3(p, sqrt(max(0.0, 1.0 - dot(p, p))));
-      // an explicit level: no derivatives in this branch
-      vec4 face = textureLod(uFace, p * 0.5 + 0.5, 0.0);
-      float mare = smoothstep(0.32, 0.38, face.r);
-      vec3 normal = n;
-      bool shade = false;
-      int k = int(face.b * 255.0 / 16.0);
-      if (k < ${CRATERS.length}) {
-        // a crater's bowl tilts the surface toward its centre, its rim outward
-        vec4 crater = uCrater[k];
-        vec3 off = n - crater.xyz * dot(n, crater.xyz);
-        float u = length(off) / crater.w;
-        float slope = u < 1.0 ? -0.85 * u * u : max(0.0, 0.85 * (1.4 - u) / 0.4);
-        normal = normalize(n + off / max(length(off), 1e-5) * slope);
-        // the shaded side of its inner rim, a 1px line at the pixel
-        vec3 at = vec3(pf, sqrt(max(0.0, 1.0 - dot(pf, pf))));
-        vec3 edge = at - crater.xyz * dot(at, crater.xyz);
-        float rimGap = abs(length(edge) - crater.w * 0.92) * radius;
-        shade = rimGap < 0.5 * uDpr && dot(edge, uLight) > 0.0;
-      }
-      // the highlands in a halftone of the lit colour, the rays bright, the maria darker: on dark
-      // paper fewer dots, on light paper ink in the highlands' paper gaps, by day
-      float day = smoothstep(0.0, 0.48, dot(normal, uLight));
-      bool light = uDark < 0.5;
-      float level = day * (0.75 - (light ? 0.0 : 0.36 * mare) + 0.6 * face.g);
-      // earthshine: the night side keeps the dither's sparsest level, the maria dark
-      level = max(level, (1.0 - mare) * 0.07);
-      bool sea = light && mare > 0.5 && threshold < level + 0.25 * day;
-      bool ink = shade || (sea && level <= threshold);
-      col = vec4(ink ? uInk : level > threshold ? uLit : uPaper, 1.0);
-    }
-  } else col = sky();
-
-  // the prisms: rays straight down the view axis, intersected with each box
-  for (int i = 0; i < 3; i++) {
-    vec4 at = uPrism[i];
-    vec3 size = PRISM[i];
-    vec2 rel = pf - at.xy;
-    if (at.w < 0.5 || dot(rel, rel) > dot(size, size)) continue;
-    vec4 back = vec4(-uPrismRotation[i].xyz, uPrismRotation[i].w);
-    vec3 o = rotate(back, vec3(rel, 4.0 - at.z));
-    vec3 d = rotate(back, vec3(0.0, 0.0, -1.0));
-    vec3 t1 = (-size - o) / d;
-    vec3 t2 = (size - o) / d;
-    vec3 tmin = min(t1, t2);
-    vec3 tmax = max(t1, t2);
-    float near = max(max(tmin.x, tmin.y), tmin.z);
-    float far = min(min(tmax.x, tmax.y), tmax.z);
-    if (near > far || 4.0 - near <= depth) continue;
-    depth = 4.0 - near;
-    vec3 face = -sign(d) * step(tmin.yzx, tmin) * step(tmin.zxy, tmin);
-    vec3 hit = o + d * near;
-    // distance to the nearest edge of the face, in device px
-    vec3 e = size - abs(hit) + abs(face);
-    float edge = min(min(e.x, e.y), e.z) * radius;
-    // two flat tones, lit faces on the paper's side of the ink pair, a narrow dither band between
-    float lit = smoothstep(0.12, 0.32, dot(rotate(uPrismRotation[i], face), uLight));
-    bool bright = (lit > threshold) != (at.w > 1.5);
-    vec3 light = uDark > 0.5 ? uInk : uPaper;
-    vec3 dark = uDark > 0.5 ? uPaper : uInk;
-    col = vec4(edge < uDpr ? uInk : bright ? light : dark, 1.0);
-  }
-
-  // the ring: a hairline with its true depth, so the moon hides the back half
-  float c = cos(uOrbit.z), s = sin(uOrbit.z);
-  vec2 screen = vec2(pf.x, -pf.y);
-  vec2 e = vec2(screen.x * c + screen.y * s, -screen.x * s + screen.y * c);
-  vec2 u = e / uOrbit.xy;
-  float gap = abs(dot(u, u) - 1.0) / length(2.0 * e / (uOrbit.xy * uOrbit.xy)) * radius;
-  if (gap <= 2.5 * uDpr) {
-    // the pen starts at the right end and runs the way the satellites go
-    bool drawn = mod(-atan(u.y, u.x), TAU) <= uOrbit.w * TAU;
-    float z = sqrt(uOrbit.x * uOrbit.x - uOrbit.y * uOrbit.y) * u.y / length(u);
-    if (drawn && z > depth) {
-      // a paper halo cuts the ring out of whatever it crosses
-      if (col.a > 0.0) col.rgb = uPaper;
-      float cover = clamp(0.5 * uDpr + 0.5 - gap, 0.0, 1.0) * 0.82;
-      col = vec4(uInk * cover + col.rgb * (1.0 - cover), cover + col.a * (1.0 - cover));
-    }
-  }
-
-  color = col;
+  return s == 0 ? vec4(0.0) : vec4(s == 1 && bright ? uSun : uInk, 1.0);
 }
 `;

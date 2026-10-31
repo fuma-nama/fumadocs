@@ -11,7 +11,7 @@ export function Integrations() {
     <Figure
       id="integrations"
       aria-label="Integrations"
-      status={`${modules.length} integrations loaded`}
+      status={`${modules.length + more.length} integrations loaded`}
     >
       <Board
         modules={modules}
@@ -25,9 +25,8 @@ export function Integrations() {
 }
 
 /**
- * The board's last row: the further integrations rolling by after their count, a copy of the list
- * behind it. Pointed at, it holds still; a link focused from the keyboard brings it back to its
- * start, scrolled to show the link. A wrap with reduced motion.
+ * The board's last row: the further integrations after their count, as many whole names as fit on
+ * its line. A link focused from the keyboard is scrolled into view.
  */
 function More() {
   const items = [];
@@ -46,18 +45,14 @@ function More() {
   }
 
   return (
-    <Keyed className="bt-more group/more flex">
-      <p className="flex shrink-0 items-center border-e border-lp-line px-(--lp-gutter) font-pixel text-sm text-lp-orange">
+    <Keyed className="group/more flex">
+      <p className="flex shrink-0 items-center border-e border-lp-line px-(--lp-gutter) font-pixel text-[13.16px] leading-4 text-lp-orange antialiased">
         +{more.length} more
       </p>
-      <div className="me-(--lp-gutter) min-w-0 flex-1 overflow-x-clip group-data-keyed/more:overflow-x-hidden">
-        <div className="bt-marquee flex w-max group-hover/more:paused group-data-keyed/more:animate-none motion-reduce:w-auto">
-          <ul className="flex motion-reduce:flex-wrap">{items}</ul>
-          <ul aria-hidden inert className="flex motion-reduce:hidden">
-            {items}
-          </ul>
-        </div>
-      </div>
+      {/* the names that don't fit wrap out of sight, scrolled into it from the keyboard */}
+      <ul className="me-(--lp-gutter) flex h-11 min-w-0 flex-1 flex-wrap overflow-clip group-data-keyed/more:overflow-hidden">
+        {items}
+      </ul>
     </Keyed>
   );
 }

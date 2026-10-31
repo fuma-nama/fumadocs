@@ -47,8 +47,9 @@ interface DeskProps {
   className: string;
 }
 
-/** a switch's or a relay's click: two steps over a tick */
-const CLICK = 'transition-transform duration-125 ease-[steps(2,end)] motion-reduce:transition-none';
+/** a switch's or a relay's click, over a tick */
+const CLICK =
+  'transition-transform duration-125 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none';
 
 /** one switch per layout, the patched one's up */
 function DipBank({ on, className, style }: PartProps & { on: number }) {

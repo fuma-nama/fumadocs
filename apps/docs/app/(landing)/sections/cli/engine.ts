@@ -1,41 +1,34 @@
-import { cubicBezier } from 'motion/react';
-import { ditherKeyframes } from '../../lib/dither';
-import { createShaderCanvas, cssRgb } from '../../lib/gl';
-import { clamp, mix, type Rect, rectIn, settle, steer, TICK } from '../../lib/motion';
+import { DISSOLVE, ditherKeyframes } from '../../lib/dither';
+import { type Anchor, identity, type Mat4, transform, type Vec3 } from '../../lib/mesh';
+import { clamp, easeOut, mix, type Rect, rectIn, TICK } from '../../lib/motion';
+import { reduce, setText } from '../../lib/script';
 import { report } from '../../lib/status';
-import { isDark, onTheme } from '../../lib/theme';
 import {
+  type Box,
   type Cable,
-  CARDS,
-  fragment,
+  CAM,
+  CHAIN_Z,
+  createMachine,
+  CRATE_Z,
+  HOPPER_Z,
+  JAW,
+  JAW_HALF,
+  LID_T,
+  type Plan,
   PLUG,
   pointAt,
-  RADIUS,
-  ROPE_POINTS,
+  type Pose,
   type Route,
   routes,
-  type Vec3,
 } from './scene';
 
-/** CSS px: the camera's distance from the wall, and depths toward the viewer */
-const CAM = 2400;
-const CRATE_Z = 200;
-const CHAIN_Z = 44;
-const HOPPER_Z = 40;
-/** a file let go of passes behind the chain's frame, in the hopper's depth */
-const DROP_Z = 30;
+/** a file let go of passes in front of the chain and its drive gear, inside the hopper's depth */
+const DROP_Z = 76;
 const WALL = 8;
-const LID_T = 30;
 const LID_OPEN = 1.62;
 const LATCH_OPEN = 2.15;
-const LIGHT = normalize([-0.25, -0.42, 0.87]);
-/**
- * The chain as the shader draws it: a jaw's reach from the chain and half its length, the drive
- * gear's radius over its teeth and its distance from the sprocket it turns, and how far the chain's
- * frame reaches round its line
- */
-const JAW = 20;
-const JAW_HALF = 13;
+/** the drive gear's radius over its teeth and its distance from the sprocket it turns, and how far
+ * the chain's frame reaches round its line */
 const DRIVE = 11.5;
 const MESH = 23;
 const FRAME = 32;
@@ -69,19 +62,14 @@ const WRITE = 300;
 const LETTER = 70;
 const READ = 640;
 
-const ease = cubicBezier(...settle);
 /** the frame round your change: shown as it dithers in, dithered out a second later */
-const MARK = ditherKeyframes(2).reverse();
-for (const frame of MARK) frame.opacity = 1;
-/** the shader's array elements, named once */
-const CARD = names('uCard', CARDS);
-const CARD_Z = names('uCardZ', CARDS / 4);
-const ROPE = names('uRope', ROPE_POINTS * 2);
-/** a box with nothing in it: a change that shows nowhere else */
-const NONE = [0, 0, 0, 0];
+const MARK = DISSOLVE.map((frame) => ({ ...frame, opacity: 1 }));
 
 interface Card {
   el: HTMLElement;
+  /** where its top middle is drawn, scaled as it shows */
+  frame: Mat4;
+  anchor: Anchor;
   w: number;
   h: number;
   scale: number;
@@ -93,9 +81,6 @@ interface Card {
   fit: number;
   inlet: HTMLElement | undefined;
   reveals: HTMLElement[];
-  at: string;
-  /** set while it is carried */
-  release: (() => void) | undefined;
 }
 
 /** an import rewired: the old line struck, the new one typed */
@@ -109,7 +94,6 @@ interface Strike {
 }
 
 export function createCli(root: HTMLElement): () => void {
-  const reduce = matchMedia('(prefers-reduced-motion: reduce)');
   const listeners = new AbortController();
   const { signal } = listeners;
   const find = (name: string, from: ParentNode = root) =>
@@ -140,8 +124,10 @@ export function createCli(root: HTMLElement): () => void {
       const trigger = el?.firstElementChild;
       return trigger instanceof HTMLButtonElement ? trigger : el;
     };
+    // the run's files on the drawing: none without a machine
     const cards: Card[] = [];
-    for (const el of root.querySelectorAll<HTMLElement>(`[data-inlet]${own}`)) {
+    for (const [el, { frame, anchor }] of sheets) {
+      if (el.dataset.scene !== String(index)) continue;
       const reveals: HTMLElement[] = [];
       for (const path of el.dataset.reveals!.split(' ')) {
         const at = rows.get(path);
@@ -150,6 +136,8 @@ export function createCli(root: HTMLElement): () => void {
       const inlet = row(el.dataset.inlet!);
       cards.push({
         el,
+        frame,
+        anchor,
         w: 0,
         h: 0,
         scale: 1,
@@ -160,8 +148,6 @@ export function createCli(root: HTMLElement): () => void {
         fit: 1,
         inlet,
         reveals,
-        at: '',
-        release: undefined,
       });
     }
     const editor = root.querySelector<HTMLElement>(`[data-editor]${own}`)!;
@@ -215,6 +201,24 @@ export function createCli(root: HTMLElement): () => void {
       edited: page.hasAttribute('data-edited'),
     };
   }
+  const elements = root.querySelectorAll<HTMLElement>('[data-inlet]');
+  const counts = [0, 0];
+  for (const el of elements) counts[Number(el.dataset.scene)]++;
+  /** the machine's holes, one for each file of the longer run */
+  const holes = Math.max(...counts);
+  const machine = createMachine(root.querySelector('canvas')!, holes, {
+    onFrame,
+    onResize(width, height) {
+      size = [width, height];
+      layout();
+    },
+  });
+  /** each file's place on the drawing */
+  const sheets = new Map<HTMLElement, { frame: Mat4; anchor: Anchor }>();
+  for (const el of machine ? elements : []) {
+    const frame = identity();
+    sheets.set(el, { frame, anchor: machine!.mesh.anchor(el, frame) });
+  }
   let scene = load(0);
 
   function pick(i: number) {
@@ -250,13 +254,7 @@ export function createCli(root: HTMLElement): () => void {
   // the editor's tabs work with or without the machine
   root.addEventListener('click', onTab, { signal });
   root.addEventListener('keydown', onTab, { signal });
-  const shader = createShaderCanvas(root.querySelector('canvas')!, {
-    fragment,
-    onResize: layout,
-    onVisible,
-    preserve: true,
-  });
-  if (!shader) {
+  if (!machine) {
     // no machine to run: the figure rests on its end state, as it does without script
     figure.toggleAttribute('data-static', true);
     return () => {
@@ -264,14 +262,11 @@ export function createCli(root: HTMLElement): () => void {
       figure.removeAttribute('data-static');
     };
   }
-  const gl = shader;
-  // world points are stage px, z toward the viewer; the camera is level with the stage's top
+  const mesh = machine.mesh;
+  // world points are stage px, y down, z toward the viewer; the camera is level with the stage's top
+  let size = [0, 0];
   let footX = 0;
-  let floor = 0;
-  const sockets: Vec3[] = [
-    [0, 0, 0],
-    [0, 0, 0],
-  ];
+  let plan: Plan | undefined;
   /** from its tail along `dir` to where it lets go; the files hang opposite `side` */
   const chain = { tail: [0, 0], dir: [0, -1], side: [1, 0], length: 1 };
   /** where a file hangs from its jaw: the share of its width before the jaw, its top below it */
@@ -291,9 +286,6 @@ export function createCli(root: HTMLElement): () => void {
   let phase: 'rest' | 'ready' | 'play' | 'hold' = 'rest';
   let clock = 0;
   let last = -1;
-  let frame = 0;
-  /** some of the stage is on screen */
-  let onScreen = false;
   /** your project's rows moved during the play: the cables follow them on its next frame */
   let rewire = false;
   /** the line being typed into, the caret after its text */
@@ -311,25 +303,11 @@ export function createCli(root: HTMLElement): () => void {
   let status = '';
   /** the tab the play last turned to: a tab you pick mid-play stays until the next beat */
   let beatTab = -1;
-  /** each cable's rope as last uploaded, and its box */
-  const ropes: { route?: Route; end: number; box: number[] }[] = [
-    { end: -1, box: [0, 0, 0, 0] },
-    { end: -1, box: [0, 0, 0, 0] },
-  ];
-  /** each group's screen box, all that a change to it redraws */
-  const groups = Array.from({ length: 4 }, () => [0, 0, 0, 0]);
-  /** each carried file's box as last drawn, and the box a change redraws: the last and the new */
-  const drawn = Array.from({ length: CARDS }, () => [0, 0, 0, 0]);
-  const redraw = [0, 0, 0, 0];
+  /** each cable's rope as last drawn */
+  const ropes: { route?: Route; end: number }[] = [{ end: -1 }, { end: -1 }];
+  const pose: Pose = { latch: [0, 0], lid: 0, travel: 0, reels: [0, 0], plugged: [false, false] };
   const scratch: Vec3 = [0, 0, 0];
   const point: Vec3 = [0, 0, 0];
-  /** a carried file's box, the reels' turns and the jacks plugged in, set each frame */
-  const hole = [0, 0, 0, 0];
-  const spin = [0, 0];
-  const plugged = [0, 0];
-  /** the carried files' depths, four to a uniform */
-  const depths: [number, number, number, number][] = [];
-  for (let i = 0; i < CARDS / 4; i++) depths.push([0, 0, 0, 0]);
 
   function project(x: number, y: number, z: number): Vec3 {
     const k = CAM / (CAM - z);
@@ -344,52 +322,19 @@ export function createCli(root: HTMLElement): () => void {
     return [footX + (x - footX) / k, y / k, z];
   }
 
-  /** screen bounds of a world box and its shadow on the wall */
-  function bounds(min: Vec3, max: Vec3) {
-    let x0 = Infinity;
-    let y0 = Infinity;
-    let x1 = -Infinity;
-    let y1 = -Infinity;
-    for (let i = 0; i < 8; i++) {
-      const p: Vec3 = [i & 1 ? max[0] : min[0], i & 2 ? max[1] : min[1], i & 4 ? max[2] : min[2]];
-      const s = p[2] / LIGHT[2];
-      for (const q of [p, [p[0] - LIGHT[0] * s, p[1] - LIGHT[1] * s, 0]]) {
-        const [x, y] = project(q[0], q[1], q[2]);
-        x0 = Math.min(x0, x);
-        y0 = Math.min(y0, y);
-        x1 = Math.max(x1, x);
-        y1 = Math.max(y1, y);
-      }
-    }
-    return [x0 - 6, y0 - 6, x1 + 6, y1 + 6];
-  }
-
-  /** a box whose front face, at z, frames `rect`; the shader leaves `rect` open */
-  function housing(name: string, rect: Rect, z: number, depth: number, border: number) {
-    gl.set(name, [rect.x, rect.y, rect.x + rect.w, rect.y + rect.h]);
+  /** the box `rect` shows on the screen at depth z, `depth` deep behind it */
+  function panel(rect: Rect, z: number, depth: number, border = 0): Box {
     const a = unproject(rect.x - border, rect.y - border, z);
     const b = unproject(rect.x + rect.w + border, rect.y + rect.h + border, z);
-    gl.set(`${name}C`, [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2, z - depth]);
-    gl.set(`${name}B`, [(b[0] - a[0]) / 2, (b[1] - a[1]) / 2, depth]);
+    return {
+      at: [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2, z - depth / 2],
+      half: [(b[0] - a[0]) / 2, (b[1] - a[1]) / 2, depth / 2],
+    };
   }
 
-  function colours() {
-    const style = getComputedStyle(document.documentElement);
-    const night = isDark();
-    const paper = cssRgb(style.getPropertyValue('--lp-paper'));
-    const ink = cssRgb(style.getPropertyValue('--lp-ink'));
-    gl.set('uLit', night ? ink : paper);
-    gl.set('uShade', night ? paper : ink);
-    gl.set('uPen', ink);
-    // shadows are dots in the tone of the sheet's lines
-    const line = night ? 0.75 : 0.82;
-    gl.set('uLine', [
-      mix(paper[0], ink[0], line),
-      mix(paper[1], ink[1], line),
-      mix(paper[2], ink[2], line),
-    ]);
-    gl.set('uAccent', cssRgb(style.getPropertyValue(night ? '--lp-orange' : '--lp-sun')));
-    gl.invalidate();
+  /** a box whose front face, at z, frames `rect`; a hole down to the page over `rect` */
+  function housing(rect: Rect, z: number, depth: number, border: number) {
+    return { box: panel(rect, z, 2 * depth, border), window: panel(rect, z + 0.5, 0.5) };
   }
 
   /** how far the chain has moved at `t`: spun up, at speed, spun down from its stop */
@@ -474,11 +419,8 @@ export function createCli(root: HTMLElement): () => void {
 
   function layout() {
     const s = root.getBoundingClientRect();
-    if (s.width === 0) return;
+    if (s.width === 0 || size[0] === 0) return;
     footX = s.width / 2;
-    gl.set('uEye', [footX, 0, CAM]);
-    gl.set('uLight', LIGHT);
-    gl.set('uCell', 2);
     const chars = scene.command.children as HTMLCollectionOf<HTMLElement>;
     const caretHeight = caret.offsetHeight;
     for (let i = 0; i <= chars.length; i++) {
@@ -496,42 +438,29 @@ export function createCli(root: HTMLElement): () => void {
     const slot = rectIn(crate, s);
     const a = unproject(slot.x, slot.y, CRATE_Z);
     const b = unproject(slot.x + slot.w, slot.y + slot.h, CRATE_Z);
-    floor = b[1];
-    const size: Vec3 = [(b[0] - a[0]) / 2, (b[1] - a[1] - LID_T) / 2, Math.round(slot.h / 4)];
-    const centre: Vec3 = [(a[0] + b[0]) / 2, floor - size[1], CRATE_Z - size[2]];
-    const top = floor - 2 * size[1];
-    gl.set('uFloor', [floor, CRATE_Z + 24]);
-    gl.set('uCrate', centre);
-    gl.set('uCrateSize', size);
-    gl.set('uLidT', LID_T);
+    const floor = b[1];
+    const half: Vec3 = [(b[0] - a[0]) / 2, (b[1] - a[1] - LID_T) / 2, Math.round(slot.h / 4)];
+    const centre: Vec3 = [(a[0] + b[0]) / 2, floor - half[1], CRATE_Z - half[2]];
+    const top = floor - 2 * half[1];
     const tag = rectIn(label, s);
-    housing('uLabel', tag, CRATE_Z + 3, 3, 6);
     // the sockets stand above the corner caps, right of the label; the right one's cable clears it
-    const socket = centre[0] + size[0] - 30;
+    const socket = centre[0] + half[0] - 30;
     const beside = unproject(tag.x + tag.w + 6, 0, CRATE_Z)[0] + 15;
-    sockets[0] = [socket, floor - 37, CRATE_Z];
-    sockets[1] = [Math.max(socket - 30, beside), floor - 37, CRATE_Z];
-    gl.set('uSocket[0]', sockets[0]);
-    gl.set('uSocket[1]', sockets[1]);
     inside = [centre[0], top + 30, centre[2]];
     // the top of the lid, standing open behind the crate
-    const lid = project(centre[0], top - 2 * size[2] - 6, centre[2] - size[2])[1];
+    const lid = project(centre[0], top - 2 * half[2] - 6, centre[2] - half[2])[1];
 
     for (const card of scene.cards) {
       card.w = card.el.offsetWidth;
       card.h = card.el.offsetHeight;
-      card.at = '';
     }
 
     const sign = rectIn(plate, s);
     const front = CHAIN_Z + 22;
-    housing('uDrive', sign, front, 18, 8);
     const counter = rectIn(scene.counter, s);
-    housing('uCounter', counter, HOPPER_Z + 24, 4, 5);
     const treeBox = rectIn(scene.tree, s);
     const editor = rectIn(scene.editor, s);
     const gutter = Number.parseFloat(getComputedStyle(root).paddingLeft);
-    gl.set('uFrame', [gutter, s.width - gutter]);
 
     // the chain carries files from over the crate to the hopper: up beside it when the hopper's
     // mouth stands above the crate, across over it otherwise. Its drive gear hangs under the
@@ -555,12 +484,6 @@ export function createCli(root: HTMLElement): () => void {
     // a file hangs beside an upright chain from its jaw's top, under a level one from its middle
     hang.share = (1 + chain.side[0]) / 2;
     hang.top = upright ? 1 - JAW_HALF : 2;
-    gl.set('uChain', [tail[0], tail[1], chain.dir[0], chain.dir[1]]);
-    gl.set('uChainLength', [span, CHAIN_Z]);
-    gl.set('uChainSide', chain.side);
-    gl.set('uDriveGear', drive);
-    gl.set('uJaw', JAW);
-    gl.set('uJawBox', upright ? [2.5, JAW_HALF] : [JAW_HALF, 2.5]);
 
     // the hopper on your project's window, its counter on its front, its mouth as wide as it can be
     // inside the gutters and clear of the machine to its left
@@ -571,15 +494,13 @@ export function createCli(root: HTMLElement): () => void {
     const rim = HOPPER_Z + 25;
     const left = upright
       ? project(head[0] + FRAME, 0, CHAIN_Z)[0]
-      : project(centre[0] + size[0] + 16, 0, CRATE_Z - 30)[0];
+      : project(centre[0] + half[0] + 16, 0, CRATE_Z - 30)[0];
     const halfWidth = Math.min(
       counter.w / 2 + LIP,
       unproject(s.width - gutter, 0, rim)[0] - hopper[0] - 4,
       hopper[0] - unproject(Math.max(gutter, left + 8), 0, rim)[0] - 4,
     );
     const spout = Math.min(counter.w / 2 + 6, halfWidth);
-    gl.set('uHopper', hopper);
-    gl.set('uHopperSize', [halfWidth, spout, neck[1] - hopper[1], 22]);
 
     // wide files shrink to stay inside the gutters, on the chain and rising out of the crate
     const lo = gutter + 4;
@@ -623,7 +544,6 @@ export function createCli(root: HTMLElement): () => void {
     grip(0);
     const queue = Math.hypot(point[0] - inside[0], point[1] + pop - inside[1]);
     lift = Math.max(1, Math.floor((queue + pop) / pitch)) * pitch;
-    gl.set('uPitch', pitch);
 
     // let go, a file lands in the middle of the hopper's front, narrow enough for its spout
     const atDrop = CAM / (CAM - DROP_Z);
@@ -638,43 +558,54 @@ export function createCli(root: HTMLElement): () => void {
       card.drop = (Math.sqrt(FALL * FALL + 2 * PULL * card.way) - FALL) / PULL;
     }
 
+    plan = {
+      width: size[0],
+      height: size[1],
+      gutter,
+      right: 0,
+      bottom: 0,
+      eye: footX,
+      floor,
+      crate: { at: centre, half },
+      sockets: [
+        [socket, floor - 37, CRATE_Z],
+        [Math.max(socket - 30, beside), floor - 37, CRATE_Z],
+      ],
+      housings: [
+        housing(tag, CRATE_Z + 3, 3, 6),
+        housing(sign, front, 18, 8),
+        housing(counter, HOPPER_Z + 24, 4, 5),
+      ],
+      windows: [panel(treeBox, 1, 1), panel(editor, 1, 1)],
+      chain: {
+        tail,
+        dir: [chain.dir[0], chain.dir[1]],
+        side: [chain.side[0], chain.side[1]],
+        span,
+        upright,
+      },
+      drive,
+      pitch,
+      hopper: { at: hopper, top: halfWidth, spout, height: neck[1] - hopper[1] },
+      cables: 0,
+      reels: [],
+      jacks: [],
+    };
     wire(s);
-
-    groups[0] = bounds(
-      [centre[0] - size[0] - 20, top - LID_T - 2 * size[2] - 10, 0],
-      [centre[0] + size[0] + 24, floor, CRATE_Z + 10],
-    );
-    // the chain runs right or up from its tail, the plate's housing above it
-    const housed = unproject(sign.x - 10, sign.y - 10, 0);
-    groups[1] = bounds(
-      [Math.min(housed[0], tail[0] - FRAME), Math.min(housed[1], head[1] - FRAME), 0],
-      [head[0] + FRAME, tail[1] + FRAME, CHAIN_Z + 42],
-    );
-    groups[2] = bounds(
-      [hopper[0] - halfWidth - 6, hopper[1] - 8, 0],
-      [hopper[0] + halfWidth + 6, neck[1] + 8, HOPPER_Z + 30],
-    );
-    groups[3] = wires.length
-      ? bounds([treeBox.x + treeBox.w - 12, editor.y, 0], [editor.x + 12, floor, 24])
-      : [0, 0, 0, 0];
-    for (let g = 0; g < groups.length; g++) gl.set(`uBox[${g}]`, groups[g]);
-    const windows = [treeBox, editor];
-    for (let i = 0; i < windows.length; i++) {
-      const r = windows[i];
-      gl.set(`uWindow[${i}]`, [r.x, r.y, r.x + r.w, r.y + r.h]);
-    }
 
     beats = schedule();
     // a run waiting for the editor waits where its rewrites now start
     if (phase === 'hold') clock = beats.strikes[0] - 1;
     landedShown = -1;
     render(phase === 'rest' ? beats.end : clock);
-    gl.invalidate();
   }
 
   /** the cables from the editor's reels into your project's rows, down the gap between them */
   function wire(s: DOMRect) {
+    if (!plan) return;
     wires.length = 0;
+    plan.reels.length = 0;
+    plan.jacks.length = 0;
     for (const rope of ropes) rope.end = -1;
     const treeBox = rectIn(scene.tree, s);
     const editor = rectIn(scene.editor, s);
@@ -696,18 +627,38 @@ export function createCli(root: HTMLElement): () => void {
             reel: [reel[0] - REEL, reel[1], WALL],
             lane,
             wall: WALL,
-            floor,
+            floor: plan.floor,
             front,
             forward: unproject(project(lane, 0, WALL)[0], 0, front)[0],
-            socket: [sockets[i][0], sockets[i][1], CRATE_Z + 2],
+            socket: [plan.sockets[i][0], plan.sockets[i][1], CRATE_Z + 2],
             target,
           }),
         );
-        gl.set(`uReel[${i}]`, reel);
-        gl.set(`uJack[${i}]`, [target[0] - 3, target[1], WALL]);
+        plan.reels.push(reel);
+        plan.jacks.push([target[0] - 3, target[1], WALL]);
       }
     }
-    gl.set('uCables', wires.length);
+    plan.cables = wires.length;
+    // the drawing spans the machine, its cables and their shadows, no more of the stage
+    const { at: c, half: b } = plan.crate;
+    const { at: h, top, height } = plan.hopper;
+    const head = plan.chain.tail[0] + plan.chain.dir[0] * plan.chain.span;
+    let right = Math.max(
+      project(c[0] + b[0] + 8, 0, CRATE_Z)[0],
+      project(h[0] + top + 3, 0, HOPPER_Z + 25)[0],
+      project(head + FRAME, 0, CHAIN_Z)[0],
+    );
+    let bottom = Math.max(
+      project(0, plan.floor, CRATE_Z + 60)[1],
+      project(0, h[1] + height, HOPPER_Z)[1],
+    );
+    for (let i = 0; i < wires.length; i++) {
+      right = Math.max(right, plan.reels[i][0] + REEL);
+      bottom = Math.max(bottom, plan.jacks[i][1]);
+    }
+    plan.right = Math.min(right + 40, s.width - plan.gutter);
+    plan.bottom = Math.min(bottom + 40, plan.height);
+    machine!.layout(plan);
   }
 
   /** your project's rows moved under the cables, its list scrolled or a folder opened: re-plug */
@@ -719,7 +670,6 @@ export function createCli(root: HTMLElement): () => void {
     }
     wire(root.getBoundingClientRect());
     render(phase === 'rest' ? beats.end : clock);
-    gl.draw();
   }
 
   function render(t: number) {
@@ -734,12 +684,12 @@ export function createCli(root: HTMLElement): () => void {
       if (shown < length) scene.command.style.setProperty('--typed', String(shown));
       else scene.command.style.removeProperty('--typed');
     }
-    const typing = !live || t > b.lid ? 'none' : t < TYPE || t > b.typed ? 'blink' : 'solid';
+    // solid while typing, blinking on the play's clock a beat at a time after it, gone once run
+    const blink = t > b.typed && Math.floor((t - b.typed) / (2 * TICK)) % 2 === 1;
+    const typing = !live || t > b.lid || blink ? 'hidden' : 'visible';
     if (typing !== caretMode) {
       caretMode = typing;
-      caret.style.visibility = typing === 'none' ? 'hidden' : 'visible';
-      // a hidden caret's animation would still tick
-      caret.classList.toggle('animate-lp-caret', onScreen && typing === 'blink');
+      caret.style.visibility = typing;
     }
     const at = `translate(${scene.ends[shown * 2].toFixed(1)}px, ${scene.ends[shown * 2 + 1].toFixed(1)}px)`;
     if (at !== caretAt) {
@@ -747,20 +697,12 @@ export function createCli(root: HTMLElement): () => void {
       caret.style.transform = at;
     }
 
-    gl.set(
-      'uLatch',
-      [
-        live ? LATCH_OPEN * spring(clamp((t - b.latch[0]) / 260)) : LATCH_OPEN,
-        live ? LATCH_OPEN * spring(clamp((t - b.latch[1]) / 260)) : LATCH_OPEN,
-      ],
-      groups[0],
-    );
-    gl.set('uLid', live ? lidAngle(t - b.lid) : LID_OPEN, groups[0]);
-
+    for (let i = 0; i < 2; i++)
+      pose.latch[i] = live ? LATCH_OPEN * spring(clamp((t - b.latch[i]) / 260)) : LATCH_OPEN;
+    pose.lid = live ? lidAngle(t - b.lid) : LID_OPEN;
     const distance = live ? travel(t) : b.travel;
-    gl.set('uPhase', distance, groups[1]);
-    gl.set('uSpin', distance / 13, groups[1]);
-    let holes = 0;
+    pose.travel = distance;
+    let used = 0;
     let landed = 0;
     for (let i = 0; i < scene.cards.length; i++) {
       const card = scene.cards[i];
@@ -768,18 +710,12 @@ export function createCli(root: HTMLElement): () => void {
       const s = distance - lift - i * pitch;
       const out = t - b.release[i];
       if (live && t >= b.landed[i]) landed++;
-      if (!live || s <= -lift || t >= b.landed[i]) {
-        if (card.release) {
-          card.release();
-          card.release = undefined;
-          card.el.style.visibility = '';
-        }
-        continue;
+      const carried = live && s > -lift && t < b.landed[i];
+      if (card.anchor.shown !== carried) {
+        card.anchor.shown = carried;
+        card.el.style.visibility = carried ? 'visible' : '';
       }
-      if (!card.release) {
-        card.release = steer(card.el);
-        card.el.style.visibility = 'visible';
-      }
+      if (!carried) continue;
       // where its top middle is, how deep, and how much of its size it shows
       let x: number;
       let y: number;
@@ -792,7 +728,7 @@ export function createCli(root: HTMLElement): () => void {
         x = mix(card.from[0], card.to[0], u);
         y = mix(card.from[1], card.to[1], u);
         z = DROP_Z;
-        fit = mix(1, card.fit, u);
+        fit = mix((CAM - DROP_Z) / (CAM - CHAIN_Z), card.fit, u);
       } else if (s < 0) {
         // rising out of the crate in the queue, then up into its jaw at the chain's tail
         const u = Math.min(1, (s + lift) / (lift - pop));
@@ -805,35 +741,15 @@ export function createCli(root: HTMLElement): () => void {
         grip(s);
         x = point[0] + offset;
         y = point[1];
-        z = s < SETTLE ? mix(inside[2], CHAIN_Z, ease(s / SETTLE)) : CHAIN_Z;
+        z = s < SETTLE ? mix(inside[2], CHAIN_Z, easeOut(s / SETTLE)) : CHAIN_Z;
       }
-      const [sx, sy, depth] = project(x, y, z);
-      const k = depth * fit * card.scale;
-      const left = sx - (card.w / 2) * k;
-      const transform = `translate(${left.toFixed(1)}px, ${sy.toFixed(1)}px) scale(${k.toFixed(4)})`;
-      if (transform !== card.at) {
-        card.at = transform;
-        card.el.style.transform = transform;
-      }
-      if (holes < CARDS) {
-        hole[0] = left;
-        hole[1] = sy;
-        hole[2] = left + card.w * k;
-        hole[3] = sy + card.h * k;
-        cover(drawn[holes], hole);
-        gl.set(CARD[holes], hole, redraw);
-        const quad = holes >> 2;
-        depths[quad][holes % 4] = z;
-        gl.set(CARD_Z[quad], depths[quad], redraw);
-        holes++;
-      }
+      const k = fit * card.scale;
+      transform(card.frame, [x, y, z], undefined, [k, k, k]);
+      card.anchor.offset = [-card.w / 2, 0];
+      machine!.sheet(used++, card.frame, card.w, card.h);
     }
-    // the boxes files were carried in, without them
-    for (let i = holes; i < CARDS && drawn[i][2] > drawn[i][0]; i++) {
-      gl.set(CARD[i], NONE, drawn[i]);
-      drawn[i].fill(0);
-    }
-    gl.set('uCards', holes, NONE);
+    // the holes files were carried in, without them
+    for (let i = used; i < holes; i++) machine!.sheet(i, null);
 
     if (landed !== landedShown) {
       // the rows of the files landed since; all of them again after a reset
@@ -882,8 +798,6 @@ export function createCli(root: HTMLElement): () => void {
       setText(strike.cut, text);
     }
 
-    spin.fill(0);
-    plugged.fill(0);
     for (let i = 0; i < wires.length; i++) {
       const c = wires[i];
       const u = live ? t - b.plugs[i] : Infinity;
@@ -895,18 +809,22 @@ export function createCli(root: HTMLElement): () => void {
       } else if (u >= 0) {
         route = c.done;
         end = c.done.length - (c.done.length - c.turn) * (1 - springOut(clamp((u - wind) / 150)));
-        plugged[i] = 1;
       }
-      spin[i] = (c.sealed.length - end) / REEL;
+      pose.plugged[i] = route === c.done;
+      pose.reels[i] = (c.sealed.length - end) / REEL;
       if (ropes[i].route !== route || ropes[i].end !== end) {
         ropes[i].route = route;
         ropes[i].end = end;
-        upload(i, route, end);
+        // its rope up to its plug, then the plug
+        const points: Vec3[] = [];
+        for (let j = 0; j < route.points.length && route.at[j] < end - PLUG; j++)
+          points.push(route.points[j]);
+        points.push(pointAt(route, end - PLUG, [0, 0, 0]), pointAt(route, end, [0, 0, 0]));
+        machine!.rope(i, points);
       }
       if (u >= wind + 150 && u < wind + 150 + TICK) flash(scene.cables[i].row, t);
     }
-    gl.set('uReelSpin', spin, groups[3]);
-    gl.set('uJackOn', plugged, groups[3]);
+    machine!.pose(pose);
 
     const e = t - b.edit;
     const cut = scene.editCut;
@@ -927,7 +845,7 @@ export function createCli(root: HTMLElement): () => void {
     const reloading = live && t >= b.reload && t < b.change;
     browser.toggleAttribute('data-reloading', reloading);
     highlight(browser, reloading);
-    const turn = reloading ? `${Math.floor((t - b.reload) / (TICK / 2)) * 45}deg` : '';
+    const turn = reloading ? `${(((t - b.reload) / (TICK / 2)) * 45) % 360}deg` : '';
     if (scene.spinner.style.rotate !== turn) scene.spinner.style.rotate = turn;
     const edited = !live || t >= b.change;
     if (edited !== scene.edited) {
@@ -963,44 +881,6 @@ export function createCli(root: HTMLElement): () => void {
     point[2] = CHAIN_Z;
   }
 
-  function upload(i: number, r: Route, end: number) {
-    const points: number[][] = [];
-    const box = [Infinity, Infinity, -Infinity, -Infinity];
-    const put = (p: Vec3, plug: boolean) => {
-      const [sx, sy, k] = project(p[0], p[1], p[2]);
-      const radius = (plug ? 6 : RADIUS) * k;
-      points.push([sx, sy, p[2], radius]);
-      box[0] = Math.min(box[0], sx - radius - 2);
-      box[1] = Math.min(box[1], sy - radius - 2);
-      box[2] = Math.max(box[2], sx + radius + 2);
-      box[3] = Math.max(box[3], sy + radius + 2);
-    };
-    for (
-      let j = 0;
-      j < r.points.length && r.at[j] < end - PLUG && points.length < ROPE_POINTS - 2;
-      j++
-    ) {
-      put(r.points[j], false);
-    }
-    put(pointAt(r, end - PLUG, point), true);
-    put(pointAt(r, end, point), true);
-    cover(ropes[i].box, box);
-    for (let n = 0; n < points.length; n++) gl.set(ROPE[i * ROPE_POINTS + n], points[n], redraw);
-    gl.set(`uRopeCount[${i}]`, points.length, redraw);
-    gl.set(`uRopeBox[${i * 2}]`, [box[0], box[1]], redraw);
-    gl.set(`uRopeBox[${i * 2 + 1}]`, [box[2], box[3]], redraw);
-  }
-
-  /** `redraw` becomes the box round `box` and `last`, which then becomes `box` */
-  function cover(last: number[], box: readonly number[]) {
-    const empty = last[2] <= last[0];
-    redraw[0] = empty ? box[0] : Math.min(last[0], box[0]);
-    redraw[1] = empty ? box[1] : Math.min(last[1], box[1]);
-    redraw[2] = empty ? box[2] : Math.max(last[2], box[2]);
-    redraw[3] = empty ? box[3] : Math.max(last[3], box[3]);
-    for (let i = 0; i < 4; i++) last[i] = box[i];
-  }
-
   function flash(row: HTMLElement | undefined, t: number) {
     if (row) flashUntil = t + TICK;
     if (flashRow === row) return;
@@ -1009,10 +889,10 @@ export function createCli(root: HTMLElement): () => void {
     if (row) highlight(row, true);
   }
 
-  /** a frame of the play: the page's parts that moved, the canvas only when one of its uniforms did */
-  function tick(now: number) {
-    frame = 0;
-    if (phase !== 'play' || !onScreen) return;
+  /** a frame of the mesh's: the play on from its clock, while some of the stage is on screen */
+  function onFrame() {
+    if (phase !== 'play') return;
+    const now = performance.now();
     clock += last < 0 ? 0 : Math.min(50, now - last);
     last = now;
     if (rewire) {
@@ -1023,25 +903,14 @@ export function createCli(root: HTMLElement): () => void {
     if (!met && clock >= beats.strikes[0]) {
       clock = beats.strikes[0] - 1;
       hold();
-    } else if (clock < beats.end) {
-      render(clock);
-      frame = requestAnimationFrame(tick);
-    } else rest();
-    gl.draw();
+    } else if (clock < beats.end) render(clock);
+    else rest();
   }
 
-  /** the play goes on from its clock, on the next frame */
+  /** the play goes on from its clock */
   function wake() {
-    if (phase !== 'play' || !onScreen) return;
     last = -1;
-    if (frame === 0) frame = requestAnimationFrame(tick);
-  }
-
-  /** the canvas covers the stage: the play and the caret's blink pause while none of it is on screen */
-  function onVisible(ratio: number) {
-    onScreen = ratio > 0;
-    caret.classList.toggle('animate-lp-caret', onScreen && caretMode === 'blink');
-    wake();
+    mesh.invalidate();
   }
 
   function hold() {
@@ -1073,11 +942,10 @@ export function createCli(root: HTMLElement): () => void {
     flash(undefined, 0);
     landedShown = -1;
     render(beats.end);
-    gl.invalidate();
   }
 
   function play() {
-    if (reduce.matches) {
+    if (reduce()) {
       rest();
       return;
     }
@@ -1099,7 +967,6 @@ export function createCli(root: HTMLElement): () => void {
     for (const chip of chips) chip.ariaPressed = String(chip.dataset.play === String(index));
     scene = load(index);
     layout();
-    gl.draw();
   }
 
   function onPlay(event: MouseEvent) {
@@ -1132,37 +999,17 @@ export function createCli(root: HTMLElement): () => void {
       if (!signal.aborted) layout();
     });
   }
-  const stopTheme = onTheme(colours);
-  colours();
   // every load waits for the reader, the figure on screen or not
-  if (!reduce.matches) phase = 'ready';
+  if (!reduce()) phase = 'ready';
 
   return () => {
-    cancelAnimationFrame(frame);
     listeners.abort();
     watch.disconnect();
     rows.disconnect();
-    stopTheme();
     for (const flaps of counters.values()) flaps.destroy();
-    for (const card of scene.cards) card.release?.();
     caretLine?.removeAttribute('data-typing');
-    gl.destroy();
+    mesh.destroy();
   };
-}
-
-function names(array: string, length: number): string[] {
-  const out: string[] = [];
-  for (let i = 0; i < length; i++) out.push(`${array}[${i}]`);
-  return out;
-}
-
-/** `el`'s text, written into its one text node: a node put in would have the page match its
- * `:has()` rules again */
-function setText(el: HTMLElement, text: string) {
-  const node = el.firstChild;
-  if (node instanceof Text && node === el.lastChild) {
-    if (node.data !== text) node.data = text;
-  } else el.textContent = text;
 }
 
 function highlight(el: HTMLElement, on: boolean) {
@@ -1207,11 +1054,6 @@ function springOut(u: number): number {
   return 1 - Math.exp(-6 * u) * Math.cos(9 * u);
 }
 
-function normalize(v: Vec3): Vec3 {
-  const l = Math.hypot(v[0], v[1], v[2]);
-  return [v[0] / l, v[1] / l, v[2] / l];
-}
-
 /** a flip takes this long, the top flap falls in the first half */
 const FLIP = 110;
 
@@ -1234,7 +1076,7 @@ function createFlaps(root: HTMLElement) {
     const layer = (clip: string) => {
       const span = document.createElement('span');
       span.ariaHidden = 'true';
-      span.style.cssText = `position:absolute;inset:0;display:grid;place-items:center;background:inherit;visibility:hidden;clip-path:${clip}`;
+      span.style.cssText = `position:absolute;inset:0;display:grid;place-items:center;background:inherit;opacity:0;will-change:transform,opacity;clip-path:${clip}`;
       el.append(span);
       return span;
     };
@@ -1265,22 +1107,20 @@ function createFlaps(root: HTMLElement) {
         cell.animations.push(
           cell.top.animate(
             [
-              { transform: 'scaleY(1)', visibility: 'visible' },
-              { transform: 'scaleY(0)', visibility: 'visible' },
+              { transform: 'scaleY(1)', opacity: 1 },
+              { transform: 'scaleY(0)', opacity: 1 },
             ],
             { duration: FLIP / 2, easing: 'cubic-bezier(0.55, 0, 1, 0.45)' },
           ),
           cell.bottom.animate(
             [
-              { transform: 'scaleY(0)', visibility: 'visible' },
-              { transform: 'scaleY(1.06)', visibility: 'visible', offset: 0.7 },
-              { transform: 'scaleY(1)', visibility: 'visible' },
+              { transform: 'scaleY(0)', opacity: 1 },
+              { transform: 'scaleY(1.06)', opacity: 1, offset: 0.7 },
+              { transform: 'scaleY(1)', opacity: 1 },
             ],
             { duration: FLIP / 2, delay: FLIP / 2, easing: 'cubic-bezier(0, 0.55, 0.45, 1)' },
           ),
-          cell.under.animate([{ visibility: 'visible' }, { visibility: 'visible' }], {
-            duration: FLIP,
-          }),
+          cell.under.animate({ opacity: [1, 1] }, { duration: FLIP }),
         );
       }
       setText(noun, value === 1 ? 'file' : 'files');

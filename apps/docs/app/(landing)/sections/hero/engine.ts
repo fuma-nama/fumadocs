@@ -1,36 +1,42 @@
-import { cubicBezier, springValue } from 'motion/react';
-import {
-  BLINK,
-  type MateInk,
-  mateInk,
-  ORBIT_STEPS,
-  paintMate,
-  STEP,
-} from '@/components/mascot/paint';
+import { springValue } from 'motion/react';
+import { type MateInk, mateAt, mateInk, ORBIT_STEPS, paintMate } from '@/components/mascot/paint';
 import { LEGS, MATE_H, MATE_W, SIT } from '@/components/mascot/sprite';
-import { createShaderCanvas, cssRgb } from '../../lib/gl';
-import { clamp, settle, TICK } from '../../lib/motion';
-import { report } from '../../lib/status';
-import { isDark, onTheme } from '../../lib/theme';
 import {
+  createMesh,
+  housePalette,
+  identity,
+  MATERIAL,
+  type Mat4,
+  type PartSpec,
+  transform,
+  type Vec3,
+} from '../../lib/mesh';
+import { clamp, easeOut, TICK } from '../../lib/motion';
+import { reduce } from '../../lib/script';
+import { report } from '../../lib/status';
+import { createTalk } from './talk';
+import {
+  bakeRelief,
   CELL,
-  CRATER_UNIFORMS,
   CROWN,
-  drawFace,
+  figureShader,
   HORIZON,
-  moonFragment,
+  MOON,
   REACH,
+  RING,
   SATELLITES,
+  skyShader,
 } from './scene';
 
 /** boot beats, in ticks from the start */
 export const BEAT_AT = {
   ring: 2,
-  outline: 5,
   satellites: 6,
   glitch: 9,
   mate: 10,
   ready: 13,
+  /** her first bubble */
+  talk: 15,
 } as const;
 /** a Pop: one inverted flash this long on its beat */
 const POP_MS = 70;
@@ -44,7 +50,7 @@ let boot: number | null | undefined;
  */
 export function bootStart(): number | null {
   if (boot === undefined) {
-    boot = matchMedia('(prefers-reduced-motion: reduce)').matches ? null : performance.now();
+    boot = reduce() ? null : performance.now();
   }
   return boot;
 }
@@ -54,9 +60,8 @@ export function untilBeat(start: number, tick: number): number {
   return start + tick * TICK - performance.now();
 }
 
-const ease = cubicBezier(...settle);
-/** the boot's mosaic, CSS px a cell, down to the dither's own */
-const MOSAIC = [64, 32, 16, 8, 4, CELL];
+/** the boot's mosaic, canvas px a cell, then the page's dots at rest */
+const MOSAIC = [64, 32, 16, 8, 4, 2];
 /** at boot the moon rises from this many radii under its place */
 const RISE = 0.6;
 const RISE_MS = 1100;
@@ -66,29 +71,84 @@ const SUN = { stiffness: 38, damping: 13 };
 
 /** the satellites' ring: semi-axes in moon radii, in-plane tilt in radians, seconds a turn */
 const ORBIT = { a: 1.3, b: 0.27, tilt: (-18 * Math.PI) / 180, period: 42 };
-const PRISM_UNIFORMS = ['uPrism[0]', 'uPrism[1]', 'uPrism[2]'];
-const ROTATION_UNIFORMS = ['uPrismRotation[0]', 'uPrismRotation[1]', 'uPrismRotation[2]'];
-/** her moon's ring round her crown, cells wide; her eyes turn to a pointer this far from her, px */
-const RING = 21;
-const GLANCE = 60;
+/** her moon's ring round her crown, cells wide */
+const RING_CELLS = 21;
 /** her cells a moon radius: she is an eighth of its width */
 const CELLS = 120;
 /** the drawing's height over the horizon in moon radii: the moon, and her on its crown */
 export const SKY = CROWN + (MATE_H - LEGS) / CELLS;
 /** a shooting star: ticks between two, about, ticks one lasts, dither cells a tick */
 const SHOOT = { every: 100, ticks: 6, speed: 14 };
+/** the scene's bounds in moon radii, for the light */
+const BOUNDS: [Vec3, Vec3] = [
+  [-REACH, -1.5, -2],
+  [REACH, 1.5, 2],
+];
 
-/** a satellite `clock` s into its turns: x right and y down from the moon's centre in moon radii,
+/** the moon, the satellites' prisms, then the ring's plane; the moon and the ring are never
+ * outlined (id 0) */
+const PARTS: PartSpec[] = [
+  { shape: 'sphere', id: 0, material: MOON, shadow: false },
+  ...SATELLITES.map((_, i) => ({
+    shape: 'box' as const,
+    id: i + 1,
+    material: MATERIAL.paper,
+    shadow: false,
+  })),
+  { shape: 'box', id: 0, material: RING, shadow: false },
+];
+const RING_PART = SATELLITES.length + 1;
+
+/** a satellite `clock` s into its turns: x right and y up from the moon's centre in moon radii,
  * and its depth toward the viewer */
-function onRing(phase: number, clock: number): [x: number, y: number, depth: number] {
+function onRing(phase: number, clock: number): Vec3 {
   const angle = phase * Math.PI * 2 - (clock / ORBIT.period) * Math.PI * 2;
   const ex = ORBIT.a * Math.cos(angle);
   const ey = ORBIT.b * Math.sin(angle);
   return [
     ex * Math.cos(ORBIT.tilt) - ey * Math.sin(ORBIT.tilt),
-    ex * Math.sin(ORBIT.tilt) + ey * Math.cos(ORBIT.tilt),
+    -ex * Math.sin(ORBIT.tilt) - ey * Math.cos(ORBIT.tilt),
     Math.sqrt(ORBIT.a * ORBIT.a - ORBIT.b * ORBIT.b) * Math.sin(angle),
   ];
+}
+
+/** the ring's plane, a thin box over the orbit's circle with room for its halo: its axes the
+ * circle's two radii, from the ring's right end and its front, and its thickness, right-handed so its
+ * faces turn out */
+function ringPlane(): Mat4 {
+  const { a, b, tilt } = ORBIT;
+  const c = Math.sqrt(a * a - b * b);
+  const room = 2 * 1.15;
+  const m = identity();
+  m.set([a * Math.cos(tilt) * room, -a * Math.sin(tilt) * room, 0], 0);
+  m.set([-b * Math.sin(tilt) * room, -b * Math.cos(tilt) * room, c * room], 4);
+  m.set([(-c * Math.sin(tilt) * 1e-3) / a, (-c * Math.cos(tilt) * 1e-3) / a, (-b * 1e-3) / a], 8);
+  return m;
+}
+
+/** `m` set to a box at `at`, of half sizes `half`, turned `turn` radians round unit `axis` */
+function boxAt(m: Mat4, at: Vec3, half: readonly number[], axis: readonly number[], turn: number) {
+  const sin = Math.sin(turn / 2);
+  const x = axis[0] * sin;
+  const y = axis[1] * sin;
+  const z = axis[2] * sin;
+  const w = Math.cos(turn / 2);
+  m.set([
+    (1 - 2 * (y * y + z * z)) * 2 * half[0],
+    2 * (x * y + z * w) * 2 * half[0],
+    2 * (x * z - y * w) * 2 * half[0],
+    0,
+    2 * (x * y - z * w) * 2 * half[1],
+    (1 - 2 * (x * x + z * z)) * 2 * half[1],
+    2 * (y * z + x * w) * 2 * half[1],
+    0,
+    2 * (x * z + y * w) * 2 * half[2],
+    2 * (y * z - x * w) * 2 * half[2],
+    (1 - 2 * (x * x + y * y)) * 2 * half[2],
+    0,
+    ...at,
+    1,
+  ]);
 }
 
 /** a 32-bit integer's bits mixed (lowbias32) */
@@ -98,17 +158,17 @@ function mix32(n: number): number {
   return (k ^ (k >>> 16)) >>> 0;
 }
 
-/** the moon's face, drawn once a page */
-let face: HTMLCanvasElement | null | undefined;
+/** the moon's near side, baked once a page */
+let relief: ImageData | undefined;
 
 /** the moon: it rises at boot, lit from the pointer, its satellites in orbit and her on its crown;
  * it sets as its sky leaves */
 export function createHero(stage: HTMLElement, reduced: boolean): (() => void) | undefined {
   const scene = stage.firstElementChild;
   const canvas = scene?.firstElementChild;
-  const drawing = scene?.lastElementChild;
+  const drawing = canvas?.nextElementSibling;
   const mate = drawing?.firstElementChild;
-  const labels = drawing?.lastElementChild?.children as HTMLCollectionOf<HTMLElement> | undefined;
+  const labels = scene?.querySelectorAll<HTMLElement>(':scope > [data-satellite]');
   // a Fast Refresh can pair this engine with other markup for a moment: no sky until they match
   if (
     !(scene instanceof HTMLElement) ||
@@ -120,83 +180,101 @@ export function createHero(stage: HTMLElement, reduced: boolean): (() => void) |
     return;
   // a page out of canvas memory gets no contexts: the hero is its text then
   const pen = mate.getContext('2d');
-  face ??= drawFace(128);
-  if (!pen || !face) return;
-  const shader = createShaderCanvas(canvas, {
-    fragment: moonFragment,
-    onFrame: (time) => frame(time),
-    onResize: (dpr) => measure(dpr),
+  if (!pen) return;
+  relief ??= bakeRelief();
+  const mesh = createMesh(canvas, {
+    parts: PARTS,
+    shader: { scene: figureShader, backdrop: skyShader, textures: { uRelief: relief } },
+    onFrame: () => frame(),
+    onResize: (width, height) => measure(width, height),
+    theme(page) {
+      mesh!.uniform('uInk', page.ink);
+      mesh!.uniform('uPaper', page.paper);
+      // the stars' sparkles: a yellow one would vanish on light paper
+      mesh!.uniform('uSun', page.night ? page.yellow : page.sun);
+      mesh!.uniform('uDark', page.night ? 1 : 0);
+      ink = mateInk(getComputedStyle(stage));
+      popInk = { ...ink, line: ink.lit, pen: ink.paper, lit: ink.line, paper: ink.pen };
+      mateShown = -1;
+      return { ...housePalette(page), line: page.ink, accent: page.yellow };
+    },
   });
-  if (!shader) return;
+  if (!mesh) return;
+  const zero = performance.now();
   const hero = stage.parentElement!;
   const mateImage = new ImageData(MATE_W, MATE_H);
-  // the light follows a mouse, on touch screens it circles on its own
   const touch = !reduced && !matchMedia('(hover: hover) and (pointer: fine)').matches;
   const sunX = springValue(REST.x, SUN);
   const sunY = springValue(REST.y, SUN);
   const start = bootStart();
-  /** CSS px a moon radius */
+  /** CSS px a moon radius, CSS px a canvas px, the canvas's CSS px size */
   let radius = 1;
-  /** the sky in dither cells */
-  let cells = { x: 1, y: 1 };
-  /** ms between the satellites' moves: a tick's whole fraction, a cell at their fastest */
-  let stride = TICK;
-  /** the next move's frame */
-  let wake = 0;
+  let pitch = 1;
+  let width = 1;
+  let height = 1;
   /** px from the moon's centre to the pointer */
   let pointerX = Number.NaN;
-  // uniform values written every frame, reused
-  const light: [number, number, number] = [0, 0, 0];
-  const vec4: [number, number, number, number] = [0, 0, 0, 0];
+  const light: Vec3 = [0, 0, 1];
   const shoot: [number, number, number, number] = [0, 0, 0, 0];
-  // her: her colours, inverted for her Pop, what she shows, the light on her moon in her canvas's axes
+  const orbit: [number, number, number, number] = [ORBIT.a, ORBIT.b, ORBIT.tilt, 0];
+  const prisms = SATELLITES.map(() => identity());
+  /** each label's place, the satellite's centre, and its size */
+  const places = SATELLITES.map(() => identity());
+  const sizes = SATELLITES.map(() => ({ w: 0, h: 0 }));
+  const pins = SATELLITES.map((s, i) =>
+    mesh.anchor(labels[i], places[i], [0, Math.hypot(...s.size), 0]),
+  );
   let ink: MateInk | undefined;
   let popInk: MateInk | undefined;
   let mateShown = -1;
-  const mateLight: [number, number, number] = [0, 0, 0];
-  /** each label's place as last set */
-  const placed: string[] = [];
+  const mateLight: Vec3 = [0, 0, 0];
 
-  shader.texture('uFace', face);
-  for (let k = 0; k < CRATER_UNIFORMS.length; k++) shader.set(`uCrater[${k}]`, CRATER_UNIFORMS[k]);
+  // the moon's sphere a little larger than the disc its material draws, so its facets clear it
+  mesh.place(0, transform(identity(), [0, 0, 0], [0, 0, 0], [2.1, 2.1, 2.1]));
+  mesh.place(RING_PART, ringPlane());
 
-  /** the page's colours: in the first frame, which waits for the stylesheet, and on theme changes */
-  const readColors = () => {
-    const style = getComputedStyle(stage);
-    const paper = style.getPropertyValue('--lp-paper');
-    if (paper === '') return;
-    shader.set('uLit', cssRgb(style.getPropertyValue(isDark() ? '--lp-yellow' : '--lp-sun')));
-    shader.set('uPaper', cssRgb(paper));
-    shader.set('uInk', cssRgb(style.getPropertyValue('--lp-ink')));
-    shader.set('uDark', isDark() ? 1 : 0);
-    shader.invalidate();
-    ink = mateInk(style);
-    popInk = { ...ink, line: ink.lit, pen: ink.paper, lit: ink.line, paper: ink.pen };
-    mateShown = -1;
+  const sized = new ResizeObserver((entries) => {
+    for (const entry of entries) {
+      const [box] = entry.borderBoxSize;
+      sizes[Array.prototype.indexOf.call(labels, entry.target)] = {
+        w: box.inlineSize,
+        h: box.blockSize,
+      };
+    }
+    mesh.invalidate();
+  });
+  for (const label of labels) sized.observe(label);
+
+  /** the camera on the moon, `rise` radii under its place */
+  const look = (rise: number) => {
+    mesh.camera({
+      width,
+      height,
+      scale: radius,
+      origin: [width / 2, height - (HORIZON - rise) * radius],
+      depth: [0, 0],
+      z: [3, -3],
+    });
   };
-  const stopTheme = onTheme(readColors);
 
-  /** `dpr`: the canvas's pixels a CSS px */
-  const measure = (dpr: number) => {
+  const measure = (w: number, h: number) => {
+    width = w;
+    height = h;
+    pitch = w / canvas.width;
     // the moon as large as it fits the sky's box, and her over the crown at a px a cell, the least
     // she is drawn at
-    const width = canvas.clientWidth;
-    const height = canvas.clientHeight;
-    radius = Math.min(width / (2 * REACH), height / SKY, (height - (MATE_H - LEGS)) / CROWN);
+    radius = Math.min(w / (2 * REACH), h / SKY, (h - (MATE_H - LEGS)) / CROWN);
     scene.style.setProperty('--r', `${radius}px`);
-    shader.set('uRadius', radius * dpr);
-    cells = { x: Math.floor(width / CELL), y: Math.floor(height / CELL) };
+    mesh.uniform('uRadius', radius / pitch);
     // her cell: an eighth of the moon's width over her 30, in whole device px, a CSS px at least,
     // and her canvas no taller than the sky over the moon's crown
-    const room = height - CROWN * radius;
+    const room = h - CROWN * radius;
     const cell = Math.min(
       Math.round((radius * devicePixelRatio) / CELLS),
       Math.floor((room * devicePixelRatio) / (MATE_H - LEGS)),
     );
     scene.style.setProperty('--cell', `${Math.max(1, cell / devicePixelRatio)}px`);
-    // px a tick of the fastest satellite, crossing the moon's face
-    const fastest = (ORBIT.a * radius * 2 * Math.PI * TICK) / (ORBIT.period * 1000);
-    stride = TICK / Math.max(1, Math.ceil(fastest / CELL));
+    look(0);
   };
 
   const onPointerMove = (e: PointerEvent) => {
@@ -205,14 +283,14 @@ export function createHero(stage: HTMLElement, reduced: boolean): (() => void) |
     pointerX = e.clientX - rect.left - rect.width / 2;
     sunX.set(pointerX / radius);
     sunY.set((e.clientY - rect.bottom) / radius + HORIZON);
-    shader.invalidate();
+    mesh.invalidate();
   };
   const onPointerLeave = (e: PointerEvent) => {
     if (e.pointerType !== 'mouse') return;
     sunX.set(REST.x);
     sunY.set(REST.y);
     pointerX = Number.NaN;
-    shader.invalidate();
+    mesh.invalidate();
   };
   if (!reduced) {
     hero.addEventListener('pointermove', onPointerMove, { passive: true });
@@ -242,100 +320,80 @@ export function createHero(stage: HTMLElement, reduced: boolean): (() => void) |
     report(stage, 'booting');
     readyTimer = window.setTimeout(() => report(stage, 'ready'), untilBeat(start, BEAT_AT.ready));
   }
+  const stopTalk = createTalk(
+    drawing,
+    mate,
+    reduced || start === null ? null : untilBeat(start, BEAT_AT.talk),
+  );
 
-  const frame = (time: number) => {
-    if (!ink) readColors();
-    // ms since the boot started
-    const t = start === null ? Infinity : performance.now() - start;
-    // drawn every frame through the boot and while the light settles, else on the next move
-    clearTimeout(wake);
-    if (t < BEAT_AT.ready * TICK || sunX.isAnimating() || sunY.isAnimating()) shader.invalidate();
-    else if (!reduced)
-      wake = window.setTimeout(shader.invalidate, stride - ((time * 1000) % stride));
-    // s, a move at a time: the satellites and the touch screens' light go by it
-    const clock = (Math.floor((time * 1000) / stride) * stride) / 1000;
-    const cell = MOSAIC[clamp(Math.floor(t / TICK), 0, MOSAIC.length - 1)];
-    const rise = t < RISE_MS ? (1 - ease(t / RISE_MS)) * RISE : 0;
+  const frame = () => {
+    const now = performance.now();
+    const time = (now - zero) / 1000;
+    const t = start === null ? Infinity : now - start;
+    // drawn every frame while anything moves: the satellites do, save with reduced motion
+    if (!reduced || t < BEAT_AT.ready * TICK || sunX.isAnimating() || sunY.isAnimating())
+      mesh.invalidate();
 
-    // the light: the pointer's, or on touch screens a slow orbit round the rest position
-    const orbit = Math.PI / 4 + clock * 0.2;
-    const sx = touch ? Math.cos(orbit) * 1.22 : sunX.get();
-    const sy = touch ? Math.sin(orbit) * 1.22 : sunY.get();
+    mesh.uniform('uCell', MOSAIC[clamp(Math.floor(t / TICK), 0, MOSAIC.length - 1)]);
+    if (t < RISE_MS) look((1 - easeOut(t / RISE_MS)) * RISE);
+
+    const turn = Math.PI / 4 + time * 0.2;
+    const sx = touch ? Math.cos(turn) * 1.22 : sunX.get();
+    const sy = touch ? Math.sin(turn) * 1.22 : sunY.get();
     const el = (clamp(90 - 45 * Math.hypot(sx, sy), -50, 90) * Math.PI) / 180;
     const azimuth = Math.atan2(-sy, sx);
     light[0] = Math.cos(el) * Math.cos(azimuth);
     light[1] = Math.cos(el) * Math.sin(azimuth);
     light[2] = Math.sin(el);
+    mesh.light(light, BOUNDS[0], BOUNDS[1]);
 
-    shader.set('uCell', cell);
-    shader.set('uOutline', cell < 4.5 && t >= BEAT_AT.outline * TICK ? 1 : 0);
-    shader.set('uRise', rise);
-    shader.set('uLight', light);
-    // the stars twinkle on ticks; a shooting star now and then crosses the upper sky, down and
-    // across from where it starts, a move at a time
-    const beat = reduced ? 0 : (clock * 1000) / TICK;
-    shader.set('uTwinkle', beat);
+    const beat = reduced ? 0 : (time * 1000) / TICK;
+    mesh.uniform('uTwinkle', Math.floor(beat));
     const event = Math.floor(beat / SHOOT.every);
     const seed = mix32(event);
     const run = beat - event * SHOOT.every - 1 - (seed % (SHOOT.every - SHOOT.ticks - 2));
     shoot[2] = run >= 0 && run < SHOOT.ticks ? (seed & 1 ? 1 : -1) : 0;
     shoot[3] = 0.35 + (0.25 * ((seed >>> 8) & 255)) / 255;
     const from = (shoot[2] < 0 ? 0.5 : 0) + (0.5 * ((seed >>> 16) & 255)) / 255;
-    shoot[0] = Math.floor(from * cells.x + shoot[2] * SHOOT.speed * run);
-    shoot[1] = Math.floor(
-      (0.05 + (0.3 * (seed >>> 24)) / 255) * cells.y + shoot[3] * SHOOT.speed * run,
+    shoot[0] = Math.floor(
+      from * Math.floor(canvas.width / (CELL * mesh.dot)) + shoot[2] * SHOOT.speed * run,
     );
-    shader.set('uShoot', shoot);
+    shoot[1] = Math.floor(
+      (0.05 + (0.3 * (seed >>> 24)) / 255) * Math.floor(canvas.height / (CELL * mesh.dot)) +
+        shoot[3] * SHOOT.speed * run,
+    );
+    mesh.uniform('uShoot', shoot);
 
     // the ring strokes on as one pen line, the back half, then the front half
-    vec4[0] = ORBIT.a;
-    vec4[1] = ORBIT.b;
-    vec4[2] = ORBIT.tilt;
-    vec4[3] = ease(clamp((t - BEAT_AT.ring * TICK) / (6 * TICK)));
-    shader.set('uOrbit', vec4);
+    orbit[3] = easeOut(clamp((t - BEAT_AT.ring * TICK) / (6 * TICK)));
+    mesh.uniform('uOrbit', orbit);
 
+    const reach = REACH * radius;
     for (let i = 0; i < SATELLITES.length; i++) {
       const s = SATELLITES[i];
-      const [x, y, depth] = onRing(s.phase, reduced ? 0 : clock);
+      const at = onRing(s.phase, reduced ? 0 : time);
+      const due = (BEAT_AT.satellites + i) * TICK;
+      boxAt(prisms[i], at, s.size, s.axis, 2 * ((reduced ? 1 : time / s.spin) * Math.PI + i * 1.3));
+      mesh.place(i + 1, prisms[i]);
+      mesh.show(i + 1, t >= due);
+      mesh.material(i + 1, t < due + POP_MS ? MATERIAL.ink : MATERIAL.paper);
 
-      // it Pops in on its beat, with its label
-      const at = (BEAT_AT.satellites + i) * TICK;
-      vec4[0] = x;
-      vec4[1] = -y;
-      vec4[2] = depth;
-      vec4[3] = t < at ? 0 : t < at + POP_MS ? 2 : 1;
-      shader.set(PRISM_UNIFORMS[i], vec4);
-      // a quaternion tumbling round the satellite's axis
-      const turn = (reduced ? 1 : clock / s.spin) * Math.PI + i * 1.3;
-      const sin = Math.sin(turn);
-      vec4[0] = s.axis[0] * sin;
-      vec4[1] = s.axis[1] * sin;
-      vec4[2] = s.axis[2] * sin;
-      vec4[3] = Math.cos(turn);
-      shader.set(ROTATION_UNIFORMS[i], vec4);
-
-      const state = t < at ? 'off' : t < at + POP_MS ? 'pop' : 'on';
+      const pin = pins[i];
+      const { w, h } = sizes[i];
+      places[i][12] = at[0];
+      places[i][13] = at[1];
+      places[i][14] = at[2];
+      const x = at[0] * radius;
+      pin.offset[0] = clamp(x - w / 2, -reach, reach - w) - x;
+      pin.offset[1] = -h;
+      pin.shown = !(at[2] < 0 && at[0] * at[0] + at[1] * at[1] < 1);
+      const state = t < due ? 'off' : t < due + POP_MS ? 'pop' : 'on';
       if (labels[i].dataset.state !== state) labels[i].dataset.state = state;
-      // its label rides over it inside the drawing, off while the moon hides it
-      const reach = REACH * radius;
-      const above = Math.hypot(...s.size);
-      const translate = `clamp(${-reach}px, calc(${x * radius}px - 50%), calc(${reach}px - 100%)) calc(${(y - above) * radius}px - 100%)`;
-      const opacity = depth < 0 && x * x + y * y < 1 ? '0' : '1';
-      if (placed[i] !== translate + opacity) {
-        placed[i] = translate + opacity;
-        labels[i].style.translate = translate;
-        labels[i].style.opacity = opacity;
-      }
     }
 
-    // her: she Pops in on her tick, blinks now and then, looks toward the pointer, her moon steps
-    // round its ring lit by the same sun; painted only when one of those changes
     const meet = BEAT_AT.mate * TICK;
     if (!ink || !popInk || t < meet) return;
-    const ticks = reduced ? 0 : Math.floor((time * 1000) / TICK);
-    const gaze = pointerX < -GLANCE ? 2 : pointerX > GLANCE ? 3 : 0;
-    const eyes = !reduced && ticks % BLINK === 0 ? 1 : gaze;
-    const step = Math.floor(ticks / STEP) % ORBIT_STEPS;
+    const { eyes, step } = mateAt(reduced ? null : Math.floor((time * 1000) / TICK), pointerX);
     const pop = t < meet + POP_MS;
     const shown = ((pop ? 4 : 0) + eyes) * ORBIT_STEPS + step;
     if (shown === mateShown) return;
@@ -343,17 +401,17 @@ export function createHero(stage: HTMLElement, reduced: boolean): (() => void) |
     mateLight[0] = light[0];
     mateLight[1] = -light[1];
     mateLight[2] = light[2];
-    paintMate(mateImage, SIT, false, eyes, step, RING, pop ? popInk : ink, mateLight);
+    paintMate(mateImage, SIT, false, eyes, step, RING_CELLS, pop ? popInk : ink, mateLight);
     pen.putImageData(mateImage, 0, 0);
     mate.style.visibility = 'visible';
   };
 
   return () => {
-    shader.destroy();
+    mesh.destroy();
     moonset?.cancel();
-    stopTheme();
-    clearTimeout(wake);
+    sized.disconnect();
     clearTimeout(readyTimer);
+    stopTalk();
     hero.removeEventListener('pointermove', onPointerMove);
     hero.removeEventListener('pointerleave', onPointerLeave);
     sunX.destroy();

@@ -1,8 +1,8 @@
 import type { ComponentProps } from 'react';
 import { cn } from '@/lib/cn';
 
-const LAYER_ICONS = {
-  // 8x8 pixel paths
+/** each layer's 8x8 pixel icon, as an SVG path */
+export const LAYER_ICONS = {
   content: 'M0 1h8v1H0zM0 3h8v1H0zM0 5h8v1H0zM0 7h5v1H0z',
   core: 'M2 0h4v1H2zM1 1h1v1H1zM6 1h1v1H6zM0 2h1v4H0zM7 2h1v4H7zM1 6h1v1H1zM6 6h1v1H6zM2 7h4v1H2zM3 3h2v2H3z',
   ui: 'M0 0h8v3H0zM0 3h1v5H0zM7 3h1v5H7zM1 7h6v1H1z',
@@ -11,7 +11,7 @@ const LAYER_ICONS = {
 
 export type Layer = keyof typeof LAYER_ICONS;
 
-/** label of a Fumadocs layer, shared by the hero satellites and the parts figure */
+/** label of a Fumadocs layer, on the hero's satellites; the parts figure prints the same icons */
 export function Chip({
   layer,
   children,
@@ -22,7 +22,7 @@ export function Chip({
     <span
       {...props}
       className={cn(
-        'inline-flex h-6 items-center gap-1.5 border border-lp-line-strong bg-lp-paper px-2 font-pixel text-xs leading-none whitespace-nowrap',
+        'inline-flex h-6 items-center gap-1.5 border border-lp-line-strong bg-lp-paper px-2 font-pixel text-[13.16px] leading-4 whitespace-nowrap antialiased',
         className,
       )}
     >
@@ -34,7 +34,7 @@ export function Chip({
       >
         <path d={LAYER_ICONS[layer]} />
       </svg>
-      {children ?? layer}
+      {children}
     </span>
   );
 }

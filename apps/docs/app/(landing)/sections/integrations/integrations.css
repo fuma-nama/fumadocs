@@ -1,5 +1,5 @@
 .bt-cell {
-  --bt-stage: 18rem;
+  --bt-stage: 22.5rem;
   /* the mechanism's palette, inverted while the card is pointed at or focused */
   --bt-ink: var(--lp-ink);
   --bt-paper: var(--lp-paper);
@@ -7,24 +7,39 @@
   /* orange over ink-filled cards: vivid while the ink is dark */
   --bt-on-ink: var(--lp-sun);
   --bt-speed: 1;
-  /* content starts on the gutter; the end, inside the cell's 1px line, gives way so a mechanism
-     always fits */
-  padding-inline-end: min(var(--lp-gutter), calc(100% - 1px - var(--lp-gutter) - var(--bt-stage)));
+  /* a card narrower than its mechanism and padding scales the mechanism down whole */
+  container-type: inline-size;
 
   @variant hover {
     --bt-ink: var(--lp-paper);
     --bt-paper: var(--lp-ink);
     --bt-orange: var(--lp-orange-on-ink);
     --bt-on-ink: var(--lp-orange);
-    --bt-speed: 2;
   }
 
-  &:focus-visible {
+  /* its title focused from the keyboard */
+  &[data-focus] {
     --bt-ink: var(--lp-paper);
     --bt-paper: var(--lp-ink);
     --bt-orange: var(--lp-orange-on-ink);
     --bt-on-ink: var(--lp-orange);
+  }
+
+  /* played again as it's inspected, at twice the pace */
+  &[data-play='fast'] {
     --bt-speed: 2;
+  }
+}
+
+@container (width < 26rem) {
+  .bt-stage {
+    zoom: 0.9;
+  }
+}
+
+@container (width < 22.5rem) {
+  .bt-stage {
+    zoom: 0.8;
   }
 }
 
@@ -44,43 +59,20 @@
   color: var(--bt-ink);
 }
 
-/* a dashed line on the cell grid: two cells drawn, one skipped */
-.bt-dashes {
-  height: 3px;
-  background-image: repeating-linear-gradient(to right, var(--bt-ink) 0 6px, transparent 6px 9px);
-}
-
 .bt-a {
   animation-duration: calc(var(--bt-dur) / var(--bt-speed));
   animation-timing-function: steps(1, end);
-  animation-iteration-count: infinite;
+  animation-fill-mode: both;
+  /* a run acts from its first tick: tick 0 is the pose it waits on */
+  animation-delay: calc(-125ms / var(--bt-speed));
 }
 
 /* the second unit of a flap display follows one tick later */
 .bt-lag .bt-a {
-  animation-delay: calc(125ms / var(--bt-speed));
+  animation-delay: 0ms;
 }
 
-/* the further integrations roll by, a copy of the list after it; under the utilities, which hold it */
-@layer components {
-  .bt-marquee {
-    animation: bt-marquee 80s linear infinite;
-  }
-}
-
-@keyframes bt-marquee {
-  to {
-    transform: translateX(-50%);
-  }
-}
-
-/* nothing plays off screen, so no layer is kept for it */
-[data-paused] :is(.bt-a, .bt-marquee) {
-  animation: none;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  :is(.bt-a, .bt-marquee) {
-    animation: none;
-  }
+/* off screen, a mechanism holds where it is till it's back */
+[data-paused] .bt-a {
+  animation-play-state: paused;
 }

@@ -1,6 +1,5 @@
 import { BAYER4 } from '@/app/(landing)/lib/dither';
-import { cssRgb } from '@/app/(landing)/lib/gl';
-import { isDark } from '@/app/(landing)/lib/theme';
+import { cssRgb, isDark } from '@/app/(landing)/lib/theme';
 import { cellOf, CROWN_CELL, leanOf, MATE_H, MATE_PAD, MATE_W } from './sprite';
 
 /** her moon's ring: its tilt (rad) and half height (cells); the steps her moon takes round it */
@@ -8,8 +7,10 @@ const TILT = -0.16;
 const RING_Y = 4;
 export const ORBIT_STEPS = 32;
 /** ticks: her moon takes a step round its ring every STEP, she blinks for one every BLINK */
-export const STEP = 2;
-export const BLINK = 33;
+const STEP = 2;
+const BLINK = 33;
+/** px off her head past which her eyes follow what she watches */
+const GLANCE = 60;
 
 type Rgb = readonly [number, number, number];
 
@@ -42,6 +43,14 @@ export function mateInk(style: CSSStyleDeclaration): MateInk {
 
 function bytes([r, g, b]: Rgb): Rgb {
   return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
+}
+
+/** her eyes and her moon's step `ticks` into her clock (`null` with reduced motion): she blinks
+ * (1), or looks ahead (0), left (2) or right (3) at what lies `look` px across from her head */
+export function mateAt(ticks: number | null, look: number) {
+  const blink = ticks !== null && ticks % BLINK === 0;
+  const eyes = blink ? 1 : look < -GLANCE ? 2 : look > GLANCE ? 3 : 0;
+  return { eyes, step: Math.floor((ticks ?? 0) / STEP) % ORBIT_STEPS };
 }
 
 /** how many of a cell's 4 neighbours are hers */

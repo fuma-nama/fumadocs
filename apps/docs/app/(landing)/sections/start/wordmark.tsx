@@ -1,11 +1,11 @@
 'use client';
-import { whenSeen } from '../../lib/later';
+import { mount } from '../../lib/script';
 import { BEAT } from '../../lib/motion';
 import { onTheme } from '../../lib/theme';
 
 const GLYPHS = '#-*>[]{}/=+fumadocs';
 const WORD = 'Fumadocs';
-/** simulation steps per second, a grain falls one cell per step */
+/** simulation steps per second, a grain travels one cell per step */
 const RATE = 40;
 /** a full wordmark (one that stopped filling) holds for this long, then drains */
 const HOLD = 4 * BEAT;
@@ -16,6 +16,7 @@ const GHOST = 1;
 const FALLING = 0;
 const RESTING = 1;
 const PUSHED = 2;
+const STALE = 255;
 
 /**
  * The wordmark as an hourglass: glyphs fall on a character grid and settle only inside the
@@ -40,8 +41,14 @@ function createSand(host: HTMLElement): () => void {
   /** steps since the grain last moved, or until a pushed grain cools down */
   let rest = new Uint8Array(0);
   let hot = new Uint8Array(0);
-  /** what is on the canvas: EMPTY, GHOST or 2 + glyph * 3 + look */
+  /** what is on the canvas: EMPTY, GHOST or 2 + glyph * 3 + look, STALE to draw again */
   let drawn = new Uint8Array(0);
+  /** the cell a grain that moved this step came from, -1 for one at rest */
+  let origin = new Int32Array(0);
+  /** the cells grains moved to this step */
+  let moved: number[] = [];
+  /** where the moving grains were drawn last frame, device px */
+  let trail: number[] = [];
   /** columns over a letter, where grains are dropped */
   let spawn = new Uint16Array(0);
   /** per column, the row of its lowest empty letter cell, -1 when the column is full */
@@ -106,6 +113,9 @@ function createSand(host: HTMLElement): () => void {
     rest = new Uint8Array(cols * rows).fill(255);
     hot = new Uint8Array(cols * rows);
     drawn = new Uint8Array(cols * rows);
+    origin = new Int32Array(cols * rows).fill(-1);
+    moved = [];
+    trail = [];
     capacity = 0;
     const over: number[] = [];
     for (let x = 0; x < cols; x++) {
@@ -134,7 +144,7 @@ function createSand(host: HTMLElement): () => void {
     }
     // resizing the canvas cleared it
     paintSprites();
-    draw(true);
+    draw(0, true);
     ready = true;
   }
 
@@ -161,14 +171,27 @@ function createSand(host: HTMLElement): () => void {
     }
   }
 
-  /** redraws the cells whose content changed, each over its own clear rect */
-  function draw(all = false) {
+  /**
+   * Redraws the cells whose content changed, each over its own clear rect, then the grains that
+   * moved this step between their cells, `t` of the way, on whole device px
+   */
+  function draw(t: number, all = false) {
     const w = Math.round(cellW * dpr);
     const h = Math.round(cellH * dpr);
     const dot = Math.max(2, Math.round(2 * dpr));
+    for (let k = 0; k < trail.length; k += 2) {
+      ctx.clearRect(trail[k], trail[k + 1], w, h);
+      // the up to four cells it covered
+      const i = Math.floor(trail[k + 1] / h) * cols + Math.floor(trail[k] / (cellW * dpr));
+      for (let d = 0; d < 4; d++) {
+        const at = i + (d & 1) + (d >> 1) * cols;
+        if (at < drawn.length) drawn[at] = STALE;
+      }
+    }
+    trail = [];
     for (let i = 0; i < grain.length; i++) {
-      const look = hot[i] > 0 ? PUSHED : rest[i] > 1 ? RESTING : FALLING;
-      const want = grain[i] ? 2 + (grain[i] - 1) * 3 + look : inside[i] ? GHOST : EMPTY;
+      const want =
+        grain[i] && origin[i] < 0 ? 2 + (grain[i] - 1) * 3 + look(i) : inside[i] ? GHOST : EMPTY;
       if (!all && want === drawn[i]) continue;
       drawn[i] = want;
       const x = Math.round((i % cols) * cellW * dpr);
@@ -177,14 +200,34 @@ function createSand(host: HTMLElement): () => void {
       if (want === GHOST) {
         ctx.fillStyle = ghost;
         ctx.fillRect(x + Math.floor((w - dot) / 2), y + Math.floor((h - dot) / 2), dot, dot);
-      } else if (want > GHOST) {
-        const g = Math.floor((want - 2) / 3);
-        ctx.drawImage(sprites, g * w, ((want - 2) % 3) * h, w, h, x, y, w, h);
-      }
+      } else if (want > GHOST) sprite(want, x, y, w, h);
+    }
+    for (const i of moved) {
+      const from = origin[i];
+      if (from < 0 || !grain[i]) continue;
+      const x = Math.round(((from % cols) + ((i % cols) - (from % cols)) * t) * cellW * dpr);
+      const y = Math.round(
+        (Math.floor(from / cols) + (Math.floor(i / cols) - Math.floor(from / cols)) * t) * h,
+      );
+      sprite(2 + (grain[i] - 1) * 3 + look(i), x, y, w, h);
+      trail.push(x, y);
     }
   }
 
+  /** how a grain is drawn: falling, at rest or pushed */
+  function look(i: number) {
+    return hot[i] > 0 ? PUSHED : rest[i] > 1 ? RESTING : FALLING;
+  }
+
+  function sprite(want: number, x: number, y: number, w: number, h: number) {
+    const g = Math.floor((want - 2) / 3);
+    ctx.drawImage(sprites, g * w, ((want - 2) % 3) * h, w, h, x, y, w, h);
+  }
+
   function move(from: number, to: number) {
+    origin[to] = origin[from] < 0 ? from : origin[from];
+    origin[from] = -1;
+    moved.push(to);
     grain[to] = grain[from];
     grain[from] = 0;
     hot[to] = hot[from];
@@ -203,6 +246,9 @@ function createSand(host: HTMLElement): () => void {
   }
 
   function step(now: number) {
+    // the grains of the last step are on their cells
+    for (const i of moved) origin[i] = -1;
+    moved = [];
     for (let n = 0; n < 2 && !draining && spawn.length > 0; n++) {
       const x = spawn[Math.floor(Math.random() * spawn.length)];
       if (!grain[x]) grain[x] = 1 + Math.floor(Math.random() * GLYPHS.length);
@@ -275,17 +321,14 @@ function createSand(host: HTMLElement): () => void {
     }
   }
 
+  /** the simulation's steps on their time, drawn every frame between them */
   function frame(now: number) {
     raf = 0;
     if (!visible || !ready || reduce.matches) return;
-    const dt = Math.min(250, now - (last || now));
+    steps += (Math.min(250, now - (last || now)) * RATE) / 1000;
     last = now;
-    steps += (dt * RATE) / 1000;
-    // a 60 or 120 Hz screen has frames between steps, with nothing new to draw
-    if (steps >= 1) {
-      for (; steps >= 1; steps--) step(now);
-      draw();
-    }
+    for (; steps >= 1; steps--) step(now);
+    draw(steps);
     raf = requestAnimationFrame(frame);
   }
 
@@ -327,7 +370,7 @@ function createSand(host: HTMLElement): () => void {
   const stopTheme = onTheme(() => {
     if (!ready) return;
     paintSprites();
-    draw(true);
+    draw(steps, true);
   });
 
   // the observer's first report lays the grid out, in the font or its fallback
@@ -352,20 +395,13 @@ function createSand(host: HTMLElement): () => void {
   };
 }
 
-function mount(host: HTMLDivElement) {
-  let destroy: (() => void) | undefined;
-  const stop = whenSeen(host, () => (destroy = createSand(host)), { rootMargin: '100% 0px' });
-  return () => {
-    stop();
-    destroy?.();
-  };
-}
+const play = mount(createSand);
 
 /** the footer wordmark, filled by falling glyphs */
 export function Wordmark() {
   return (
     <div
-      ref={mount}
+      ref={play}
       role="img"
       aria-label="Fumadocs"
       className="mx-(--lp-gutter) h-[clamp(96px,22vw,320px)] overflow-hidden"

@@ -1,4 +1,4 @@
-import { BEAT, TICK } from '../../lib/motion';
+import { TICK } from '../../lib/motion';
 
 /**
  * The `pnpm create fumadocs-app` session, as `@clack/prompts` 1.8.1 renders the prompts of
@@ -232,13 +232,7 @@ export function createSession() {
     log.push(line);
     show([], TICK);
   }
-  // the finished session at rest, its last output on screen: what reduced motion shows
-  const rest = frames[frames.length - 1];
-  for (let i = 0; i < 4; i++) {
-    show(shell('', true), BEAT);
-    show(shell('', false), BEAT);
-  }
-  type('clear', 40);
-  show(shell('clear', true), 2 * TICK);
-  return { frames, duration: at, rest };
+  // the finished session at rest, its last output on screen: where it ends, and what reduced motion
+  // shows
+  return { frames, rest: frames[frames.length - 1] };
 }

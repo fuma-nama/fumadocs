@@ -19,7 +19,7 @@ const box =
   'relative size-2.5 shrink-0 border border-lp-line-strong bg-lp-paper group-hover:invisible group-focus-visible:invisible';
 
 /** a tile's striped title bar, its title between two boxes; inverted while its tile is pointed at */
-export function TileBar({ className, children }: { className?: string; children: ReactNode }) {
+function TileBar({ className, children }: { className?: string; children: ReactNode }) {
   return (
     <span
       className={cn(

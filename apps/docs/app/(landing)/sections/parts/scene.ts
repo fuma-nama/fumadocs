@@ -1,334 +1,529 @@
-import { bayer8 } from '../../lib/dither';
+import { FACING, MATERIAL, type Shape, type Vec3 } from '../../lib/mesh';
+import type { Layer } from '../../ui/chip';
+import type { Look } from './data';
 
-/**
- * World units are a 1000px page's: the stack stands on the floor, y = 0, with the page on its top
- * (+y), the reader's side is +z. Every part is a box: the four layers top down (ui, core, content,
- * framework), then a post at each corner of the gap under each layer, standing on the layer under
- * it or, for the feet, on the floor.
- */
-export const fragment = `#version 300 es
-precision highp float;
-precision highp int;
+/** units are CSS px at the drawing's full size: y up, z toward the viewer */
+export const W = 380;
+export const D = 150;
+export const GAP = 10;
+const FEET = 6;
+const DOCK: Vec3 = [W + 40, 8, D + 36];
+/** a nameplate's mount: its face is the page's nameplate, laid on it */
+export const PLATE = { w: 216, h: 38, x: -W / 2 + 14 + 108, z: D / 2 + 2 } as const;
 
-uniform vec2 uResolution;
-uniform float uDpr;
-uniform vec3 uEye;
-uniform vec3 uRight;
-uniform vec3 uUp;
-uniform vec3 uFwd;
-uniform float uFocal;
-uniform vec2 uCentre;
-uniform vec3 uLight;
-uniform vec3 uLit;
-uniform vec3 uShade;
-uniform vec3 uPaper;
-uniform float uNight;
-uniform vec3 uMin[4];
-uniform vec3 uMax[4];
-// how far each layer has dithered in, 0 to 1
-uniform float uShow[4];
-// the posts' x and z off the centre, their half width and their height
-uniform vec4 uPost;
-// every box together, for rays that miss them all
-uniform vec3 uBoundMin;
-uniform vec3 uBoundMax;
-// the floor's shadow density, and its grid's step, alpha and radius
-uniform float uShadow;
-uniform vec3 uGrid;
-out vec4 color;
-${bayer8}
-// this pixel's dither threshold, in cells of 2 CSS px
-float threshold;
+const CASES: Partial<Record<Look, number>> = {
+  ink: MATERIAL.ink,
+  paper: MATERIAL.paper,
+  grey: MATERIAL.grey,
+};
 
-vec3 invert(vec3 d) {
-  return 1.0 / mix(d, vec3(1e-9), lessThan(abs(d), vec3(1e-9)));
+interface Screen {
+  at: Readonly<Vec3>;
+  size: readonly [number, number];
 }
 
-// where the ray enters and leaves, and the axis it enters through
-vec3 slab(vec3 ro, vec3 inv, vec3 lo, vec3 hi) {
-  vec3 t0 = (lo - ro) * inv;
-  vec3 t1 = (hi - ro) * inv;
-  vec3 a = min(t0, t1);
-  vec3 b = max(t0, t1);
-  float tn = max(max(a.x, a.y), a.z);
-  float tf = min(min(b.x, b.y), b.z);
-  return vec3(tn, tf, tn == a.x ? 0.0 : (tn == a.y ? 1.0 : 2.0));
+/** the screens the page lays its words on; the UI's about 120px tall at full size */
+export const DISPLAYS = {
+  framework: { at: [99, 0, D / 2 + 2.5], size: [118, 36] },
+  core: { at: [101, 0, D / 2 + 2.5], size: [108, 66] },
+  ui: { at: [0, 186 / 2 - 8 - (117 + 12) / 2, D / 2 + 3], size: [W - 32, 117] },
+} as const satisfies Partial<Record<Layer, Screen>>;
+
+/** a falling page, CSS px: its words keep their size at every width, so it does too */
+export const CARD: readonly [number, number] = [96, 120];
+/** CSS px a falling page keeps clear */
+export const ROOM = 16;
+/** the content's bin: walls this thick round a well this deep, open at the top */
+const WALL = 8;
+export const WELL = 24;
+/** a page's sheet, units thick as it lies in the bin */
+export const LEAF = 6;
+/** where the pages fall onto the rim */
+export const INLET: Vec3 = [160, 0, 0];
+/** where a sheet lies in the bin: its front edge, just inside the front wall */
+export const BED: Vec3 = [128, 0, D / 2 - WALL - 3 - LEAF];
+/** how far back from its front edge a sheet may lie in the bin */
+export const DEEP = BED[2] + D / 2 - WALL - 4;
+/** the content's front window: a band of paper rises in it for each page landed, the pile's edge */
+export const GAUGE: { at: Vec3; size: Vec3 } = { at: [106, 0, D / 2 + 1], size: [108, 32, 1] };
+
+export interface Piece {
+  shape: Shape;
+  material: number;
+  at: Vec3;
+  size: Vec3;
+  /** radians round x, then y, then z */
+  turn?: Vec3;
+  /** its own solid, inked round; else one with the body it sits on */
+  solid?: boolean;
+  looks?: Look[];
+  dressed?: Partial<Record<Look, number>>;
+  plate?: boolean;
+  /** the window's band for page `band`, each over the window's bottom, the lower in front */
+  band?: number;
 }
 
-void part(int i, out vec3 lo, out vec3 hi) {
-  if (i < 4) {
-    lo = uMin[i];
-    hi = uMax[i];
-    return;
-  }
-  int gap = (i - 4) / 4;
-  int corner = i - 4 - gap * 4;
-  float y = gap < 3 ? uMax[gap + 1].y : 0.0;
-  vec2 at = vec2(corner == 1 || corner == 3 ? uPost.x : -uPost.x, corner >= 2 ? -uPost.y : uPost.y);
-  lo = vec3(at.x - uPost.z, y, at.y - uPost.z);
-  hi = vec3(at.x + uPost.z, y + uPost.w, at.y + uPost.z);
+interface Module {
+  layer: Layer;
+  height: number;
+  pieces: Piece[];
 }
 
-// the part has dithered in at this pixel; a post with the layer it stands on, the feet with the
-// layer on them
-bool shows(int i) {
-  return uShow[i < 4 ? i : min((i - 4) / 4 + 1, 3)] > threshold;
-}
-
-float lit(vec3 p, int self) {
-  vec3 inv = invert(uLight);
-  vec3 s = slab(p, inv, uBoundMin, uBoundMax);
-  if (s.x >= s.y || s.y <= 0.0) return 1.0;
-  vec3 lo;
-  vec3 hi;
-  for (int i = 0; i < 20; i++) {
-    if (i == self || !shows(i)) continue;
-    part(i, lo, hi);
-    s = slab(p, inv, lo, hi);
-    if (s.x < s.y && s.y > 0.0) return 0.0;
-  }
-  return 1.0;
-}
-
-void main() {
-  vec2 size = uResolution / uDpr;
-  vec2 px = vec2(gl_FragCoord.x, uResolution.y - gl_FragCoord.y) / uDpr;
-  // one CSS px across the screen moves the ray by t world units at t
-  vec3 D = uFwd * uFocal + uRight * (px.x - uCentre.x) + uUp * (uCentre.y - px.y);
-  vec3 inv = invert(D);
-  threshold = bayer8(floor(px / 2.0));
-  // a line on each face (a crease gets two), and one outside a silhouette
-  float inner = max(0.75, 1.0 / uDpr);
-  float outer = max(1.0, 1.0 / uDpr);
-  vec3 pen = uNight > 0.5 ? uLit : uShade;
-  float ground = D.y < 0.0 ? -uEye.y / D.y : 1e20;
-
-  float best = 1e20;
-  int hit = -1;
-  int axis = 0;
-  bool rim = false;
-  vec3 lo;
-  vec3 hi;
-  vec3 c = 0.5 * (uBoundMin + uBoundMax);
-  float far = outer * max(dot(c - uEye, uFwd) / uFocal, 1e-3) * 2.0;
-  vec3 s = slab(uEye, inv, uBoundMin - far, uBoundMax + far);
-  if (s.x < s.y && s.y > 0.0) {
-    for (int i = 0; i < 20; i++) {
-      part(i, lo, hi);
-      s = slab(uEye, inv, lo, hi);
-      if (s.x < s.y && s.x > 0.0 && s.x < best) {
-        best = s.x;
-        hit = i;
-        axis = int(s.z);
-      }
-    }
-    // silhouettes: a near miss of a part in front of whatever the ray reaches
-    float depth = min(best, ground);
-    for (int i = 0; i < 20; i++) {
-      if (i == hit || !shows(i)) continue;
-      part(i, lo, hi);
-      float guess = max(dot(0.5 * (lo + hi) - uEye, uFwd) / uFocal, 1e-3);
-      s = slab(uEye, inv, lo - outer * guess, hi + outer * guess);
-      if (s.x < s.y && s.x > 0.0 && s.x < depth) {
-        float r = outer * s.x;
-        s = slab(uEye, inv, lo - r, hi + r);
-        if (s.x < s.y && s.x > 0.0 && s.x < depth) rim = true;
-      }
-    }
-  }
-  if (rim) {
-    color = vec4(pen, 1.0);
-    return;
-  }
-
-  if (hit >= 0 && best < ground) {
-    // a part still dithering in covers its share of the faces under the canvas with paper
-    if (!shows(hit)) {
-      color = vec4(uPaper, 1.0);
-      return;
-    }
-    part(hit, lo, hi);
-    vec3 p = uEye + best * D;
-    vec3 n = vec3(0.0);
-    n[axis] = -sign(D[axis]);
-    int a1 = axis == 0 ? 1 : 0;
-    int a2 = axis == 2 ? 1 : 2;
-    // the hit point's screen derivatives on its plane: lines keep their width at any angle
-    float nd = dot(n, D);
-    vec3 gx = best * (uRight - D * dot(n, uRight) / nd);
-    vec3 gy = best * (-uUp + D * dot(n, uUp) / nd);
-    float e1 = min(p[a1] - lo[a1], hi[a1] - p[a1]) / length(vec2(gx[a1], gy[a1]));
-    float e2 = min(p[a2] - lo[a2], hi[a2] - p[a2]) / length(vec2(gx[a2], gy[a2]));
-    bool line = min(e1, e2) < inner;
-    // the real page on the ui layer's top, and every layer's front, show through
-    bool page = hit == 0 && axis == 1 && n.y > 0.0;
-    bool front = hit < 4 && axis == 2 && n.z > 0.0;
-    if (page || front) {
-      color = line ? vec4(page ? pen : uShade, 1.0) : vec4(0.0);
-      return;
-    }
-    float lambert = dot(n, uLight);
-    float tone = clamp((lambert - 0.12) / 0.3, 0.0, 1.0);
-    // a face turned away is shade, a cast shadow on a lit face a screen
-    if (lambert > 0.0 && lit(p + n * best * 0.5, hit) < 0.5) tone = min(tone, 0.55);
-    vec3 col = tone > threshold ? uLit : uShade;
-    if (line) col = tone > 0.5 ? uShade : uLit;
-    color = vec4(col, 1.0);
-    return;
-  }
-
-  if (ground < 1e19) {
-    vec3 p = uEye + ground * D;
-    // the floor dissolves before the canvas' edges, never cut by them
-    float edge = smoothstep(0.0, 24.0, min(min(px.x, size.x - px.x), min(px.y, size.y - px.y)));
-    if (threshold < uShadow * edge && lit(p + vec3(0.0, 0.01, 0.0), -1) < 0.5) {
-      color = vec4(pen, 1.0);
-      return;
-    }
-    // the sheet's grid on the floor, faded round the stack and where its lines crowd
-    vec3 gx = ground * (uRight - D * uRight.y / D.y);
-    vec3 gy = ground * (-uUp + D * uUp.y / D.y);
-    float sx = length(vec2(gx.x, gy.x));
-    float sz = length(vec2(gx.z, gy.z));
-    float step = uGrid.x;
-    float dx = abs(fract(p.x / step + 0.5) - 0.5) * step / sx;
-    float dz = abs(fract(p.z / step + 0.5) - 0.5) * step / sz;
-    float fade = 1.0 - smoothstep(0.5, 1.0, length(p.xz) / uGrid.z);
-    float a = min(dx, dz) < 0.5 ? uGrid.y * fade * edge * smoothstep(5.0, 10.0, step / max(sx, sz)) : 0.0;
-    color = vec4(pen * a, a);
-    return;
-  }
-  color = vec4(0.0);
-}
-`;
-
-export type Vec3 = [number, number, number];
-
-/** the page on the stack's top, a 16:10 screen, a layer's thickness and the gap its posts keep */
-export const W = 1000;
-export const D = 625;
-export const T = 140;
-export const GAP = 60;
-/** the stack's height at rest, on its feet, and the height a layer settles in from */
-export const HEIGHT = 4 * (T + GAP);
-export const DROP = GAP;
-
-const DEG = Math.PI / 180;
-/** the camera above the floor and round the stack, left of its front */
-const ELEV = 32 * DEG;
-const YAW = -26 * DEG;
-/** its distance in page widths: a long lens, so the stack keeps its shape */
-const LENS = 3;
-/** the cell's least margin round the stack, a part of the stack's width on screen */
-const MARGIN = 0.06;
-
-/** a camera's basis and its principal point, CSS px */
-export interface Camera {
-  eye: Vec3;
-  fwd: Vec3;
-  right: Vec3;
-  up: Vec3;
-  focal: number;
-  centre: [number, number];
-}
-
-/** a world point in canvas CSS px into `out` */
-export function project(cam: Camera, x: number, y: number, z: number, out: number[]) {
-  const vx = x - cam.eye[0];
-  const vy = y - cam.eye[1];
-  const vz = z - cam.eye[2];
-  const rx = vx * cam.right[0] + vz * cam.right[2];
-  const uy = vx * cam.up[0] + vy * cam.up[1] + vz * cam.up[2];
-  const d = vx * cam.fwd[0] + vy * cam.fwd[1] + vz * cam.fwd[2];
-  out[0] = cam.centre[0] + (cam.focal * rx) / d;
-  out[1] = cam.centre[1] - (cam.focal * uy) / d;
-}
-
-function num(v: number): string {
-  return Math.abs(v) < 1e-12 ? '0' : String(+v.toPrecision(9));
-}
-
-/**
- * The `matrix3d` that lays a `w` x `h` px element (origin at its top left, placed at the canvas'
- * top left) on the quad `q`: its top left, top right, bottom right and bottom left corners in
- * canvas px, as x, y pairs. A plane seen through a pinhole is a homography, so the element sits on
- * its face exactly (Heckbert's square to quad).
- */
-export function quadMatrix(q: readonly number[], w: number, h: number): string {
-  const dx1 = q[2] - q[4];
-  const dx2 = q[6] - q[4];
-  const dx3 = q[0] - q[2] + q[4] - q[6];
-  const dy1 = q[3] - q[5];
-  const dy2 = q[7] - q[5];
-  const dy3 = q[1] - q[3] + q[5] - q[7];
-  const den = dx1 * dy2 - dx2 * dy1;
-  const g = (dx3 * dy2 - dx2 * dy3) / den;
-  const k = (dx1 * dy3 - dx3 * dy1) / den;
-  const a = q[2] - q[0] + g * q[2];
-  const b = q[6] - q[0] + k * q[6];
-  const d = q[3] - q[1] + g * q[3];
-  const e = q[7] - q[1] + k * q[7];
-  return `matrix3d(${num(a / w)},${num(d / w)},0,${num(g / w)},${num(b / h)},${num(e / h)},0,${num(k / h)},0,0,1,0,${num(q[0])},${num(q[1])},0,1)`;
-}
-
-/** the box across the stack from the floor to `top` on `cam`'s canvas */
-function bounds(cam: Camera, top: number) {
-  const point = [0, 0];
-  const box = { x0: Infinity, y0: Infinity, x1: -Infinity, y1: -Infinity };
-  for (let i = 0; i < 8; i++) {
-    project(cam, i & 1 ? W / 2 : -W / 2, i & 2 ? top : 0, i & 4 ? D / 2 : -D / 2, point);
-    box.x0 = Math.min(box.x0, point[0]);
-    box.x1 = Math.max(box.x1, point[0]);
-    box.y0 = Math.min(box.y0, point[1]);
-    box.y1 = Math.max(box.y1, point[1]);
-  }
-  return box;
-}
-
-/**
- * The stack's one pose, framed for a cell 1 CSS px wide: the focal length and the principal point
- * scale with the cell's width. The cell takes the aspect ratio of the stack's box on screen with an
- * even margin round it, wide enough for the top layer settling in from above; `face` is a layer's
- * width on screen, a part of the cell's.
- */
-function pose() {
-  const ce = Math.cos(ELEV);
-  const out: Vec3 = [Math.sin(YAW) * ce, Math.sin(ELEV), Math.cos(YAW) * ce];
-  const right: Vec3 = [Math.cos(YAW), 0, -Math.sin(YAW)];
-  const fwd: Vec3 = [-out[0], -out[1], -out[2]];
-  const cam: Camera = {
-    eye: [LENS * W * out[0], HEIGHT / 2 + LENS * W * out[1], LENS * W * out[2]],
-    fwd,
-    right,
-    // right x fwd
-    up: [-right[2] * fwd[1], right[2] * fwd[0] - right[0] * fwd[2], right[0] * fwd[1]],
-    focal: 1,
-    centre: [0, 0],
-  };
-  const rest = bounds(cam, HEIGHT);
-  const reach = bounds(cam, HEIGHT + DROP);
-  const margin = Math.max(
-    MARGIN * (rest.x1 - rest.x0),
-    rest.x0 - reach.x0,
-    rest.y0 - reach.y0,
-    reach.x1 - rest.x1,
-    reach.y1 - rest.y1,
-  );
-  const span = rest.x1 - rest.x0 + 2 * margin;
-  const point = [0, 0];
-  project(cam, -W / 2, HEIGHT / 2, D / 2, point);
-  const [ax, ay] = point;
-  project(cam, W / 2, HEIGHT / 2, D / 2, point);
+function plate(y = 0): Piece {
   return {
-    eye: cam.eye,
-    fwd,
-    right,
-    up: cam.up,
-    focal: 1 / span,
-    centre: [(margin - rest.x0) / span, (margin - rest.y0) / span] as const,
-    aspect: span / (rest.y1 - rest.y0 + 2 * margin),
-    face: Math.hypot(point[0] - ax, point[1] - ay) / span,
+    shape: 'box',
+    material: MATERIAL.ink,
+    at: [PLATE.x, y, PLATE.z - 1],
+    size: [PLATE.w, PLATE.h, 2],
+    solid: true,
+    plate: true,
   };
 }
 
-export const POSE = pose();
+function display({ at, size }: Screen): Piece[] {
+  return [
+    {
+      shape: 'box',
+      material: MATERIAL.grey,
+      at: [at[0], at[1], at[2] - 1.5],
+      size: [size[0] + 6, size[1] + 6, 2],
+      solid: true,
+    },
+    {
+      shape: 'box',
+      material: MATERIAL.ink,
+      at: [at[0], at[1], at[2] - 0.25],
+      size: [size[0], size[1], 0.5],
+    },
+  ];
+}
+
+function posts(height: number): Piece[] {
+  const out: Piece[] = [];
+  for (const x of [-W / 2 + 22, W / 2 - 22]) {
+    for (const z of [-D / 2 + 20, D / 2 - 20]) {
+      out.push({
+        shape: 'cylinder',
+        material: MATERIAL.grey,
+        at: [x, -height / 2 - GAP / 2, z],
+        size: [10, GAP, 10],
+        solid: true,
+      });
+    }
+  }
+  return out;
+}
+
+function ui(): Module {
+  const height = 186;
+  const { at, size } = DISPLAYS.ui;
+  const knobs = -height / 2 + 8 + PLATE.h / 2;
+  const pieces: Piece[] = [
+    { shape: 'box', material: MATERIAL.paper, at: [0, 0, 0], size: [W, height, D] },
+    {
+      shape: 'box',
+      material: MATERIAL.ink,
+      at: [0, at[1], D / 2 + 1],
+      size: [size[0] + 12, size[1] + 12, 2],
+      solid: true,
+    },
+    { shape: 'box', material: MATERIAL.paper, at: [0, at[1], at[2] - 0.5], size: [...size, 1] },
+    plate(knobs),
+    {
+      shape: 'cylinder',
+      material: MATERIAL.ink,
+      at: [118, knobs, D / 2 + 3],
+      size: [18, 6, 18],
+      turn: FACING,
+      solid: true,
+    },
+    {
+      shape: 'cylinder',
+      material: MATERIAL.paper,
+      at: [146, knobs, D / 2 + 2.5],
+      size: [13, 5, 13],
+      turn: FACING,
+      solid: true,
+    },
+    {
+      shape: 'sphere',
+      material: MATERIAL.accent,
+      at: [170, knobs, D / 2 + 1],
+      size: [9, 9, 9],
+      solid: true,
+    },
+  ];
+  for (let i = 0; i < 9; i++) {
+    pieces.push({
+      shape: 'box',
+      material: MATERIAL.ink,
+      at: [-128 + i * 32, height / 2 + 0.5, -6],
+      size: [14, 1, D - 50],
+    });
+  }
+  return { layer: 'ui', height, pieces: [...pieces, ...posts(height)] };
+}
+
+function core(): Module {
+  const height = 72;
+  const pieces: Piece[] = [
+    { shape: 'box', material: MATERIAL.ink, at: [0, 0, 0], size: [W, height, D] },
+    plate(),
+    ...display(DISPLAYS.core),
+  ];
+  // proud of the case on every face it shows, so neither face wins by a rounding
+  for (const x of [-W / 2 + 6, W / 2 - 13.5]) {
+    pieces.push({
+      shape: 'box',
+      material: MATERIAL.hazard,
+      at: [x, 0, 0.5],
+      size: [x < 0 ? 12 : 29, height + 1, D + 1],
+      solid: true,
+    });
+  }
+  return { layer: 'core', height, pieces: [...pieces, ...posts(height)] };
+}
+
+function content(): Module {
+  const height = 60;
+  const pieces: Piece[] = [
+    {
+      shape: 'box',
+      material: MATERIAL.paper,
+      at: [0, -WELL / 2, 0],
+      size: [W - 2 * WALL, height - WELL, D - 2 * WALL],
+    },
+    plate(),
+    { shape: 'box', material: MATERIAL.ink, at: [106, 0, D / 2 + 0.5], size: [112, 36, 1] },
+    {
+      shape: 'sphere',
+      material: MATERIAL.accent,
+      at: [W / 2 - 14, 14, D / 2 + 1],
+      size: [8, 8, 8],
+      solid: true,
+    },
+  ];
+  for (let band = 0; band < 3; band++) {
+    pieces.push({ shape: 'box', material: MATERIAL.paper, at: GAUGE.at, size: GAUGE.size, band });
+  }
+  for (const side of [-1, 1]) {
+    pieces.push(
+      {
+        shape: 'box',
+        material: MATERIAL.paper,
+        at: [0, 0, side * (D / 2 - WALL / 2)],
+        size: [W, height, WALL],
+      },
+      {
+        shape: 'box',
+        material: MATERIAL.paper,
+        at: [side * (W / 2 - WALL / 2), 0, 0],
+        size: [WALL, height, D - 2 * WALL],
+      },
+    );
+  }
+  return { layer: 'content', height, pieces: [...pieces, ...posts(height)] };
+}
+
+const FOLD = 14;
+/** a page as a sheet, upright, CSS px of its card round its middle: its corner folded on a file, an
+ * icon on a CMS page, and its two lines where the card has them */
+function sheet(): Piece[] {
+  const pieces: Piece[] = [
+    {
+      shape: 'box',
+      material: MATERIAL.paper,
+      at: [0, -FOLD / 2, 0],
+      size: [CARD[0], CARD[1] - FOLD, LEAF],
+    },
+    {
+      shape: 'box',
+      material: MATERIAL.paper,
+      at: [-FOLD / 2, CARD[1] / 2 - FOLD / 2, 0],
+      size: [CARD[0] - FOLD, FOLD, LEAF],
+    },
+    {
+      shape: 'box',
+      material: MATERIAL.paper,
+      at: [CARD[0] / 2 - FOLD / 2, CARD[1] / 2 - FOLD / 2, 0],
+      size: [FOLD, FOLD, LEAF],
+      looks: ['blocks'],
+    },
+    {
+      shape: 'box',
+      material: MATERIAL.grey,
+      at: [CARD[0] / 2 - (3 * FOLD) / 4, CARD[1] / 2 - (3 * FOLD) / 4, 0],
+      size: [FOLD * Math.SQRT2, FOLD / Math.SQRT2, LEAF - 1],
+      turn: [0, 0, -Math.PI / 4],
+      looks: ['files'],
+    },
+    {
+      shape: 'box',
+      material: MATERIAL.accent,
+      at: [-CARD[0] / 2 + 15, CARD[1] / 2 - 15, LEAF / 2 + 0.5],
+      size: [12, 12, 1],
+      looks: ['blocks'],
+    },
+  ];
+  // a line is as thin as a face's edge, so its paper draws all ink
+  for (const [look, top] of [
+    ['files', 33],
+    ['blocks', 53],
+  ] as const) {
+    for (const [n, width] of [78, 65].entries()) {
+      pieces.push({
+        shape: 'box',
+        material: MATERIAL.paper,
+        at: [(width - 78) / 2, CARD[1] / 2 - top - 0.5 - 9 * n, LEAF / 2 + 0.5],
+        size: [width, 1, 1],
+        looks: [look],
+      });
+    }
+  }
+  return pieces;
+}
+
+export const SHEET = sheet();
+
+function framework(): Module {
+  const height = 64;
+  const pieces: Piece[] = [
+    {
+      shape: 'box',
+      material: MATERIAL.ink,
+      at: [0, 0, 0],
+      size: [W, height, D],
+      dressed: CASES,
+    },
+    plate(),
+    ...display(DISPLAYS.framework),
+    {
+      shape: 'cylinder',
+      material: MATERIAL.accent,
+      at: [W / 2 - 24, 13, D / 2 + 2],
+      size: [12, 4, 12],
+      turn: FACING,
+      solid: true,
+    },
+    {
+      shape: 'box',
+      material: MATERIAL.paper,
+      at: [W / 2 - 24, -11, D / 2 + 2],
+      size: [12, 18, 4],
+      solid: true,
+    },
+  ];
+  for (const x of [-W / 2 + 30, W / 2 - 30]) {
+    for (const z of [-D / 2 + 24, D / 2 - 24]) {
+      pieces.push({
+        shape: 'box',
+        material: MATERIAL.ink,
+        at: [x, -height / 2 - FEET / 2, z],
+        size: [36, FEET, 28],
+        solid: true,
+      });
+    }
+  }
+  return { layer: 'framework', height, pieces };
+}
+
+export const MODULES: Module[] = [framework(), content(), core(), ui()];
+
+export const PLACES: number[] = (() => {
+  const out: number[] = [];
+  let y = DOCK[1] + FEET;
+  for (const module of MODULES) {
+    out.push(y + module.height / 2);
+    y += module.height + GAP;
+  }
+  return out;
+})();
+
+export const STACK = PLACES[PLACES.length - 1] + MODULES[MODULES.length - 1].height / 2;
+
+export const SHOULDER: [number, number] = [-510, 150];
+export const BOOM = 236;
+export const FOREARM = 200;
+export const TOOL = 46;
+const FOOT = 80;
+export const RAM_FOOT: Vec3 = [SHOULDER[0] - 62, 80, 30];
+export const RAM_HEAD: [number, number] = [82, 22];
+
+export const BASE: Piece[] = [
+  { shape: 'box', material: MATERIAL.paper, at: [0, DOCK[1] / 2, 0], size: DOCK },
+  ...[-1, 1].map((side): Piece => ({
+    shape: 'box',
+    material: MATERIAL.ink,
+    at: [side * (W / 2 + 6), DOCK[1] + 0.5, D / 2 + 6],
+    size: [16, 1, 8],
+  })),
+  {
+    shape: 'box',
+    material: MATERIAL.hazard,
+    at: [SHOULDER[0], 7, 0],
+    size: [2 * FOOT, 14, 2 * FOOT],
+  },
+  { shape: 'box', material: MATERIAL.paper, at: [SHOULDER[0], 36, 0], size: [150, 44, 150] },
+  {
+    shape: 'cylinder',
+    material: MATERIAL.grey,
+    at: [SHOULDER[0], 66, 0],
+    size: [124, 16, 124],
+    solid: true,
+  },
+  {
+    shape: 'box',
+    material: MATERIAL.paper,
+    at: [SHOULDER[0], 106, -34],
+    size: [68, 70, 10],
+    solid: true,
+  },
+  {
+    shape: 'box',
+    material: MATERIAL.paper,
+    at: [SHOULDER[0], 106, 34],
+    size: [68, 70, 10],
+    solid: true,
+  },
+  {
+    shape: 'box',
+    material: MATERIAL.ink,
+    at: [RAM_FOOT[0], RAM_FOOT[1] - 4, RAM_FOOT[2]],
+    size: [16, 14, 14],
+    solid: true,
+  },
+  ...[54, 18, -18].map((x): Piece => ({
+    shape: 'prism',
+    material: MATERIAL.ink,
+    at: [SHOULDER[0] + x, 36, 76.5],
+    size: [9, 3, 9],
+    turn: FACING,
+    solid: true,
+  })),
+  {
+    shape: 'sphere',
+    material: MATERIAL.accent,
+    at: [SHOULDER[0] - 54, 36, 76],
+    size: [10, 10, 10],
+    solid: true,
+  },
+];
+
+export const BOOM_PIECES: Piece[] = [
+  { shape: 'cylinder', material: MATERIAL.grey, at: [0, 0, 0], size: [62, 88, 62], turn: FACING },
+  {
+    shape: 'cylinder',
+    material: MATERIAL.accent,
+    at: [0, 0, 45],
+    size: [32, 3, 32],
+    turn: FACING,
+    solid: true,
+  },
+  { shape: 'box', material: MATERIAL.paper, at: [BOOM / 2, 0, 0], size: [BOOM, 36, 42] },
+  ...[0.36, 0.6, 0.82].map((t): Piece => ({
+    shape: 'cylinder',
+    material: MATERIAL.ink,
+    at: [BOOM * t, 0, 21.5],
+    size: [15, 1, 15],
+    turn: FACING,
+  })),
+  { shape: 'box', material: MATERIAL.ink, at: [-50, 0, 0], size: [56, 60, 50], solid: true },
+  { shape: 'box', material: MATERIAL.hazard, at: [-50, 0, 25.5], size: [56, 15, 1] },
+];
+
+export const FOREARM_PIECES: Piece[] = [
+  { shape: 'cylinder', material: MATERIAL.grey, at: [0, 0, 0], size: [48, 60, 48], turn: FACING },
+  {
+    shape: 'cylinder',
+    material: MATERIAL.accent,
+    at: [0, 0, 31],
+    size: [26, 3, 26],
+    turn: FACING,
+    solid: true,
+  },
+  { shape: 'box', material: MATERIAL.paper, at: [FOREARM / 2, 0, 0], size: [FOREARM, 28, 32] },
+  {
+    shape: 'box',
+    material: MATERIAL.ink,
+    at: [FOREARM / 2 + 6, 0, 16.5],
+    size: [FOREARM - 64, 6, 1],
+  },
+];
+
+export const TOOL_PIECES: Piece[] = [
+  { shape: 'cylinder', material: MATERIAL.grey, at: [0, 0, 0], size: [34, 42, 34], turn: FACING },
+  { shape: 'box', material: MATERIAL.paper, at: [20, 0, 0], size: [26, 28, 38], solid: true },
+  { shape: 'box', material: MATERIAL.ink, at: [TOOL - 3, 0, 0], size: [6, 46, 60], solid: true },
+  {
+    shape: 'cylinder',
+    material: MATERIAL.ink,
+    at: [18, 21, 12],
+    size: [5, 18, 5],
+    solid: true,
+  },
+];
+
+export const RAM_PIECES: Piece[] = [
+  { shape: 'cylinder', material: MATERIAL.ink, at: [0, 0, 0], size: [1, 1, 1], solid: true },
+  { shape: 'cylinder', material: MATERIAL.ink, at: [0, 0, 0], size: [1, 1, 1], solid: true },
+];
+
+/** the boom's and forearm's angles that put the pad's face at `pad`, the elbow up */
+export function reach(pad: readonly [number, number], out: [number, number]): [number, number] {
+  const tx = pad[0] - TOOL - SHOULDER[0];
+  const ty = pad[1] - SHOULDER[1];
+  const d = Math.min(
+    Math.max(Math.hypot(tx, ty), Math.abs(BOOM - FOREARM) + 1),
+    BOOM + FOREARM - 1,
+  );
+  const toward = Math.atan2(ty, tx);
+  const inner = Math.acos((BOOM * BOOM + d * d - FOREARM * FOREARM) / (2 * BOOM * d));
+  const boom = toward + inner;
+  const ex = Math.cos(boom) * BOOM;
+  const ey = Math.sin(boom) * BOOM;
+  out[0] = boom;
+  out[1] = Math.atan2(ty - ey, tx - ex);
+  return out;
+}
+
+export const FLOOR: Piece = {
+  shape: 'box',
+  material: MATERIAL.floor,
+  at: [0, -0.5, 0],
+  size: [2400, 1, 600],
+};
+export const BOUNDS: [Vec3, Vec3] = [
+  [SHOULDER[0] - FOOT - 40, -1, -D / 2 - 120],
+  [W / 2 + 60, STACK + 20, D / 2 + 40],
+];
+
+export const LIGHT: Vec3 = [0.2, 0.86, 0.47];
+
+/** a unit back goes this far right and up: the 2:1 of a pixel line */
+export const DEPTH: [number, number] = [0.447, 0.224];
+
+export interface View {
+  left: number;
+  right: number;
+  top: number;
+  bottom: number;
+}
+
+const FRONT = -DEPTH[1] * (DOCK[2] / 2) - 2;
+
+export const REST: [number, number] = [-250, 418];
+
+/** the least the core and the UI lift as the content swaps: room for a page to fall in */
+export const RACK = 130;
+
+const TOP = STACK + RACK + DEPTH[1] * (D / 2) + 2;
+/** from 768px the whole machine; on phones from just past the pedestal, the arm over the edge */
+export const VIEWS: Record<'wide' | 'phone', View> = {
+  wide: {
+    left: SHOULDER[0] - FOOT - DEPTH[0] * FOOT - 2,
+    right: DOCK[0] / 2 + DEPTH[0] * (DOCK[2] / 2) + 2,
+    top: TOP,
+    bottom: FRONT,
+  },
+  phone: { left: SHOULDER[0] + FOOT + DEPTH[0] * FOOT + 2, right: 300, top: TOP, bottom: FRONT },
+};

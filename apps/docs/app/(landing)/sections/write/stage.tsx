@@ -3,10 +3,15 @@ import type { ReactNode } from 'react';
 import { RotateCcw } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { Window } from '../../ui/window';
+import type { Step } from './data';
 import { createPress } from './engine';
 import { BED } from './scene';
 
 const TONES = ['text-lp-ink', 'text-lp-ink-2', 'text-lp-orange'];
+/** a rivet ring, set in each corner of a plate */
+const RIVET =
+  'radial-gradient(circle, var(--lp-paper) 1.5px, var(--lp-ink-2) 2px 2.75px, transparent 3.25px)';
+const RIVETS = `${RIVET} 0 0 / 7px 7px no-repeat, ${RIVET} 100% 0 / 7px 7px no-repeat, ${RIVET} 0 100% / 7px 7px no-repeat, ${RIVET} 100% 100% / 7px 7px no-repeat`;
 /** the source's type, which sizes the caret a character by a line */
 const SOURCE = 'font-mono text-[13px]/5 md:text-xs/[18px]';
 
@@ -14,17 +19,13 @@ const SOURCE = 'font-mono text-[13px]/5 md:text-xs/[18px]';
 const SYNTAX =
   /(---|^#{1,6}(?= )|```\w*|<\/?|\/?>|[{}[\]()=:;,"']|\/\/.*$|\/\*.*?\*\/|\b(?:import|from|const|export|async|function|await|return|interface)\b)|(\b\d+\b)/g;
 
-/** a plate a block: a row of 4 from xl, 2 rows round the rail band from md, tabs facing the rail;
- * its frame reaches over its border */
+/** a plate a block, 2 rows round the rail band from md, its trigger facing the rail; its frame
+ * reaches over its border */
 const PLATES = [
   { place: 'md:col-start-1 md:row-start-1 md:border-r md:before:-right-px', foot: true },
-  { place: 'md:col-start-2 md:row-start-1 xl:border-r xl:before:-right-px', foot: true },
-  {
-    place:
-      'md:col-start-1 md:row-start-3 md:border-r md:before:-right-px xl:col-start-3 xl:row-start-1',
-    foot: false,
-  },
-  { place: 'md:col-start-2 md:row-start-3 xl:col-start-4 xl:row-start-1', foot: false },
+  { place: 'md:col-start-2 md:row-start-1', foot: true },
+  { place: 'md:col-start-1 md:row-start-3 md:border-r md:before:-right-px', foot: false },
+  { place: 'md:col-start-2 md:row-start-3', foot: false },
 ];
 
 /** a source line's words as inline blocks, so a long line wraps between words, not at a hyphen */
@@ -72,7 +73,7 @@ function mount(stage: HTMLDivElement | null) {
 interface StageProps {
   /** the MDX file on the bed */
   file: string;
-  steps: { tab: string; status: string }[];
+  steps: Step[];
   sources: string[];
   /** each block's compiled output */
   slots: ReactNode[];
@@ -84,7 +85,7 @@ interface StageProps {
 /** the finished page, each block's source hidden under its output till the engine writes it */
 export function Stage({ file, steps, sources, slots, bed, column }: StageProps) {
   return (
-    <div className="px-(--lp-gutter) pb-(--lp-gutter)">
+    <div className="px-(--lp-gutter) pb-(--lp-section)">
       {/* what moves here gets a layer, and so does all painted over it: the clip keeps them to the stage */}
       <div ref={mount} data-file={file} className="relative flex overflow-clip">
         <Window
@@ -102,7 +103,7 @@ export function Stage({ file, steps, sources, slots, bed, column }: StageProps) 
           }
           className="min-w-0 flex-1"
         >
-          <div className="flex flex-col gap-4 px-4 py-5 md:grid md:grid-cols-2 md:gap-0 md:p-0 xl:grid-cols-4">
+          <div className="flex flex-col gap-8 px-4 py-6 md:grid md:grid-cols-2 md:gap-0 md:p-0">
             {slots.map((slot, i) => (
               <div
                 key={i}
@@ -111,13 +112,21 @@ export function Stage({ file, steps, sources, slots, bed, column }: StageProps) 
                 className={cn(
                   // framed while held for a press, where the card the canvas draws stands: the frame
                   // is a box of its own, as an outlined one repaints whenever anything in it moves
-                  'relative -mx-2 -my-2 grid grid-cols-1 gap-2 border-lp-line bg-lp-paper px-2 py-2 before:pointer-events-none before:absolute before:inset-0 data-framed:before:outline data-framed:before:-outline-offset-5 data-framed:before:outline-lp-line-strong md:m-0 md:gap-3 md:p-3',
+                  'relative -m-2 grid grid-cols-1 gap-3 border-lp-line bg-lp-paper p-2 before:pointer-events-none before:absolute before:inset-0 data-framed:before:outline data-framed:before:-outline-offset-5 data-framed:before:outline-lp-line-strong md:m-0 md:gap-5 md:p-6 xl:p-8',
                   PLATES[i].place,
                   PLATES[i].foot
                     ? 'md:grid-rows-[minmax(0,1fr)_auto]'
-                    : 'md:grid-rows-[auto_minmax(0,1fr)] xl:grid-rows-[minmax(0,1fr)_auto]',
+                    : 'md:grid-rows-[auto_minmax(0,1fr)]',
                 )}
               >
+                {/* riveted to the bed */}
+                <span
+                  aria-hidden
+                  className="pointer-events-none absolute inset-1 max-md:hidden"
+                  style={{ background: RIVETS }}
+                />
+                {/* the plate's nameplate on the press, in the bed's lines: its lamp lit while the
+                    plate shows its Markdown, blinking while its press waits for the sequence */}
                 <button
                   type="button"
                   data-tab
@@ -125,16 +134,22 @@ export function Stage({ file, steps, sources, slots, bed, column }: StageProps) 
                   aria-label={`${steps[i].tab} Markdown`}
                   aria-pressed="false"
                   className={cn(
-                    'relative inline-flex h-7 cursor-pointer items-center justify-self-start border border-lp-line bg-lp-paper px-3 text-xs font-medium tracking-normal whitespace-pre text-lp-ink-2 transition-none before:absolute before:top-1/2 before:left-1 before:hidden before:size-1 before:-translate-y-1/2 before:bg-current after:absolute after:-inset-y-2 after:inset-x-0 hover:bg-lp-ink hover:text-lp-paper focus-visible:bg-lp-ink focus-visible:text-lp-paper focus-visible:outline-none data-inverted:bg-lp-ink data-inverted:text-lp-paper aria-pressed:bg-lp-yellow aria-pressed:text-lp-on-yellow data-queued:bg-lp-ink data-queued:text-lp-paper data-queued:before:block data-queued:before:animate-lp-caret motion-reduce:data-queued:before:animate-none [@media(scripting:none)]:pointer-events-none',
-                    PLATES[i].foot ? 'md:row-start-2' : 'xl:row-start-2',
+                    'group/tab relative flex h-8 cursor-pointer justify-self-start border border-lp-ink-2 bg-lp-paper font-pixel text-sm whitespace-pre text-lp-ink-2 transition-none after:absolute after:-inset-y-2 after:inset-x-0 hover:bg-lp-ink hover:text-lp-paper focus-visible:bg-lp-ink focus-visible:text-lp-paper focus-visible:outline-none data-inverted:bg-lp-ink data-inverted:text-lp-paper aria-pressed:bg-lp-yellow aria-pressed:text-lp-on-yellow [@media(scripting:none)]:pointer-events-none',
+                    PLATES[i].foot && 'md:row-start-2',
                   )}
                 >
-                  {steps[i].tab}
+                  <span
+                    aria-hidden
+                    className="flex aspect-square items-center justify-center border-e border-current"
+                  >
+                    <span className="relative size-2.5 rounded-full border border-current before:absolute before:inset-0 before:hidden before:rounded-full before:bg-lp-sun group-aria-pressed/tab:before:block group-data-queued/tab:before:block group-data-queued/tab:before:animate-lp-caret motion-reduce:before:animate-none" />
+                  </span>
+                  <span className="flex items-center px-2.5">{steps[i].tab}</span>
                 </button>
                 <div
                   className={cn(
                     'grid grid-cols-1 *:col-start-1 *:row-start-1',
-                    PLATES[i].foot ? 'md:row-start-1' : 'xl:row-start-1',
+                    PLATES[i].foot && 'md:row-start-1',
                   )}
                 >
                   <div data-src className={`invisible ${SOURCE} [font-variant-ligatures:none]`}>
@@ -151,7 +166,8 @@ export function Stage({ file, steps, sources, slots, bed, column }: StageProps) 
                   {/* a stacking context keeps popovers like Twoslash's under the arm; the window
                    the press shows its page through, over the source */}
                   <div data-out className="isolate">
-                    <div className="prose h-full bg-lp-paper [&_.twoslash-completion-list]:w-56! [&_.twoslash-completion-list]:select-text! [&>:first-child]:mt-0 [&>:last-child]:mb-0">
+                    {/* its code wraps, so no line is cut by its plate */}
+                    <div className="prose h-full bg-lp-paper [&_.twoslash-completion-list]:w-max! [&_.twoslash-completion-list]:select-text! [&_pre]:w-full [&_pre]:wrap-anywhere [&_pre]:whitespace-pre-wrap [&>:first-child]:mt-0 [&>:last-child]:mb-0">
                       {slot}
                     </div>
                   </div>
@@ -160,7 +176,7 @@ export function Stage({ file, steps, sources, slots, bed, column }: StageProps) 
             ))}
             <div
               data-bay
-              className="relative max-md:hidden md:col-span-2 md:row-start-2 md:border-y md:border-lp-line xl:col-span-4 xl:border-b-0"
+              className="relative max-md:hidden md:col-span-2 md:row-start-2 md:border-y md:border-lp-line"
               style={{ height: BED.height }}
             >
               {bed}
@@ -179,6 +195,17 @@ export function Stage({ file, steps, sources, slots, bed, column }: StageProps) 
           <span />
           <span />
         </div>
+        {/* paper dithered over the page before it is written again; the line her pencil drags */}
+        <div
+          data-cover
+          aria-hidden
+          className="pointer-events-none invisible absolute z-1 bg-lp-paper"
+        />
+        <span
+          data-scan
+          aria-hidden
+          className="pointer-events-none absolute top-0 left-0 z-1 h-px bg-lp-ink"
+        />
         <span
           data-caret
           aria-hidden

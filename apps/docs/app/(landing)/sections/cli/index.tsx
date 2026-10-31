@@ -325,7 +325,7 @@ export function Cli() {
 
   return (
     <Figure id="cli" aria-label="CLI" status={plans[0].done}>
-      <div className="flex flex-col gap-8 px-(--lp-gutter) pt-16 pb-10 lg:flex-row lg:items-end lg:justify-between lg:gap-16">
+      <div className="flex flex-col gap-8 px-(--lp-gutter) pt-(--lp-section) pb-10 md:pb-12 lg:flex-row lg:items-end lg:justify-between lg:gap-16">
         <FigureHeader lead={<Asked>{copy.cli.lead}</Asked>} title={copy.cli.title} />
         {/* the runs and the command share both edges: the stage's width on a phone and a tablet, the
             command's from 1024px, against the stage's right edge */}
@@ -344,7 +344,7 @@ export function Cli() {
                 <span
                   data-caret
                   aria-hidden
-                  className="invisible absolute top-0 left-0 h-[1.1em] w-[0.6em] bg-current motion-reduce:animate-none"
+                  className="invisible absolute top-0 left-0 h-[1.1em] w-[0.6em] bg-current"
                 />
               </span>
             </div>

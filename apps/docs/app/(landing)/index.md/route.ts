@@ -2,10 +2,10 @@ import { baseUrl } from '@/lib/metadata';
 import { showcases, vercel } from '@/lib/showcases';
 import { command, copy, frameworks, plain, quotes, type Run } from '../content';
 import { modules, more } from '../sections/integrations/data';
-import { CORE, LAYERS, OPTIONS } from '../sections/parts/data';
+import { CORE, LAYERS, NAMES, OPTIONS, ROLES } from '../sections/parts/data';
 import { getContributorCount, getDownloads, getStars } from '../sections/proof/data';
 import { LAYOUTS, TABS, THEME_NAMES, THEMES } from '../sections/style/data';
-import { blocks as buttonBlocks } from '../sections/automate/data';
+import { FILE, OUTPUTS, SOURCE } from '../sections/automate/data';
 import { blocks, fileLines } from '../sections/write/data';
 
 // the counters in it, like the page
@@ -40,10 +40,15 @@ async function landingMarkdown(): Promise<string> {
   ]);
   const runsOn: string[] = [];
   for (const framework of frameworks) runsOn.push(`[${framework.name}](${url(framework.href)})`);
+  // what she says from the moon, each bubble as a sentence
+  const said: string[] = [];
+  for (const lines of copy.hero.says) said.push(lines.join(' '));
   const out = [
     '# Fumadocs',
     '',
     `> ${plain(copy.hero.title)}`,
+    '',
+    said.join(' '),
     '',
     `- Get started: ${url('/docs')}`,
     `- Create a project: \`${command}\``,
@@ -84,15 +89,16 @@ async function landingMarkdown(): Promise<string> {
     fence,
   );
 
-  const button = fileLines(buttonBlocks);
-  const buttonFence = fenceFor(button);
+  const outputs: string[] = [];
+  for (const output of OUTPUTS) outputs.push(`\`${output.title}\``);
   out.push(
     ...section(copy.automate),
-    '- `<auto-type-table>` reads a TypeScript type, and async server components in MDX read your data, both at build time.',
+    '- `<auto-type-table>` reads a TypeScript type, `<include>` takes code from your files, and async server components in MDX read your data, all at build time.',
+    `- One source, many outputs: from \`${FILE}\` come ${outputs.join(', ')}. Change the source and every one of them follows.`,
     '',
-    `${buttonFence}mdx title="button.mdx"`,
-    ...button,
-    buttonFence,
+    `\`\`\`tsx title="${FILE}"`,
+    SOURCE,
+    '```',
   );
 
   out.push(
@@ -100,10 +106,9 @@ async function landingMarkdown(): Promise<string> {
     `- Every page runs on these ${LAYERS.length} layers, each a library of its own:`,
   );
   for (const layer of LAYERS) {
-    const names: string[] = [];
+    out.push(`  - ${NAMES[layer]}: ${ROLES[layer]}${layer === 'core' ? ' (fixed)' : ''}`);
     for (const option of layer === 'core' ? [CORE] : OPTIONS[layer])
-      names.push(`${option.title} (\`${option.name}\`)`);
-    out.push(`  - ${layer}${layer === 'core' ? ' (kept)' : ''}: ${names.join(', ')}`);
+      out.push(`    - ${option.title} (\`${option.name}\`): ${option.line}`);
   }
 
   out.push(...section(copy.integrations));
@@ -134,8 +139,9 @@ async function landingMarkdown(): Promise<string> {
   out.push(...section(copy.proof));
   if (counts.length > 0) out.push(`- ${counts.join(', ')}.`);
   out.push(`- Showcase (${url('/showcase')}): ${sites.join(', ')}`);
-  for (const quote of quotes)
-    out.push('', `> ${quote.message}`, `>`, `> ${quote.name}, ${quote.role}`);
+  const voices: string[] = [];
+  for (const quote of quotes) voices.push(`> ${quote.message}\n>\n> ${quote.name}, ${quote.role}`);
+  out.push(...section(copy.feedback), voices.join('\n\n'));
 
   out.push(
     ...section(copy.start),

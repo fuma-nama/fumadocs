@@ -1,6 +1,7 @@
 'use client';
 import { cn } from '@/lib/cn';
-import { useActive, useFigures, useStatus } from '../lib/status';
+import { reduce, setText } from '../lib/script';
+import { onStatus, useActive, useFigures } from '../lib/status';
 
 /** the bar itself never re-renders: the status and the figure links each subscribe */
 export function StatusBar() {
@@ -11,7 +12,7 @@ export function StatusBar() {
         {/* a lit lamp, then the page's log line in the machine's type */}
         <p
           aria-hidden
-          className="flex min-w-0 flex-1 items-center gap-2 ps-(--lp-gutter) pe-3 font-pixel font-normal"
+          className="flex min-w-0 flex-1 items-center gap-2 ps-(--lp-gutter) pe-3 font-pixel text-[13.16px] leading-4 font-normal tabular-nums antialiased"
         >
           <span className="size-2 shrink-0 rounded-full border border-lp-ink bg-lp-sun" />
           <Status />
@@ -22,15 +23,29 @@ export function StatusBar() {
   );
 }
 
+/**
+ * each line prints in: written into the one text node, the paper over it stepping off to the right.
+ * A node put in instead would have the page match its layouts' `:has()` rules again.
+ */
+function print(el: HTMLSpanElement) {
+  return onStatus((text) => {
+    if (el.textContent === text) return;
+    setText(el, text);
+    if (reduce()) return;
+    el.animate(
+      { translate: ['0', '100%'] },
+      { duration: 300, easing: 'steps(12)', pseudoElement: '::after' },
+    );
+  });
+}
+
 function Status() {
-  const text = useStatus();
-  // each line is a new element, so it prints in
   return (
     <span
-      key={text}
+      ref={print}
       className="relative truncate after:absolute after:inset-0 after:translate-x-full after:bg-lp-paper motion-safe:after:animate-lp-print"
     >
-      {text}
+      ready
     </span>
   );
 }

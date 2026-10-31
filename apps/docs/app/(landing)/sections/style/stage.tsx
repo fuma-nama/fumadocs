@@ -41,13 +41,14 @@ export function Stage({ table, hung, hardware }: StageProps) {
     if (root.current) report(root.current, `theme: ${id}`);
   }, []);
 
-  // The pickers take a quarter of the row, never less than the dial: beside the browser and as tall
-  // as it, or under it side by side, each its own height; on a phone everything stacks. Their
-  // titles never widen them.
+  // From 1280px the browser takes two thirds of the row at a 4:3 screen, tall enough that the
+  // pickers beside it, a third and its height, hold the dial at its own height and the layouts at
+  // theirs. Under it they stand side by side, each its own height; on a phone everything stacks.
+  // Their titles never widen them.
   return (
     <div
       ref={root}
-      className="grid gap-(--lp-gutter) px-(--lp-gutter) xl:grid-cols-[minmax(0,3fr)_minmax(auto,1fr)]"
+      className="grid gap-(--lp-gutter) px-(--lp-gutter) xl:grid-cols-[minmax(0,2fr)_minmax(auto,1fr)] xl:gap-3"
     >
       <Monitor
         table={table}
@@ -60,7 +61,7 @@ export function Stage({ table, hung, hardware }: StageProps) {
         onBusy={setBusy}
         className="min-w-0 xl:self-start"
       />
-      <div className="grid min-w-0 gap-(--lp-gutter) sm:grid-cols-[minmax(0,3fr)_minmax(auto,1fr)] sm:items-start xl:grid-cols-1 xl:grid-rows-[minmax(0,1fr)_auto] xl:items-stretch">
+      <div className="grid min-w-0 gap-(--lp-gutter) sm:grid-cols-[minmax(0,3fr)_minmax(auto,1fr)] sm:items-start xl:grid-cols-1 xl:grid-rows-[minmax(0,1fr)_auto] xl:items-stretch xl:gap-3">
         <Desk
           selected={layout}
           live={tab === 'layouts'}

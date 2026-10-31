@@ -1,9 +1,8 @@
 import { type MateInk, mateInk, ORBIT_STEPS, paintMate } from '@/components/mascot/paint';
 import { LEGS, MATE_H, MATE_W, SIT } from '@/components/mascot/sprite';
 import { BAYER4, ditherKeyframes } from '../lib/dither';
-import { cssRgb } from '../lib/gl';
 import { BEAT, clamp, TICK } from '../lib/motion';
-import { isDark, onTheme } from '../lib/theme';
+import { cssRgb, isDark, onTheme } from '../lib/theme';
 
 /** the deck in its own units, y down from the viewer's bottom edge; it scales with its column */
 export const W = 640;

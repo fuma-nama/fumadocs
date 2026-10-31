@@ -106,15 +106,14 @@ export function Monitor({
         <span aria-hidden className="lp-pinstripe min-w-0 flex-1" />
         <span className="flex shrink-0 items-center px-1.5">
           {busy ? (
-            // clack's spinner while the page is on its way, a quarter turn a tick
-            <svg
-              aria-hidden
-              viewBox="-7 -7 14 14"
-              className="size-3.5 animate-[spin_500ms_steps(4)_infinite] motion-reduce:animate-none"
-            >
-              <circle r="6.5" className="fill-lp-paper stroke-lp-ink" />
-              <path d="M-6.5 0a6.5 6.5 0 0 0 13 0z" className="fill-lp-ink" />
-            </svg>
+            // clack's spinner while the page is on its way, a turn every 4 ticks, turned by an
+            // HTML box: the compositor can't turn an svg
+            <span className="animate-[spin_500ms_linear_infinite] motion-reduce:animate-none">
+              <svg aria-hidden viewBox="-7 -7 14 14" className="block size-3.5">
+                <circle r="6.5" className="fill-lp-paper stroke-lp-ink" />
+                <path d="M-6.5 0a6.5 6.5 0 0 0 13 0z" className="fill-lp-ink" />
+              </svg>
+            </span>
           ) : (
             // the box at the end of the bar opens the tab's docs, its hit area 24px around it
             <a
@@ -127,14 +126,14 @@ export function Monitor({
           )}
         </span>
       </div>
-      {/* a monitor's screen: a desktop's beside the pickers, a phone's on a phone; the frame fits
-          whatever box it is given */}
+      {/* a monitor's screen: a desktop's, 4:3 beside the pickers, a phone's on a phone; the frame
+          fits whatever box it is given */}
       <div
         ref={screen}
         role="tabpanel"
         id="style-panel"
         aria-labelledby={`style-tab-${tab}`}
-        className="lp-dots relative aspect-10/16 min-h-0 overflow-hidden bg-lp-paper sm:aspect-16/10"
+        className="lp-dots relative aspect-10/16 min-h-0 overflow-hidden bg-lp-paper sm:aspect-16/10 xl:aspect-4/3"
       >
         {tab === 'layouts' && (
           <div

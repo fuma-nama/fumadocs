@@ -2,8 +2,8 @@
 import type { ComponentProps, ReactNode } from 'react';
 import { cn } from '@/lib/cn';
 import type { Run } from '../content';
-import { DITHER_MASKS } from '../lib/dither';
 import { registerFigure } from '../lib/status';
+import { Shadow } from './window';
 
 interface FigureProps extends ComponentProps<'section'> {
   id: string;
@@ -53,11 +53,7 @@ export function Status({ children }: { children: ReactNode }) {
   return (
     // as much air under it as the CLI bubble's tail leaves its title
     <span className="relative isolate mb-[0.5em] flex h-lh w-fit font-pixel text-mark font-normal tracking-normal text-lp-ink">
-      <span
-        aria-hidden
-        className="absolute inset-0 translate-x-0.75 translate-y-1 bg-lp-ink-2"
-        style={{ maskImage: DITHER_MASKS[6], maskSize: '4px 4px' }}
-      />
+      <Shadow />
       <span
         aria-hidden
         className="relative flex aspect-square h-full items-center justify-center border border-lp-ink bg-lp-paper"
@@ -72,19 +68,24 @@ export function Status({ children }: { children: ReactNode }) {
   );
 }
 
-/** a title's runs in the light voice it sits in, its key terms a step up in medium and in orange */
+/** a title's runs in the light voice it sits in, its key terms a step up in medium and in orange,
+ * a line break where a run sets one */
 export function Terms({ runs }: { runs: readonly Run[] }) {
   const out: ReactNode[] = [];
   for (const run of runs) {
-    out.push(
-      typeof run === 'string' ? (
-        run
-      ) : (
+    if (typeof run !== 'string') {
+      out.push(
         <span key={run.term} className="font-medium whitespace-nowrap text-lp-orange">
           {run.term}
-        </span>
-      ),
-    );
+        </span>,
+      );
+      continue;
+    }
+    const lines = run.split('\n');
+    for (let i = 0; i < lines.length; i++) {
+      if (i > 0) out.push(<br key={out.length} />);
+      out.push(lines[i]);
+    }
   }
   return out;
 }

@@ -1,12 +1,36 @@
 import { bayer8 } from '../../lib/dither';
+import type { Vec3 } from '../../lib/mesh';
 import { mix, type Rect } from '../../lib/motion';
 import { COLS, type Frame, ROWS } from './data';
 
-/** clack's symbols, drawn by hand: the Google Fonts build of JetBrains Mono has no box drawing or geometric shapes */
-const SYMBOLS = '│└┌◆◇●○◒◐◓◑█↑↓•';
+/**
+ * Clack's symbols in their cell, 60 by 125 units with the font's math axis at 64.5, drawn by hand:
+ * the Google Fonts build of JetBrains Mono has no box drawing or geometric shapes. Box drawing runs
+ * on into the atlas's padding, so it stays joined from cell to cell as the atlas minifies.
+ */
+const SHAPES: Record<string, string> = {
+  '│': 'M25.75-100h8.5V225h-8.5z',
+  '└': 'M25.75-100h8.5V58.25H160v8.5H25.75z',
+  '┌': 'M25.75 58.25H160v8.5H34.25V225h-8.5z',
+  '◆': 'M30 34.5 60 64.5 30 94.5 0 64.5z',
+  '◇': 'M30 34.5 60 64.5 30 94.5 0 64.5zm0 12L12 64.5 30 82.5 48 64.5z',
+  '●': 'M3 64.5a27 27 0 0 0 54 0 27 27 0 0 0-54 0z',
+  '○': 'M3 64.5a27 27 0 0 0 54 0 27 27 0 0 0-54 0zm8.5 0a18.5 18.5 0 0 0 37 0 18.5 18.5 0 0 0-37 0z',
+  '◒': 'M3 64.5a27 27 0 0 0 54 0 27 27 0 0 0-54 0zm8.5 0a18.5 18.5 0 0 1 37 0z',
+  '◐': 'M3 64.5a27 27 0 0 0 54 0 27 27 0 0 0-54 0zM30 46a18.5 18.5 0 0 1 0 37z',
+  '◓': 'M3 64.5a27 27 0 0 0 54 0 27 27 0 0 0-54 0zm8.5 0a18.5 18.5 0 0 0 37 0z',
+  '◑': 'M3 64.5a27 27 0 0 0 54 0 27 27 0 0 0-54 0zM30 46a18.5 18.5 0 0 0 0 37z',
+  '█': 'M-100-100h260V225H-100z',
+  '↑': 'M25.75 94.5V44.75L10.5 60l-6-6L30 28.5 55.5 54l-6 6-15.25-15.25V94.5z',
+  '↓': 'M25.75 34.5V84.25L10.5 69l-6 6L30 100.5 55.5 75l-6-6-15.25 15.25V34.5z',
+  '•': 'M20 64.5a10 10 0 0 0 20 0 10 10 0 0 0-20 0z',
+};
+const SYMBOLS = Object.keys(SHAPES).join('');
 const ASCII = 95;
 const GLYPHS = ASCII + SYMBOLS.length;
 const ATLAS_COLUMNS = 16;
+/** texels of padding round each glyph's box, so its mips to level 4 stay its own */
+const PAD = 16;
 
 /** world units, the terminal stands on y = 0 and faces +z */
 const SCREEN = { c: [0, 2.2, 1.3], b: [1.89, 1.08] } as const;
@@ -14,26 +38,26 @@ const SCREEN = { c: [0, 2.2, 1.3], b: [1.89, 1.08] } as const;
 const GRID = [1.38, 0.8625] as const;
 /** the glass bulges out to this z at its centre */
 const GLASS_Z = 1.22;
-type Box = { readonly min: readonly number[]; readonly max: readonly number[] };
 /** visible extent, for framing */
-const BOUNDS: Box = { min: [-2.3, 0, -2.35], max: [2.3, 3.6, 1.3] };
-/** the screen's recess: the glass, where the session shows */
-export const GLASS: Box = {
-  min: [SCREEN.c[0] - SCREEN.b[0], SCREEN.c[1] - SCREEN.b[1], SCREEN.c[2] - 0.3],
-  max: [SCREEN.c[0] + SCREEN.b[0], SCREEN.c[1] + SCREEN.b[1], SCREEN.c[2] + 0.3],
-};
+const BOUNDS = { min: [-2.3, 0, -2.35], max: [2.3, 3.6, 1.3] } as const;
 
-export const fragment = `#version 300 es
-precision highp float;
-precision highp int;
-
+/**
+ * The whole figure, drawn as the mesh's backdrop: the terminal's solid traced in its box, shaded on
+ * 2px dither with the creases where its parts meet and down its rounded edges and the session on its
+ * glass, then the ridges, the ground and its shadow, and the moon round it. Its patterns lie as
+ * they show from the composition the camera settles on, so they ride its move; the moon's on itself.
+ */
+export const backdrop = `
 uniform vec2 uResolution, uShift, uHorizon;
 uniform float uDpr, uYaw, uFocal, uNight, uOpen;
 uniform vec3 uEye, uLit, uShade, uAccent;
 // uClear: the call to action's edges and foot (stage px), and how far the valley under it is open
 uniform vec4 uMoon, uClear, uGlyph;
 uniform sampler2D uAtlas, uChars;
-out vec4 color;
+// the composition at rest: its eye, yaw and shift
+uniform vec3 uRestEye;
+uniform vec2 uRestShift;
+uniform float uRestYaw;
 ${bayer8}
 // from the front right and above
 const vec3 LIGHT = vec3(sin(0.85) * cos(0.62), sin(0.62), cos(0.85) * cos(0.62));
@@ -70,7 +94,7 @@ float sdRoundBox(vec3 p, vec3 b, float r) {
 float sdRecess(vec3 p) { return sdRoundBox(p - SCREEN_C, vec3(SCREEN_B, 0.3), 0.12); }
 float sdBulge(vec3 p) { return length(p - vec3(SCREEN_C.xy, GLASS_Z - GLASS_R)) - GLASS_R; }
 
-float sdf(vec3 p) {
+float field(vec3 p) {
   float recess = sdRecess(p);
   float shell = min(sdRoundBox(p - BODY_C, BODY_B, BODY_R), sdRoundBox(p - REAR_C, REAR_B, REAR_R));
   shell = max(max(shell, -recess), -sdRoundBox(p - SLOT_C, SLOT_B, 0.04));
@@ -78,29 +102,40 @@ float sdf(vec3 p) {
   return min(min(shell, stand), max(sdBulge(p), recess));
 }
 
-vec3 normalAt(vec3 p, float e) {
-  const vec2 k = vec2(1.0, -1.0);
-  return normalize(
-    k.xyy * sdf(p + k.xyy * e) + k.yyx * sdf(p + k.yyx * e) +
-    k.yxy * sdf(p + k.yxy * e) + k.xxx * sdf(p + k.xxx * e)
-  );
+/** how far from the middle line of a rounded box edge, q = abs(p - c) - (b - r); each edge stops where it meets the others */
+float crease(vec3 q) {
+  float d = 1e9;
+  if (q.x > 0.0 && q.y > 0.0 && q.z < min(q.x, q.y)) d = abs(q.x - q.y);
+  if (q.x > 0.0 && q.z > 0.0 && q.y < min(q.x, q.z)) d = min(d, abs(q.x - q.z));
+  if (q.y > 0.0 && q.z > 0.0 && q.x < min(q.y, q.z)) d = min(d, abs(q.y - q.z));
+  return d;
 }
 
-vec2 boxSpan(vec3 ro, vec3 rd) {
+/** where a ray enters and leaves the box from lo to hi */
+vec2 boxSpan(vec3 ro, vec3 rd, vec3 lo, vec3 hi) {
   vec3 r = mix(rd, vec3(1e-6), lessThan(abs(rd), vec3(1e-6)));
-  vec3 t0 = (BOX_MIN - ro) / r;
-  vec3 t1 = (BOX_MAX - ro) / r;
+  vec3 t0 = (lo - ro) / r;
+  vec3 t1 = (hi - ro) / r;
   vec3 a = min(t0, t1);
   vec3 b = max(t0, t1);
   return vec2(max(max(a.x, a.y), a.z), min(min(b.x, b.y), b.z));
 }
 
-float lit(vec3 ro, vec3 rd) {
-  vec2 span = boxSpan(ro, rd);
+vec3 fieldNormal(vec3 p, float e) {
+  const vec2 k = vec2(1.0, -1.0);
+  return normalize(
+    k.xyy * field(p + k.xyy * e) + k.yyx * field(p + k.yyx * e) +
+    k.yxy * field(p + k.yxy * e) + k.xxx * field(p + k.xxx * e)
+  );
+}
+
+/** 1 where a ray from ro toward the light leaves the solid's box without meeting it, else 0 */
+float lit(vec3 ro, vec3 rd, vec3 lo, vec3 hi) {
+  vec2 span = boxSpan(ro, rd, lo, hi);
   if (span.y <= 0.0 || span.x > span.y) return 1.0;
   float t = max(span.x, 0.0);
   for (int i = 0; i < 40; i++) {
-    float d = sdf(ro + rd * t);
+    float d = field(ro + rd * t);
     if (d < 0.002) return 0.0;
     t += d;
     if (t > span.y) break;
@@ -108,18 +143,59 @@ float lit(vec3 ro, vec3 rd) {
   return 1.0;
 }
 
-/** the middle line of a rounded box edge, q = abs(p - c) - (b - r); each edge stops where it meets the others */
-bool crease(vec3 q, float lw) {
-  return (q.x > 0.0 && q.y > 0.0 && q.z < min(q.x, q.y) && abs(q.x - q.y) < lw) ||
-    (q.x > 0.0 && q.z > 0.0 && q.y < min(q.x, q.z) && abs(q.x - q.z) < lw) ||
-    (q.y > 0.0 && q.z > 0.0 && q.x < min(q.y, q.z) && abs(q.y - q.z) < lw);
+/**
+ * The sphere trace of a ray through the solid's box from lo to hi, pixel the size of a px a unit
+ * away: x where it hits or -1; y how close, in px, it passed a silhouette nearer than that, z where
+ */
+vec3 trace(vec3 ro, vec3 rd, vec3 lo, vec3 hi, float pixel) {
+  float hit = -1.0;
+  float edge = 1e9;
+  float edgeT = 1e9;
+  vec2 span = boxSpan(ro, rd, lo, hi);
+  if (span.x < span.y && span.y > 0.0) {
+    float t = max(span.x, 0.0);
+    float d0 = 1e9;
+    float t0 = t;
+    float d1 = 1e9;
+    float t1 = t;
+    bool inside = true;
+    for (int i = 0; i < 64; i++) {
+      float d = field(ro + rd * t);
+      if (d < 0.2 * t * pixel) { hit = t; break; }
+      if (d > d1 && d1 < d0 && d1 < 3.0 * t1 * pixel) {
+        // passed close to a surface: find the true closest approach between t0 and t
+        float a = t0;
+        float b = t;
+        for (int j = 0; j < 6; j++) {
+          float m1 = mix(a, b, 0.382);
+          float m2 = mix(a, b, 0.618);
+          if (field(ro + rd * m1) < field(ro + rd * m2)) b = m2;
+          else a = m1;
+        }
+        float m = 0.5 * (a + b);
+        float e = field(ro + rd * m) / (m * pixel);
+        if (e < edge) { edge = e; edgeT = m; }
+      }
+      d0 = d1;
+      t0 = t1;
+      d1 = d;
+      t1 = t;
+      t += d;
+      if (t > span.y) { inside = false; break; }
+    }
+    // out of steps while skimming a face: that is a silhouette too
+    if (hit < 0.0 && inside && d1 / (t1 * pixel) < 3.0) { edge = 0.0; edgeT = t1; }
+  }
+  return vec3(hit, edge, edgeT);
 }
 
-float coverage(int glyph, vec2 f) {
+/** glyph's ink at f, 0 to 1 across its cell, from the atlas's mip level lod, kept off its neighbours */
+float coverage(int glyph, vec2 f, float lod) {
   vec2 size = vec2(textureSize(uAtlas, 0));
-  vec2 origin = vec2(float(glyph % ${ATLAS_COLUMNS}), float(glyph / ${ATLAS_COLUMNS})) * uGlyph.xy + 1.0;
-  vec2 q = origin + clamp(f * uGlyph.zw, vec2(0.5), uGlyph.zw - 0.5);
-  return textureLod(uAtlas, vec2(q.x, size.y - q.y) / size, 0.0).r;
+  vec2 origin = vec2(float(glyph % ${ATLAS_COLUMNS}), float(glyph / ${ATLAS_COLUMNS})) * uGlyph.xy + ${PAD}.0;
+  float edge = exp2(lod - 1.0);
+  vec2 q = origin + clamp(f * uGlyph.zw, vec2(edge), uGlyph.zw - edge);
+  return textureLod(uAtlas, vec2(q.x, size.y - q.y) / size, lod).r;
 }
 
 /** the CRT: phosphor text from the cell buffer; w = world size of a CSS px, facing = |cos| of the view angle */
@@ -128,7 +204,8 @@ vec3 screen(vec3 p, float w, float facing) {
   s *= 1.0 + 0.012 * dot(s, s);
   if (abs(s.y) > uOpen) return uShade;
   if (uOpen < 1.0 && abs(s.y) > uOpen - 1.5 * w / SCREEN_B.y) return uAccent;
-  float fp = w / (2.0 * GRID_B.x / ${COLS}.0) / max(facing, 0.25);
+  // the cells a canvas px spans, wider on glass seen at a grazing angle
+  float fp = w / uDpr / (2.0 * GRID_B.x / ${COLS}.0) / max(facing, 0.25);
   vec2 g = s * SCREEN_B / GRID_B * 0.5 + 0.5;
   vec2 c = vec2(g.x * ${COLS}.0, (1.0 - g.y) * ${ROWS}.0);
   if (c.x < 0.0 || c.y < 0.0 || c.x >= ${COLS}.0 || c.y >= ${ROWS}.0) return uShade;
@@ -136,14 +213,8 @@ vec3 screen(vec3 p, float w, float facing) {
   vec4 data = texelFetch(uChars, ivec2(cell.x, ${ROWS - 1} - cell.y), 0);
   int glyph = int(data.r * 255.0 + 0.5);
   int style = int(data.g * 255.0 + 0.5);
-  vec2 f = fract(c);
-  float cov;
-  if (fp < 0.05) cov = coverage(glyph, f);
-  else {
-    vec2 o = vec2(fp * 0.3);
-    cov = 0.25 * (coverage(glyph, f + vec2(-o.x, -o.y * 0.4)) + coverage(glyph, f + vec2(o.x, o.y * 0.4)) +
-      coverage(glyph, f + vec2(o.x * 0.4, -o.y)) + coverage(glyph, f + vec2(-o.x * 0.4, o.y)));
-  }
+  // the mip half a level finer than a canvas px's footprint, for crisp type
+  float cov = coverage(glyph, fract(c), clamp(log2(fp * uGlyph.z) - 0.5, 0.0, 4.0));
   // text is never dithered: cells too small to resolve fade to their ink density
   cov = mix(cov, data.b, smoothstep(0.45, 0.7, fp));
 
@@ -155,27 +226,11 @@ vec3 screen(vec3 p, float w, float facing) {
 }
 
 float hash(float n) { return fract(sin(n * 127.1) * 43758.5453); }
-float hash3(vec3 p) {
-  p = fract(p * 0.3183099 + 0.1);
-  p *= 17.0;
-  return fract(p.x * p.y * p.z * (p.x + p.y + p.z));
-}
 
 float noise(float x) {
   float i = floor(x);
   float f = fract(x);
   return mix(hash(i), hash(i + 1.0), f * f * (3.0 - 2.0 * f));
-}
-
-float noise3(vec3 x) {
-  vec3 i = floor(x);
-  vec3 f = fract(x);
-  f = f * f * (3.0 - 2.0 * f);
-  return mix(
-    mix(mix(hash3(i), hash3(i + vec3(1, 0, 0)), f.x), mix(hash3(i + vec3(0, 1, 0)), hash3(i + vec3(1, 1, 0)), f.x), f.y),
-    mix(mix(hash3(i + vec3(0, 0, 1)), hash3(i + vec3(1, 0, 1)), f.x), mix(hash3(i + vec3(0, 1, 1)), hash3(i + vec3(1, 1, 1)), f.x), f.y),
-    f.z
-  );
 }
 
 float ridge(int k, float theta) {
@@ -205,59 +260,36 @@ float cylinder(vec3 ro, vec3 rd, float r) {
   return (-b + sqrt(max(b * b - a * c, 0.0))) / max(a, 1e-8);
 }
 
-void main() {
+/** stage px where world point p shows from the composition at rest */
+vec2 rest(vec3 p, vec2 px) {
+  vec3 v = p - uRestEye;
+  float z = dot(v, vec3(-sin(uRestYaw), 0.0, -cos(uRestYaw)));
+  vec2 at = vec2(dot(v, vec3(cos(uRestYaw), 0.0, -sin(uRestYaw))), -v.y) * uFocal / z;
+  return z > 0.1 ? uResolution / uDpr * 0.5 + uRestShift + at : px;
+}
+
+/** how much of a canvas px a band reaching r CSS px either side of its middle covers, d px off it */
+float band(float d, float r) {
+  return clamp((r - abs(d)) * uDpr + 0.5, 0.0, 1.0);
+}
+
+vec4 backdrop(vec2 at) {
   vec2 stage = uResolution / uDpr;
-  vec2 px = vec2(gl_FragCoord.x, uResolution.y - gl_FragCoord.y) / uDpr;
+  vec2 px = at / uDpr;
   vec2 centre = stage * 0.5 + uShift;
   vec3 fwd = vec3(-sin(uYaw), 0.0, -cos(uYaw));
   vec3 right = vec3(cos(uYaw), 0.0, -sin(uYaw));
   vec3 ro = uEye;
   vec3 rd = normalize(fwd * uFocal + right * (px.x - centre.x) + vec3(0.0, centre.y - px.y, 0.0));
   float pixel = 1.0 / uFocal;
-  float threshold = bayer8(floor(px / 2.0));
   vec3 paper = uNight > 0.5 ? uShade : uLit;
   vec3 pen = uNight > 0.5 ? uLit : uShade;
 
-  // the terminal, sphere traced inside its box; local minima of the distance are its silhouettes
-  float hit = -1.0;
-  float edge = 1e9;
-  float edgeT = 1e9;
-  vec2 span = boxSpan(ro, rd);
-  if (span.x < span.y && span.y > 0.0) {
-    float t = max(span.x, 0.0);
-    float d0 = 1e9;
-    float t0 = t;
-    float d1 = 1e9;
-    float t1 = t;
-    bool inside = true;
-    for (int i = 0; i < 64; i++) {
-      float d = sdf(ro + rd * t);
-      if (d < 0.2 * t * pixel) { hit = t; break; }
-      if (d > d1 && d1 < d0 && d1 < 3.0 * t1 * pixel) {
-        // passed close to a surface: find the true closest approach between t0 and t
-        float a = t0;
-        float b = t;
-        for (int j = 0; j < 6; j++) {
-          float m1 = mix(a, b, 0.382);
-          float m2 = mix(a, b, 0.618);
-          if (sdf(ro + rd * m1) < sdf(ro + rd * m2)) b = m2;
-          else a = m1;
-        }
-        float m = 0.5 * (a + b);
-        float e = sdf(ro + rd * m) / (m * pixel);
-        if (e < edge) { edge = e; edgeT = m; }
-      }
-      d0 = d1;
-      t0 = t1;
-      d1 = d;
-      t1 = t;
-      t += d;
-      if (t > span.y) { inside = false; break; }
-    }
-    // out of steps while skimming a face: that is a silhouette too
-    if (hit < 0.0 && inside && d1 / (t1 * pixel) < 3.0) { edge = 0.0; edgeT = t1; }
-  }
-
+  // the terminal, traced in its box: where it passes close, a silhouette
+  vec3 traced = trace(ro, rd, BOX_MIN, BOX_MAX, pixel);
+  float hit = traced.x;
+  float edge = traced.y;
+  float edgeT = traced.z;
   float ground = rd.y < -1e-6 ? -ro.y / rd.y : 1e9;
   bool terminal = hit > 0.0 && hit < ground;
   vec3 col = paper;
@@ -267,7 +299,7 @@ void main() {
     depth = hit;
     vec3 p = ro + rd * hit;
     float w = hit * pixel;
-    vec3 n = normalAt(p, 0.5 * w);
+    vec3 n = fieldNormal(p, 0.5 * w);
     float recess = sdRecess(p);
     float bulge = sdBulge(p);
     float body = sdRoundBox(p - BODY_C, BODY_B, BODY_R);
@@ -275,85 +307,95 @@ void main() {
     float neck = sdRoundBox(p - NECK_C, NECK_B, 0.06);
     float foot = sdRoundBox(p - FOOT_C, FOOT_B, 0.05);
     float slot = sdRoundBox(p - SLOT_C, SLOT_B, 0.04);
-    // lines keep their screen width on faces seen at a grazing angle
-    float lw = 0.75 * w / max(abs(dot(rd, n)), 0.2);
+    // world units a CSS px spans across the face here, wider on faces seen at a grazing angle
+    float across = w / max(abs(dot(rd, n)), 0.2);
     bool glass = max(bulge, recess) < 0.5 * w;
-    float tone;
-    if (glass) {
-      col = screen(p, w, abs(dot(rd, n)));
-      tone = 0.0;
-    } else {
+    float tone = 0.0;
+    if (glass) col = screen(p, w, abs(dot(rd, n)));
+    else {
       float lambert = dot(n, LIGHT);
-      float v = lambert > 0.0 ? lambert * lit(p + n * 2.0 * w, LIGHT) : lambert;
-      tone = clamp((v - 0.12) / 0.3, 0.0, 1.0);
-      col = tone > threshold ? uLit : uShade;
+      float v = lambert > 0.0 ? lambert * lit(p + n * 2.0 * w, LIGHT, BOX_MIN, BOX_MAX) : lambert;
+      // solid, quarters, solid, on 2 px cells as they lie at rest
+      tone = floor(clamp((v - 0.12) / 0.3, 0.0, 1.0) * 4.0 + 0.5) / 4.0;
+      col = bayer8(floor(rest(p, px) / 2.0)) < tone ? uLit : uShade;
     }
-    // creases: where two parts meet, and the middle of each rounded edge
-    bool line = max(abs(body), abs(recess)) < lw || max(abs(bulge), abs(recess)) < lw ||
-      max(abs(body), abs(rear)) < lw || max(abs(body), abs(slot)) < lw ||
-      max(abs(neck), abs(foot)) < lw || max(abs(neck), abs(body)) < lw;
-    if (abs(body) < lw) line = line || crease(abs(p - BODY_C) - (BODY_B - BODY_R), lw);
-    if (abs(rear) < lw) line = line || crease(abs(p - REAR_C) - (REAR_B - REAR_R), lw);
-    if (abs(foot) < lw) line = line || crease(abs(p - FOOT_C) - (FOOT_B - 0.05), lw);
-    if (line) col = glass ? uLit : (tone > 0.5 ? uShade : uLit);
+    // creases 1.5 CSS px across: where two parts meet, and the middle of each rounded edge
+    float d = min(min(max(abs(body), abs(recess)), max(abs(bulge), abs(recess))),
+      min(min(max(abs(body), abs(rear)), max(abs(body), abs(slot))),
+        min(max(abs(neck), abs(foot)), max(abs(neck), abs(body)))));
+    if (abs(body) < across) d = min(d, crease(abs(p - BODY_C) - (BODY_B - BODY_R)));
+    if (abs(rear) < across) d = min(d, crease(abs(p - REAR_C) - (REAR_B - REAR_R)));
+    if (abs(foot) < across) d = min(d, crease(abs(p - FOOT_C) - (FOOT_B - 0.05)));
+    col = mix(col, glass ? uLit : (tone > 0.5 ? uShade : uLit), band(d / across, 0.75));
   } else {
-    bool sky = true;
-    for (int k = 0; k < 3; k++) {
+    // the ridges near to far, each edge blended over what lies past it, then the ground or the sky
+    vec4 acc = vec4(0.0);
+    for (int k = 0; k < 3 && acc.a < 1.0; k++) {
       float t = cylinder(ro, rd, RIDGE_R[k]);
       if (t > ground) {
-        // the ground in front: paper, with the terminal's cast shadow as a 50% screen
-        depth = ground;
-        sky = false;
+        // the ground in front: paper, with the terminal's cast shadow as a quarter screen on 2 px
+        // cells counted from under the terminal, as the ground seen this low would press any it lay on
+        if (acc.a == 0.0) depth = ground;
         vec3 p = ro + rd * ground;
-        if (k == 0 && threshold < 0.22 && lit(p + vec3(0.0, 0.002, 0.0), LIGHT) < 0.5) col = pen;
+        vec3 v = FOOT_C - ro;
+        vec2 foot = centre + vec2(dot(v, right), -v.y) * uFocal / dot(v, fwd);
+        bool shade = k == 0 && bayer8(floor((px - foot) / 2.0)) < 0.25 && lit(p + vec3(0.0, 0.002, 0.0), LIGHT, BOX_MIN, BOX_MAX) < 0.5;
+        acc += (1.0 - acc.a) * vec4(shade ? pen : paper, 1.0);
         break;
       }
       vec3 p = ro + rd * t;
+      float w = t * pixel;
+      // over the ridge's tallest peak, its noise can't reach the ray
+      if (p.y > RIDGE_H[k] + w) continue;
       float theta = atan(p.z, p.x);
       float h = ridge(k, theta);
       float along = t * dot(rd, fwd);
       if (uClear.w > 0.0) h = valley(k, h, along, px.x, centre.y);
-      if (p.y > h) continue;
-      depth = t;
-      sky = false;
-      float w = t * pixel;
       float next = ridge(k, theta + 0.002);
       if (uClear.w > 0.0) next = valley(k, next, along, px.x, centre.y);
       float slope = (next - h) / (0.002 * RIDGE_R[k]);
-      float stipple = bayer8(floor(px / 3.0) + float(k) * 3.0);
-      if ((h - p.y) / sqrt(1.0 + slope * slope) < 0.9 * w) col = pen;
-      else {
-        // slopes facing the light are lighter near the crest, the mass below is one flat screen
-        vec3 normal = normalize(vec3(-cos(theta), 1.0, -sin(theta)) * 0.7 + vec3(sin(theta), 0.0, -cos(theta)) * slope * 2.5);
-        float crest = 1.0 - step(RIDGE_H[k] * 0.22, h - p.y);
-        float density = RIDGE_D[k] + (dot(normal, LIGHT) > 0.3 ? 0.0 : crest * 0.08);
-        if (density > stipple) col = pen;
-      }
-      break;
+      // CSS px over its crest
+      float over = (p.y - h) / sqrt(1.0 + slope * slope) / w;
+      float cover = clamp(0.5 - over * uDpr, 0.0, 1.0);
+      if (cover <= 0.0) continue;
+      if (acc.a == 0.0) depth = t;
+      // slopes facing the light are lighter near the crest, the mass below one flat screen, on 3 px
+      // cells as they lie at rest
+      vec3 normal = normalize(vec3(-cos(theta), 1.0, -sin(theta)) * 0.7 + vec3(sin(theta), 0.0, -cos(theta)) * slope * 2.5);
+      float crest = 1.0 - step(RIDGE_H[k] * 0.22, h - p.y);
+      float density = RIDGE_D[k] + (dot(normal, LIGHT) > 0.3 ? 0.0 : crest * 0.08);
+      vec3 rc = bayer8(floor(rest(p, px) / 3.0) + float(k) * 3.0) < density ? pen : paper;
+      rc = mix(rc, pen, band(over + 0.45, 0.45));
+      acc += (1.0 - acc.a) * cover * vec4(rc, 1.0);
     }
-    if (sky) {
-      // the moon, behind the far ridge, shaded on 3px cells like the hero's
+    if (acc.a < 1.0) {
+      // the sky, and the moon behind the far ridge: an accent disc in a CSS px of rim, its
+      // terminator three steps from solid sky to solid accent on 3 px cells counted from its middle
+      vec3 sky = paper;
       vec3 oc = ro - uMoon.xyz;
       float b = dot(oc, rd);
-      float closest = sqrt(max(dot(oc, oc) - b * b, 0.0));
-      if (abs(closest - uMoon.w) < 0.5 * -b * pixel) col = uAccent;
-      else if (closest < uMoon.w) {
-        vec2 cell = floor(px / 3.0);
-        vec2 q = (cell + 0.5) * 3.0;
-        vec3 rc = normalize(fwd * uFocal + right * (q.x - centre.x) + vec3(0.0, centre.y - q.y, 0.0));
-        float bc = dot(oc, rc);
-        float hc = uMoon.w * uMoon.w - (dot(oc, oc) - bc * bc);
-        vec3 n = hc > 0.0 ? normalize(oc + rc * (-bc - sqrt(hc))) : normalize(oc + rd * (-b - sqrt(uMoon.w * uMoon.w - closest * closest)));
-        float maria = smoothstep(0.52, 0.64, noise3(n * 2.3) * 0.65 + noise3(n * 5.3 + 3.1) * 0.35);
-        float v = dot(n, LIGHT) * (1.0 - 0.45 * maria);
-        float t3 = bayer8(cell);
-        if (clamp((v - 0.04) / 0.32, 0.0, 1.0) > t3) col = uAccent;
-        else if (t3 < 0.07) col = pen;
+      float rim = (sqrt(max(dot(oc, oc) - b * b, 0.0)) - uMoon.w) / (-b * pixel);
+      if (rim < 1.0) {
+        vec3 v = uMoon.xyz - ro;
+        vec2 mid = centre + vec2(dot(v, right), -v.y) * uFocal / dot(v, fwd);
+        vec2 cell = floor((px - mid) / 3.0);
+        vec2 q = mid + (cell + 0.5) * 3.0;
+        vec3 rq = normalize(fwd * uFocal + right * (q.x - centre.x) + vec3(0.0, centre.y - q.y, 0.0));
+        float bq = dot(oc, rq);
+        float hq = uMoon.w * uMoon.w - (dot(oc, oc) - bq * bq);
+        vec3 n = normalize(oc + (hq > 0.0 ? rq * (-bq - sqrt(hq)) : rd * -b));
+        float tone = (dot(n, LIGHT) - 0.04) / 0.32;
+        float level = tone >= 1.0 ? 1.0 : tone <= 0.0 ? 0.0 : (floor(tone * 3.0) + 1.0) / 4.0;
+        vec3 face = bayer8(cell) < level ? uAccent : paper;
+        sky = mix(paper, mix(face, uAccent, band(rim, 0.5)), clamp((0.5 - rim) * uDpr + 0.5, 0.0, 1.0));
       }
+      acc += (1.0 - acc.a) * vec4(sky, 1.0);
     }
+    col = acc.rgb;
   }
 
-  if (edge < 1.25 && edgeT < depth) col = pen;
+  // the silhouette, a band 1.25 CSS px out
+  if (edgeT < depth) col = mix(col, pen, clamp((1.25 - edge) * uDpr + 0.5, 0.0, 1.0));
 
   // the ground line at the foot of the near ridge, with ticks, drawn out from under the terminal
   if (!terminal && abs(px.x - uHorizon.x) < uHorizon.y) {
@@ -362,13 +404,11 @@ void main() {
     float base = -b + sqrt(max(b * b - dot(ro.xz, ro.xz) + RIDGE_R[0] * RIDGE_R[0], 0.0));
     vec3 v = vec3(d.x * base, -ro.y, d.y * base);
     float y = px.y - (centre.y - v.y / dot(v, fwd) * uFocal);
-    if (abs(y) < 0.5 || (y > 0.0 && y < 6.0 && mod(px.x, 24.0) < 1.0)) col = pen;
+    col = mix(col, pen, max(band(y, 0.5), y > 0.0 && y < 6.0 && mod(px.x, 24.0) < 1.0 ? 1.0 : 0.0));
   }
-  color = vec4(col, 1.0);
+  return vec4(col, 1.0);
 }
 `;
-
-export type Vec3 = [number, number, number];
 
 export interface View {
   eye: Vec3;
@@ -410,8 +450,8 @@ function project(view: View, x: number, y: number, z: number): [x: number, y: nu
   return [((vx * c - vz * s) / depth) * view.focal, ((view.eye[1] - y) / depth) * view.focal];
 }
 
-/** projected bounds of the terminal, or a part of it, in stage CSS px */
-export function terminalRect(view: View, width: number, height: number, box = BOUNDS): Rect {
+/** projected bounds of the terminal in stage CSS px */
+export function terminalRect(view: View, width: number, height: number): Rect {
   let minX = Infinity;
   let minY = Infinity;
   let maxX = -Infinity;
@@ -419,9 +459,9 @@ export function terminalRect(view: View, width: number, height: number, box = BO
   for (let i = 0; i < 8; i++) {
     const [x, y] = project(
       view,
-      i & 1 ? box.max[0] : box.min[0],
-      i & 2 ? box.max[1] : box.min[1],
-      i & 4 ? box.max[2] : box.min[2],
+      i & 1 ? BOUNDS.max[0] : BOUNDS.min[0],
+      i & 2 ? BOUNDS.max[1] : BOUNDS.min[1],
+      i & 4 ? BOUNDS.max[2] : BOUNDS.min[2],
     );
     minX = Math.min(minX, x);
     minY = Math.min(minY, y);
@@ -512,129 +552,69 @@ function glyphOf(char: string): number {
 
 /**
  * Terminal cells of `family` (a monospaced font with a 0.6em advance) at 1.25 line height for
- * `uAtlas`: white glyphs on black, one cell per glyph; with each glyph's ink coverage (0 to 255),
- * and the cell pitch and glyph box in texels for `uGlyph`.
+ * `uAtlas`: white glyphs on black, one cell per glyph with PAD texels of its own round it, bottom row
+ * first as the glass samples it; with each glyph's ink coverage (0 to 255), and the cell pitch and
+ * glyph box in texels for `uGlyph`. At 48px, a close-up magnifies them only a little.
  */
 export function createAtlas(family: string) {
-  const size = 56;
+  const size = 48;
   const w = size * 0.6;
-  const h = Math.round(size * 1.25);
-  const pitchW = Math.ceil(w) + 2;
-  const pitchH = h + 2;
+  const h = size * 1.25;
+  const pitchW = Math.ceil(w) + 2 * PAD;
+  const pitchH = h + 2 * PAD;
+  const width = ATLAS_COLUMNS * pitchW;
+  const height = Math.ceil(GLYPHS / ATLAS_COLUMNS) * pitchH;
   const canvas = document.createElement('canvas');
-  canvas.width = ATLAS_COLUMNS * pitchW;
-  canvas.height = Math.ceil(GLYPHS / ATLAS_COLUMNS) * pitchH;
+  canvas.width = width;
+  canvas.height = height;
   const ctx = canvas.getContext('2d', { willReadFrequently: true })!;
   ctx.fillStyle = '#000';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.fillRect(0, 0, width, height);
   ctx.fillStyle = '#fff';
-  ctx.strokeStyle = '#fff';
   ctx.font = `${size}px ${family}`;
   const metrics = ctx.measureText('M');
   const ascent = metrics.fontBoundingBoxAscent;
   const baseline = (h - ascent - metrics.fontBoundingBoxDescent) / 2 + ascent;
-  const stroke = size * 0.085;
-  const half = stroke / 2;
-  ctx.lineWidth = stroke;
-
-  /** `axis`: the vertical centre of symbols, on the math axis */
-  function symbol(char: string, x: number, y: number, axis: number) {
-    const cx = x + w / 2;
-    const cy = y + h / 2;
-    switch (char) {
-      case '│':
-        ctx.fillRect(cx - half, y, stroke, h);
-        return;
-      case '└':
-      case '┌':
-        ctx.fillRect(cx - half, char === '└' ? y : cy - half, stroke, h / 2 + half);
-        ctx.fillRect(cx - half, cy - half, x + w - cx + half, stroke);
-        return;
-      case '◆':
-      case '◇': {
-        const r = size * 0.32;
-        ctx.beginPath();
-        ctx.moveTo(cx, axis - r);
-        ctx.lineTo(cx + r, axis);
-        ctx.lineTo(cx, axis + r);
-        ctx.lineTo(cx - r, axis);
-        ctx.closePath();
-        if (char === '◆') ctx.fill();
-        else {
-          ctx.lineJoin = 'miter';
-          ctx.stroke();
-        }
-        return;
-      }
-      case '█':
-        ctx.fillRect(x, y, w, h);
-        return;
-      case '•':
-        ctx.beginPath();
-        ctx.arc(cx, axis, size * 0.1, 0, Math.PI * 2);
-        ctx.fill();
-        return;
-      case '↑':
-      case '↓': {
-        const dir = char === '↑' ? -1 : 1;
-        const r = size * 0.3;
-        ctx.fillRect(cx - half, axis - r, stroke, r * 2);
-        ctx.beginPath();
-        ctx.moveTo(cx - r * 0.75, axis + dir * (r - r * 0.75));
-        ctx.lineTo(cx, axis + dir * r);
-        ctx.lineTo(cx + r * 0.75, axis + dir * (r - r * 0.75));
-        ctx.stroke();
-        return;
-      }
-    }
-
-    // circles: ● ○ and the spinner's half-filled ◒ ◐ ◓ ◑
-    const r = size * 0.27;
-    ctx.beginPath();
-    ctx.arc(cx, axis, r - (char === '●' ? 0 : half), 0, Math.PI * 2);
-    if (char === '●') {
-      ctx.fill();
-      return;
-    }
-    ctx.stroke();
-    if (char === '○') return;
-    const start = { '◒': 0, '◐': Math.PI / 2, '◓': Math.PI, '◑': -Math.PI / 2 }[char] ?? 0;
-    ctx.beginPath();
-    ctx.arc(cx, axis, r, start, start + Math.PI);
-    ctx.closePath();
-    ctx.fill();
-  }
 
   for (let i = 0; i < GLYPHS; i++) {
-    const x = (i % ATLAS_COLUMNS) * pitchW + 1;
-    const y = Math.floor(i / ATLAS_COLUMNS) * pitchH + 1;
+    const x = (i % ATLAS_COLUMNS) * pitchW + PAD;
+    const y = Math.floor(i / ATLAS_COLUMNS) * pitchH + PAD;
     ctx.save();
     ctx.beginPath();
-    ctx.rect(x, y, w, h);
+    ctx.rect(x - PAD, y - PAD, pitchW, pitchH);
     ctx.clip();
     if (i < ASCII) ctx.fillText(String.fromCharCode(32 + i), x, y + baseline);
-    else symbol(SYMBOLS[i - ASCII], x, y, y + baseline - size * 0.34);
+    else {
+      ctx.translate(x, y);
+      ctx.scale(w / 60, h / 125);
+      ctx.fill(new Path2D(SHAPES[SYMBOLS[i - ASCII]]), 'evenodd');
+    }
     ctx.restore();
   }
 
-  const pixels = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+  const pixels = ctx.getImageData(0, 0, width, height).data;
   const density = new Uint8Array(GLYPHS);
   for (let i = 0; i < GLYPHS; i++) {
-    const x0 = (i % ATLAS_COLUMNS) * pitchW + 1;
-    const y0 = Math.floor(i / ATLAS_COLUMNS) * pitchH + 1;
+    const x0 = (i % ATLAS_COLUMNS) * pitchW + PAD;
+    const y0 = Math.floor(i / ATLAS_COLUMNS) * pitchH + PAD;
     let sum = 0;
     for (let y = y0; y < y0 + h; y++) {
-      for (let x = x0; x < x0 + Math.floor(w); x++) sum += pixels[(y * canvas.width + x) * 4];
+      for (let x = x0; x < x0 + Math.floor(w); x++) sum += pixels[(y * width + x) * 4];
     }
     density[i] = Math.round(sum / (h * Math.floor(w)));
   }
-  return { canvas, density, metrics: [pitchW, pitchH, w, h] as const };
+  const image = new ImageData(width, height);
+  const row = width * 4;
+  for (let y = 0; y < height; y++)
+    image.data.set(pixels.subarray((height - 1 - y) * row, (height - y) * row), y * row);
+  canvas.width = 0;
+  return { image, density, metrics: [pitchW, pitchH, w, h] as const };
 }
 
-/** writes the rows `frame` shows into the cell buffer of `uChars`: glyph, style, glyph ink */
+/** writes the rows `frame` shows into the cell buffer of `uChars`, bottom up: glyph, style, glyph ink */
 export function paint(frame: Frame, data: Uint8ClampedArray, density: Uint8Array) {
   for (let r = 0; r < ROWS; r++) {
-    let o = r * COLS * 4;
+    let o = (ROWS - 1 - r) * COLS * 4;
     const end = o + COLS * 4;
     for (const [text, style] of frame.lines[frame.top + r] ?? []) {
       for (let i = 0; i < text.length && o < end; i++, o += 4) write(o, glyphOf(text[i]), style);

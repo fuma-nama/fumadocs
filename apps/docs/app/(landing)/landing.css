@@ -59,8 +59,16 @@
   /* the home layout's 1400px width and h-14 navbar; the gutter widens once the frame shows */
   --lp-max: 1400px;
   --lp-gutter: 16px;
+  /* the room a figure keeps from its seams, over its title and under its last part */
+  --lp-section: 64px;
   --lp-menu-h: 56px;
   --lp-status-h: 28px;
+}
+
+@media (min-width: 768px) {
+  :root:has(> body > .landing) {
+    --lp-section: 80px;
+  }
 }
 
 /* the sheet's frame lines show once it is narrower than the viewport, content keeps clear of them */
@@ -73,6 +81,13 @@
   #nd-home-layout.landing {
     --fd-layout-width: calc(var(--lp-max) - 2px - 2 * var(--lp-gutter) + 32px);
   }
+}
+
+/* each sheet paints apart from the rest, so a change in one repaints that sheet, not the page; Projects
+   and Feedback as one, as their cables run over both */
+.landing [data-figure]:not([data-showcase] > *),
+.landing [data-showcase] {
+  isolation: isolate;
 }
 
 body:has(> .landing),

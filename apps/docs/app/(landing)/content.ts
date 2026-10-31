@@ -5,33 +5,37 @@ export const summary =
 /** a run of a title's text, or a key term of it */
 export type Run = string | { term: string };
 
-/** a title's text, its terms as plain words and its no-break spaces as plain ones */
+/** a title's text, its terms as plain words and its line breaks and no-break spaces as spaces */
 export function plain(title: readonly Run[]): string {
   let text = '';
   for (const run of title) text += typeof run === 'string' ? run : run.term;
-  return text.replaceAll('\u00a0', ' ');
+  return text.replaceAll('\u00a0', ' ').replaceAll('\n', ' ');
 }
 
 /**
  * The copy of every figure, shared by the page and its Markdown version (`/index.md`). A title is
- * one sentence with its key terms marked; a `lead` is set over it as a mark of its own. A no-break
- * space (\u00a0) holds a phrase on one line, so no width breaks it apart.
+ * one sentence with its key terms marked, a line break (\n) where its lines break; a `lead` is set
+ * over it as a mark of its own. A no-break space (\u00a0) holds a phrase on one line.
  */
 export const copy = {
   /** the hero sets it itself, around its glitch; here for the Markdown */
   hero: {
     title: ['Build ', { term: 'better docs' }, ', in seconds.'],
+    /** what she says from the moon, a bubble at a time, the first again at the end: each bubble's
+     * two lines, set as they break */
+    says: [
+      ['Turn your Markdown into', 'a beautiful docs site!'],
+      ['Fumadocs is fully open source,', 'made possible by the community :D'],
+      ['I am working hard to make', 'the perfect docs framework :3'],
+      ['Time to own your docs,', 'Fumadocs will keep improving!'],
+    ],
   },
   parts: {
-    title: [
-      'Fit Fumadocs to\u00a0',
-      { term: 'your stack' },
-      ', one\u00a0layer at\u00a0a\u00a0time.',
-    ],
+    title: ['Designed to be ', { term: 'composable' }, ',\nseparated as layers.'],
   },
   write: {
     title: [
-      'Express more in\u00a0fewer\u00a0words, with\u00a0the\u00a0',
+      'Express more in fewer words,\nwith the ',
       { term: 'Markdown' },
       ' you\u00a0already\u00a0know.',
     ],
@@ -40,9 +44,9 @@ export const copy = {
     /** on the status plate */
     lead: 'Always up to date.',
     title: [
-      'Generate content from\u00a0your\u00a0',
+      'Generate content from your ',
       { term: 'code' },
-      ', the\u00a0single ',
+      ',\nthe single ',
       { term: 'source of truth' },
       '.',
     ],
@@ -99,23 +103,22 @@ export const copy = {
     title: [
       'Use ',
       { term: 'Fumadocs CLI' },
-      ' to\u00a0install and own the\u00a0UI as\u00a0',
+      ' to install\nand own the UI as ',
       { term: 'code' },
       '.',
     ],
   },
   integrations: {
-    title: [
-      'From search to\u00a0API\u00a0references, ',
-      { term: 'feature-rich integrations' },
-      ' that\u00a0just\u00a0work.',
-    ],
+    title: ['Extend your docs with ', { term: 'integrations' }, ',\neffortlessly.'],
   },
   proof: {
-    title: [{ term: 'Teams you know' }, ' already run their docs on Fumadocs.'],
+    title: [{ term: 'Battle-tested' }, ',\nrunning in production.'],
+  },
+  feedback: {
+    title: ['Loved by the best\n', { term: 'developers' }, ' & ', { term: 'teams' }, '.'],
   },
   start: {
-    title: ['Your docs are\u00a0', { term: '1 command' }, ' away.'],
+    title: ['Your docs\nare ', { term: '1 command' }, ' away.'],
   },
 };
 
@@ -131,6 +134,8 @@ export const frameworks = [
 
 export interface Quote {
   name: string;
+  /** GitHub username */
+  handle: string;
   role: string;
   /** GitHub avatar URL */
   avatar: string;
@@ -141,6 +146,7 @@ export interface Quote {
 export const quotes: Quote[] = [
   {
     name: 'shadcn',
+    handle: 'shadcn',
     role: 'Creator of Shadcn UI',
     avatar: 'https://avatars.githubusercontent.com/u/124599',
     message:
@@ -148,6 +154,7 @@ export const quotes: Quote[] = [
   },
   {
     name: 'Anthony Shew',
+    handle: 'anthonyshew',
     role: 'Turbo DX at Vercel',
     avatar: 'https://avatars.githubusercontent.com/u/35677084',
     message:
@@ -155,12 +162,14 @@ export const quotes: Quote[] = [
   },
   {
     name: 'Aiden Bai',
+    handle: 'aidenybai',
     role: 'Creator of Million.js',
     avatar: 'https://avatars.githubusercontent.com/u/38025074',
     message: 'fumadocs is the best Next.js docs framework',
   },
   {
     name: 'David Blass',
+    handle: 'ssalbdivad',
     role: 'Creator of Arktype',
     avatar: 'https://avatars.githubusercontent.com/u/10645823',
     message: "I'd have no shot building @arktypeio docs that looked half this good without it 😍",

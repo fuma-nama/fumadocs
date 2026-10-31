@@ -6,6 +6,7 @@ import {
   useCallback,
   useRef,
   useState,
+  useSyncExternalStore,
 } from 'react';
 import { flushSync } from 'react-dom';
 import Image from 'next/image';
@@ -15,7 +16,6 @@ import { cn } from '@/lib/cn';
 import type { ShowcaseObject } from '@/lib/showcases';
 import { clamp, TICK } from '../lib/motion';
 import { report } from '../lib/status';
-import { useIsClient } from '../lib/use-is-client';
 import { address } from '../ui/site-tile';
 import { Roller } from '../ui/text';
 import { Window } from '../ui/window';
@@ -98,13 +98,19 @@ function Leader({ style }: { style: CSSProperties }) {
   );
 }
 
+const subscribeNone = () => () => {};
+
 /**
  * The showcase on a reel: the strip runs one frame at a time through the gate, and the window above
  * shows the frame in the gate. Pick a frame and the strip runs to it; the switch stops the reel.
  */
 export function Projector({ sites, back, front }: ProjectorProps) {
   const reduced = useReducedMotion() === true;
-  const client = useIsClient();
+  const client = useSyncExternalStore(
+    subscribeNone,
+    () => true,
+    () => false,
+  );
   const [current, setCurrent] = useState(0);
   const [picked, setPicked] = useState<number | null>(null);
   /** the frame the strip is on its way to */

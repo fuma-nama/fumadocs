@@ -1,5 +1,6 @@
 import { DITHER_MASKS } from '../../lib/dither';
 import { steer } from '../../lib/motion';
+import { reduce } from '../../lib/script';
 import {
   cableEnds,
   centre,
@@ -84,7 +85,6 @@ export function createDesk(board: HTMLElement, hung: Hung) {
   /** two per cable: on the window and on the hub */
   const plugs = Array.from(board.querySelectorAll<SVGGElement>('[data-plug]'));
   const hub = board.querySelector<HTMLElement>('[data-hub]')!;
-  const reduce = matchMedia('(prefers-reduced-motion: reduce)');
 
   let current = FIRST_SLOT;
   const target = pose(current, createPose());
@@ -197,7 +197,7 @@ export function createDesk(board: HTMLElement, hung: Hung) {
       if (index === current) return;
       current = index;
       pose(current, target);
-      if (reduce.matches) {
+      if (reduce()) {
         sync(true);
         read();
         ropes = hangRopes(target);

@@ -92,6 +92,17 @@ export function onActive(listener: (figure: HTMLElement | null) => void): () => 
   });
 }
 
+/** calls `listener` with the status line now and each time it changes; returns its stop */
+export function onStatus(listener: (text: string) => void): () => void {
+  let last = status;
+  listener(last);
+  return subscribe(() => {
+    if (status === last) return;
+    last = status;
+    listener(status);
+  });
+}
+
 /** after a passing line: the active figure's own line again */
 export function restore() {
   setStatus(active?.dataset.status ?? 'ready');
@@ -99,10 +110,6 @@ export function restore() {
 
 function useStore<T>(snapshot: () => T, server: T): T {
   return useSyncExternalStore(subscribe, snapshot, () => server);
-}
-
-export function useStatus(): string {
-  return useStore(() => status, 'ready');
 }
 
 export function useFigures(): readonly FigureEntry[] {

@@ -25,6 +25,9 @@ export function ditherKeyframes(cell: number): Keyframe[] {
   return frames;
 }
 
+/** an element dithered out, 2px cells: `ditherKeyframes(2)` the other way, ending on nothing */
+export const DISSOLVE = ditherKeyframes(2).reverse();
+
 /** GLSL `bayer8(p)`, paste with `${bayer8}`: the 8x8 dither threshold in (0, 1) at pixel `p` */
 export const bayer8 = `
 const int BAYER8[64] = int[64](

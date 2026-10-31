@@ -1,5 +1,6 @@
 import { DITHER_MASKS, ditherKeyframes } from '../../lib/dither';
 import { TICK } from '../../lib/motion';
+import { reduce } from '../../lib/script';
 import { onTheme } from '../../lib/theme';
 import { DEMOS, FRAME, type LayoutId, STORY_ARGS, type TabId, type ThemeId } from './data';
 import type { InkTable } from './presets';
@@ -13,6 +14,19 @@ const DEMO = '/story/demo/';
 let KEYFRAMES = '@keyframes lp-print{';
 for (let i = 0; i <= 16; i++) KEYFRAMES += `${(i / 16) * 100}%{mask-image:${DITHER_MASKS[i]}}`;
 KEYFRAMES += '}';
+
+/** runs `task` once the page holds still, its scroll the same `ms` apart; returns its cancel */
+function whenStill(task: () => void, ms = 125): () => void {
+  let y = Number.NaN;
+  let timer = 0;
+  const check = () => {
+    if (scrollY === y) return task();
+    y = scrollY;
+    timer = window.setTimeout(check, ms);
+  };
+  check();
+  return () => clearTimeout(timer);
+}
 
 /**
  * A preset's CSS as `@import 'fumadocs-ui/css/<theme>.css'` gives it to the frame, a page of this
@@ -100,8 +114,8 @@ function pathOf({ tab, layout }: View): string {
 }
 
 /**
- * The screen's one frame, made when the screen comes into view and kept: loading its page again each
- * time the reader came back cost a phone a whole app.
+ * The screen's one frame, made when the screen is in view and the page holds still, and kept: loading
+ * its page again each time the reader came back cost a phone a whole app.
  * It shows the view's page once that has rendered in the theme, dithered in over the screen; until
  * then the screen shows the layout's plan. A layout story moves to the next layout in place, through
  * the story's router; anything else loads in full.
@@ -112,7 +126,6 @@ export function createFrames(
   onBusy: (busy: boolean) => void,
 ) {
   const live = screen.querySelector<HTMLElement>('[data-live]')!;
-  const reduce = matchMedia('(prefers-reduced-motion: reduce)');
   let view: View | null = null;
   let frame: HTMLIFrameElement | null = null;
   let visible = false;
@@ -123,6 +136,7 @@ export function createFrames(
   let listening = false;
   let inked: ThemeId | null = null;
   let scale = 1;
+  let waiting: (() => void) | undefined;
 
   function fit() {
     if (!frame) return;
@@ -182,7 +196,7 @@ export function createFrames(
     going = null;
     ink(false);
     live.style.visibility = 'visible';
-    if (!reduce.matches) live.animate(ditherKeyframes(CELL), { duration: PRINT });
+    if (!reduce()) live.animate(ditherKeyframes(CELL), { duration: PRINT });
     onBusy(false);
   }
 
@@ -192,7 +206,7 @@ export function createFrames(
     if (!doc || !view || !shown || (inked === view.theme && inked !== 'shadcn')) return;
     const css = inkCss(table, view.theme, frame!, !shown.startsWith(DEMO));
     const apply = () => adopt(doc, css);
-    if (print && inked !== null && !reduce.matches) printIn(doc, CELL / scale, apply);
+    if (print && inked !== null && !reduce()) printIn(doc, CELL / scale, apply);
     else apply();
     inked = view.theme;
   }
@@ -213,10 +227,21 @@ export function createFrames(
     } else if (type === 'fumadocs-story:rendered') arrive();
   }
 
+  /** the frame, once the reader stops scrolling: its page's boot is a long task */
+  function boot() {
+    if (!visible || !view || frame || waiting) return;
+    waiting = whenStill(() => {
+      waiting = undefined;
+      create();
+    });
+  }
+
   const resize = new ResizeObserver(fit);
   const near = new IntersectionObserver((entries) => {
     visible = entries[entries.length - 1].isIntersecting;
-    if (visible && !frame && view) create();
+    if (visible) return boot();
+    waiting?.();
+    waiting = undefined;
   });
   resize.observe(screen);
   near.observe(screen);
@@ -231,11 +256,12 @@ export function createFrames(
   return {
     show(next: View) {
       view = next;
-      if (visible && !frame) create();
-      else sync();
+      boot();
+      sync();
     },
     destroy() {
       if (going) onBusy(false);
+      waiting?.();
       frame?.remove();
       live.style.visibility = '';
       resize.disconnect();
