@@ -62,14 +62,12 @@ export function Sidebar({ footer, banner, collapsible = true, components, ...res
   const iconLinks = menuItems.filter((item) => item.type === 'icon');
   const viewport = (
     <Base.SidebarViewport>
-      <div className="flex flex-col gap-0.5">
-        {menuItems
-          .filter((v) => v.type !== 'icon')
-          .map((item, i, list) => (
-            <SidebarLinkItem key={i} item={item} className={cn(i === list.length - 1 && 'mb-4')} />
-          ))}
-        <SidebarPageTree {...components} />
-      </div>
+      {menuItems
+        .filter((v) => v.type !== 'icon')
+        .map((item, i, list) => (
+          <SidebarLinkItem key={i} item={item} className={cn(i === list.length - 1 && 'mb-4')} />
+        ))}
+      <SidebarPageTree {...components} />
     </Base.SidebarViewport>
   );
 

@@ -231,11 +231,13 @@ export function Sidebar({ className, children, ...props }: SidebarProps) {
         />
       )}
       <ScrollArea.Root className="min-h-0 flex-1">
-        <ScrollArea.Viewport className="size-full rounded-[inherit] flex flex-col p-2 [mask-image:linear-gradient(to_bottom,transparent,white_16px,white_calc(100%-16px),transparent))]">
-          {menuItems.map(
-            (item, i) => item.type !== 'icon' && <SidebarLinkItem key={i} item={item} />,
-          )}
-          {root.children.map((item, i) => cloneElement(renderNode(item), { key: i }))}
+        <ScrollArea.Viewport className="size-full rounded-[inherit] p-2 [mask-image:linear-gradient(to_bottom,transparent,white_16px,white_calc(100%-16px),transparent))]">
+          <ScrollArea.Content className="flex flex-col">
+            {menuItems.map(
+              (item, i) => item.type !== 'icon' && <SidebarLinkItem key={i} item={item} />,
+            )}
+            {root.children.map((item, i) => cloneElement(renderNode(item), { key: i }))}
+          </ScrollArea.Content>
         </ScrollArea.Viewport>
         <ScrollArea.Corner />
         <ScrollArea.Scrollbar

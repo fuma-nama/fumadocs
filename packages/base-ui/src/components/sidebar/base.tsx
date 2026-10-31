@@ -246,7 +246,7 @@ export function SidebarViewport({ className, ...props }: ScrollArea.Root.Props) 
       {...props}
     >
       <ScrollArea.Viewport className="size-full rounded-[inherit] p-4 overscroll-contain mask-[linear-gradient(to_bottom,transparent,white_12px,white_calc(100%-12px),transparent)]">
-        {props.children}
+        <ScrollArea.Content className="flex flex-col gap-0.5">{props.children}</ScrollArea.Content>
       </ScrollArea.Viewport>
       <ScrollArea.Corner />
       <ScrollArea.Scrollbar

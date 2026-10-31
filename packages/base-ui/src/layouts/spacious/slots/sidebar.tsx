@@ -242,10 +242,25 @@ function TabIcon({ tab, className }: { tab: LayoutTab; className?: string }) {
 }
 
 function SidebarViewport() {
+  const { menuItems } = useSpaciousLayout();
+  const links = menuItems.filter((item) => item.type !== 'icon');
+
   return (
     <ScrollArea.Root className="min-h-0 flex-1 mt-2">
       <ScrollArea.Viewport className="size-full overscroll-contain px-3 pt-4 pb-8 mask-t-from-[calc(100%-16px)] mask-b-from-[calc(100%-32px)]">
-        <SidebarItems />
+        <ScrollArea.Content ref={follow} className="relative flex flex-col">
+          {/* inset to keep apart from the background of active item */}
+          <div
+            aria-hidden
+            className="absolute top-0 left-0 py-0.5 rounded-lg bg-fd-accent/60 bg-clip-content opacity-0 pointer-events-none transition-opacity duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] motion-safe:transition-[translate,width,height,opacity]"
+          />
+          {links.map((item, i) => (
+            <SidebarLinkItem key={i} item={item} className={cn(i === links.length - 1 && 'mb-6')} />
+          ))}
+          <div className="flex flex-col">
+            <SidebarPageTree />
+          </div>
+        </ScrollArea.Content>
       </ScrollArea.Viewport>
       <ScrollArea.Scrollbar
         className={(s) =>
@@ -255,27 +270,6 @@ function SidebarViewport() {
         <ScrollArea.Thumb className="flex-1 rounded-full bg-fd-border" />
       </ScrollArea.Scrollbar>
     </ScrollArea.Root>
-  );
-}
-
-function SidebarItems() {
-  const { menuItems } = useSpaciousLayout();
-  const links = menuItems.filter((item) => item.type !== 'icon');
-
-  return (
-    <div ref={follow} className="relative flex flex-col">
-      {/* inset to keep apart from the background of active item */}
-      <div
-        aria-hidden
-        className="absolute top-0 left-0 py-0.5 rounded-lg bg-fd-accent/60 bg-clip-content opacity-0 pointer-events-none transition-opacity duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] motion-safe:transition-[translate,width,height,opacity]"
-      />
-      {links.map((item, i) => (
-        <SidebarLinkItem key={i} item={item} className={cn(i === links.length - 1 && 'mb-6')} />
-      ))}
-      <div className="flex flex-col">
-        <SidebarPageTree />
-      </div>
-    </div>
   );
 }
 

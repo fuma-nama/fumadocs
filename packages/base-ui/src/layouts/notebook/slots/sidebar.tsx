@@ -306,18 +306,16 @@ export function Sidebar({ banner, footer, components, collapsible = true, ...res
 
   const viewport = (
     <Base.SidebarViewport>
-      <div className="flex flex-col gap-0.5">
-        {menuItems
-          .filter((item) => item.type !== 'icon')
-          .map((item, i, arr) => (
-            <SidebarLinkItem
-              key={i}
-              item={item}
-              className={cn('lg:hidden', i === arr.length - 1 && 'mb-4')}
-            />
-          ))}
-        <SidebarPageTree {...components} />
-      </div>
+      {menuItems
+        .filter((item) => item.type !== 'icon')
+        .map((item, i, arr) => (
+          <SidebarLinkItem
+            key={i}
+            item={item}
+            className={cn('lg:hidden', i === arr.length - 1 && 'mb-4')}
+          />
+        ))}
+      <SidebarPageTree {...components} />
     </Base.SidebarViewport>
   );
 
