@@ -14,10 +14,6 @@
 @theme {
   --spacing-page: 1436px;
   --color-brand: hsl(26, 73%, 51%);
-  --color-brand-foreground: white;
-  --color-brand-secondary: #c6bb58;
-  --color-brand-secondary-foreground: #97890c;
-  --color-brand-200: hsl(33, 100%, 50%);
 
   --color-landing-foreground: #59592a;
   --color-landing-foreground-200: #a8a866;
@@ -28,35 +24,43 @@
   --color-landing-foreground-200: #b7af7e;
 
   --color-brand: #fff383;
-  --color-brand-secondary: #fc7744;
-  --color-brand-secondary-foreground: #521700;
-  --color-brand-foreground: black;
-  --color-brand-200: #fff7c8;
+}
+
+/* landing page tokens, values live in app/(landing)/landing.css */
+@theme inline {
+  --color-lp-paper: var(--lp-paper);
+  --color-lp-paper-2: var(--lp-paper-2);
+  --color-lp-ink: var(--lp-ink);
+  --color-lp-ink-2: var(--lp-ink-2);
+  --color-lp-line: var(--lp-line);
+  --color-lp-line-strong: var(--lp-line-strong);
+  --color-lp-orange: var(--lp-orange);
+  --color-lp-sun: var(--lp-sun);
+  --color-lp-yellow: var(--lp-yellow);
+  /* ink on the yellow, the same in both themes */
+  --color-lp-on-yellow: #121210;
+  /* the machine's voice, loaded by the landing layout; the sans stands in until it arrives, its
+     widths within a few percent, so no label wraps or jumps at the swap */
+  --font-pixel: var(--font-geist-pixel), var(--font-sans);
+  /* a caret's blink; its keyframes are in app/(landing)/landing.css */
+  --animate-lp-caret: lp-caret 1s steps(1, end) infinite;
+  --animate-lp-print: lp-print 0.3s steps(12);
+  /* the sheet's width (`--lp-max`): from here its frame lines and corner marks show */
+  --breakpoint-sheet: 87.5rem;
+  /* a link preview's ratio, that of every site screenshot */
+  --aspect-og: 1.91 / 1;
+  /* a mark set over a title (the CLI's bubble, Automate's plate): half the title, 16px at least, a
+     line as tall as the bubble's padded one */
+  --text-mark: max(1rem, 0.5em);
+  --text-mark--line-height: 1.8;
+  /* a title's measure, in its own characters at any size: a long sentence wraps into two or three
+     balanced lines at its phrases, a short one stays on one */
+  --container-title: 30ch;
 }
 
 @theme inline {
   --default-font-family: var(--font-sans);
   --default-mono-font-family: var(--font-mono);
-  --animate-marquee: marquee var(--duration) infinite linear;
-  --animate-marquee-vertical: marquee-vertical var(--duration) linear infinite;
-
-  @keyframes marquee {
-    from {
-      transform: translateX(0);
-    }
-    to {
-      transform: translateX(calc(-100% - var(--gap)));
-    }
-  }
-
-  @keyframes marquee-vertical {
-    from {
-      transform: translateY(0);
-    }
-    to {
-      transform: translateY(calc(-100% - var(--gap)));
-    }
-  }
 
   @keyframes stroke {
     from {

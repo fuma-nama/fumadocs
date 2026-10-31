@@ -1,0 +1,210 @@
+/* the palette covers the whole document while the landing is mounted, portals included, and
+   `body`, where the docs' section class (`.framework`) sets its own primary. The landing is a child
+   of `body`: a `:has()` looking no deeper is matched again only when one of those changes */
+:root:has(> body > .landing),
+:root:has(> body > .landing) body {
+  --lp-paper: #f2f0ea;
+  --lp-paper-2: #e8e5dc;
+  --lp-ink: #121210;
+  --lp-ink-2: rgb(18 18 16 / 0.62);
+  --lp-line: rgb(18 18 16 / 0.14);
+  --lp-line-strong: rgb(18 18 16 / 0.82);
+  /* numbers and readouts, AA on both papers; the vivid one is for large fills (the moon) */
+  --lp-orange: #af4204;
+  --lp-sun: #f25c05;
+  /* orange text on an ink ground, an inverted hover: AA against the other theme's paper too */
+  --lp-orange-on-ink: var(--lp-sun);
+  --lp-yellow: #fff383;
+
+  /* real Fumadocs UI rendered on the page lives in the same paper world */
+  --color-fd-background: var(--lp-paper);
+  --color-fd-foreground: var(--lp-ink);
+  --color-fd-card: var(--lp-paper-2);
+  --color-fd-card-foreground: var(--lp-ink);
+  --color-fd-popover: var(--lp-paper);
+  --color-fd-popover-foreground: var(--lp-ink);
+  --color-fd-muted: var(--lp-paper-2);
+  --color-fd-muted-foreground: var(--lp-ink-2);
+  --color-fd-secondary: var(--lp-paper-2);
+  --color-fd-secondary-foreground: var(--lp-ink);
+  --color-fd-accent: rgb(18 18 16 / 0.07);
+  --color-fd-accent-foreground: var(--lp-ink);
+  --color-fd-border: var(--lp-line);
+  --color-fd-primary: var(--lp-orange);
+  --color-fd-primary-foreground: #fff;
+  --color-fd-ring: var(--lp-orange);
+  --color-fd-info: var(--color-fd-primary);
+}
+
+:root.dark:has(> body > .landing),
+:root.dark:has(> body > .landing) body {
+  --lp-paper: #0d0d0c;
+  --lp-paper-2: #171715;
+  --lp-ink: #eceae2;
+  --lp-ink-2: rgb(236 234 226 / 0.6);
+  --lp-line: rgb(236 234 226 / 0.13);
+  --lp-line-strong: rgb(236 234 226 / 0.75);
+  --lp-orange: #ff7a33;
+  --lp-sun: #ff7a33;
+  --lp-orange-on-ink: #af4204;
+
+  --color-fd-accent: rgb(236 234 226 / 0.08);
+  --color-fd-primary: var(--lp-yellow);
+  --color-fd-primary-foreground: var(--lp-paper);
+  --color-fd-ring: var(--lp-yellow);
+}
+
+/* layout only on the root, so the breakpoints below reach everything that inherits it */
+:root:has(> body > .landing) {
+  /* the home layout's 1400px width and h-14 navbar; the gutter widens once the frame shows */
+  --lp-max: 1400px;
+  --lp-gutter: 16px;
+  /* the room a figure keeps from its seams, over its title and under its last part */
+  --lp-section: 64px;
+  --lp-menu-h: 56px;
+  --lp-status-h: 28px;
+}
+
+@media (min-width: 768px) {
+  :root:has(> body > .landing) {
+    --lp-section: 80px;
+  }
+}
+
+/* the sheet's frame lines show once it is narrower than the viewport, content keeps clear of them */
+@media (min-width: 1400px) {
+  :root:has(> body > .landing) {
+    --lp-gutter: 32px;
+  }
+
+  /* the navbar's content edge lands on the sheet's: two 1px frame lines, its own 16px padding */
+  #nd-home-layout.landing {
+    --fd-layout-width: calc(var(--lp-max) - 2px - 2 * var(--lp-gutter) + 32px);
+  }
+}
+
+/* each sheet paints apart from the rest, so a change in one repaints that sheet, not the page; Projects
+   and Feedback as one, as their cables run over both */
+.landing [data-figure]:not([data-showcase] > *),
+.landing [data-showcase] {
+  isolation: isolate;
+}
+
+body:has(> .landing),
+.landing {
+  background-color: var(--lp-paper);
+  color: var(--lp-ink);
+}
+
+.landing ::selection {
+  background-color: var(--lp-yellow);
+  color: var(--color-lp-on-yellow);
+}
+
+/* the theme switch dithers the new frame in */
+:root:has(> body > .landing)::view-transition-old(root),
+:root:has(> body > .landing)::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+:root:has(> body > .landing)::view-transition-new(root) {
+  mask-size: 24px 24px;
+  animation: lp-dither-in 560ms linear both;
+}
+
+@keyframes lp-dither-in {
+  0% {
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4' shape-rendering='crispEdges'%3E%3Cpath d=''/%3E%3C/svg%3E");
+  }
+  6.25% {
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4' shape-rendering='crispEdges'%3E%3Cpath d='M0 0h1v1h-1z'/%3E%3C/svg%3E");
+  }
+  12.5% {
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4' shape-rendering='crispEdges'%3E%3Cpath d='M0 0h1v1h-1zM2 2h1v1h-1z'/%3E%3C/svg%3E");
+  }
+  18.75% {
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4' shape-rendering='crispEdges'%3E%3Cpath d='M0 0h1v1h-1zM2 0h1v1h-1zM2 2h1v1h-1z'/%3E%3C/svg%3E");
+  }
+  25% {
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4' shape-rendering='crispEdges'%3E%3Cpath d='M0 0h1v1h-1zM2 0h1v1h-1zM0 2h1v1h-1zM2 2h1v1h-1z'/%3E%3C/svg%3E");
+  }
+  31.25% {
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4' shape-rendering='crispEdges'%3E%3Cpath d='M0 0h1v1h-1zM2 0h1v1h-1zM1 1h1v1h-1zM0 2h1v1h-1zM2 2h1v1h-1z'/%3E%3C/svg%3E");
+  }
+  37.5% {
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4' shape-rendering='crispEdges'%3E%3Cpath d='M0 0h1v1h-1zM2 0h1v1h-1zM1 1h1v1h-1zM0 2h1v1h-1zM2 2h1v1h-1zM3 3h1v1h-1z'/%3E%3C/svg%3E");
+  }
+  43.75% {
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4' shape-rendering='crispEdges'%3E%3Cpath d='M0 0h1v1h-1zM2 0h1v1h-1zM1 1h1v1h-1zM3 1h1v1h-1zM0 2h1v1h-1zM2 2h1v1h-1zM3 3h1v1h-1z'/%3E%3C/svg%3E");
+  }
+  50% {
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4' shape-rendering='crispEdges'%3E%3Cpath d='M0 0h1v1h-1zM2 0h1v1h-1zM1 1h1v1h-1zM3 1h1v1h-1zM0 2h1v1h-1zM2 2h1v1h-1zM1 3h1v1h-1zM3 3h1v1h-1z'/%3E%3C/svg%3E");
+  }
+  56.25% {
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4' shape-rendering='crispEdges'%3E%3Cpath d='M0 0h1v1h-1zM1 0h1v1h-1zM2 0h1v1h-1zM1 1h1v1h-1zM3 1h1v1h-1zM0 2h1v1h-1zM2 2h1v1h-1zM1 3h1v1h-1zM3 3h1v1h-1z'/%3E%3C/svg%3E");
+  }
+  62.5% {
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4' shape-rendering='crispEdges'%3E%3Cpath d='M0 0h1v1h-1zM1 0h1v1h-1zM2 0h1v1h-1zM1 1h1v1h-1zM3 1h1v1h-1zM0 2h1v1h-1zM2 2h1v1h-1zM3 2h1v1h-1zM1 3h1v1h-1zM3 3h1v1h-1z'/%3E%3C/svg%3E");
+  }
+  68.75% {
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4' shape-rendering='crispEdges'%3E%3Cpath d='M0 0h1v1h-1zM1 0h1v1h-1zM2 0h1v1h-1zM3 0h1v1h-1zM1 1h1v1h-1zM3 1h1v1h-1zM0 2h1v1h-1zM2 2h1v1h-1zM3 2h1v1h-1zM1 3h1v1h-1zM3 3h1v1h-1z'/%3E%3C/svg%3E");
+  }
+  75% {
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4' shape-rendering='crispEdges'%3E%3Cpath d='M0 0h1v1h-1zM1 0h1v1h-1zM2 0h1v1h-1zM3 0h1v1h-1zM1 1h1v1h-1zM3 1h1v1h-1zM0 2h1v1h-1zM1 2h1v1h-1zM2 2h1v1h-1zM3 2h1v1h-1zM1 3h1v1h-1zM3 3h1v1h-1z'/%3E%3C/svg%3E");
+  }
+  81.25% {
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4' shape-rendering='crispEdges'%3E%3Cpath d='M0 0h1v1h-1zM1 0h1v1h-1zM2 0h1v1h-1zM3 0h1v1h-1zM0 1h1v1h-1zM1 1h1v1h-1zM3 1h1v1h-1zM0 2h1v1h-1zM1 2h1v1h-1zM2 2h1v1h-1zM3 2h1v1h-1zM1 3h1v1h-1zM3 3h1v1h-1z'/%3E%3C/svg%3E");
+  }
+  87.5% {
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4' shape-rendering='crispEdges'%3E%3Cpath d='M0 0h1v1h-1zM1 0h1v1h-1zM2 0h1v1h-1zM3 0h1v1h-1zM0 1h1v1h-1zM1 1h1v1h-1zM3 1h1v1h-1zM0 2h1v1h-1zM1 2h1v1h-1zM2 2h1v1h-1zM3 2h1v1h-1zM1 3h1v1h-1zM2 3h1v1h-1zM3 3h1v1h-1z'/%3E%3C/svg%3E");
+  }
+  93.75% {
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4' shape-rendering='crispEdges'%3E%3Cpath d='M0 0h1v1h-1zM1 0h1v1h-1zM2 0h1v1h-1zM3 0h1v1h-1zM0 1h1v1h-1zM1 1h1v1h-1zM2 1h1v1h-1zM3 1h1v1h-1zM0 2h1v1h-1zM1 2h1v1h-1zM2 2h1v1h-1zM3 2h1v1h-1zM1 3h1v1h-1zM2 3h1v1h-1zM3 3h1v1h-1z'/%3E%3C/svg%3E");
+  }
+  100% {
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4' shape-rendering='crispEdges'%3E%3Cpath d='M0 0h1v1h-1zM1 0h1v1h-1zM2 0h1v1h-1zM3 0h1v1h-1zM0 1h1v1h-1zM1 1h1v1h-1zM2 1h1v1h-1zM3 1h1v1h-1zM0 2h1v1h-1zM1 2h1v1h-1zM2 2h1v1h-1zM3 2h1v1h-1zM0 3h1v1h-1zM1 3h1v1h-1zM2 3h1v1h-1zM3 3h1v1h-1z'/%3E%3C/svg%3E");
+  }
+}
+
+.lp-dots {
+  background-image: radial-gradient(var(--lp-line-strong) 0.75px, transparent 0.75px);
+  background-size: 12px 12px;
+}
+
+.lp-pinstripe {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    var(--lp-line-strong) 0 1px,
+    transparent 1px 3px
+  );
+  background-size: 100% 11px;
+  background-position: 0 50%;
+  background-repeat: no-repeat;
+}
+
+@keyframes lp-caret {
+  50% {
+    opacity: 0;
+  }
+}
+
+/* a new status line prints in, left to right: the paper over it steps off to the right */
+@keyframes lp-print {
+  from {
+    translate: 0;
+  }
+}
+
+/* a `Roller` cell's strip, from its first character to the one it rests on */
+@keyframes lp-roll {
+  from {
+    translate: 0 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root:has(> body > .landing)::view-transition-new(root) {
+    animation: none;
+  }
+}

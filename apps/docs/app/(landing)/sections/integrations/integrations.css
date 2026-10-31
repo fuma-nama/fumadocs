@@ -1,0 +1,78 @@
+.bt-cell {
+  --bt-stage: 22.5rem;
+  /* the mechanism's palette, inverted while the card is pointed at or focused */
+  --bt-ink: var(--lp-ink);
+  --bt-paper: var(--lp-paper);
+  --bt-orange: var(--lp-orange);
+  /* orange over ink-filled cards: vivid while the ink is dark */
+  --bt-on-ink: var(--lp-sun);
+  --bt-speed: 1;
+  /* a card narrower than its mechanism and padding scales the mechanism down whole */
+  container-type: inline-size;
+
+  @variant hover {
+    --bt-ink: var(--lp-paper);
+    --bt-paper: var(--lp-ink);
+    --bt-orange: var(--lp-orange-on-ink);
+    --bt-on-ink: var(--lp-orange);
+  }
+
+  /* its title focused from the keyboard */
+  &[data-focus] {
+    --bt-ink: var(--lp-paper);
+    --bt-paper: var(--lp-ink);
+    --bt-orange: var(--lp-orange-on-ink);
+    --bt-on-ink: var(--lp-orange);
+  }
+
+  /* played again as it's inspected, at twice the pace */
+  &[data-play='fast'] {
+    --bt-speed: 2;
+  }
+}
+
+@container (width < 26rem) {
+  .bt-stage {
+    zoom: 0.9;
+  }
+}
+
+@container (width < 22.5rem) {
+  .bt-stage {
+    zoom: 0.8;
+  }
+}
+
+.bt-ink-card {
+  --bt-orange: var(--bt-on-ink);
+}
+
+.bt-code {
+  font-family: var(--font-mono);
+  /* a character is two cells: 0.6em */
+  font-size: 10px;
+}
+
+/* content on the yellow highlight is always dark, as `text-lp-on-yellow` */
+.bt-on-hi {
+  --bt-ink: #121210;
+  color: var(--bt-ink);
+}
+
+.bt-a {
+  animation-duration: calc(var(--bt-dur) / var(--bt-speed));
+  animation-timing-function: steps(1, end);
+  animation-fill-mode: both;
+  /* a run acts from its first tick: tick 0 is the pose it waits on */
+  animation-delay: calc(-125ms / var(--bt-speed));
+}
+
+/* the second unit of a flap display follows one tick later */
+.bt-lag .bt-a {
+  animation-delay: 0ms;
+}
+
+/* off screen, a mechanism holds where it is till it's back */
+[data-paused] .bt-a {
+  animation-play-state: paused;
+}

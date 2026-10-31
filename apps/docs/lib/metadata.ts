@@ -21,6 +21,7 @@ export function createMetadata(override: Metadata): Metadata {
       ...override.twitter,
     },
     alternates: {
+      ...override.alternates,
       types: {
         'application/rss+xml': [
           {
@@ -28,8 +29,8 @@ export function createMetadata(override: Metadata): Metadata {
             url: 'https://fumadocs.dev/blog/rss.xml',
           },
         ],
+        ...override.alternates?.types,
       },
-      ...override.alternates,
     },
   };
 }
