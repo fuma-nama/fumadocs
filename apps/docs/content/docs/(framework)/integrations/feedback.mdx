@@ -85,18 +85,6 @@ export default defineConfig({
 });
 ```
 
-```npm tab="Astro"
-npm i @fumadocs/satteri
-```
-
-```js tab="Astro" title="astro.config.mjs"
-import { remarkBlockId } from '@fumadocs/satteri/remark-block-id';
-
-fumadocs({
-  mdastPlugins: [remarkBlockId({ addDataAttribute: 'feedback' })],
-});
-```
-
 Then, wrap your page content under the `FeedbackText` component:
 
 ```tsx

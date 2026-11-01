@@ -1,0 +1,75 @@
+---
+title: Internationalization
+description: Support multiple languages in your docs.
+---
+
+## Setup
+
+Define your languages:
+
+<include cwd meta='title="src/lib/i18n.ts"'>
+  ../../examples/astro-i18n/src/lib/i18n.ts
+</include>
+
+See [i18n Config](/docs/headless/internationalization/config) for the options, like `hideLocale`.
+
+Pass it to your source and add Fumadocs UI translations to your config:
+
+<include cwd meta='tab="src/lib/source.ts"'>
+  ../../examples/astro-i18n/src/lib/source.ts
+</include>
+
+<include cwd meta='tab="src/fumadocs.config.ts"'>
+  ../../examples/astro-i18n/src/fumadocs.config.ts
+</include>
+
+`@fumadocs/language` has translations for [many languages](/docs/ui/translations).
+
+## Writing Pages
+
+Add the language to a translation's file name, see [i18n Routing](/docs/page-conventions#i18n-routing):
+
+<Files>
+  <Folder name="content/docs" defaultOpen>
+    <File name="index.mdx" />
+    <File name="index.cn.mdx" />
+    <File name="meta.json" />
+    <File name="meta.cn.json" />
+  </Folder>
+</Files>
+
+Docs pages are created for every language, like `/docs` and `/cn/docs` above. The search dialog searches the current language.
+
+### Links
+
+For links that include the language, add `DynamicLink` to your MDX components:
+
+<include cwd meta='title="src/components/mdx.tsx"'>
+  ../../examples/astro-i18n/src/components/mdx.tsx
+</include>
+
+```mdx
+<DynamicLink href="/[lang]/docs/setup">Setup</DynamicLink>
+```
+
+## Layout Options
+
+`baseOptions()` receives the language. The navbar title links to the language's home page by default:
+
+```tsx title="src/lib/layout.shared.tsx"
+import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
+
+export function baseOptions(locale?: string): BaseLayoutProps {
+  return {
+    nav: { title: locale === 'cn' ? '文檔' : 'Docs' },
+  };
+}
+```
+
+## Custom Pages
+
+Create a page for each language with `getStaticPaths()`, and pass the language to `HomeLayout`:
+
+<include cwd meta='title="src/pages/[...lang]/index.astro"'>
+  ../../examples/astro-i18n/src/pages/[...lang]/index.astro
+</include>

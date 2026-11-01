@@ -1,0 +1,198 @@
+---
+title: Without Config
+description: Use the integration with your own routes and layouts.
+---
+
+## Overview
+
+Without `src/fumadocs.config.ts`, the integration only processes your MDX files and renders their content as a React island. You write the routes, layouts and providers.
+
+Prefer the [Fumadocs config](/docs/astro/manual-installation), use this only when it doesn't cover your case yet, like routes rendered on demand, or integrations without a plugin like [AsyncAPI](/docs/integrations/asyncapi). The `layout`, `page` and `css` options and plugins require the config file.
+
+## Setup
+
+Follow [Manual Installation](/docs/astro/manual-installation) until the source files, then register your MDX components with `DocsBody` as `wrapper` for content styles:
+
+```tsx tab="src/components/mdx.tsx"
+import defaultMdxComponents from 'fumadocs-ui/mdx';
+import { DocsBody } from 'fumadocs-ui/layouts/docs/page'; // [!code ++]
+import type { MDXComponents } from 'mdx/types';
+
+export function getMDXComponents(components?: MDXComponents) {
+  return {
+    ...defaultMdxComponents,
+    ...components,
+  } satisfies MDXComponents;
+}
+
+export default getMDXComponents({ wrapper: DocsBody }); // [!code ++]
+```
+
+```js tab="astro.config.mjs"
+fumadocs({
+  components: './src/components/mdx.tsx', // [!code ++]
+});
+```
+
+### Provider
+
+Fumadocs UI needs a provider in each React island:
+
+```tsx title="src/components/provider.tsx"
+import { navigate } from 'astro:transitions/client';
+import type { ReactNode } from 'react';
+import { RootProvider } from 'fumadocs-ui/provider/astro';
+
+export interface ProviderProps {
+  /** `Astro.url.pathname` */
+  pathname: string;
+  /** `Astro.params` */
+  params: Record<string, string | undefined>;
+  children?: ReactNode;
+}
+
+export function Provider({ pathname, params, children }: ProviderProps) {
+  return (
+    <RootProvider pathname={pathname} params={params} navigate={navigate}>
+      {children}
+    </RootProvider>
+  );
+}
+```
+
+### Docs Page
+
+Render the docs layout as an island, with the content as children:
+
+```tsx tab="src/components/docs.tsx"
+import { type SerializedPageTree, useFumadocsLoader } from 'fumadocs-core/source/client';
+import type { TOCItemType } from 'fumadocs-core/toc';
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+import { DocsDescription, DocsPage, DocsTitle } from 'fumadocs-ui/layouts/docs/page';
+import { Provider, type ProviderProps } from '@/components/provider';
+
+export interface DocsProps extends ProviderProps {
+  tree: SerializedPageTree;
+  title: string;
+  description?: string;
+  toc: TOCItemType[];
+}
+
+export function Docs({ tree, title, description, toc, children, ...props }: DocsProps) {
+  const data = useFumadocsLoader({ tree });
+
+  return (
+    <Provider {...props}>
+      <DocsLayout nav={{ title: 'My App' }} tree={data.tree}>
+        <DocsPage toc={toc}>
+          <DocsTitle>{title}</DocsTitle>
+          <DocsDescription>{description}</DocsDescription>
+          {children}
+        </DocsPage>
+      </DocsLayout>
+    </Provider>
+  );
+}
+```
+
+```astro tab="src/layouts/Layout.astro"
+---
+import { ClientRouter } from 'astro:transitions';
+import '@/styles/global.css';
+
+const { title } = Astro.props;
+---
+
+<html lang="en" transition:animate="none">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <ClientRouter />
+  </head>
+  <body class="flex flex-col min-h-screen">
+    <slot />
+  </body>
+</html>
+```
+
+```astro tab="src/pages/docs/[...slug].astro"
+---
+import type { GetStaticPaths, InferGetStaticPropsType } from 'astro';
+import Layout from '@/layouts/Layout.astro';
+import { Docs } from '@/components/docs';
+import { source } from '@/lib/source';
+
+export const getStaticPaths = (() => {
+  return source.getPages().map((page) => ({
+    params: { slug: page.slugs.join('/') || undefined },
+    props: { page },
+  }));
+}) satisfies GetStaticPaths;
+
+type Props = InferGetStaticPropsType<typeof getStaticPaths>;
+
+const { page } = Astro.props;
+const { body: Content, toc } = await page.data.load();
+const tree = await source.serializePageTree(source.getPageTree());
+---
+
+<Layout title={page.data.title}>
+  <Docs
+    client:load
+    transition:persist="docs"
+    pathname={Astro.url.pathname}
+    params={Astro.params}
+    tree={tree}
+    title={page.data.title}
+    description={page.data.description}
+    toc={toc}
+  >
+    <Content />
+  </Docs>
+</Layout>
+```
+
+### Search
+
+Export the search index, the search dialog queries `/api/search` by default:
+
+```ts title="src/pages/api/search.ts"
+import type { APIRoute } from 'astro';
+import { createFromSource } from 'fumadocs-core/search/server';
+import { source } from '@/lib/source';
+
+const server = createFromSource(source);
+
+export const GET: APIRoute = () => server.staticGET();
+```
+
+Pass a [static search dialog](/docs/search/orama#static) to `RootProvider`, see [Search UI](/docs/ui/search).
+
+## Content Island
+
+The content is its own React island, so your layout's providers don't reach it. `wrapper` receives `<Content />`'s props, add a provider there, without theme and search:
+
+```tsx tab="src/components/mdx.tsx"
+import { navigate } from 'astro:transitions/client';
+import { RootProvider } from 'fumadocs-ui/provider/astro';
+import type { ProviderProps } from '@/components/provider';
+
+export default getMDXComponents({
+  wrapper: ({ pathname, params, children }: ProviderProps) => (
+    <RootProvider
+      pathname={pathname}
+      params={params}
+      navigate={navigate}
+      theme={{ enabled: false }}
+      search={{ enabled: false }}
+    >
+      <DocsBody>{children}</DocsBody>
+    </RootProvider>
+  ),
+});
+```
+
+```astro tab="src/pages/docs/[...slug].astro"
+<Content pathname={Astro.url.pathname} params={Astro.params} />
+```

@@ -12,7 +12,7 @@ import { z } from 'zod';
 import { source } from '@/lib/source';
 import { Document, type DocumentData } from 'flexsearch';
 import { $routeHandler } from 'fuma-cli/macros/route-handler';
-import { ChatUIMessage, SearchTool } from '@/components/ai-sdk/search';
+import type { ChatUIMessage, SearchTool } from '@/components/ai-sdk/search';
 
 interface CustomDocument extends DocumentData {
   url: string;

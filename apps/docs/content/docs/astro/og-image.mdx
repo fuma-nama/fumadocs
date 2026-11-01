@@ -1,0 +1,45 @@
+---
+title: OG Images
+description: Generate Open Graph images for docs pages.
+---
+
+## Setup
+
+`takumiPlugin()` generates an image for each docs page with [Takumi](/docs/integrations/og/takumi), showing its title, description and the site title.
+
+```npm
+npm i takumi-js
+```
+
+```ts title="src/fumadocs.config.ts"
+import { defineConfig } from '@fumadocs/astro/config';
+import { takumiPlugin } from '@fumadocs/astro/plugins/takumi'; // [!code ++]
+import { source } from './lib/source';
+
+export default defineConfig({
+  source,
+  title: 'My Docs',
+  plugins: [takumiPlugin()], // [!code ++]
+});
+```
+
+Or with Fumadocs CLI:
+
+```npm
+npx @fumadocs/cli feature og --engine takumi
+```
+
+Images are generated at build time, under `/og/docs/<page>/image.webp`. Change it with the `prefix` option, like `takumiPlugin({ prefix: '/images/og' })`.
+
+## Site URL
+
+Docs pages link their image with `og:image`, set [`site`](https://docs.astro.build/en/reference/configuration-reference/#site) so it is an absolute URL, as social previews require:
+
+```js title="astro.config.mjs"
+export default defineConfig({
+  site: 'https://example.com', // [!code ++]
+  // ...
+});
+```
+
+The `page` module receives the URL as `page.image`.

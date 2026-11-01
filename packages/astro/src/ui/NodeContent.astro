@@ -1,0 +1,13 @@
+---
+import { FumadocsIsland } from 'virtual:fumadocs/island';
+import { getProviderData } from '../app.js';
+import type { NodeContentProps } from '../island-node';
+
+type Props = NodeContentProps;
+
+const { tree, slots, provider = getProviderData(Astro), body } = Astro.props;
+---
+
+<FumadocsIsland client:load react tree={tree} props={{ provider, body }}>
+  {slots.map((html, i) => <Fragment slot={`s${i}`} set:html={html} />)}
+</FumadocsIsland>

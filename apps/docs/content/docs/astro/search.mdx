@@ -1,0 +1,88 @@
+---
+title: Search
+description: The built-in search, and other search engines.
+---
+
+## Overview
+
+Search works out of the box: the integration exports search indexes at build time, and the dialog searches them in the browser.
+
+Search is made of:
+
+- **Engine:** where results come from, used through its search hook.
+- **Dialog:** how results are shown.
+
+Replace either from the [layout module](/docs/astro/layouts#layout-options).
+
+## Search Engine
+
+Export `useSearch()` to use another engine in the built-in dialog:
+
+```tsx title="src/lib/layout.shared.tsx"
+import { liteClient } from 'algoliasearch/lite';
+import { useAlgoliaSearch } from 'fumadocs-core/search/client';
+
+const client = liteClient('app id', 'search api key');
+
+export function useSearch({ locale }: { locale?: string }) {
+  return useAlgoliaSearch({ client, indexName: 'docs', locale });
+}
+```
+
+To sync pages to the engine, see its guide, like [Algolia](/docs/search/algolia).
+
+## Search Dialog
+
+Export `SearchDialog` to replace the dialog with a [custom search dialog](/docs/ui/search#custom-ui):
+
+```tsx title="src/lib/layout.shared.tsx"
+export { default as SearchDialog } from '@/components/search';
+```
+
+Fumadocs CLI creates it for your engine:
+
+```npm
+npx @fumadocs/cli feature search --provider algolia
+```
+
+## Search Index
+
+The built-in index is left out when the layout module exports `useSearch` or `SearchDialog`. Add its plugin to keep it, or to pass `createFromSource()` options:
+
+```ts title="src/fumadocs.config.ts"
+import { oramaSearchPlugin } from '@fumadocs/astro/plugins/orama-search';
+
+export default defineConfig({
+  // ...
+  plugins: [oramaSearchPlugin({ language: 'english' })], // [!code ++]
+});
+```
+
+Your own dialog can search it with `useStaticSearch()` of `fumadocs-core/search/client`.
+
+### FlexSearch
+
+To index your pages with [FlexSearch](/docs/search/flexsearch) instead, add its plugin and search engine:
+
+```npm
+npm i flexsearch
+```
+
+```ts tab="src/fumadocs.config.ts"
+import { flexsearchPlugin } from '@fumadocs/astro/plugins/flexsearch';
+
+export default defineConfig({
+  // ...
+  plugins: [flexsearchPlugin()], // [!code ++]
+});
+```
+
+```tsx tab="src/lib/layout.shared.tsx"
+import { useFlexsearchStatic } from 'fumadocs-core/search/client/flexsearch-static';
+
+export function useSearch({ locale }: { locale?: string }) {
+  return useFlexsearchStatic({ locale });
+}
+```
+
+The plugin takes the options of [`flexsearchFromSource()`](/docs/headless/search/flexsearch#from-source), like a tag filter for your own dialog.

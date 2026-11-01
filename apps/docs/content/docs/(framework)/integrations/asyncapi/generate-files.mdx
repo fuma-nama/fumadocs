@@ -170,7 +170,7 @@ Generate docs with the script:
 bun ./scripts/generate-docs.ts
 ```
 
-Add the `AsyncAPIPage` component to your MDX components. Generated files use the `<AsyncAPIPage />` tag. On Astro, it requires [`loadDocument`](/docs/integrations/asyncapi/server#loading-documents-once) to load documents.
+Add the `AsyncAPIPage` component to your MDX components. Generated files use the `<AsyncAPIPage />` tag.
 
 ```tsx tab="Next.js" title="app/docs/[[...slug]]/page.tsx"
 // [!code ++:2]
@@ -298,20 +298,6 @@ export default function Page({ slugs }: PageProps<'/docs/[...slugs]'>) {
     })}
   />;
 }
-```
-
-```tsx tab="Astro" title="src/components/mdx.tsx"
-// [!code ++:2]
-import type { AsyncAPIPageProps_Preloaded } from '@fumadocs/asyncapi/ui';
-import { AsyncAPIPage } from '@/components/api-page';
-
-export default getMDXComponents({
-  wrapper: DocsBody,
-  // [!code ++:4] documents are loaded by `loadDocument`
-  AsyncAPIPage: (props: Omit<AsyncAPIPageProps_Preloaded, 'preloaded'>) => (
-    <AsyncAPIPage {...props} preloaded={{ docs: {} }} />
-  ),
-});
 ```
 
 Add the plugin to your `loader()`:

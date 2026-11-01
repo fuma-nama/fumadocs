@@ -137,7 +137,9 @@ const api = createEpubExportAPI({
   secret: getSecret('EXPORT_SECRET'),
 });
 
-// requires `output: 'server'`
+// renders on request, requires an adapter
+export const prerender = false;
+
 export const GET: APIRoute = ({ request }) => api.GET(request);
 ```
 

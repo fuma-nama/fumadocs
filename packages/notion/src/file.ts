@@ -74,7 +74,8 @@ export function createNotionFileHandler(
       return new Response('Invalid Notion file request', { status: 400 });
     }
 
-    const key = `${pageId}:${blockId}`;
+    // IDs match in any case and with or without dashes, one entry for all their forms
+    const key = `${toNotionId(pageId)}:${toNotionId(blockId)}`;
     const hit = remembered.get(key);
     if (hit && hit.expires > Date.now()) return redirect(hit.url);
 
@@ -202,6 +203,10 @@ function isNotionId(value: string): boolean {
   );
 }
 
+function toNotionId(value: string): string {
+  return value.replaceAll('-', '').toLowerCase();
+}
+
 function sameNotionId(a: string, b: string): boolean {
-  return a.replaceAll('-', '').toLowerCase() === b.replaceAll('-', '').toLowerCase();
+  return toNotionId(a) === toNotionId(b);
 }

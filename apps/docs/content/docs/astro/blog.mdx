@@ -1,0 +1,233 @@
+---
+title: Blog & Changelog
+description: Add a blog or changelog to your site.
+---
+
+## Blog
+
+The [Blog](/docs/integrations/blog) components render your posts with cards, tags and a floating table of contents. Install them with Fumadocs CLI:
+
+```npm
+npx @fumadocs/cli@latest add blog
+```
+
+### Setup
+
+Add a blog collection with `blogPageSchema` and create a source:
+
+```js tab="astro.config.mjs"
+fumadocs({
+  collections: {
+    docs: { dir: 'content/docs' },
+    blog: { dir: 'content/blog' }, // [!code ++]
+  },
+});
+```
+
+```ts tab="src/content.config.ts"
+import { blogPageSchema } from './lib/blog'; // [!code ++]
+
+export const collections = {
+  // ...
+  blog: defineCollection({ loader: pageLoader('blog'), schema: blogPageSchema }), // [!code ++]
+};
+```
+
+```ts tab="src/lib/source.ts"
+import { getCollection } from 'astro:content';
+import { loader } from 'fumadocs-core/source';
+import { toFumadocsSource } from '@fumadocs/astro/source';
+import type { BlogAuthor } from './blog';
+
+export const blogSource = loader({
+  baseUrl: '/blog',
+  source: toFumadocsSource(await getCollection('blog')),
+});
+
+export const blogAuthors: Record<string, BlogAuthor> = {
+  fuma: {
+    name: 'Fuma Nama',
+    title: 'Maintainer',
+    url: 'https://fuma-nama.dev',
+    image: 'https://avatars.githubusercontent.com/u/76240755',
+  },
+};
+```
+
+See [Blog](/docs/integrations/blog) for the frontmatter fields and utilities like `getPosts()`.
+
+### Pages
+
+The blog pages are [custom pages](/docs/astro/layouts#custom-pages) with `HomeLayout.astro`. `BlogPage` hydrates with `client:load` for the floating panel; its children stay static. `<Body />` renders the content as an island with typography styles, so you don't need `BlogBody`.
+
+```astro tab="src/pages/blog/index.astro"
+---
+import HomeLayout from '@fumadocs/astro/components/HomeLayout.astro';
+import { blogAuthors, blogSource } from '@/lib/source';
+import { getPosts } from '@/lib/blog';
+import { BlogCards } from '@/components/blog';
+---
+
+<HomeLayout title="Blog">
+  <div class="mx-auto w-full max-w-(--fd-layout-width) px-4 py-12">
+    <BlogCards posts={getPosts(blogSource.getPages(), blogAuthors)} />
+  </div>
+</HomeLayout>
+```
+
+```astro tab="src/pages/blog/[slug].astro"
+---
+import type { GetStaticPaths, InferGetStaticPropsType } from 'astro';
+import HomeLayout from '@fumadocs/astro/components/HomeLayout.astro';
+import { blogAuthors, blogSource } from '@/lib/source';
+import { findPost, getPosts } from '@/lib/blog';
+import {
+  BlogAuthors,
+  BlogBackLink,
+  BlogDate,
+  BlogDescription,
+  BlogHeader,
+  BlogPage,
+  BlogPostNav,
+  BlogTags,
+  BlogTitle,
+} from '@/components/blog';
+
+export const getStaticPaths = (() => {
+  return blogSource.getPages().map((page) => ({ params: { slug: page.slugs[0] }, props: { page } }));
+}) satisfies GetStaticPaths;
+
+type Props = InferGetStaticPropsType<typeof getStaticPaths>;
+
+const { page } = Astro.props;
+const { post, newer, older } = findPost(getPosts(blogSource.getPages(), blogAuthors), page.url)!;
+const { body: Body, toc } = await page.data.load();
+---
+
+<HomeLayout title={post.title} description={post.description}>
+  <BlogPage client:load toc={toc}>
+    <BlogHeader>
+      <BlogBackLink href="/blog" />
+      <BlogTitle>{post.title}</BlogTitle>
+      <BlogDescription>{post.description}</BlogDescription>
+      <BlogAuthors authors={post.authors} />
+      <BlogTags tags={post.tags} />
+      {post.date && <BlogDate date={post.date} />}
+    </BlogHeader>
+    <Body />
+    <BlogPostNav newer={newer} older={older} />
+  </BlogPage>
+</HomeLayout>
+```
+
+```astro tab="src/pages/blog/tags/index.astro"
+---
+import HomeLayout from '@fumadocs/astro/components/HomeLayout.astro';
+import { blogSource } from '@/lib/source';
+import { getPosts, getTags } from '@/lib/blog';
+import { BlogHeader, BlogTagCards, BlogTitle } from '@/components/blog';
+
+const tags = getTags(getPosts(blogSource.getPages()));
+---
+
+<HomeLayout title="All Tags">
+  <div class="mx-auto flex w-full max-w-(--fd-layout-width) flex-col gap-4 px-4 py-12">
+    <BlogHeader>
+      <BlogTitle>All Tags</BlogTitle>
+    </BlogHeader>
+    <BlogTagCards tags={tags} />
+  </div>
+</HomeLayout>
+```
+
+```astro tab="src/pages/blog/tags/[tag].astro"
+---
+import type { GetStaticPaths, InferGetStaticPropsType } from 'astro';
+import HomeLayout from '@fumadocs/astro/components/HomeLayout.astro';
+import { blogAuthors, blogSource } from '@/lib/source';
+import { getPosts, getTagPosts, getTags } from '@/lib/blog';
+import { BlogCards, BlogHeader, BlogTitle } from '@/components/blog';
+
+export const getStaticPaths = (() => {
+  const posts = getPosts(blogSource.getPages(), blogAuthors);
+  return getTags(posts).map((tag) => ({
+    params: { tag: tag.slug },
+    props: getTagPosts(posts, tag.slug)!,
+  }));
+}) satisfies GetStaticPaths;
+
+type Props = InferGetStaticPropsType<typeof getStaticPaths>;
+
+const { tag, posts } = Astro.props;
+---
+
+<HomeLayout title={tag.name}>
+  <div class="mx-auto flex w-full max-w-(--fd-layout-width) flex-col gap-4 px-4 py-12">
+    <BlogHeader>
+      <BlogTitle>{tag.name}</BlogTitle>
+    </BlogHeader>
+    <BlogCards posts={posts} />
+  </div>
+</HomeLayout>
+```
+
+### Internationalization
+
+Pass a locale's pages to `getPosts()`, like `blogSource.getPages(lang)`. Create the pages under `src/pages/[...lang]/blog` with a path for each language, see [Custom Pages](/docs/astro/internationalization#custom-pages).
+
+## Changelog
+
+The [Changelog](/docs/integrations/changelog) components render a timeline of your releases. Install them with Fumadocs CLI:
+
+```npm
+npx @fumadocs/cli@latest add changelog
+```
+
+The pages are [custom pages](/docs/astro/layouts#custom-pages), generated at build time. The timeline renders with `ReactContent.astro` so copy buttons in release notes hydrate:
+
+```astro title="src/pages/changelog/[...page].astro"
+---
+import type { GetStaticPaths, InferGetStaticPropsType } from 'astro';
+import { createElement } from 'react';
+import { githubReleases } from '@fumadocs/changelog/github';
+import HomeLayout from '@fumadocs/astro/components/HomeLayout.astro';
+import ReactContent from '@fumadocs/astro/components/ReactContent.astro';
+import { ChangelogPagination, ChangelogTimeline } from '@/components/changelog';
+
+export const getStaticPaths = (async () => {
+  const paths = [];
+  for (let page: number | undefined = 1; page; ) {
+    const releases = await githubReleases({
+      owner: 'fuma-nama',
+      repo: 'fumadocs',
+      token: import.meta.env.GITHUB_TOKEN,
+      page,
+    });
+    if (releases.entries.length === 0) break;
+    paths.push({
+      params: { page: page > 1 ? String(page) : undefined },
+      props: { page, ...releases },
+    });
+    page = releases.nextPage;
+  }
+  return paths;
+}) satisfies GetStaticPaths;
+
+type Props = InferGetStaticPropsType<typeof getStaticPaths>;
+
+const { page, entries, nextPage } = Astro.props;
+const href = (page: number) => (page > 1 ? `/changelog/${page}` : '/changelog');
+---
+
+<HomeLayout title="Changelog">
+  <div class="mx-auto flex w-full max-w-[900px] flex-col gap-10 px-4 py-12">
+    <ReactContent node={createElement(ChangelogTimeline, { entries })} />
+    <ChangelogPagination
+      newer={page > 1 ? href(page - 1) : undefined}
+      older={nextPage ? href(nextPage) : undefined}
+    />
+  </div>
+</HomeLayout>
+```
+
+See [Changelog](/docs/integrations/changelog) for the sources and components, like `githubReleases()`. With [custom entries](/docs/integrations/changelog#custom-entries), `body` takes React nodes, not Astro components. Pass the Markdown of pages as `content` instead, like `await page.data.getText('raw')`.

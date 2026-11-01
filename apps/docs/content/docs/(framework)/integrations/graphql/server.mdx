@@ -199,19 +199,6 @@ export async function GET(_: Request, { params }: ApiContext<'/api/graphql-schem
 }
 ```
 
-```ts tab="Astro" title="src/pages/api/graphql-schema/[id].ts"
-import type { APIRoute, GetStaticPaths } from 'astro';
-import { graphql } from '@/lib/graphql';
-
-export const getStaticPaths = (async () => {
-  return Object.keys(await graphql.getSchemas()).map((id) => ({ params: { id } }));
-}) satisfies GetStaticPaths;
-
-export const GET: APIRoute = async ({ params }) => {
-  return new Response((await graphql.getSchema(params.id!)).sdl);
-};
-```
-
 On Tanstack Start, route loaders run on both sides, call a server function only when the browser doesn't have the schema yet:
 
 ```tsx title="src/routes/docs/$.tsx"

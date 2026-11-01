@@ -29,10 +29,6 @@ Create the server from source object.
   ../../examples/waku/src/pages/_api/api/search.ts
 </include>
 
-<include cwd meta='tab="Astro" title="src/pages/api/search.ts"'>
-  ../../examples/astro/src/pages/api/search.ts
-</include>
-
 ### From Search Indexes
 
 Create the server from search indexes, each index needs a `structuredData` field.
@@ -111,28 +107,6 @@ export const { GET } = createSearchAPI('advanced', {
     structuredData: page.data.structuredData,
   })),
 });
-```
-
-```ts tab="Astro" title="src/pages/api/search.ts"
-import type { APIRoute } from 'astro';
-import { createSearchAPI } from 'fumadocs-core/search/server';
-import { source } from '@/lib/source';
-
-const server = createSearchAPI('advanced', {
-  indexes: () =>
-    Promise.all(
-      source.getPages().map(async (page) => ({
-        title: page.data.title,
-        description: page.data.description,
-        url: page.url,
-        id: page.url,
-        structuredData: await page.data.structuredData(),
-      })),
-    ),
-});
-
-// Astro builds a static site by default, see Static Mode below
-export const GET: APIRoute = () => server.staticGET();
 ```
 
 ### Searching Documents
@@ -250,13 +224,6 @@ export const { staticGET: GET } = createFromSource(source);
 export const getConfig = async () => ({
   render: 'static',
 });
-```
-
-```ts tab="Astro" title="src/pages/api/search.ts"
-import type { APIRoute } from 'astro';
-
-// [!code highlight]
-export const GET: APIRoute = () => server.staticGET();
 ```
 
 > `staticGET` is also available on `createSearchAPI`.

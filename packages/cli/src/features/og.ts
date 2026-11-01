@@ -1,18 +1,16 @@
+import fs from 'node:fs/promises';
 import path from 'node:path';
 import type { Feature } from '@/features';
 import type { Framework, I18nInfo } from '@/project';
-import {
-  astroPageRoute,
-  type FormattedRoute,
-  formatRoute,
-  reactRouterTypes,
-} from '@/project/route';
+import { type FormattedRoute, formatRoute, reactRouterTypes } from '@/project/route';
 import { addElements, getConfigObject, getProperty } from '@/codemod';
 import { docs } from './docs';
 import { extendNextProxy } from './llms';
 import {
+  addAstroPlugin,
   addPageUrl,
   registerReactRouterRoutes,
+  requiresManaged,
   sharedRoute,
   type SourceRef,
   sourceRef,
@@ -48,7 +46,7 @@ type Template = (
   src: SourceRef,
 ) => string;
 
-const templates: Record<Framework, Template> = {
+const templates: Record<Exclude<Framework, 'astro'>, Template> = {
   next: (route, engine, i18n, src) => `import { ${src.ref} } from '@/lib/source';
 import { notFound } from 'next/navigation';
 ${imports(engine)}
@@ -123,12 +121,6 @@ export async function getConfig() {
   } as const;
 }
 `,
-  astro: (_route, engine, i18n, src) =>
-    astroPageRoute(
-      i18n,
-      `${imports(engine)}\nimport { ${src.ref} } from '@/lib/source';`,
-      image(engine),
-    ),
 };
 
 export const og: Feature<{ engine: Engine }> = {
@@ -145,11 +137,22 @@ export const og: Feature<{ engine: Engine }> = {
       ],
     },
   },
+  supports: requiresManaged,
+  async detect({ cwd, baseDir, fumadocsConfig }) {
+    const file = fumadocsConfig ?? path.join(baseDir, 'lib/shared.ts');
+    const content = await fs.readFile(path.join(cwd, file), 'utf-8').catch(() => '');
+    return content.includes(fumadocsConfig ? 'takumiPlugin(' : 'getPageImageUrl');
+  },
   async apply(ctx, { engine }) {
     const { baseDir, configFile, i18n, source, framework } = ctx.project;
     if (engine === 'next-og' && framework !== 'next')
       throw new Error('next/og is only available on Next.js');
     if (engine === 'takumi') ctx.addDependencies({ 'takumi-js': null });
+    if (framework === 'astro') {
+      if (await addAstroPlugin(ctx, 'takumiPlugin', '@fumadocs/astro/plugins/takumi'))
+        ctx.note('Docs pages link their image with `og:image`, served under `/og`.');
+      return;
+    }
 
     const shared = path.join(baseDir, 'lib/shared.ts');
     const imageRoute = await sharedRoute(

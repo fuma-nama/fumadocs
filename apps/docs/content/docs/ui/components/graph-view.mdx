@@ -12,9 +12,9 @@ You can install this from CLI:
 npx @fumadocs/cli add graph-view
 ```
 
-Enable `extractLinkReferences` on Fumadocs MDX.
+Enable `extractLinkReferences` on your content source.
 
-```ts title="source.config.ts"
+```ts title="source.config.ts" tab="Fumadocs MDX"
 import { defineDocs } from 'fumadocs-mdx/config';
 
 export const docs = defineDocs({
@@ -24,6 +24,12 @@ export const docs = defineDocs({
       extractLinkReferences: true,
     },
   },
+});
+```
+
+```js title="astro.config.mjs" tab="Astro"
+fumadocs({
+  extractLinkReferences: true, // [!code ++]
 });
 ```
 

@@ -45,7 +45,6 @@ function cachePromise<T>(key: string, setPromise: () => Promise<T>): Promise<T> 
   return promise;
 }
 
-// `useTheme()` doesn't reach the content island of Astro, observe `<html>` instead
 function subscribeTheme(onChange: () => void) {
   const observer = new MutationObserver(onChange);
   observer.observe(document.documentElement, { attributeFilter: ['class'] });
@@ -238,18 +237,6 @@ export default defineConfig({
   mdxOptions: {
     remarkPlugins: [remarkMdxMermaid],
   },
-});
-```
-
-```npm tab="Astro"
-npm i @fumadocs/satteri
-```
-
-```js tab="Astro" title="astro.config.mjs"
-import { remarkMdxMermaid } from '@fumadocs/satteri/remark-mdx-mermaid';
-
-fumadocs({
-  mdastPlugins: [remarkMdxMermaid()],
 });
 ```
 

@@ -125,19 +125,6 @@ export async function GET(_: Request, { params }: ApiContext<'/api/openapi/[id]'
 }
 ```
 
-```ts tab="Astro" title="src/pages/api/openapi/[id].ts"
-import type { APIRoute, GetStaticPaths } from 'astro';
-import { openapi } from '@/lib/openapi';
-
-export const getStaticPaths = (async () => {
-  return Object.keys(await openapi.getSchemas()).map((id) => ({ params: { id } }));
-}) satisfies GetStaticPaths;
-
-export const GET: APIRoute = async ({ params }) => {
-  return Response.json((await openapi.getSchema(params.id!)).bundled);
-};
-```
-
 On Tanstack Start, route loaders run on both sides, call a server function only when the browser doesn't have the document yet:
 
 ```tsx title="src/routes/docs/$.tsx"

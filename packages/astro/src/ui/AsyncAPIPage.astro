@@ -1,0 +1,11 @@
+---
+import { APIPage, documents, type BodyProps } from './asyncapi.js';
+import type { ProviderData } from './provider';
+
+type Props = BodyProps & { provider: ProviderData };
+
+const { page, schema, provider } = Astro.props;
+if (schema) documents.set(schema.id, schema.bundled);
+---
+
+<APIPage client:load page={page} provider={provider} />

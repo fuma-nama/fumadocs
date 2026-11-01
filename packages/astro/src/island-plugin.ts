@@ -6,14 +6,9 @@ import type {
   MdxJsxTextElementHast,
 } from 'satteri';
 import type { Program } from 'estree-jsx';
-import { parse } from 'yuku-parser';
+import { parse, type JSXElement, type JSXFragment, type Node } from 'yuku-parser';
 
 const islandName = '_FumadocsIsland';
-/** the replacer of `JSON.stringify()`, functions would be lost */
-const serializeProps = `(key, value) => {
-  if (typeof value === 'function') throw new Error(\`The props of MDX components must be serializable, "\${key}" is a function.\`);
-  return value;
-}`;
 
 type JsxElement = MdxJsxFlowElementHast | MdxJsxTextElementHast;
 
@@ -21,11 +16,17 @@ type JsxElement = MdxJsxFlowElementHast | MdxJsxTextElementHast;
  * Render the MDX body as one React island: components share context and hydrate. Astro renders
  * the parts React can't (code content, images, imported components, expressions) into slots.
  *
- * The tree is serialized as {@link import('./shared').IslandNode}, evaluated by the MDX module.
+ * The tree is serialized as `IslandNode` of `island.tsx`, evaluated by the MDX module.
  *
  * @param module - the module exporting `FumadocsIsland` of the collection
+ * @param runtime - the runtime of compiled MDX files, `mdx-runtime.ts`
+ * @param managed - pages with the providers of Fumadocs, from `getIslandProps()`
  */
-export function islandPlugin(module: string): HastPluginDefinition {
+export function islandPlugin(
+  module: string,
+  runtime: string,
+  managed: boolean,
+): HastPluginDefinition {
   // names declared by the ESM of document, rendered by Astro
   const locals = new Set<string>();
 
@@ -53,7 +54,7 @@ export function islandPlugin(module: string): HastPluginDefinition {
             name: 'tree',
             value: {
               type: 'mdxJsxAttributeValueExpression',
-              value: `JSON.stringify([${tree}], ${serializeProps})`,
+              value: `_serializeIsland([${tree}])`,
             },
           },
           {
@@ -62,7 +63,9 @@ export function islandPlugin(module: string): HastPluginDefinition {
             // like MDX, `wrapper` receives the props of content
             value: {
               type: 'mdxJsxAttributeValueExpression',
-              value: '(({ components: _, children: __, ...rest }) => rest)(props)',
+              value: managed
+                ? '_getIslandProps(props)'
+                : '(({ components: _, children: __, ...rest }) => rest)(props)',
             },
           },
         ],
@@ -71,7 +74,8 @@ export function islandPlugin(module: string): HastPluginDefinition {
       for (const node of body) ctx.removeNode(node);
       ctx.prependChild(root, {
         type: 'mdxjsEsm',
-        value: `import { FumadocsIsland as ${islandName} } from ${JSON.stringify(module)};`,
+        value: `import { FumadocsIsland as ${islandName} } from ${JSON.stringify(module)};
+import { serializeIsland as _serializeIsland, Slot as _Slot${managed ? ', getIslandProps as _getIslandProps' : ''} } from ${JSON.stringify(runtime)};`,
       });
     },
   };
@@ -91,7 +95,7 @@ function serialize(nodes: HastNode[], locals: Set<string>) {
       attributes: [{ type: 'mdxJsxAttribute', name: 'slot', value: name }],
       children: copies as JsxElement['children'],
     });
-    return `{$slot:${JSON.stringify(name)}}`;
+    return `new _Slot(${JSON.stringify(name)})`;
   }
 
   function list(children: HastNode[], pre = false): string {
@@ -162,9 +166,7 @@ function serialize(nodes: HastNode[], locals: Set<string>) {
     const code = `(${source})`;
     const { program } = parse(code, { lang: 'jsx' });
     assertLocalComponents(program, locals);
-    const nodes: Span[] = [];
-    collectJsx(program, nodes);
-
+    const nodes = collectJsx(program);
     nodes.sort((a, b) => a.start - b.start);
     let out = '';
     let last = 1;
@@ -204,21 +206,26 @@ function isStatic(node: HastNode): boolean {
   return true;
 }
 
-interface Span {
-  start: number;
-  end: number;
+/** a node of a parsed expression */
+function isNode(value: unknown): value is Node {
+  return typeof value === 'object' && value !== null && 'type' in value;
+}
+
+/** visit the nodes of `value` depth-first, `visit` returns `false` to skip the children of a node */
+function walk(value: unknown, visit: (node: Node) => boolean | void) {
+  if (Array.isArray(value)) {
+    for (const item of value) walk(item, visit);
+    return;
+  }
+  if (!isNode(value) || visit(value) === false) return;
+  for (const child of Object.values(value)) walk(child, visit);
 }
 
 /** JSX in expressions is rendered by Astro, which doesn't have the provided components */
-function assertLocalComponents(node: unknown, locals: Set<string>) {
-  if (typeof node !== 'object' || node === null) return;
-  if (Array.isArray(node)) {
-    for (const item of node) assertLocalComponents(item, locals);
-    return;
-  }
-
-  const { type, name } = node as { type?: string; name?: JsxName };
-  if (type === 'JSXOpeningElement' && name) {
+function assertLocalComponents(program: Node, locals: Set<string>) {
+  walk(program, (node) => {
+    if (node.type !== 'JSXOpeningElement') return;
+    const { name } = node;
     let root = name;
     while (root.type === 'JSXMemberExpression') root = root.object;
     if (
@@ -230,36 +237,20 @@ function assertLocalComponents(node: unknown, locals: Set<string>) {
       throw new Error(
         `<${root.name}> in a JavaScript expression is rendered by Astro, outside of the content island. Use it outside of expressions, or import it in the MDX file.`,
       );
-  }
-
-  for (const key in node) {
-    if (key !== 'loc') assertLocalComponents((node as Record<string, unknown>)[key], locals);
-  }
+  });
 }
 
-type JsxName =
-  | { type: 'JSXIdentifier'; name: string }
-  | { type: 'JSXMemberExpression'; object: JsxName }
-  | { type: 'JSXNamespacedName' };
-
 /** outermost JSX, functions are skipped as their output isn't serializable anyway */
-function collectJsx(node: unknown, out: Span[]) {
-  if (typeof node !== 'object' || node === null) return;
-  if (Array.isArray(node)) {
-    for (const item of node) collectJsx(item, out);
-    return;
-  }
-
-  const { type } = node as { type?: string };
-  if (type === 'JSXElement' || type === 'JSXFragment') {
-    out.push(node as Span);
-    return;
-  }
-  if (type === 'ArrowFunctionExpression' || type === 'FunctionExpression') return;
-
-  for (const key in node) {
-    if (key !== 'loc') collectJsx((node as Record<string, unknown>)[key], out);
-  }
+function collectJsx(program: Node): (JSXElement | JSXFragment)[] {
+  const out: (JSXElement | JSXFragment)[] = [];
+  walk(program, (node) => {
+    if (node.type === 'JSXElement' || node.type === 'JSXFragment') {
+      out.push(node);
+      return false;
+    }
+    return node.type !== 'ArrowFunctionExpression' && node.type !== 'FunctionExpression';
+  });
+  return out;
 }
 
 function collectLocals(program: Program, out: Set<string>) {

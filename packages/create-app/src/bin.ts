@@ -256,8 +256,8 @@ async function main(defaultName: string | undefined, config: CliOptions): Promis
   );
 
   const projectName = options.name.toLowerCase().replace(/\s/, '-');
-  if (options.template === 'astro' && options.aiChat) {
-    console.warn(pc.yellow('AI Chat is not supported by the Astro template yet, skipping it.'));
+  if (options.aiChat && isStatic(options.template)) {
+    console.warn(pc.yellow('AI Chat needs a server, the template is static, skipping it.'));
     options.aiChat = false;
   }
   if (options.ogImage === 'next-og' && !options.template.startsWith('+next')) {
@@ -279,7 +279,11 @@ async function main(defaultName: string | undefined, config: CliOptions): Promis
 
   if (options.search !== 'orama') plugins.push(feature(search, { provider: options.search }));
   if (options.lint !== 'disabled') plugins.push(feature(lint, { linter: options.lint }));
-  if (options.ogImage === 'takumi' && options.template.startsWith('+next'))
+  // the other templates come with OG images, Astro always uses Takumi
+  if (
+    options.template === 'astro' ||
+    (options.ogImage === 'takumi' && options.template.startsWith('+next'))
+  )
     plugins.push(feature(og, { engine: 'takumi' }));
   if (options.aiChat) plugins.push(feature(ai, { provider: options.aiChat }));
 

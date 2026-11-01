@@ -42,21 +42,6 @@ export default defineConfig({
 });
 ```
 
-```js tab="Astro" title="astro.config.mjs"
-import { transformerTwoslash } from 'fumadocs-twoslash';
-import { rehypeCodeDefaultOptions } from 'fumadocs-core/mdx-plugins';
-
-fumadocs({
-  rehypeCodeOptions: {
-    themes: {
-      light: 'github-light',
-      dark: 'github-dark',
-    },
-    transformers: [...(rehypeCodeDefaultOptions.transformers ?? []), transformerTwoslash()],
-  },
-});
-```
-
 Add styles, Tailwind CSS v4 is required.
 
 ```css title="Tailwind CSS"
