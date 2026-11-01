@@ -267,7 +267,6 @@ export function createPress(stage: HTMLElement): () => void {
   // what the frames move, they move by transform, steered while the frames run
   const moved: Element[] = [runs, fixedRun, pulledRun, bend, caret, past, after];
   let steered: (() => void)[] = [];
-  const button = stage.querySelector<HTMLButtonElement>('[data-replay]')!;
   const voice = stage.querySelector<HTMLElement>('[data-voice]')!;
   const figure = stage.closest<HTMLElement>('[data-figure]');
   /** the figure's own line, once there is nothing going on */
@@ -1544,7 +1543,6 @@ export function createPress(stage: HTMLElement): () => void {
     if (!mesh) {
       canvas.remove();
       canvas = null;
-      button.hidden = true;
       // no WebGL2: the server's page stays, done, and a press flips its block at once
       for (const b of blocks) b.base = true;
       begun = false;
@@ -1576,7 +1574,6 @@ export function createPress(stage: HTMLElement): () => void {
   stage.addEventListener('pointermove', onMove, passive);
   stage.addEventListener('pointerleave', onLeave, passive);
   stage.addEventListener('click', onClick, { signal });
-  button.addEventListener('click', replay, { signal });
 
   const near = new IntersectionObserver((entries) => {
     visible = entries[entries.length - 1].isIntersecting;

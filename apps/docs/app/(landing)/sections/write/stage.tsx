@@ -1,6 +1,5 @@
 'use client';
 import type { ReactNode } from 'react';
-import { RotateCcw } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { Window } from '../../ui/window';
 import type { Step } from './data';
@@ -88,21 +87,7 @@ export function Stage({ file, steps, sources, slots, bed, column }: StageProps) 
     <div className="px-(--lp-gutter) pb-(--lp-section)">
       {/* what moves here gets a layer, and so does all painted over it: the clip keeps them to the stage */}
       <div ref={mount} data-file={file} className="relative flex overflow-clip">
-        <Window
-          data-doc
-          title={file}
-          actions={
-            <button
-              type="button"
-              data-replay
-              aria-label="Replay"
-              className="relative inline-flex size-6 items-center justify-center bg-lp-paper text-lp-ink-2 transition-none hover:bg-lp-ink hover:text-lp-paper focus-visible:bg-lp-ink focus-visible:text-lp-paper focus-visible:outline-none motion-reduce:hidden noscript:hidden"
-            >
-              <RotateCcw aria-hidden className="size-4" />
-            </button>
-          }
-          className="min-w-0 flex-1"
-        >
+        <Window data-doc title={file} className="min-w-0 flex-1">
           <div className="flex flex-col gap-8 px-4 py-6 md:grid md:grid-cols-2 md:gap-0 md:p-0">
             {slots.map((slot, i) => (
               <div
