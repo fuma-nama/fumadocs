@@ -1,0 +1,108 @@
+---
+title: Writing Plugins
+description: Add routes and change pages with your own plugins.
+---
+
+## Overview
+
+A plugin is an object with a `name` and hooks, add it to the `plugins` of your config:
+
+```ts title="src/lib/plugins.ts"
+import type { Plugin } from '@fumadocs/astro/config';
+
+export function fullPagesPlugin(): Plugin {
+  return {
+    name: 'full-pages',
+    // use the full width for pages with `full: true` in frontmatter
+    transformPage(page, data) {
+      if ('full' in page.data && page.data.full === true) return { ...data, full: true };
+      return data;
+    },
+  };
+}
+```
+
+```ts title="src/fumadocs.config.ts"
+import { fullPagesPlugin } from './lib/plugins'; // [!code ++]
+
+export default defineConfig({
+  source,
+  plugins: [fullPagesPlugin()], // [!code ++]
+});
+```
+
+A plugin of the same name as a [default plugin](/docs/astro/search#default-plugins) replaces it.
+
+| Hook            | Description                                                               |
+| --------------- | ------------------------------------------------------------------------- |
+| `routes`        | Add routes.                                                               |
+| `transformPage` | Change the data of a docs page, the `page` prop of the `page` module.     |
+| `getBody`       | Render the body of pages, like the pages of another content source.       |
+| `getText`       | The Markdown of pages for LLMs.                                           |
+| `translations`  | UI translations of the plugin, see [Translations](/docs/ui/translations). |
+
+In hooks, `this` is the app:
+
+| Property                 | Description                                  |
+| ------------------------ | -------------------------------------------- |
+| `this.config`            | Your config.                                 |
+| `this.source`            | The source of pages.                         |
+| `this.base`              | The `base` of Astro, without trailing slash. |
+| `this.getPages()`        | Pages of every language.                     |
+| `this.getText(page)`     | The Markdown of a page.                      |
+| `this.getPageData(page)` | The data of a docs page.                     |
+
+## Add Routes
+
+`routes()` returns files and pages, they are prerendered. For example, a sitemap:
+
+```ts title="src/lib/plugins.ts"
+import type { Plugin } from '@fumadocs/astro/config';
+
+export function sitemapPlugin(site: string): Plugin {
+  return {
+    name: 'sitemap',
+    routes() {
+      const urls = this.getPages().map((page) => `<url><loc>${site}${page.url}</loc></url>`);
+      const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls.join('')}</urlset>`;
+
+      return [
+        {
+          type: 'file',
+          url: `${this.base}/sitemap.xml`,
+          GET: () => new Response(xml, { headers: { 'Content-Type': 'application/xml' } }),
+        },
+      ];
+    },
+  };
+}
+```
+
+A route of `type: 'page'` renders an Astro `component` with `props` instead.
+
+## Render Pages
+
+`getBody()` renders the body of docs pages, return `undefined` to pass. For example, pages of a source with HTML content:
+
+```ts title="src/lib/plugins.ts"
+import type { Plugin } from '@fumadocs/astro/config';
+import HtmlBody from '@/components/HtmlBody.astro';
+
+export function htmlPlugin(): Plugin {
+  return {
+    name: 'html',
+    getBody(page) {
+      if ('html' in page.data) return { component: HtmlBody, props: { html: page.data.html } };
+    },
+  };
+}
+```
+
+```astro title="src/components/HtmlBody.astro"
+<Fragment set:html={Astro.props.html} />
+```
+
+The body can also have a `toc`, the table of contents of the page.
+
+See [Configuration](/docs/astro/configuration) for all options of the integration and config.

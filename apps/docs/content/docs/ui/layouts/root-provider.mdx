@@ -7,7 +7,7 @@ The context provider of all the components, including `next-themes` and [`<Frame
 
 ## Usage
 
-Import it according to your React.js framework:
+Import it according to your React.js framework, on Astro the [Fumadocs integration](/docs/astro) renders it for you:
 
 ```jsx tab="Next.js"
 import { RootProvider } from 'fumadocs-ui/provider/next';
@@ -70,20 +70,6 @@ export default function Layout({ children }) {
         <RootProvider>{children}</RootProvider>
       </body>
     </html>
-  );
-}
-```
-
-```jsx tab="Astro"
-import { navigate } from 'astro:transitions/client';
-import { RootProvider } from 'fumadocs-ui/provider/astro';
-
-// wrap your React islands, pass `Astro.url.pathname` and `Astro.params` from `.astro` pages
-export function Provider({ pathname, params, children }) {
-  return (
-    <RootProvider pathname={pathname} params={params} navigate={navigate}>
-      {children}
-    </RootProvider>
   );
 }
 ```

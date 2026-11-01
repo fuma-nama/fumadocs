@@ -1,0 +1,81 @@
+---
+title: Search
+description: The built-in search, other search engines and your own dialog.
+---
+
+## Built-in Search
+
+Search works with no setup: the search index of [ZBSearch](/docs/headless/search/orama) is exported to `/api/search` at build time, and the search dialog queries it in the browser.
+
+It comes from a plugin. Plugins add routes and features to your site, `oramaSearchPlugin()` is added by default. Add it yourself to pass the options of [`createFromSource()`](/docs/headless/search/orama):
+
+```ts title="src/fumadocs.config.ts"
+import { defineConfig } from '@fumadocs/astro/config';
+import { oramaSearchPlugin } from '@fumadocs/astro/plugins/orama-search'; // [!code ++]
+
+export default defineConfig({
+  source,
+  plugins: [
+    // [!code ++:3]
+    oramaSearchPlugin({
+      // options
+    }),
+  ],
+});
+```
+
+### Default Plugins
+
+The config adds `oramaSearchPlugin()` and [`llmsPlugin()`](/docs/astro/llms) unless you pass them yourself. Turn them off with `preset`:
+
+```ts title="src/fumadocs.config.ts"
+export default defineConfig({
+  source,
+  preset: false,
+});
+```
+
+## Other Search Engines
+
+Fumadocs CLI sets up a search engine like Algolia, Orama Cloud, Meilisearch or Typesense:
+
+```npm
+npx @fumadocs/cli feature search --provider algolia
+```
+
+It writes a search dialog, a route exporting your pages for the search engine, and a script to sync them after each build.
+
+To use another engine manually, export `useSearch()` from the [`layout` module](/docs/astro/layout). It is the search hook of the built-in dialog, like `useAlgoliaSearch()`:
+
+```tsx title="src/lib/layout.shared.tsx"
+import { liteClient } from 'algoliasearch/lite';
+import { useAlgoliaSearch } from 'fumadocs-core/search/client';
+
+const client = liteClient(
+  import.meta.env.PUBLIC_ALGOLIA_APP_ID,
+  import.meta.env.PUBLIC_ALGOLIA_SEARCH_KEY,
+);
+
+export function useSearch({ locale }: { locale?: string }) {
+  return useAlgoliaSearch({ client, indexName: 'document', locale });
+}
+```
+
+See the guide of your search engine to sync the search index, like [Algolia](/docs/headless/search/algolia).
+
+## Search Dialog
+
+To replace the search dialog, export it as `SearchDialog` from the `layout` module:
+
+```tsx title="src/lib/layout.shared.tsx"
+export { default as SearchDialog } from '@/components/search';
+```
+
+See [Search UI](/docs/ui/search#custom-ui) to build one.
+
+<Callout title="The built-in index">
+  With `useSearch()` or `SearchDialog`, the built-in index isn't generated. Add
+  `oramaSearchPlugin()` to keep it, like for a dialog using `useStaticSearch()`.
+</Callout>
+
+Next, serve your docs to AI agents with [LLMs](/docs/astro/llms).

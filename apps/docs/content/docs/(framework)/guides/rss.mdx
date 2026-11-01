@@ -153,8 +153,8 @@ export const Route = createRootRoute({
 <link rel="alternate" type="application/rss+xml" title="Fumadocs Blog" href="/rss.xml" />
 ```
 
-```astro tab="Astro" title="src/layouts/Layout.astro"
-<head>
-  <link rel="alternate" type="application/rss+xml" title="Fumadocs Blog" href="/rss.xml" />
-</head>
+```astro tab="Astro" title="src/components/Head.astro"
+<link rel="alternate" type="application/rss+xml" title="Fumadocs Blog" href="/rss.xml" />
 ```
+
+On Astro, it is the [`head` component](/docs/astro/layout#head) of your Fumadocs config.

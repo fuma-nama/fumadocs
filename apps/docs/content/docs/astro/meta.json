@@ -1,0 +1,28 @@
+{
+  "title": "Fumadocs Astro",
+  "description": "The Astro integration",
+  "icon": "Rocket",
+  "root": true,
+  "pages": [
+    "---Getting Started---",
+    "index",
+    "manual-installation",
+    "writing",
+    "---Customization---",
+    "layout",
+    "page",
+    "---Features---",
+    "search",
+    "llms",
+    "og-image",
+    "openapi",
+    "internationalization",
+    "---Advanced---",
+    "pages",
+    "collections",
+    "plugin",
+    "without-config",
+    "---Reference---",
+    "configuration"
+  ]
+}

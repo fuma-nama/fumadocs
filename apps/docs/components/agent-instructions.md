@@ -12,7 +12,7 @@ Don't add Fumadocs to an existing marketing or product app unless the user expli
 - Waku: https://fumadocs.dev/docs/manual-installation/waku.mdx (Recommended if user prefer Vite)
 - React Router: https://fumadocs.dev/docs/manual-installation/react-router.mdx
 - Tanstack Start: https://fumadocs.dev/docs/manual-installation/tanstack-start.mdx
-- Astro: https://fumadocs.dev/docs/manual-installation/astro.mdx
+- Astro: https://fumadocs.dev/docs/astro/manual-installation.mdx
 
 ## 2. Scaffold with create-fumadocs-app
 

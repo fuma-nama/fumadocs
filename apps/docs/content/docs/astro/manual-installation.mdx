@@ -1,0 +1,108 @@
+---
+title: Manual Installation
+description: Add Fumadocs to an existing Astro project.
+---
+
+## Prerequisites
+
+- Astro 7.
+- Tailwind CSS 4.
+
+Fumadocs CLI can also set it up for you:
+
+```npm
+npx @fumadocs/cli init
+```
+
+## Installation
+
+```npm
+npm i @fumadocs/astro fumadocs-core fumadocs-ui @astrojs/react react react-dom
+
+npm i -D @types/react @types/react-dom @types/mdx
+```
+
+### Astro Config
+
+Add the Fumadocs integration, it also adds the React and MDX integrations of Astro:
+
+<include cwd meta='title="astro.config.mjs"'>
+  ../../examples/astro-min/astro.config.mjs
+</include>
+
+It requires Sätteri, the default Markdown processor of Astro 7.
+
+### Styles
+
+The integration loads `src/styles/global.css` on its pages, add the styles of Fumadocs UI to it:
+
+```css title="src/styles/global.css"
+@import 'tailwindcss';
+/* [!code ++:2] */
+@import 'fumadocs-ui/css/neutral.css';
+@import 'fumadocs-ui/css/preset.css';
+```
+
+### Content Collections
+
+Define the collections of your docs, from the MDX files in `content/docs`:
+
+<include cwd meta='title="src/content.config.ts"'>
+  ../../examples/astro-min/src/content.config.ts
+</include>
+
+### Fumadocs Config
+
+Create a source of pages from the collections:
+
+<include cwd meta='title="src/lib/source.ts"'>
+  ../../packages/create-app/template/astro/src/lib/source.ts
+</include>
+
+And pass it to the config of Fumadocs:
+
+<include cwd meta='title="src/fumadocs.config.ts"'>
+  ../../packages/create-app/template/astro/src/fumadocs.config.ts
+</include>
+
+With this file, the integration creates the docs routes and renders them with Fumadocs UI.
+
+### Home Page
+
+Your own pages can use the home layout of Fumadocs UI:
+
+<include cwd meta='title="src/pages/index.astro"'>
+  ../../examples/astro-min/src/pages/index.astro
+</include>
+
+### Done
+
+Write your first page:
+
+```mdx title="content/docs/index.mdx"
+---
+title: Hello World
+---
+
+I love Fumadocs
+```
+
+Start the dev server, and open `/docs`.
+
+<Callout title="Path alias">
+
+Other guides import `src/*` as `@/*`, add the alias to your `tsconfig.json`:
+
+```json title="tsconfig.json"
+{
+  "compilerOptions": {
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  }
+}
+```
+
+</Callout>
+
+See [Writing Pages](/docs/astro/writing) to continue.

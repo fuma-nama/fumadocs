@@ -1,0 +1,125 @@
+---
+title: Configuration
+description: Options of the Fumadocs integration and config.
+---
+
+## Integration
+
+The options of `fumadocs()` in `astro.config.mjs`:
+
+```js title="astro.config.mjs"
+fumadocs({
+  // module whose default export is the MDX components
+  components: './src/components/mdx.tsx',
+  // module exporting `baseOptions()`, and optionally `useSearch()` or `SearchDialog`
+  layout: './src/lib/layout.shared.tsx',
+  // module whose default export is the docs page
+  page: './src/components/docs.tsx',
+  // the global CSS of Fumadocs pages, default: `src/styles/global.css`
+  css: './src/styles/global.css',
+  // enable `getText('processed')` on pages, default: false
+  includeProcessedMarkdown: true,
+  // content directories, relative to the project root
+  collections: {
+    docs: { dir: 'content/docs' },
+  },
+});
+```
+
+| Option                     | Guide                                                   |
+| -------------------------- | ------------------------------------------------------- |
+| `components`               | [MDX Components](/docs/astro/writing#mdx-components)    |
+| `layout`                   | [Layout](/docs/astro/layout)                            |
+| `page`                     | [Docs Page](/docs/astro/page)                           |
+| `css`                      | [Theme](/docs/astro/layout#theme)                       |
+| `includeProcessedMarkdown` | [LLMs](/docs/astro/llms#processed-markdown)             |
+| `collections`              | [Collections](/docs/astro/collections#more-directories) |
+
+The integration adds `@astrojs/react` and `@astrojs/mdx` with their default options, add them to `integrations` yourself to configure them.
+
+### Markdown
+
+Code highlighting and Markdown plugins of your docs are options of the integration, they apply to the MDX files of its `collections`. The `markdown` config of Astro applies to other Markdown.
+
+Fumadocs highlights code blocks with [Shiki](/docs/headless/mdx/rehype-code), configure it with `rehypeCodeOptions`:
+
+```js title="astro.config.mjs"
+fumadocs({
+  rehypeCodeOptions: {
+    themes: { light: 'catppuccin-latte', dark: 'catppuccin-mocha' },
+  },
+});
+```
+
+Add Sätteri plugins with `mdastPlugins` and `hastPlugins`, as an array or a function receiving the default plugins. Plugins of Fumadocs are in `@fumadocs/satteri`, like the one of [Mermaid](/docs/markdown/mermaid):
+
+```npm
+npm i @fumadocs/satteri
+```
+
+```js title="astro.config.mjs"
+import { remarkMdxMermaid } from '@fumadocs/satteri/remark-mdx-mermaid';
+
+fumadocs({
+  mdastPlugins: [remarkMdxMermaid()],
+});
+```
+
+The built-in plugins take the same options as on [Fumadocs MDX](/docs/mdx/mdx#customize-built-in-plugins): `remarkHeadingOptions`, `remarkCodeTabOptions`, `remarkNpmOptions`, `remarkStructureOptions`, `rehypeCodeOptions` and `rehypeKatexOptions`.
+
+## Fumadocs Config
+
+The options of `defineConfig()` in `src/fumadocs.config.ts`:
+
+```ts title="src/fumadocs.config.ts"
+import { defineConfig } from '@fumadocs/astro/config';
+import { source } from './lib/source';
+import Head from './components/Head.astro';
+
+export default defineConfig({
+  // the source of pages, created with `loader()`
+  source,
+  // the site name
+  title: 'My Docs',
+  // UI translations, default: the languages of `source`
+  translations: undefined,
+  // Astro component rendered in `<head>`
+  head: Head,
+  // plugins of your site
+  plugins: [],
+  // add the default plugins, default: true
+  preset: true,
+});
+```
+
+| Option         | Guide                                                    |
+| -------------- | -------------------------------------------------------- |
+| `title`        | [Site Title](/docs/astro/layout#site-title)              |
+| `translations` | [Internationalization](/docs/astro/internationalization) |
+| `head`         | [Head](/docs/astro/layout#head)                          |
+| `plugins`      | [Writing Plugins](/docs/astro/plugin)                    |
+| `preset`       | [Default Plugins](/docs/astro/search#default-plugins)    |
+
+## Plugins
+
+| Plugin                | Import                                 | Guide                             |
+| --------------------- | -------------------------------------- | --------------------------------- |
+| `oramaSearchPlugin()` | `@fumadocs/astro/plugins/orama-search` | [Search](/docs/astro/search)      |
+| `llmsPlugin()`        | `@fumadocs/astro/plugins/llms.txt`     | [LLMs](/docs/astro/llms)          |
+| `takumiPlugin()`      | `@fumadocs/astro/plugins/takumi`       | [OG Images](/docs/astro/og-image) |
+| `openapiPlugin()`     | `@fumadocs/astro/plugins/openapi`      | [OpenAPI](/docs/astro/openapi)    |
+
+## Routes
+
+With the config file, the integration creates:
+
+| Route                         | From                                   |
+| ----------------------------- | -------------------------------------- |
+| Docs pages, under `baseUrl`   | The source.                            |
+| `/api/search`                 | `oramaSearchPlugin()`                  |
+| `/llms.txt`, `/llms-full.txt` | `llmsPlugin()`                         |
+| `/llms.mdx/**/content.md`     | `llmsPlugin()`                         |
+| `/og/**/image.webp`           | `takumiPlugin()`                       |
+| 404                           | Unless you have `src/pages/404.astro`. |
+
+They are prerendered, routes rendered on demand aren't supported yet.

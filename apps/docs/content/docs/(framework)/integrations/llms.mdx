@@ -13,7 +13,7 @@ npx @fumadocs/cli feature llms
 
 It enables processed Markdown on your docs collection, adds `docsLlms` to `lib/source.ts`, and creates the routes below. The generated files are listed here if you prefer a manual setup.
 
-On Astro, the Fumadocs integration serves these routes, the CLI only enables processed Markdown.
+On Astro, `llmsPlugin()` serves these routes, see [LLMs](/docs/astro/llms) of the Astro integration.
 
 ### `docsLlms`
 
@@ -46,13 +46,7 @@ With `getSource`, `index()` and `indexNode()` return a promise instead of a stri
 
 It requires `includeProcessedMarkdown`:
 
-<feature tab="Fumadocs MDX" title="source.config.ts">
-  llms/source.config.ts
-</feature>
-
-<feature tab="Astro" title="astro.config.mjs">
-  llms/astro/astro.config.mjs
-</feature>
+<feature title="source.config.ts">llms/source.config.ts</feature>
 
 MDX components appear as JSX syntax by default, you can render them into meaningful Markdown with the [`output` option](/docs/headless/mdx/remark-llms#output).
 

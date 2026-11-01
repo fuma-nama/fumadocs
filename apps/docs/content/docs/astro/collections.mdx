@@ -1,0 +1,79 @@
+---
+title: Collections
+description: Content collections, other content sources and page data.
+---
+
+## Content Collections
+
+Docs are Astro content collections, loaded by the loaders of Fumadocs:
+
+<include cwd meta='title="src/content.config.ts"'>
+  ../../examples/astro-min/src/content.config.ts
+</include>
+
+`pageLoader()` loads the MDX files of `content/docs`, `metaLoader()` loads its [meta files](/docs/page-conventions#meta).
+
+### Schema
+
+The frontmatter is validated by `pageSchema` from `fumadocs-core/source/schema`, extend it for your own fields:
+
+```ts title="src/content.config.ts"
+import { defineCollection } from 'astro:content';
+import { z } from 'astro/zod';
+import { metaLoader, pageLoader } from '@fumadocs/astro/loaders';
+import { pageSchema } from 'fumadocs-core/source/schema';
+
+export const collections = {
+  docs: defineCollection({
+    loader: pageLoader(),
+    // [!code ++:3]
+    schema: pageSchema.extend({
+      author: z.string(),
+    }),
+  }),
+  meta: defineCollection({ loader: metaLoader() }),
+};
+```
+
+### More Directories
+
+Fumadocs processes the MDX files of its `collections`, `docs` in `content/docs` by default. Add one for other content, like a blog with its own MDX components:
+
+```js title="astro.config.mjs"
+fumadocs({
+  components: './src/components/mdx.tsx',
+  collections: {
+    docs: { dir: 'content/docs' },
+    // [!code ++]
+    blog: { dir: 'content/blog', components: './src/components/blog-mdx.tsx' },
+  },
+});
+```
+
+Each collection takes the options of the integration, they default to the ones at the top. Load it with `pageLoader('blog')`.
+
+## Other Sources
+
+Combine sources with `multiple()`, like your MDX pages and the pages of [OpenAPI](/docs/astro/openapi):
+
+<include cwd meta='title="src/lib/source.ts"'>
+  ../../examples/astro/src/lib/source.ts
+</include>
+
+The keys are the `type` of pages. A plugin renders the pages of its source, see [Writing Plugins](/docs/astro/plugin#render-pages).
+
+## Page Data
+
+Pages of `toFumadocsSource()` have:
+
+```ts
+// the MDX content, table of contents and structured data (for search)
+const { body, toc, structuredData } = await page.data.load();
+
+// structured data only
+await page.data.structuredData();
+
+// the source file, or the Markdown processed by Fumadocs (requires `includeProcessedMarkdown`)
+await page.data.getText('raw');
+await page.data.getText('processed');
+```

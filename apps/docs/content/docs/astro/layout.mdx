@@ -1,0 +1,102 @@
+---
+title: Layout
+description: Change the navbar, links, theme and head of your site.
+---
+
+## Site Title
+
+The `title` of your config is the site name, appended to the page titles and shown in the navbar unless the `layout` module sets `nav.title`:
+
+```ts title="src/fumadocs.config.ts"
+export default defineConfig({
+  source,
+  title: 'My Docs', // [!code highlight]
+});
+```
+
+## The `layout` Module
+
+The options of Fumadocs UI layouts come from the `layout` module, a file exporting `baseOptions()`:
+
+```js title="astro.config.mjs"
+fumadocs({
+  layout: './src/lib/layout.shared.tsx', // [!code ++]
+});
+```
+
+```tsx title="src/lib/layout.shared.tsx"
+import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
+
+export function baseOptions(): BaseLayoutProps {
+  return {
+    nav: {
+      title: 'My App',
+    },
+  };
+}
+```
+
+They apply to docs pages and [your own pages](/docs/astro/pages). For example, add links and a GitHub link to the navbar:
+
+```tsx title="src/lib/layout.shared.tsx"
+export function baseOptions(): BaseLayoutProps {
+  return {
+    nav: {
+      title: 'My App',
+    },
+    // [!code ++:3]
+    links: [{ text: 'Blog', url: '/blog' }],
+    githubUrl: 'https://github.com/acme/docs',
+  };
+}
+```
+
+See [Navbar](/docs/ui/layouts/nav) and [Layout Links](/docs/ui/layouts/links) for the options.
+
+The navbar title links to the home page of the current language. `baseOptions()` receives the language for [Internationalization](/docs/astro/internationalization).
+
+<Callout title="Runs in the browser">
+  The module is part of the React islands of every page, keep server-only code out of it.
+</Callout>
+
+## Theme
+
+The integration loads `src/styles/global.css` on its pages. Swap the theme import to change colors:
+
+```css title="src/styles/global.css"
+@import 'tailwindcss';
+/* [!code --] */
+@import 'fumadocs-ui/css/neutral.css';
+/* [!code ++] */
+@import 'fumadocs-ui/css/black.css';
+@import 'fumadocs-ui/css/preset.css';
+```
+
+See [Themes](/docs/ui/theme) for the presets and CSS variables. To load another file, pass it as `css`:
+
+```js title="astro.config.mjs"
+fumadocs({
+  css: './src/styles/docs.css',
+});
+```
+
+## Head
+
+Render tags into `<head>` with an Astro component, like a favicon or fonts:
+
+<include cwd meta='title="src/components/Head.astro"'>
+  ../../examples/astro/src/components/Head.astro
+</include>
+
+```ts title="src/fumadocs.config.ts"
+import Head from './components/Head.astro'; // [!code ++]
+
+export default defineConfig({
+  source,
+  head: Head, // [!code ++]
+});
+```
+
+It renders on every page of Fumadocs, and receives `page` on docs pages.
+
+Next, change the docs page itself with the [`page` module](/docs/astro/page).

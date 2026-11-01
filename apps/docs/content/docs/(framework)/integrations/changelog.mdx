@@ -176,9 +176,7 @@ export { default, getConfig } from './[page]';
 ---
 import type { GetStaticPaths, InferGetStaticPropsType } from 'astro';
 import { githubReleases } from '@fumadocs/changelog/github';
-import Layout from '@/layouts/Layout.astro';
-// the island of your Home Layout
-import { Home } from '@/components/home';
+import HomeLayout from '@fumadocs/astro/components/HomeLayout.astro';
 import { ChangelogPagination, ChangelogTimeline } from '@/components/changelog';
 
 export const getStaticPaths = (async () => {
@@ -205,20 +203,18 @@ const { page, entries, nextPage } = Astro.props;
 const href = (page: number) => (page > 1 ? `/changelog/${page}` : '/changelog');
 ---
 
-<Layout title="Changelog">
-  <Home client:load pathname={Astro.url.pathname} params={Astro.params}>
-    <div class="mx-auto flex w-full max-w-[900px] flex-col gap-10 px-4 py-12">
-      <ChangelogTimeline entries={entries} />
-      <ChangelogPagination
-        newer={page > 1 ? href(page - 1) : undefined}
-        older={nextPage ? href(nextPage) : undefined}
-      />
-    </div>
-  </Home>
-</Layout>
+<HomeLayout title="Changelog">
+  <div class="mx-auto flex w-full max-w-[900px] flex-col gap-10 px-4 py-12">
+    <ChangelogTimeline entries={entries} />
+    <ChangelogPagination
+      newer={page > 1 ? href(page - 1) : undefined}
+      older={nextPage ? href(nextPage) : undefined}
+    />
+  </div>
+</HomeLayout>
 ```
 
-On Astro, the pages are generated at build time. The timeline is a child of the island, it renders on the server only, without interactivity like copy buttons.
+On Astro, the pages are generated at build time, see [Custom Pages](/docs/astro/pages). The timeline is a child of the island, it renders on the server only, without interactivity like copy buttons.
 
 ## Sources
 

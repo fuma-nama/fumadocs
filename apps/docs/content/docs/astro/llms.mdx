@@ -1,0 +1,88 @@
+---
+title: LLMs
+description: Serve your docs as Markdown for LLMs and AI agents.
+---
+
+## Routes
+
+`llmsPlugin()` is a default plugin, your site serves:
+
+| Route                              | Content                                              |
+| ---------------------------------- | ---------------------------------------------------- |
+| `/llms.txt`                        | An index of all pages, generated from the page tree. |
+| `/llms-full.txt`                   | The content of all pages in a single file.           |
+| `/llms.mdx/docs/<page>/content.md` | The Markdown of a page.                              |
+
+Docs pages link their Markdown with the page actions, from `page.markdownUrl` in the [`page` module](/docs/astro/page).
+
+Change the prefix of page Markdown by adding the plugin yourself:
+
+```ts title="src/fumadocs.config.ts"
+import { llmsPlugin } from '@fumadocs/astro/plugins/llms.txt';
+
+export default defineConfig({
+  source,
+  plugins: [llmsPlugin({ prefix: '/markdown' })],
+});
+```
+
+## Processed Markdown
+
+The routes serve the source of your MDX files by default. Enable `includeProcessedMarkdown` to serve the Markdown processed by Fumadocs instead: imports are removed, headings get their IDs, and [included](/docs/markdown#include) content is expanded.
+
+```js title="astro.config.mjs"
+fumadocs({
+  includeProcessedMarkdown: true,
+});
+```
+
+Fumadocs CLI enables it for you:
+
+```npm
+npx @fumadocs/cli feature llms
+```
+
+### MDX Components
+
+MDX components are kept as JSX syntax, like `<Tabs items={['a', 'b']}>...</Tabs>`. With `output: 'function'`, they are rendered by your [`components` module](/docs/astro/writing#mdx-components):
+
+```js title="astro.config.mjs"
+fumadocs({
+  includeProcessedMarkdown: { output: 'function' },
+});
+```
+
+A component defines its Markdown form with `asMarkdown()`, others are still kept as JSX:
+
+```tsx title="src/components/product-card.tsx"
+import { asMarkdown, md } from 'fumadocs-core/server';
+
+export function ProductCard({ name, href }: { name: string; href: string }) {
+  if (asMarkdown()) return md`[${name}](${href})`;
+
+  return <a href={href}>{name}</a>;
+}
+```
+
+`asMarkdown()` is `false` in the browser, the component works in the content island too. See [Markdown Rendering](/docs/headless/utils/markdown) for `md`.
+
+### In Your Code
+
+Pages of the source have `getText()`:
+
+```ts
+// the source file
+await page.data.getText('raw');
+
+// the processed Markdown, requires `includeProcessedMarkdown`
+await page.data.getText('processed');
+
+// with `output: 'function'`, render with other components
+await page.data.getText('processed', { components });
+```
+
+## Not Supported Yet
+
+The [MCP server](/docs/integrations/llms#mcp-server) is an Astro route of your own, it requires `output: 'server'`. [WebMCP](/docs/integrations/llms#webmcp) and [Ask AI](/docs/integrations/llms#ask-ai) aren't available on Astro.
+
+Next, generate [OG images](/docs/astro/og-image) for your pages.
