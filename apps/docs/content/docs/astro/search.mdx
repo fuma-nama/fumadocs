@@ -68,7 +68,7 @@ To index your pages with [FlexSearch](/docs/search/flexsearch) instead, add its 
 npm i flexsearch
 ```
 
-```ts title="src/fumadocs.config.ts"
+```ts tab="src/fumadocs.config.ts"
 import { flexsearchPlugin } from '@fumadocs/astro/plugins/flexsearch';
 
 export default defineConfig({
@@ -77,7 +77,7 @@ export default defineConfig({
 });
 ```
 
-```tsx title="src/lib/layout.shared.tsx"
+```tsx tab="src/lib/layout.shared.tsx"
 import { useFlexsearchStatic } from 'fumadocs-core/search/client/flexsearch-static';
 
 export function useSearch({ locale }: { locale?: string }) {

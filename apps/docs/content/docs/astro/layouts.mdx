@@ -16,11 +16,11 @@ The integration renders your pages with the layouts of [Fumadocs UI](/docs/ui). 
 
 Create a module exporting `baseOptions()`, it returns the [options of layouts](/docs/ui/layouts/docs), JSX included:
 
-<include cwd meta='title="src/lib/layout.shared.tsx"'>
+<include cwd meta='tab="src/lib/layout.shared.tsx"'>
   ../../examples/astro/src/lib/layout.shared.tsx
 </include>
 
-```js title="astro.config.mjs"
+```js tab="astro.config.mjs"
 fumadocs({
   layout: './src/lib/layout.shared.tsx', // [!code ++]
 });
@@ -54,11 +54,11 @@ It wraps every layout, but not the React components in your content, they render
 
 The docs page is a React component of its own, like `page.tsx` on other frameworks. Create a module whose default export renders it:
 
-<include cwd meta='title="src/components/docs.tsx"'>
+<include cwd meta='tab="src/components/docs.tsx"'>
   ../../examples/astro/src/components/docs.tsx
 </include>
 
-```js title="astro.config.mjs"
+```js tab="astro.config.mjs"
 fumadocs({
   page: './src/components/docs.tsx', // [!code ++]
 });
@@ -95,14 +95,7 @@ Use `HomeLayout.astro` for your own pages, with the navbar of your layout option
   ../../examples/astro-min/src/pages/index.astro
 </include>
 
-| Prop          | Description                                                  |
-| ------------- | ------------------------------------------------------------ |
-| `title`       | The page title.                                              |
-| `description` | The page description.                                        |
-| `lang`        | The language, with [i18n](/docs/astro/internationalization). |
-| `notFound`    | Render the not found page.                                   |
-
-Anything in its `head` slot goes into `<head>`.
+Anything in its `head` slot goes into `<head>`. Pass `title`, `description`, `lang` (with [i18n](/docs/astro/internationalization)) and `notFound` as props.
 
 Your pages can read your docs from the source:
 
@@ -142,11 +135,11 @@ import { Timeline } from '@/components/timeline';
 
 Render tags into the `<head>` of every page, like a favicon, with an Astro component:
 
-<include cwd meta='title="src/components/Head.astro"'>
+<include cwd meta='tab="src/components/Head.astro"'>
   ../../examples/astro/src/components/Head.astro
 </include>
 
-```ts title="src/fumadocs.config.ts"
+```ts tab="src/fumadocs.config.ts"
 import Head from './components/Head.astro';
 
 export default defineConfig({

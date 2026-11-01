@@ -45,7 +45,6 @@ function cachePromise<T>(key: string, setPromise: () => Promise<T>): Promise<T> 
   return promise;
 }
 
-// `useTheme()` doesn't reach the content island of Astro, observe `<html>` instead
 function subscribeTheme(onChange: () => void) {
   const observer = new MutationObserver(onChange);
   observer.observe(document.documentElement, { attributeFilter: ['class'] });

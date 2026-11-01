@@ -7,13 +7,13 @@ description: Use the integration with routes and layouts of your own.
 
 Without `src/fumadocs.config.ts`, the integration only processes your MDX files, and renders their content as a React island. You write the routes, layouts and providers.
 
-Prefer the [config file](/docs/astro/manual-installation#config), use this only when it doesn't cover your case yet, like routes rendered on demand, or integrations without a plugin like [AsyncAPI](/docs/integrations/asyncapi). The `layout`, `page` and `css` options and plugins require the config file.
+Prefer the [config file](/docs/astro/manual-installation#source-files), use this only when it doesn't cover your case yet, like routes rendered on demand, or integrations without a plugin like [AsyncAPI](/docs/integrations/asyncapi). The `layout`, `page` and `css` options and plugins require the config file.
 
 ## Setup
 
 Follow [Manual Installation](/docs/astro/manual-installation) until the source, and register your MDX components with `DocsBody` as `wrapper`, for the styles of content:
 
-```tsx title="src/components/mdx.tsx"
+```tsx tab="src/components/mdx.tsx"
 import defaultMdxComponents from 'fumadocs-ui/mdx';
 import { DocsBody } from 'fumadocs-ui/layouts/docs/page'; // [!code ++]
 import type { MDXComponents } from 'mdx/types';
@@ -28,7 +28,7 @@ export function getMDXComponents(components?: MDXComponents) {
 export default getMDXComponents({ wrapper: DocsBody }); // [!code ++]
 ```
 
-```js title="astro.config.mjs"
+```js tab="astro.config.mjs"
 fumadocs({
   components: './src/components/mdx.tsx', // [!code ++]
 });
@@ -64,7 +64,7 @@ export function Provider({ pathname, params, children }: ProviderProps) {
 
 Render the docs layout as an island, with the content as children:
 
-```tsx title="src/components/docs.tsx"
+```tsx tab="src/components/docs.tsx"
 import { type SerializedPageTree, useFumadocsLoader } from 'fumadocs-core/source/client';
 import type { TOCItemType } from 'fumadocs-core/toc';
 import { DocsLayout } from 'fumadocs-ui/layouts/docs';
@@ -95,7 +95,7 @@ export function Docs({ tree, title, description, toc, children, ...props }: Docs
 }
 ```
 
-```astro title="src/layouts/Layout.astro"
+```astro tab="src/layouts/Layout.astro"
 ---
 import { ClientRouter } from 'astro:transitions';
 import '@/styles/global.css';
@@ -116,7 +116,7 @@ const { title } = Astro.props;
 </html>
 ```
 
-```astro title="src/pages/docs/[...slug].astro"
+```astro tab="src/pages/docs/[...slug].astro"
 ---
 import type { GetStaticPaths, InferGetStaticPropsType } from 'astro';
 import Layout from '@/layouts/Layout.astro';
@@ -173,7 +173,7 @@ Pass a [static search dialog](/docs/search/orama#static) to `RootProvider`, see 
 
 The content is a React island of its own, the providers of your layout don't reach it. `wrapper` receives the props of `<Content />`, add a provider there, without theme and search:
 
-```tsx title="src/components/mdx.tsx"
+```tsx tab="src/components/mdx.tsx"
 import { navigate } from 'astro:transitions/client';
 import { RootProvider } from 'fumadocs-ui/provider/astro';
 import type { ProviderProps } from '@/components/provider';
@@ -193,6 +193,6 @@ export default getMDXComponents({
 });
 ```
 
-```astro title="src/pages/docs/[...slug].astro"
+```astro tab="src/pages/docs/[...slug].astro"
 <Content pathname={Astro.url.pathname} params={Astro.params} />
 ```

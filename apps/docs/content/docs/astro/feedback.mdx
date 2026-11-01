@@ -13,7 +13,7 @@ npx @fumadocs/cli feature feedback
 
 It installs the component, adds it to your [`page` module](/docs/astro/layouts#docs-page), and creates the action:
 
-```ts title="src/actions/index.ts"
+```ts tab="src/actions/index.ts"
 import { defineAction } from 'astro:actions';
 import { pageFeedback, type ActionResponse } from '@/components/feedback/schema';
 
@@ -29,9 +29,7 @@ export const server = {
 };
 ```
 
-The component calls it in `onSendAction`:
-
-```tsx title="src/components/docs.tsx"
+```tsx tab="src/components/docs.tsx"
 import { actions } from 'astro:actions';
 import { Feedback } from '@/components/feedback/client';
 

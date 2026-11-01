@@ -29,14 +29,7 @@ Or with Fumadocs CLI:
 npx @fumadocs/cli feature og --engine takumi
 ```
 
-Images are generated at build time, under `/og`:
-
-| Page          | Image                       |
-| ------------- | --------------------------- |
-| `/docs`       | `/og/docs/image.webp`       |
-| `/docs/hello` | `/og/docs/hello/image.webp` |
-
-Change it with the `prefix` option, like `takumiPlugin({ prefix: '/images/og' })`.
+Images are generated at build time, under `/og/docs/<page>/image.webp`. Change it with the `prefix` option, like `takumiPlugin({ prefix: '/images/og' })`.
 
 ## Site URL
 

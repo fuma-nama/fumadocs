@@ -5,15 +5,9 @@ description: Write docs pages, and render them with MDX components.
 
 ## Pages
 
-Each MDX file in `content/docs` is a page, with the same [conventions](/docs/page-conventions) and [Markdown features](/docs/markdown) as other Fumadocs apps:
+Each MDX file in `content/docs` is a page, with the same [conventions](/docs/page-conventions) and [Markdown features](/docs/markdown) as other Fumadocs apps.
 
-| File                          | URL                |
-| ----------------------------- | ------------------ |
-| `content/docs/index.mdx`      | `/docs`            |
-| `content/docs/setup.mdx`      | `/docs/setup`      |
-| `content/docs/guide/edit.mdx` | `/docs/guide/edit` |
-
-The URLs start with the `baseUrl` of your [source](/docs/astro/manual-installation#source). With the [`base`](https://docs.astro.build/en/reference/configuration-reference/#base) of Astro, include it in `baseUrl`, like `/my-base/docs`.
+The URLs start with the `baseUrl` of your [source](/docs/astro/manual-installation#source-files). With the [`base`](https://docs.astro.build/en/reference/configuration-reference/#base) of Astro, include it in `baseUrl`, like `/my-base/docs`.
 
 Docs pages are generated at build time, or rendered on request with [`output: 'server'`](https://docs.astro.build/en/guides/on-demand-rendering/) like other Astro pages.
 
@@ -49,7 +43,7 @@ export const collections = {
 
 Pages render with the components of [Fumadocs UI](/docs/ui) by default. To use your own, create a module whose default export is the MDX components:
 
-```tsx title="src/components/mdx.tsx"
+```tsx tab="src/components/mdx.tsx"
 import defaultMdxComponents from 'fumadocs-ui/mdx';
 import type { MDXComponents } from 'mdx/types';
 
@@ -63,7 +57,7 @@ export function getMDXComponents(components?: MDXComponents) {
 export default getMDXComponents();
 ```
 
-```js title="astro.config.mjs"
+```js tab="astro.config.mjs"
 fumadocs({
   components: './src/components/mdx.tsx', // [!code ++]
 });
@@ -84,7 +78,7 @@ Props of your MDX components are serialized into the island, they must be JSON-s
 
 Components outside the docs page island, like [Graph View](/docs/ui/components/graph-view), need a framework provider of their own:
 
-```tsx title="src/components/graph.tsx"
+```tsx tab="src/components/graph.tsx"
 import { AstroProvider } from 'fumadocs-core/framework/astro';
 import { navigate } from 'astro:transitions/client';
 import { GraphView, type GraphViewProps } from './graph-view';
@@ -98,7 +92,7 @@ export function Graph({ pathname, ...props }: GraphViewProps & { pathname: strin
 }
 ```
 
-```astro title="src/components/Graph.astro"
+```astro tab="src/components/Graph.astro"
 ---
 import { Graph } from './graph';
 import { buildGraph } from '@/lib/build-graph';
@@ -142,7 +136,7 @@ fumadocs({
 });
 ```
 
-The built-in plugins take the same options as on [Fumadocs MDX](/docs/mdx/mdx#customize-built-in-plugins), see [Configuration](/docs/astro/configuration#integration) for all options.
+The built-in plugins take the same options as on [Fumadocs MDX](/docs/mdx/mdx#customize-built-in-plugins), see [Configuration](/docs/astro/configuration#integration) for all options. [Include](/docs/mdx/include) and [heading IDs](/docs/headless/mdx/headings) are enabled by default.
 
 For [Math](/docs/markdown/math), add `@import 'katex/dist/katex.css';` to `src/styles/global.css`.
 
@@ -150,7 +144,7 @@ For [Math](/docs/markdown/math), add `@import 'katex/dist/katex.css';` to `src/s
 
 The integration processes the MDX files of `content/docs` by default. To add another directory, like a blog, add it to `collections`:
 
-```js title="astro.config.mjs"
+```js tab="astro.config.mjs"
 fumadocs({
   collections: {
     docs: { dir: 'content/docs' },
@@ -159,7 +153,7 @@ fumadocs({
 });
 ```
 
-```ts title="src/content.config.ts"
+```ts tab="src/content.config.ts"
 export const collections = {
   // ...
   blog: defineCollection({ loader: pageLoader('blog') }), // [!code ++]
@@ -186,12 +180,7 @@ export default defineConfig({
 });
 ```
 
-[Local Markdown](/docs/integrations/content/local-md), [Local HTML](/docs/integrations/content/local-html), [Obsidian](/docs/integrations/content/obsidian) and [Python](/docs/integrations/content/python) need no setup. Notion and Sanity render with a plugin:
-
-| Content Source                              | Plugin                 | Import                           |
-| ------------------------------------------- | ---------------------- | -------------------------------- |
-| [Notion](/docs/integrations/content/notion) | `notionPlugin(notion)` | `@fumadocs/astro/plugins/notion` |
-| [Sanity](/docs/integrations/content/sanity) | `sanityPlugin()`       | `@fumadocs/astro/plugins/sanity` |
+[Local Markdown](/docs/integrations/content/local-md), [Local HTML](/docs/integrations/content/local-html), [Obsidian](/docs/integrations/content/obsidian) and [Python](/docs/integrations/content/python) need no setup. [Notion](/docs/integrations/content/notion) and [Sanity](/docs/integrations/content/sanity) render with a plugin, see [Plugins](/docs/astro/plugins).
 
 With the `dynamicLoader()` of a source guide, pass `await getSource()`.
 

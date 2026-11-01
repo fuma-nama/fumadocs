@@ -15,7 +15,7 @@ npx @fumadocs/cli@latest add blog
 
 Add a blog [collection](/docs/astro/content#collections) with `blogPageSchema`, and create a source for the posts:
 
-```js title="astro.config.mjs"
+```js tab="astro.config.mjs"
 fumadocs({
   collections: {
     docs: { dir: 'content/docs' },
@@ -24,7 +24,7 @@ fumadocs({
 });
 ```
 
-```ts title="src/content.config.ts"
+```ts tab="src/content.config.ts"
 import { blogPageSchema } from './lib/blog'; // [!code ++]
 
 export const collections = {
@@ -33,7 +33,7 @@ export const collections = {
 };
 ```
 
-```ts title="src/lib/source.ts"
+```ts tab="src/lib/source.ts"
 import { getCollection } from 'astro:content';
 import { loader } from 'fumadocs-core/source';
 import { toFumadocsSource } from '@fumadocs/astro/source';
@@ -58,9 +58,9 @@ See [Blog](/docs/integrations/blog) for the frontmatter fields and utilities lik
 
 ### Pages
 
-The blog pages are [your own pages](/docs/astro/layouts#your-own-pages) with `HomeLayout.astro`:
+The blog pages are [your own pages](/docs/astro/layouts#your-own-pages) with `HomeLayout.astro`. `BlogPage` hydrates with `client:load` for the floating panel, its children stay static. `<Body />` renders the content as an island with typography styles, it needs no `BlogBody`.
 
-```astro title="src/pages/blog/index.astro"
+```astro tab="src/pages/blog/index.astro"
 ---
 import HomeLayout from '@fumadocs/astro/components/HomeLayout.astro';
 import { blogAuthors, blogSource } from '@/lib/source';
@@ -75,7 +75,7 @@ import { BlogCards } from '@/components/blog';
 </HomeLayout>
 ```
 
-```astro title="src/pages/blog/[slug].astro"
+```astro tab="src/pages/blog/[slug].astro"
 ---
 import type { GetStaticPaths, InferGetStaticPropsType } from 'astro';
 import HomeLayout from '@fumadocs/astro/components/HomeLayout.astro';
@@ -120,9 +120,7 @@ const { body: Body, toc } = await page.data.load();
 </HomeLayout>
 ```
 
-`BlogPage` hydrates with `client:load` for the floating panel, its children stay static. `<Body />` renders the content as an island with typography styles, it needs no `BlogBody`.
-
-```astro title="src/pages/blog/tags/index.astro"
+```astro tab="src/pages/blog/tags/index.astro"
 ---
 import HomeLayout from '@fumadocs/astro/components/HomeLayout.astro';
 import { blogSource } from '@/lib/source';
@@ -142,7 +140,7 @@ const tags = getTags(getPosts(blogSource.getPages()));
 </HomeLayout>
 ```
 
-```astro title="src/pages/blog/tags/[tag].astro"
+```astro tab="src/pages/blog/tags/[tag].astro"
 ---
 import type { GetStaticPaths, InferGetStaticPropsType } from 'astro';
 import HomeLayout from '@fumadocs/astro/components/HomeLayout.astro';
