@@ -191,7 +191,8 @@ export const app: App = {
       title = page.slugs.at(-1) ?? '',
       description,
       type,
-    } = page.data as { title?: string; description?: string; type?: string };
+      full,
+    } = page.data as { title?: string; description?: string; type?: string; full?: boolean };
     let data: DocsPageData = {
       title,
       description,
@@ -200,6 +201,7 @@ export const app: App = {
       locale: page.locale,
       type,
       toc: body?.toc ?? [],
+      full,
     };
     for (const plugin of this.plugins) {
       if (plugin.transformPage) data = plugin.transformPage.call(this, page, data);

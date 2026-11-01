@@ -30,7 +30,7 @@ const Head = app.config.head;
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     {fullTitle && <title>{fullTitle}</title>}
     {description && <meta name="description" content={description} />}
-    {image && <meta property="og:image" content={image} />}
+    {image && <meta property="og:image" content={Astro.site ? new URL(image, Astro.site).href : image} />}
     {Head && <Head page={page} />}
     <slot name="head" />
     <ClientRouter />
