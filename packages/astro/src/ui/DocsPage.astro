@@ -12,9 +12,21 @@ const body = await app.getBody(page);
 const data = await app.getPageData(page, body);
 const tree = await app.source.serializePageTree(app.source.getPageTree(page.locale));
 const provider = getProviderData(Astro, page.locale);
+const alternates: Record<string, string> = {};
+for (const language of app.source._i18n?.languages ?? []) {
+  const translated = app.source.getPage(page.slugs, language);
+  if (translated) alternates[language] = translated.url;
+}
 ---
 
-<Layout lang={page.locale} title={data.title} description={data.description} image={data.image} page={page}>
+<Layout
+  lang={page.locale}
+  title={data.title}
+  description={data.description}
+  image={data.image}
+  alternates={alternates}
+  page={page}
+>
   <Docs
     client:load
     transition:persist="docs"

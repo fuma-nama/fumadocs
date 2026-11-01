@@ -1,6 +1,8 @@
 declare module 'virtual:fumadocs/config' {
   /** the content directories of collections */
   export const dirs: Record<string, string>;
+  /** has an adapter, routes can render on request */
+  export const server: boolean;
 }
 
 declare module 'virtual:fumadocs/app' {

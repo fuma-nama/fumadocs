@@ -242,7 +242,8 @@ export { components };`;
             hastPlugins: [restoreCode, preset.hastPlugins, exportData, island],
           });
         }
-        modules['virtual:fumadocs/config'] = `export const dirs = ${JSON.stringify(dirs)};`;
+        modules['virtual:fumadocs/config'] = `export const dirs = ${JSON.stringify(dirs)};
+export const server = ${config.adapter !== undefined};`;
         hasConfig = appFile !== undefined;
         if (appFile) {
           modules['virtual:fumadocs/app'] = `export { default } from ${JSON.stringify(appFile)};`;

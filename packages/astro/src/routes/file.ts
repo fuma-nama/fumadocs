@@ -4,4 +4,4 @@ import { getStaticPaths as getPaths, type FileRoute } from '../app';
 export const getStaticPaths = () => getPaths('file', 'fumadocsFile');
 
 export const GET: APIRoute = (context) =>
-  (context.props as { route: FileRoute }).route.GET(context);
+  (context.props as { route: FileRoute }).route.GET!(context);

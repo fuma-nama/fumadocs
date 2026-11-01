@@ -8,6 +8,8 @@ interface Props {
   description?: string;
   image?: string;
   lang?: string;
+  /** the URLs of the page in other languages, by language */
+  alternates?: Record<string, string>;
   /** the docs page, for the `head` component */
   page?: AnyPage;
 }
@@ -16,12 +18,18 @@ const {
   title,
   description,
   image,
+  alternates,
   page,
   lang = Astro.currentLocale ?? app.source._i18n?.defaultLanguage ?? 'en',
 } = Astro.props;
 const siteName = app.config.title;
 const fullTitle = title && siteName ? `${title} | ${siteName}` : (title ?? siteName);
 const Head = app.config.head;
+// social previews need absolute URLs
+const site = Astro.site;
+// like the URLs of pages, `Astro.url` has a trailing slash in static builds
+const url = site && new URL(Astro.url.pathname.replace(/(.)\/$/, '$1'), site).href;
+const imageUrl = image && (site ? new URL(image, site).href : image);
 ---
 
 <html lang={lang} transition:animate="none">
@@ -30,7 +38,22 @@ const Head = app.config.head;
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     {fullTitle && <title>{fullTitle}</title>}
     {description && <meta name="description" content={description} />}
-    {image && <meta property="og:image" content={Astro.site ? new URL(image, Astro.site).href : image} />}
+    {url && <link rel="canonical" href={url} />}
+    {
+      site &&
+        alternates &&
+        Object.entries(alternates).map(([language, href]) => (
+          <link rel="alternate" hreflang={language} href={new URL(href, site).href} />
+        ))
+    }
+    <meta property="og:type" content="website" />
+    {(title ?? siteName) && <meta property="og:title" content={title ?? siteName} />}
+    {description && <meta property="og:description" content={description} />}
+    {siteName && <meta property="og:site_name" content={siteName} />}
+    {url && <meta property="og:url" content={url} />}
+    {imageUrl && <meta property="og:image" content={imageUrl} />}
+    <meta name="twitter:card" content={imageUrl ? 'summary_large_image' : 'summary'} />
+    {imageUrl && <meta name="twitter:image" content={imageUrl} />}
     {Head && <Head page={page} />}
     <slot name="head" />
     <ClientRouter />

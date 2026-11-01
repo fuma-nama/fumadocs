@@ -1,6 +1,7 @@
-import type { APIContext } from 'astro';
+import type { APIContext, MiddlewareNext } from 'astro';
 import type { ReactNode } from 'react';
 import config from 'virtual:fumadocs/app';
+import { server } from 'virtual:fumadocs/config';
 import { defineI18n, type TranslationExtension, type TranslationsAPI } from 'fumadocs-core/i18n';
 import type * as PageTree from 'fumadocs-core/page-tree';
 import { createGetUrl, type LoaderOutput, type Page } from 'fumadocs-core/source';
@@ -30,10 +31,19 @@ export interface PageRoute {
   props?: Record<string, unknown>;
 }
 
-export interface FileRoute {
+export type Method = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'OPTIONS';
+
+export type RouteHandler = (context: APIContext) => Response | Promise<Response>;
+
+export interface FileRoute extends Partial<Record<Method, RouteHandler>> {
   type: 'file';
   url: string;
-  GET: (context: APIContext) => Response | Promise<Response>;
+  /**
+   * Generate the response at build time, only `GET` is used. Set it to `false` to handle requests on the server, which requires an adapter (see `app.server`).
+   *
+   * @defaultValue true
+   */
+  prerender?: boolean;
 }
 
 export type Route = PageRoute | FileRoute;
@@ -60,6 +70,9 @@ export interface DocsPageData {
   markdownUrl?: string;
   /** OG image */
   image?: string;
+  /** the URL to view the source file */
+  githubUrl?: string;
+  lastModified?: Date;
 }
 
 /** the props of the component in the `page` module */
@@ -81,7 +94,17 @@ export interface Plugin {
   getBody?: (this: App, page: AnyPage) => PageBody | undefined | Promise<PageBody | undefined>;
   /** the Markdown of page, for LLMs */
   getText?: (this: App, page: AnyPage) => string | undefined | Promise<string | undefined>;
-  transformPage?: (this: App, page: AnyPage, data: DocsPageData) => DocsPageData;
+  transformPage?: (
+    this: App,
+    page: AnyPage,
+    data: DocsPageData,
+  ) => DocsPageData | Promise<DocsPageData>;
+  /** an Astro middleware, it receives requests of every route rendered on the server */
+  middleware?: (
+    this: App,
+    context: APIContext,
+    next: MiddlewareNext,
+  ) => Response | Promise<Response> | undefined | Promise<undefined>;
 }
 
 export type PluginOption = Plugin | false | null | undefined | PluginOption[];
@@ -121,6 +144,8 @@ export interface App {
   plugins: Plugin[];
   /** `base` of Astro, without trailing slash */
   base: string;
+  /** routes can render on request, with an adapter of Astro */
+  server: boolean;
   /** remove `base`, for route params */
   toPath: (url: string) => string;
   /** pages of every language */
@@ -159,6 +184,7 @@ export const app: App = {
   source: config.source,
   plugins: resolvePlugins(),
   base,
+  server,
   toPath(url) {
     return url.startsWith(`${base}/`) || url === base ? url.slice(base.length) : url;
   },
@@ -211,7 +237,7 @@ export const app: App = {
       full,
     };
     for (const plugin of this.plugins) {
-      if (plugin.transformPage) data = plugin.transformPage.call(this, page, data);
+      if (plugin.transformPage) data = await plugin.transformPage.call(this, page, data);
     }
     return data;
   },
@@ -282,6 +308,7 @@ export async function getStaticPaths<T extends Route['type']>(type: T, param: st
   const paths = [];
   for (const route of await getRoutes()) {
     if (route.type !== type) continue;
+    if (route.type === 'file' && (route.prerender === false || !route.GET)) continue;
     const path = app.toPath(route.url).split('/').filter(Boolean).join('/');
     paths.push({
       params: { [param]: path || undefined },

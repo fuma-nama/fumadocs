@@ -7,6 +7,7 @@ import {
   DocsPage,
   DocsTitle,
   MarkdownCopyButton,
+  PageLastUpdate,
   ViewOptionsPopover,
 } from 'fumadocs-ui/layouts/docs/page';
 import UserPage from 'virtual:fumadocs/page';
@@ -53,13 +54,14 @@ function DefaultPage({ tree, page, layout, children }: DocsPageProps) {
       <DocsPage toc={page.toc} full={page.full}>
         <DocsTitle>{page.title}</DocsTitle>
         <DocsDescription>{page.description}</DocsDescription>
-        {page.markdownUrl && (
+        {(page.markdownUrl || page.githubUrl) && (
           <div style={pageActions}>
-            <MarkdownCopyButton markdownUrl={page.markdownUrl} />
-            <ViewOptionsPopover markdownUrl={page.markdownUrl} />
+            {page.markdownUrl && <MarkdownCopyButton markdownUrl={page.markdownUrl} />}
+            <ViewOptionsPopover markdownUrl={page.markdownUrl} githubUrl={page.githubUrl} />
           </div>
         )}
         {children}
+        {page.lastModified && <PageLastUpdate date={page.lastModified} />}
       </DocsPage>
     </DocsLayout>
   );
