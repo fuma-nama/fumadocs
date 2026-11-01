@@ -29,9 +29,16 @@ Create the server from source object.
   ../../examples/waku/src/pages/_api/api/search.ts
 </include>
 
-<include cwd meta='tab="Astro" title="src/pages/api/search.ts"'>
-  ../../examples/astro/src/pages/api/search.ts
-</include>
+```ts tab="Astro" title="src/fumadocs.config.ts"
+import { defineConfig } from '@fumadocs/astro/config';
+import { oramaSearchPlugin } from '@fumadocs/astro/plugins/orama-search';
+
+export default defineConfig({
+  // ...
+  // added by default, add it yourself for the options of `createFromSource()`
+  plugins: [oramaSearchPlugin()],
+});
+```
 
 ### From Search Indexes
 
