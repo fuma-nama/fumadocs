@@ -17,7 +17,11 @@ import SearchDialog from '@/components/search';
 </RootProvider>;
 ```
 
-On Astro, it is in your [provider island](/docs/manual-installation/astro#layout).
+On Astro, export it as `SearchDialog` from the [`layout` module](/docs/manual-installation/astro#options) instead:
+
+```tsx title="src/lib/layout.shared.tsx"
+export { default as SearchDialog } from '@/components/search';
+```
 
 If it was in a server component, you would need a separate client component for provider to pass functions:
 
