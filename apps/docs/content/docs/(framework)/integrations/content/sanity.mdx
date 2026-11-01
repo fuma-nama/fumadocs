@@ -119,12 +119,6 @@ With `sanityFetch`, `<SanityLive />` revalidates queries when content changes, l
 
 If you enabled [Cache Components](https://nextjs.org/docs/app/api-reference/config/next-config-js/cacheComponents), call `getSource()` inside a `'use cache'` scope (for example, a cached page) as `sanityFetch` requires one.
 
-<Callout title="Astro">
-  Pass `await getSource()` as `source` and add `sanityPlugin({components})` with the components of
-  `CustomPortableText`, it renders the pages, see [Other Content
-  Sources](/docs/astro/content#other-content-sources).
-</Callout>
-
 Now render pages with the `getSource()` function:
 
 ```tsx tab="Next.js" title="app/docs/[[...slug]]/page.tsx"

@@ -95,14 +95,6 @@ The source paginates through every matching data-source row and lazily pulls eac
 
 ### Render Pages [step]
 
-<Callout title="Astro">
-  Pass `await getSource()` as `source` and add `notionPlugin(notion)` instead, see [Other Content
-  Sources](/docs/astro/content#other-content-sources). It renders the blocks with the `components`
-  and `highlightCode` options of `NotionRenderer`, and serves [Notion files](#notion-files) on
-  request with an adapter, set `fileProxy: false` for static sites. Add `@fumadocs/notion/client` to
-  your MDX components for toggles and tabs.
-</Callout>
-
 Use the loader in your layout to build the page tree:
 
 ```tsx title="app/docs/layout.tsx"

@@ -116,3 +116,21 @@ mcpPlugin({
   },
 });
 ```
+
+## WebMCP
+
+[WebMCP](/docs/integrations/llms#webmcp) exposes tools to the AI agent of the browser, on the page the reader is viewing.
+
+```npm
+npx @fumadocs/cli feature webmcp
+```
+
+The CLI adds it to the `Provider` of your [`layout` module](/docs/astro/layouts#provider). `search_docs` uses the built-in search index.
+
+## Ask AI
+
+The [Ask AI](/docs/integrations/llms#ask-ai) chat dialog runs as an endpoint at `src/pages/api/chat.ts`, rendered on request with an [adapter](https://docs.astro.build/en/guides/on-demand-rendering/). Use the client layout in your [docs page module](/docs/astro/layouts#docs-page), or let the CLI set it up:
+
+```npm
+npx @fumadocs/cli feature ai
+```

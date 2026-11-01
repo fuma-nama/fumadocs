@@ -43,6 +43,20 @@ import { Feedback } from '@/components/feedback/client';
 
 For [block feedback](/docs/integrations/feedback#feedback-block), add a `blockFeedback` action with the `blockFeedback` schema, and pass it to `FeedbackText` the same way.
 
+Add the `remark-block-id` plugin:
+
+```npm
+npm i @fumadocs/satteri
+```
+
+```js title="astro.config.mjs"
+import { remarkBlockId } from '@fumadocs/satteri/remark-block-id';
+
+fumadocs({
+  mdastPlugins: [remarkBlockId({ addDataAttribute: 'feedback' })],
+});
+```
+
 Without an adapter, the CLI keeps `onSendAction` in the browser, send the feedback from there, like to your analytics.
 
 To report feedback to GitHub Discussions, call `onPageFeedbackAction()` of the [GitHub integration](/docs/integrations/feedback#integrating-with-github-discussion) in the handler.

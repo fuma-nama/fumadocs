@@ -27,19 +27,19 @@ Create the [OpenAPI server](/docs/integrations/openapi/server) from your schema:
   ../../examples/astro/src/lib/openapi.ts
 </include>
 
-Add its pages to your source with `multiple()`:
+Add its pages to your source:
 
 ```ts title="src/lib/source.ts"
 import { getCollection } from 'astro:content';
-import { loader, multiple } from 'fumadocs-core/source'; // [!code ++]
+import { loader } from 'fumadocs-core/source';
 import { toFumadocsSource } from '@fumadocs/astro/source';
 import { openapi } from './openapi'; // [!code ++]
 
 export const source = loader({
-  source: multiple({
+  source: {
     docs: toFumadocsSource(await getCollection('docs'), await getCollection('meta')),
     api: await openapi.staticSource({ baseDir: 'api' }), // [!code ++]
-  }),
+  },
   baseUrl: '/docs',
   // adds a badge to each page in the sidebar [!code ++]
   plugins: [openapi.loaderPlugin()],
@@ -63,5 +63,14 @@ export default defineConfig({
 ```
 
 The plugin follows your server: it serves the documents left out by [`includeDocument: false`](/docs/integrations/openapi/server#loading-documents-once), and [the proxy](/docs/integrations/openapi/server#creating-proxy) at `proxyUrl` when it is a pathname, which requires an [adapter](https://docs.astro.build/en/guides/on-demand-rendering/).
+
+Pass the options of the proxy with `createProxy`, like [allowed origins](/docs/integrations/openapi/server#allowed-origins), or `false` when it is served elsewhere:
+
+```ts title="src/fumadocs.config.ts"
+openapiPlugin({
+  server: openapi,
+  createProxy: { allowedOrigins: ['https://api.example.com'] }, // [!code ++]
+});
+```
 
 To customize the pages, create `<OpenAPIPage />` with [`createOpenAPIPage()`](/docs/integrations/openapi/api-page) and add it to your [MDX components](/docs/astro/content#mdx-components), [lazily](/docs/astro/content#heavy-components).

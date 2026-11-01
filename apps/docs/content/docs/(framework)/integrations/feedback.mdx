@@ -17,11 +17,6 @@ Install it using **Fumadocs CLI**, it also adds the component to your docs page 
 npx @fumadocs/cli feature feedback
 ```
 
-<Callout title="Astro">
-  It adds the component to the [`page` module](/docs/astro/layouts#docs-page), with an Astro Action
-  as `onSendAction`, see [Feedback](/docs/astro/feedback).
-</Callout>
-
 Or install the component only:
 
 ```npm
@@ -87,18 +82,6 @@ export default defineConfig({
       [remarkBlockId, blockIdOptions],
     ],
   },
-});
-```
-
-```npm tab="Astro"
-npm i @fumadocs/satteri
-```
-
-```js tab="Astro" title="astro.config.mjs"
-import { remarkBlockId } from '@fumadocs/satteri/remark-block-id';
-
-fumadocs({
-  mdastPlugins: [remarkBlockId({ addDataAttribute: 'feedback' })],
 });
 ```
 

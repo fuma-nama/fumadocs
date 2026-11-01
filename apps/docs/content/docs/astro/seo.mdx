@@ -68,4 +68,6 @@ Sitemap: https://example.com/sitemap-index.xml
 
 ## RSS Feed
 
-See [RSS Feed](/docs/guides/rss).
+See [RSS Feed](/docs/guides/rss). Add the `<link>` in the [`head` component](/docs/astro/layouts#head) of your Fumadocs config.
+
+`page.data` has no `lastModified`, add a date to the [frontmatter schema](/docs/astro/content#frontmatter), like `date: z.coerce.date()`, and use `page.data.date`.

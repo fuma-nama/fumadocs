@@ -157,8 +157,3 @@ export const Route = createRootRoute({
 <link rel="alternate" type="application/rss+xml" title="Fumadocs Blog" href="/rss.xml" />
 ```
 
-<Callout title="Astro">
-  The `<link>` goes in the [`head` component](/docs/astro/layouts#head) of your Fumadocs config.
-  `page.data` has no `lastModified`, add a date to the [frontmatter
-  schema](/docs/astro/content#frontmatter), like `date: z.coerce.date()`, and use `page.data.date`.
-</Callout>

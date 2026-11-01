@@ -81,7 +81,7 @@ import { DocsLayout as NotebookLayout } from 'fumadocs-ui/layouts/notebook'; // 
 import type { DocsPageProps } from '@fumadocs/astro/config';
 
 export default function Docs({ tree, page, layout, children }: DocsPageProps) {
-  // `type` is the key of its source in `multiple()`
+  // `type` is the key of its source in `loader()`
   const Layout = page.type === 'api' ? NotebookLayout : DocsLayout;
   // ...
 }

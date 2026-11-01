@@ -15,10 +15,6 @@ It requires the directive syntax, from `remark-directive` or the `directive` fea
 npm i remark-directive
 ```
 
-```npm tab="Astro"
-npm i @fumadocs/satteri @astrojs/markdown-satteri
-```
-
 Configure both in your config.
 
 ```ts title="source.config.ts" tab="Fumadocs MDX"
@@ -30,24 +26,6 @@ export default defineConfig({
   mdxOptions: {
     remarkPlugins: [remarkDirective, remarkDirectiveAdmonition],
   },
-});
-```
-
-```js title="astro.config.mjs" tab="Astro"
-import { defineConfig } from 'astro/config';
-import { satteri } from '@astrojs/markdown-satteri';
-import fumadocs from '@fumadocs/astro';
-import { remarkDirectiveAdmonition } from '@fumadocs/satteri/remark-directive-admonition';
-
-export default defineConfig({
-  markdown: {
-    processor: satteri({ features: { directive: true } }),
-  },
-  integrations: [
-    fumadocs({
-      mdastPlugins: [remarkDirectiveAdmonition()],
-    }),
-  ],
 });
 ```
 

@@ -172,57 +172,6 @@ export const getConfig = async () => ({ render: 'dynamic' }) as const;
 export { default, getConfig } from './[page]';
 ```
 
-```astro tab="Astro" title="src/pages/changelog/[...page].astro"
----
-import type { GetStaticPaths, InferGetStaticPropsType } from 'astro';
-import { createElement } from 'react';
-import { githubReleases } from '@fumadocs/changelog/github';
-import HomeLayout from '@fumadocs/astro/components/HomeLayout.astro';
-import ReactContent from '@fumadocs/astro/components/ReactContent.astro';
-import { ChangelogPagination, ChangelogTimeline } from '@/components/changelog';
-
-export const getStaticPaths = (async () => {
-  const paths = [];
-  for (let page: number | undefined = 1; page; ) {
-    const releases = await githubReleases({
-      owner: 'fuma-nama',
-      repo: 'fumadocs',
-      token: import.meta.env.GITHUB_TOKEN,
-      page,
-    });
-    if (releases.entries.length === 0) break;
-    paths.push({
-      params: { page: page > 1 ? String(page) : undefined },
-      props: { page, ...releases },
-    });
-    page = releases.nextPage;
-  }
-  return paths;
-}) satisfies GetStaticPaths;
-
-type Props = InferGetStaticPropsType<typeof getStaticPaths>;
-
-const { page, entries, nextPage } = Astro.props;
-const href = (page: number) => (page > 1 ? `/changelog/${page}` : '/changelog');
----
-
-<HomeLayout title="Changelog">
-  <div class="mx-auto flex w-full max-w-[900px] flex-col gap-10 px-4 py-12">
-    <ReactContent node={createElement(ChangelogTimeline, { entries })} />
-    <ChangelogPagination
-      newer={page > 1 ? href(page - 1) : undefined}
-      older={nextPage ? href(nextPage) : undefined}
-    />
-  </div>
-</HomeLayout>
-```
-
-<Callout title="Astro">
-  The pages are [your own pages](/docs/astro/layouts#your-own-pages), generated at build time. The
-  timeline renders with [`ReactContent.astro`](/docs/astro/layouts#react-content), so copy buttons
-  in release notes hydrate.
-</Callout>
-
 ## Sources
 
 ### GitHub Releases
@@ -268,8 +217,3 @@ export default function Page() {
   );
 }
 ```
-
-<Callout title="Astro">
-  `body` takes React nodes, not Astro components. Pass the Markdown of pages as `content` instead,
-  like `await page.data.getText('raw')`.
-</Callout>

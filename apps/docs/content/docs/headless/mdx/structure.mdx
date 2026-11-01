@@ -45,13 +45,6 @@ export default defineConfig({
 });
 ```
 
-```js title="astro.config.mjs" tab="Astro"
-fumadocs({
-  // enabled by default, read with `page.data.structuredData()`
-  remarkStructureOptions: {},
-});
-```
-
 ```ts tab="MDX Compiler"
 import { compile } from '@mdx-js/mdx';
 import { remarkStructure } from 'fumadocs-core/mdx-plugins';

@@ -31,20 +31,20 @@ export const graphql = createGraphQL({
 });
 ```
 
-Add its pages to your source with `multiple()`:
+Add its pages to your source:
 
 ```ts title="src/lib/source.ts"
 import { getCollection } from 'astro:content';
-import { loader, multiple } from 'fumadocs-core/source'; // [!code ++]
+import { loader } from 'fumadocs-core/source';
 import { toFumadocsSource } from '@fumadocs/astro/source';
 import { graphql } from './graphql'; // [!code ++]
 
 export const source = loader({
-  source: multiple({
+  source: {
     docs: toFumadocsSource(await getCollection('docs'), await getCollection('meta')),
     // `baseUrl` of the loader, to link types and operations [!code ++]
     graphql: await graphql.staticSource({ baseDir: 'graphql', baseUrl: '/docs' }),
-  }),
+  },
   baseUrl: '/docs',
   // adds the kind of items to each page in the sidebar [!code ++]
   plugins: [graphql.loaderPlugin()],

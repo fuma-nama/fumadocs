@@ -13,10 +13,6 @@ npx @fumadocs/cli feature llms
 
 It enables processed Markdown on your docs collection, adds `docsLlms` to `lib/source.ts`, and creates the routes below. The generated files are listed here if you prefer a manual setup.
 
-<Callout title="Astro">
-  `llmsPlugin()` serves these routes for you, see [LLMs](/docs/astro/llms).
-</Callout>
-
 ### `docsLlms`
 
 `llms()` renders your docs for LLMs. `renderPage` turns one page into Markdown, from the processed document rather than the raw file content:
@@ -192,8 +188,6 @@ export default function proxy(request: NextRequest) {
 
 Because the same URL now has two representations, the response needs `Vary: Accept` to prevent cache collisions.
 
-<Callout title="Astro">`llmsPlugin()` handles it, see [`Accept`](/docs/astro/llms#accept).</Callout>
-
 <Callout title="Next.js">
   Next.js discards `Vary` on App Router **page** responses, so the HTML side of the branch above
   can't carry the header from inside the app. Set it at your CDN if you serve documentation through
@@ -232,11 +226,6 @@ npx @fumadocs/cli feature mcp
 ```
 
 It creates a `/api/mcp` route with the streamable HTTP transport, on top of the [LLM routes](#docs-for-llm) above.
-
-<Callout title="Astro">
-  It adds `mcpPlugin()` to your Fumadocs config instead, see [MCP
-  Server](/docs/astro/llms#mcp-server).
-</Callout>
 
 The tools come from [`fumadocs-core/mcp`](/docs/headless/utils/mcp), see linked docs for details.
 
@@ -285,11 +274,6 @@ It creates a `WebMCP` component on top of the [LLM routes](#docs-for-llm), you c
 
 - `search_docs` queries the search API route, you can use [other clients](/docs/search) than `fetchClient`.
 - `read_page` fetches the Markdown of a page, `/docs/page.md` on TanStack Start.
-
-<Callout title="Astro">
-  The CLI renders it in the `Provider` of your [`layout` module](/docs/astro/layouts#provider), and
-  `search_docs` uses the built-in search index.
-</Callout>
 
 ## Ask AI
 
@@ -413,13 +397,3 @@ import { DocsLayout } from '@/components/ai/layout'; // [!code ++]
 ```
 
 As the layout options are passed through a client component, they have to be serializable.
-
-<Callout title="Astro">
-
-The chat route is an endpoint at `src/pages/api/chat.ts`, it renders on request with an [adapter](https://docs.astro.build/en/guides/on-demand-rendering/). Use the client layout in your [docs page module](/docs/astro/layouts#docs-page), or let the CLI set it up:
-
-```npm
-npx @fumadocs/cli feature ai
-```
-
-</Callout>
