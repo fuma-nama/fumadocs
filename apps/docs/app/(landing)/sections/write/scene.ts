@@ -99,8 +99,7 @@ const RAM_Z = 142;
 /** shades the figure's own materials */
 export const shading = `
 bool figure(int material, vec3 world, vec3 n, vec2 px, inout vec4 color) {
-  color = vec4(material == ${GOLD} ? uYellow : uShade, 1.0);
-  if (material == ${WOOD} && dot(n, uLight) > 0.21 && threshold < 0.75) color.rgb = uLit;
+  color = vec4(material == ${GOLD} ? uYellow : material == ${WOOD} ? mix(uLit, uShade, line) : uShade, 1.0);
   return true;
 }`;
 

@@ -26,17 +26,14 @@ const drawing: CSSProperties = {
 const mate: CSSProperties = {
   width: `calc(${MATE_W} * var(--cell))`,
   left: `calc(50% - ${MATE_W / 2} * var(--cell))`,
-  bottom: 'var(--feet)',
 };
 
-/** her bubble's tail, from its root on the bubble's foot to the dot, and its shadow, bubble and
- * tail as one shape; `createTalk` sets the root and the tip, the drop is 9px */
-const tail = { clipPath: 'polygon(var(--tail-a) 0, var(--tail-b) 0, var(--tail-tip) 100%)' };
+/** her bubble's shadow, bubble and tail as one shape; `createTalk` sets the tail's root and tip,
+ * the drop is 9px */
 const shadow: CSSProperties = {
   clipPath:
     'polygon(0 0, 100% 0, 100% calc(100% - 9px), var(--tail-b) calc(100% - 9px), var(--tail-tip) 100%, var(--tail-a) calc(100% - 9px), 0 calc(100% - 9px))',
   maskImage: DITHER_MASKS[6],
-  maskSize: '4px 4px',
 };
 
 /** what she says, laid over her head by `createTalk`: shaped as the CLI's bubble is, paper type on
@@ -49,18 +46,19 @@ function Bubble() {
     <div
       data-bubble
       data-state="off"
-      className="pointer-events-auto absolute top-0 left-0 isolate w-max pr-0.75 pb-3.25 font-pixel select-text text-[13.16px] leading-4 font-normal antialiased data-[state=off]:invisible [@media(min-resolution:3dppx)]:text-[17.54px] [@media(min-resolution:3dppx)]:leading-5.5"
+      className="pointer-events-auto absolute top-0 left-0 isolate w-max pr-0.75 pb-3.25 font-pixel select-text text-pixel font-normal antialiased data-[state=off]:invisible [@media(min-resolution:3dppx)]:text-[17.54px] [@media(min-resolution:3dppx)]:leading-5.5"
     >
       <span
         style={shadow}
-        className="absolute top-0 right-0.75 bottom-1 left-0 translate-x-0.75 translate-y-1 bg-lp-ink-2"
+        className="absolute top-0 right-0.75 bottom-1 left-0 translate-x-0.75 translate-y-1 bg-lp-ink-2 lp-dither"
       />
       <span className="relative grid justify-items-start bg-lp-ink px-2.5 py-2 whitespace-pre text-lp-paper contain-layout contain-paint *:col-start-1 *:row-start-1">
         <span data-sizer className="invisible" />
         <span data-said />
       </span>
-      {/* from a pixel into the box, so the two fills meet without a seam */}
-      <span style={tail} className="absolute inset-x-0 bottom-1 h-2.5 bg-lp-ink" />
+      {/* her bubble's tail, from its root on the bubble's foot to the dot, from a pixel into the box
+          so the two fills meet without a seam */}
+      <span className="absolute inset-x-0 bottom-1 h-2.5 bg-lp-ink [clip-path:polygon(var(--tail-a)_0,var(--tail-b)_0,var(--tail-tip)_100%)]" />
     </div>
   );
 }
@@ -90,7 +88,7 @@ export function Stage() {
             width={MATE_W}
             height={MATE_H}
             style={mate}
-            className="invisible absolute [image-rendering:pixelated]"
+            className="invisible absolute bottom-(--feet) [image-rendering:pixelated]"
           />
           <Bubble />
         </div>

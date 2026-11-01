@@ -54,12 +54,15 @@ interface MeshOptions {
   onFrame: (dt: number) => void;
   /** the canvas's CSS px size before the frame that shows it */
   onResize: (width: number, height: number) => void;
+  /** the frames rest, or stop off screen: what the figure keeps on a layer for them may leave it */
+  onRest?: () => void;
   /**
    * The figure's own GLSL: `scene` defines `bool figure(int material, vec3 world, vec3 normal,
    * vec2 px, inout vec4 color)` for its materials from MATERIAL.figure, true when it shaded the
    * pixel, its colour premultiplied; `backdrop` defines `vec4 backdrop(vec2 px)` for where nothing
    * drew. `px` counts canvas px from the top left, `uDot` of them a dot; `figure` may read `cell` and
-   * `threshold`, the dither's cell and threshold there, laid on its part. Both may declare uniforms,
+   * `threshold`, the dither's cell and threshold there, laid on its part, and `line`, its faces'
+   * edge line there. Both may declare uniforms,
    * set with `uniform()`, and samplers named as `textures`; those `coverage` names hold coverage
    * alone, kept in one channel and mipmapped, for sampling smaller than they are.
    */
@@ -196,9 +199,11 @@ layout(location = 1) out uvec4 data;
 layout(location = 2) out float rim;
 ${bayer8}
 
-// the dither's cell under this pixel, laid on its part's surface, and its threshold
+// the dither's cell under this pixel, laid on its part's surface, and its threshold; how much of
+// a dot wide line in from each edge of its faces covers it, all line on a face under three dots across
 vec2 cell;
 float threshold;
+float line;
 
 bool shadowed(vec3 p) {
   vec3 l = (uLightView * vec4(p, 1.0)).xyz * 0.5 + 0.5;
@@ -274,6 +279,9 @@ void main() {
   }
   cell = floor(laid / 2.0);
   threshold = bayer8(cell);
+  bool small = vSize.y < 12.0;
+  float across = 1.0 / max(max(length(gu), length(gv)), 1e-6);
+  line = !small && across < 3.0 * uDot ? 1.0 : clamp(uDot + 0.5 - face, 0.0, 1.0);
   rim = vData.x >= 1.0 && edge < uDot + 1.5 ? 1.0 : 0.0;
   uint z = uint(gl_FragCoord.z * 16777215.0);
   uvec2 w = uvec2(round((normalize(way + vec2(1e-9, 0.0)) * 0.5 + 0.5) * 255.0));
@@ -313,13 +321,9 @@ void main() {
   }
   // solid, quarters, solid: two tones on a part or a face too thin for a pattern, a cylinder in
   // bands; its lit tone on a part too small
-  bool small = vSize.y < 12.0;
-  float across = 1.0 / max(max(length(gu), length(gv)), 1e-6);
   bool thin = vSize.x < (uShape == 1 ? 16.0 : 8.0) || pressed > 2.5 || across < 8.0 * uDot;
   tone = small ? 1.0 : thin ? step(0.5, tone) : floor(tone * 4.0 + 0.5) / 4.0;
   vec3 c = threshold < tone ? lit : shade;
-  // a dot wide line in from each edge of its faces, all line on a face under three dots across
-  float line = !small && across < 3.0 * uDot ? 1.0 : clamp(uDot + 0.5 - face, 0.0, 1.0);
   color = vec4(mix(c, material == ${MATERIAL.ink} || tone <= 0.5 ? uLit : uShade, line), 1.0);
 }`;
 
@@ -713,7 +717,16 @@ const NONE = new Uint32Array([0xffff, 0xff00, 0xff80, 0x8000]);
  */
 export function createMesh(
   canvas: HTMLCanvasElement,
-  { parts, onFrame, onResize, shader = {}, reach = Infinity, stretch = false, theme }: MeshOptions,
+  {
+    parts,
+    onFrame,
+    onResize,
+    onRest,
+    shader = {},
+    reach = Infinity,
+    stretch = false,
+    theme,
+  }: MeshOptions,
 ) {
   const context = canvas.getContext('webgl2', {
     antialias: false,
@@ -903,6 +916,12 @@ export function createMesh(
   /** a part that casts a shadow, or the light, moved: the shadow map draws again */
   let shadowsMoved = true;
   let changed = true;
+  /**
+   * the uniforms the programs hold are out of date: the camera, the light, the theme, the dots or
+   * the figure's own changed, or the region's origin or the canvas, as `held` last had them
+   */
+  let stale = true;
+  const held = [Number.NaN, 0, 0, 0];
   /** the figure's box, CSS px: nothing shows outside it */
   let box: number[] | null = null;
   /** the scene targets' size, canvas px: none till the first frame */
@@ -973,22 +992,24 @@ export function createMesh(
   /** the parts, their colour and their ids with depth, into the scene's targets, inside `region` */
   function drawParts(width: number, height: number, region: readonly number[]) {
     gl.useProgram(scene);
-    figureUniforms(scene);
-    gl.uniformMatrix4fv(uniform(scene, 'uView'), false, view);
-    gl.uniformMatrix4fv(uniform(scene, 'uLightView'), false, light);
-    gl.uniform3fv(uniform(scene, 'uLight'), lightDir);
-    gl.uniform1f(uniform(scene, 'uReach'), Math.min(reachDepth, 1e9));
-    gl.uniform2f(uniform(scene, 'uBuf'), width, height);
-    gl.uniform2f(uniform(scene, 'uOrigin'), region[0], region[1]);
-    gl.uniform1f(uniform(scene, 'uDot'), dot);
-    gl.uniform4fv(uniform(scene, 'uEye'), eye);
-    gl.uniform1f(uniform(scene, 'uUnit'), focus / pitch / dot);
-    if (palette) {
-      gl.uniform3fv(uniform(scene, 'uLit'), palette.lit);
-      gl.uniform3fv(uniform(scene, 'uShade'), palette.shade);
-      gl.uniform3fv(uniform(scene, 'uLine'), palette.line);
-      gl.uniform3fv(uniform(scene, 'uAccent'), palette.accent);
-      gl.uniform3fv(uniform(scene, 'uYellow'), palette.yellow);
+    if (stale) {
+      figureUniforms(scene);
+      gl.uniformMatrix4fv(uniform(scene, 'uView'), false, view);
+      gl.uniformMatrix4fv(uniform(scene, 'uLightView'), false, light);
+      gl.uniform3fv(uniform(scene, 'uLight'), lightDir);
+      gl.uniform1f(uniform(scene, 'uReach'), Math.min(reachDepth, 1e9));
+      gl.uniform2f(uniform(scene, 'uBuf'), width, height);
+      gl.uniform2f(uniform(scene, 'uOrigin'), region[0], region[1]);
+      gl.uniform1f(uniform(scene, 'uDot'), dot);
+      gl.uniform4fv(uniform(scene, 'uEye'), eye);
+      gl.uniform1f(uniform(scene, 'uUnit'), focus / pitch / dot);
+      if (palette) {
+        gl.uniform3fv(uniform(scene, 'uLit'), palette.lit);
+        gl.uniform3fv(uniform(scene, 'uShade'), palette.shade);
+        gl.uniform3fv(uniform(scene, 'uLine'), palette.line);
+        gl.uniform3fv(uniform(scene, 'uAccent'), palette.accent);
+        gl.uniform3fv(uniform(scene, 'uYellow'), palette.yellow);
+      }
     }
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, map);
@@ -1034,6 +1055,10 @@ export function createMesh(
     // the outline reads is this frame's, into targets that hold just them; the shadow map whole
     const reach = dot + 2;
     const region = inside(2 * reach);
+    if (region[0] !== held[0] || region[1] !== held[1] || width !== held[2] || height !== held[3]) {
+      held.splice(0, 4, region[0], region[1], width, height);
+      stale = true;
+    }
     if (draws.length > 0) {
       if (from < to) {
         gl.bindBuffer(gl.ARRAY_BUFFER, instanceBuffer);
@@ -1071,11 +1096,14 @@ export function createMesh(
       gl.scissor(x, y, w, h);
     }
     gl.useProgram(post);
-    figureUniforms(post);
-    gl.uniform2f(uniform(post, 'uBuf'), width, height);
-    gl.uniform2f(uniform(post, 'uOrigin'), region[0], region[1]);
-    gl.uniform1f(uniform(post, 'uDot'), dot);
-    if (palette) gl.uniform3fv(uniform(post, 'uPen'), palette.pen);
+    if (stale) {
+      figureUniforms(post);
+      gl.uniform2f(uniform(post, 'uBuf'), width, height);
+      gl.uniform2f(uniform(post, 'uOrigin'), region[0], region[1]);
+      gl.uniform1f(uniform(post, 'uDot'), dot);
+      if (palette) gl.uniform3fv(uniform(post, 'uPen'), palette.pen);
+      stale = false;
+    }
     gl.bindVertexArray(triangleVao);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
     gl.bindVertexArray(null);
@@ -1126,8 +1154,7 @@ export function createMesh(
     frame: Readonly<Mat4>;
     /** its transform as last written: x, y and its scale, all 0 while hidden */
     drawn: number[];
-    /** frames since it last moved, and its own layer while it moves */
-    still: number;
+    /** its own layer while the frames run, once it moved */
     release: (() => void) | undefined;
   }
   const pins: Pin[] = [];
@@ -1151,8 +1178,10 @@ export function createMesh(
     return Math.round(v * devicePixelRatio) / devicePixelRatio;
   }
 
-  /** the anchors on their points, each on a layer of its own while it moves, written when changed */
+  /** the anchors on their points, written when changed, each on a layer of its own from then till
+   * the frames rest */
   function pin() {
+    const ratio = devicePixelRatio;
     for (const p of pins) {
       let x = 0;
       let y = 0;
@@ -1163,21 +1192,20 @@ export function createMesh(
         const k = onCanvas(p.at, m)[2];
         sx = Math.hypot(m[0], m[1], m[2]) * k;
         sy = Math.hypot(m[4], m[5], m[6]) * k;
-        x = snap(point[0] + p.offset[0] * sx);
-        y = snap(point[1] + p.offset[1] * sy);
+        x = Math.round((point[0] + p.offset[0] * sx) * ratio) / ratio;
+        y = Math.round((point[1] + p.offset[1] * sy) * ratio) / ratio;
       }
       const d = p.drawn;
-      if (d[0] === x && d[1] === y && d[2] === sx && d[3] === sy) {
-        if (++p.still > 30) settle(p);
-        continue;
-      }
-      p.drawn = [x, y, sx, sy];
+      if (d[0] === x && d[1] === y && d[2] === sx && d[3] === sy) continue;
+      d[0] = x;
+      d[1] = y;
+      d[2] = sx;
+      d[3] = sy;
+      p.release ??= steer(p.el);
       let transform = 'scale(0)';
       if (p.shown) transform = `translate(${x}px, ${y}px)`;
       if (p.shown && (sx !== 1 || sy !== 1)) transform += ` scale(${sx}, ${sy})`;
       p.el.style.transform = transform;
-      p.still = 0;
-      p.release ??= steer(p.el);
     }
   }
 
@@ -1197,7 +1225,7 @@ export function createMesh(
     );
     const page = { paper, ink, sun, orange, yellow, night: isDark() };
     palette = (theme ?? housePalette)(page) ?? palette;
-    themed = changed = true;
+    themed = changed = stale = true;
   }
   const stopTheme = onTheme(() => (readTheme(), invalidate()));
 
@@ -1226,7 +1254,13 @@ export function createMesh(
     before = now;
     if (raf !== 0) return;
     before = Number.NaN;
+    rest();
+  }
+
+  /** the frames stop: the anchors, and what the figure keeps on a layer for them, leave their layers */
+  function rest() {
     for (const p of pins) settle(p);
+    onRest?.();
   }
 
   function invalidate() {
@@ -1243,6 +1277,7 @@ export function createMesh(
   function pause() {
     cancelAnimationFrame(raf);
     raf = 0;
+    rest();
   }
 
   // the canvas fills its parent, its patterns and lines in dots of as many device px as the ratio
@@ -1259,7 +1294,7 @@ export function createMesh(
       canvas.style.width = `${width * pitch}px`;
       canvas.style.height = `${height * pitch}px`;
     }
-    changed = true;
+    changed = stale = true;
     if (canvas.width === width && canvas.height === height) return;
     canvas.width = width;
     canvas.height = height;
@@ -1283,7 +1318,10 @@ export function createMesh(
   return {
     place(i: number, matrix: Readonly<Mat4>) {
       const at = slots[i] * INSTANCE;
-      if (Number.isNaN(at) || matrix.every((v, k) => instances[at + k] === v)) return;
+      if (Number.isNaN(at)) return;
+      let k = 0;
+      while (k < 16 && instances[at + k] === matrix[k]) k++;
+      if (k === 16) return;
       // first moved since the camera was set: its pattern stays laid as it stood
       if (placed[i] && !anchored[i]) {
         instances.copyWithin(at + 24, at, at + 16);
@@ -1333,12 +1371,12 @@ export function createMesh(
       }
       // a camera that turns y over sees every face wound the other way
       wound = view[0] * view[5] - view[4] * view[1] < 0;
-      changed = true;
+      changed = stale = true;
     },
     light(direction: Readonly<Vec3>, min: Readonly<Vec3>, max: Readonly<Vec3>) {
       lightDir.splice(0, 3, ...direction);
       reachDepth = reach / lightView(light, direction, min, max);
-      shadowsMoved = changed = true;
+      shadowsMoved = changed = stale = true;
     },
     /** a uniform the figure's GLSL declares: a float, or a vec2 to vec4; a frame draws if it changed */
     uniform(name: string, value: number | readonly number[]) {
@@ -1351,7 +1389,7 @@ export function createMesh(
             known.every((v, k) => v === value[k]);
       if (same) return;
       custom.set(name, typeof value === 'number' ? value : [...value]);
-      changed = true;
+      changed = stale = true;
     },
     /** a new image for texture `name` of `shader.textures` */
     texture(name: string, source: TexImageSource) {
@@ -1394,7 +1432,6 @@ export function createMesh(
         offset: [0, 0],
         shown: false,
         drawn,
-        still: 0,
         release: undefined,
       };
       pins.push(p);
@@ -1417,7 +1454,6 @@ export function createMesh(
       if (linked !== null) for (const p of programs) gl.deleteProgram(p);
       for (const buffer of buffers) gl.deleteBuffer(buffer);
       for (const vao of [triangleVao, ...draws.map((d) => d.vao)]) gl.deleteVertexArray(vao);
-      for (const p of pins) settle(p);
       for (const texture of [
         map,
         colorTexture,

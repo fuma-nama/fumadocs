@@ -1,6 +1,6 @@
 import { DISSOLVE, ditherKeyframes } from '../../lib/dither';
 import { type Anchor, identity, type Mat4, transform, type Vec3 } from '../../lib/mesh';
-import { clamp, easeOut, mix, type Rect, rectIn, TICK } from '../../lib/motion';
+import { clamp, easeOut, mix, type Rect, rectIn, steer, TICK } from '../../lib/motion';
 import { reduce, setText } from '../../lib/script';
 import { report } from '../../lib/status';
 import {
@@ -81,6 +81,7 @@ interface Card {
   fit: number;
   inlet: HTMLElement | undefined;
   reveals: HTMLElement[];
+  carried: boolean;
 }
 
 /** an import rewired: the old line struck, the new one typed */
@@ -107,7 +108,7 @@ export function createCli(root: HTMLElement): () => void {
   const replay = find('replay', figure);
   const commandBox = replay.parentElement!;
   const chips = figure.querySelectorAll<HTMLButtonElement>('[data-play]');
-  /** each run's counter, made the first time it shows, after the stage is measured */
+  /** each run's counter, made with the machine */
   const counters = new Map<HTMLElement, Flaps>();
 
   /** run `index`'s parts, in the stage and in the header */
@@ -148,6 +149,7 @@ export function createCli(root: HTMLElement): () => void {
         fit: 1,
         inlet,
         reveals,
+        carried: false,
       });
     }
     const editor = root.querySelector<HTMLElement>(`[data-editor]${own}`)!;
@@ -199,6 +201,7 @@ export function createCli(root: HTMLElement): () => void {
       mark: find('mark', page),
       spinner: editor.querySelector<SVGSVGElement>('[data-spinner]')!,
       edited: page.hasAttribute('data-edited'),
+      live: false,
     };
   }
   const elements = root.querySelectorAll<HTMLElement>('[data-inlet]');
@@ -208,6 +211,7 @@ export function createCli(root: HTMLElement): () => void {
   const holes = Math.max(...counts);
   const machine = createMachine(root.querySelector('canvas')!, holes, {
     onFrame,
+    onRest: settleCaret,
     onResize(width, height) {
       size = [width, height];
       layout();
@@ -263,6 +267,8 @@ export function createCli(root: HTMLElement): () => void {
     };
   }
   const mesh = machine.mesh;
+  for (const counter of root.querySelectorAll<HTMLElement>('[data-counter]'))
+    counters.set(counter, createFlaps(counter));
   // world points are stage px, y down, z toward the viewer; the camera is level with the stage's top
   let size = [0, 0];
   let footX = 0;
@@ -290,14 +296,15 @@ export function createCli(root: HTMLElement): () => void {
   let rewire = false;
   /** the line being typed into, the caret after its text */
   let caretLine: HTMLElement | undefined;
-  /** the parts in the middle half of the screen, and whether this run's editor has been there */
+  /** the parts in the middle half of the screen */
   const seen = new Set<Element>();
-  let met = false;
   let landedShown = -1;
   let flashed = -1;
   let flashUntil = 0;
   let flashRow: HTMLElement | undefined;
-  let caretMode = '';
+  let caretShown = false;
+  let caretSolid = false;
+  let caretRelease: (() => void) | undefined;
   let caretAt = '';
   let typedShown = -1;
   let status = '';
@@ -593,9 +600,10 @@ export function createCli(root: HTMLElement): () => void {
     };
     wire(s);
 
+    // a run waiting for the editor waits as far into its rewrites as it was, or where they now start
+    const into = clock - beats.strikes[0];
     beats = schedule();
-    // a run waiting for the editor waits where its rewrites now start
-    if (phase === 'hold') clock = beats.strikes[0] - 1;
+    if (phase === 'hold') clock = beats.strikes[0] + Math.max(into, -1);
     landedShown = -1;
     render(phase === 'rest' ? beats.end : clock);
   }
@@ -675,21 +683,42 @@ export function createCli(root: HTMLElement): () => void {
   function render(t: number) {
     const live = phase !== 'rest';
     const b = beats;
+    // the run's files stay on the drawing while it plays, each faded out but while it's carried:
+    // showing one then only fades its layer
+    if (live !== scene.live) {
+      scene.live = live;
+      for (const card of scene.cards) {
+        card.anchor.shown = live;
+        card.carried = false;
+        card.el.style.visibility = live ? 'visible' : '';
+        card.el.style.opacity = live ? '0' : '';
+      }
+    }
 
     // characters not typed yet keep their place, unseen
-    const length = scene.command.children.length;
+    const chars = scene.command.children as HTMLCollectionOf<HTMLElement>;
+    const length = chars.length;
     const shown = live ? Math.round(clamp((t - TYPE) / (b.typed - TYPE)) * length) : length;
     if (shown !== typedShown) {
+      const from = typedShown < 0 ? 0 : Math.min(shown, typedShown);
+      const to = typedShown < 0 ? length : Math.max(shown, typedShown);
+      for (let i = from; i < to; i++) chars[i].style.visibility = i < shown ? '' : 'hidden';
       typedShown = shown;
-      if (shown < length) scene.command.style.setProperty('--typed', String(shown));
-      else scene.command.style.removeProperty('--typed');
     }
-    // solid while typing, blinking on the play's clock a beat at a time after it, gone once run
+    // solid while typing, blinking on the play's clock a beat at a time after it, gone once run;
+    // on a layer of its own while the frames run, so it moves and blinks without a layout of layers
     const blink = t > b.typed && Math.floor((t - b.typed) / (2 * TICK)) % 2 === 1;
-    const typing = !live || t > b.lid || blink ? 'hidden' : 'visible';
-    if (typing !== caretMode) {
-      caretMode = typing;
-      caret.style.visibility = typing;
+    const running = live && t <= b.lid;
+    if (running !== caretShown) {
+      caretShown = running;
+      caret.style.visibility = running ? 'visible' : '';
+    }
+    if (running) caretRelease ??= steer(caret);
+    else settleCaret();
+    const solid = running && !blink;
+    if (solid !== caretSolid) {
+      caretSolid = solid;
+      caret.style.opacity = solid ? '' : '0';
     }
     const at = `translate(${scene.ends[shown * 2].toFixed(1)}px, ${scene.ends[shown * 2 + 1].toFixed(1)}px)`;
     if (at !== caretAt) {
@@ -711,9 +740,9 @@ export function createCli(root: HTMLElement): () => void {
       const out = t - b.release[i];
       if (live && t >= b.landed[i]) landed++;
       const carried = live && s > -lift && t < b.landed[i];
-      if (card.anchor.shown !== carried) {
-        card.anchor.shown = carried;
-        card.el.style.visibility = carried ? 'visible' : '';
+      if (carried !== card.carried) {
+        card.carried = carried;
+        card.el.style.opacity = carried ? '' : '0';
       }
       if (!carried) continue;
       // where its top middle is, how deep, and how much of its size it shows
@@ -761,7 +790,6 @@ export function createCli(root: HTMLElement): () => void {
         }
       }
       landedShown = landed;
-      if (!counters.has(scene.counter)) counters.set(scene.counter, createFlaps(scene.counter));
       counters.get(scene.counter)!.set(live ? landed : scene.cards.length, more);
       if (live && landed > 0 && landed - 1 !== flashed) {
         flashed = landed - 1;
@@ -881,6 +909,12 @@ export function createCli(root: HTMLElement): () => void {
     point[2] = CHAIN_Z;
   }
 
+  /** the caret leaves its layer: once run, and as the frames rest */
+  function settleCaret() {
+    caretRelease?.();
+    caretRelease = undefined;
+  }
+
   function flash(row: HTMLElement | undefined, t: number) {
     if (row) flashUntil = t + TICK;
     if (flashRow === row) return;
@@ -893,15 +927,17 @@ export function createCli(root: HTMLElement): () => void {
   function onFrame() {
     if (phase !== 'play') return;
     const now = performance.now();
+    const before = clock;
     clock += last < 0 ? 0 : Math.min(50, now - last);
     last = now;
     if (rewire) {
       rewire = false;
       wire(root.getBoundingClientRect());
     }
-    // the rewrites wait just before their start until the reader has seen the editor
-    if (!met && clock >= beats.strikes[0]) {
-      clock = beats.strikes[0] - 1;
+    // the rewrites start, and go on, while the reader sees the editor: else they wait, just
+    // before their start or where they were
+    if (clock >= beats.strikes[0] && !seen.has(scene.editor)) {
+      clock = Math.max(before, beats.strikes[0] - 1);
       hold();
     } else if (clock < beats.end) render(clock);
     else rest();
@@ -920,9 +956,8 @@ export function createCli(root: HTMLElement): () => void {
   }
 
   function check() {
-    if (seen.has(scene.editor) && phase !== 'ready') met = true;
     if (phase === 'ready' && seen.has(crate)) arrive();
-    else if (phase === 'hold' && met) {
+    else if (phase === 'hold' && seen.has(scene.editor)) {
       phase = 'play';
       wake();
     }
@@ -951,7 +986,6 @@ export function createCli(root: HTMLElement): () => void {
     }
     phase = 'play';
     clock = 0;
-    met = seen.has(scene.editor);
     landedShown = -1;
     flashed = -1;
     beatTab = -1;
@@ -1073,16 +1107,19 @@ function createFlaps(root: HTMLElement) {
   const noun = root.querySelector<HTMLElement>('[data-noun]')!;
   const cells: Flap[] = [];
   for (const el of root.querySelectorAll<HTMLElement>('[data-flap]')) {
+    const digit = el.textContent;
     const layer = (clip: string) => {
       const span = document.createElement('span');
       span.ariaHidden = 'true';
+      // its text node from the start: a node put in later has the page match its `:has()` rules
+      span.textContent = digit;
       span.style.cssText = `position:absolute;inset:0;display:grid;place-items:center;background:inherit;opacity:0;will-change:transform,opacity;clip-path:${clip}`;
       el.append(span);
       return span;
     };
     cells.push({
       el,
-      value: el.firstChild?.textContent ?? '',
+      value: digit,
       under: layer('inset(50% 0 0 0)'),
       top: layer('inset(0 0 50% 0)'),
       bottom: layer('inset(50% 0 0 0)'),
@@ -1120,7 +1157,8 @@ function createFlaps(root: HTMLElement) {
             ],
             { duration: FLIP / 2, delay: FLIP / 2, easing: 'cubic-bezier(0, 0.55, 0.45, 1)' },
           ),
-          cell.under.animate({ opacity: [1, 1] }, { duration: FLIP }),
+          // shown through the flip and gone at its end: a change, so the compositor runs it
+          cell.under.animate({ opacity: [1, 0] }, { duration: FLIP, easing: 'steps(1, end)' }),
         );
       }
       setText(noun, value === 1 ? 'file' : 'files');

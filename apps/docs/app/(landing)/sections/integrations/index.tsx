@@ -4,7 +4,6 @@ import { copy } from '../../content';
 import { Board, Keyed } from './board';
 import { modules, more } from './data';
 import { mechanisms } from './mechanisms';
-import './integrations.css';
 
 export function Integrations() {
   return (
@@ -36,7 +35,7 @@ function More() {
         <Link
           href={item.href}
           prefetch={false}
-          className="flex h-11 items-center px-3 text-sm text-lp-ink-2 hover:bg-lp-ink hover:text-lp-paper focus-visible:bg-lp-ink focus-visible:text-lp-paper focus-visible:outline-none"
+          className="flex h-11 items-center px-3 text-sm text-lp-ink-2 lp-invert"
         >
           {item.name}
         </Link>
@@ -46,7 +45,7 @@ function More() {
 
   return (
     <Keyed className="group/more flex">
-      <p className="flex shrink-0 items-center border-e border-lp-line px-(--lp-gutter) font-pixel text-[13.16px] leading-4 text-lp-orange antialiased">
+      <p className="flex shrink-0 items-center border-e border-lp-line px-(--lp-gutter) font-pixel text-pixel text-lp-orange antialiased">
         +{more.length} more
       </p>
       {/* the names that don't fit wrap out of sight, scrolled into it from the keyboard */}

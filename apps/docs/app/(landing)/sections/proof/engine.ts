@@ -37,16 +37,35 @@ export const TIMING = {
 };
 
 /**
+ * `els` each keep their layer till all of `moves` have ended, by a paused move of their `translate`
+ * that adds nothing, as `steer` does with `transform`, which leaves their own animations as they are:
+ * the page is laid out in layers once as they all end, not again as each does; resolves as they let go
+ */
+function keepLayers(els: Element[], moves: Animation[]): Promise<void> {
+  const held: Animation[] = [];
+  for (const el of els) {
+    const still = el.animate({ translate: ['0 0', '0 0'] }, { duration: 1, composite: 'add' });
+    still.pause();
+    held.push(still);
+  }
+  const ends: Promise<Animation>[] = [];
+  for (const move of moves) ends.push(move.finished);
+  return Promise.allSettled(ends).then(() => {
+    for (const still of held) still.cancel();
+  });
+}
+
+/**
  * The machine's screen switches on, a dot, a line, then all of it, and as it opens its counters roll
  * in from zeros; the windows land on the desk by `TIMING`: the picks, Vercel's SDKs, the pile and
  * ArkType, then the way to all of the sites on top. The first reports its file, and `status`, the
- * figure's line, is reported again once all is there; `roll` sets how many counters have rolled in,
- * `null` for all at rest.
+ * figure's line, is reported again once all is there; `hold` holds the counters at zeros, or lets
+ * them rest on their readings.
  */
 export function createProjects(
   root: HTMLElement,
   status: string,
-  roll: (printed: number | null) => void,
+  hold: (zeros: boolean) => void,
 ): (() => void) | undefined {
   const machine = root.querySelector<HTMLElement>('[data-machine]');
   const desk = root.querySelector<HTMLElement>('[data-desk]');
@@ -70,7 +89,7 @@ export function createProjects(
   function finish() {
     for (const el of windows.values()) show(el, true);
     power(true);
-    roll(null);
+    hold(false);
     report(desk!, status);
   }
 
@@ -128,8 +147,23 @@ export function createProjects(
 
   function playMachine() {
     switchOn();
-    for (let i = 0; i < TIMING.rolls.length; i++)
-      at(clocks.machine, TIMING.rolls[i], () => roll(i + 1));
+    const cells: Element[] = [];
+    const rolls: Animation[] = [];
+    for (const cell of machine!.querySelectorAll('[data-cell]')) {
+      const roll = cell.getAnimations()[0];
+      if (!roll) continue;
+      cells.push(cell);
+      rolls.push(roll);
+    }
+    void keepLayers(cells, rolls);
+    // a counter rolls in as its held cells run, set here rather than rendered again
+    const counters = machine!.querySelectorAll('dd');
+    for (let i = 0; i < counters.length; i++) {
+      at(clocks.machine, TIMING.rolls[i], () => {
+        for (const cell of counters[i].querySelectorAll<HTMLElement>('[data-cell]'))
+          cell.style.animationPlayState = 'running';
+      });
+    }
     at(clocks.machine, TIMING.open, open);
   }
 
@@ -160,10 +194,27 @@ export function createProjects(
       if (i === 0) at(clocks.desk, beat, () => report(desk!, `${name}.png`));
       else if (i === last) at(clocks.desk, beat, () => report(desk!, status));
     }
+    const els: HTMLElement[] = [];
+    const moves: Animation[] = [];
     for (const { el, frames, beat, x, y } of pops) {
-      const made = [dot(desk!, x, y, undefined, beat), pop(el, frames, beat)];
+      const made = [dot(desk!, x, y, beat), pop(el, frames, beat)];
       if (clocks.desk.held) for (const animation of made) animation.pause();
+      els.push(el);
+      moves.push(made[1]);
     }
+    // a window that kept its layer past its landing stays painted as it was laid out on it, its
+    // shadow's edge a device px off; laid out again, it is painted in place (one that has focus keeps it)
+    void keepLayers(els, moves).then(() => {
+      if (dead) return;
+      const again: HTMLElement[] = [];
+      for (const el of els) {
+        if (el.contains(document.activeElement)) continue;
+        el.style.display = 'none';
+        again.push(el);
+      }
+      void desk!.offsetHeight;
+      for (const el of again) el.style.display = '';
+    });
   }
 
   // each part already in view, or with reduced motion, is simply there, as the page shows it: else
@@ -171,11 +222,10 @@ export function createProjects(
   const stopViews: (() => void)[] = [];
   if (reached(machine)) {
     power(true);
-    roll(null);
     open();
   } else {
     power(false);
-    roll(0);
+    hold(true);
     stopViews.push(whenShareSeen(machine, clocks.machine, playMachine));
   }
   const there = reached(desk);

@@ -52,7 +52,7 @@ export function Start() {
                 href={link.href}
                 target={link.external ? '_blank' : undefined}
                 rel={link.external ? 'noreferrer noopener' : undefined}
-                className="inline-flex h-9 items-center px-2.5 transition-none hover:bg-lp-ink hover:text-lp-paper focus-visible:bg-lp-ink focus-visible:text-lp-paper focus-visible:outline-none"
+                className="inline-flex h-9 items-center px-2.5 lp-invert"
               >
                 {link.text}
               </Link>

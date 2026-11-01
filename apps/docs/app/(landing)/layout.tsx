@@ -14,7 +14,11 @@ const pixel = Geist_Pixel({
 
 export default function Layout({ children }: { children: ReactNode }) {
   return (
-    <SiteHomeLayout className={`landing overflow-x-clip ${pixel.variable}`}>
+    <SiteHomeLayout
+      // from the sheet's width the navbar's content edge lands on the sheet's: two 1px frame lines,
+      // its own 16px padding
+      className={`landing overflow-x-clip selection:bg-lp-yellow selection:text-lp-on-yellow sheet:[--fd-layout-width:calc(var(--lp-max)-2px-2*var(--lp-gutter)+32px)] ${pixel.variable}`}
+    >
       <div
         data-sheet=""
         className="mx-auto w-full max-w-(--lp-max) flex-1 border-lp-line pb-(--lp-status-h) sheet:border-x"

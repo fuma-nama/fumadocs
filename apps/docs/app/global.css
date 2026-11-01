@@ -42,9 +42,26 @@
   /* the machine's voice, loaded by the landing layout; the sans stands in until it arrives, its
      widths within a few percent, so no label wraps or jumps at the swap */
   --font-pixel: var(--font-geist-pixel), var(--font-sans);
-  /* a caret's blink; its keyframes are in app/(landing)/landing.css */
+  /* its crisp size, in its 16px line */
+  --text-pixel: 13.16px;
+  --text-pixel--line-height: 1rem;
+  /* a caret's blink */
   --animate-lp-caret: lp-caret 1s steps(1, end) infinite;
+  /* a new status line prints in, left to right: the paper over it steps off to the right */
   --animate-lp-print: lp-print 0.3s steps(12);
+
+  @keyframes lp-caret {
+    50% {
+      opacity: 0;
+    }
+  }
+
+  @keyframes lp-print {
+    from {
+      translate: 0;
+    }
+  }
+
   /* the sheet's width (`--lp-max`): from here its frame lines and corner marks show */
   --breakpoint-sheet: 87.5rem;
   /* a link preview's ratio, that of every site screenshot */
@@ -56,6 +73,37 @@
   /* a title's measure, in its own characters at any size: a long sentence wraps into two or three
      balanced lines at its phrases, a short one stays on one */
   --container-title: 30ch;
+}
+
+@utility lp-dots {
+  background-image: radial-gradient(var(--lp-line-strong) 0.75px, transparent 0.75px);
+  background-size: 12px 12px;
+}
+
+/* inverted while pointed at or focused from the keyboard */
+@utility lp-invert {
+  @apply transition-none hover:bg-lp-ink hover:text-lp-paper focus-visible:bg-lp-ink focus-visible:text-lp-paper focus-visible:outline-none;
+}
+
+/* inverted while its `group` is */
+@utility lp-invert-group {
+  @apply group-hover:bg-lp-ink group-hover:text-lp-paper group-focus-visible:bg-lp-ink group-focus-visible:text-lp-paper;
+}
+
+/* the 4px tile of a `DITHER_MASKS` mask */
+@utility lp-dither {
+  mask-size: 4px 4px;
+}
+
+@utility lp-pinstripe {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    var(--lp-line-strong) 0 1px,
+    transparent 1px 3px
+  );
+  background-size: 100% 11px;
+  background-position: 0 50%;
+  background-repeat: no-repeat;
 }
 
 @theme inline {

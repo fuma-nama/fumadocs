@@ -12,7 +12,7 @@ export function StatusBar() {
         {/* a lit lamp, then the page's log line in the machine's type */}
         <p
           aria-hidden
-          className="flex min-w-0 flex-1 items-center gap-2 ps-(--lp-gutter) pe-3 font-pixel text-[13.16px] leading-4 font-normal tabular-nums antialiased"
+          className="flex min-w-0 flex-1 items-center gap-2 ps-(--lp-gutter) pe-3 font-pixel text-pixel font-normal tabular-nums antialiased"
         >
           <span className="size-2 shrink-0 rounded-full border border-lp-ink bg-lp-sun" />
           <Status />

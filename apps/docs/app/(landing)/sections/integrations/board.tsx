@@ -87,10 +87,13 @@ export function Board({
               return;
           delete card.dataset.play;
         }}
-        className="bt-cell group relative flex cursor-pointer flex-col border-e border-b border-lp-line bg-lp-paper p-(--lp-gutter) text-lp-ink data-waiting:pointer-events-none data-waiting:opacity-0 hover:bg-lp-ink hover:text-lp-paper data-focus:bg-lp-ink data-focus:text-lp-paper md:p-6 xl:p-8"
+        // the mechanism's palette, inverted while the card is pointed at or focused from the
+        // keyboard; played again as it's inspected, at twice the pace; a card narrower than its
+        // mechanism and padding scales the mechanism down whole
+        className="bt-cell group @container relative flex cursor-pointer flex-col border-e border-b border-lp-line bg-(--bt-paper) p-(--lp-gutter) text-(--bt-ink) [--bt-ink:var(--lp-ink)] [--bt-orange:var(--lp-orange)] [--bt-paper:var(--lp-paper)] [--bt-speed:1] data-waiting:pointer-events-none data-waiting:opacity-0 hover:[--bt-ink:var(--lp-paper)] hover:[--bt-orange:var(--lp-orange-on-ink)] hover:[--bt-paper:var(--lp-ink)] data-focus:[--bt-ink:var(--lp-paper)] data-focus:[--bt-orange:var(--lp-orange-on-ink)] data-focus:[--bt-paper:var(--lp-ink)] data-[play=fast]:[--bt-speed:2] md:p-6 xl:p-8"
       >
         {/* as wide as the mechanism, so the hotkeys end on its right edge */}
-        <div className="flex max-w-(--bt-stage) items-start justify-between gap-4">
+        <div className="flex max-w-90 items-start justify-between gap-4">
           {module.href ? (
             <Link href={module.href} prefetch={false} className={title}>
               {module.title}
@@ -200,7 +203,7 @@ function Install({ commands, command }: { commands: string[]; command: string })
   return (
     // below 1024 each cell shows its own command: the window would sit screens above most cells
     <Window
-      title={<span className="font-pixel text-[13.16px] antialiased">install</span>}
+      title={<span className="font-pixel text-pixel antialiased">install</span>}
       className="shrink-0 max-lg:hidden"
     >
       <div className="flex items-center gap-3 px-3 py-2.5 font-mono text-sm">
@@ -215,7 +218,7 @@ function Install({ commands, command }: { commands: string[]; command: string })
           type="button"
           onClick={onCopy}
           aria-label={copied ? 'Copied' : `Copy "${command}"`}
-          className="flex size-6 shrink-0 items-center justify-center border border-lp-line-strong hover:bg-lp-ink hover:text-lp-paper focus-visible:bg-lp-ink focus-visible:text-lp-paper focus-visible:outline-none"
+          className="flex size-6 shrink-0 items-center justify-center border border-lp-line-strong lp-invert"
         >
           {copied ? <Check className="size-3.5" /> : <Clipboard className="size-3.5" />}
         </button>

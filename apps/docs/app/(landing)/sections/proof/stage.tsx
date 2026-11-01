@@ -1,6 +1,6 @@
 'use client';
 import { type ReactNode, useCallback, useState } from 'react';
-import { nearby } from '../../lib/script';
+import { DOT, nearby } from '../../lib/script';
 import { Roller } from '../../ui/text';
 import { createProjects, TIMING } from './engine';
 
@@ -19,17 +19,17 @@ const format = new Intl.NumberFormat('en-US');
  * the title and the screen keep to the gutter every section's title sits on; below the sheet's width
  * that is the gutter, edge to edge. The screen reads its meters side by side from 1024px, each its
  * name over where the reading comes from over the number, and a row each below: the number at the
- * row's end, under the name on phones. `printed` is how many have rolled in from zeros, `null` at
- * rest.
+ * row's end, under the name on phones. `held` holds them at zeros, each to roll in when the script
+ * plays its cells.
  */
 function Machine({
   title,
   readings,
-  printed,
+  held,
 }: {
   title: ReactNode;
   readings: Reading[];
-  printed: number | null;
+  held: boolean;
 }) {
   const rows: ReactNode[] = [];
   for (let i = 0; i < readings.length; i++) {
@@ -41,7 +41,7 @@ function Machine({
         className="flex flex-col gap-2 border-t border-lp-paper/15 px-4 py-3 first:border-t-0 sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:py-2.5 lg:flex-col lg:items-start lg:justify-start lg:gap-2 lg:border-s lg:border-t-0 lg:px-5 lg:py-4 lg:first:border-s-0 dark:border-lp-ink/15"
       >
         <dt className="flex flex-col">
-          <span className="font-pixel text-[13.16px] leading-4 text-lp-paper/70 antialiased dark:text-lp-ink/70">
+          <span className="font-pixel text-pixel text-lp-paper/70 antialiased dark:text-lp-ink/70">
             {reading.label}
           </span>
           <span className="font-mono text-xs leading-4 text-lp-paper/50 dark:text-lp-ink/50">
@@ -50,10 +50,9 @@ function Machine({
         </dt>
         <dd className="font-pixel text-[26.32px] leading-7 text-lp-sun antialiased sm:text-[52.64px] sm:leading-14">
           <Roller
-            key={printed === null ? 'rest' : 'roll'}
+            key={held ? 'roll' : 'rest'}
             value={text}
-            from={printed === null ? undefined : text.replace(/\d/g, '0')}
-            play={printed !== null && i < printed}
+            from={held ? text.replace(/\d/g, '0') : undefined}
             step={TIMING.step}
             stagger={TIMING.stagger}
             cell="w-4.5 text-center sm:w-9"
@@ -108,14 +107,14 @@ interface StageProps {
  * a cascading pile, then Vercel's SDKs and the way to the rest, side by side from 640px.
  */
 export function Stage({ title, readings, status, picks, vercel, rest }: StageProps) {
-  const [printed, setPrinted] = useState<number | null>(null);
+  const [held, setHeld] = useState(false);
   const mount = useCallback(
     (stage: HTMLDivElement | null) => {
       if (!stage) return;
-      const stop = nearby(stage, () => createProjects(stage, status, setPrinted));
+      const stop = nearby(stage, () => createProjects(stage, status, setHeld));
       return () => {
         stop();
-        setPrinted(null);
+        setHeld(false);
       };
     },
     [status],
@@ -123,7 +122,7 @@ export function Stage({ title, readings, status, picks, vercel, rest }: StagePro
 
   return (
     <div ref={mount} className="flex flex-col">
-      <Machine title={title} readings={readings} printed={printed} />
+      <Machine title={title} readings={readings} held={held} />
       <div
         data-desk
         className="relative z-10 mt-10 flex flex-col gap-8 sm:grid sm:grid-cols-2 sm:items-start md:mt-12 lg:block"
@@ -136,6 +135,7 @@ export function Stage({ title, readings, status, picks, vercel, rest }: StagePro
         <div className="relative h-38 w-70 lg:contents">{rest}</div>
         {/* as tall as the lowest window, ArkType's, and its shadow */}
         <span aria-hidden className="hidden pt-[calc(44.6%_+_33px)] lg:block" />
+        <span aria-hidden data-dot className={DOT} />
       </div>
     </div>
   );

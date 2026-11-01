@@ -3,7 +3,7 @@ import { Search } from 'lucide-react';
 import type { CSSProperties, ReactNode } from 'react';
 import { cn } from '@/lib/cn';
 import { type Layer, LAYER_ICONS } from '../../ui/chip';
-import { mount } from '../../lib/script';
+import { DOT, mount } from '../../lib/script';
 import { Shadow, Window } from '../../ui/window';
 import { PORT } from '../../lib/cable';
 import { CORE, LAYERS, NAMES, OPTIONS, ROLES } from './data';
@@ -34,12 +34,11 @@ function Plates() {
           ? {}
           : { role: 'button', tabIndex: 0, 'aria-label': `${NAMES[layer]}: ${title}` })}
         style={{ transform: 'scale(0)' }}
-        className={cn(
-          'pointer-events-auto absolute top-0 left-0 flex h-(--parts-plate-h) w-(--parts-plate-w) origin-top-left border font-pixel text-[13.16px] leading-4 antialiased select-text',
+        className={`pointer-events-auto absolute top-0 left-0 flex h-(--parts-plate-h) w-(--parts-plate-w) origin-top-left border font-pixel text-pixel antialiased select-text ${
           core
             ? 'border-lp-paper bg-lp-ink text-lp-paper dark:border-lp-ink dark:bg-lp-paper dark:text-lp-ink'
-            : 'border-lp-ink bg-lp-paper text-lp-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lp-orange data-ready:cursor-pointer data-ready:hover:bg-lp-yellow data-ready:hover:text-lp-on-yellow dark:border-lp-paper dark:bg-lp-ink dark:text-lp-paper',
-        )}
+            : 'border-lp-ink bg-lp-paper text-lp-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lp-orange data-ready:cursor-pointer data-ready:hover:bg-lp-yellow data-ready:hover:text-lp-on-yellow dark:border-lp-paper dark:bg-lp-ink dark:text-lp-paper'
+        }`}
       >
         <span
           data-badge
@@ -76,7 +75,7 @@ function Plates() {
 
 function Displays() {
   const display =
-    'pointer-events-auto absolute top-0 left-0 overflow-hidden px-1 font-pixel text-[13.16px] leading-4 whitespace-pre text-lp-paper antialiased select-text dark:text-lp-ink';
+    'pointer-events-auto absolute top-0 left-0 overflow-hidden px-1 font-pixel text-pixel whitespace-pre text-lp-paper antialiased select-text dark:text-lp-ink';
   return (
     <>
       <div data-display="framework" style={{ transform: 'scale(0)' }} className={display}>
@@ -164,7 +163,7 @@ function Pages() {
         <span className="hidden size-3 bg-lp-sun group-data-[look=blocks]/page:block dark:bg-lp-orange" />
         <span
           data-name
-          className="truncate text-[13px] leading-4 font-medium [mask-size:8px_8px] group-data-handed/page:visible group-data-[look=files]/page:font-pixel group-data-[look=files]/page:text-[13.16px] group-data-[look=files]/page:font-normal group-data-[look=files]/page:antialiased"
+          className="truncate text-[13px] leading-4 font-medium [mask-size:8px_8px] group-data-handed/page:visible group-data-[look=files]/page:font-pixel group-data-[look=files]/page:text-pixel group-data-[look=files]/page:font-normal group-data-[look=files]/page:antialiased"
         />
         <span className="h-px w-full bg-current" />
         <span className="h-px w-5/6 bg-current" />
@@ -209,7 +208,7 @@ function Panel({ className }: { className: string }) {
             aria-checked={k === 0}
             tabIndex={k === 0 ? 0 : -1}
             disabled
-            className="border border-lp-line-strong px-1.5 py-1 font-pixel text-[13.16px] leading-4 text-lp-ink antialiased focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lp-orange enabled:cursor-pointer aria-checked:bg-lp-ink aria-checked:text-lp-paper enabled:not-aria-checked:hover:bg-lp-yellow enabled:not-aria-checked:hover:text-lp-on-yellow"
+            className="border border-lp-line-strong px-1.5 py-1 font-pixel text-pixel text-lp-ink antialiased focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lp-orange enabled:cursor-pointer aria-checked:bg-lp-ink aria-checked:text-lp-paper enabled:not-aria-checked:hover:bg-lp-yellow enabled:not-aria-checked:hover:text-lp-on-yellow"
           >
             {option.title}
           </button>,
@@ -226,12 +225,10 @@ function Panel({ className }: { className: string }) {
         <span data-port aria-hidden className={cn(PORT, '-left-[7px] hidden lg:block')} />
         <div>
           <p className="flex items-baseline gap-2">
-            <span className="font-pixel text-[13.16px] leading-4 antialiased">{NAMES[layer]}</span>
+            <span className="font-pixel text-pixel antialiased">{NAMES[layer]}</span>
             <span className="text-sm/5 text-pretty text-lp-ink-2">{ROLES[layer]}</span>
             {layer === 'core' && (
-              <span className="ms-auto font-pixel text-[13.16px] leading-4 text-lp-ink-2 antialiased">
-                fixed
-              </span>
+              <span className="ms-auto font-pixel text-pixel text-lp-ink-2 antialiased">fixed</span>
             )}
           </p>
           {chips.length > 0 && (
@@ -254,7 +251,7 @@ function Panel({ className }: { className: string }) {
       className={cn('relative isolate data-[state=off]:invisible', className)}
     >
       <Shadow />
-      <Window title={<span className="font-pixel text-[13.16px] antialiased">Your stack</span>}>
+      <Window title={<span className="font-pixel text-pixel antialiased">Your stack</span>}>
         <div data-rows className="relative">
           {rows}
         </div>
@@ -277,7 +274,8 @@ export function Stage({ header }: { header: ReactNode }) {
           {LAYERS.map((layer) => (
             <Leader key={layer} layer={layer} />
           ))}
-          <div className="pointer-events-none absolute inset-0">
+          {/* clipped, the faces can't take the rest of the page into layers (see steer) */}
+          <div className="pointer-events-none absolute inset-0 overflow-clip">
             <Plates />
             <Displays />
             <Screen />
@@ -286,11 +284,12 @@ export function Stage({ header }: { header: ReactNode }) {
           <p
             data-caption
             hidden
-            className="absolute top-full left-0 mt-2 text-center font-pixel text-[13.16px] leading-4 text-balance text-lp-ink antialiased select-text"
+            className="absolute top-full left-0 mt-2 text-center font-pixel text-pixel text-balance text-lp-ink antialiased select-text"
           />
         </div>
         <Panel className="mt-12 md:mt-6 md:max-w-120 lg:mt-(--parts-panel) lg:self-start" />
       </div>
+      <span aria-hidden data-dot className={DOT} />
     </div>
   );
 }

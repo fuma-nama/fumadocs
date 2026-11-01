@@ -21,12 +21,7 @@ const box =
 /** a tile's striped title bar, its title between two boxes; inverted while its tile is pointed at */
 function TileBar({ className, children }: { className?: string; children: ReactNode }) {
   return (
-    <span
-      className={cn(
-        'relative flex h-5 items-center gap-1 px-1 group-hover:bg-lp-ink group-hover:text-lp-paper group-focus-visible:bg-lp-ink group-focus-visible:text-lp-paper',
-        className,
-      )}
-    >
+    <span className={cn('relative flex h-5 items-center gap-1 px-1 lp-invert-group', className)}>
       <span
         aria-hidden
         className="lp-pinstripe absolute inset-x-1 inset-y-0 group-hover:hidden group-focus-visible:hidden"
@@ -65,7 +60,7 @@ export function SiteTile({ site, sizes, className, ...props }: SiteTileProps) {
         // the initial scales with the tile
         <span
           aria-hidden
-          className="flex aspect-og items-center justify-center bg-lp-paper-2 @container group-hover:bg-lp-ink group-hover:text-lp-paper group-focus-visible:bg-lp-ink group-focus-visible:text-lp-paper"
+          className="flex aspect-og items-center justify-center bg-lp-paper-2 @container lp-invert-group"
         >
           <span className="font-pixel text-[40cqw] leading-none">{site.name[0]}</span>
         </span>

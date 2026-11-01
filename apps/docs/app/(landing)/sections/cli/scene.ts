@@ -89,7 +89,11 @@ export interface Pose {
 export function createMachine(
   canvas: HTMLCanvasElement,
   cards: number,
-  options: { onFrame: () => void; onResize: (width: number, height: number) => void },
+  options: {
+    onFrame: () => void;
+    onResize: (width: number, height: number) => void;
+    onRest: () => void;
+  },
 ) {
   const specs: PartSpec[] = [];
   let ids = 0;

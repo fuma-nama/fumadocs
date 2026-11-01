@@ -21,6 +21,9 @@ import {
   uncover,
 } from './stage';
 
+/** a label in code, a character two cells: 0.6em */
+const CODE = 'font-mono text-[10px]/none';
+
 // sprites drawn by more than one mechanism, `#` cells
 
 const MAGNIFIER = ['.###...', '#...#..', '#...#..', '#...#..', '.###...', '....##.', '.....##'];
@@ -49,7 +52,10 @@ const search = choreograph('search', 17, 16, {
 function Result({ i, selected }: { i: number; selected: boolean }) {
   const y = 8 * i;
   return (
-    <Layer className={selected ? 'bt-on-hi' : undefined}>
+    // content on the yellow highlight is always dark
+    <Layer
+      className={selected ? 'text-lp-on-yellow [--bt-ink:var(--color-lp-on-yellow)]' : undefined}
+    >
       {selected && <Px w={94} h={24} hi={rect(0, y, 94, 8)} />}
       {i > 0 && <Px w={94} h={24} ink={rect(4, y, 1, 8) + art(HASH, 7, y + 2)} />}
       <Text x={i === 0 ? 3 : 14} y={y} h={8}>
@@ -295,19 +301,19 @@ function LLMsMechanism() {
         }
         knock={rect(5, 27, 10, 1) + rect(5, 29, 14, 1) + rect(5, 31, 8, 1)}
       />
-      <Text x={34} y={0} h={4} className="bt-code opacity-55">
+      <Text x={34} y={0} h={4} className={`${CODE} opacity-55`}>
         /docs/markdown/twoslash.md
       </Text>
-      <Text x={37} y={7} h={3} className="bt-code">
+      <Text x={37} y={7} h={3} className={CODE}>
         #
       </Text>
-      <Text x={37} y={15} h={3} className="bt-code">
+      <Text x={37} y={15} h={3} className={CODE}>
         ##
       </Text>
-      <Text x={37} y={25} h={3} className="bt-code">
+      <Text x={37} y={25} h={3} className={CODE}>
         ```ts
       </Text>
-      <Text x={37} y={33} h={3} className="bt-code">
+      <Text x={37} y={33} h={3} className={CODE}>
         ```
       </Text>
       <Cover x={35} y={5} w={60} h={33} className={c.print} />
@@ -411,7 +417,8 @@ function I18nMechanism() {
   return (
     <Stage c={i18n} states={I18N_STATES} status={c.status} lamp={c.lamp} spec="3 locales">
       <Flap x={0} y={3} w={32} values={LOCALES} code />
-      <Layer className="bt-lag">
+      {/* the second unit follows one tick later */}
+      <Layer className="[--bt-lead:0ms]">
         <Flap x={0} y={22} w={96} values={LABELS} />
       </Layer>
     </Stage>
@@ -469,10 +476,11 @@ function OGMechanism() {
           frame(69, 0, 9, 6)
         }
       />
-      <Text x={22} y={0} w={20} h={3} className="bt-code justify-center">
+      <Text x={22} y={0} w={20} h={3} className={`${CODE} justify-center`}>
         1200×630
       </Text>
-      <Layer className="bt-ink-card">
+      {/* orange over the ink-filled card: vivid while the ink is dark */}
+      <Layer className="[--bt-orange:var(--lp-sun)] group-hover:[--bt-orange:var(--lp-orange)] group-data-focus:[--bt-orange:var(--lp-orange)]">
         <Px
           ink={rect(1, 6, 62, 32)}
           knock={dither(5, 14, 44, 2, 12) + dither(5, 18, 30, 2, 12)}

@@ -49,8 +49,8 @@ export function Shadow() {
   return (
     <span
       aria-hidden
-      className="absolute inset-0 -z-10 translate-x-0.75 translate-y-1 bg-lp-ink-2"
-      style={{ maskImage: DITHER_MASKS[6], maskSize: '4px 4px' }}
+      className="absolute inset-0 -z-10 translate-x-0.75 translate-y-1 bg-lp-ink-2 lp-dither"
+      style={{ maskImage: DITHER_MASKS[6] }}
     />
   );
 }

@@ -46,30 +46,25 @@ export function pop(el: HTMLElement | SVGElement, frames: Keyframe[], delay = 0)
   return el.animate(frames, { duration: (frames.length - 1) * FRAME, delay, fill: 'backwards' });
 }
 
-/** each parent's dots whose frame is over, kept for its next pops rather than put in again */
-const spare = new WeakMap<Element, HTMLElement[]>();
+/** a pop's dot, unseen between its frames: a parent whose markup holds one (`data-dot`) never has
+ * one put in */
+export const DOT = 'pointer-events-none absolute top-0 left-0 size-1.5 bg-lp-ink opacity-0';
 
-/** a pop's first frame: a 6px dot at `x, y` in `parent`'s box, in ink or `tone`, `delay` ms from now */
-export function dot(
-  parent: Element,
-  x: number,
-  y: number,
-  tone = 'bg-lp-ink',
-  delay = 0,
-): Animation {
-  let kept = spare.get(parent);
-  if (!kept) spare.set(parent, (kept = []));
-  const el = kept.pop() ?? document.createElement('span');
-  el.className = `pointer-events-none absolute top-0 left-0 size-1.5 opacity-0 ${tone}`;
-  // over everything else in `parent`, as a dot put in last is
+/** each parent's dot, shared by its pops: no two of them show theirs at once */
+const dots = new WeakMap<Element, HTMLElement>();
+
+/** a pop's first frame: a 6px ink dot at `x, y` in `parent`'s box, `delay` ms from now */
+export function dot(parent: Element, x: number, y: number, delay = 0): Animation {
+  let el = dots.get(parent);
+  if (!el) {
+    el = parent.querySelector<HTMLElement>(':scope > [data-dot]') ?? document.createElement('span');
+    el.className = DOT;
+    dots.set(parent, el);
+  }
+  // over everything else in `parent`, as its last child
   if (parent.lastElementChild !== el) parent.append(el);
   const at = `translate(${x - 3}px, ${y - 3}px)`;
-  const animation = el.animate(
-    { transform: [at, at], opacity: [1, 1] },
-    { duration: FRAME, delay },
-  );
-  animation.onfinish = animation.oncancel = () => kept.push(el);
-  return animation;
+  return el.animate({ transform: [at, at], opacity: [1, 1] }, { duration: FRAME, delay });
 }
 
 /** `el` popping by `frames` from its centre, with its dot in `parent` */

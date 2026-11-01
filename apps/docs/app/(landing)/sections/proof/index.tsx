@@ -80,11 +80,7 @@ function file(name: string): string {
 
 /** a window's title that inverts while its window is pointed at */
 function Title({ children }: { children: ReactNode }) {
-  return (
-    <span className="-mx-2 px-2 group-hover:bg-lp-ink group-hover:text-lp-paper group-focus-visible:bg-lp-ink group-focus-visible:text-lp-paper">
-      {children}
-    </span>
-  );
+  return <span className="-mx-2 px-2 lp-invert-group">{children}</span>;
 }
 
 interface PickProps {
@@ -208,7 +204,7 @@ export async function Proof() {
             className="relative isolate w-full max-w-105 lg:absolute lg:top-0 lg:left-[min(72%,100%_-_max(25%,300px))] lg:mt-[10%] lg:w-[max(25%,300px)]"
           >
             <Shadow />
-            <Window title={<VercelTitle className="font-pixel text-[13.16px] antialiased" />}>
+            <Window title={<VercelTitle className="font-pixel text-pixel antialiased" />}>
               <p className="p-3 text-sm/5 text-pretty">{showcase.vercel}</p>
               <ul className="flex flex-col border-t border-lp-line-strong [&_a]:py-3">
                 <VercelLinks />
@@ -222,7 +218,7 @@ export async function Proof() {
             {source && (
               <Pick
                 site={source}
-                title={<span className="font-pixel text-[13.16px] antialiased">{source.name}</span>}
+                title={<span className="font-pixel text-pixel antialiased">{source.name}</span>}
                 style={place(SOURCE)}
                 sizes="(min-width: 1400px) 167px, (min-width: 1024px) 12.5vw, 124px"
               />
@@ -238,8 +234,8 @@ export async function Proof() {
             >
               <Shadow />
               <Window title={<Title>showcase</Title>} className="h-24">
-                <span className="flex flex-1 flex-col justify-center gap-1 px-3 group-hover:bg-lp-ink group-hover:text-lp-paper group-focus-visible:bg-lp-ink group-focus-visible:text-lp-paper">
-                  <span className="font-pixel text-[13.16px] leading-4 text-lp-ink-2 antialiased group-hover:text-lp-paper group-focus-visible:text-lp-paper">
+                <span className="flex flex-1 flex-col justify-center gap-1 px-3 lp-invert-group">
+                  <span className="font-pixel text-pixel text-lp-ink-2 antialiased group-hover:text-lp-paper group-focus-visible:text-lp-paper">
                     {picks.length} of {online}
                   </span>
                   <span className="inline-flex items-center gap-2 text-sm font-medium">

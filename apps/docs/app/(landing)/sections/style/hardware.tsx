@@ -10,8 +10,8 @@ function Dither({ level, className }: { level: number; className?: string }) {
   return (
     <span
       aria-hidden
-      className={cn('pointer-events-none absolute inset-0 bg-lp-ink', className)}
-      style={{ maskImage: DITHER_MASKS[level], maskSize: '4px 4px' }}
+      className={cn('pointer-events-none absolute inset-0 bg-lp-ink lp-dither', className)}
+      style={{ maskImage: DITHER_MASKS[level] }}
     />
   );
 }
@@ -199,8 +199,8 @@ const CHASSIS: Record<LayoutId, ReactNode> = {
   ),
   glass: (
     <>
-      <Tape className="-top-[2%] -left-[5%]" style={{ rotate: '-32deg' }} />
-      <Tape className="-top-[2%] -right-[5%]" style={{ rotate: '28deg' }} />
+      <Tape className="-top-[2%] -left-[5%] -rotate-32" />
+      <Tape className="-top-[2%] -right-[5%] rotate-28" />
     </>
   ),
   spacious: (

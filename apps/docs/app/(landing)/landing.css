@@ -76,11 +76,6 @@
   :root:has(> body > .landing) {
     --lp-gutter: 32px;
   }
-
-  /* the navbar's content edge lands on the sheet's: two 1px frame lines, its own 16px padding */
-  #nd-home-layout.landing {
-    --fd-layout-width: calc(var(--lp-max) - 2px - 2 * var(--lp-gutter) + 32px);
-  }
 }
 
 /* each sheet paints apart from the rest, so a change in one repaints that sheet, not the page; Projects
@@ -94,11 +89,6 @@ body:has(> .landing),
 .landing {
   background-color: var(--lp-paper);
   color: var(--lp-ink);
-}
-
-.landing ::selection {
-  background-color: var(--lp-yellow);
-  color: var(--color-lp-on-yellow);
 }
 
 /* the theme switch dithers the new frame in */
@@ -164,35 +154,6 @@ body:has(> .landing),
   }
   100% {
     mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4' shape-rendering='crispEdges'%3E%3Cpath d='M0 0h1v1h-1zM1 0h1v1h-1zM2 0h1v1h-1zM3 0h1v1h-1zM0 1h1v1h-1zM1 1h1v1h-1zM2 1h1v1h-1zM3 1h1v1h-1zM0 2h1v1h-1zM1 2h1v1h-1zM2 2h1v1h-1zM3 2h1v1h-1zM0 3h1v1h-1zM1 3h1v1h-1zM2 3h1v1h-1zM3 3h1v1h-1z'/%3E%3C/svg%3E");
-  }
-}
-
-.lp-dots {
-  background-image: radial-gradient(var(--lp-line-strong) 0.75px, transparent 0.75px);
-  background-size: 12px 12px;
-}
-
-.lp-pinstripe {
-  background-image: repeating-linear-gradient(
-    to bottom,
-    var(--lp-line-strong) 0 1px,
-    transparent 1px 3px
-  );
-  background-size: 100% 11px;
-  background-position: 0 50%;
-  background-repeat: no-repeat;
-}
-
-@keyframes lp-caret {
-  50% {
-    opacity: 0;
-  }
-}
-
-/* a new status line prints in, left to right: the paper over it steps off to the right */
-@keyframes lp-print {
-  from {
-    translate: 0;
   }
 }
 

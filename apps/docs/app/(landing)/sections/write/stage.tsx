@@ -13,7 +13,7 @@ const RIVET =
   'radial-gradient(circle, var(--lp-paper) 1.5px, var(--lp-ink-2) 2px 2.75px, transparent 3.25px)';
 const RIVETS = `${RIVET} 0 0 / 7px 7px no-repeat, ${RIVET} 100% 0 / 7px 7px no-repeat, ${RIVET} 0 100% / 7px 7px no-repeat, ${RIVET} 100% 100% / 7px 7px no-repeat`;
 /** the source's type, which sizes the caret a character by a line */
-const SOURCE = 'font-mono text-[13px]/5 md:text-xs/[18px]';
+const SOURCE = 'font-mono text-[13px]/5 md:text-xs/4.5';
 
 /** syntax in ink-2, numbers in orange, the rest in ink */
 const SYNTAX =
@@ -96,7 +96,7 @@ export function Stage({ file, steps, sources, slots, bed, column }: StageProps) 
               type="button"
               data-replay
               aria-label="Replay"
-              className="relative inline-flex size-6 items-center justify-center bg-lp-paper text-lp-ink-2 transition-none hover:bg-lp-ink hover:text-lp-paper focus-visible:bg-lp-ink focus-visible:text-lp-paper focus-visible:outline-none motion-reduce:hidden [@media(scripting:none)]:hidden"
+              className="relative inline-flex size-6 items-center justify-center bg-lp-paper text-lp-ink-2 lp-invert motion-reduce:hidden noscript:hidden"
             >
               <RotateCcw aria-hidden className="size-4" />
             </button>
@@ -134,7 +134,7 @@ export function Stage({ file, steps, sources, slots, bed, column }: StageProps) 
                   aria-label={`${steps[i].tab} Markdown`}
                   aria-pressed="false"
                   className={cn(
-                    'group/tab relative flex h-8 cursor-pointer justify-self-start border border-lp-ink-2 bg-lp-paper font-pixel text-sm whitespace-pre text-lp-ink-2 transition-none after:absolute after:-inset-y-2 after:inset-x-0 hover:bg-lp-ink hover:text-lp-paper focus-visible:bg-lp-ink focus-visible:text-lp-paper focus-visible:outline-none data-inverted:bg-lp-ink data-inverted:text-lp-paper aria-pressed:bg-lp-yellow aria-pressed:text-lp-on-yellow [@media(scripting:none)]:pointer-events-none',
+                    'group/tab relative flex h-8 cursor-pointer justify-self-start border border-lp-ink-2 bg-lp-paper font-pixel text-sm whitespace-pre text-lp-ink-2 after:absolute after:-inset-y-2 after:inset-x-0 lp-invert data-inverted:bg-lp-ink data-inverted:text-lp-paper aria-pressed:bg-lp-yellow aria-pressed:text-lp-on-yellow noscript:pointer-events-none',
                     PLATES[i].foot && 'md:row-start-2',
                   )}
                 >
@@ -167,7 +167,7 @@ export function Stage({ file, steps, sources, slots, bed, column }: StageProps) 
                    the press shows its page through, over the source */}
                   <div data-out className="isolate">
                     {/* its code wraps, so no line is cut by its plate */}
-                    <div className="prose h-full bg-lp-paper [&_.twoslash-completion-list]:w-max! [&_.twoslash-completion-list]:select-text! [&_pre]:w-full [&_pre]:wrap-anywhere [&_pre]:whitespace-pre-wrap [&>:first-child]:mt-0 [&>:last-child]:mb-0">
+                    <div className="prose h-full bg-lp-paper [&_.twoslash-completion-list]:w-max! [&_.twoslash-completion-list]:select-text! [&_pre]:w-full [&_pre]:wrap-anywhere [&_pre]:whitespace-pre-wrap *:first:mt-0 *:last:mb-0">
                       {slot}
                     </div>
                   </div>

@@ -62,6 +62,14 @@ export function dashes(x: number, y: number, w: number, on: number, off: number)
   return d;
 }
 
+/**
+ * a track's run, each pose held till the next tick, `--bt-speed` times as fast; it acts from its
+ * first tick, tick 0 being the pose it waits on, `--bt-lead` early; off screen, it holds where it is
+ * till it's back
+ */
+const RUN =
+  '[animation-duration:calc(var(--bt-dur)/var(--bt-speed))] [animation-timing-function:steps(1,end)] fill-mode-both [animation-delay:calc(var(--bt-lead,-125ms)/var(--bt-speed))] in-data-paused:paused';
+
 /** the CSS a track holds from each tick on */
 type Poses = Readonly<Record<number, string>>;
 
@@ -82,7 +90,7 @@ interface Choreography<K extends string = string> {
 
 /**
  * keyframes of a mechanism, played once through while its card is `[data-play]`: every track runs
- * over `ticks` ticks, each pose held till the next (`steps(1, end)` from `.bt-a`) unless it
+ * over `ticks` ticks, each pose held till the next (`steps(1, end)` from `RUN`) unless it
  * `glide`s, and stops on its pose at tick `rest`, its payoff, which it also holds at rest. A card
  * `[data-queued]` for its turn holds its first pose.
  */
@@ -97,7 +105,7 @@ export function choreograph<T extends Record<string, Track>>(
   for (const key in tracks) {
     const id = `bt-${name}-${key}`;
     const { base = '', poses } = tracks[key];
-    cls[key] = `bt-a ${id}`;
+    cls[key] = `${RUN} ${id}`;
     let held = '';
     let frames = 0 in poses ? '' : `0%{${base}}`;
     // integer keys come in ascending order
@@ -191,7 +199,7 @@ export function Stage({ c, states, status, lamp, spec, children }: StageProps) {
   return (
     <span
       aria-hidden
-      className="bt-stage relative block h-42 w-(--bt-stage) overflow-clip text-(--bt-ink) *:absolute"
+      className="relative block h-42 w-90 overflow-clip text-(--bt-ink) *:absolute @max-[26rem]:[zoom:0.9] @max-[22.5rem]:[zoom:0.8]"
       style={{ '--bt-dur': `${c.dur}ms` } as CSSProperties}
     >
       <style href={`bt-${c.name}`} precedence="default">

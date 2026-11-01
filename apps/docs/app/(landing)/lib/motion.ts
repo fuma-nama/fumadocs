@@ -37,13 +37,17 @@ export function rectIn(el: Element, origin: DOMRect): Rect {
 }
 
 /**
- * Lets a script steer `el` by its `transform` each frame as cheaply as an animation, till the
- * returned release: with an animation current on it, as this paused one that adds nothing stays,
- * a change moves its layer instead of laying the page out in layers again and repainting it. It
- * then takes `el` to cover anything painted after it, so a clip round it keeps that to the clip.
+ * Lets a script steer `el` by its `transform` and `opacity` each frame as cheaply as an animation,
+ * till the returned release: with an animation current on it, as this paused one that adds nothing
+ * stays, a change moves or fades its layer instead of laying the page out in layers again and
+ * repainting it. It then takes `el` to cover anything painted after it, so a clip round it keeps
+ * that to the clip.
  */
 export function steer(el: Element): () => void {
-  const animation = el.animate({ transform: ['none', 'none'] }, { duration: 1, composite: 'add' });
+  const animation = el.animate(
+    { transform: ['none', 'none'], opacity: [0, 0] },
+    { duration: 1, composite: 'add' },
+  );
   animation.pause();
   return () => animation.cancel();
 }

@@ -253,7 +253,7 @@ export function Editor({
     panels.push(
       panel(
         i + 1,
-        'flex flex-col overflow-y-auto px-3 py-2 font-mono text-xs leading-4 [font-variant-ligatures:none] [scrollbar-color:var(--lp-ink)_var(--lp-paper)] [scrollbar-width:thin] md:py-3 md:pe-4 md:leading-5',
+        'flex flex-col overflow-y-auto px-3 py-2 font-mono text-xs leading-4 [font-variant-ligatures:none] scrollbar-thin scrollbar-thumb-lp-ink scrollbar-track-lp-paper md:py-3 md:pe-4 md:leading-5',
         rows,
       ),
     );

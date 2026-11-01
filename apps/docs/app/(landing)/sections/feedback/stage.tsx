@@ -1,6 +1,6 @@
 'use client';
 import type { ReactNode } from 'react';
-import { mount } from '../../lib/script';
+import { DOT, mount } from '../../lib/script';
 import { createFeedback } from './engine';
 
 const play = mount(createFeedback);
@@ -13,6 +13,7 @@ export function Desk({ children }: { children: ReactNode }) {
       className="relative z-10 mt-10 flex flex-col md:mt-12 lg:grid lg:grid-cols-[44%_40%] lg:items-start lg:gap-x-[14%]"
     >
       {children}
+      <span aria-hidden data-dot className={DOT} />
     </div>
   );
 }

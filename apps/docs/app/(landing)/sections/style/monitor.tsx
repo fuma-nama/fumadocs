@@ -99,7 +99,7 @@ export function Monitor({
       )}
     >
       {/* the stripes give way to the tabs; a browser narrower than them scrolls its bar */}
-      <div className="flex h-7 shrink-0 overflow-x-auto border-b border-lp-line-strong [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <div className="flex h-7 shrink-0 overflow-x-auto border-b border-lp-line-strong scrollbar-none [&::-webkit-scrollbar]:hidden">
         <div role="tablist" aria-label="Hands-on" onKeyDown={onKeyDown} className="flex shrink-0">
           {tabs}
         </div>

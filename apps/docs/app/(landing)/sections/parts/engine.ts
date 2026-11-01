@@ -12,7 +12,7 @@ import {
   type Vec3,
 } from '../../lib/mesh';
 import { clamp, easeInOut, easeOut, mix, TICK } from '../../lib/motion';
-import { dot, FIRST, pop, reached, reduce } from '../../lib/script';
+import { dot, FIRST, pop, reached, reduce, setText } from '../../lib/script';
 import { report } from '../../lib/status';
 import type { Layer } from '../../ui/chip';
 import { CORE, type Look, NAMES, type Option, OPTIONS, type SwapLayer } from './data';
@@ -301,7 +301,9 @@ export function createParts(root: HTMLElement): (() => void) | undefined {
   let lift = 0;
   let lifting = { at: -Infinity, to: 0 };
   const caption = root.querySelector<HTMLElement>('[data-caption]')!;
+  /** the caption's words, and those it shows */
   let said = '';
+  let captioned = '';
   /** css px the stage runs past the page's gutter on its left */
   let bleed = 0;
   const serve = root.querySelector<HTMLElement>('[data-display="framework"]')!;
@@ -418,7 +420,7 @@ export function createParts(root: HTMLElement): (() => void) | undefined {
           measure.measureText(option.title).width <= room ? option.title : option.short,
         );
       }
-      slot.name.textContent = slot.names[slot.option];
+      setText(slot.name, slot.names[slot.option]);
       slot.leader.route = '';
       slot.leader.y = Number.NaN;
     }
@@ -744,7 +746,7 @@ export function createParts(root: HTMLElement): (() => void) | undefined {
     slot.option = k;
     slot.look = option.look;
     report(root, `${slot.layer}: ${option.title}`);
-    slot.name.textContent = slot.names[k];
+    setText(slot.name, slot.names[k]);
     slot.plate.setAttribute('aria-label', `${NAMES[slot.layer]}: ${option.title}`);
     light(slot);
   }
@@ -1111,15 +1113,15 @@ export function createParts(root: HTMLElement): (() => void) | undefined {
   /** the beats as they stand, written only where they changed */
   function show() {
     const name = running[framework.option];
-    write(serveLines[0], `${name ?? ''} running`);
+    setText(serveLines[0], `${name ?? ''} running`);
     reveal(serveLines[0], served > 0 && serveRows > 1 && name !== undefined);
     reveal(serveLines[1], served > 1 && serveRows > 0);
     const listing = OPTIONS.content[treeFrom];
     const hit = hitOf(treeFrom);
-    write(typing, listing.query!.slice(0, typed));
+    setText(typing, listing.query!.slice(0, typed));
     reveal(search, typed > 0 && !reloading && treeRows > 3);
     for (const [n, line] of branches.entries()) {
-      write(line, listing.pages![n].title);
+      setText(line, listing.pages![n].title);
       reveal(line, listed > n && !reloading && treeRows > 2);
       flag(line, 'hit', found && n === hit);
     }
@@ -1135,10 +1137,10 @@ export function createParts(root: HTMLElement): (() => void) | undefined {
     for (const [k, step] of (['frame', 'text', 'done'] as const).entries())
       flag(page, step, drawn > k);
     for (const [n, entry] of entries.entries()) {
-      write(entry, drafted[n].title);
+      setText(entry, drafted[n].title);
       flag(entry, 'hit', drawn > 2 && n === lit && ui.look !== 'plain');
     }
-    write(heading, drafted[lit].title);
+    setText(heading, drafted[lit].title);
     // a page falls from over the drawing's top, or from under the core where the open rack holds
     // it, to the bin's rim, where its sheet takes over and its name dithers out
     const pages = OPTIONS.content[source.option].pages!;
@@ -1153,7 +1155,7 @@ export function createParts(root: HTMLElement): (() => void) | undefined {
       if (!anchor.shown) continue;
       if (card.dataset.look !== source.look) card.dataset.look = source.look;
       const name = card.querySelector<HTMLElement>('[data-name]')!;
-      write(name, pages[n].file ?? pages[n].title);
+      setText(name, pages[n].file ?? pages[n].title);
       const out = since - TIMING.fall;
       anchor.at =
         out < 0
@@ -1165,8 +1167,9 @@ export function createParts(root: HTMLElement): (() => void) | undefined {
         out < 0 ? '' : DITHER_MASKS[Math.max(0, 16 - Math.ceil((out / TIMING.step) * 16))];
       if (name.style.maskImage !== mask) name.style.maskImage = mask;
     }
-    if (caption.textContent !== said) {
-      caption.textContent = said;
+    if (captioned !== said) {
+      captioned = said;
+      setText(caption, said);
       setCaption();
     }
   }
@@ -1205,10 +1208,6 @@ export function createParts(root: HTMLElement): (() => void) | undefined {
 
   function move(el: HTMLElement, css: string) {
     if (el.style.transform !== css) el.style.transform = css;
-  }
-
-  function write(el: HTMLElement, text: string) {
-    if (el.textContent !== text) el.textContent = text;
   }
 
   function reveal(el: HTMLElement, on: boolean) {

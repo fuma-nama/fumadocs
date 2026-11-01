@@ -150,7 +150,10 @@ function mark(part: HTMLElement, framed: boolean, pop?: HTMLElement): Mark {
     return el;
   };
   part.dataset.mark = '';
-  const flash = span(part, `inset-0 -z-1 bg-lp-yellow ${framed ? 'border-2 border-lp-ink' : ''}`);
+  const flash = span(
+    part,
+    `inset-0 -z-1 rounded-[inherit] bg-lp-yellow ${framed ? 'border-2 border-lp-ink' : ''}`,
+  );
   flash.dataset.frame = '';
   return { part, flash, bar: pop && span(pop, 'left-px w-0.5 bg-lp-ink') };
 }

@@ -66,8 +66,11 @@ function DipBank({ on, className, style }: PartProps & { on: number }) {
           y={15}
           width={8}
           height={8}
-          className={cn(CLICK, 'stroke-none', i === on ? 'fill-lp-ink' : 'fill-lp-ink-2')}
-          style={{ transform: i === on ? undefined : 'translateY(10px)' }}
+          className={cn(
+            CLICK,
+            'stroke-none',
+            i === on ? 'fill-lp-ink' : 'translate-y-2.5 fill-lp-ink-2',
+          )}
         />
       </g>,
     );
@@ -91,10 +94,7 @@ function Relay({ flip, className, style }: PartProps & { flip: boolean }) {
       <path d="M8.5 18.5h16M8.5 21.5h16M8.5 24.5h16M8.5 27.5h16M8.5 30.5h16M8.5 33.5h16M8.5 36.5h16" />
       <path d="M16.5 14.5V8.5h30" className="fill-none" />
       <circle cx={46.5} cy={8.5} r={1.8} className="fill-lp-ink-2 stroke-none" />
-      <g
-        className={cn(CLICK, 'origin-[46.5px_8.5px]')}
-        style={{ transform: flip ? 'rotate(-14deg)' : 'rotate(14deg)' }}
-      >
+      <g className={cn(CLICK, 'origin-[46.5px_8.5px]', flip ? '-rotate-14' : 'rotate-14')}>
         <path d="M46.5 8.5V34" strokeWidth={2} />
       </g>
       <path d="M36 36.5h5M52 36.5h5" strokeWidth={2} />
@@ -248,11 +248,10 @@ export const Desk = memo(function Desk({
           data-shadow
           aria-hidden
           hidden={level === 0}
-          className="absolute -z-20 bg-lp-ink-2"
+          className="absolute -z-20 bg-lp-ink-2 lp-dither"
           style={{
             inset: shadowInset(slot),
             maskImage: DITHER_MASKS[level],
-            maskSize: '4px 4px',
             transform: shadowTransform(slot, lift),
           }}
         />
@@ -292,7 +291,7 @@ export const Desk = memo(function Desk({
         {/* A chosen window's plate stands out of the board by `--plate`, its stamp over its edge at
             the overshoot, a line tall: both keep the stamps' gap to the frame. Under the browser
             the board takes the width, beside it the height it is given. */}
-        <div className="grid flex-1 place-items-center px-(--stamp) py-[calc(1.5*var(--stamp)+1lh+3px)] leading-4 [container-type:inline-size] xl:[container-type:size]">
+        <div className="grid flex-1 place-items-center px-(--stamp) py-[calc(1.5*var(--stamp)+1lh+3px)] leading-4 @container xl:@container-size">
           <div
             ref={ref}
             role="radiogroup"
@@ -327,8 +326,8 @@ export const Desk = memo(function Desk({
               }}
             >
               <span
-                className="absolute inset-0 bg-lp-ink-2"
-                style={{ maskImage: DITHER_MASKS[4], maskSize: '4px 4px', translate: '5px 7px' }}
+                className="absolute inset-0 translate-x-1.25 translate-y-1.75 bg-lp-ink-2 lp-dither"
+                style={{ maskImage: DITHER_MASKS[4] }}
               />
               <span className="absolute inset-0 border border-lp-ink bg-lp-paper" />
               {hardware.junction}

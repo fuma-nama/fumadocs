@@ -22,7 +22,7 @@ const framed: CodeBlockProps = {
   allowCopy: false,
   className: 'my-0 rounded-none border-0 bg-transparent shadow-none',
   viewportProps: {
-    className: 'py-2.5 text-[11px]/4 lg:text-xs/[18px] overflow-hidden [&_.line]:px-3!',
+    className: 'py-2.5 text-[11px]/4 lg:text-xs/4.5 overflow-hidden [&_.line]:px-3!',
   },
 };
 
@@ -72,7 +72,7 @@ async function markdown(source: string): Promise<ReactNode> {
     );
   }
   return (
-    <pre className="px-3 py-2.5 font-mono text-[11px]/4 text-pretty whitespace-pre-wrap text-lp-ink lg:text-xs/[18px]">
+    <pre className="px-3 py-2.5 font-mono text-[11px]/4 text-pretty whitespace-pre-wrap text-lp-ink lg:text-xs/4.5">
       <span className="max-lg:hidden">{`# ${PAGE.title}\n\n${PAGE.description}\n\n## Props\n\n`}</span>
       {lines}
     </pre>
@@ -97,8 +97,8 @@ function page(source: string): ReactNode {
         </div>
         <span aria-hidden className="w-3/5 border-t border-lp-line-strong">
           <span
-            className="block h-1.5 bg-lp-ink-2"
-            style={{ maskImage: DITHER_MASKS[4], maskSize: '4px 4px' }}
+            className="block h-1.5 bg-lp-ink-2 lp-dither"
+            style={{ maskImage: DITHER_MASKS[4] }}
           />
         </span>
       </div>

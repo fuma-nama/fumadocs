@@ -48,7 +48,6 @@ interface ProjectorProps {
 }
 
 /** strokes stay 1px at any size */
-const LINE = { vectorEffect: 'non-scaling-stroke' } as const;
 const TRACK = TRACK_RIGHT - TRACK_LEFT;
 /** frames kept on the strip either side of the gate and the next frame; their screenshots load */
 const NEAR = 4;
@@ -74,7 +73,7 @@ function pop(i: number): CSSProperties {
 
 /** hidden until the reel first comes into view, then shown on its tick */
 const reveal =
-  'invisible group-data-booted/projector:visible [transition:visibility_0s_linear_var(--pop,0ms)] motion-reduce:[transition:none] [@media(scripting:none)]:visible';
+  'invisible group-data-booted/projector:visible [transition:visibility_0s_linear_var(--pop,0ms)] motion-reduce:transition-none noscript:visible';
 
 /** the perforations: 4 a frame, punched in both rails */
 const PERFS = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 48' preserveAspectRatio='none'%3E%3Crect x='5.5' y='2' width='7' height='4' rx='1'/%3E%3Crect x='5.5' y='42' width='7' height='4' rx='1'/%3E%3C/svg%3E")`;
@@ -85,14 +84,14 @@ function Leader({ style }: { style: CSSProperties }) {
     <span aria-hidden className="absolute bg-lp-paper" style={style}>
       <svg
         viewBox={`0 0 ${FRAME_W} ${FRAME_H}`}
-        className={cn('size-full fill-none stroke-lp-ink-2', reveal)}
+        className={cn(
+          'size-full fill-none stroke-lp-ink-2 **:[vector-effect:non-scaling-stroke]',
+          reveal,
+        )}
       >
-        <circle cx={FRAME_W / 2} cy={FRAME_H / 2} r={12} style={LINE} />
-        <circle cx={FRAME_W / 2} cy={FRAME_H / 2} r={7.5} style={LINE} />
-        <path
-          d={`M${FRAME_W / 2} 2v${FRAME_H - 4}M8 ${FRAME_H / 2}h${FRAME_W - 16}`}
-          style={LINE}
-        />
+        <circle cx={FRAME_W / 2} cy={FRAME_H / 2} r={12} />
+        <circle cx={FRAME_W / 2} cy={FRAME_H / 2} r={7.5} />
+        <path d={`M${FRAME_W / 2} 2v${FRAME_H - 4}M8 ${FRAME_H / 2}h${FRAME_W - 16}`} />
       </svg>
     </span>
   );
@@ -262,7 +261,7 @@ export function Projector({ sites, back, front }: ProjectorProps) {
             // eager once hydrated: on the server it would add a preload for every frame
             loading={client ? 'eager' : 'lazy'}
             onLoad={(event) => printFrame(event.currentTarget.parentElement)}
-            className="invisible absolute inset-0 size-full object-cover [@media(scripting:none)]:visible"
+            className="invisible absolute inset-0 size-full object-cover noscript:visible"
           />
         )}
         <canvas
@@ -292,11 +291,7 @@ export function Projector({ sites, back, front }: ProjectorProps) {
         className="group outline-offset-2 outline-lp-ink focus-visible:outline"
       >
         <Window
-          title={
-            <span className="-mx-2 block px-2 group-hover:bg-lp-ink group-hover:text-lp-paper group-focus-visible:bg-lp-ink group-focus-visible:text-lp-paper">
-              {address(site.url)}
-            </span>
-          }
+          title={<span className="-mx-2 block px-2 lp-invert-group">{address(site.url)}</span>}
         >
           <span className="sr-only">{site.name}</span>
           <span ref={screen} className="relative block aspect-og overflow-hidden">
