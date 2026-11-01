@@ -25,7 +25,7 @@ const SPEED = 2.5;
  */
 export function createEntrance(board: HTMLElement): (() => void) | undefined {
   if (reached(board)) return;
-  const cards = board.querySelectorAll<HTMLElement>(':scope > .bt-cell');
+  const cards = board.querySelectorAll<HTMLElement>(':scope > [data-card]');
   const wires = board.querySelectorAll<HTMLElement>('[data-wire]');
   const animations: Animation[] = [];
   /** each cable as routed, its growth's ms once the entrance is set out, and its growth once started */
@@ -33,13 +33,13 @@ export function createEntrance(board: HTMLElement): (() => void) | undefined {
   const durations: number[] = [];
   const growths: Animation[] = [];
   const clock = createClock([board]);
-  const playing = () => board.querySelectorAll('.bt-cell[data-play]').length;
+  const playing = () => board.querySelectorAll('[data-card][data-play]').length;
   // a mechanism coming to rest gives its turn to the next card queued, in reading order
   const turns = new MutationObserver(() => {
     for (
-      let next = board.querySelector<HTMLElement>('.bt-cell[data-queued]');
+      let next = board.querySelector<HTMLElement>('[data-card][data-queued]');
       next && playing() < 2;
-      next = board.querySelector<HTMLElement>('.bt-cell[data-queued]')
+      next = board.querySelector<HTMLElement>('[data-card][data-queued]')
     ) {
       delete next.dataset.queued;
       next.dataset.play = '';

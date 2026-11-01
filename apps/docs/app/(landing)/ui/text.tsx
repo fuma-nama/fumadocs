@@ -15,11 +15,10 @@ interface RollerProps {
   /** a class for each digit's cell: a fixed width keeps a number's width as it rolls */
   cell?: string;
   /**
-   * the value it shows first, held till `play`, then rolled from to `value` once: its strips are
+   * the value it shows first, held till its cells are set running, then rolled from to `value` once: its strips are
    * there from the start and stay at rest, so nothing is put in or taken out as it rolls
    */
   from?: string;
-  play?: boolean;
 }
 
 /**
@@ -34,7 +33,6 @@ export function Roller({
   stagger = 24,
   cell,
   from: start,
-  play = false,
 }: RollerProps) {
   const reduced = useReducedMotion();
   // `from` is the value it rolls from, `null` at rest
@@ -91,7 +89,7 @@ export function Roller({
           className="absolute inset-x-0 top-0 text-center"
           style={{
             translate: `0 -${ticks}lh`,
-            animation: `lp-roll ${ticks * step}ms steps(${ticks}) ${i * stagger}ms backwards ${held && !play ? 'paused' : 'running'}`,
+            animation: `lp-roll ${ticks * step}ms steps(${ticks}) ${i * stagger}ms backwards ${held ? 'paused' : 'running'}`,
           }}
         >
           {strip.join('\n')}

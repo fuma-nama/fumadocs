@@ -87,10 +87,11 @@ export function Board({
               return;
           delete card.dataset.play;
         }}
+        data-card=""
         // the mechanism's palette, inverted while the card is pointed at or focused from the
         // keyboard; played again as it's inspected, at twice the pace; a card narrower than its
         // mechanism and padding scales the mechanism down whole
-        className="bt-cell group @container relative flex cursor-pointer flex-col border-e border-b border-lp-line bg-(--bt-paper) p-(--lp-gutter) text-(--bt-ink) [--bt-ink:var(--lp-ink)] [--bt-orange:var(--lp-orange)] [--bt-paper:var(--lp-paper)] [--bt-speed:1] data-waiting:pointer-events-none data-waiting:opacity-0 hover:[--bt-ink:var(--lp-paper)] hover:[--bt-orange:var(--lp-orange-on-ink)] hover:[--bt-paper:var(--lp-ink)] data-focus:[--bt-ink:var(--lp-paper)] data-focus:[--bt-orange:var(--lp-orange-on-ink)] data-focus:[--bt-paper:var(--lp-ink)] data-[play=fast]:[--bt-speed:2] md:p-6 xl:p-8"
+        className="group @container relative flex cursor-pointer flex-col border-e border-b border-lp-line bg-(--bt-paper) p-(--lp-gutter) text-(--bt-ink) [--bt-ink:var(--lp-ink)] [--bt-orange:var(--lp-orange)] [--bt-paper:var(--lp-paper)] [--bt-speed:1] data-waiting:pointer-events-none data-waiting:opacity-0 hover:[--bt-ink:var(--lp-paper)] hover:[--bt-orange:var(--lp-orange-on-ink)] hover:[--bt-paper:var(--lp-ink)] data-focus:[--bt-ink:var(--lp-paper)] data-focus:[--bt-orange:var(--lp-orange-on-ink)] data-focus:[--bt-paper:var(--lp-ink)] data-[play=fast]:[--bt-speed:2] md:p-6 xl:p-8"
       >
         {/* as wide as the mechanism, so the hotkeys end on its right edge */}
         <div className="flex max-w-90 items-start justify-between gap-4">
@@ -184,7 +185,7 @@ function playOnScreen(board: HTMLDivElement) {
   const observer = new IntersectionObserver((entries) => {
     for (const entry of entries) entry.target.toggleAttribute('data-paused', !entry.isIntersecting);
   });
-  for (const el of board.querySelectorAll('.bt-cell')) observer.observe(el);
+  for (const el of board.querySelectorAll('[data-card]')) observer.observe(el);
   return () => observer.disconnect();
 }
 
