@@ -1,33 +1,35 @@
 import path from 'node:path';
 import { render } from 'astro:content';
+import type { DataStore } from 'astro/loaders';
 import type { AstroComponentFactory } from 'astro/runtime/server/index.js';
+import type { MDXComponents } from 'mdx/types';
 import { root } from 'virtual:fumadocs/config';
-import type { ElementType } from 'react';
 import type { MetaData, PageData, StaticSource, VirtualFile } from 'fumadocs-core/source';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
-import type { TOCItemType } from 'fumadocs-core/toc';
-import { renderMarkdown } from './markdown';
-import { dataKey, NoProcessedMarkdownError, type FumadocsData } from './shared';
+import { renderMarkdown } from './mdx-runtime';
+import { dataKey, type FumadocsData } from './shared';
+
+/** an entry of Astro content collections */
+type DataEntry = NonNullable<ReturnType<DataStore['get']>>;
 
 /** an entry of `pageLoader()` */
-export interface PageEntry {
-  id: string;
+export interface PageEntry extends Pick<DataEntry, 'id' | 'filePath' | 'body'> {
   data: PageData;
-  filePath?: string;
-  body?: string;
 }
 
 /** an entry of `metaLoader()` */
-export interface MetaEntry {
-  id: string;
+export interface MetaEntry extends Pick<DataEntry, 'id'> {
   data: MetaData;
 }
 
-export interface DocData {
+/** a link in the content of a page */
+export interface ExtractedReference {
+  href: string;
+}
+
+export interface DocData extends Pick<FumadocsData, 'toc' | 'structuredData'> {
   /** the MDX content, as an Astro component */
   body: AstroComponentFactory;
-  toc: TOCItemType[];
-  structuredData: StructuredData;
 }
 
 export type AstroPageData<Entry extends PageEntry = PageEntry> = Entry['data'] & {
@@ -41,7 +43,7 @@ export type AstroPageData<Entry extends PageEntry = PageEntry> = Entry['data'] &
    */
   getText: (type: 'raw' | 'processed', options?: GetTextOptions) => Promise<string>;
   /** the links of content, with `extractLinkReferences` */
-  extractedReferences?: { href: string }[];
+  extractedReferences?: ExtractedReference[];
 };
 
 export interface GetTextOptions {
@@ -50,7 +52,22 @@ export interface GetTextOptions {
    *
    * @defaultValue the MDX components of the collection
    */
-  components?: Record<string, ElementType>;
+  components?: MDXComponents;
+}
+
+/** the config of the source from `toFumadocsSource()` */
+interface AstroSourceConfig<Page extends PageEntry, Meta extends MetaEntry> {
+  pageData: AstroPageData<Page>;
+  metaData: Meta['data'];
+}
+
+/** `getText('processed')` without `includeProcessedMarkdown` */
+export class NoProcessedMarkdownError extends Error {
+  constructor() {
+    super(
+      "getText('processed') requires `includeProcessedMarkdown` in the options of the Fumadocs integration.",
+    );
+  }
 }
 
 /**
@@ -59,8 +76,8 @@ export interface GetTextOptions {
 export function toFumadocsSource<Page extends PageEntry, Meta extends MetaEntry>(
   pages: Page[],
   meta: Meta[] = [],
-): StaticSource<{ pageData: AstroPageData<Page>; metaData: Meta['data'] }> {
-  const files: VirtualFile<{ pageData: AstroPageData<Page>; metaData: Meta['data'] }>[] = [];
+): StaticSource<AstroSourceConfig<Page, Meta>> {
+  const files: VirtualFile<AstroSourceConfig<Page, Meta>>[] = [];
   for (const entry of pages) {
     files.push({
       type: 'page',
@@ -75,14 +92,15 @@ export function toFumadocsSource<Page extends PageEntry, Meta extends MetaEntry>
 }
 
 function pageData<Entry extends PageEntry>(entry: Entry): AstroPageData<Entry> {
-  async function compile() {
+  async function compile(): Promise<{ body: AstroComponentFactory; data: FumadocsData }> {
+    // `render()` is typed by `astro sync` of projects
     const { Content, remarkPluginFrontmatter } = await render(entry);
-    const data = remarkPluginFrontmatter[dataKey] as FumadocsData | undefined;
+    const data: FumadocsData | undefined = remarkPluginFrontmatter[dataKey];
     if (!data)
       throw new Error(
         `"${entry.filePath ?? entry.id}" is not processed by Fumadocs, which only processes the MDX files of its \`collections\`.`,
       );
-    return { body: Content as AstroComponentFactory, data };
+    return { body: Content, data };
   }
 
   return {

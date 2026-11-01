@@ -1,10 +1,12 @@
 ---
-import { getStaticPaths as getPaths, type PageRoute } from '../app.js';
+import type { GetStaticPaths, InferGetStaticPropsType } from 'astro';
+import { getStaticPaths as getPaths } from '../app.js';
 
-export const getStaticPaths = () => getPaths('page', 'fumadocsPage');
+export const getStaticPaths = (() => getPaths('page', 'fumadocsPage')) satisfies GetStaticPaths;
 
-const { route } = Astro.props as { route: PageRoute };
-const Component = route.component as any;
+type Props = InferGetStaticPropsType<typeof getStaticPaths>;
+
+const { route } = Astro.props;
 ---
 
-<Component {...route.props} />
+<route.component {...route.props} />

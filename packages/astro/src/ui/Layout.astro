@@ -1,7 +1,8 @@
 ---
 import { ClientRouter } from 'astro:transitions';
 import 'virtual:fumadocs/css';
-import { app, type AnyPage } from '../app.js';
+import type { Page } from 'fumadocs-core/source';
+import { app } from '../app.js';
 
 interface Props {
   title?: string;
@@ -13,7 +14,7 @@ interface Props {
   /** keep the page out of search engines, like a page shown in the fallback language */
   noindex?: boolean;
   /** the docs page, for the `head` component */
-  page?: AnyPage;
+  page?: Page;
 }
 
 const {
@@ -26,7 +27,8 @@ const {
   lang = Astro.currentLocale ?? app.source._i18n?.defaultLanguage ?? 'en',
 } = Astro.props;
 const siteName = app.config.title;
-const fullTitle = title && siteName ? `${title} | ${siteName}` : (title ?? siteName);
+const pageTitle = title ?? siteName;
+const fullTitle = title && siteName ? `${title} | ${siteName}` : pageTitle;
 const Head = app.config.head;
 // social previews need absolute URLs
 const site = Astro.site;
@@ -54,7 +56,7 @@ const imageUrl = image && (site ? new URL(image, site).href : image);
         ))
     }
     <meta property="og:type" content="website" />
-    {(title ?? siteName) && <meta property="og:title" content={title ?? siteName} />}
+    {pageTitle && <meta property="og:title" content={pageTitle} />}
     {description && <meta property="og:description" content={description} />}
     {siteName && <meta property="og:site_name" content={siteName} />}
     {url && <meta property="og:url" content={url} />}

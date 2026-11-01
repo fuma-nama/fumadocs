@@ -1,13 +1,15 @@
+import type { APIRoute } from 'astro';
 import { createMcpHandler, McpServer } from '@modelcontextprotocol/server';
 import { registerSearchTool, registerSourceTools } from 'fumadocs-core/mcp';
 import { createFromSource } from 'fumadocs-core/search/server';
 import { llms } from 'fumadocs-core/source';
-import type { App, Plugin, RouteHandler } from '../app';
+import type { App, Plugin } from '../app';
 import { pageMarkdown } from '../shared';
+import type { OramaSearchOptions } from './orama-search';
 
 export interface MCPOptions {
   /** options of `createFromSource()`, for the `search` tool */
-  search?: Parameters<typeof createFromSource>[1];
+  search?: OramaSearchOptions;
   /** register more tools on the MCP server */
   tools?: (this: App, server: McpServer) => void | Promise<void>;
 }
@@ -29,7 +31,7 @@ export function mcpPlugin({ search, tools }: MCPOptions = {}): Plugin {
         await tools?.call(this, server);
         return server;
       });
-      const handle: RouteHandler = ({ request }) => handler.fetch(request);
+      const handle: APIRoute = ({ request }) => handler.fetch(request);
 
       return [
         {

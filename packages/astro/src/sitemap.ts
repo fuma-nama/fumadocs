@@ -4,11 +4,17 @@ import path from 'node:path';
 /** where the built pages are, set by the integration */
 export const output: { dir?: string; base: string } = { base: '' };
 
+/** a language alternate of a sitemap item */
+interface SitemapLink {
+  url: string;
+  lang: string;
+}
+
 /** an item of `@astrojs/sitemap` */
 interface SitemapItem {
   url: string;
   lastmod?: string;
-  links?: { url: string; lang: string }[];
+  links?: SitemapLink[];
 }
 
 /**
@@ -25,7 +31,7 @@ export async function serializeSitemap<Item extends SitemapItem>(
   if (!head) return item;
 
   let lastmod = item.lastmod;
-  const links: { url: string; lang: string }[] = [];
+  const links: SitemapLink[] = [];
   for (const [, tag, attributes] of head.matchAll(/<(meta|link)\s([^>]*)>/g)) {
     const attrs: Record<string, string> = {};
     for (const [, name, value] of attributes.matchAll(/([\w:-]+)="([^"]*)"/g))

@@ -53,6 +53,7 @@
   "dependencies": {
     "@astrojs/mdx": "^8.1.1",
     "@fumadocs/satteri": "workspace:^",
+    "devalue": "^6.0.2",
     "satteri": "^0.10.5",
     "yuku-parser": "^0.19.0"
   },
@@ -67,6 +68,7 @@
     "@portabletext/react": "^8.0.1",
     "@types/estree-jsx": "^1.0.5",
     "@types/hast": "^3.0.5",
+    "@types/mdx": "^2.0.14",
     "@types/node": "26.6.5",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
@@ -80,6 +82,7 @@
     "tsconfig": "workspace:*",
     "tsdown": "0.23.1",
     "typescript": "^7.0.2",
+    "vite": "^8.3.5",
     "vitest": "^5.0.5"
   },
   "peerDependencies": {
@@ -90,6 +93,7 @@
     "@fumadocs/sanity": "^0.2.3",
     "@modelcontextprotocol/server": "2.x.x",
     "@portabletext/react": "^8.0.0",
+    "@types/mdx": "*",
     "astro": "^7.4.0",
     "fumadocs-core": "^16.17.8",
     "fumadocs-openapi": "^12.5.7",
@@ -115,6 +119,9 @@
       "optional": true
     },
     "@portabletext/react": {
+      "optional": true
+    },
+    "@types/mdx": {
       "optional": true
     },
     "fumadocs-openapi": {

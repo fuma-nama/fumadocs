@@ -1,14 +1,13 @@
 ---
 import type { ReactNode } from 'react';
 import { toPageBody } from '../island-node.js';
-import NodeContent from '../ui/NodeContent.astro';
 
 interface Props {
   /** React content, like `createElement(ChangelogTimeline, { entries })` */
   node: ReactNode;
 }
 
-const { props } = await toPageBody({ node: Astro.props.node });
+const content = await toPageBody({ node: Astro.props.node });
 ---
 
-<NodeContent {...props} body={false} />
+<content.component {...content.props} body={false} />

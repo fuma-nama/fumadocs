@@ -37,8 +37,11 @@ export default {
   Tabs,
   Tab,
   Card,
+  Time: ({ date, counts }: { date: Date; counts: Map<string, number> }) => (
+    <time data-count={counts.get('a')}>{date.toISOString()}</time>
+  ),
   UI: { Badge: ({ children }: { children: ReactNode }) => <mark>{children}</mark> },
-  pre: (props: { children: ReactNode }) => <pre data-codeblock="">{props.children}</pre>,
+  pre: (props: { children?: ReactNode }) => <pre data-codeblock="">{props.children}</pre>,
   wrapper: ({ lang, children }: { lang?: string; children: ReactNode }) =>
     lang ? <main lang={lang}>{children}</main> : children,
 };

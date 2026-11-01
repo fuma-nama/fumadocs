@@ -1,31 +1,33 @@
 import type { ComponentType } from 'react';
+import type { GraphQLPageData } from '@fumadocs/graphql/server';
 import { createGraphQLPage, type GraphQLPageProps } from '@fumadocs/graphql/ui';
 import { components } from 'virtual:fumadocs/components';
-import { ContentProvider, type ProviderData } from './provider';
+import { getBase } from '../shared';
+import { withContentProvider } from './provider';
 
-const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+type Schema = ReturnType<GraphQLPageData['getSchema']>;
+
+/** the props of `GraphQLPage.astro`, besides `provider` */
+export interface BodyProps {
+  page: GraphQLPageProps;
+  /** the schema left out of `page`, with `includeSchema: false` */
+  schema?: Schema;
+}
 
 export function schemaUrl(id: string) {
-  return `${base}/api/graphql-schema/${id}`;
+  return `${getBase()}/api/graphql-schema/${id}`;
 }
 
 /** the SDL of schemas left out of page props, for server rendering */
-export const schemas = new Map<string, string>();
+export const schemas: Map<string, Schema['sdl']> = new Map();
 
 // `<GraphQLPage />` of the MDX components replaces the default
-const GraphQLPage =
+export const APIPage = withContentProvider(
   (components.GraphQLPage as ComponentType<GraphQLPageProps> | undefined) ??
-  createGraphQLPage({
-    async loadSchema(id) {
-      if (import.meta.env.SSR) return schemas.get(id)!;
-      return (await fetch(schemaUrl(id))).text();
-    },
-  });
-
-export function APIPage({ page, provider }: { page: GraphQLPageProps; provider: ProviderData }) {
-  return (
-    <ContentProvider provider={provider}>
-      <GraphQLPage {...page} />
-    </ContentProvider>
-  );
-}
+    createGraphQLPage({
+      async loadSchema(id) {
+        if (import.meta.env.SSR) return schemas.get(id)!;
+        return (await fetch(schemaUrl(id))).text();
+      },
+    }),
+);

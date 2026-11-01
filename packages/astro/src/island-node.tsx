@@ -4,15 +4,34 @@ import {
   isValidElement,
   StrictMode,
   Suspense,
+  type DOMAttributes,
+  type FunctionComponent,
   type ReactElement,
   type ReactNode,
 } from 'react';
+import { stringify } from 'devalue';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { prerender } from 'react-dom/static';
 import { components } from 'virtual:fumadocs/components';
-import type { NodeBody, PageBody } from './app';
-import type { IslandNode } from './shared';
+import type { ComponentBody, NodeBody } from './app';
+import type { FumadocsIslandProps, IslandNode } from './island';
+import { serializeIsland, Slot } from './mdx-runtime';
+import type { ContentProps } from './ui/content';
 import NodeContent from './ui/NodeContent.astro';
+
+/** the props of `NodeContent.astro`, the island tree from {@link toPageBody} with the props of content */
+export interface NodeContentProps extends Pick<FumadocsIslandProps, 'tree'>, ContentProps {
+  /** static HTML, slot `s0` is the first */
+  slots: string[];
+}
+
+/** the props of elements, as the serializer reads them */
+interface ElementProps extends Pick<
+  DOMAttributes<Element>,
+  'children' | 'dangerouslySetInnerHTML'
+> {
+  [key: string]: unknown;
+}
 
 /** the names of components, the island gets them from the same MDX components */
 const names = new Map<unknown, string>();
@@ -28,13 +47,13 @@ const unserializable = Symbol('unserializable');
  *
  * Highlighted code and the parts the island can't receive, like class components and elements in props, render once by Astro as slots.
  */
-export async function toPageBody({ node, toc }: NodeBody): Promise<PageBody> {
+export async function toPageBody({ node, toc }: NodeBody): Promise<ComponentBody> {
   const tree: IslandNode[] = [];
   const slots: string[] = [];
   await serialize(node, tree, slots, false);
   return {
     component: NodeContent,
-    props: { tree: JSON.stringify(tree), slots },
+    props: { tree: serializeIsland(tree), slots } satisfies NodeContentProps,
     // serializable, like the TOC of MDX
     toc: toc?.map((item) => ({ ...item, title: textOf(item.title) })),
   };
@@ -42,40 +61,38 @@ export async function toPageBody({ node, toc }: NodeBody): Promise<PageBody> {
 
 /** add the island nodes of `node` to `out`, `pre` for the children of code blocks */
 async function serialize(
-  node: unknown,
+  node: ReactNode,
   out: IslandNode[],
   slots: string[],
   pre: boolean,
 ): Promise<void> {
-  if (node === null || node === undefined || typeof node === 'boolean') return;
   if (typeof node === 'string' || typeof node === 'number' || typeof node === 'bigint') {
     out.push(String(node));
     return;
   }
-  if (typeof (node as PromiseLike<unknown>).then === 'function')
-    return serialize(await node, out, slots, pre);
-  if (typeof node === 'object' && Symbol.iterator in node) {
-    for (const child of node as Iterable<unknown>) await serialize(child, out, slots, pre);
+  // `null`, booleans, and functions like render props
+  if (typeof node !== 'object' || node === null) return;
+  if ('then' in node) return serialize(await node, out, slots, pre);
+  if (Symbol.iterator in node) {
+    for (const child of node) await serialize(child, out, slots, pre);
     return;
   }
-  if (!isValidElement(node)) return;
+  if (!isValidElement<ElementProps>(node)) return;
 
-  const { type, props } = node as ReactElement<Record<string, unknown>>;
+  const { type, props } = node;
   if (type === Fragment || type === Suspense || type === StrictMode)
     return serialize(props.children, out, slots, pre);
 
   if (typeof type === 'string') {
     const { children, ...rest } = props;
     if (pre && type === 'code') {
-      const { dangerouslySetInnerHTML: html, ...code } = rest as Record<string, unknown> & {
-        dangerouslySetInnerHTML?: { __html: string };
-      };
+      const { dangerouslySetInnerHTML: html, ...code } = rest;
       // highlighted code is rendered once by Astro, rather than also being in the island props
       if (html || isStatic(children)) {
         out.push([
           type,
           hostProps(code),
-          slot(slots, html?.__html ?? renderToStaticMarkup(children as ReactNode)),
+          slot(slots, html ? String(html.__html) : renderToStaticMarkup(children)),
         ]);
         return;
       }
@@ -90,21 +107,18 @@ async function serialize(
   if (name !== undefined && typeof props.children !== 'function') {
     // refs are of the browser
     const { children, ref: _ref, ...rest } = props;
-    const json = await toJson(rest, slots);
-    if (json !== unserializable) {
+    const islandProps = await toIslandProps(rest, slots);
+    if (islandProps !== unserializable) {
       const nodes: IslandNode[] = [];
       await serialize(children, nodes, slots, name === 'pre');
-      out.push([1, name, json as Record<string, unknown>, ...nodes]);
+      out.push([1, name, islandProps, ...nodes]);
       return;
     }
   }
 
   // other function components render on the server like server components, their output can have components
-  if (
-    typeof type === 'function' &&
-    !(type.prototype as { isReactComponent?: unknown } | undefined)?.isReactComponent
-  ) {
-    const result = await call(type as (props: object) => unknown, props);
+  if (isFunctionComponent(type)) {
+    const result = await call(type, props);
     if (result) return serialize(await result.value, out, slots, pre);
   }
 
@@ -112,14 +126,19 @@ async function serialize(
   out.push(slot(slots, await render(node)));
 }
 
+/** class components have `isReactComponent` on their prototype */
+function isFunctionComponent(type: ReactElement['type']): type is FunctionComponent<ElementProps> {
+  return typeof type === 'function' && !type.prototype?.isReactComponent;
+}
+
 /** call a function component in a render of React, so it can use hooks, `undefined` when it throws */
 async function call(
-  type: (props: object) => unknown,
-  props: object,
-): Promise<{ value: unknown } | undefined> {
-  let result: { value: unknown } | undefined;
+  component: FunctionComponent<ElementProps>,
+  props: ElementProps,
+): Promise<{ value: ReturnType<FunctionComponent> } | undefined> {
+  let result: { value: ReturnType<FunctionComponent> } | undefined;
   const element = createElement(() => {
-    result = { value: type(props) };
+    result = { value: component(props) };
     return null;
   });
   try {
@@ -139,9 +158,9 @@ async function render(node: ReactNode): Promise<string> {
   return new Response(prelude).text();
 }
 
-function slot(slots: string[], html: string): { $slot: string } {
+function slot(slots: string[], html: string): Slot {
   slots.push(html);
-  return { $slot: `s${slots.length - 1}` };
+  return new Slot(`s${slots.length - 1}`);
 }
 
 /** event handlers and refs are of the browser, like React rendering HTML */
@@ -154,29 +173,47 @@ function hostProps(props: Record<string, unknown>): Record<string, unknown> | 0 
   return out;
 }
 
-/** the props of a component in the island, elements render into slots */
-async function toJson(value: unknown, slots: string[]): Promise<unknown> {
+/** a prop of a component in the island, elements render into slots */
+async function toIslandProp(value: unknown, slots: string[]): Promise<unknown> {
   if (typeof value === 'function') return unserializable;
   if (typeof value !== 'object' || value === null) return value;
   if (isValidElement(value)) return slot(slots, await render(value));
   if (Array.isArray(value)) {
     const out: unknown[] = [];
     for (const item of value) {
-      const json = await toJson(item, slots);
-      if (json === unserializable) return unserializable;
-      out.push(json);
+      const prop = await toIslandProp(item, slots);
+      if (prop === unserializable) return unserializable;
+      out.push(prop);
     }
     return out;
   }
 
   const prototype = Object.getPrototypeOf(value);
-  // like dates, serialized by `toJSON()`
-  if (prototype !== Object.prototype && prototype !== null) return value;
+  // values of other classes like dates and maps, the component renders on the server when the island can't receive them
+  if (prototype !== Object.prototype && prototype !== null)
+    return isSerializable(value) ? value : unserializable;
+  return toIslandProps(value, slots);
+}
+
+function isSerializable(value: object): boolean {
+  try {
+    stringify(value);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/** the props of a component in the island */
+async function toIslandProps(
+  value: object,
+  slots: string[],
+): Promise<Record<string, unknown> | typeof unserializable> {
   const out: Record<string, unknown> = {};
   for (const [key, item] of Object.entries(value)) {
-    const json = await toJson(item, slots);
-    if (json === unserializable) return unserializable;
-    out[key] = json;
+    const prop = await toIslandProp(item, slots);
+    if (prop === unserializable) return unserializable;
+    out[key] = prop;
   }
   return out;
 }
@@ -188,8 +225,8 @@ function isStatic(node: unknown): boolean {
     for (const child of node) if (!isStatic(child)) return false;
     return true;
   }
-  if (!isValidElement(node)) return false;
-  const { type, props } = node as ReactElement<{ children?: unknown }>;
+  if (!isValidElement<ElementProps>(node)) return false;
+  const { type, props } = node;
   return (typeof type === 'string' || type === Fragment) && isStatic(props.children);
 }
 
@@ -200,6 +237,6 @@ function textOf(node: ReactNode): string {
     for (const child of node) out += textOf(child);
     return out;
   }
-  if (isValidElement(node)) return textOf((node.props as { children?: ReactNode }).children);
+  if (isValidElement<ElementProps>(node)) return textOf(node.props.children);
   return '';
 }

@@ -5,7 +5,6 @@ const route = await findServerRoute(Astro.url.pathname);
 // a page rather than an endpoint: its 404 without body renders the 404 page
 if (!route) return new Response(null, { status: 404 });
 if (route.type === 'file') return handleFileRoute(route, Astro);
-const Component = route.component as any;
 ---
 
-<Component {...route.props} />
+<route.component {...route.props} />

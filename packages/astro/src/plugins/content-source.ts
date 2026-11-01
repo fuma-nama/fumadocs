@@ -1,21 +1,37 @@
 import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
+import type { PageData } from 'fumadocs-core/source';
 import type { TOCItemType } from 'fumadocs-core/toc';
 import { createRelativeLink } from 'fumadocs-ui/mdx';
-import type { FC, ReactNode } from 'react';
-import type { AnyPage, Plugin } from '../app';
+import type { MDXComponents } from 'mdx/types';
+import { createElement, type ReactNode } from 'react';
+import type { Plugin } from '../app';
+import { isPageDataOf } from '../shared';
 
-/** the renderer of a page, from `page.data.load()` of content sources like `@fumadocs/local-md` */
+/** the renderer from `load()`, like `MarkdownRenderer` of `@fumadocs/local-md` */
 interface Renderer {
   structuredData: StructuredData;
-  // oxlint-disable-next-line typescript/no-explicit-any -- each component has its props, like `MDXComponents`
-  render: (components: Record<string, FC<any>>) => Promise<{ body: ReactNode; toc: TOCItemType[] }>;
+  render: (components: MDXComponents) => Promise<{ body: ReactNode; toc: TOCItemType[] }>;
 }
 
-async function getRenderer(page: AnyPage): Promise<Renderer | undefined> {
-  const { load } = page.data as { load?: () => Promise<Partial<Renderer>> };
-  if (typeof load !== 'function') return;
-  const loaded = await load();
-  if (typeof loaded.render === 'function') return loaded as Renderer;
+/** the page data of runtime content sources, like `LocalMarkdownPage` of `@fumadocs/local-md` */
+interface ContentSourcePageData extends PageData {
+  /** the source file, not on generated pages like Python */
+  content?: string;
+  load: () => Promise<object>;
+}
+
+function isContentSourcePageData(data: PageData): data is ContentSourcePageData {
+  return isPageDataOf<ContentSourcePageData>(data, 'load');
+}
+
+function isRenderer(value: object): value is Renderer {
+  return typeof (value as Partial<Renderer>).render === 'function';
+}
+
+async function loadRenderer(data: ContentSourcePageData): Promise<Renderer | undefined> {
+  const loaded = await data.load();
+  // other content sources have `load()` too, like Astro content collections
+  if (isRenderer(loaded)) return loaded;
 }
 
 /**
@@ -27,20 +43,23 @@ export function contentSourcePlugin(): Plugin {
   return {
     name: 'content-source',
     async getBody(page) {
-      const renderer = await getRenderer(page);
+      if (!isContentSourcePageData(page.data)) return;
+      const renderer = await loadRenderer(page.data);
       if (!renderer) return;
+      const { a: Link } = this.components;
       const { body, toc } = await renderer.render({
         ...this.components,
-        a: createRelativeLink(this.source, page, this.components.a),
+        // `createRelativeLink()` takes function components, MDX components can be any element type
+        a: createRelativeLink(this.source, page, Link && ((props) => createElement(Link, props))),
       });
       return { node: body, toc };
     },
-    async getText(page) {
-      const renderer = await getRenderer(page);
+    async getText({ data, path }) {
+      if (!isContentSourcePageData(data)) return;
+      const renderer = await loadRenderer(data);
       if (!renderer) return;
       // the source of Markdown pages, the text of others like HTML
-      const { content } = page.data as { content?: unknown };
-      if (typeof content === 'string' && /\.mdx?$/.test(page.path)) return content;
+      if (data.content !== undefined && /\.mdx?$/.test(path)) return data.content;
 
       const { headings, contents } = renderer.structuredData;
       const lines: string[] = [];

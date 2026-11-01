@@ -1,5 +1,6 @@
+import type { APIContext } from 'astro';
 import { navigate } from 'astro:transitions/client';
-import { lazy, type ReactNode } from 'react';
+import { lazy, type ComponentType, type ReactNode } from 'react';
 import { RootProvider } from 'fumadocs-ui/provider/astro';
 import type { I18nProviderProps } from 'fumadocs-ui/contexts/i18n';
 import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
@@ -14,10 +15,8 @@ const Dialog = SearchDialog ?? lazy(() => import('./search'));
 
 /** the serializable props of providers, created by the Astro components of Fumadocs */
 export interface ProviderData {
-  /** `Astro.url.pathname` */
   pathname: string;
-  /** `Astro.params` */
-  params: Record<string, string | undefined>;
+  params: APIContext['params'];
   i18n?: I18nProviderProps;
   /** has the built-in search index */
   search: boolean;
@@ -61,6 +60,17 @@ export function ContentProvider({ provider: { pathname, params, i18n }, children
       {children}
     </RootProvider>
   );
+}
+
+/** an island of `Page` in {@link ContentProvider}, `page` is the props of `Page` */
+export function withContentProvider<P extends object>(Page: ComponentType<P>) {
+  return function ContentPage({ page, provider }: { page: P; provider: ProviderData }) {
+    return (
+      <ContentProvider provider={provider}>
+        <Page {...page} />
+      </ContentProvider>
+    );
+  };
 }
 
 /** `baseOptions()` of the `layout` module over the defaults from the server */

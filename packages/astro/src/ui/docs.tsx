@@ -1,7 +1,6 @@
-import type { ComponentType, CSSProperties } from 'react';
+import { useMemo, type ComponentType, type CSSProperties } from 'react';
 import { type SerializedPageTree, useFumadocsLoader } from 'fumadocs-core/source/client';
 import { DocsLayout } from 'fumadocs-ui/layouts/docs';
-import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
 import {
   DocsDescription,
   DocsPage,
@@ -11,14 +10,13 @@ import {
   ViewOptionsPopover,
 } from 'fumadocs-ui/layouts/docs/page';
 import UserPage from 'virtual:fumadocs/page';
-import type { DocsPageData, DocsPageProps } from '../app';
+import type { DocsPageProps } from '../app';
 import { Provider, resolveLayout, type ProviderProps } from './provider';
 
-export interface DocsProps extends ProviderProps {
-  /** the defaults of layout options */
-  layout: BaseLayoutProps;
-  tree: SerializedPageTree;
-  page: DocsPageData;
+/** the props of the `page` module with the serialized tree, `layout` is the defaults of `baseOptions()` */
+export interface DocsProps extends ProviderProps, Omit<DocsPageProps, 'tree'> {
+  /** JSON of the {@link SerializedPageTree}, from `getSerializedTree()` */
+  tree: string;
 }
 
 const Page: ComponentType<DocsPageProps> = UserPage ?? DefaultPage;
@@ -27,7 +25,8 @@ const Page: ComponentType<DocsPageProps> = UserPage ?? DefaultPage;
  * The React island of docs pages, the body is passed as children.
  */
 export function Docs({ provider, layout, tree, page, children }: DocsProps) {
-  const data = useFumadocsLoader({ tree });
+  const serialized = useMemo<SerializedPageTree>(() => JSON.parse(tree), [tree]);
+  const data = useFumadocsLoader({ tree: serialized });
 
   return (
     <Provider provider={provider}>

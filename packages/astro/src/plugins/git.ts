@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import type { AnyPage, Plugin } from '../app';
+import type { Page } from 'fumadocs-core/source';
+import type { Plugin } from '../app';
 
 export interface GitOptions {
   /** the user or organization owning the repository */
@@ -63,7 +64,7 @@ function findRootDir(): string {
 }
 
 /** one `git log` for the directory containing every page */
-async function getDates(rootDir: string, pages: AnyPage[]): Promise<Map<string, Date>> {
+async function getDates(rootDir: string, pages: Page[]): Promise<Map<string, Date>> {
   const dates = new Map<string, Date>();
   let dir: string | undefined;
   for (const page of pages) {

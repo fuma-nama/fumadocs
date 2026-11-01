@@ -5,25 +5,19 @@ import {
   type PortableTextBlock,
   type PortableTextProps,
 } from '@portabletext/react';
+import type { PageData } from 'fumadocs-core/source';
 import { createElement } from 'react';
-import type { AnyPage, Plugin } from '../app';
+import type { Plugin } from '../app';
 import { loadOnce } from '../shared';
 
-export interface SanityPluginOptions {
-  /** the components of Portable Text, for your block types */
-  components?: PortableTextProps['components'];
-}
+/** the components of Portable Text, for your block types */
+export type SanityPluginOptions = Pick<PortableTextProps, 'components'>;
 
-type SanityPage = DocToPage<BaseDoc & { body?: PortableTextBlock[] }>;
+type SanityPageData = DocToPage<BaseDoc & { body?: PortableTextBlock[] }>;
 
-function getData(page: AnyPage): SanityPage | undefined {
-  const data = page.data as Partial<SanityPage>;
-  if (
-    typeof data._id === 'string' &&
-    typeof data._type === 'string' &&
-    typeof data.load === 'function'
-  )
-    return data as SanityPage;
+function isSanityPageData(data: PageData): data is SanityPageData {
+  const { _id, _type, load } = data as Partial<SanityPageData>;
+  return typeof _id === 'string' && typeof _type === 'string' && typeof load === 'function';
 }
 
 /**
@@ -32,22 +26,20 @@ function getData(page: AnyPage): SanityPage | undefined {
 export function sanityPlugin({ components }: SanityPluginOptions = {}): Plugin {
   return {
     name: 'sanity',
-    async getBody(page) {
-      const data = getData(page);
-      if (!data) return;
+    async getBody({ data }) {
+      if (!isSanityPageData(data)) return;
       const doc = await loadOnce(data);
       return {
         node: createElement(PortableText, { value: doc.body ?? [], components }),
         toc: doc.renderToc({ render: (block) => toPlainText(block) }),
       };
     },
-    async getText(page) {
-      const data = getData(page);
-      if (data) return toPlainText((await loadOnce(data)).body ?? []);
+    async getText({ data }) {
+      if (isSanityPageData(data)) return toPlainText((await loadOnce(data)).body ?? []);
     },
     transformPage(page, data) {
-      const updatedAt = getData(page)?._updatedAt;
-      return updatedAt ? { ...data, lastModified: new Date(updatedAt) } : data;
+      if (!isSanityPageData(page.data) || !page.data._updatedAt) return data;
+      return { ...data, lastModified: new Date(page.data._updatedAt) };
     },
   };
 }

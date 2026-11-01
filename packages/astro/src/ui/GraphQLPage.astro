@@ -1,5 +1,8 @@
 ---
-import { APIPage, schemas } from './graphql.js';
+import { APIPage, schemas, type BodyProps } from './graphql.js';
+import type { ProviderData } from './provider';
+
+type Props = BodyProps & { provider: ProviderData };
 
 const { page, schema, provider } = Astro.props;
 if (schema) schemas.set(schema.id, schema.sdl);

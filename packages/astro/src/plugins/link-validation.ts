@@ -1,7 +1,8 @@
 import type { FileObject, ScanResult, UrlMeta, ValidateConfig } from 'next-validate-link';
 import { publicDir, root, srcDir } from 'virtual:fumadocs/config';
 import type { App, Plugin } from '../app';
-import { trimSlash } from '../shared';
+import { isPageDataOf, trimSlash } from '../shared';
+import type { AstroPageData } from '../source';
 
 export type LinkValidationOptions = Omit<ValidateConfig, 'scanned'>;
 
@@ -24,7 +25,7 @@ export function linkValidationPlugin(options: LinkValidationOptions = {}): Plugi
   };
 }
 
-async function validateLinks(app: App, options: LinkValidationOptions) {
+async function validateLinks(app: App, options: LinkValidationOptions): Promise<void> {
   // build-only modules, kept out of the server runtime
   const [{ scanURLs, validateFiles }, fs, path] = await Promise.all([
     import('next-validate-link'),
@@ -48,11 +49,11 @@ async function validateLinks(app: App, options: LinkValidationOptions) {
 
     // a file shared by languages is validated once
     if (page.absolutePath && paths.has(page.absolutePath)) continue;
-    const data = page.data as { getText?: (type: 'raw') => Promise<string> };
-    if (page.absolutePath && data.getText) {
+    if (page.absolutePath && isPageDataOf<Pick<AstroPageData, 'getText'>>(page.data, 'getText')) {
       paths.add(page.absolutePath);
       // the source file, errors point to its lines
-      files.push({ path: page.absolutePath, content: await data.getText('raw'), url: page.url });
+      const content = await page.data.getText('raw');
+      files.push({ path: page.absolutePath, content, url: page.url });
     } else {
       // generated Markdown, like OpenAPI pages
       files.push({ path: `${page.path}.md`, content: await app.getText(page), url: page.url });

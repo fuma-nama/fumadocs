@@ -1,12 +1,10 @@
 ---
+import type { ComponentProps } from 'astro/types';
 import Layout from '../ui/Layout.astro';
 import { Home } from '../ui/home.js';
 import { app, getLayoutDefaults, getProviderData } from '../app.js';
 
-interface Props {
-  title?: string;
-  description?: string;
-  lang?: string;
+interface Props extends Pick<ComponentProps<typeof Layout>, 'title' | 'description' | 'lang'> {
   /** render the not found page of Fumadocs UI */
   notFound?: boolean;
 }

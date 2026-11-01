@@ -2,6 +2,7 @@ import { glob, type Loader, type LoaderContext } from 'astro/loaders';
 import { mdxToMdast, type MdastNode } from 'satteri';
 import { metaSchema, pageSchema } from 'fumadocs-core/source/schema';
 import { loaders } from 'virtual:fumadocs/config';
+import type { ExtractedReference } from './source';
 
 function getOptions(collection: string) {
   const options = loaders[collection];
@@ -69,11 +70,11 @@ function withReferences(store: Store): Store {
   });
 }
 
-function getReferences(source: string): { href: string }[] {
-  const out: { href: string }[] = [];
+function getReferences(source: string): ExtractedReference[] {
+  const out: ExtractedReference[] = [];
   const stack: MdastNode[] = [mdxToMdast(source)];
-  while (stack.length > 0) {
-    const node = stack.pop()!;
+  let node: MdastNode | undefined;
+  while ((node = stack.pop())) {
     if (node.type === 'link') out.push({ href: node.url });
     if ('children' in node)
       for (let i = node.children.length - 1; i >= 0; i--) stack.push(node.children[i]);

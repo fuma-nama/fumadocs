@@ -1,17 +1,9 @@
 ---
 import { FumadocsIsland } from 'virtual:fumadocs/island';
 import { getProviderData } from '../app.js';
-import type { ProviderData } from './provider';
+import type { NodeContentProps } from '../island-node';
 
-interface Props {
-  /** JSON of the island nodes of React content, see `island-node.tsx` */
-  tree: string;
-  /** static HTML, slot `s0` is the first */
-  slots: string[];
-  provider?: ProviderData;
-  /** in the `wrapper` of the MDX components, `false` for content on your own pages */
-  body?: boolean;
-}
+type Props = NodeContentProps;
 
 const { tree, slots, provider = getProviderData(Astro), body } = Astro.props;
 ---

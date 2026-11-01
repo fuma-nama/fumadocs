@@ -1,6 +1,12 @@
 import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
 import type { TOCItemType } from 'fumadocs-core/toc';
-import type { AnyPage, App } from './app';
+import type { Page } from 'fumadocs-core/source';
+import type { App } from './app';
+
+/** `base` of Astro without the trailing slash, `''` for the root, at runtime: the integration imports this module without `import.meta.env` */
+export function getBase(): string {
+  return import.meta.env.BASE_URL.replace(/\/$/, '');
+}
 
 /** the key in `remarkPluginFrontmatter` holding {@link FumadocsData} */
 export const dataKey = '_fumadocs';
@@ -13,22 +19,6 @@ export interface FumadocsData {
   /** with `output: 'function'`, the key of its function output in `registerMarkdown()` */
   markdownId?: string;
 }
-
-/** `getText('processed')` without `includeProcessedMarkdown` */
-export class NoProcessedMarkdownError extends Error {
-  constructor() {
-    super(
-      "getText('processed') requires `includeProcessedMarkdown` in the options of the Fumadocs integration.",
-    );
-  }
-}
-
-/** a node of the island tree, see `island-plugin.ts` for MDX, and `island-node.tsx` for React content */
-export type IslandNode =
-  | string
-  | { $slot: string }
-  | [tagName: string, properties: Record<string, unknown> | 0, ...children: IslandNode[]]
-  | [jsx: 1, name: string | null, props: Record<string, unknown>, ...children: IslandNode[]];
 
 const loaded = new WeakMap<object, Promise<unknown>>();
 
@@ -46,12 +36,12 @@ export function trimSlash(url: string): string {
 }
 
 /** the URL of a page without `base` and the trailing slash, `''` for the root, for the files of pages like `<path>.md` */
-export function pagePath(app: App, page: AnyPage): string {
+export function pagePath(app: App, page: Page): string {
   return app.toPath(page.url).replace(/\/$/, '');
 }
 
 /** the Markdown of a page for LLMs, with its title and URL */
-export async function pageMarkdown(app: App, page: AnyPage): Promise<string> {
+export async function pageMarkdown(app: App, page: Page): Promise<string> {
   return `# ${(await app.getPageData(page)).title} (${page.url})
 
 ${await app.getText(page)}`;

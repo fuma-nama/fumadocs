@@ -1,4 +1,5 @@
-import { flexsearchFromSource } from 'fumadocs-core/search/flexsearch';
+import { flexsearchFromSource, type FromSourceOptions } from 'fumadocs-core/search/flexsearch';
+import type { LoaderConfig } from 'fumadocs-core/source';
 import type { Plugin } from '../app';
 
 /**
@@ -6,7 +7,7 @@ import type { Plugin } from '../app';
  *
  * @param options - options of `flexsearchFromSource()`
  */
-export function flexsearchPlugin(options?: Parameters<typeof flexsearchFromSource>[1]): Plugin {
+export function flexsearchPlugin(options?: FromSourceOptions<LoaderConfig>): Plugin {
   return {
     name: 'search',
     routes() {
