@@ -9,6 +9,7 @@ import { i18nProvider } from 'fumadocs-ui/i18n';
 import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
 import { SearchDialog, useSearch } from 'virtual:fumadocs/layout';
 import type { ProviderData } from './ui/provider';
+import { NoProcessedMarkdownError } from './shared';
 import { llmsPlugin } from './plugins/llms.txt';
 import { oramaSearchPlugin } from './plugins/orama-search';
 import DocsPage from './ui/DocsPage.astro';
@@ -184,8 +185,13 @@ export const app: App = {
       if (text !== undefined) return text;
     }
     const data = page.data as { getText?: (type: 'raw' | 'processed') => Promise<string> };
-    if (data.getText) return data.getText('processed').catch(() => data.getText!('raw'));
-    return (page.data as { description?: string }).description ?? '';
+    if (!data.getText) return (page.data as { description?: string }).description ?? '';
+    try {
+      return await data.getText('processed');
+    } catch (error) {
+      if (error instanceof NoProcessedMarkdownError) return data.getText('raw');
+      throw error;
+    }
   },
   async getPageData(page, body) {
     const {

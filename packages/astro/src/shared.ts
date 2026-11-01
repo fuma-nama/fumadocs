@@ -13,6 +13,15 @@ export interface FumadocsData {
   markdownId?: string;
 }
 
+/** `getText('processed')` without `includeProcessedMarkdown` */
+export class NoProcessedMarkdownError extends Error {
+  constructor() {
+    super(
+      "getText('processed') requires `includeProcessedMarkdown` in the options of the Fumadocs integration.",
+    );
+  }
+}
+
 /** a node of the island tree, see `island-plugin.ts` */
 export type IslandNode =
   | string

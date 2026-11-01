@@ -5,7 +5,7 @@ import type { MetaData, PageData, StaticSource, VirtualFile } from 'fumadocs-cor
 import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
 import type { TOCItemType } from 'fumadocs-core/toc';
 import { renderMarkdown } from './markdown';
-import { dataKey, type FumadocsData } from './shared';
+import { dataKey, NoProcessedMarkdownError, type FumadocsData } from './shared';
 
 /** an entry of `pageLoader()` */
 export interface PageEntry {
@@ -87,10 +87,7 @@ function pageData<Entry extends PageEntry>(entry: Entry): AstroPageData<Entry> {
       // compiling registers the function output
       const { markdown, markdownId } = (await compile()).data;
       if (markdownId !== undefined) return renderMarkdown(markdownId, options?.components);
-      if (markdown === undefined)
-        throw new Error(
-          "getText('processed') requires `includeProcessedMarkdown` in the options of the Fumadocs integration.",
-        );
+      if (markdown === undefined) throw new NoProcessedMarkdownError();
       return markdown;
     },
   };
