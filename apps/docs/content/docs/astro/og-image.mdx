@@ -14,6 +14,7 @@ npm i takumi-js
 ```ts title="src/fumadocs.config.ts"
 import { defineConfig } from '@fumadocs/astro/config';
 import { takumiPlugin } from '@fumadocs/astro/plugins/takumi'; // [!code ++]
+import { source } from './lib/source';
 
 export default defineConfig({
   source,
@@ -22,29 +23,30 @@ export default defineConfig({
 });
 ```
 
-Fumadocs CLI does the same:
+Or with Fumadocs CLI:
 
 ```npm
 npx @fumadocs/cli feature og --engine takumi
 ```
 
-The images are generated at build time, under `/og`:
+Images are generated at build time, under `/og`:
 
 | Page          | Image                       |
 | ------------- | --------------------------- |
 | `/docs`       | `/og/docs/image.webp`       |
 | `/docs/hello` | `/og/docs/hello/image.webp` |
 
-Docs pages link them with `<meta property="og:image" />`, and the [`page` module](/docs/astro/page) receives the URL as `page.image`.
+Change it with the `prefix` option, like `takumiPlugin({ prefix: '/images/og' })`.
 
-Set [`site`](https://docs.astro.build/en/reference/configuration-reference/#site) in your Astro config for social previews, `og:image` is an absolute URL with it, and relative otherwise.
+## Site URL
 
-## Options
+Docs pages link their image with `og:image`, set [`site`](https://docs.astro.build/en/reference/configuration-reference/#site) so it is an absolute URL, as social previews require:
 
-Change the prefix of image URLs:
-
-```ts title="src/fumadocs.config.ts"
-takumiPlugin({ prefix: '/images/og' });
+```js title="astro.config.mjs"
+export default defineConfig({
+  site: 'https://example.com', // [!code ++]
+  // ...
+});
 ```
 
-Next, add [OpenAPI](/docs/astro/openapi) pages, or [translate your docs](/docs/astro/internationalization).
+The `page` module receives the URL as `page.image`.

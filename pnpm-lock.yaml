@@ -211,6 +211,9 @@ importers:
       '@fumadocs/ai-chat':
         specifier: workspace:*
         version: link:../../packages/ai-chat
+      '@fumadocs/astro':
+        specifier: workspace:*
+        version: link:../../packages/astro
       '@fumadocs/asyncapi':
         specifier: workspace:*
         version: link:../../packages/asyncapi

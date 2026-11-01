@@ -1,103 +1,75 @@
 ---
 title: Internationalization
-description: Write your docs in multiple languages.
+description: Support multiple languages in your docs.
 ---
 
 ## Setup
 
-Fumadocs CLI sets up Fumadocs with i18n:
-
-```npm
-npx @fumadocs/cli init --i18n
-```
-
-Or configure it manually. Define your languages:
+Define your languages:
 
 <include cwd meta='title="src/lib/i18n.ts"'>
   ../../examples/astro-i18n/src/lib/i18n.ts
 </include>
 
-> See [available options](/docs/headless/internationalization/config) for the i18n config.
+See [i18n Config](/docs/headless/internationalization/config) for the options, like `hideLocale`.
 
-Pass it to `loader()`:
+Pass it to your source, and add the translations of Fumadocs UI to your config:
 
-```ts title="src/lib/source.ts"
-import { i18n } from './i18n'; // [!code ++]
-
-export const source = loader({
-  source: toFumadocsSource(await getCollection('docs'), await getCollection('meta')),
-  baseUrl: '/docs',
-  i18n, // [!code ++]
-});
-```
-
-The UI is in English by default. Translate it with `translations`:
-
-```ts title="src/fumadocs.config.ts"
-import { uiTranslations } from 'fumadocs-ui/i18n';
-import { zhTW } from '@fumadocs/language/zh-tw';
-import { i18n } from './lib/i18n';
-
-export default defineConfig({
-  source,
-  // [!code ++]
-  translations: i18n.translations().extend(uiTranslations()).preset('cn', zhTW()),
-});
-```
-
-See [Translations](/docs/ui/translations) for the display names and language packs, pass them as `translations` rather than to `RootProvider`.
-
-### Content
-
-Translated pages have a locale suffix, like `index.cn.mdx` next to `index.mdx`, see [i18n Routing](/docs/page-conventions#i18n-routing) for other conventions.
-
-With `hideLocale: 'default-locale'`, the default language has no prefix:
-
-| Page                        | URL        |
-| --------------------------- | ---------- |
-| `content/docs/index.mdx`    | `/docs`    |
-| `content/docs/index.cn.mdx` | `/cn/docs` |
-
-Remove `hideLocale` to always prefix the locale.
-
-### Layout
-
-The navbar title links to the home page of the current language, and the search dialog searches it. `baseOptions()` of the [`layout` module](/docs/astro/layout) receives the language for localized options:
-
-```tsx title="src/lib/layout.shared.tsx"
-export function baseOptions(locale?: string): BaseLayoutProps {
-  return {
-    nav: {
-      title: locale === 'cn' ? '我的文檔' : 'My Docs',
-    },
-  };
-}
-```
-
-### Home Page
-
-Your own pages are Astro routes, create one per language with `getStaticPaths()`:
-
-<include cwd meta='title="src/pages/[...lang]/index.astro"'>
-  ../../examples/astro-i18n/src/pages/[...lang]/index.astro
+<include cwd meta='tab="src/lib/source.ts"'>
+  ../../examples/astro-i18n/src/lib/source.ts
 </include>
 
-Pass `lang` to `HomeLayout`, see [Custom Pages](/docs/astro/pages).
+<include cwd meta='tab="src/fumadocs.config.ts"'>
+  ../../examples/astro-i18n/src/fumadocs.config.ts
+</include>
 
-### Links in Content
+`@fumadocs/language` has the translations of [many languages](/docs/ui/translations).
 
-Fumadocs only adds the locale to the links of its layouts, like the sidebar. In MDX content, register `DynamicLink` in your [`components` module](/docs/astro/writing#mdx-components), it fills `[lang]` with the locale:
+## Writing Pages
+
+Add the language to the file name of a translation, see [i18n Routing](/docs/page-conventions#i18n-routing):
+
+<Files>
+  <Folder name="content/docs" defaultOpen>
+    <File name="index.mdx" />
+    <File name="index.cn.mdx" />
+    <File name="meta.json" />
+    <File name="meta.cn.json" />
+  </Folder>
+</Files>
+
+Docs pages are created for every language, like `/docs` and `/cn/docs` above. The search dialog searches the current language.
+
+### Links
+
+For links that include the language, add `DynamicLink` to your MDX components:
 
 <include cwd meta='title="src/components/mdx.tsx"'>
   ../../examples/astro-i18n/src/components/mdx.tsx
 </include>
 
-```mdx title="content/docs/index.mdx"
-<DynamicLink href="/[lang]/docs/hello">This is a link</DynamicLink>
+```mdx
+<DynamicLink href="/[lang]/docs/setup">Setup</DynamicLink>
 ```
 
-## Search
+## Layout Options
 
-The built-in search indexes every language, and works for all of them (including Chinese and Japanese) with no config. See [Internationalization](/docs/headless/search/orama#internationalization) for its options.
+`baseOptions()` receives the language, the navbar title links to the home page of the language by default:
 
-Next, see [Collections](/docs/astro/collections) for other content and sources.
+```tsx title="src/lib/layout.shared.tsx"
+import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
+
+export function baseOptions(locale?: string): BaseLayoutProps {
+  return {
+    nav: { title: locale === 'cn' ? '文檔' : 'Docs' },
+  };
+}
+```
+
+## Your Own Pages
+
+Create a page for each language with `getStaticPaths()`, and pass the language to `HomeLayout`:
+
+<include cwd meta='title="src/pages/[...lang]/index.astro"'>
+  ../../examples/astro-i18n/src/pages/[...lang]/index.astro
+</include>

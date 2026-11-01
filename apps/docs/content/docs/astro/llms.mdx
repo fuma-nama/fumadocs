@@ -5,34 +5,23 @@ description: Serve your docs as Markdown for LLMs and AI agents.
 
 ## Routes
 
-`llmsPlugin()` is a default plugin, your site serves:
+Your site serves the Markdown of your docs by default, from `llmsPlugin()`:
 
-| Route                              | Content                                              |
-| ---------------------------------- | ---------------------------------------------------- |
-| `/llms.txt`                        | An index of all pages, generated from the page tree. |
-| `/llms-full.txt`                   | The content of all pages in a single file.           |
-| `/llms.mdx/docs/<page>/content.md` | The Markdown of a page.                              |
+| Route                              | Content                                |
+| ---------------------------------- | -------------------------------------- |
+| `/llms.txt`                        | An index of all pages.                 |
+| `/llms-full.txt`                   | The content of all pages, in one file. |
+| `/llms.mdx/docs/<page>/content.md` | The Markdown of a page.                |
 
-Docs pages link their Markdown with the page actions, from `page.markdownUrl` in the [`page` module](/docs/astro/page).
-
-Change the prefix of page Markdown by adding the plugin yourself:
-
-```ts title="src/fumadocs.config.ts"
-import { llmsPlugin } from '@fumadocs/astro/plugins/llms.txt';
-
-export default defineConfig({
-  source,
-  plugins: [llmsPlugin({ prefix: '/markdown' })],
-});
-```
+Docs pages link to their Markdown in the page actions, from `page.markdownUrl`. To change the prefix, see [Default Plugins](/docs/astro/plugins#default-plugins).
 
 ## Processed Markdown
 
-The routes serve the source of your MDX files by default. Enable `includeProcessedMarkdown` to serve the output of [Remark LLMs](/docs/headless/mdx/remark-llms) instead, it takes the same options:
+The routes serve the source of your MDX files by default. To serve the processed Markdown of [Remark LLMs](/docs/headless/mdx/remark-llms), enable `includeProcessedMarkdown`, it takes the same options:
 
 ```js title="astro.config.mjs"
 fumadocs({
-  includeProcessedMarkdown: true,
+  includeProcessedMarkdown: true, // [!code ++]
 });
 ```
 
@@ -44,19 +33,19 @@ npx @fumadocs/cli feature llms
 
 ### MDX Components
 
-MDX components are kept as JSX syntax by default. With `output: 'function'`, they are rendered by your [`components` module](/docs/astro/writing#mdx-components):
+MDX components are kept as JSX by default. With `output: 'function'`, your [MDX components](/docs/astro/content#mdx-components) render them:
 
 ```js title="astro.config.mjs"
 fumadocs({
-  includeProcessedMarkdown: { output: 'function' },
+  includeProcessedMarkdown: { output: 'function' }, // [!code ++]
 });
 ```
 
-A component defines its Markdown form with [`asMarkdown()`](/docs/headless/utils/markdown#asmarkdown), others are still kept as JSX. It is `false` in the browser, so the component works in the content island too.
+A component defines its Markdown with [`asMarkdown()`](/docs/headless/utils/markdown#asmarkdown), the others are kept as JSX. In the browser, `asMarkdown()` is `false` and the component renders as usual.
 
-### In Your Code
+## Get Text
 
-Pages of the source have `getText()`:
+Pages of your source have `getText()`:
 
 ```ts
 // the source file
@@ -68,9 +57,3 @@ await page.data.getText('processed');
 // with `output: 'function'`, render with other components
 await page.data.getText('processed', { components });
 ```
-
-## Not Supported Yet
-
-The [MCP server](/docs/integrations/llms#mcp-server) is an Astro route of your own, it requires `output: 'server'`. [WebMCP](/docs/integrations/llms#webmcp) and [Ask AI](/docs/integrations/llms#ask-ai) aren't available on Astro.
-
-Next, generate [OG images](/docs/astro/og-image) for your pages.

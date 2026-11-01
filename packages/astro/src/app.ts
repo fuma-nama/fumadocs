@@ -100,6 +100,7 @@ export interface FumadocsConfig<Source extends LoaderOutput<any> = LoaderOutput>
   /** Astro component rendered in `<head>`, it receives `page` on docs pages */
   head?: AstroComponent;
 
+  /** routes and features of the site, like `takumiPlugin()` */
   plugins?: PluginOption[];
 
   /**

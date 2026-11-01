@@ -1,20 +1,20 @@
 ---
-title: Getting Started
-description: Build your docs on Astro with Fumadocs.
+title: Introduction
+description: Fumadocs on Astro, with routes and layouts managed for you.
 icon: Rocket
 ---
 
-## Introduction
+## Overview
 
-`@fumadocs/astro` is the Astro integration of Fumadocs. You write MDX files, it creates the docs site:
+`@fumadocs/astro` brings Fumadocs to [Astro](https://astro.build). You write MDX files, the integration builds the docs site around them:
 
-- Docs pages, search, `llms.txt` and the 404 page, with no route files to write.
-- The UI of [Fumadocs UI](/docs/ui), rendered as React islands.
-- A static site, every route is prerendered.
+- Docs pages, search, `llms.txt` and the 404 page are created for you, with no routes, layouts or providers in your app.
+- [Fumadocs UI](/docs/ui) renders as React islands.
+- Features like OG images and OpenAPI pages are [plugins](/docs/astro/plugins).
 
-## Create a Site
+## Quick Start
 
-Astro 7 requires Node.js 22.23.4 or later.
+Create a new app, it requires Node.js 22.23.4 or later:
 
 ```npm
 npx create-fumadocs-app@latest my-docs --template astro
@@ -26,55 +26,51 @@ Start the dev server, and open `/docs`:
 npm run dev
 ```
 
+To add Fumadocs to an existing Astro app, see [Manual Installation](/docs/astro/manual-installation).
+
 ### Project Structure
 
-| File                        | For                                                            |
-| --------------------------- | -------------------------------------------------------------- |
-| `content/docs`              | Your docs pages.                                               |
-| `src/fumadocs.config.ts`    | The site: its pages, title and plugins.                        |
-| `src/lib/source.ts`         | The source of pages, created with `loader()`.                  |
-| `src/content.config.ts`     | The content collections of your docs.                          |
-| `src/lib/layout.shared.tsx` | The [`layout` module](/docs/astro/layout): navbar and links.   |
-| `src/components/mdx.tsx`    | The [`components` module](/docs/astro/writing#mdx-components). |
-| `src/pages/index.astro`     | The home page, an Astro page of your own.                      |
-| `src/styles/global.css`     | Tailwind CSS and the styles of Fumadocs UI.                    |
-| `astro.config.mjs`          | Adds the Fumadocs integration, and registers your modules.     |
+<Files>
+  <Folder name="content/docs" defaultOpen>
+    <File name="index.mdx" />
+    <File name="meta.json" />
+  </Folder>
+  <Folder name="src" defaultOpen>
+    <Folder name="components" defaultOpen>
+      <File name="mdx.tsx" />
+    </Folder>
+    <Folder name="lib" defaultOpen>
+      <File name="layout.shared.tsx" />
+      <File name="source.ts" />
+    </Folder>
+    <Folder name="pages" defaultOpen>
+      <File name="index.astro" />
+    </Folder>
+    <Folder name="styles" defaultOpen>
+      <File name="global.css" />
+    </Folder>
+    <File name="content.config.ts" />
+    <File name="fumadocs.config.ts" />
+  </Folder>
+  <File name="astro.config.mjs" />
+</Files>
 
-The template also generates [OG images](/docs/astro/og-image).
+The site is defined in `src/fumadocs.config.ts`, with the source of your pages:
 
-### Write a Page
-
-Edit the first page, or add one next to it:
-
-```mdx title="content/docs/hello.mdx"
----
-title: Hello
-description: My second page
----
-
-## Overview
-
-I love Fumadocs.
-```
-
-It is available at `/docs/hello`.
-
-## Coming From
-
-- **An existing Astro project:** see [Manual Installation](/docs/astro/manual-installation).
-- **Fumadocs on another framework:** there are no docs routes, layouts or providers to write. Layout options go to the [`layout` module](/docs/astro/layout), the docs page to the [`page` module](/docs/astro/page).
-- **The older setup with your own routes:** it keeps working without `src/fumadocs.config.ts`, see [Without the Config File](/docs/astro/without-config).
+<include cwd meta='title="src/fumadocs.config.ts"'>
+  ../../examples/astro-min/src/fumadocs.config.ts
+</include>
 
 ## Learn More
 
 <Cards>
-  <Card title="Writing Pages" href="/docs/astro/writing">
-    Content files, Markdown and MDX components.
+  <Card title="Content" href="/docs/astro/content">
+    Write pages, and the MDX components they render with.
   </Card>
-  <Card title="Layout" href="/docs/astro/layout">
-    Change the navbar, links and theme.
+  <Card title="Layouts" href="/docs/astro/layouts">
+    The navbar, the docs page and your own pages.
   </Card>
-  <Card title="Search" href="/docs/astro/search">
-    The built-in search, or other search engines.
+  <Card title="Plugins" href="/docs/astro/plugins">
+    LLM routes, OG images, OpenAPI and your own plugins.
   </Card>
 </Cards>

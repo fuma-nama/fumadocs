@@ -27,31 +27,30 @@ Create the OpenAPI server from your schema:
   ../../examples/astro/src/lib/openapi.ts
 </include>
 
-### Generate Pages
+### Pages
 
-Add its pages to your source with `multiple()`, next to your MDX pages:
+Add its pages to your source with `multiple()`:
 
 ```ts title="src/lib/source.ts"
 import { getCollection } from 'astro:content';
-import { loader, multiple } from 'fumadocs-core/source';
+import { loader, multiple } from 'fumadocs-core/source'; // [!code ++]
 import { toFumadocsSource } from '@fumadocs/astro/source';
-import { openapi } from './openapi';
+import { openapi } from './openapi'; // [!code ++]
 
 export const source = loader({
   source: multiple({
     docs: toFumadocsSource(await getCollection('docs'), await getCollection('meta')),
-    // [!code ++]
-    api: await openapi.staticSource({ baseDir: 'api' }),
+    api: await openapi.staticSource({ baseDir: 'api' }), // [!code ++]
   }),
   baseUrl: '/docs',
-  // optional: adds a badge to each page item in page tree [!code ++]
+  // adds a badge to each page in the sidebar [!code ++]
   plugins: [openapi.loaderPlugin()],
 });
 ```
 
-It generates a page per operation under `/docs/api`, see [Generating Pages](/docs/integrations/openapi/generate-files) to customize them. The keys of `multiple()` are the `type` of pages, like `page.type` in the [`page` module](/docs/astro/page).
+It generates a page per operation under `/docs/api`, see [Generating Pages](/docs/integrations/openapi/generate-files) to customize them.
 
-Then render them with the plugin:
+Render them with the plugin:
 
 ```ts title="src/fumadocs.config.ts"
 import { defineConfig } from '@fumadocs/astro/config';
@@ -64,10 +63,6 @@ export default defineConfig({
 });
 ```
 
-The pages use the full width of the docs layout, their Markdown for LLMs is the description of the operation.
+The pages use the full width, and their Markdown for LLMs is the description of the operation.
 
-## Not Supported Yet
-
-OpenAPI pages render with the default options of `createOpenAPIPage()`. The [proxy](/docs/integrations/openapi/server#creating-proxy), [OAuth redirect](/docs/integrations/openapi/server#oauth-redirect) and [loading documents once](/docs/integrations/openapi/server#loading-documents-once) need these options and routes of their own, the plugin doesn't support them yet.
-
-Next, [translate your docs](/docs/astro/internationalization).
+> The plugin renders with the default options of `createOpenAPIPage()`, the [proxy](/docs/integrations/openapi/server#creating-proxy) and the [OAuth redirect](/docs/integrations/openapi/server#oauth-redirect) aren't supported yet.

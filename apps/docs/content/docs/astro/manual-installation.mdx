@@ -1,40 +1,32 @@
 ---
 title: Manual Installation
-description: Add Fumadocs to an existing Astro project.
+description: Add Fumadocs to an existing Astro app.
 ---
 
-## Prerequisites
+## Prerequisite
+
+Before continuing, make sure you have configured:
 
 - Astro 7.
-- Tailwind CSS 4.
+- [Tailwind CSS 4](https://docs.astro.build/en/guides/styling/#tailwind).
 
-Fumadocs CLI can also set it up for you:
-
-```npm
-npx @fumadocs/cli init
-```
-
-## Installation
+## Getting Started
 
 ```npm
-npm i @fumadocs/astro fumadocs-core fumadocs-ui @astrojs/react react react-dom
-
-npm i -D @types/react @types/react-dom @types/mdx
+npm i fumadocs-core fumadocs-ui @fumadocs/astro @astrojs/react react react-dom
 ```
 
-### Astro Config
+### Integration
 
-Add the Fumadocs integration, it also adds the React and MDX integrations of Astro:
+Add the Fumadocs integration, it adds the Markdown features of Fumadocs to the Sätteri processor of Astro, and the React and MDX integrations:
 
 <include cwd meta='title="astro.config.mjs"'>
   ../../examples/astro-min/astro.config.mjs
 </include>
 
-It requires Sätteri, the default Markdown processor of Astro 7.
-
 ### Styles
 
-The integration loads `src/styles/global.css` on its pages, add the styles of Fumadocs UI to it:
+Add the following to your Tailwind CSS file:
 
 ```css title="src/styles/global.css"
 @import 'tailwindcss';
@@ -43,41 +35,37 @@ The integration loads `src/styles/global.css` on its pages, add the styles of Fu
 @import 'fumadocs-ui/css/preset.css';
 ```
 
+The pages of Fumadocs load `src/styles/global.css`, you don't have to import it.
+
 ### Content Collections
 
-Define the collections of your docs, from the MDX files in `content/docs`:
+Define the collections of your docs pages and their [meta files](/docs/page-conventions):
 
 <include cwd meta='title="src/content.config.ts"'>
   ../../examples/astro-min/src/content.config.ts
 </include>
 
-### Fumadocs Config
+### Source
 
-Create a source of pages from the collections:
+Create the source of your pages with the [Loader API](/docs/headless/source-api):
 
 <include cwd meta='title="src/lib/source.ts"'>
-  ../../packages/create-app/template/astro/src/lib/source.ts
+  ../../examples/astro-min/src/lib/source.ts
 </include>
 
-And pass it to the config of Fumadocs:
+### Config
+
+Create the config of Fumadocs:
 
 <include cwd meta='title="src/fumadocs.config.ts"'>
-  ../../packages/create-app/template/astro/src/fumadocs.config.ts
+  ../../examples/astro-min/src/fumadocs.config.ts
 </include>
 
-With this file, the integration creates the docs routes and renders them with Fumadocs UI.
-
-### Home Page
-
-Your own pages can use the home layout of Fumadocs UI:
-
-<include cwd meta='title="src/pages/index.astro"'>
-  ../../examples/astro-min/src/pages/index.astro
-</include>
+From this file, the integration creates the routes of docs pages, search, LLMs and the 404 page.
 
 ### Done
 
-Write your first page:
+You can start writing documents at `content/docs`:
 
 ```mdx title="content/docs/index.mdx"
 ---
@@ -89,20 +77,11 @@ I love Fumadocs
 
 Start the dev server, and open `/docs`.
 
-<Callout title="Path alias">
-
-Other guides import `src/*` as `@/*`, add the alias to your `tsconfig.json`:
-
-```json title="tsconfig.json"
-{
-  "compilerOptions": {
-    "paths": {
-      "@/*": ["./src/*"]
-    }
-  }
-}
-```
-
-</Callout>
-
-See [Writing Pages](/docs/astro/writing) to continue.
+<Cards>
+  <Card title="Content" href="/docs/astro/content">
+    Write pages, and the MDX components they render with.
+  </Card>
+  <Card title="Layouts" href="/docs/astro/layouts">
+    The navbar, the docs page and your own pages.
+  </Card>
+</Cards>

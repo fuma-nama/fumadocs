@@ -1,0 +1,131 @@
+---
+title: Layouts
+description: Customize the navbar, the docs page and your own pages.
+---
+
+## Overview
+
+The integration renders your pages with the layouts of [Fumadocs UI](/docs/ui). You customize them with React modules registered in the integration, they run in the browser like any island:
+
+| Module   | Exports                                  |
+| -------- | ---------------------------------------- |
+| `layout` | `baseOptions()`, the options of layouts. |
+| `page`   | The component of docs pages, as default. |
+
+## Layout Options
+
+Create a module exporting `baseOptions()`, it returns the [options of layouts](/docs/ui/layouts/docs), JSX included:
+
+<include cwd meta='title="src/lib/layout.shared.tsx"'>
+  ../../examples/astro/src/lib/layout.shared.tsx
+</include>
+
+```js title="astro.config.mjs"
+fumadocs({
+  layout: './src/lib/layout.shared.tsx', // [!code ++]
+});
+```
+
+The options apply to every layout: docs pages, your own pages and the 404 page.
+
+> Without it, the navbar shows the `title` of your Fumadocs config.
+
+## Docs Page
+
+The docs page is a React component of its own, like `page.tsx` on other frameworks. Create a module whose default export renders it:
+
+<include cwd meta='title="src/components/docs.tsx"'>
+  ../../examples/astro/src/components/docs.tsx
+</include>
+
+```js title="astro.config.mjs"
+fumadocs({
+  page: './src/components/docs.tsx', // [!code ++]
+});
+```
+
+It receives:
+
+- `tree`: the page tree.
+- `layout`: the options from `baseOptions()`.
+- `page`: the data of the page.
+- `children`: the content.
+
+<auto-type-table path="./props.ts" name="DocsPageData" />
+
+Use any layout or component of Fumadocs UI here, such as the [Notebook layout](/docs/ui/layouts/notebook) for some pages:
+
+```tsx title="src/components/docs.tsx"
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+import { DocsLayout as NotebookLayout } from 'fumadocs-ui/layouts/notebook'; // [!code ++]
+import type { DocsPageProps } from '@fumadocs/astro/config';
+
+export default function Docs({ tree, page, layout, children }: DocsPageProps) {
+  // `type` is the key of its source in `multiple()`
+  const Layout = page.type === 'api' ? NotebookLayout : DocsLayout;
+  // ...
+}
+```
+
+## Your Own Pages
+
+Use `HomeLayout.astro` for your own pages, with the navbar of your layout options:
+
+<include cwd meta='title="src/pages/index.astro"'>
+  ../../examples/astro-min/src/pages/index.astro
+</include>
+
+| Prop          | Description                                                  |
+| ------------- | ------------------------------------------------------------ |
+| `title`       | The page title.                                              |
+| `description` | The page description.                                        |
+| `lang`        | The language, with [i18n](/docs/astro/internationalization). |
+| `notFound`    | Render the not found page.                                   |
+
+Anything in its `head` slot goes into `<head>`.
+
+Your pages can read your docs from the source:
+
+```astro title="src/pages/all.astro"
+---
+import HomeLayout from '@fumadocs/astro/components/HomeLayout.astro';
+import { source } from '@/lib/source';
+---
+
+<HomeLayout title="All Pages">
+  <ul>
+    {source.getPages().map((page) => <li><a href={page.url}>{page.data.title}</a></li>)}
+  </ul>
+</HomeLayout>
+```
+
+A page of your own takes priority over a docs page of the same URL, remove the MDX file to avoid the warning of Astro. To replace the 404 page, create `src/pages/404.astro`.
+
+## Head
+
+Render tags into the `<head>` of every page, like a favicon, with an Astro component:
+
+<include cwd meta='title="src/components/Head.astro"'>
+  ../../examples/astro/src/components/Head.astro
+</include>
+
+```ts title="src/fumadocs.config.ts"
+import Head from './components/Head.astro';
+
+export default defineConfig({
+  // ...
+  head: Head, // [!code ++]
+});
+```
+
+On docs pages, it receives the page of your source as `page`.
+
+## Styles
+
+The pages load `src/styles/global.css`, see [Themes](/docs/ui/theme) for its colors and presets. Set `css` for another file:
+
+```js title="astro.config.mjs"
+fumadocs({
+  css: './src/styles/docs.css', // [!code ++]
+});
+```

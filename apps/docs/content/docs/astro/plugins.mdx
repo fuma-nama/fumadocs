@@ -1,0 +1,85 @@
+---
+title: Plugins
+description: Add features to your site with plugins.
+---
+
+## Overview
+
+Features of your site come from plugins, like the routes of search and LLMs. Add them to your config:
+
+```ts title="src/fumadocs.config.ts"
+import { defineConfig } from '@fumadocs/astro/config';
+import { takumiPlugin } from '@fumadocs/astro/plugins/takumi'; // [!code ++]
+import { source } from './lib/source';
+
+export default defineConfig({
+  source,
+  plugins: [takumiPlugin()], // [!code ++]
+});
+```
+
+| Plugin                | Import                                 | Feature                           |
+| --------------------- | -------------------------------------- | --------------------------------- |
+| `oramaSearchPlugin()` | `@fumadocs/astro/plugins/orama-search` | [Search](/docs/astro/search)      |
+| `llmsPlugin()`        | `@fumadocs/astro/plugins/llms.txt`     | [LLMs](/docs/astro/llms)          |
+| `takumiPlugin()`      | `@fumadocs/astro/plugins/takumi`       | [OG Images](/docs/astro/og-image) |
+| `openapiPlugin()`     | `@fumadocs/astro/plugins/openapi`      | [OpenAPI](/docs/astro/openapi)    |
+
+The routes of plugins are prerendered at build time.
+
+### Default Plugins
+
+`oramaSearchPlugin()` and `llmsPlugin()` are added by default. Add one yourself to pass its options, it replaces the default one:
+
+```ts title="src/fumadocs.config.ts"
+import { llmsPlugin } from '@fumadocs/astro/plugins/llms.txt';
+
+export default defineConfig({
+  // ...
+  plugins: [llmsPlugin({ prefix: '/markdown' })], // [!code ++]
+});
+```
+
+To remove them, set `preset` to `false`.
+
+## Writing Plugins
+
+A plugin is an object, its hooks receive the app as `this`, like `this.getPages()` for the pages of every language:
+
+<auto-type-table path="./props.ts" name="Plugin" />
+
+For example, a plugin that serves the URLs of pages, and opens API pages in full width:
+
+```ts title="src/lib/my-plugin.ts"
+import type { Plugin } from '@fumadocs/astro/config';
+
+export function myPlugin(): Plugin {
+  return {
+    name: 'my-plugin',
+    routes() {
+      const urls = this.getPages().map((page) => page.url);
+
+      return [
+        {
+          type: 'file',
+          url: `${this.base}/pages.json`,
+          GET: () => Response.json(urls),
+        },
+      ];
+    },
+    transformPage(page, data) {
+      return page.slugs[0] === 'api' ? { ...data, full: true } : data;
+    },
+  };
+}
+```
+
+`transformPage()` changes the [data of docs pages](/docs/astro/layouts#docs-page), received by the `page` module and used for the `<head>` tags like the title.
+
+A route of `type: 'page'` renders an Astro component with `props`, use [`HomeLayout.astro`](/docs/astro/layouts#your-own-pages) in it for the layout.
+
+An item of `plugins` can also be an array of plugins, `false` and `undefined` are skipped:
+
+```ts
+plugins: [myPlugin(), import.meta.env.PROD && takumiPlugin()];
+```
