@@ -1,10 +1,10 @@
 import Link from 'next/link';
 import { asMarkdown } from 'fumadocs-core/server';
 import { ArrowUpRight } from 'lucide-react';
-import { command, copy, frameworks } from '../../content';
+import { command, copy, frameworks, plain } from '../../content';
 import { Command } from '../../ui/command';
+import { block, url } from '../../markdown';
 import { Figure } from '../../ui/figure';
-import { commas, Terms, url } from '../../ui/heading';
 import { Glitch } from './glitch';
 import { Stage } from './stage';
 
@@ -15,35 +15,18 @@ const invert =
  * desktop and under it on phones */
 export function Hero() {
   if (asMarkdown())
-    return (
-      <>
-        <h1>Fumadocs</h1>
-        <blockquote>
-          <Terms runs={copy.hero.title} />
-        </blockquote>
-        {/* what she says from the moon, each bubble as a sentence */}
-        <p>{copy.hero.says.flat().join(' ')}</p>
-        <ul>
-          <li>
-            <a href={url('/docs')}>Get started</a>
-          </li>
-          <li>
-            Create a project: <code>{command}</code>
-          </li>
-          <li>
-            Runs on:{' '}
-            {commas(frameworks, (framework) => (
-              <a href={url(framework.href)}>{framework.name}</a>
-            ))}
-          </li>
-          <li>
-            For LLMs: <a href={url('/llms.txt')}>llms.txt</a> indexes the docs,{' '}
-            <a href={url('/llms-full.txt')}>llms-full.txt</a> has all of them; add <code>.md</code>{' '}
-            to a docs URL for its Markdown.
-          </li>
-        </ul>
-      </>
-    );
+    return block`
+      # Fumadocs
+
+      > ${plain(copy.hero.title)}
+
+      ${copy.hero.says.flat().join(' ')}
+
+      - [Get started](${url('/docs')})
+      - Create a project: \`${command}\`
+      - Runs on: ${frameworks.map((framework) => `[${framework.name}](${url(framework.href)})`).join(', ')}
+      - For LLMs: [llms.txt](${url('/llms.txt')}) indexes the docs, [llms-full.txt](${url('/llms-full.txt')}) has all of them; add \`.md\` to a docs URL for its Markdown.
+    `;
 
   return (
     <Figure

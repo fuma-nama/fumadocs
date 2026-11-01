@@ -1,8 +1,8 @@
 import type { ReactNode } from 'react';
 import { asMarkdown } from 'fumadocs-core/server';
 import { copy, plain } from '../../content';
-import { Figure } from '../../ui/figure';
-import { commas, FigureHeader, url } from '../../ui/heading';
+import { block, heading, url } from '../../markdown';
+import { Figure, FigureHeader } from '../../ui/figure';
 import { FIRST, LAYOUTS, TABS, THEME_NAMES, THEMES } from './data';
 import { createHardware } from './hardware';
 import { loadInks } from './presets';
@@ -10,39 +10,25 @@ import { FIRST_POSE, hangRopes } from './scene';
 import { Stage } from './stage';
 
 export async function Style() {
-  if (asMarkdown())
-    return (
-      <>
-        <FigureHeader title={copy.style.title} />
-        <p>{plain([copy.style.claims.join(' ')])}</p>
-        <ul>
-          <li>Restyle any layout or theme with CSS variables.</li>
-          {TABS.map((id) => {
-            const tab = copy.style.tabs[id];
-            return (
-              <li key={id}>
-                <a href={url(tab.href)}>{tab.label}</a>: {tab.line}
-                {id === 'layouts' && (
-                  <ul>
-                    <li>Layouts: {LAYOUTS.map((layout) => layout.name).join(', ')}</li>
-                    <li>
-                      <a href={url('/docs/ui/theme')}>Themes</a>:{' '}
-                      {commas(THEMES, (theme) => (
-                        <>
-                          {THEME_NAMES[theme]} (<code>{theme}</code>)
-                        </>
-                      ))}
-                      , each a stylesheet imported as{' '}
-                      <code>{"@import 'fumadocs-ui/css/<id>.css';"}</code>
-                    </li>
-                  </ul>
-                )}
-              </li>
-            );
-          })}
-        </ul>
-      </>
-    );
+  if (asMarkdown()) {
+    const lines = ['- Restyle any layout or theme with CSS variables.'];
+    for (const id of TABS) {
+      const tab = copy.style.tabs[id];
+      lines.push(`- [${tab.label}](${url(tab.href)}): ${tab.line}`);
+      if (id !== 'layouts') continue;
+      lines.push(
+        `  - Layouts: ${LAYOUTS.map((layout) => layout.name).join(', ')}`,
+        `  - [Themes](${url('/docs/ui/theme')}): ${THEMES.map((theme) => `${THEME_NAMES[theme]} (\`${theme}\`)`).join(', ')}, each a stylesheet imported as \`@import 'fumadocs-ui/css/<id>.css';\``,
+      );
+    }
+    return block`
+      ${heading(copy.style)}
+
+      ${plain([copy.style.claims.join(' ')])}
+
+      ${lines.join('\n')}
+    `;
+  }
 
   const table = await loadInks();
   // the desk's cables in its first pose settle here, once: the browser takes their shape

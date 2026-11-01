@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { asMarkdown } from 'fumadocs-core/server';
-import { Figure } from '../../ui/figure';
-import { commas, FigureHeader, url } from '../../ui/heading';
+import { block, heading, url } from '../../markdown';
+import { Figure, FigureHeader } from '../../ui/figure';
 import { copy } from '../../content';
 import { Board, Keyed } from './board';
 import { modules, more } from './data';
@@ -9,25 +9,12 @@ import { mechanisms } from './mechanisms';
 
 export function Integrations() {
   if (asMarkdown())
-    return (
-      <>
-        <FigureHeader title={copy.integrations.title} />
-        <ul>
-          {modules.map((item) => (
-            <li key={item.title}>
-              <a href={url(item.href ?? '/docs/search')}>{item.title}</a> (<code>{item.pkg}</code>):{' '}
-              {item.line} Add it with <code>{item.install}</code>.
-            </li>
-          ))}
-          <li>
-            More:{' '}
-            {commas(more, (item) => (
-              <a href={url(item.href)}>{item.name}</a>
-            ))}
-          </li>
-        </ul>
-      </>
-    );
+    return block`
+      ${heading(copy.integrations)}
+
+      ${modules.map((item) => `- [${item.title}](${url(item.href ?? '/docs/search')}) (\`${item.pkg}\`): ${item.line} Add it with \`${item.install}\`.`).join('\n')}
+      - More: ${more.map((item) => `[${item.name}](${url(item.href)})`).join(', ')}
+    `;
 
   return (
     <Figure

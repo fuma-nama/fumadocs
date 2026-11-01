@@ -1,8 +1,8 @@
 import Link from 'next/link';
 import { asMarkdown } from 'fumadocs-core/server';
 import { cn } from '@/lib/cn';
-import { Figure } from '../../ui/figure';
-import { FigureHeader, url } from '../../ui/heading';
+import { block, heading, url } from '../../markdown';
+import { Figure, FigureHeader } from '../../ui/figure';
 import { Command } from '../../ui/command';
 import { Stage } from './stage';
 import { Wordmark } from './wordmark';
@@ -22,15 +22,15 @@ const button =
 
 export function Start() {
   if (asMarkdown())
-    return (
-      <>
-        <FigureHeader title={copy.start.title} />
-        <pre data-lang="bash">{command}</pre>
-        <p>
-          <a href={url('/docs')}>Read the docs</a>.
-        </p>
-      </>
-    );
+    return block`
+      ${heading(copy.start)}
+
+      \`\`\`bash
+      ${command}
+      \`\`\`
+
+      [Read the docs](${url('/docs')}).
+    `;
 
   return (
     <Figure id="start" aria-label="Start" status="awaiting input">

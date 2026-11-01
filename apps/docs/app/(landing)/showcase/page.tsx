@@ -2,11 +2,12 @@ import type { Metadata } from 'next';
 import { asMarkdown } from 'fumadocs-core/server';
 import { ArrowUpRight } from 'lucide-react';
 import { createMetadata } from '@/lib/metadata';
-import { blogs, showcases } from '@/lib/showcases';
-import { Figure } from '../ui/figure';
-import { FigureHeader, Terms } from '../ui/heading';
+import { blogs, showcases, vercel } from '@/lib/showcases';
+import { plain } from '../content';
+import { block, heading } from '../markdown';
+import { Figure, FigureHeader, Terms } from '../ui/figure';
 import { address } from '../ui/site-tile';
-import { arrange, copy, suggest } from './data';
+import { arrange, copy, kinds, suggest } from './data';
 import { DeckBack, DeckFront } from './deck';
 import { Projector } from './projector';
 import { Blogs, Wall } from './wall';
@@ -25,25 +26,32 @@ export const metadata: Metadata = createMetadata({
 const figure = 'flex flex-col gap-12 px-(--lp-gutter) py-16 md:gap-16 md:py-20';
 
 export default function Page() {
-  if (asMarkdown())
-    return (
-      <>
-        <h1>Showcase</h1>
-        <blockquote>
-          <Terms runs={copy.header.title} />
-        </blockquote>
-        <p>{copy.header.summary}</p>
-        <ul>
-          <li>
-            <a href={suggest}>Suggest yours</a>
-          </li>
-        </ul>
-        <h2>Sites</h2>
-        <Wall sites={showcases} />
-        <FigureHeader title={copy.blogs.title} />
-        <Blogs sites={blogs} />
-      </>
-    );
+  if (asMarkdown()) {
+    // the wall's order: the featured with their own words, Vercel's SDKs, then every other site
+    const { featured, shots, blank } = arrange(showcases);
+    const sites: string[] = [];
+    for (const site of featured) sites.push(`- [${site.name}](${site.url}): ${kinds[site.url]}`);
+    sites.push(`- Vercel: ${copy.vercel}`);
+    for (const site of vercel) sites.push(`  - [${site.name}](${site.url}): ${kinds[site.url]}`);
+    for (const site of [...shots, ...blank]) sites.push(`- [${site.name}](${site.url})`);
+    return block`
+      # Showcase
+
+      > ${plain(copy.header.title)}
+
+      ${copy.header.summary}
+
+      - [Suggest yours](${suggest})
+
+      ## Sites
+
+      ${sites.join('\n')}
+
+      ${heading(copy.blogs)}
+
+      ${blogs.map((site) => `- [${site.name}](${site.url})`).join('\n')}
+    `;
+  }
 
   const { featured, shots } = arrange(showcases);
   const reel = [...featured, ...shots];

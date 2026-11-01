@@ -9,8 +9,8 @@ import { type ShowcaseObject, showcases, vercel } from '@/lib/showcases';
 import { copy } from '../../content';
 import { copy as showcase } from '../../showcase/data';
 import { VercelLinks, VercelTitle } from '../../showcase/wall';
-import { Figure } from '../../ui/figure';
-import { commas, FigureHeader, url } from '../../ui/heading';
+import { block, heading, url } from '../../markdown';
+import { Figure, FigureHeader } from '../../ui/figure';
 import { Shadow, STRIPES, Window } from '../../ui/window';
 import { getContributorCount, getDownloads, getStars } from './data';
 import { type Reading, Stage } from './stage';
@@ -193,25 +193,12 @@ export async function Proof() {
     readings.push({ label: 'Contributors', value: contributors, source: repository });
 
   if (asMarkdown())
-    return (
-      <>
-        <FigureHeader title={copy.proof.title} />
-        <ul>
-          {readings.map((reading) => (
-            <li key={reading.label}>
-              {reading.label}: {reading.value.toLocaleString('en-US')} (
-              <code>{reading.source}</code>)
-            </li>
-          ))}
-          <li>
-            <a href={url('/showcase')}>Showcase</a>:{' '}
-            {commas([...showcases, ...vercel], (site) => (
-              <a href={site.url}>{site.name}</a>
-            ))}
-          </li>
-        </ul>
-      </>
-    );
+    return block`
+      ${heading(copy.proof)}
+
+      ${readings.map((reading) => `- ${reading.label}: ${reading.value.toLocaleString('en-US')} (\`${reading.source}\`)`).join('\n')}
+      - [Showcase](${url('/showcase')}): ${[...showcases, ...vercel].map((site) => `[${site.name}](${site.url})`).join(', ')}
+    `;
 
   return (
     <Figure
