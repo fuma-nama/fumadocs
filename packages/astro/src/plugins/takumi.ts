@@ -6,7 +6,7 @@ import type { AnyPage, App, Plugin, Route } from '../app';
  */
 export function takumiPlugin({ prefix = '/og' }: { prefix?: string } = {}): Plugin {
   function imageUrl(app: App, page: AnyPage) {
-    return `${app.base}${prefix}${app.toPath(page.url).replace(/\/$/, '')}/image.webp`;
+    return `${app.base}${prefix.replace(/\/$/, '')}${app.toPath(page.url).replace(/\/$/, '')}/image.webp`;
   }
 
   return {

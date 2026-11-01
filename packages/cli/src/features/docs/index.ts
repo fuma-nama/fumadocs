@@ -258,7 +258,18 @@ async function configureCss(ctx: FeatureContext) {
     const current = await fs.readFile(path.join(cwd, file), 'utf-8').catch(() => '');
     const lines = cssImports(preset);
     if (!/@import\s+['"]tailwindcss['"]/.test(current)) lines.unshift("@import 'tailwindcss';");
-    await ctx.append(file, lines);
+    const missing = lines.filter((line) => !current.includes(line));
+    if (missing.length === 0) return;
+    // `@import` must come before other rules, after the existing imports
+    const content = current.split('\n');
+    let index = 0;
+    for (let i = 0; i < content.length; i++) {
+      if (content[i].trimStart().startsWith('@import')) index = i + 1;
+    }
+    content.splice(index, 0, ...missing);
+    await fs.mkdir(path.dirname(path.join(cwd, file)), { recursive: true });
+    await fs.writeFile(path.join(cwd, file), content.join('\n').replace(/\n*$/, '\n'));
+    ctx.log(`updated ${file}`);
     return;
   }
 

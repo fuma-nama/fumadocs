@@ -14,7 +14,7 @@ export function llmsPlugin(): Plugin {
     name: 'llms.txt',
     routes() {
       const output = llms(this.source, {
-        renderPage: async (page) => `# ${page.data.title} (${page.url})
+        renderPage: async (page) => `# ${(await this.getPageData(page)).title} (${page.url})
 
 ${await this.getText(page)}`,
       });
