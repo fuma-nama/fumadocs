@@ -28,7 +28,7 @@ export default defineConfig({
 
 ## Processed Markdown
 
-The routes serve the source of your MDX files by default. Enable `includeProcessedMarkdown` to serve the Markdown processed by Fumadocs instead: imports are removed, headings get their IDs, and [included](/docs/markdown#include) content is expanded.
+The routes serve the source of your MDX files by default. Enable `includeProcessedMarkdown` to serve the output of [Remark LLMs](/docs/headless/mdx/remark-llms) instead, it takes the same options:
 
 ```js title="astro.config.mjs"
 fumadocs({
@@ -44,7 +44,7 @@ npx @fumadocs/cli feature llms
 
 ### MDX Components
 
-MDX components are kept as JSX syntax, like `<Tabs items={['a', 'b']}>...</Tabs>`. With `output: 'function'`, they are rendered by your [`components` module](/docs/astro/writing#mdx-components):
+MDX components are kept as JSX syntax by default. With `output: 'function'`, they are rendered by your [`components` module](/docs/astro/writing#mdx-components):
 
 ```js title="astro.config.mjs"
 fumadocs({
@@ -52,19 +52,7 @@ fumadocs({
 });
 ```
 
-A component defines its Markdown form with `asMarkdown()`, others are still kept as JSX:
-
-```tsx title="src/components/product-card.tsx"
-import { asMarkdown, md } from 'fumadocs-core/server';
-
-export function ProductCard({ name, href }: { name: string; href: string }) {
-  if (asMarkdown()) return md`[${name}](${href})`;
-
-  return <a href={href}>{name}</a>;
-}
-```
-
-`asMarkdown()` is `false` in the browser, the component works in the content island too. See [Markdown Rendering](/docs/headless/utils/markdown) for `md`.
+A component defines its Markdown form with [`asMarkdown()`](/docs/headless/utils/markdown#asmarkdown), others are still kept as JSX. It is `false` in the browser, so the component works in the content island too.
 
 ### In Your Code
 

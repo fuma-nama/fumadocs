@@ -61,18 +61,18 @@ It is a React component rendered as an island, the content of the page is `child
 
 `page` has:
 
-| Property      | Description                                                  |
-| ------------- | ------------------------------------------------------------ |
-| `title`       | Title from frontmatter.                                      |
-| `description` | Description from frontmatter.                                |
-| `url`         | URL of the page.                                             |
-| `path`        | File path, relative to the content directory.                |
-| `locale`      | Language of the page, with i18n.                             |
-| `type`        | Key of its source in `multiple()`.                           |
-| `toc`         | Table of contents.                                           |
-| `full`        | Use the full width of page, set on OpenAPI pages.            |
-| `markdownUrl` | URL of the page as Markdown, from [LLMs](/docs/astro/llms).  |
-| `image`       | URL of the OG image, from [OG Images](/docs/astro/og-image). |
+| Property      | Description                                                                            |
+| ------------- | -------------------------------------------------------------------------------------- |
+| `title`       | Title from frontmatter.                                                                |
+| `description` | Description from frontmatter.                                                          |
+| `url`         | URL of the page.                                                                       |
+| `path`        | File path, relative to the content directory.                                          |
+| `locale`      | Language of the page, with i18n.                                                       |
+| `type`        | Key of its source in [`multiple()`](/docs/astro/collections#other-sources).            |
+| `toc`         | Table of contents.                                                                     |
+| `full`        | Use the full width, from [frontmatter](/docs/astro/writing#pages) or on OpenAPI pages. |
+| `markdownUrl` | URL of the page as Markdown, from [LLMs](/docs/astro/llms).                            |
+| `image`       | URL of the OG image, from [OG Images](/docs/astro/og-image).                           |
 
 ## Examples
 
@@ -116,4 +116,4 @@ To edit the layout itself, copy its source into your project with Fumadocs CLI, 
 npx @fumadocs/cli customize
 ```
 
-Next, add features with [plugins](/docs/astro/search), starting from search.
+Next, add pages outside your docs with [Custom Pages](/docs/astro/pages).

@@ -10,12 +10,13 @@ A plugin is an object with a `name` and hooks, add it to the `plugins` of your c
 ```ts title="src/lib/plugins.ts"
 import type { Plugin } from '@fumadocs/astro/config';
 
-export function fullPagesPlugin(): Plugin {
+export function draftPlugin(): Plugin {
   return {
-    name: 'full-pages',
-    // use the full width for pages with `full: true` in frontmatter
+    name: 'draft',
+    // mark the title of pages with `draft: true` in frontmatter
     transformPage(page, data) {
-      if ('full' in page.data && page.data.full === true) return { ...data, full: true };
+      if ('draft' in page.data && page.data.draft === true)
+        return { ...data, title: `${data.title} (Draft)` };
       return data;
     },
   };
@@ -23,13 +24,15 @@ export function fullPagesPlugin(): Plugin {
 ```
 
 ```ts title="src/fumadocs.config.ts"
-import { fullPagesPlugin } from './lib/plugins'; // [!code ++]
+import { draftPlugin } from './lib/plugins'; // [!code ++]
 
 export default defineConfig({
   source,
-  plugins: [fullPagesPlugin()], // [!code ++]
+  plugins: [draftPlugin()], // [!code ++]
 });
 ```
+
+`draft` is a field of your own, add it to the [schema](/docs/astro/collections#schema).
 
 A plugin of the same name as a [default plugin](/docs/astro/search#default-plugins) replaces it.
 

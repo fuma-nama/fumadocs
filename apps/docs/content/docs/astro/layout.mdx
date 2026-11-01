@@ -51,9 +51,7 @@ export function baseOptions(): BaseLayoutProps {
 }
 ```
 
-See [Navbar](/docs/ui/layouts/nav) and [Layout Links](/docs/ui/layouts/links) for the options.
-
-The navbar title links to the home page of the current language. `baseOptions()` receives the language for [Internationalization](/docs/astro/internationalization).
+See [Navbar](/docs/ui/layouts/nav) and [Layout Links](/docs/ui/layouts/links) for the options. With [i18n](/docs/astro/internationalization#layout), `baseOptions()` receives the language.
 
 <Callout title="Runs in the browser">
   The module is part of the React islands of every page, keep server-only code out of it.
@@ -61,7 +59,7 @@ The navbar title links to the home page of the current language. `baseOptions()`
 
 ## Theme
 
-The integration loads `src/styles/global.css` on its pages. Swap the theme import to change colors:
+Swap the theme import of `src/styles/global.css` to change colors:
 
 ```css title="src/styles/global.css"
 @import 'tailwindcss';
@@ -72,7 +70,7 @@ The integration loads `src/styles/global.css` on its pages. Swap the theme impor
 @import 'fumadocs-ui/css/preset.css';
 ```
 
-See [Themes](/docs/ui/theme) for the presets and CSS variables. To load another file, pass it as `css`:
+See [Themes](/docs/ui/theme) for the presets and CSS variables. To load another file than `src/styles/global.css` on the pages of Fumadocs, pass it as `css`:
 
 ```js title="astro.config.mjs"
 fumadocs({

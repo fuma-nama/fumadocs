@@ -28,31 +28,6 @@ npm run dev
 
 ### Project Structure
 
-<Files>
-  <Folder name="content/docs" defaultOpen>
-    <File name="index.mdx" />
-    <File name="meta.json" />
-  </Folder>
-  <Folder name="src" defaultOpen>
-    <Folder name="components" defaultOpen>
-      <File name="mdx.tsx" />
-    </Folder>
-    <Folder name="lib" defaultOpen>
-      <File name="layout.shared.tsx" />
-      <File name="source.ts" />
-    </Folder>
-    <Folder name="pages" defaultOpen>
-      <File name="index.astro" />
-    </Folder>
-    <Folder name="styles" defaultOpen>
-      <File name="global.css" />
-    </Folder>
-    <File name="content.config.ts" />
-    <File name="fumadocs.config.ts" />
-  </Folder>
-  <File name="astro.config.mjs" />
-</Files>
-
 | File                        | For                                                            |
 | --------------------------- | -------------------------------------------------------------- |
 | `content/docs`              | Your docs pages.                                               |
@@ -88,7 +63,7 @@ It is available at `/docs/hello`.
 
 - **An existing Astro project:** see [Manual Installation](/docs/astro/manual-installation).
 - **Fumadocs on another framework:** there are no docs routes, layouts or providers to write. Layout options go to the [`layout` module](/docs/astro/layout), the docs page to the [`page` module](/docs/astro/page).
-- **The setup with your own routes:** it keeps working when there is no `src/fumadocs.config.ts`, see [Without the Config File](/docs/astro/without-config).
+- **The older setup with your own routes:** it keeps working without `src/fumadocs.config.ts`, see [Without the Config File](/docs/astro/without-config).
 
 ## Learn More
 

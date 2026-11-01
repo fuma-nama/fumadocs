@@ -63,7 +63,7 @@ See [Loader API](/docs/headless/source-api) for its methods.
 
 ## Replacing a Docs Page
 
-Your routes take priority over the docs routes. To render `/docs/test` without the docs layout, remove `content/docs/test.mdx` and create `src/pages/docs/test.astro`.
+Your routes in `src/pages` take priority over the docs routes. To render `/docs/test` without the docs layout, create `src/pages/docs/test.astro` and remove `content/docs/test.mdx`.
 
 ## Not Found Page
 
@@ -81,4 +81,4 @@ import HomeLayout from '@fumadocs/astro/components/HomeLayout.astro';
 
 The routes of Fumadocs are prerendered, routes rendered on demand aren't supported yet. Your own routes can be, with `output: 'server'` and an [adapter](https://docs.astro.build/en/guides/on-demand-rendering).
 
-Next, see [Collections](/docs/astro/collections) for other content and sources.
+Next, add features with [plugins](/docs/astro/search), starting from search.

@@ -5,7 +5,7 @@ description: Write your docs in multiple languages.
 
 ## Setup
 
-Fumadocs CLI sets up a new site with i18n:
+Fumadocs CLI sets up Fumadocs with i18n:
 
 ```npm
 npx @fumadocs/cli init --i18n
@@ -19,13 +19,33 @@ Or configure it manually. Define your languages:
 
 > See [available options](/docs/headless/internationalization/config) for the i18n config.
 
-Pass it to `loader()`, and add the UI translations:
+Pass it to `loader()`:
 
-<include cwd meta='title="src/fumadocs.config.ts"'>
-  ../../examples/astro-i18n/src/fumadocs.config.ts
-</include>
+```ts title="src/lib/source.ts"
+import { i18n } from './i18n'; // [!code ++]
 
-`translations` defaults to the languages of `i18n`, see [Translations](/docs/ui/translations) for the display names and language packs.
+export const source = loader({
+  source: toFumadocsSource(await getCollection('docs'), await getCollection('meta')),
+  baseUrl: '/docs',
+  i18n, // [!code ++]
+});
+```
+
+The UI is in English by default. Translate it with `translations`:
+
+```ts title="src/fumadocs.config.ts"
+import { uiTranslations } from 'fumadocs-ui/i18n';
+import { zhTW } from '@fumadocs/language/zh-tw';
+import { i18n } from './lib/i18n';
+
+export default defineConfig({
+  source,
+  // [!code ++]
+  translations: i18n.translations().extend(uiTranslations()).preset('cn', zhTW()),
+});
+```
+
+See [Translations](/docs/ui/translations) for the display names and language packs, pass them as `translations` rather than to `RootProvider`.
 
 ### Content
 
@@ -80,4 +100,4 @@ Fumadocs only adds the locale to the links of its layouts, like the sidebar. In 
 
 The built-in search indexes every language, and works for all of them (including Chinese and Japanese) with no config. See [Internationalization](/docs/headless/search/orama#internationalization) for its options.
 
-Next, add pages outside your docs with [Custom Pages](/docs/astro/pages).
+Next, see [Collections](/docs/astro/collections) for other content and sources.
