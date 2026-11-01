@@ -5,7 +5,7 @@ description: Generate docs pages from your AsyncAPI schema.
 
 ## Setup
 
-`asyncapiPlugin()` renders the pages of [Fumadocs AsyncAPI](/docs/integrations/asyncapi), with the interactive playground.
+`asyncapiPlugin()` renders [AsyncAPI](/docs/integrations/asyncapi) pages with the interactive playground.
 
 ```npm
 npm i @fumadocs/asyncapi shiki
@@ -66,6 +66,6 @@ export default defineConfig({
 });
 ```
 
-The plugin serves the documents left out by [`includeDocument: false`](/docs/integrations/asyncapi/server#loading-documents-once), so pages load them once per browser session.
+The plugin serves the documents left out by `includeDocument: false`, so pages load them once per browser session.
 
-To customize the pages, create `<AsyncAPIPage />` with [`createAsyncAPIPage()`](/docs/integrations/asyncapi/api-page) and add it to your [MDX components](/docs/astro/content#mdx-components), [lazily](/docs/astro/content#heavy-components).
+To customize the pages, create `<AsyncAPIPage />` with [`createAsyncAPIPage()`](/docs/integrations/asyncapi/api-page) and add it to your MDX components, loaded lazily (see [Lazy Components](/docs/astro/content#lazy-components)).

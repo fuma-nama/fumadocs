@@ -23,13 +23,13 @@ npm i -D @types/react @types/react-dom @types/mdx
 
 ### Integration
 
-Add the Fumadocs integration, it adds the Markdown features of Fumadocs to the Sätteri processor of Astro, and the React and MDX integrations:
+Add the Fumadocs integration. It adds Fumadocs Markdown features to Astro's Sätteri processor, and the React and MDX integrations:
 
 <include cwd meta='title="astro.config.mjs"'>
   ../../examples/astro-min/astro.config.mjs
 </include>
 
-The integration runs on Sätteri, the default Markdown processor of Astro, and throws when `markdown.processor` is another processor.
+The integration requires Sätteri, Astro's default Markdown processor. It throws if `markdown.processor` is set to another processor.
 
 ### Styles
 
@@ -42,11 +42,11 @@ Add the following to your Tailwind CSS file:
 @import 'fumadocs-ui/css/preset.css';
 ```
 
-The pages of Fumadocs load `src/styles/global.css`, you don't have to import it.
+Fumadocs pages load `src/styles/global.css`, you don't have to import it.
 
 ### Source Files
 
-Create the [collections](/docs/page-conventions), the [source](/docs/headless/source-api) and the Fumadocs config:
+Create the content collections, source and Fumadocs config:
 
 <include cwd meta='tab="src/content.config.ts"'>
   ../../examples/astro-min/src/content.config.ts
@@ -60,7 +60,7 @@ Create the [collections](/docs/page-conventions), the [source](/docs/headless/so
   ../../examples/astro-min/src/fumadocs.config.ts
 </include>
 
-From `src/fumadocs.config.ts`, the integration creates the routes of docs pages, search, LLMs and the 404 page.
+From `src/fumadocs.config.ts`, the integration creates docs pages, search, LLM routes and the 404 page.
 
 ### Layout Options
 
@@ -68,7 +68,7 @@ Create a `layout` module for the navbar title and links, see [Layout Options](/d
 
 ### Home Page
 
-Only `/docs` is generated, create a home page for `/` with [`HomeLayout.astro`](/docs/astro/layouts#your-own-pages).
+Only `/docs` is generated, create a home page for `/` with [`HomeLayout.astro`](/docs/astro/layouts#custom-pages).
 
 ### Done
 
@@ -89,9 +89,9 @@ Start the dev server, and open `/docs`.
     Write pages, and the MDX components they render with.
   </Card>
   <Card title="Layouts" href="/docs/astro/layouts">
-    The navbar, the docs page and your own pages.
+    The navbar, the docs page and custom pages.
   </Card>
   <Card title="Configuration" href="/docs/astro/configuration">
-    The options of the integration and the Fumadocs config.
+    Integration and config options.
   </Card>
 </Cards>

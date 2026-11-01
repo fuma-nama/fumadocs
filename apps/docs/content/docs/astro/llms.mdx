@@ -5,13 +5,13 @@ description: Serve your docs as Markdown for LLMs and AI agents.
 
 ## Routes
 
-Your site serves the Markdown of your docs by default, from `llmsPlugin()`:
+Your site serves your docs as Markdown by default, from `llmsPlugin()`:
 
-| Route             | Content                                  |
-| ----------------- | ---------------------------------------- |
-| `/llms.txt`       | An index of all pages.                   |
-| `/llms-full.txt`  | The content of all pages, in one file.   |
-| `/docs/<page>.md` | The Markdown of a page, like `/docs.md`. |
+| Route             | Content                                |
+| ----------------- | -------------------------------------- |
+| `/llms.txt`       | An index of all pages.                 |
+| `/llms-full.txt`  | The content of all pages, in one file. |
+| `/docs/<page>.md` | One page as Markdown, like `/docs.md`. |
 
 Docs pages link to their Markdown in the page actions, as `page.markdownUrl`.
 
@@ -31,7 +31,7 @@ Prerendered pages are static files, hosts serve them without running Astro.
 
 ## Processed Markdown
 
-The routes serve the source of your MDX files by default. To serve the processed Markdown of [Remark LLMs](/docs/headless/mdx/remark-llms), enable `includeProcessedMarkdown`, it takes the same options:
+The routes serve your raw MDX source by default. To serve processed Markdown, enable `includeProcessedMarkdown`. It takes the same options as [Remark LLMs](/docs/headless/mdx/remark-llms):
 
 ```js title="astro.config.mjs"
 fumadocs({
@@ -47,7 +47,7 @@ npx @fumadocs/cli feature llms
 
 ### MDX Components
 
-MDX components are kept as JSX by default. With `output: 'function'`, your [MDX components](/docs/astro/content#mdx-components) render them:
+MDX components are kept as JSX by default. With `output: 'function'`, your MDX components render them:
 
 ```js title="astro.config.mjs"
 fumadocs({
@@ -57,9 +57,9 @@ fumadocs({
 
 A component defines its Markdown with [`asMarkdown()`](/docs/headless/utils/markdown#asmarkdown), the others are kept as JSX. In the browser, `asMarkdown()` is `false` and the component renders as usual.
 
-## Get Text
+## getText()
 
-Pages of your source have `getText()`:
+Source pages have `getText()`:
 
 ```ts
 // the source file
@@ -74,7 +74,7 @@ await page.data.getText('processed', { components });
 
 ## MCP Server
 
-`mcpPlugin()` serves a [MCP server](/docs/integrations/llms#mcp-server) at `/api/mcp`, with tools to list, read and search your pages. It renders on request, with an [adapter](https://docs.astro.build/en/guides/on-demand-rendering/).
+`mcpPlugin()` serves a MCP server at `/api/mcp`, with tools to list, read and search your pages. It requires an [Astro adapter](https://docs.astro.build/en/guides/on-demand-rendering/) to render on request.
 
 ```npm
 npm i @modelcontextprotocol/server zod
@@ -97,7 +97,7 @@ Or with Fumadocs CLI:
 npx @fumadocs/cli feature mcp
 ```
 
-Pages are read like the [Markdown routes](#routes), from every content source.
+Pages are read from every content source, like the Markdown routes above.
 
 <auto-type-table path="./props.ts" name="MCPOptions" />
 
@@ -119,17 +119,17 @@ mcpPlugin({
 
 ## WebMCP
 
-[WebMCP](/docs/integrations/llms#webmcp) exposes tools to the AI agent of the browser, on the page the reader is viewing.
+WebMCP exposes tools to the browser's AI agent on the page the reader is viewing. See [WebMCP](/docs/integrations/llms#webmcp).
 
 ```npm
 npx @fumadocs/cli feature webmcp
 ```
 
-The CLI adds it to the `Provider` of your [`layout` module](/docs/astro/layouts#provider). `search_docs` uses the built-in search index.
+The CLI adds it to `Provider` in your [layout module](/docs/astro/layouts#provider). `search_docs` uses the built-in search index.
 
 ## Ask AI
 
-The [Ask AI](/docs/integrations/llms#ask-ai) chat dialog runs as an endpoint at `src/pages/api/chat.ts`, rendered on request with an [adapter](https://docs.astro.build/en/guides/on-demand-rendering/). Use the client layout in your [docs page module](/docs/astro/layouts#docs-page), or let the CLI set it up:
+The chat dialog runs as an endpoint at `src/pages/api/chat.ts` and requires an [Astro adapter](https://docs.astro.build/en/guides/on-demand-rendering/). Use the client layout in your docs page module, or let the CLI set it up. See [Ask AI](/docs/integrations/llms#ask-ai).
 
 ```npm
 npx @fumadocs/cli feature ai

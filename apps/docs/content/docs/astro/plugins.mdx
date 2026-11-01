@@ -5,7 +5,7 @@ description: Add features to your site with plugins.
 
 ## Overview
 
-Features of your site come from plugins, like the routes of search and LLMs. Add them to your config:
+Plugins add features like search and LLM routes to your site. Add them to your config:
 
 ```ts title="src/fumadocs.config.ts"
 import { defineConfig } from '@fumadocs/astro/config';
@@ -17,21 +17,6 @@ export default defineConfig({
   plugins: [takumiPlugin()], // [!code ++]
 });
 ```
-
-| Plugin                   | Import                                    | Feature                                      |
-| ------------------------ | ----------------------------------------- | -------------------------------------------- |
-| `oramaSearchPlugin()`    | `@fumadocs/astro/plugins/orama-search`    | [Search](/docs/astro/search)                 |
-| `flexsearchPlugin()`     | `@fumadocs/astro/plugins/flexsearch`      | [FlexSearch](/docs/astro/search#flexsearch)  |
-| `llmsPlugin()`           | `@fumadocs/astro/plugins/llms.txt`        | [LLMs](/docs/astro/llms)                     |
-| `takumiPlugin()`         | `@fumadocs/astro/plugins/takumi`          | [OG Images](/docs/astro/og-image)            |
-| `gitPlugin()`            | `@fumadocs/astro/plugins/git`             | [Git](/docs/astro/git)                       |
-| `linkValidationPlugin()` | `@fumadocs/astro/plugins/link-validation` | [Validate Links](/docs/astro/validate-links) |
-| `mcpPlugin()`            | `@fumadocs/astro/plugins/mcp`             | [MCP](/docs/astro/llms#mcp-server)           |
-| `openapiPlugin()`        | `@fumadocs/astro/plugins/openapi`         | [OpenAPI](/docs/astro/openapi)               |
-| `asyncapiPlugin()`       | `@fumadocs/astro/plugins/asyncapi`        | [AsyncAPI](/docs/astro/asyncapi)             |
-| `graphqlPlugin()`        | `@fumadocs/astro/plugins/graphql`         | [GraphQL](/docs/astro/graphql)               |
-| `notionPlugin()`         | `@fumadocs/astro/plugins/notion`          | [Notion](/docs/integrations/content/notion)  |
-| `sanityPlugin()`         | `@fumadocs/astro/plugins/sanity`          | [Sanity](/docs/integrations/content/sanity)  |
 
 ### Default Plugins
 
@@ -50,7 +35,7 @@ To remove them, set `preset` to `false`.
 
 ## Writing Plugins
 
-A plugin is an object, its hooks receive the app as `this`, like `this.getPages()` for the pages of every language:
+A plugin is an object, its hooks receive the app as `this`, like `this.getPages()` for all pages:
 
 <auto-type-table path="./props.ts" name="Plugin" />
 
@@ -80,9 +65,9 @@ export function myPlugin(): Plugin {
 }
 ```
 
-`transformPage()` changes the [data of docs pages](/docs/astro/layouts#docs-page), received by the `page` module and used for the `<head>` tags like the title.
+`transformPage()` changes the [page data](/docs/astro/layouts#docs-page), received by the `page` module and used for `<head>` tags like the title.
 
-A route of `type: 'page'` renders an Astro component with `props`, use [`HomeLayout.astro`](/docs/astro/layouts#your-own-pages) in it for the layout.
+A route of `type: 'page'` renders an Astro component with `props`, use [`HomeLayout.astro`](/docs/astro/layouts#custom-pages) for the layout.
 
 An item of `plugins` can also be an array of plugins, `false` and `undefined` are skipped:
 
@@ -92,7 +77,7 @@ plugins: [myPlugin(), import.meta.env.PROD && takumiPlugin()];
 
 ### Content Sources
 
-The pages of your own [content source](/docs/headless/source-api/source) are rendered by a plugin, the [official ones](/docs/astro/content#other-content-sources) work already. `getBody()` returns their content as React nodes, rendered with your MDX components (`this.components`) so they hydrate like MDX content.
+Your own content source renders its pages with a plugin. The [built-in sources](/docs/astro/content#other-content-sources) work already. `getBody()` returns their content as React nodes, rendered with your MDX components (`this.components`) so they hydrate like MDX content.
 
 For example, pages with MDX from a CMS, compiled by [MDX Remote](/docs/integrations/content/mdx-remote):
 
@@ -125,7 +110,7 @@ Search indexes the `structuredData` of page data, and a `lastModified` date show
 
 ### Server Routes
 
-Routes are generated at build time. Set `prerender: false` to handle requests on the server, it requires an [adapter of Astro](https://docs.astro.build/en/guides/on-demand-rendering/):
+Routes are generated at build time. Set `prerender: false` to handle requests on the server. This requires an [Astro adapter](https://docs.astro.build/en/guides/on-demand-rendering/):
 
 ```ts
 routes() {

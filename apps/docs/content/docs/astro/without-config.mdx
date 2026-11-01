@@ -1,17 +1,17 @@
 ---
 title: Without Config
-description: Use the integration with routes and layouts of your own.
+description: Use the integration with your own routes and layouts.
 ---
 
 ## Overview
 
-Without `src/fumadocs.config.ts`, the integration only processes your MDX files, and renders their content as a React island. You write the routes, layouts and providers.
+Without `src/fumadocs.config.ts`, the integration only processes your MDX files and renders their content as a React island. You write the routes, layouts and providers.
 
-Prefer the [config file](/docs/astro/manual-installation#source-files), use this only when it doesn't cover your case yet, like routes rendered on demand, or integrations without a plugin like [AsyncAPI](/docs/integrations/asyncapi). The `layout`, `page` and `css` options and plugins require the config file.
+Prefer the [Fumadocs config](/docs/astro/manual-installation), use this only when it doesn't cover your case yet, like routes rendered on demand, or integrations without a plugin like [AsyncAPI](/docs/integrations/asyncapi). The `layout`, `page` and `css` options and plugins require the config file.
 
 ## Setup
 
-Follow [Manual Installation](/docs/astro/manual-installation) until the source, and register your MDX components with `DocsBody` as `wrapper`, for the styles of content:
+Follow [Manual Installation](/docs/astro/manual-installation) until the source files, then register your MDX components with `DocsBody` as `wrapper` for content styles:
 
 ```tsx tab="src/components/mdx.tsx"
 import defaultMdxComponents from 'fumadocs-ui/mdx';
@@ -171,7 +171,7 @@ Pass a [static search dialog](/docs/search/orama#static) to `RootProvider`, see 
 
 ## Content Island
 
-The content is a React island of its own, the providers of your layout don't reach it. `wrapper` receives the props of `<Content />`, add a provider there, without theme and search:
+The content is its own React island, so your layout's providers don't reach it. `wrapper` receives `<Content />`'s props, add a provider there, without theme and search:
 
 ```tsx tab="src/components/mdx.tsx"
 import { navigate } from 'astro:transitions/client';

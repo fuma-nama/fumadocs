@@ -5,7 +5,7 @@ description: Fail the build on broken links.
 
 ## Setup
 
-`linkValidationPlugin()` checks the links in the content of your pages with [`next-validate-link`](/docs/markdown/validate-links) when you build, and fails the build on a broken one.
+`linkValidationPlugin()` checks links in your pages with [next-validate-link](https://next-validate-link.vercel.app) when you build, and fails the build on a broken one.
 
 ```npm
 npm i next-validate-link
@@ -22,7 +22,7 @@ export default defineConfig({
 });
 ```
 
-Links can point to your pages and their headings, the routes of plugins, your Astro pages and the files of `public`:
+Links can point to your pages and their headings, plugin routes, Astro pages and `public/` files:
 
 ```text
 [Fumadocs] broken links:
@@ -31,7 +31,7 @@ In "content/docs/index.mdx:12:1": link "/docs/missing" not-found
 
 ## Options
 
-It takes the options of [`validateFiles()`](https://next-validate-link.vercel.app), like `whitelist` for links to skip and `checkExternal` for absolute URLs:
+It takes the [`validateFiles()` options](https://next-validate-link.vercel.app), like `whitelist` for links to skip and `checkExternal` for absolute URLs:
 
 ```ts title="src/fumadocs.config.ts"
 linkValidationPlugin({

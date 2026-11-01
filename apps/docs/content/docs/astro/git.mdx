@@ -5,7 +5,7 @@ description: Link docs pages to their source files, and show their last updated 
 
 ## Setup
 
-`gitPlugin()` links each docs page to its file on GitHub, and dates it with the last commit of the file.
+`gitPlugin()` links each docs page to its file on GitHub, and dates it with the file's last commit.
 
 ```ts title="src/fumadocs.config.ts"
 import { defineConfig } from '@fumadocs/astro/config';
@@ -21,7 +21,7 @@ export default defineConfig({
 ```
 
 The default docs page shows them as "Open in GitHub" in View Options, and "Last updated on" below the content.
-A [`page` module](/docs/astro/layouts#docs-page) receives them as `page.githubUrl` and `page.lastModified`.
+A [page module](/docs/astro/layouts#docs-page) receives them as `page.githubUrl` and `page.lastModified`.
 
 The dates come from the local git history at build time, so they need the full history.
 CI checkouts are often shallow, fetch the history with `fetch-depth: 0` on GitHub Actions, or `VERCEL_DEEP_CLONE=true` on Vercel.

@@ -13,7 +13,7 @@ Define your languages:
 
 See [i18n Config](/docs/headless/internationalization/config) for the options, like `hideLocale`.
 
-Pass it to your source, and add the translations of Fumadocs UI to your config:
+Pass it to your source and add Fumadocs UI translations to your config:
 
 <include cwd meta='tab="src/lib/source.ts"'>
   ../../examples/astro-i18n/src/lib/source.ts
@@ -23,11 +23,11 @@ Pass it to your source, and add the translations of Fumadocs UI to your config:
   ../../examples/astro-i18n/src/fumadocs.config.ts
 </include>
 
-`@fumadocs/language` has the translations of [many languages](/docs/ui/translations).
+`@fumadocs/language` has translations for [many languages](/docs/ui/translations).
 
 ## Writing Pages
 
-Add the language to the file name of a translation, see [i18n Routing](/docs/page-conventions#i18n-routing):
+Add the language to a translation's file name, see [i18n Routing](/docs/page-conventions#i18n-routing):
 
 <Files>
   <Folder name="content/docs" defaultOpen>
@@ -54,7 +54,7 @@ For links that include the language, add `DynamicLink` to your MDX components:
 
 ## Layout Options
 
-`baseOptions()` receives the language, the navbar title links to the home page of the language by default:
+`baseOptions()` receives the language. The navbar title links to the language's home page by default:
 
 ```tsx title="src/lib/layout.shared.tsx"
 import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
@@ -66,7 +66,7 @@ export function baseOptions(locale?: string): BaseLayoutProps {
 }
 ```
 
-## Your Own Pages
+## Custom Pages
 
 Create a page for each language with `getStaticPaths()`, and pass the language to `HomeLayout`:
 

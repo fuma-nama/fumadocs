@@ -5,7 +5,7 @@ description: Sitemap, robots.txt and RSS feeds.
 
 ## Sitemap
 
-Use [`@astrojs/sitemap`](https://docs.astro.build/en/guides/integrations-guide/sitemap), it lists every page of your site, including docs pages and your own pages.
+Use [`@astrojs/sitemap`](https://docs.astro.build/en/guides/integrations-guide/sitemap) to list every page of your site, including docs pages and custom pages.
 
 ```npm
 npx astro add sitemap
@@ -27,10 +27,10 @@ export default defineConfig({
 It reads the `<head>` of each built page:
 
 - `lastmod` from `<meta property="article:modified_time">`, which docs pages with a last modified date have, like from the [Git plugin](/docs/astro/git).
-- The `hreflang` links of docs pages with [i18n](/docs/astro/internationalization).
+- The `hreflang` links of docs pages with [internationalization](/docs/astro/internationalization).
 - Pages with `noindex` are left out, like the pages shown in the fallback language.
 
-Your own pages can render the same tags in the `head` slot of [`HomeLayout`](/docs/astro/layouts#your-own-pages). To add `hreflang` links to them, pass the languages to the `i18n` option of the sitemap:
+Custom pages can render the same tags in `HomeLayout`'s `head` slot. To add `hreflang` links to them, pass the languages to the `i18n` option:
 
 ```js title="astro.config.mjs"
 sitemap({
@@ -68,6 +68,6 @@ Sitemap: https://example.com/sitemap-index.xml
 
 ## RSS Feed
 
-See [RSS Feed](/docs/guides/rss). Add the `<link>` in the [`head` component](/docs/astro/layouts#head) of your Fumadocs config.
+See [RSS Feed](/docs/guides/rss). Add the `<link>` in your Fumadocs config's [`head` component](/docs/astro/layouts#head).
 
 `page.data` has no `lastModified`, add a date to the [frontmatter schema](/docs/astro/content#frontmatter), like `date: z.coerce.date()`, and use `page.data.date`.

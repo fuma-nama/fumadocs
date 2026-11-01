@@ -5,7 +5,7 @@ description: Generate docs pages from your GraphQL schema.
 
 ## Setup
 
-`graphqlPlugin()` renders the pages of [Fumadocs GraphQL](/docs/integrations/graphql).
+`graphqlPlugin()` renders [GraphQL](/docs/integrations/graphql) pages.
 
 ```npm
 npm i @fumadocs/graphql graphql shiki
@@ -67,6 +67,6 @@ export default defineConfig({
 });
 ```
 
-The plugin serves the schemas left out by [`includeSchema: false`](/docs/integrations/graphql/server#loading-schemas-once), so pages load them once per browser session.
+The plugin serves the schemas left out by `includeSchema: false`, so pages load them once per browser session.
 
-To customize the pages, create `<GraphQLPage />` with [`createGraphQLPage()`](/docs/integrations/graphql/api-page) and add it to your [MDX components](/docs/astro/content#mdx-components), [lazily](/docs/astro/content#heavy-components).
+To customize the pages, create `<GraphQLPage />` with [`createGraphQLPage()`](/docs/integrations/graphql/api-page) and add it to your MDX components, loaded lazily (see [Lazy Components](/docs/astro/content#lazy-components)).

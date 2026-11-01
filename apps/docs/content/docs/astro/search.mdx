@@ -5,18 +5,18 @@ description: The built-in search, and other search engines.
 
 ## Overview
 
-Search works out of the box: the integration exports the search indexes of your pages at build time, and the search dialog searches them in the browser, with the [built-in search](/docs/headless/search/orama).
+Search works out of the box: the integration exports search indexes at build time, and the dialog searches them in the browser.
 
 Search is made of:
 
 - **Engine:** where results come from, used through its search hook.
 - **Dialog:** how results are shown.
 
-Replace either one from the [`layout` module](/docs/astro/layouts#layout-options).
+Replace either from the [layout module](/docs/astro/layouts#layout-options).
 
 ## Search Engine
 
-Export `useSearch()` to use another engine in the built-in dialog, with the search hook of the engine:
+Export `useSearch()` to use another engine in the built-in dialog:
 
 ```tsx title="src/lib/layout.shared.tsx"
 import { liteClient } from 'algoliasearch/lite';
@@ -29,11 +29,11 @@ export function useSearch({ locale }: { locale?: string }) {
 }
 ```
 
-To sync your pages to the engine, see the guide of your engine, like [Algolia](/docs/search/algolia).
+To sync pages to the engine, see its guide, like [Algolia](/docs/search/algolia).
 
 ## Search Dialog
 
-Export `SearchDialog` to replace the dialog, it is a [search dialog](/docs/ui/search#custom-ui) of Fumadocs UI:
+Export `SearchDialog` to replace the dialog with a [custom search dialog](/docs/ui/search#custom-ui):
 
 ```tsx title="src/lib/layout.shared.tsx"
 export { default as SearchDialog } from '@/components/search';
@@ -47,7 +47,7 @@ npx @fumadocs/cli feature search --provider algolia
 
 ## Search Index
 
-The built-in index is left out when the `layout` module exports `useSearch` or `SearchDialog`. Add its plugin to keep it, or to pass the [options of `createFromSource()`](/docs/headless/search/orama):
+The built-in index is left out when the layout module exports `useSearch` or `SearchDialog`. Add its plugin to keep it, or to pass `createFromSource()` options:
 
 ```ts title="src/fumadocs.config.ts"
 import { oramaSearchPlugin } from '@fumadocs/astro/plugins/orama-search';
@@ -85,4 +85,4 @@ export function useSearch({ locale }: { locale?: string }) {
 }
 ```
 
-The plugin takes the [options of `flexsearchFromSource()`](/docs/headless/search/flexsearch#from-source), like a [tag](/docs/search/flexsearch#tag-filter) for your own dialog to filter by.
+The plugin takes the options of [`flexsearchFromSource()`](/docs/headless/search/flexsearch#from-source), like a tag filter for your own dialog.

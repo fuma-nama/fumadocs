@@ -5,7 +5,7 @@ description: Generate docs pages from your OpenAPI schema.
 
 ## Setup
 
-`openapiPlugin()` renders the pages of [Fumadocs OpenAPI](/docs/integrations/openapi), with the interactive playground.
+`openapiPlugin()` renders [OpenAPI](/docs/integrations/openapi) pages with the interactive playground.
 
 ```npm
 npm i fumadocs-openapi shiki
@@ -62,9 +62,9 @@ export default defineConfig({
 });
 ```
 
-The plugin follows your server: it serves the documents left out by [`includeDocument: false`](/docs/integrations/openapi/server#loading-documents-once), and [the proxy](/docs/integrations/openapi/server#creating-proxy) at `proxyUrl` when it is a pathname, which requires an [adapter](https://docs.astro.build/en/guides/on-demand-rendering/).
+The plugin follows your server: it serves the documents left out by `includeDocument: false`, and the proxy at `proxyUrl` when it is a pathname (requires an [Astro adapter](https://docs.astro.build/en/guides/on-demand-rendering/)). See [OpenAPI server options](/docs/integrations/openapi/server).
 
-Pass the options of the proxy with `createProxy`, like [allowed origins](/docs/integrations/openapi/server#allowed-origins), or `false` when it is served elsewhere:
+Pass proxy options with `createProxy`, or `false` when the proxy is served elsewhere:
 
 ```ts title="src/fumadocs.config.ts"
 openapiPlugin({
@@ -73,4 +73,4 @@ openapiPlugin({
 });
 ```
 
-To customize the pages, create `<OpenAPIPage />` with [`createOpenAPIPage()`](/docs/integrations/openapi/api-page) and add it to your [MDX components](/docs/astro/content#mdx-components), [lazily](/docs/astro/content#heavy-components).
+To customize the pages, create `<OpenAPIPage />` with [`createOpenAPIPage()`](/docs/integrations/openapi/api-page) and add it to your MDX components, loaded lazily (see [Lazy Components](/docs/astro/content#lazy-components)).

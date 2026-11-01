@@ -1,20 +1,20 @@
 ---
 title: Layouts
-description: Customize the navbar, the docs page and your own pages.
+description: Customize the navbar, the docs page and custom pages.
 ---
 
 ## Overview
 
-The integration renders your pages with the layouts of [Fumadocs UI](/docs/ui). You customize them with React modules registered in the integration, they run in the browser like any island:
+The integration renders pages with [Fumadocs UI](/docs/ui) layouts. You customize them with React modules that run in the browser as islands:
 
-| Module   | Exports                                                  |
-| -------- | -------------------------------------------------------- |
-| `layout` | `baseOptions()`, the options of layouts, and `Provider`. |
-| `page`   | The component of docs pages, as default.                 |
+| Module   | Exports                                          |
+| -------- | ------------------------------------------------ |
+| `layout` | `baseOptions()`, layout options, and `Provider`. |
+| `page`   | The docs page component, as default export.      |
 
 ## Layout Options
 
-Create a module exporting `baseOptions()`, it returns the [options of layouts](/docs/ui/layouts/docs), JSX included:
+Create a module exporting `baseOptions()`, which returns the [layout options](/docs/ui/layouts/docs), JSX included:
 
 <include cwd meta='tab="src/lib/layout.shared.tsx"'>
   ../../examples/astro/src/lib/layout.shared.tsx
@@ -26,13 +26,13 @@ fumadocs({
 });
 ```
 
-The options apply to every layout: docs pages, your own pages and the 404 page.
+The options apply to every layout: docs pages, custom pages and the 404 page.
 
-> Without it, the navbar shows the `title` of your Fumadocs config.
+> Without it, the navbar shows your Fumadocs config's `title`.
 
 ## Provider
 
-The integration renders the [root provider](/docs/ui/layouts/root-provider) for you. To render components inside it, like [WebMCP](/docs/integrations/llms#webmcp), export `Provider` from the `layout` module:
+The integration renders the [root provider](/docs/ui/layouts/root-provider) for you. To render components inside it like WebMCP, export `Provider` from the `layout` module:
 
 ```tsx title="src/lib/layout.shared.tsx"
 import type { ReactNode } from 'react';
@@ -48,11 +48,11 @@ export function Provider({ children }: { children: ReactNode }) {
 }
 ```
 
-It wraps every layout, but not the React components in your content, they render in islands of their own.
+It wraps every layout, but not the content components -- those render in their own islands.
 
 ## Docs Page
 
-The docs page is a React component of its own, like `page.tsx` on other frameworks. Create a module whose default export renders it:
+The docs page is a React component, like `page.tsx` on other frameworks. Create a module whose default export renders it:
 
 <include cwd meta='tab="src/components/docs.tsx"'>
   ../../examples/astro/src/components/docs.tsx
@@ -67,13 +67,13 @@ fumadocs({
 It receives:
 
 - `tree`: the page tree.
-- `layout`: the options from `baseOptions()`.
-- `page`: the data of the page.
+- `layout`: the `baseOptions()` result.
+- `page`: page data.
 - `children`: the content.
 
 <auto-type-table path="./props.ts" name="DocsPageData" />
 
-Use any layout or component of Fumadocs UI here, such as the [Notebook layout](/docs/ui/layouts/notebook) for some pages:
+Use any Fumadocs UI layout or component here, such as the [Notebook layout](/docs/ui/layouts/notebook) for some pages:
 
 ```tsx title="src/components/docs.tsx"
 import { DocsLayout } from 'fumadocs-ui/layouts/docs';
@@ -87,15 +87,15 @@ export default function Docs({ tree, page, layout, children }: DocsPageProps) {
 }
 ```
 
-## Your Own Pages
+## Custom Pages
 
-Use `HomeLayout.astro` for your own pages, with the navbar of your layout options:
+Use `HomeLayout.astro` for custom pages, with the navbar from your layout options:
 
 <include cwd meta='title="src/pages/index.astro"'>
   ../../examples/astro-min/src/pages/index.astro
 </include>
 
-Anything in its `head` slot goes into `<head>`. Pass `title`, `description`, `lang` (with [i18n](/docs/astro/internationalization)) and `notFound` as props.
+Anything in its `head` slot goes into `<head>`. Props: `title`, `description`, `lang` (for [internationalization](/docs/astro/internationalization)) and `notFound`.
 
 Your pages can read your docs from the source:
 
@@ -112,11 +112,11 @@ import { source } from '@/lib/source';
 </HomeLayout>
 ```
 
-A page of your own takes priority over a docs page of the same URL, remove the MDX file to avoid the warning of Astro. To replace the 404 page, create `src/pages/404.astro`.
+A custom page takes priority over a docs page at the same URL. Remove the MDX file to avoid a warning from Astro. To replace the 404 page, create `src/pages/404.astro`.
 
 ### React Content
 
-Render React content with `ReactContent.astro` to hydrate it like the content of docs pages: it renders on the server, and the components of your [MDX components](/docs/astro/content#mdx-components) hydrate, such as the copy buttons of code blocks.
+Render React content with `ReactContent.astro` to hydrate it like docs content: it renders on the server and your [MDX components](/docs/astro/content#mdx-components) hydrate, like code block copy buttons.
 
 ```astro title="src/pages/changelog.astro"
 ---
@@ -133,7 +133,7 @@ import { Timeline } from '@/components/timeline';
 
 ## Head
 
-Render tags into the `<head>` of every page, like a favicon, with an Astro component:
+Add tags to the `<head>` of every page with an Astro component:
 
 <include cwd meta='tab="src/components/Head.astro"'>
   ../../examples/astro/src/components/Head.astro
@@ -148,7 +148,7 @@ export default defineConfig({
 });
 ```
 
-On docs pages, it receives the page of your source as `page`.
+On docs pages, it receives page data as `page`.
 
 ## Styles
 
