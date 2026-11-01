@@ -22,7 +22,7 @@ export class NoProcessedMarkdownError extends Error {
   }
 }
 
-/** a node of the island tree, see `island-plugin.ts` */
+/** a node of the island tree, see `island-plugin.ts` for MDX, and `island-node.tsx` for React content */
 export type IslandNode =
   | string
   | { $slot: string }

@@ -30,6 +30,7 @@ export default defineConfig({
     'src/remark-directive-admonition.ts',
     'src/remark-steps.ts',
     'src/remark-mdx-mermaid.ts',
+    'src/remark-mdx-files.ts',
     'src/remark-feedback-block.ts',
     'src/rehype-toc.ts',
     'src/rehype-code.ts',

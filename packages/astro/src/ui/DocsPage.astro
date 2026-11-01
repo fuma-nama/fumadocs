@@ -12,11 +12,26 @@ const body = await app.getBody(page);
 const data = await app.getPageData(page, body);
 const tree = await app.source.serializePageTree(app.source.getPageTree(page.locale));
 const provider = getProviderData(Astro, page.locale);
-const alternates: Record<string, string> = {};
-for (const language of app.source._i18n?.languages ?? []) {
-  const translated = app.source.getPage(page.slugs, language);
-  if (translated) alternates[language] = translated.url;
+
+const i18n = app.source._i18n;
+/** the page a language shows when it has no file of its own, pages of every language (`$`) too */
+function inheritedFrom(target: AnyPage) {
+  if (!i18n) return;
+  const language = i18n.fallbackLanguage ?? i18n.defaultLanguage;
+  if (target.locale === language) return;
+  const origin = app.source.getPage(target.slugs, language);
+  if (origin?.path === target.path) return origin;
 }
+
+let alternates: Record<string, string> = {};
+for (const language of i18n?.languages ?? []) {
+  const translated = app.source.getPage(page.slugs, language);
+  if (translated && !inheritedFrom(translated)) alternates[language] = translated.url;
+}
+const languages = Object.keys(alternates);
+if (languages.length > 1)
+  alternates['x-default'] = alternates[i18n!.defaultLanguage] ?? alternates[languages[0]];
+else alternates = {};
 ---
 
 <Layout
@@ -25,6 +40,7 @@ for (const language of app.source._i18n?.languages ?? []) {
   description={data.description}
   image={data.image}
   alternates={alternates}
+  noindex={inheritedFrom(page) !== undefined}
   page={page}
 >
   <Docs

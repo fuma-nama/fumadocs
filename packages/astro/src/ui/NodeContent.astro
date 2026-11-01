@@ -1,0 +1,19 @@
+---
+import { FumadocsIsland } from 'virtual:fumadocs/island';
+import { getProviderData } from '../app.js';
+import type { ProviderData } from './provider';
+
+interface Props {
+  /** JSON of the island nodes of React content, see `island-node.tsx` */
+  tree: string;
+  /** static HTML, slot `s0` is the first */
+  slots: string[];
+  provider?: ProviderData;
+}
+
+const { tree, slots, provider = getProviderData(Astro) } = Astro.props;
+---
+
+<FumadocsIsland client:load react tree={tree} props={{ provider }}>
+  {slots.map((html, i) => <Fragment slot={`s${i}`} set:html={html} />)}
+</FumadocsIsland>

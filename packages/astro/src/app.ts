@@ -1,7 +1,9 @@
+import { AsyncLocalStorage } from 'node:async_hooks';
 import type { APIContext, MiddlewareNext } from 'astro';
-import type { ReactNode } from 'react';
+import type { FC, ReactNode } from 'react';
 import config from 'virtual:fumadocs/app';
 import { server } from 'virtual:fumadocs/config';
+import { components } from 'virtual:fumadocs/components';
 import { defineI18n, type TranslationExtension, type TranslationsAPI } from 'fumadocs-core/i18n';
 import type * as PageTree from 'fumadocs-core/page-tree';
 import { createGetUrl, type LoaderOutput, type Page } from 'fumadocs-core/source';
@@ -11,6 +13,7 @@ import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
 import { SearchDialog, useSearch } from 'virtual:fumadocs/layout';
 import type { ProviderData } from './ui/provider';
 import { NoProcessedMarkdownError } from './shared';
+import { toPageBody } from './island-node';
 import { llmsPlugin } from './plugins/llms.txt';
 import { oramaSearchPlugin } from './plugins/orama-search';
 import DocsPage from './ui/DocsPage.astro';
@@ -56,6 +59,12 @@ export interface PageBody {
   toc?: TOCItemType[];
 }
 
+/** the body of a docs page as React content, like a page of a CMS rendered with `app.components` */
+export interface NodeBody {
+  node: ReactNode;
+  toc?: TOCItemType[];
+}
+
 /** the data of a docs page, transformed by plugins */
 export interface DocsPageData {
   title: string;
@@ -90,8 +99,15 @@ export interface Plugin {
   /** translations used by the UI of plugin */
   translations?: TranslationExtension;
   routes?: (this: App) => Route[] | Promise<Route[]>;
-  /** render the body of pages from a content source, return `undefined` to pass */
-  getBody?: (this: App, page: AnyPage) => PageBody | undefined | Promise<PageBody | undefined>;
+  /**
+   * Render the body of pages from a content source, return `undefined` to pass.
+   *
+   * A React `node` renders on the content island: components of `this.components` hydrate, others render on the server.
+   */
+  getBody?: (
+    this: App,
+    page: AnyPage,
+  ) => PageBody | NodeBody | undefined | Promise<PageBody | NodeBody | undefined>;
   /** the Markdown of page, for LLMs */
   getText?: (this: App, page: AnyPage) => string | undefined | Promise<string | undefined>;
   transformPage?: (
@@ -99,7 +115,7 @@ export interface Plugin {
     page: AnyPage,
     data: DocsPageData,
   ) => DocsPageData | Promise<DocsPageData>;
-  /** an Astro middleware, it receives requests of every route rendered on the server */
+  /** an Astro middleware, it runs for every route, prerendered ones at build time (see `context.isPrerendered`) */
   middleware?: (
     this: App,
     context: APIContext,
@@ -142,6 +158,9 @@ export interface App {
   config: FumadocsConfig;
   source: LoaderOutput;
   plugins: Plugin[];
+  /** the MDX components of the `components` option, React content rendered with them hydrates */
+  // oxlint-disable-next-line typescript/no-explicit-any -- each component has its props, like `MDXComponents`
+  components: Record<string, FC<any>>;
   /** `base` of Astro, without trailing slash */
   base: string;
   /** routes can render on request, with an adapter of Astro */
@@ -183,6 +202,7 @@ export const app: App = {
   config,
   source: config.source,
   plugins: resolvePlugins(),
+  components,
   base,
   server,
   toPath(url) {
@@ -197,7 +217,7 @@ export const app: App = {
   async getBody(page) {
     for (const plugin of this.plugins) {
       const body = await plugin.getBody?.call(this, page);
-      if (body) return body;
+      if (body) return 'node' in body ? toPageBody(body) : body;
     }
     const body = await collectionBody(page);
     if (body) return body;
@@ -225,7 +245,14 @@ export const app: App = {
       description,
       type,
       full,
-    } = page.data as { title?: string; description?: string; type?: string; full?: boolean };
+      lastModified,
+    } = page.data as {
+      title?: string;
+      description?: string;
+      type?: string;
+      full?: boolean;
+      lastModified?: unknown;
+    };
     let data: DocsPageData = {
       title,
       description,
@@ -235,6 +262,11 @@ export const app: App = {
       type,
       toc: body?.toc ?? [],
       full,
+      // from content sources, like the last edit of a CMS
+      lastModified:
+        lastModified instanceof Date || typeof lastModified === 'string'
+          ? new Date(lastModified)
+          : undefined,
     };
     for (const plugin of this.plugins) {
       if (plugin.transformPage) data = await plugin.transformPage.call(this, page, data);
@@ -269,7 +301,7 @@ export function getTranslations() {
 /** the props of providers, for an Astro component rendering islands */
 export function getProviderData(
   astro: { url: URL; params: Record<string, string | undefined>; currentLocale?: string },
-  lang = astro.currentLocale ?? app.source._i18n?.defaultLanguage,
+  lang = astro.currentLocale ?? localeOf(astro.url.pathname),
 ): ProviderData {
   const translations = getTranslations();
   return {
@@ -278,6 +310,27 @@ export function getProviderData(
     i18n: translations && i18nProvider(translations, lang),
     search: app.plugins.some((plugin) => plugin.name === 'search'),
   };
+}
+
+/** the language of a URL, by its prefix like the URLs of pages */
+function localeOf(pathname: string): string | undefined {
+  const i18n = app.source._i18n;
+  if (!i18n) return;
+  const prefix = app.toPath(pathname).split('/')[1];
+  return prefix && i18n.languages.includes(prefix) ? prefix : i18n.defaultLanguage;
+}
+
+/** the request being rendered, from the middleware of Fumadocs */
+export const requests = new AsyncLocalStorage<APIContext>();
+
+/** the props of content islands, `provider` defaults to the request, like content rendered on your pages */
+export function getIslandProps({
+  components: _components,
+  children: _children,
+  ...props
+}: Record<string, unknown>): Record<string, unknown> {
+  const context = props.provider ? undefined : requests.getStore();
+  return context ? { ...props, provider: getProviderData(context) } : props;
 }
 
 /** the defaults of layout options, `baseOptions()` of the `layout` module goes over them */
@@ -297,7 +350,14 @@ export function getRoutes(): Promise<Route[]> {
       out.push({ type: 'page', url: page.url, component: DocsPage, props: { page } });
 
     for (const plugin of app.plugins) {
-      if (plugin.routes) out.push(...(await plugin.routes.call(app)));
+      if (!plugin.routes) continue;
+      for (const route of await plugin.routes.call(app)) {
+        if (route.type === 'file' && route.prerender === false && !app.server)
+          throw new Error(
+            `The route "${route.url}" of plugin "${plugin.name}" renders on request, add an adapter to Astro.`,
+          );
+        out.push(route);
+      }
     }
     return out;
   })());
@@ -316,4 +376,31 @@ export async function getStaticPaths<T extends Route['type']>(type: T, param: st
     });
   }
   return paths;
+}
+
+const methods: Method[] = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'];
+
+/** with `trailingSlash`, a URL matches with or without the slash */
+const trimSlash = (url: string) => url.replace(/(.)\/$/, '$1');
+
+let serverRoutes: Promise<Map<string, FileRoute>> | undefined;
+
+/** the response of the file route with `prerender: false` at the URL, `undefined` when there's none */
+export async function renderServerRoute(context: APIContext): Promise<Response | undefined> {
+  serverRoutes ??= getRoutes().then((list) => {
+    const map = new Map<string, FileRoute>();
+    for (const route of list) {
+      if (route.type === 'file' && route.prerender === false) map.set(trimSlash(route.url), route);
+    }
+    return map;
+  });
+  const route = (await serverRoutes).get(trimSlash(decodeURI(context.url.pathname)));
+  if (!route) return;
+
+  const { method } = context.request;
+  const handler = route[method === 'HEAD' ? 'GET' : (method as Method)];
+  if (handler) return handler(context);
+  const allow: Method[] = [];
+  for (const item of methods) if (route[item]) allow.push(item);
+  return new Response(null, { status: 405, headers: { Allow: allow.join(', ') } });
 }

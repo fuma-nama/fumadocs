@@ -1,7 +1,8 @@
 ---
-import { APIPage } from './openapi.js';
+import { APIPage, documents } from './openapi.js';
 
-const { page, provider } = Astro.props;
+const { page, schema, provider } = Astro.props;
+if (schema) documents.set(schema.id, schema.bundled);
 ---
 
 <APIPage client:load page={page} provider={provider} />

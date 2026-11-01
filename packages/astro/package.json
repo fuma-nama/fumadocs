@@ -22,6 +22,10 @@
     ".": "./dist/index.js",
     "./config": "./dist/config.js",
     "./loaders": "./dist/loaders.js",
+    "./plugins/asyncapi": "./dist/plugins/asyncapi.js",
+    "./plugins/flexsearch": "./dist/plugins/flexsearch.js",
+    "./plugins/git": "./dist/plugins/git.js",
+    "./plugins/graphql": "./dist/plugins/graphql.js",
     "./plugins/llms.txt": "./dist/plugins/llms.txt.js",
     "./plugins/openapi": "./dist/plugins/openapi.js",
     "./plugins/orama-search": "./dist/plugins/orama-search.js",
@@ -44,11 +48,14 @@
   "dependencies": {
     "@astrojs/mdx": "^8.1.1",
     "@fumadocs/satteri": "workspace:^",
+    "satteri": "^0.10.5",
     "yuku-parser": "^0.19.0"
   },
   "devDependencies": {
     "@astrojs/markdown-satteri": "^0.4.5",
     "@astrojs/react": "^7.1.1",
+    "@fumadocs/asyncapi": "workspace:*",
+    "@fumadocs/graphql": "workspace:*",
     "@types/estree-jsx": "^1.0.5",
     "@types/hast": "^3.0.5",
     "@types/node": "26.6.5",
@@ -60,7 +67,6 @@
     "fumadocs-ui": "workspace:@fumadocs/base-ui@*",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
-    "satteri": "^0.10.5",
     "tsconfig": "workspace:*",
     "tsdown": "0.23.1",
     "typescript": "^7.0.2",
@@ -68,6 +74,8 @@
   },
   "peerDependencies": {
     "@astrojs/react": "^7.0.0",
+    "@fumadocs/asyncapi": "^0.5.4",
+    "@fumadocs/graphql": "^0.4.2",
     "astro": "^7.4.0",
     "fumadocs-core": "^16.17.8",
     "fumadocs-openapi": "^12.5.7",
@@ -76,6 +84,12 @@
     "react-dom": "^19.2.0"
   },
   "peerDependenciesMeta": {
+    "@fumadocs/asyncapi": {
+      "optional": true
+    },
+    "@fumadocs/graphql": {
+      "optional": true
+    },
     "fumadocs-openapi": {
       "optional": true
     },

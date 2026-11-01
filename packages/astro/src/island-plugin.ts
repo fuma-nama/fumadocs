@@ -24,8 +24,9 @@ type JsxElement = MdxJsxFlowElementHast | MdxJsxTextElementHast;
  * The tree is serialized as {@link import('./shared').IslandNode}, evaluated by the MDX module.
  *
  * @param module - the module exporting `FumadocsIsland` of the collection
+ * @param app - the runtime of `fumadocs.config.ts`, for the props of providers
  */
-export function islandPlugin(module: string): HastPluginDefinition {
+export function islandPlugin(module: string, app?: string): HastPluginDefinition {
   // names declared by the ESM of document, rendered by Astro
   const locals = new Set<string>();
 
@@ -62,7 +63,9 @@ export function islandPlugin(module: string): HastPluginDefinition {
             // like MDX, `wrapper` receives the props of content
             value: {
               type: 'mdxJsxAttributeValueExpression',
-              value: '(({ components: _, children: __, ...rest }) => rest)(props)',
+              value: app
+                ? '_getIslandProps(props)'
+                : '(({ components: _, children: __, ...rest }) => rest)(props)',
             },
           },
         ],
@@ -71,7 +74,7 @@ export function islandPlugin(module: string): HastPluginDefinition {
       for (const node of body) ctx.removeNode(node);
       ctx.prependChild(root, {
         type: 'mdxjsEsm',
-        value: `import { FumadocsIsland as ${islandName} } from ${JSON.stringify(module)};`,
+        value: `import { FumadocsIsland as ${islandName} } from ${JSON.stringify(module)};${app ? `\nimport { getIslandProps as _getIslandProps } from ${JSON.stringify(app)};` : ''}`,
       });
     },
   };

@@ -10,6 +10,8 @@ interface Props {
   lang?: string;
   /** the URLs of the page in other languages, by language */
   alternates?: Record<string, string>;
+  /** keep the page out of search engines, like a page shown in the fallback language */
+  noindex?: boolean;
   /** the docs page, for the `head` component */
   page?: AnyPage;
 }
@@ -19,6 +21,7 @@ const {
   description,
   image,
   alternates,
+  noindex,
   page,
   lang = Astro.currentLocale ?? app.source._i18n?.defaultLanguage ?? 'en',
 } = Astro.props;
@@ -27,8 +30,11 @@ const fullTitle = title && siteName ? `${title} | ${siteName}` : (title ?? siteN
 const Head = app.config.head;
 // social previews need absolute URLs
 const site = Astro.site;
-// like the URLs of pages, `Astro.url` has a trailing slash in static builds
-const url = site && new URL(Astro.url.pathname.replace(/(.)\/$/, '$1'), site).href;
+const url = site && new URL(Astro.url.pathname, site).href;
+// in the URL format of Astro, like its sitemap: page URLs have no trailing slash
+const slash = Astro.url.pathname.endsWith('/');
+const toHref = (href: string) =>
+  new URL(slash && !href.endsWith('/') ? `${href}/` : href, site).href;
 const imageUrl = image && (site ? new URL(image, site).href : image);
 ---
 
@@ -38,12 +44,13 @@ const imageUrl = image && (site ? new URL(image, site).href : image);
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     {fullTitle && <title>{fullTitle}</title>}
     {description && <meta name="description" content={description} />}
+    {noindex && <meta name="robots" content="noindex" />}
     {url && <link rel="canonical" href={url} />}
     {
       site &&
         alternates &&
         Object.entries(alternates).map(([language, href]) => (
-          <link rel="alternate" hreflang={language} href={new URL(href, site).href} />
+          <link rel="alternate" hreflang={language} href={toHref(href)} />
         ))
     }
     <meta property="og:type" content="website" />

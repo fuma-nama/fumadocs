@@ -1,0 +1,8 @@
+---
+import { APIPage, documents } from './asyncapi.js';
+
+const { page, schema, provider } = Astro.props;
+if (schema) documents.set(schema.id, schema.bundled);
+---
+
+<APIPage client:load page={page} provider={provider} />

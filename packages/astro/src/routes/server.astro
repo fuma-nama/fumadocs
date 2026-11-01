@@ -1,0 +1,6 @@
+---
+import { renderServerRoute } from '../app.js';
+
+// a page rather than an endpoint: its 404 without body renders the 404 page
+return (await renderServerRoute(Astro)) ?? new Response(null, { status: 404 });
+---

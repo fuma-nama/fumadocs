@@ -17,6 +17,7 @@ import { remarkInclude } from '@fumadocs/satteri/remark-include';
 import { remarkLlms, type LLMsOptions } from '@fumadocs/satteri/remark-llms';
 import { islandPlugin } from './island-plugin';
 import { dataKey, type FumadocsData } from './shared';
+import type { Route } from './app';
 
 export interface CollectionOptions extends Pick<
   DefaultSatteriOptions,
@@ -44,6 +45,13 @@ export interface CollectionOptions extends Pick<
    * @defaultValue false
    */
   includeProcessedMarkdown?: boolean | Omit<LLMsOptions, 'as'>;
+
+  /**
+   * Add the links of pages to `page.data.extractedReferences`, like for a graph view.
+   *
+   * @defaultValue false
+   */
+  extractLinkReferences?: boolean;
 }
 
 export interface FumadocsOptions extends CollectionOptions {
@@ -169,7 +177,13 @@ export default function fumadocs({
   return {
     name: '@fumadocs/astro',
     hooks: {
-      async 'astro:config:setup'({ config, updateConfig, injectScript, injectRoute }) {
+      async 'astro:config:setup'({
+        config,
+        updateConfig,
+        injectScript,
+        injectRoute,
+        addMiddleware,
+      }) {
         const { processor } = config.markdown;
         if (processor.name !== 'satteri') {
           throw new Error(
@@ -187,34 +201,40 @@ export default function fumadocs({
         const appFile = resolveConfigFile(srcDir);
         const satteri = processor.options as SatteriResolvedOptions;
         const include = remarkInclude({ cwd: root });
-        const islandFile = internalModule('island');
-        const modules: Record<string, string> = {};
-        const dirs: Record<string, string> = {};
-        const resolved: ResolvedCollection[] = [];
-        for (const [name, collection] of Object.entries(collections)) {
-          const { dir, components, includeProcessedMarkdown, ...options } = {
-            ...defaults,
-            ...collection,
-          };
-          dirs[name] = dir;
-          let island: HastPluginEntry;
-          let islandId: string | undefined;
-          if (components || appFile) {
-            const id = (islandId = `virtual:fumadocs/island/${name}`);
-            // resolved from the project rather than this package
-            modules[id] =
-              `import components from ${userModule(root, components ?? 'fumadocs-ui/mdx')};
+        // the runtime of `fumadocs.config.ts`
+        const appModule = appFile && internalModule('app');
+        // resolved from the project rather than this package
+        const islandModule = (components = 'fumadocs-ui/mdx') =>
+          `import components from ${userModule(root, components)};
 ${
   appFile
     ? // with the providers of Fumadocs pages
       `import { createContentIsland } from ${JSON.stringify(internalModule('ui/content'))};
 export const FumadocsIsland = createContentIsland(components);`
-    : `import { createIsland } from ${JSON.stringify(islandFile)};
+    : `import { createIsland } from ${JSON.stringify(internalModule('island'))};
 export const FumadocsIsland = createIsland(components);`
 }
 export { components };`;
+        const modules: Record<string, string> = {
+          // for the React bodies and the UI of plugins
+          'virtual:fumadocs/components': `export { default as components } from ${userModule(root, defaults.components ?? 'fumadocs-ui/mdx')};`,
+        };
+        // for the loaders of content collections
+        const loaders: Record<string, { dir: string; extractLinkReferences?: boolean }> = {};
+        const resolved: ResolvedCollection[] = [];
+        for (const [name, collection] of Object.entries(collections)) {
+          const { dir, components, includeProcessedMarkdown, extractLinkReferences, ...options } = {
+            ...defaults,
+            ...collection,
+          };
+          loaders[name] = { dir, extractLinkReferences };
+          let island: HastPluginEntry;
+          let islandId: string | undefined;
+          if (components || appFile) {
+            const id = (islandId = `virtual:fumadocs/island/${name}`);
+            modules[id] = islandModule(components);
             // the plugin has the state of a file
-            island = () => islandPlugin(id);
+            island = () => islandPlugin(id, appModule);
           }
           const llms =
             includeProcessedMarkdown === true ? {} : includeProcessedMarkdown || undefined;
@@ -242,11 +262,15 @@ export { components };`;
             hastPlugins: [restoreCode, preset.hastPlugins, exportData, island],
           });
         }
-        modules['virtual:fumadocs/config'] = `export const dirs = ${JSON.stringify(dirs)};
-export const server = ${config.adapter !== undefined};`;
+        const server = config.adapter !== undefined;
+        modules['virtual:fumadocs/config'] = `export const loaders = ${JSON.stringify(loaders)};
+export const root = ${JSON.stringify(root)};
+export const server = ${server};`;
         hasConfig = appFile !== undefined;
         if (appFile) {
           modules['virtual:fumadocs/app'] = `export { default } from ${JSON.stringify(appFile)};`;
+          // the content island of React bodies from plugins
+          modules['virtual:fumadocs/island'] = islandModule(defaults.components);
           // a namespace, as the exports are optional
           modules['virtual:fumadocs/layout'] = layout
             ? `import * as layout from ${userModule(root, layout)};
@@ -271,6 +295,17 @@ export const { baseOptions, SearchDialog, useSearch } = { ...layout };`
             });
           route('[...fumadocsPage]', 'page.astro');
           route('[...fumadocsFile]', 'file.js');
+          // file routes with `prerender: false`, Astro tries the prerendered routes of a pattern first
+          if (server)
+            injectRoute({
+              pattern: '[...fumadocsServer]',
+              entrypoint: new URL('./routes/server.astro', import.meta.url),
+              prerender: false,
+            });
+          addMiddleware({
+            order: 'pre',
+            entrypoint: new URL('./routes/middleware.js', import.meta.url),
+          });
           const pages = path.join(srcDir, 'pages');
           if (
             !['astro', 'md', 'mdx', 'html'].some((ext) =>
@@ -332,6 +367,9 @@ document.addEventListener('astro:before-swap', onBeforeSwap);`,
                   });
                 },
               },
+              appModule !== undefined &&
+                config.trailingSlash !== 'ignore' &&
+                trailingSlashPlugin(config.trailingSlash, appModule),
             ],
             optimizeDeps: { exclude: ['@fumadocs/astro'] },
             ssr: { noExternal: ['@fumadocs/astro'] },
@@ -358,6 +396,62 @@ interface Watcher {
   add: (paths: string | string[]) => void;
   on: (event: 'change', listener: (file: string) => void) => void;
   emit: (event: 'change', file: string) => void;
+}
+
+type Handle = (req: { url?: string }, res: unknown, next: () => void) => void;
+
+/** the dev server of Vite */
+interface DevServer {
+  environments: Record<string, { runner?: { import: (id: string) => Promise<unknown> } }>;
+  middlewares: { stack: { route: string; handle: Handle }[] };
+}
+
+/**
+ * In dev, the file routes like `/api/search` match with or without the trailing slash, as their files do in builds.
+ *
+ * The dev server of Astro rejects other forms than `trailingSlash` before routing, so the URL is rewritten before it.
+ */
+function trailingSlashPlugin(trailingSlash: 'always' | 'never', app: string) {
+  const trim = (url: string) => url.replace(/(.)\/$/, '$1');
+
+  return {
+    name: '@fumadocs/astro:trailing-slash',
+    configureServer(server: DevServer) {
+      // where Astro renders routes in dev
+      const runner = server.environments.ssr?.runner;
+      if (!runner) return;
+      let routes: Route[] | undefined;
+      let urls = new Set<string>();
+      async function getUrls() {
+        const list = await ((await runner!.import(app)) as typeof import('./app')).getRoutes();
+        if (list === routes) return urls;
+        routes = list;
+        urls = new Set();
+        for (const route of list) if (route.type === 'file') urls.add(trim(route.url));
+        return urls;
+      }
+
+      const handle: Handle = (req, _res, next) => {
+        const url = new URL(req.url ?? '/', 'http://localhost');
+        const { pathname } = url;
+        if (pathname.endsWith('/') === (trailingSlash === 'always') || pathname.startsWith('/@'))
+          return next();
+        getUrls()
+          .then((files) => {
+            if (!files.has(trim(decodeURI(pathname)))) return;
+            req.url =
+              (trailingSlash === 'always' ? `${pathname}/` : pathname.slice(0, -1)) + url.search;
+          })
+          // the route renders the error
+          .catch(() => undefined)
+          .finally(next);
+      };
+      // Astro adds its middlewares to the front of the stack after the other plugins, this goes before them
+      return () => {
+        server.middlewares.stack.unshift({ route: '', handle });
+      };
+    },
+  };
 }
 
 interface ResolvedCollection {

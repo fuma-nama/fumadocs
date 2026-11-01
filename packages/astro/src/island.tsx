@@ -1,4 +1,4 @@
-import type { ComponentType, ReactNode } from 'react';
+import { createElement, Fragment, type ComponentType, type ReactNode } from 'react';
 import type { Expression, Program } from 'estree-jsx';
 import type { Nodes } from 'hast';
 import { type Evaluator, toJsx } from 'fumadocs-core/utils/hast-to-jsx';
@@ -9,6 +9,8 @@ export interface FumadocsIslandProps {
   tree: string;
   /** props of `<Content />`, passed to `wrapper` */
   props: Record<string, unknown>;
+  /** the tree of React content: elements have React props, and are created as they are */
+  react?: boolean;
   /** slots rendered by Astro */
   [slot: string]: unknown;
 }
@@ -47,13 +49,32 @@ export function createIsland(components: Record<string, unknown>) {
   // like MDX, `wrapper` is the layout of content
   const Wrapper = components.wrapper as ComponentType<{ children: ReactNode }> | undefined;
 
-  return function FumadocsIsland({ tree, props, ...slots }: FumadocsIslandProps) {
+  function toReact(node: IslandNode): ReactNode {
+    // text and slots
+    if (!Array.isArray(node)) return node as ReactNode;
+    const children: ReactNode[] = [];
+    if (node[0] === 1) {
+      const [, name, props] = node;
+      for (let i = 3; i < node.length; i++) children.push(toReact(node[i] as IslandNode));
+      const type =
+        name === null ? Fragment : evaluator.evaluateExpression({ type: 'Identifier', name });
+      return createElement(type as ComponentType, props, ...children);
+    }
+
+    const [tagName, props] = node;
+    for (let i = 2; i < node.length; i++) children.push(toReact(node[i] as IslandNode));
+    return createElement(tagName, props || null, ...children);
+  }
+
+  return function FumadocsIsland({ tree, props, react, ...slots }: FumadocsIslandProps) {
     const nodes: IslandNode[] = JSON.parse(tree, (_, value) =>
       typeof value?.$slot === 'string' ? slots[value.$slot] : value,
     );
     const children: unknown[] = [];
-    for (const node of nodes) children.push(decode(node));
-    const content = toJsx({ type: 'root', children } as Nodes, { components, evaluator });
+    for (const node of nodes) children.push(react ? toReact(node) : decode(node));
+    const content = react
+      ? createElement(Fragment, null, ...(children as ReactNode[]))
+      : toJsx({ type: 'root', children } as Nodes, { components, evaluator });
     return Wrapper ? <Wrapper {...props}>{content}</Wrapper> : content;
   };
 }

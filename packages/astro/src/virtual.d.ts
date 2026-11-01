@@ -1,8 +1,23 @@
 declare module 'virtual:fumadocs/config' {
-  /** the content directories of collections */
-  export const dirs: Record<string, string>;
+  /** the options of collections, for their loaders */
+  export const loaders: Record<string, { dir: string; extractLinkReferences?: boolean }>;
+  /** the root directory of the project */
+  export const root: string;
   /** has an adapter, routes can render on request */
   export const server: boolean;
+}
+
+/** the default export of the `components` module */
+declare module 'virtual:fumadocs/components' {
+  // oxlint-disable-next-line typescript/no-explicit-any -- each component has its props, like `MDXComponents`
+  export const components: Record<string, import('react').FC<any>>;
+}
+
+/** the content island of React bodies */
+declare module 'virtual:fumadocs/island' {
+  export const FumadocsIsland: import('react').ComponentType<
+    import('./island').FumadocsIslandProps
+  >;
 }
 
 declare module 'virtual:fumadocs/app' {

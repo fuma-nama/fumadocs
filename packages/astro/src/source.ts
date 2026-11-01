@@ -1,5 +1,7 @@
+import path from 'node:path';
 import { render } from 'astro:content';
 import type { AstroComponentFactory } from 'astro/runtime/server/index.js';
+import { root } from 'virtual:fumadocs/config';
 import type { ElementType } from 'react';
 import type { MetaData, PageData, StaticSource, VirtualFile } from 'fumadocs-core/source';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
@@ -38,6 +40,8 @@ export type AstroPageData<Entry extends PageEntry = PageEntry> = Entry['data'] &
    * - `processed`: the Markdown processed by Fumadocs, requires `includeProcessedMarkdown`.
    */
   getText: (type: 'raw' | 'processed', options?: GetTextOptions) => Promise<string>;
+  /** the links of content, with `extractLinkReferences` */
+  extractedReferences?: { href: string }[];
 };
 
 export interface GetTextOptions {
@@ -57,7 +61,15 @@ export function toFumadocsSource<Page extends PageEntry, Meta extends MetaEntry>
   meta: Meta[] = [],
 ): StaticSource<{ pageData: AstroPageData<Page>; metaData: Meta['data'] }> {
   const files: VirtualFile<{ pageData: AstroPageData<Page>; metaData: Meta['data'] }>[] = [];
-  for (const entry of pages) files.push({ type: 'page', path: entry.id, data: pageData(entry) });
+  for (const entry of pages) {
+    files.push({
+      type: 'page',
+      path: entry.id,
+      // `filePath` is relative to the project root
+      absolutePath: entry.filePath && path.resolve(root, entry.filePath),
+      data: pageData(entry),
+    });
+  }
   for (const entry of meta) files.push({ type: 'meta', path: entry.id, data: entry.data });
   return { files };
 }

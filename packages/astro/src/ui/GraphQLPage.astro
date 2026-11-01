@@ -1,0 +1,8 @@
+---
+import { APIPage, schemas } from './graphql.js';
+
+const { page, schema, provider } = Astro.props;
+if (schema) schemas.set(schema.id, schema.sdl);
+---
+
+<APIPage client:load page={page} provider={provider} />
