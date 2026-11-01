@@ -6,23 +6,20 @@ type Components = Record<string, ElementType>;
 /** the function output of `remarkLlms()` */
 type Render = (props: { components?: Components }) => unknown;
 
-/** documents with the function output, by their file paths relative to the project root */
+/** documents with the function output, by the `markdownId` from the compiler */
 const documents = new Map<string, { render: Render; components?: Components }>();
 
 /** called by compiled MDX files */
-export function registerMarkdown(file: string, render: Render, components?: Components) {
-  documents.set(file, { render, components });
+export function registerMarkdown(id: string, render: Render, components?: Components) {
+  documents.set(id, { render, components });
 }
 
 /**
  * Render the function output of a document into Markdown, its components can define their Markdown form with `asMarkdown()`.
  */
-export async function renderMarkdown(
-  file: string,
-  components?: Components,
-): Promise<string | undefined> {
-  const document = documents.get(file);
-  if (!document) return;
+export async function renderMarkdown(id: string, components?: Components): Promise<string> {
+  const document = documents.get(id);
+  if (!document) throw new Error(`The function output of "${id}" is not registered.`);
 
   const { renderToMarkdown } = await import('fumadocs-core/server');
   return renderToMarkdown(

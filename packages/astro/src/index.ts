@@ -121,9 +121,17 @@ const exportData: HastPluginDefinition = {
       toc: ctx.data.rehypeToc ?? [],
       structuredData: ctx.data.structuredData ?? { headings: [], contents: [] },
       markdown: ctx.data.markdown,
+      markdownId: ctx.data._markdownId,
     } satisfies FumadocsData;
   },
 };
+
+declare module 'satteri' {
+  interface DataMap {
+    /** the key of the function output in `registerMarkdown()` */
+    _markdownId?: string;
+  }
+}
 
 /** register the function output of `remarkLlms()` for `getText('processed')`, with the MDX components of the island */
 function registerMarkdown(root: string, island?: string): MdastPluginEntry {
@@ -131,6 +139,7 @@ function registerMarkdown(root: string, island?: string): MdastPluginEntry {
     name: 'fumadocs-astro-markdown',
     after(tree, ctx) {
       const file = path.relative(root, fileURLToPath(fileURL!)).replaceAll(path.sep, '/');
+      ctx.data._markdownId = file;
       ctx.prependChild(tree, {
         type: 'mdxjsEsm',
         value: `import { registerMarkdown as _registerMarkdown } from ${JSON.stringify(internalModule('markdown'))};

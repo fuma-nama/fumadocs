@@ -9,6 +9,8 @@ export interface FumadocsData {
   structuredData: StructuredData;
   /** with `includeProcessedMarkdown` */
   markdown?: string;
+  /** with `output: 'function'`, the key of its function output in `registerMarkdown()` */
+  markdownId?: string;
 }
 
 /** a node of the island tree, see `island-plugin.ts` */

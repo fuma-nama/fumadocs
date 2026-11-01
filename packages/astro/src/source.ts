@@ -84,11 +84,9 @@ function pageData<Entry extends PageEntry>(entry: Entry): AstroPageData<Entry> {
     },
     async getText(type, options) {
       if (type === 'raw') return entry.body ?? '';
-      const { markdown } = (await compile()).data;
       // compiling registers the function output
-      const rendered =
-        entry.filePath && (await renderMarkdown(entry.filePath, options?.components));
-      if (rendered !== undefined) return rendered;
+      const { markdown, markdownId } = (await compile()).data;
+      if (markdownId !== undefined) return renderMarkdown(markdownId, options?.components);
       if (markdown === undefined)
         throw new Error(
           "getText('processed') requires `includeProcessedMarkdown` in the options of the Fumadocs integration.",
