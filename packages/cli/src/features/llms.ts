@@ -253,7 +253,7 @@ export const llms: Feature = {
     }
     if (framework === 'astro') {
       ctx.note(
-        'The Fumadocs integration serves `llms.txt`, `llms-full.txt` and the Markdown of pages under `/llms.mdx`, docs pages show their page actions.',
+        'The Fumadocs integration serves `llms.txt`, `llms-full.txt` and the Markdown of pages at `<page>.md`, docs pages show their page actions.',
       );
       return;
     }
