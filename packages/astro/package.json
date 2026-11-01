@@ -20,9 +20,15 @@
   "sideEffects": false,
   "exports": {
     ".": "./dist/index.js",
+    "./config": "./dist/config.js",
     "./loaders": "./dist/loaders.js",
+    "./plugins/llms.txt": "./dist/plugins/llms.txt.js",
+    "./plugins/openapi": "./dist/plugins/openapi.js",
+    "./plugins/orama-search": "./dist/plugins/orama-search.js",
+    "./plugins/takumi": "./dist/plugins/takumi.js",
     "./source": "./dist/source.js",
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./components/*": "./dist/components/*"
   },
   "publishConfig": {
     "access": "public"
@@ -50,6 +56,8 @@
     "@types/react-dom": "^19.3.0",
     "astro": "^7.4.2",
     "fumadocs-core": "workspace:*",
+    "fumadocs-openapi": "workspace:*",
+    "fumadocs-ui": "workspace:@fumadocs/base-ui@*",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "satteri": "^0.10.5",
@@ -62,7 +70,17 @@
     "@astrojs/react": "^7.0.0",
     "astro": "^7.4.0",
     "fumadocs-core": "^16.17.8",
+    "fumadocs-openapi": "^12.5.7",
+    "fumadocs-ui": "^16.17.8",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
+  },
+  "peerDependenciesMeta": {
+    "fumadocs-openapi": {
+      "optional": true
+    },
+    "fumadocs-ui": {
+      "optional": true
+    }
   }
 }

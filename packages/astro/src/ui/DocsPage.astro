@@ -1,0 +1,28 @@
+---
+import Layout from './Layout.astro';
+import { Docs } from './docs.js';
+import { app, getLayoutDefaults, getProviderData, type AnyPage } from '../app.js';
+
+interface Props {
+  page: AnyPage;
+}
+
+const { page } = Astro.props;
+const body = await app.getBody(page);
+const data = await app.getPageData(page, body);
+const tree = await app.source.serializePageTree(app.source.getPageTree(page.locale));
+const provider = getProviderData(Astro, page.locale);
+---
+
+<Layout lang={page.locale} title={data.title} description={data.description} image={data.image} page={page}>
+  <Docs
+    client:load
+    transition:persist="docs"
+    provider={provider}
+    layout={getLayoutDefaults(page.locale)}
+    tree={tree}
+    page={data}
+  >
+    <body.component {...body.props} provider={provider} />
+  </Docs>
+</Layout>

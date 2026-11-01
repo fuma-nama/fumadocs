@@ -61,6 +61,29 @@ export interface FumadocsOptions extends CollectionOptions {
       dir: string;
     }
   >;
+
+  /**
+   * Module exporting `baseOptions(locale)`, the options of Fumadocs UI layouts. It loads on every page, requires `src/fumadocs.config.ts`.
+   *
+   * For search, it can also export:
+   * - `useSearch({ locale })`: the search hook of the built-in dialog, like `useAlgoliaSearch()`.
+   * - `SearchDialog`: your own search dialog.
+   *
+   * Either one replaces the built-in search index, add `oramaSearchPlugin()` to keep it.
+   */
+  layout?: string;
+
+  /**
+   * Module whose default export is the React component of docs pages, requires `src/fumadocs.config.ts`.
+   */
+  page?: string;
+
+  /**
+   * The global CSS of Fumadocs pages, like your Tailwind CSS file. Requires `src/fumadocs.config.ts`.
+   *
+   * @defaultValue `src/styles/global.css` when it exists
+   */
+  css?: string;
 }
 
 /** code blocks are renamed in mdast, so the syntax highlighter of Astro skips them */
@@ -107,16 +130,20 @@ const exportData: HastPluginDefinition = {
  */
 export default function fumadocs({
   collections = { docs: { dir: 'content/docs' } },
+  layout,
+  page,
+  css,
   ...defaults
 }: FumadocsOptions = {}): AstroIntegration {
   // included files -> the MDX files including them
   const dependents = new Map<string, Set<string>>();
   let watcher: Watcher | undefined;
+  let hasConfig = false;
 
   return {
     name: '@fumadocs/astro',
     hooks: {
-      async 'astro:config:setup'({ config, updateConfig, injectScript }) {
+      async 'astro:config:setup'({ config, updateConfig, injectScript, injectRoute }) {
         const { processor } = config.markdown;
         if (processor.name !== 'satteri') {
           throw new Error(
@@ -130,6 +157,8 @@ export default function fumadocs({
         if (!names.has('@astrojs/mdx')) integrations.push(mdx());
 
         const root = fileURLToPath(config.root);
+        const srcDir = fileURLToPath(config.srcDir);
+        const appFile = resolveConfigFile(srcDir);
         const satteri = processor.options as SatteriResolvedOptions;
         const include = remarkInclude({ cwd: root });
         const islandFile = internalModule('island');
@@ -143,14 +172,15 @@ export default function fumadocs({
           };
           dirs[name] = dir;
           let island: HastPluginEntry;
-          if (components) {
+          if (components || appFile) {
             const id = `virtual:fumadocs/island/${name}`;
             // resolved from the project rather than this package
-            modules[id] = `import components from ${JSON.stringify(
-              components.startsWith('.')
-                ? path.resolve(root, components).replaceAll(path.sep, '/')
-                : components,
-            )};
+            modules[id] = appFile
+              ? // with the providers of Fumadocs pages
+                `import components from ${userModule(root, components ?? 'fumadocs-ui/mdx')};
+import { createContentIsland } from ${JSON.stringify(internalModule('ui/content'))};
+export const FumadocsIsland = createContentIsland(components);`
+              : `import components from ${userModule(root, components!)};
 import { createIsland } from ${JSON.stringify(islandFile)};
 export const FumadocsIsland = createIsland(components);`;
             // the plugin has the state of a file
@@ -179,6 +209,41 @@ export const FumadocsIsland = createIsland(components);`;
           });
         }
         modules['virtual:fumadocs/config'] = `export const dirs = ${JSON.stringify(dirs)};`;
+        hasConfig = appFile !== undefined;
+        if (appFile) {
+          modules['virtual:fumadocs/app'] = `export { default } from ${JSON.stringify(appFile)};`;
+          // a namespace, as the exports are optional
+          modules['virtual:fumadocs/layout'] = layout
+            ? `import * as layout from ${userModule(root, layout)};
+export const { baseOptions, SearchDialog, useSearch } = { ...layout };`
+            : 'export const baseOptions = undefined, SearchDialog = undefined, useSearch = undefined;';
+          modules['virtual:fumadocs/page'] = page
+            ? `export { default } from ${userModule(root, page)};`
+            : 'export default undefined;';
+          const globalCss = path.join(srcDir, 'styles/global.css');
+          modules['virtual:fumadocs/css'] = css
+            ? `import ${userModule(root, css)};`
+            : fs.existsSync(globalCss)
+              ? `import ${JSON.stringify(globalCss.replaceAll(path.sep, '/'))};`
+              : '';
+
+          // pages and files of the config, both can be at any path
+          const route = (pattern: string, file: string) =>
+            injectRoute({
+              pattern,
+              entrypoint: new URL(`./routes/${file}`, import.meta.url),
+              prerender: true,
+            });
+          route('[...fumadocsPage]', 'page.astro');
+          route('[...fumadocsFile]', 'file.js');
+          const pages = path.join(srcDir, 'pages');
+          if (
+            !['astro', 'md', 'mdx', 'html'].some((ext) =>
+              fs.existsSync(path.join(pages, `404.${ext}`)),
+            )
+          )
+            route('404', '404.astro');
+        }
 
         // the Markdown pipeline of Astro renders `.md` into HTML, which can't have components
         const collectionOf = ({ fileURL, sourceFormat }: PluginFactoryContext) => {
@@ -238,6 +303,17 @@ document.addEventListener('astro:before-swap', onBeforeSwap);`,
           },
         });
       },
+      'astro:config:done'({ injectTypes }) {
+        if (!hasConfig) return;
+        // `.astro` components in `fumadocs.config.ts`, for `tsc` without the language tools of Astro
+        injectTypes({
+          filename: 'astro-modules.d.ts',
+          content: `declare module '*.astro' {
+  const component: import('astro/runtime/server/index.js').AstroComponentFactory;
+  export default component;
+}`,
+        });
+      },
     },
   };
 }
@@ -261,6 +337,21 @@ function realPath(file: string): string {
     return fs.realpathSync(file);
   } catch {
     return file;
+  }
+}
+
+/** resolved from the project rather than this package */
+function userModule(root: string, file: string): string {
+  return JSON.stringify(
+    file.startsWith('.') ? path.resolve(root, file).replaceAll(path.sep, '/') : file,
+  );
+}
+
+/** the runtime config, its routes and UI are managed by Fumadocs */
+function resolveConfigFile(srcDir: string) {
+  for (const ext of ['ts', 'tsx', 'js', 'mjs']) {
+    const candidate = path.join(srcDir, `fumadocs.config.${ext}`);
+    if (fs.existsSync(candidate)) return candidate.replaceAll(path.sep, '/');
   }
 }
 

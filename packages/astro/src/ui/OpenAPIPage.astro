@@ -1,0 +1,7 @@
+---
+import { APIPage } from './openapi.js';
+
+const { page, provider } = Astro.props;
+---
+
+<APIPage client:load page={page} provider={provider} />

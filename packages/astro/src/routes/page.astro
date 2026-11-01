@@ -1,0 +1,10 @@
+---
+import { getStaticPaths as getPaths, type PageRoute } from '../app.js';
+
+export const getStaticPaths = () => getPaths('page', 'fumadocsPage');
+
+const { route } = Astro.props as { route: PageRoute };
+const Component = route.component as any;
+---
+
+<Component {...route.props} />

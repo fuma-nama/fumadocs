@@ -1,0 +1,41 @@
+---
+import { ClientRouter } from 'astro:transitions';
+import 'virtual:fumadocs/css';
+import { app, type AnyPage } from '../app.js';
+
+interface Props {
+  title?: string;
+  description?: string;
+  image?: string;
+  lang?: string;
+  /** the docs page, for the `head` component */
+  page?: AnyPage;
+}
+
+const {
+  title,
+  description,
+  image,
+  page,
+  lang = Astro.currentLocale ?? app.source._i18n?.defaultLanguage ?? 'en',
+} = Astro.props;
+const siteName = app.config.title;
+const fullTitle = title && siteName ? `${title} | ${siteName}` : (title ?? siteName);
+const Head = app.config.head;
+---
+
+<html lang={lang} transition:animate="none">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    {fullTitle && <title>{fullTitle}</title>}
+    {description && <meta name="description" content={description} />}
+    {image && <meta property="og:image" content={image} />}
+    {Head && <Head page={page} />}
+    <slot name="head" />
+    <ClientRouter />
+  </head>
+  <body style="display: flex; flex-direction: column; min-height: 100vh">
+    <slot />
+  </body>
+</html>
