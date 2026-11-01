@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { asMarkdown } from 'fumadocs-core/server';
 import { FileIcon, RotateCcw, Search, SidebarIcon, Text } from 'lucide-react';
 import { Banner } from 'fumadocs-ui/components/banner';
 import { Card, Cards } from 'fumadocs-ui/components/card';
@@ -8,7 +9,8 @@ import pkg from 'fumadocs-ui/package.json';
 import { cn } from '@/lib/cn';
 import { copy } from '../../content';
 import { DITHER_MASKS } from '../../lib/dither';
-import { Figure, FigureHeader } from '../../ui/figure';
+import { Figure } from '../../ui/figure';
+import { FigureHeader, url } from '../../ui/heading';
 import { Window } from '../../ui/window';
 import { deliveries, type Entry, type Plan, plans } from './data';
 import { Editor } from './editor';
@@ -143,6 +145,8 @@ function rows(entries: Entry[]): ReactNode[] {
  * answer's first letter, its root `--tail-root` wide.
  */
 function Asked({ children }: { children: string }) {
+  if (asMarkdown()) return children;
+
   return (
     <span className="relative isolate mb-[calc(var(--tail-drop)+0.5em)] block w-fit font-pixel text-mark leading-none font-normal tracking-normal [--tail-drop:0.55em] [--tail-root:0.8em]">
       <span
@@ -202,6 +206,30 @@ function Counter({ count }: { count: number }) {
 }
 
 export function Cli() {
+  if (asMarkdown())
+    return (
+      <>
+        <FigureHeader lead={<Asked>{copy.cli.lead}</Asked>} title={copy.cli.title} />
+        <ul>
+          <li>
+            <code>npx @fumadocs/cli customize</code> copies a layout into <code>layouts/</code> and
+            points your route files at it.
+          </li>
+          <li>
+            <code>npx @fumadocs/cli add banner files</code> installs components from the Fumadocs
+            registry, with their imports rewritten for your project.
+          </li>
+          <li>
+            <code>{'npx @fumadocs/cli feature <name>'}</code> sets up a feature, such as{' '}
+            <code>ai</code> or <code>search</code>, and wires it into your app.
+          </li>
+          <li>
+            <a href={url('/docs/cli')}>CLI guide</a>
+          </li>
+        </ul>
+      </>
+    );
+
   const cells: ReactNode[] = [];
   const editors: ReactNode[] = [];
   const cards: ReactNode[] = [];

@@ -1,8 +1,10 @@
 import Link from 'next/link';
+import { asMarkdown } from 'fumadocs-core/server';
 import { ArrowUpRight } from 'lucide-react';
-import { command, frameworks } from '../../content';
+import { command, copy, frameworks } from '../../content';
 import { Command } from '../../ui/command';
 import { Figure } from '../../ui/figure';
+import { commas, Terms, url } from '../../ui/heading';
 import { Glitch } from './glitch';
 import { Stage } from './stage';
 
@@ -12,6 +14,37 @@ const invert =
 /** a screen below the menu: the text and the sky over the horizon, the sky beside the text on
  * desktop and under it on phones */
 export function Hero() {
+  if (asMarkdown())
+    return (
+      <>
+        <h1>Fumadocs</h1>
+        <blockquote>
+          <Terms runs={copy.hero.title} />
+        </blockquote>
+        {/* what she says from the moon, each bubble as a sentence */}
+        <p>{copy.hero.says.flat().join(' ')}</p>
+        <ul>
+          <li>
+            <a href={url('/docs')}>Get started</a>
+          </li>
+          <li>
+            Create a project: <code>{command}</code>
+          </li>
+          <li>
+            Runs on:{' '}
+            {commas(frameworks, (framework) => (
+              <a href={url(framework.href)}>{framework.name}</a>
+            ))}
+          </li>
+          <li>
+            For LLMs: <a href={url('/llms.txt')}>llms.txt</a> indexes the docs,{' '}
+            <a href={url('/llms-full.txt')}>llms-full.txt</a> has all of them; add <code>.md</code>{' '}
+            to a docs URL for its Markdown.
+          </li>
+        </ul>
+      </>
+    );
+
   return (
     <Figure
       id="fumadocs"

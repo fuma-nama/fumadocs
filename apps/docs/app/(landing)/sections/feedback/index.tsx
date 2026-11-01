@@ -1,9 +1,11 @@
 import type { ReactNode } from 'react';
 import Image from 'next/image';
+import { asMarkdown } from 'fumadocs-core/server';
 import { cn } from '@/lib/cn';
 import { copy, type Quote, quotes } from '../../content';
 import { PORT } from '../../lib/cable';
-import { Figure, FigureHeader } from '../../ui/figure';
+import { Figure } from '../../ui/figure';
+import { FigureHeader } from '../../ui/heading';
 import { Shadow, Window } from '../../ui/window';
 import { Desk } from './stage';
 
@@ -72,6 +74,21 @@ function Voice({ quote, port, className }: { quote: Quote; port: boolean; classN
 }
 
 export function Feedback() {
+  if (asMarkdown())
+    return (
+      <>
+        <FigureHeader title={copy.feedback.title} />
+        {quotes.map((quote) => (
+          <blockquote key={quote.handle}>
+            <p>{quote.message}</p>
+            <p>
+              {quote.name}, {quote.role}
+            </p>
+          </blockquote>
+        ))}
+      </>
+    );
+
   const voices: ReactNode[] = [];
   for (const voice of VOICES) {
     const quote = quotes.find((item) => item.handle === voice.handle);
@@ -100,6 +117,8 @@ export function Feedback() {
  * Each cable is its own svg round it, so its draw-on repaints no more than its cable.
  */
 export function Wires({ children }: { children: ReactNode }) {
+  if (asMarkdown()) return children;
+
   const wires: ReactNode[] = [];
   for (const voice of VOICES) {
     if (!voice.from) continue;

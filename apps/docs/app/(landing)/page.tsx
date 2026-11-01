@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { asMarkdown } from 'fumadocs-core/server';
 import { createMetadata } from '@/lib/metadata';
 import { Hero } from './sections/hero';
 import { Style } from './sections/style';
@@ -20,6 +21,9 @@ export const metadata: Metadata = createMetadata({
 });
 
 export default function Page() {
+  // its Markdown, at `/index.md`, is each section's own
+  asMarkdown();
+
   return (
     <>
       <Hero />

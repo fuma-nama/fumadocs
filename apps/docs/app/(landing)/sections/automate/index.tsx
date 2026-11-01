@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { asMarkdown } from 'fumadocs-core/server';
 import { Card, Cards } from 'fumadocs-ui/components/card';
 import type { CodeBlockProps } from 'fumadocs-ui/components/codeblock';
 import { createServerCodeBlock } from 'fumadocs-ui/components/codeblock.rsc';
@@ -8,9 +9,20 @@ import { ServerCodeBlock } from '@/components/server-codeblock';
 import { apiHighlighter, highlighter } from '@/lib/highlighter';
 import { copy } from '../../content';
 import { DITHER_MASKS } from '../../lib/dither';
-import { Figure, FigureHeader, Status } from '../../ui/figure';
+import { Figure } from '../../ui/figure';
+import { commas, FigureHeader, Status } from '../../ui/heading';
 import { Button } from './content/button';
-import { BEFORE, EDIT, EDIT_LINE, FILE, type Output, PAGE, RELEASES, SOURCE } from './data';
+import {
+  BEFORE,
+  EDIT,
+  EDIT_LINE,
+  FILE,
+  type Output,
+  OUTPUTS,
+  PAGE,
+  RELEASES,
+  SOURCE,
+} from './data';
 import { type Made, Stage } from './stage';
 
 const generator = createGenerator({
@@ -161,6 +173,31 @@ async function table(source: string): Promise<ReactNode> {
 }
 
 export async function Automate() {
+  if (asMarkdown())
+    return (
+      <>
+        <FigureHeader lead={<Status>{copy.automate.lead}</Status>} title={copy.automate.title} />
+        <ul>
+          <li>
+            <code>{'<auto-type-table>'}</code> reads a TypeScript type, <code>{'<include>'}</code>{' '}
+            takes code from your files, and async server components in MDX read your data, all at
+            build time.
+          </li>
+          <li>
+            One source, many outputs: from <code>{FILE}</code> come{' '}
+            {commas(OUTPUTS, (output) => (
+              <code>{output.title}</code>
+            ))}
+            . Change the source and every one of them follows.
+          </li>
+        </ul>
+        <p>
+          <code>{FILE}</code>:
+        </p>
+        <pre data-lang="tsx">{SOURCE}</pre>
+      </>
+    );
+
   const outputs: Record<Output, Made> = {
     props: { before: await table(BEFORE), after: await table(SOURCE) },
     page: { before: page(BEFORE), after: page(SOURCE) },

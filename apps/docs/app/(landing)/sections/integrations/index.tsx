@@ -1,11 +1,34 @@
 import Link from 'next/link';
-import { Figure, FigureHeader } from '../../ui/figure';
+import { asMarkdown } from 'fumadocs-core/server';
+import { Figure } from '../../ui/figure';
+import { commas, FigureHeader, url } from '../../ui/heading';
 import { copy } from '../../content';
 import { Board, Keyed } from './board';
 import { modules, more } from './data';
 import { mechanisms } from './mechanisms';
 
 export function Integrations() {
+  if (asMarkdown())
+    return (
+      <>
+        <FigureHeader title={copy.integrations.title} />
+        <ul>
+          {modules.map((item) => (
+            <li key={item.title}>
+              <a href={url(item.href ?? '/docs/search')}>{item.title}</a> (<code>{item.pkg}</code>):{' '}
+              {item.line} Add it with <code>{item.install}</code>.
+            </li>
+          ))}
+          <li>
+            More:{' '}
+            {commas(more, (item) => (
+              <a href={url(item.href)}>{item.name}</a>
+            ))}
+          </li>
+        </ul>
+      </>
+    );
+
   return (
     <Figure
       id="integrations"

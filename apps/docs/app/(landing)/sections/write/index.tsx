@@ -1,12 +1,14 @@
 import type { ReactNode } from 'react';
 import type { MDXComponents } from 'mdx/types';
+import { asMarkdown } from 'fumadocs-core/server';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
 import { TypeTable } from 'fumadocs-ui/components/type-table';
 import * as Twoslash from 'fumadocs-twoslash/ui';
 import { Mermaid } from '@/components/mdx/mermaid';
 import { copy } from '../../content';
-import { Figure, FigureHeader } from '../../ui/figure';
-import { blocks, quickStart, steps } from './data';
+import { Figure } from '../../ui/figure';
+import { FigureHeader } from '../../ui/heading';
+import { blocks, fileLines, quickStart, steps } from './data';
 import { RailBed, RailColumn } from './rail';
 import { Stage } from './stage';
 
@@ -25,6 +27,23 @@ const FILE = 'quick-start.mdx';
 
 /** a figure that types an MDX file block by block, and presses each into its page */
 export function Write() {
+  if (asMarkdown())
+    return (
+      <>
+        <FigureHeader title={copy.write.title} />
+        <ul>
+          <li>
+            Writers stay in Markdown, and developers add React components and code checked by
+            Twoslash.
+          </li>
+        </ul>
+        <p>
+          <code>{FILE}</code>:
+        </p>
+        <pre data-lang="mdx">{fileLines(blocks).join('\n')}</pre>
+      </>
+    );
+
   const slots: ReactNode[] = [];
   for (const entry of quickStart.entries) {
     const Body = entry.body;

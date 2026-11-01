@@ -1,8 +1,10 @@
 import type { Metadata } from 'next';
+import { asMarkdown } from 'fumadocs-core/server';
 import { ArrowUpRight } from 'lucide-react';
 import { createMetadata } from '@/lib/metadata';
 import { blogs, showcases } from '@/lib/showcases';
-import { Figure, FigureHeader, Terms } from '../ui/figure';
+import { Figure } from '../ui/figure';
+import { FigureHeader, Terms } from '../ui/heading';
 import { address } from '../ui/site-tile';
 import { arrange, copy, suggest } from './data';
 import { DeckBack, DeckFront } from './deck';
@@ -23,6 +25,26 @@ export const metadata: Metadata = createMetadata({
 const figure = 'flex flex-col gap-12 px-(--lp-gutter) py-16 md:gap-16 md:py-20';
 
 export default function Page() {
+  if (asMarkdown())
+    return (
+      <>
+        <h1>Showcase</h1>
+        <blockquote>
+          <Terms runs={copy.header.title} />
+        </blockquote>
+        <p>{copy.header.summary}</p>
+        <ul>
+          <li>
+            <a href={suggest}>Suggest yours</a>
+          </li>
+        </ul>
+        <h2>Sites</h2>
+        <Wall sites={showcases} />
+        <FigureHeader title={copy.blogs.title} />
+        <Blogs sites={blogs} />
+      </>
+    );
+
   const { featured, shots } = arrange(showcases);
   const reel = [...featured, ...shots];
 

@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import Image from 'next/image';
+import { asMarkdown } from 'fumadocs-core/server';
 import { ArrowUpRight } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { type ShowcaseObject, vercel } from '@/lib/showcases';
@@ -144,8 +145,31 @@ function Slot() {
   );
 }
 
+/** a site's item in the Markdown: its link, and what it is when it's featured */
+function item(site: ShowcaseObject): ReactNode {
+  return (
+    <li key={site.url}>
+      <a href={site.url}>{site.name}</a>
+      {kinds[site.url] && `: ${kinds[site.url]}`}
+    </li>
+  );
+}
+
 export function Wall({ sites }: { sites: ShowcaseObject[] }) {
   const { featured, shots, blank } = arrange(sites);
+  if (asMarkdown())
+    return (
+      <ul>
+        {featured.map(item)}
+        <li>
+          Vercel: {copy.vercel}
+          <ul>{vercel.map(item)}</ul>
+        </li>
+        {shots.map(item)}
+        {blank.map(item)}
+      </ul>
+    );
+
   const cells: ReactNode[] = [];
   for (const site of featured) cells.push(<Featured key={site.url} site={site} />);
   cells.push(<Vercel key="vercel" />);
@@ -156,6 +180,8 @@ export function Wall({ sites }: { sites: ShowcaseObject[] }) {
 }
 
 export function Blogs({ sites }: { sites: ShowcaseObject[] }) {
+  if (asMarkdown()) return <ul>{sites.map(item)}</ul>;
+
   const cells: ReactNode[] = [];
   for (const site of sites) cells.push(<Tile key={site.url} site={site} />);
   return <Peek className={grid}>{cells}</Peek>;

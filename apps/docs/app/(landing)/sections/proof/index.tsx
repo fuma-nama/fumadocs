@@ -1,6 +1,7 @@
 import type { CSSProperties, ReactNode } from 'react';
 import Image, { type StaticImageData } from 'next/image';
 import Link from 'next/link';
+import { asMarkdown } from 'fumadocs-core/server';
 import { ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { owner, repo } from '@/lib/github';
@@ -8,7 +9,8 @@ import { type ShowcaseObject, showcases, vercel } from '@/lib/showcases';
 import { copy } from '../../content';
 import { copy as showcase } from '../../showcase/data';
 import { VercelLinks, VercelTitle } from '../../showcase/wall';
-import { Figure, FigureHeader } from '../../ui/figure';
+import { Figure } from '../../ui/figure';
+import { commas, FigureHeader, url } from '../../ui/heading';
 import { Shadow, STRIPES, Window } from '../../ui/window';
 import { getContributorCount, getDownloads, getStars } from './data';
 import { type Reading, Stage } from './stage';
@@ -189,6 +191,27 @@ export async function Proof() {
     readings.push({ label: 'Weekly downloads', value: downloads, source: 'fumadocs-core' });
   if (contributors !== undefined)
     readings.push({ label: 'Contributors', value: contributors, source: repository });
+
+  if (asMarkdown())
+    return (
+      <>
+        <FigureHeader title={copy.proof.title} />
+        <ul>
+          {readings.map((reading) => (
+            <li key={reading.label}>
+              {reading.label}: {reading.value.toLocaleString('en-US')} (
+              <code>{reading.source}</code>)
+            </li>
+          ))}
+          <li>
+            <a href={url('/showcase')}>Showcase</a>:{' '}
+            {commas([...showcases, ...vercel], (site) => (
+              <a href={site.url}>{site.name}</a>
+            ))}
+          </li>
+        </ul>
+      </>
+    );
 
   return (
     <Figure
