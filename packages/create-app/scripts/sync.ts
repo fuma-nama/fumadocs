@@ -8,8 +8,8 @@ const dir = path.dirname(fileURLToPath(import.meta.url));
 const examplesDir = path.join('../../examples');
 const templateDir = path.join(dir, '../template');
 
+// `template/astro` is maintained by hand, the setup of `fumadocs feature docs`
 const templates = [
-  'astro',
   'react-router',
   'tanstack-start',
   'tanstack-start-spa',

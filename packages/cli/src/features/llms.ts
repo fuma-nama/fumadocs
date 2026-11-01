@@ -1,8 +1,8 @@
+import fs from 'node:fs/promises';
 import path from 'node:path';
 import type { Feature, FeatureContext } from '@/features';
 import type { Framework, I18nInfo } from '@/project';
 import {
-  astroPageRoute,
   type FormattedRoute,
   formatRoute,
   reactRouterTypes,
@@ -23,6 +23,7 @@ import {
   type SourceRef,
   sourceRef,
   registerReactRouterRoutes,
+  requiresManaged,
   requiresMarkdown,
   sharedRoute,
 } from './utils';
@@ -87,7 +88,7 @@ interface Routes {
 type Template = (route: FormattedRoute, i18n: I18nInfo | null, src: SourceRef) => string;
 
 /** the per-page Markdown route, the only one reading route params */
-const markdownTemplates: Record<Framework, Template> = {
+const markdownTemplates: Record<Exclude<Framework, 'astro'>, Template> = {
   next: (route, i18n, src) => `${pageImports(src)}
 import { notFound } from 'next/navigation';
 
@@ -164,11 +165,11 @@ export async function getConfig() {
   } as const;
 }
 `,
-  astro: (_route, i18n, src) => astroPageRoute(i18n, pageImports(src), markdown),
 };
 
+/** the routes on Astro come from the Fumadocs integration */
 export function templates(
-  framework: Framework,
+  framework: Exclude<Framework, 'astro'>,
   routes: Routes,
   i18n: I18nInfo | null,
   src: SourceRef,
@@ -212,16 +213,37 @@ export function llmsRoutes(
   };
 }
 
+/** add `docsLlms` to `lib/source.ts` */
+export async function addDocsLlms(ctx: FeatureContext) {
+  const sourceFile = path.join(ctx.project.baseDir, 'lib/source.ts');
+  if (
+    await addExport(ctx, sourceFile, 'docsLlms', docsLlms(sourceRef(ctx.project.source.dynamic)))
+  ) {
+    await ctx.source(sourceFile, (file) =>
+      addImport(file, { from: 'fumadocs-core/source', named: ['llms'] }),
+    );
+  }
+}
+
 export const llms: Feature = {
   id: 'llms',
   title: 'LLM Routes',
   description: 'serve docs as Markdown for LLMs: llms.txt, llms-full.txt and per-page Markdown',
   requires: [docs],
-  supports: requiresMarkdown,
+  supports: (project) => {
+    const managed = requiresManaged(project);
+    return managed === true ? requiresMarkdown(project) : managed;
+  },
+  async detect({ cwd, baseDir, framework, configFile }) {
+    const file = framework === 'astro' ? configFile : path.join(baseDir, 'lib/source.ts');
+    if (!file) return false;
+    const content = await fs.readFile(path.join(cwd, file), 'utf-8').catch(() => '');
+    return framework === 'astro'
+      ? /includeProcessedMarkdown:\s*true/.test(content)
+      : /export const docsLlms\b/.test(content);
+  },
   async apply(ctx) {
     const { baseDir, i18n, source, configFile, framework } = ctx.project;
-    const sourceFile = path.join(baseDir, 'lib/source.ts');
-    const src = sourceRef(ctx.project.source.dynamic);
     // runtime content sources already give raw Markdown
     if (source.collections) {
       await ctx.source(source.collections, (file) => {
@@ -229,11 +251,13 @@ export const llms: Feature = {
           throw new Error(`cannot enable \`includeProcessedMarkdown\` in ${source.collections}`);
       });
     }
-    if (await addExport(ctx, sourceFile, 'docsLlms', docsLlms(src))) {
-      await ctx.source(sourceFile, (file) =>
-        addImport(file, { from: 'fumadocs-core/source', named: ['llms'] }),
+    if (framework === 'astro') {
+      ctx.note(
+        'The Fumadocs integration serves `llms.txt`, `llms-full.txt` and the Markdown of pages under `/llms.mdx`, docs pages show their page actions.',
       );
+      return;
     }
+    await addDocsLlms(ctx);
 
     const docsRoute = source.baseUrl.replace(/\/$/, '');
     let contentRoute = `/llms.mdx${docsRoute}`;
@@ -245,7 +269,12 @@ export const llms: Feature = {
       await addPageUrl(ctx, 'getPageMarkdownUrl', markdownUrl(i18n !== null));
     }
     const routes = llmsRoutes(framework, i18n, docsRoute, contentRoute);
-    for (const [route, content] of templates(framework, routes, i18n, src))
+    for (const [route, content] of templates(
+      framework,
+      routes,
+      i18n,
+      sourceRef(ctx.project.source.dynamic),
+    ))
       await ctx.write(path.join(baseDir, route.file), content);
 
     if (framework === 'react-router') {

@@ -3,7 +3,7 @@ import type { Feature } from '@/features';
 import type { Framework } from '@/project';
 import { type FormattedRoute, formatRoute, routeModule } from '@/project/route';
 import { addReactRouterPrerenderArray } from '@/codemod';
-import { llms } from './llms';
+import { addDocsLlms, llms } from './llms';
 import { registerReactRouterRoutes, requiresMarkdown, type SourceRef, sourceRef } from './utils';
 
 const server = ({
@@ -47,6 +47,8 @@ export const mcp: Feature = {
   async apply(ctx) {
     const { baseDir, framework } = ctx.project;
     ctx.addDependencies({ '@modelcontextprotocol/server': null, zod: null });
+    // the LLM routes of Astro come from the Fumadocs integration, without `docsLlms`
+    await addDocsLlms(ctx);
 
     const route = mcpRoute(framework);
     await ctx.write(

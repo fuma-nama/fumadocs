@@ -2,25 +2,26 @@ import path from 'node:path';
 import type { Feature } from '@/features';
 import { addImport, appendJsxChildren, findJsxElement } from '@/codemod';
 import { docs } from './docs';
-import { findSource } from './utils';
+import { astroPage } from './docs/templates';
+import { astroModule, findSource, requiresManaged } from './utils';
 
 export const feedback: Feature = {
   id: 'feedback',
   title: 'Feedback',
   description: 'let readers rate docs pages, with a component to send feedback',
   requires: [docs],
+  supports: requiresManaged,
   async apply(ctx) {
     const { cwd, baseDir, info, framework, static: isStatic } = ctx.project;
     await ctx.install('feedback');
 
     // server actions are only available on RSC frameworks, static export has none
     const serverAction = framework === 'next' || framework === 'waku';
-    // Astro renders docs pages in a React island, from its components
-    const page = await findSource(
-      cwd,
-      framework === 'astro' ? baseDir : path.join(baseDir, info.routesDir),
-      '<DocsPage',
-    );
+    // Astro renders docs pages with the `page` module of the Fumadocs integration
+    const page =
+      framework === 'astro'
+        ? await astroModule(ctx, 'page', astroPage())
+        : await findSource(cwd, path.join(baseDir, info.routesDir), '<DocsPage');
     const edited =
       page !== undefined &&
       !(serverAction && isStatic) &&

@@ -182,6 +182,15 @@ export const docs = defineDocs({
     });
     const mcp = mcpRoute(framework);
     files[`mcp/${framework}/${mcp.file}`] = mcpTemplates(framework, mcp, src);
+    // the Fumadocs integration serves the routes on Astro
+    if (framework === 'astro') {
+      files[`${base}/astro.config.mjs`] = codemod(
+        'astro.config.mjs',
+        astroConfig,
+        enableProcessedMarkdown,
+      );
+      continue;
+    }
     const routes = llmsRoutes(framework, null, '/docs', '/llms.mdx/docs');
     for (const [route, content] of templates(framework, routes, null, src)) {
       files[`${base}/${route.file}`] = content;
@@ -199,13 +208,6 @@ export const docs = defineDocs({
           file,
           Object.values(routes).map((route) => ({ path: route.path, entry: route.file })),
         ),
-      );
-    }
-    if (framework === 'astro') {
-      files[`${base}/astro.config.mjs`] = codemod(
-        'astro.config.mjs',
-        astroConfig,
-        enableProcessedMarkdown,
       );
     }
     if (framework === 'next') {

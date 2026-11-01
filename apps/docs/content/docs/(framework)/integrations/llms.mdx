@@ -13,6 +13,8 @@ npx @fumadocs/cli feature llms
 
 It enables processed Markdown on your docs collection, adds `docsLlms` to `lib/source.ts`, and creates the routes below. The generated files are listed here if you prefer a manual setup.
 
+On Astro, the Fumadocs integration serves these routes, the CLI only enables processed Markdown.
+
 ### `docsLlms`
 
 `llms()` renders your docs for LLMs. `renderPage` turns one page into Markdown, from the processed document rather than the raw file content:
@@ -78,10 +80,6 @@ An index of all pages, generated from the page tree.
   llms/waku/pages/_api/llms.txt.ts
 </feature>
 
-<feature tab="Astro" title="src/pages/llms.txt.ts">
-  llms/astro/pages/llms.txt.ts
-</feature>
-
 ### `llms-full.txt`
 
 The content of all pages in a single file.
@@ -100,10 +98,6 @@ The content of all pages in a single file.
 
 <feature tab="Waku" title="pages/_api/llms-full.txt.ts">
   llms/waku/pages/_api/llms-full.txt.ts
-</feature>
-
-<feature tab="Astro" title="src/pages/llms-full.txt.ts">
-  llms/astro/pages/llms-full.txt.ts
 </feature>
 
 ### `*.md` [#md-extension]
@@ -173,14 +167,6 @@ export default {
 
 <feature tab="Waku" title="pages/_api/llms.mdx/docs/[...slug]/content.md.ts">
   llms/waku/pages/_api/llms.mdx/docs/[...slug]/content.md.ts
-</feature>
-
-<feature tab="Astro" title="src/lib/shared.ts">
-  llms/astro/lib/shared.ts
-</feature>
-
-<feature tab="Astro" title="src/pages/llms.mdx/docs/[...slug]/content.md.ts">
-  llms/astro/pages/llms.mdx/docs/[...slug]/content.md.ts
 </feature>
 
 #### `Accept`

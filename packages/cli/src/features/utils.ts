@@ -3,7 +3,8 @@ import path from 'node:path';
 import type { Project } from '@/project';
 import type { FormattedRoute } from '@/project/route';
 import type { FeatureContext, PackageJson } from '@/features';
-import { addImport, addReactRouterRoute } from '@/codemod';
+import { addImport, addReactRouterRoute, ensureAstroOption, type SourceFile } from '@/codemod';
+import { exists } from '@/utils/fs';
 
 /** the shallowest `.ts`/`.tsx` file under `dir` whose content includes `needle`, relative to `cwd` */
 export async function findSource(
@@ -102,6 +103,49 @@ export const requiresMarkdown = (project: Project) =>
   project.source.collections !== null ||
   project.source.dynamic ||
   'requires Fumadocs MDX, `@fumadocs/astro` or a runtime content source';
+
+/** on Astro, features extend the managed setup of `@fumadocs/astro` */
+export const requiresManaged = (project: Project) =>
+  project.framework !== 'astro' ||
+  project.fumadocsConfig !== undefined ||
+  'requires `src/fumadocs.config.ts` of `@fumadocs/astro`, run `fumadocs feature docs` to set up the managed integration';
+
+const astroModules = { layout: 'lib/layout.shared.tsx', page: 'components/docs.tsx' };
+
+/**
+ * The file of a module option of the Fumadocs integration in an Astro config, set to the default path when missing
+ *
+ * @returns relative to cwd, `undefined` when it isn't a local file of the project
+ */
+export function astroModuleFile(
+  file: SourceFile,
+  project: Project,
+  name: keyof typeof astroModules,
+): string | undefined {
+  const fallback = `./${posix(path.join(project.baseDir, astroModules[name]))}`;
+  const specifier = ensureAstroOption(file, name, fallback);
+  if (specifier?.startsWith('.')) return path.normalize(specifier);
+}
+
+/**
+ * A module of the Fumadocs integration on Astro, registered in the Astro config and created with `content` when missing.
+ *
+ * @returns the file relative to cwd, `undefined` when it isn't a local file of the project
+ */
+export async function astroModule(
+  ctx: FeatureContext,
+  name: keyof typeof astroModules,
+  content: string,
+): Promise<string | undefined> {
+  const { cwd, configFile } = ctx.project;
+  if (!configFile) return;
+  let file: string | undefined;
+  await ctx.source(configFile, (source) => {
+    file = astroModuleFile(source, ctx.project, name);
+  });
+  if (file && !(await exists(path.join(cwd, file)))) await ctx.write(file, content);
+  return file;
+}
 
 /** how generated code refers to the loader of `lib/source.ts` */
 export interface SourceRef {

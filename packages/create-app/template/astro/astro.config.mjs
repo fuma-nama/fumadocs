@@ -7,7 +7,7 @@ export default defineConfig({
   integrations: [
     fumadocs({
       components: './src/components/mdx.tsx',
-      includeProcessedMarkdown: true,
+      layout: './src/lib/layout.shared.tsx',
     }),
   ],
   vite: {

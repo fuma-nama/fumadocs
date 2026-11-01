@@ -120,7 +120,11 @@ export const webmcp: Feature = {
   description:
     'expose tools to AI agents in the browser (experimental): search, read and open docs pages',
   requires: [llms],
-  supports: requiresMarkdown,
+  supports: (project) =>
+    // the Fumadocs integration of Astro renders the root provider
+    project.framework === 'astro'
+      ? 'Astro is not supported by this feature'
+      : requiresMarkdown(project),
   async apply(ctx) {
     const { cwd, baseDir, i18n, framework } = ctx.project;
     await ctx.write(

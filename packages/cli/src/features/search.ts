@@ -7,15 +7,20 @@ import {
   addImport,
   addJsxAttribute,
   addTanstackPrerender,
+  createSourceFile,
   filterReactRouterPrerenderArray,
   filterReactRouterRoute,
   findJsxElement,
 } from '@/codemod';
 import { docs } from './docs';
+import { layoutShared } from './docs/templates';
 import {
+  astroModule,
+  astroModuleFile,
   findSource,
   posix,
   registerReactRouterRoutes,
+  requiresManaged,
   scripts,
   type SourceRef,
   sourceRef,
@@ -476,10 +481,24 @@ export const search: Feature<{ provider: SearchProvider }> = {
   title: 'Search',
   description: 'replace the default search with a 3rd party search solution',
   requires: [docs],
-  supports: (project) =>
-    project.source.loader ||
-    project.source.dynamic ||
-    '`lib/source.ts` must export a `source` loader',
+  supports: (project) => {
+    const managed = requiresManaged(project);
+    if (managed !== true) return managed;
+    return (
+      project.source.loader ||
+      project.source.dynamic ||
+      '`lib/source.ts` must export a `source` loader'
+    );
+  },
+  async detect(project) {
+    // other frameworks also write a dialog for the default search
+    if (project.framework !== 'astro' || !project.configFile) return false;
+    const config = await createSourceFile(path.join(project.cwd, project.configFile));
+    const layout = astroModuleFile(config, project, 'layout');
+    if (!layout) return false;
+    const content = await fs.readFile(path.join(project.cwd, layout), 'utf-8').catch(() => '');
+    return content.includes('SearchDialog');
+  },
   options: {
     provider: {
       message: 'Choose a search provider',
@@ -514,8 +533,14 @@ export const search: Feature<{ provider: SearchProvider }> = {
       'createFromSource(',
       (file) => /(^|[\\/])search(\.ts|[\\/]route\.ts)$/.test(file),
     );
+    // the default search of Astro is built in, it drops out with the dialog of the layout module
+    const routeFile =
+      searchRoute ??
+      (framework === 'astro'
+        ? path.join(baseDir, formatRoute({ segments: ['api/search'] }, framework, null).file)
+        : undefined);
     if (provider.searchRoute) {
-      if (searchRoute) await ctx.write(searchRoute, provider.searchRoute[framework]);
+      if (routeFile) await ctx.write(routeFile, provider.searchRoute[framework]);
       else
         ctx.note(
           'Create the search route with `createMixedbreadSearchAPI`, see https://fumadocs.dev/docs/headless/search/mixedbread.',
@@ -533,19 +558,34 @@ export const search: Feature<{ provider: SearchProvider }> = {
       }
     }
 
-    const rootProvider = await findSource(project.cwd, baseDir, '<RootProvider');
-    const edited =
-      rootProvider !== undefined &&
-      (await ctx.source(rootProvider, (file) => {
-        const element = findJsxElement(file, 'RootProvider')?.openingElement;
-        if (!element || file.code.slice(element.start, element.end).includes('search=')) return;
-        addJsxAttribute(file, element, 'search={{ SearchDialog }}');
-        addImport(file, { from: '@/components/search', default: 'SearchDialog' });
-      }));
-    if (!edited)
-      ctx.note(
-        'Pass `search={{ SearchDialog }}` from `@/components/search` to `<RootProvider />`.',
-      );
+    if (framework === 'astro') {
+      // the Fumadocs integration takes the dialog from the layout module
+      const layout = await astroModule(ctx, 'layout', layoutShared(null));
+      const edited =
+        layout !== undefined &&
+        (await ctx.source(layout, (file) => {
+          if (!file.code.includes('SearchDialog'))
+            file.s.append("\nexport { default as SearchDialog } from '@/components/search';\n");
+        }));
+      if (!edited)
+        ctx.note(
+          'Export `SearchDialog` from `@/components/search` in the `layout` module of the Fumadocs integration.',
+        );
+    } else {
+      const rootProvider = await findSource(project.cwd, baseDir, '<RootProvider');
+      const edited =
+        rootProvider !== undefined &&
+        (await ctx.source(rootProvider, (file) => {
+          const element = findJsxElement(file, 'RootProvider')?.openingElement;
+          if (!element || file.code.slice(element.start, element.end).includes('search=')) return;
+          addJsxAttribute(file, element, 'search={{ SearchDialog }}');
+          addImport(file, { from: '@/components/search', default: 'SearchDialog' });
+        }));
+      if (!edited)
+        ctx.note(
+          'Pass `search={{ SearchDialog }}` from `@/components/search` to `<RootProvider />`.',
+        );
+    }
 
     if (provider.sync) {
       await ctx.packageJson((data) => {
