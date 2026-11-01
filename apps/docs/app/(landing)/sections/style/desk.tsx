@@ -248,7 +248,7 @@ export const Desk = memo(function Desk({
           data-shadow
           aria-hidden
           hidden={level === 0}
-          className="absolute -z-20 bg-lp-ink-2 lp-dither"
+          className="absolute -z-20 bg-lp-ink-2"
           style={{
             inset: shadowInset(slot),
             maskImage: DITHER_MASKS[level],
@@ -326,7 +326,7 @@ export const Desk = memo(function Desk({
               }}
             >
               <span
-                className="absolute inset-0 translate-x-1.25 translate-y-1.75 bg-lp-ink-2 lp-dither"
+                className="absolute inset-0 translate-x-1.25 translate-y-1.75 bg-lp-ink-2"
                 style={{ maskImage: DITHER_MASKS[4] }}
               />
               <span className="absolute inset-0 border border-lp-ink bg-lp-paper" />

@@ -10,7 +10,7 @@ function Dither({ level, className }: { level: number; className?: string }) {
   return (
     <span
       aria-hidden
-      className={cn('pointer-events-none absolute inset-0 bg-lp-ink lp-dither', className)}
+      className={cn('pointer-events-none absolute inset-0 bg-lp-ink', className)}
       style={{ maskImage: DITHER_MASKS[level] }}
     />
   );

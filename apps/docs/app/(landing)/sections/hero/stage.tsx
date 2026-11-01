@@ -50,7 +50,7 @@ function Bubble() {
     >
       <span
         style={shadow}
-        className="absolute top-0 right-0.75 bottom-1 left-0 translate-x-0.75 translate-y-1 bg-lp-ink-2 lp-dither"
+        className="absolute top-0 right-0.75 bottom-1 left-0 translate-x-0.75 translate-y-1 bg-lp-ink-2"
       />
       <span className="relative grid justify-items-start bg-lp-ink px-2.5 py-2 whitespace-pre text-lp-paper contain-layout contain-paint *:col-start-1 *:row-start-1">
         <span data-sizer className="invisible" />

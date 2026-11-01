@@ -291,7 +291,11 @@ export function Projector({ sites, back, front }: ProjectorProps) {
         className="group outline-offset-2 outline-lp-ink focus-visible:outline"
       >
         <Window
-          title={<span className="-mx-2 block px-2 lp-invert-group">{address(site.url)}</span>}
+          title={
+            <span className="-mx-2 block px-2 group-hover:bg-lp-ink group-hover:text-lp-paper group-focus-visible:bg-lp-ink group-focus-visible:text-lp-paper">
+              {address(site.url)}
+            </span>
+          }
         >
           <span className="sr-only">{site.name}</span>
           <span ref={screen} className="relative block aspect-og overflow-hidden">

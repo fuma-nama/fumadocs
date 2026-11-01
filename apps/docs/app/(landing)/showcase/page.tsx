@@ -43,7 +43,7 @@ export default function Page() {
             href={suggest}
             target="_blank"
             rel="noreferrer noopener"
-            className="mt-4 inline-flex h-11 w-fit items-center gap-1.5 border border-lp-line-strong bg-lp-yellow px-5 font-medium text-lp-on-yellow lp-invert max-sm:w-full max-sm:justify-center"
+            className="mt-4 inline-flex h-11 w-fit items-center gap-1.5 border border-lp-line-strong bg-lp-yellow px-5 font-medium text-lp-on-yellow transition-none hover:bg-lp-ink hover:text-lp-paper focus-visible:bg-lp-ink focus-visible:text-lp-paper focus-visible:outline-none max-sm:w-full max-sm:justify-center"
           >
             Suggest yours
             <ArrowUpRight aria-hidden className="size-4" />

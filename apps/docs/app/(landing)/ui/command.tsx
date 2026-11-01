@@ -47,7 +47,7 @@ export function Command({ command, className, ...props }: CommandProps) {
         type="button"
         onClick={onCopy}
         aria-label={copied ? 'Copied' : `Copy "${command}"`}
-        className="flex w-11 shrink-0 items-center justify-center border-s border-lp-line-strong lp-invert"
+        className="flex w-11 shrink-0 items-center justify-center border-s border-lp-line-strong transition-none hover:bg-lp-ink hover:text-lp-paper focus-visible:bg-lp-ink focus-visible:text-lp-paper focus-visible:outline-none"
       >
         {copied ? <Check className="size-4" /> : <Clipboard className="size-4" />}
       </button>

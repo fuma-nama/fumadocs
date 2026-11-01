@@ -9,7 +9,7 @@ import { copy } from '../../content';
 import { copy as showcase } from '../../showcase/data';
 import { VercelLinks, VercelTitle } from '../../showcase/wall';
 import { Figure, FigureHeader } from '../../ui/figure';
-import { Shadow, Window } from '../../ui/window';
+import { Shadow, STRIPES, Window } from '../../ui/window';
 import { getContributorCount, getDownloads, getStars } from './data';
 import { type Reading, Stage } from './stage';
 
@@ -80,7 +80,11 @@ function file(name: string): string {
 
 /** a window's title that inverts while its window is pointed at */
 function Title({ children }: { children: ReactNode }) {
-  return <span className="-mx-2 px-2 lp-invert-group">{children}</span>;
+  return (
+    <span className="-mx-2 px-2 group-hover:bg-lp-ink group-hover:text-lp-paper group-focus-visible:bg-lp-ink group-focus-visible:text-lp-paper">
+      {children}
+    </span>
+  );
 }
 
 interface PickProps {
@@ -133,7 +137,7 @@ function Small({ image, index }: { image: StaticImageData | string; index: numbe
       )}
     >
       <span className="relative flex h-3 shrink-0 items-center justify-between border-b border-lp-line-strong px-0.5">
-        <span className="lp-pinstripe absolute inset-x-0.5 inset-y-0" />
+        <span className={`absolute inset-x-0.5 inset-y-0 ${STRIPES}`} />
         <span className={box} />
         <span className={box} />
       </span>
@@ -234,7 +238,7 @@ export async function Proof() {
             >
               <Shadow />
               <Window title={<Title>showcase</Title>} className="h-24">
-                <span className="flex flex-1 flex-col justify-center gap-1 px-3 lp-invert-group">
+                <span className="flex flex-1 flex-col justify-center gap-1 px-3 group-hover:bg-lp-ink group-hover:text-lp-paper group-focus-visible:bg-lp-ink group-focus-visible:text-lp-paper">
                   <span className="font-pixel text-pixel text-lp-ink-2 antialiased group-hover:text-lp-paper group-focus-visible:text-lp-paper">
                     {picks.length} of {online}
                   </span>

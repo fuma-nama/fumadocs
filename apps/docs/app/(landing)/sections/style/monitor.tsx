@@ -7,6 +7,7 @@ import { LAYOUTS, type LayoutId, TABS, type TabId, THEME_NAMES, type ThemeId } f
 import { createFrames, type Frames } from './frames';
 import { Plan } from './plan';
 import type { InkTable } from './presets';
+import { STRIPES } from '../../ui/window';
 
 interface MonitorProps {
   table: InkTable;
@@ -103,7 +104,7 @@ export function Monitor({
         <div role="tablist" aria-label="Hands-on" onKeyDown={onKeyDown} className="flex shrink-0">
           {tabs}
         </div>
-        <span aria-hidden className="lp-pinstripe min-w-0 flex-1" />
+        <span aria-hidden className={`min-w-0 flex-1 ${STRIPES}`} />
         <span className="flex shrink-0 items-center px-1.5">
           {busy ? (
             // clack's spinner while the page is on its way, a turn every 4 ticks, turned by an
@@ -133,7 +134,7 @@ export function Monitor({
         role="tabpanel"
         id="style-panel"
         aria-labelledby={`style-tab-${tab}`}
-        className="lp-dots relative aspect-10/16 min-h-0 overflow-hidden bg-lp-paper sm:aspect-16/10 xl:aspect-4/3"
+        className="bg-radial from-lp-line-strong from-[0.75px] to-transparent to-[0.75px] bg-size-[12px_12px] relative aspect-10/16 min-h-0 overflow-hidden bg-lp-paper sm:aspect-16/10 xl:aspect-4/3"
       >
         {tab === 'layouts' && (
           <div

@@ -6,6 +6,9 @@ import { Figure } from '../../ui/figure';
 import { Glitch } from './glitch';
 import { Stage } from './stage';
 
+const invert =
+  'transition-none hover:bg-lp-ink hover:text-lp-paper focus-visible:bg-lp-ink focus-visible:text-lp-paper focus-visible:outline-none';
+
 /** a screen below the menu: the text and the sky over the horizon, the sky beside the text on
  * desktop and under it on phones */
 export function Hero() {
@@ -30,7 +33,7 @@ export function Hero() {
         <div className="mt-8 flex flex-wrap items-center gap-3">
           <Link
             href="/docs"
-            className="inline-flex h-11 items-center justify-center border border-lp-line-strong bg-lp-yellow px-5 font-medium text-lp-on-yellow max-sm:w-full lp-invert"
+            className={`inline-flex h-11 items-center justify-center border border-lp-line-strong bg-lp-yellow px-5 font-medium text-lp-on-yellow max-sm:w-full ${invert}`}
           >
             Get started
           </Link>
@@ -39,7 +42,7 @@ export function Hero() {
             href="https://stackblitz.com/github/fuma-nama/fumadocs/tree/main/examples/stackblitz"
             target="_blank"
             rel="noreferrer noopener"
-            className="-ms-2 inline-flex h-11 items-center gap-1 px-2 font-medium underline decoration-lp-line-strong underline-offset-4 lp-invert"
+            className={`-ms-2 inline-flex h-11 items-center gap-1 px-2 font-medium underline decoration-lp-line-strong underline-offset-4 ${invert}`}
           >
             Open in StackBlitz
             <ArrowUpRight aria-hidden className="size-4" />
@@ -50,7 +53,7 @@ export function Hero() {
           {frameworks.map((framework, i) => (
             <span key={framework.name}>
               {i > 0 && <> ·&nbsp;</>}
-              <Link href={framework.href} className="whitespace-nowrap text-lp-ink lp-invert">
+              <Link href={framework.href} className={`whitespace-nowrap text-lp-ink ${invert}`}>
                 {framework.name}
               </Link>
             </span>

@@ -147,7 +147,7 @@ function Asked({ children }: { children: string }) {
     <span className="relative isolate mb-[calc(var(--tail-drop)+0.5em)] block w-fit font-pixel text-mark leading-none font-normal tracking-normal [--tail-drop:0.55em] [--tail-root:0.8em]">
       <span
         aria-hidden
-        className="absolute inset-x-0 top-0 -bottom-(--tail-drop) translate-x-0.75 translate-y-1 bg-lp-ink-2 lp-dither [clip-path:polygon(0_0,100%_0,100%_calc(100%-var(--tail-drop)),var(--tail-root)_calc(100%-var(--tail-drop)),0_100%)]"
+        className="absolute inset-x-0 top-0 -bottom-(--tail-drop) translate-x-0.75 translate-y-1 bg-lp-ink-2 [clip-path:polygon(0_0,100%_0,100%_calc(100%-var(--tail-drop)),var(--tail-root)_calc(100%-var(--tail-drop)),0_100%)]"
         style={{ maskImage: DITHER_MASKS[6] }}
       />
       <span className="relative block bg-lp-ink px-[0.75em] py-[0.55em] whitespace-nowrap text-lp-paper [text-box:trim-both_cap_alphabetic]">
@@ -334,7 +334,7 @@ export function Cli() {
               type="button"
               data-replay
               aria-label="Run again"
-              className="flex w-11 shrink-0 items-center justify-center border-s border-lp-line-strong lp-invert motion-reduce:hidden in-data-static:hidden noscript:hidden"
+              className="flex w-11 shrink-0 items-center justify-center border-s border-lp-line-strong transition-none hover:bg-lp-ink hover:text-lp-paper focus-visible:bg-lp-ink focus-visible:text-lp-paper focus-visible:outline-none motion-reduce:hidden in-data-static:hidden noscript:hidden"
             >
               <RotateCcw aria-hidden className="size-4" />
             </button>

@@ -35,7 +35,7 @@ function More() {
         <Link
           href={item.href}
           prefetch={false}
-          className="flex h-11 items-center px-3 text-sm text-lp-ink-2 lp-invert"
+          className="flex h-11 items-center px-3 text-sm text-lp-ink-2 transition-none hover:bg-lp-ink hover:text-lp-paper focus-visible:bg-lp-ink focus-visible:text-lp-paper focus-visible:outline-none"
         >
           {item.name}
         </Link>

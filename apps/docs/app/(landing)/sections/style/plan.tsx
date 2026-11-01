@@ -20,7 +20,7 @@ export const Plan = memo(function Plan({ layout }: { layout: LayoutId }) {
     dots.push(
       <span
         key={i}
-        className="absolute bg-lp-ink lp-dither"
+        className="absolute bg-lp-ink"
         style={{ ...percent(x, y, w, h, FRAME), maskImage: DITHER_MASKS[2] }}
       />,
     );

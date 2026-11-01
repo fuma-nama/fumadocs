@@ -96,7 +96,7 @@ export function Stage({ file, steps, sources, slots, bed, column }: StageProps) 
               type="button"
               data-replay
               aria-label="Replay"
-              className="relative inline-flex size-6 items-center justify-center bg-lp-paper text-lp-ink-2 lp-invert motion-reduce:hidden noscript:hidden"
+              className="relative inline-flex size-6 items-center justify-center bg-lp-paper text-lp-ink-2 transition-none hover:bg-lp-ink hover:text-lp-paper focus-visible:bg-lp-ink focus-visible:text-lp-paper focus-visible:outline-none motion-reduce:hidden noscript:hidden"
             >
               <RotateCcw aria-hidden className="size-4" />
             </button>
@@ -134,7 +134,7 @@ export function Stage({ file, steps, sources, slots, bed, column }: StageProps) 
                   aria-label={`${steps[i].tab} Markdown`}
                   aria-pressed="false"
                   className={cn(
-                    'group/tab relative flex h-8 cursor-pointer justify-self-start border border-lp-ink-2 bg-lp-paper font-pixel text-sm whitespace-pre text-lp-ink-2 after:absolute after:-inset-y-2 after:inset-x-0 lp-invert data-inverted:bg-lp-ink data-inverted:text-lp-paper aria-pressed:bg-lp-yellow aria-pressed:text-lp-on-yellow noscript:pointer-events-none',
+                    'group/tab relative flex h-8 cursor-pointer justify-self-start border border-lp-ink-2 bg-lp-paper font-pixel text-sm whitespace-pre text-lp-ink-2 after:absolute after:-inset-y-2 after:inset-x-0 transition-none hover:bg-lp-ink hover:text-lp-paper focus-visible:bg-lp-ink focus-visible:text-lp-paper focus-visible:outline-none data-inverted:bg-lp-ink data-inverted:text-lp-paper aria-pressed:bg-lp-yellow aria-pressed:text-lp-on-yellow noscript:pointer-events-none',
                     PLATES[i].foot && 'md:row-start-2',
                   )}
                 >

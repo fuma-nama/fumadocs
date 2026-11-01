@@ -96,10 +96,7 @@ function page(source: string): ReactNode {
           <Button label="Read the docs" href="/docs" />
         </div>
         <span aria-hidden className="w-3/5 border-t border-lp-line-strong">
-          <span
-            className="block h-1.5 bg-lp-ink-2 lp-dither"
-            style={{ maskImage: DITHER_MASKS[4] }}
-          />
+          <span className="block h-1.5 bg-lp-ink-2" style={{ maskImage: DITHER_MASKS[4] }} />
         </span>
       </div>
       <div className="border-t border-lp-line">

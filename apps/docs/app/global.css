@@ -75,37 +75,6 @@
   --container-title: 30ch;
 }
 
-@utility lp-dots {
-  background-image: radial-gradient(var(--lp-line-strong) 0.75px, transparent 0.75px);
-  background-size: 12px 12px;
-}
-
-/* inverted while pointed at or focused from the keyboard */
-@utility lp-invert {
-  @apply transition-none hover:bg-lp-ink hover:text-lp-paper focus-visible:bg-lp-ink focus-visible:text-lp-paper focus-visible:outline-none;
-}
-
-/* inverted while its `group` is */
-@utility lp-invert-group {
-  @apply group-hover:bg-lp-ink group-hover:text-lp-paper group-focus-visible:bg-lp-ink group-focus-visible:text-lp-paper;
-}
-
-/* the 4px tile of a `DITHER_MASKS` mask */
-@utility lp-dither {
-  mask-size: 4px 4px;
-}
-
-@utility lp-pinstripe {
-  background-image: repeating-linear-gradient(
-    to bottom,
-    var(--lp-line-strong) 0 1px,
-    transparent 1px 3px
-  );
-  background-size: 100% 11px;
-  background-position: 0 50%;
-  background-repeat: no-repeat;
-}
-
 @theme inline {
   --default-font-family: var(--font-sans);
   --default-mono-font-family: var(--font-mono);

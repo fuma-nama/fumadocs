@@ -218,7 +218,7 @@ function Install({ commands, command }: { commands: string[]; command: string })
           type="button"
           onClick={onCopy}
           aria-label={copied ? 'Copied' : `Copy "${command}"`}
-          className="flex size-6 shrink-0 items-center justify-center border border-lp-line-strong lp-invert"
+          className="flex size-6 shrink-0 items-center justify-center border border-lp-line-strong transition-none hover:bg-lp-ink hover:text-lp-paper focus-visible:bg-lp-ink focus-visible:text-lp-paper focus-visible:outline-none"
         >
           {copied ? <Check className="size-3.5" /> : <Clipboard className="size-3.5" />}
         </button>
