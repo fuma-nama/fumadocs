@@ -13,7 +13,9 @@ npx @fumadocs/cli feature llms
 
 It enables processed Markdown on your docs collection, adds `docsLlms` to `lib/source.ts`, and creates the routes below. The generated files are listed here if you prefer a manual setup.
 
-On Astro, `llmsPlugin()` serves these routes, see [LLMs](/docs/astro/llms) of the Astro integration.
+<Callout title="Astro">
+  `llmsPlugin()` serves these routes for you, see [LLMs](/docs/astro/llms).
+</Callout>
 
 ### `docsLlms`
 
@@ -227,7 +229,9 @@ Expose your docs to AI agents through a [MCP](https://modelcontextprotocol.io) s
 npx @fumadocs/cli feature mcp
 ```
 
-It creates a `/api/mcp` route with the streamable HTTP transport, on top of the [LLM routes](#docs-for-llm) above. On Astro, it requires `output: 'server'`.
+It creates a `/api/mcp` route with the streamable HTTP transport, on top of the [LLM routes](#docs-for-llm) above.
+
+<Callout title="Astro">It requires `output: 'server'`.</Callout>
 
 The tools come from [`fumadocs-core/mcp`](/docs/headless/utils/mcp), see linked docs for details.
 
