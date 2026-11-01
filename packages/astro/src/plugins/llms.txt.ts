@@ -1,17 +1,13 @@
 import { llms } from 'fumadocs-core/source';
 import type { AnyPage, App, Plugin, Route } from '../app';
 
-export interface LLMsOptions {
-  /** prefix of the Markdown of pages, @defaultValue '/llms.mdx' */
-  prefix?: string;
-}
-
 /**
- * `llms.txt`, `llms-full.txt` and the Markdown of pages.
+ * `llms.txt`, `llms-full.txt` and the Markdown of pages: `/docs/page.md`, `/index.md` for the root page.
  */
-export function llmsPlugin({ prefix = '/llms.mdx' }: LLMsOptions = {}): Plugin {
+export function llmsPlugin(): Plugin {
   function markdownUrl(app: App, page: AnyPage) {
-    return `${app.base}${prefix}${app.toPath(page.url).replace(/\/$/, '')}/content.md`;
+    const path = app.toPath(page.url).replace(/\/$/, '');
+    return `${app.base}${path ? `${path}.md` : '/index.md'}`;
   }
 
   return {
@@ -36,7 +32,7 @@ ${await this.getText(page)}`,
           url: markdownUrl(this, page),
           GET: async () =>
             new Response(await output.page(page), {
-              headers: { 'Content-Type': 'text/markdown' },
+              headers: { 'Content-Type': 'text/markdown; charset=utf-8' },
             }),
         });
       }

@@ -7,13 +7,13 @@ description: Serve your docs as Markdown for LLMs and AI agents.
 
 Your site serves the Markdown of your docs by default, from `llmsPlugin()`:
 
-| Route                              | Content                                |
-| ---------------------------------- | -------------------------------------- |
-| `/llms.txt`                        | An index of all pages.                 |
-| `/llms-full.txt`                   | The content of all pages, in one file. |
-| `/llms.mdx/docs/<page>/content.md` | The Markdown of a page.                |
+| Route             | Content                                  |
+| ----------------- | ---------------------------------------- |
+| `/llms.txt`       | An index of all pages.                   |
+| `/llms-full.txt`  | The content of all pages, in one file.   |
+| `/docs/<page>.md` | The Markdown of a page, like `/docs.md`. |
 
-Docs pages link to their Markdown in the page actions, from `page.markdownUrl`. To change the prefix, see [Default Plugins](/docs/astro/plugins#default-plugins).
+Docs pages link to their Markdown in the page actions, as `page.markdownUrl`.
 
 ## Processed Markdown
 

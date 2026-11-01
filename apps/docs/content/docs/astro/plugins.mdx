@@ -32,11 +32,11 @@ The routes of plugins are prerendered at build time.
 `oramaSearchPlugin()` and `llmsPlugin()` are added by default. Add one yourself to pass its options, it replaces the default one:
 
 ```ts title="src/fumadocs.config.ts"
-import { llmsPlugin } from '@fumadocs/astro/plugins/llms.txt';
+import { oramaSearchPlugin } from '@fumadocs/astro/plugins/orama-search';
 
 export default defineConfig({
   // ...
-  plugins: [llmsPlugin({ prefix: '/markdown' })], // [!code ++]
+  plugins: [oramaSearchPlugin({ language: 'english' })], // [!code ++]
 });
 ```
 
