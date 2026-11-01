@@ -92,7 +92,7 @@ plugins: [myPlugin(), import.meta.env.PROD && takumiPlugin()];
 
 ### Content Sources
 
-The pages of your own [content source](/docs/headless/source-api/source) are rendered by a plugin, the official ones have [plugins](/docs/astro/content#other-content-sources). `getBody()` returns their content as React nodes, rendered with your MDX components (`this.components`) so they hydrate like MDX content.
+The pages of your own [content source](/docs/headless/source-api/source) are rendered by a plugin, the [official ones](/docs/astro/content#other-content-sources) work already. `getBody()` returns their content as React nodes, rendered with your MDX components (`this.components`) so they hydrate like MDX content.
 
 For example, pages with MDX from a CMS, compiled by [MDX Remote](/docs/integrations/content/mdx-remote):
 
