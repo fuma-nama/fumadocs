@@ -164,14 +164,15 @@
 
 @variant dark (&:where(.dark, .dark *));
 
-/* define/override layout variables */
+/* define/override layout variables, from a direct child of the layout: a descendant `:has()` re-checks the whole layout on DOM changes */
 @variant layout {
-  #nd-docs-layout:has(&),
-  #nd-notebook-layout:has(&),
-  #nd-home-layout:has(&),
-  #nd-flux-layout:has(&),
-  #fd-glass-layout:has(&),
-  #fd-spacious-layout:has(&) {
+  #nd-docs-layout:has(> &),
+  #nd-notebook-layout:has(> &),
+  #nd-home-layout:has(> &),
+  #nd-flux-layout:has(> &),
+  #fd-glass-layout:has(> &),
+  /* the spacious page nests its TOC and page in the page panel */
+  #fd-spacious-layout:has(> &, > * > &, > * > * > &) {
     @slot;
   }
 }
