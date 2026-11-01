@@ -7,6 +7,7 @@ import { getDefaultConfig } from '@/config';
 import { loadProject } from '@/project';
 import { runFeature } from '@/features';
 import { docs } from '@/features/docs';
+import { mcp } from '@/features/mcp';
 import { search } from '@/features/search';
 
 async function project(files: Record<string, string>) {
@@ -158,4 +159,41 @@ export default defineConfig({});
   expect(await fs.readFile(path.join(app.cwd, 'src/pages/index.astro'), 'utf-8')).toBe('home');
   await expect(fs.access(path.join(app.cwd, 'src/pages/[...lang]/index.astro'))).rejects.toThrow();
   expect(await fs.readFile(path.join(app.cwd, 'src/lib/source.ts'), 'utf-8')).toContain('i18n,');
+});
+
+test('mcp: add the plugin to the Fumadocs config of Astro', async () => {
+  const app = await project({
+    'package.json': JSON.stringify({ dependencies: { astro: '7.4.2' } }),
+    // processed Markdown is off for docs, `mcpPlugin()` reads the raw files
+    'astro.config.mjs': `export default defineConfig({
+  output: 'server',
+  integrations: [fumadocs({ collections: { docs: { includeProcessedMarkdown: false } } })],
+});
+`,
+    'src/pages/index.astro': '',
+    'src/fumadocs.config.ts': `import { defineConfig } from '@fumadocs/astro/config';
+import { source } from './lib/source';
+
+export default defineConfig({ source });
+`,
+    'src/lib/source.ts': `import { toFumadocsSource } from '@fumadocs/astro/source';
+export const source = loader({ baseUrl: '/docs', source: toFumadocsSource([], []) });`,
+  });
+  const read = (file: string) => fs.readFile(path.join(app.cwd, file), 'utf-8');
+
+  await runFeature(
+    mcp,
+    {},
+    {
+      project: app,
+      connector: {} as RegistryConnector,
+      io: { log: () => {}, confirmOverwrite: async () => true, installDependencies: false },
+    },
+  );
+  expect(await read('src/fumadocs.config.ts')).toContain('plugins: [mcpPlugin()]');
+  expect(await read('src/fumadocs.config.ts')).toContain(
+    "import { mcpPlugin } from '@fumadocs/astro/plugins/mcp';",
+  );
+  await expect(fs.access(path.join(app.cwd, 'src/pages/api/mcp.ts'))).rejects.toThrow();
+  expect(await read('src/lib/source.ts')).not.toContain('docsLlms');
 });

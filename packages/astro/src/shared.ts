@@ -28,3 +28,13 @@ export type IslandNode =
   | { $slot: string }
   | [tagName: string, properties: Record<string, unknown> | 0, ...children: IslandNode[]]
   | [jsx: 1, name: string | null, props: Record<string, unknown>, ...children: IslandNode[]];
+
+const loaded = new WeakMap<object, Promise<unknown>>();
+
+/** `load()` of a page from a content source, once per page except in dev, where content changes */
+export function loadOnce<T>(data: { load: () => Promise<T> }): Promise<T> {
+  if (import.meta.env.DEV) return data.load();
+  let result = loaded.get(data) as Promise<T> | undefined;
+  if (!result) loaded.set(data, (result = data.load()));
+  return result;
+}

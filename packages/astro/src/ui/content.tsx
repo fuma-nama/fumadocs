@@ -11,8 +11,17 @@ export function createContentIsland(components: Record<string, unknown>) {
 
   return createIsland({
     ...components,
-    wrapper: ({ children, provider }: { children: ReactNode; provider?: ProviderData }) => {
-      const content = <Wrapper>{children}</Wrapper>;
+    wrapper: ({
+      children,
+      provider,
+      body = true,
+    }: {
+      children: ReactNode;
+      provider?: ProviderData;
+      /** the body of a docs page, in `wrapper`, rather than content on your own pages */
+      body?: boolean;
+    }) => {
+      const content = body ? <Wrapper>{children}</Wrapper> : children;
       return provider ? <ContentProvider provider={provider}>{content}</ContentProvider> : content;
     },
   });

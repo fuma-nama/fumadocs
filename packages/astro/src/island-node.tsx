@@ -104,7 +104,7 @@ async function serialize(
     typeof type === 'function' &&
     !(type.prototype as { isReactComponent?: unknown } | undefined)?.isReactComponent
   ) {
-    const result = call(type as (props: object) => unknown, props);
+    const result = await call(type as (props: object) => unknown, props);
     if (result) return serialize(await result.value, out, slots, pre);
   }
 
@@ -113,15 +113,19 @@ async function serialize(
 }
 
 /** call a function component in a render of React, so it can use hooks, `undefined` when it throws */
-function call(type: (props: object) => unknown, props: object): { value: unknown } | undefined {
+async function call(
+  type: (props: object) => unknown,
+  props: object,
+): Promise<{ value: unknown } | undefined> {
   let result: { value: unknown } | undefined;
+  const element = createElement(() => {
+    result = { value: type(props) };
+    return null;
+  });
   try {
-    renderToStaticMarkup(
-      createElement(() => {
-        result = { value: type(props) };
-        return null;
-      }),
-    );
+    renderToStaticMarkup(createElement(Suspense, null, element));
+    // it suspended, like `use()` of async data, React calls it again when the data is ready
+    if (!result) await prerender(element, { onError() {} });
   } catch {
     // when React renders it instead, it waits for suspending components, and throws real errors
     return;

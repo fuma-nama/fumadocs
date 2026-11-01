@@ -43,6 +43,15 @@ else alternates = {};
   noindex={inheritedFrom(page) !== undefined}
   page={page}
 >
+  {
+    data.lastModified && (
+      <meta
+        slot="head"
+        property="article:modified_time"
+        content={data.lastModified.toISOString()}
+      />
+    )
+  }
   <Docs
     client:load
     transition:persist="docs"

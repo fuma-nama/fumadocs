@@ -9,11 +9,13 @@ interface Props {
   /** static HTML, slot `s0` is the first */
   slots: string[];
   provider?: ProviderData;
+  /** in the `wrapper` of the MDX components, `false` for content on your own pages */
+  body?: boolean;
 }
 
-const { tree, slots, provider = getProviderData(Astro) } = Astro.props;
+const { tree, slots, provider = getProviderData(Astro), body } = Astro.props;
 ---
 
-<FumadocsIsland client:load react tree={tree} props={{ provider }}>
+<FumadocsIsland client:load react tree={tree} props={{ provider, body }}>
   {slots.map((html, i) => <Fragment slot={`s${i}`} set:html={html} />)}
 </FumadocsIsland>

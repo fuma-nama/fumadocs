@@ -52,7 +52,8 @@ export const frameworks: Record<Framework, FrameworkInfo> = {
     provider: 'fumadocs-ui/provider/astro',
     routesDir: 'pages',
     configFiles: ['astro.config.mjs', 'astro.config.ts', 'astro.config.js', 'astro.config.mts'],
-    isStatic: (config) => !/output:\s*['"]server['"]/.test(config),
+    // an adapter renders routes on request, even with static output
+    isStatic: (config) => !/output:\s*['"]server['"]|\badapter:/.test(config),
   },
 };
 

@@ -10,6 +10,7 @@ export default defineConfig({
   entry: [
     'src/index.ts',
     'src/island.tsx',
+    'src/island-node.tsx',
     'src/loaders.ts',
     'src/source.ts',
     'src/config.ts',
@@ -31,6 +32,7 @@ export default defineConfig({
     enabled: true,
     exclude: [
       './island',
+      './island-node',
       './navigation',
       './markdown',
       './app',

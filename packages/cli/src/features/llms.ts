@@ -234,12 +234,13 @@ export const llms: Feature = {
     const managed = requiresManaged(project);
     return managed === true ? requiresMarkdown(project) : managed;
   },
-  async detect({ cwd, baseDir, framework, configFile }) {
-    const file = framework === 'astro' ? configFile : path.join(baseDir, 'lib/source.ts');
+  async detect({ cwd, baseDir, framework, fumadocsConfig }) {
+    const file = framework === 'astro' ? fumadocsConfig : path.join(baseDir, 'lib/source.ts');
     if (!file) return false;
     const content = await fs.readFile(path.join(cwd, file), 'utf-8').catch(() => '');
+    // on Astro, `llmsPlugin()` serves the routes from any Markdown, it's a default plugin
     return framework === 'astro'
-      ? /includeProcessedMarkdown:\s*(?:true|\{)/.test(content)
+      ? !/preset:\s*false/.test(content) || content.includes('llmsPlugin(')
       : /export const docsLlms\b/.test(content);
   },
   async apply(ctx) {

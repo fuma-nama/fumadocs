@@ -31,6 +31,15 @@ describe('remark-mdx-files', () => {
     expect(data.markdown).toBe(`${source}\n`);
   });
 
+  it('keeps several top-level entries', async () => {
+    const { code } = await compile('```files\nsrc/\n  index.js\npackage.json\n```');
+
+    expect(code).toMatch(/name: "src\/",\s*defaultOpen: true/);
+    expect(code).toContain('name: "index.js"');
+    expect(code).toContain('_jsx(File, { name: "package.json" })');
+    expect(code).not.toContain('name: ""');
+  });
+
   it('ignores other code blocks', async () => {
     const { code } = await compile('```js\nconst a = 1\n```');
 

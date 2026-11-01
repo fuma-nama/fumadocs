@@ -256,8 +256,8 @@ async function main(defaultName: string | undefined, config: CliOptions): Promis
   );
 
   const projectName = options.name.toLowerCase().replace(/\s/, '-');
-  if (options.template === 'astro' && options.aiChat) {
-    console.warn(pc.yellow('AI Chat is not supported by the Astro template yet, skipping it.'));
+  if (options.aiChat && isStatic(options.template)) {
+    console.warn(pc.yellow('AI Chat needs a server, the template is static, skipping it.'));
     options.aiChat = false;
   }
   if (options.ogImage === 'next-og' && !options.template.startsWith('+next')) {

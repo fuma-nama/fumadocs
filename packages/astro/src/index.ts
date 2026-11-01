@@ -17,7 +17,10 @@ import { remarkInclude } from '@fumadocs/satteri/remark-include';
 import { remarkLlms, type LLMsOptions } from '@fumadocs/satteri/remark-llms';
 import { islandPlugin } from './island-plugin';
 import { dataKey, type FumadocsData } from './shared';
+import { output } from './sitemap';
 import type { Route } from './app';
+
+export { serializeSitemap } from './sitemap';
 
 export interface CollectionOptions extends Pick<
   DefaultSatteriOptions,
@@ -74,6 +77,8 @@ export interface FumadocsOptions extends CollectionOptions {
 
   /**
    * Module exporting `baseOptions(locale)`, the options of Fumadocs UI layouts. It loads on every page, requires `src/fumadocs.config.ts`.
+   *
+   * It can also export `Provider`, a component wrapping the children of the root provider in layouts, for UI on every page like WebMCP.
    *
    * For search, it can also export:
    * - `useSearch({ locale })`: the search hook of the built-in dialog, like `useAlgoliaSearch()`.
@@ -263,9 +268,13 @@ export { components };`;
           });
         }
         const server = config.adapter !== undefined;
+        const onDemand = config.output === 'server';
         modules['virtual:fumadocs/config'] = `export const loaders = ${JSON.stringify(loaders)};
 export const root = ${JSON.stringify(root)};
-export const server = ${server};`;
+export const srcDir = ${JSON.stringify(srcDir)};
+export const publicDir = ${JSON.stringify(fileURLToPath(config.publicDir))};
+export const server = ${server};
+export const onDemand = ${onDemand};`;
         hasConfig = appFile !== undefined;
         if (appFile) {
           modules['virtual:fumadocs/app'] = `export { default } from ${JSON.stringify(appFile)};`;
@@ -274,8 +283,8 @@ export const server = ${server};`;
           // a namespace, as the exports are optional
           modules['virtual:fumadocs/layout'] = layout
             ? `import * as layout from ${userModule(root, layout)};
-export const { baseOptions, SearchDialog, useSearch } = { ...layout };`
-            : 'export const baseOptions = undefined, SearchDialog = undefined, useSearch = undefined;';
+export const { baseOptions, Provider, SearchDialog, useSearch } = { ...layout };`
+            : 'export const baseOptions = undefined, Provider = undefined, SearchDialog = undefined, useSearch = undefined;';
           modules['virtual:fumadocs/page'] = page
             ? `export { default } from ${userModule(root, page)};`
             : 'export default undefined;';
@@ -293,9 +302,10 @@ export const { baseOptions, SearchDialog, useSearch } = { ...layout };`
               entrypoint: new URL(`./routes/${file}`, import.meta.url),
               prerender: true,
             });
-          route('[...fumadocsPage]', 'page.astro');
+          // with `output: 'server'`, pages render on request like other Astro pages
+          if (!onDemand) route('[...fumadocsPage]', 'page.astro');
           route('[...fumadocsFile]', 'file.js');
-          // file routes with `prerender: false`, Astro tries the prerendered routes of a pattern first
+          // routes rendered on request, Astro tries the prerendered routes of a pattern first
           if (server)
             injectRoute({
               pattern: '[...fumadocsServer]',
@@ -370,13 +380,19 @@ document.addEventListener('astro:before-swap', onBeforeSwap);`,
               appModule !== undefined &&
                 config.trailingSlash !== 'ignore' &&
                 trailingSlashPlugin(config.trailingSlash, appModule),
+              appModule !== undefined &&
+                contentReloadPlugin(
+                  appModule,
+                  resolved.map((item) => item.dir),
+                ),
             ],
             optimizeDeps: { exclude: ['@fumadocs/astro'] },
             ssr: { noExternal: ['@fumadocs/astro'] },
           },
         });
       },
-      'astro:config:done'({ injectTypes }) {
+      'astro:config:done'({ config, injectTypes }) {
+        output.base = config.base.replace(/\/$/, '');
         if (!hasConfig) return;
         // `.astro` components in `fumadocs.config.ts`, for `tsc` without the language tools of Astro
         injectTypes({
@@ -387,6 +403,10 @@ document.addEventListener('astro:before-swap', onBeforeSwap);`,
 }`,
         });
       },
+      // before `astro:build:done` of every integration, like the sitemap
+      'astro:build:generated'({ dir }) {
+        output.dir = fileURLToPath(dir);
+      },
     },
   };
 }
@@ -394,16 +414,59 @@ document.addEventListener('astro:before-swap', onBeforeSwap);`,
 /** the file watcher of Vite */
 interface Watcher {
   add: (paths: string | string[]) => void;
-  on: (event: 'change', listener: (file: string) => void) => void;
+  on: (event: 'add' | 'change' | 'unlink', listener: (file: string) => void) => void;
   emit: (event: 'change', file: string) => void;
 }
 
 type Handle = (req: { url?: string }, res: unknown, next: () => void) => void;
 
+interface DevEnvironment {
+  runner?: { import: (id: string) => Promise<unknown> };
+  moduleGraph: { getModulesByFile: (file: string) => Set<unknown> | undefined };
+  hot: { send: (payload: { type: 'full-reload' }) => void };
+}
+
 /** the dev server of Vite */
 interface DevServer {
-  environments: Record<string, { runner?: { import: (id: string) => Promise<unknown> } }>;
+  environments: Record<string, DevEnvironment | undefined>;
   middlewares: { stack: { route: string; handle: Handle }[] };
+  watcher: Watcher;
+}
+
+/**
+ * In dev, files of runtime content sources (like `@fumadocs/local-md`) aren't modules, a change reloads the pages to read them again.
+ *
+ * Collections are left to Astro, which reloads their content itself.
+ */
+function contentReloadPlugin(app: string, collections: string[]) {
+  const isIn = (dir: string, file: string) => {
+    const relative = path.relative(dir, file);
+    return !relative.startsWith('..') && !path.isAbsolute(relative);
+  };
+
+  return {
+    name: '@fumadocs/astro:content-reload',
+    configureServer(server: DevServer) {
+      const ssr = server.environments.ssr;
+      if (!ssr?.runner) return;
+      async function onFile(file: string) {
+        if (ssr!.moduleGraph.getModulesByFile(file)?.size) return;
+        if (collections.some((dir) => isIn(dir, file))) return;
+        const { app: runtime } = (await ssr!.runner!.import(app)) as typeof import('./app');
+        for (const page of runtime.getPages()) {
+          if (!page.absolutePath || !isIn(path.dirname(page.absolutePath), file)) continue;
+          ssr!.hot.send({ type: 'full-reload' });
+          server.environments.client?.hot.send({ type: 'full-reload' });
+          return;
+        }
+      }
+
+      const listener = (file: string) => void onFile(file).catch(() => undefined);
+      server.watcher.on('add', listener);
+      server.watcher.on('change', listener);
+      server.watcher.on('unlink', listener);
+    },
+  };
 }
 
 /**

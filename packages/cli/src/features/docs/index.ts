@@ -263,8 +263,14 @@ async function configureCss(ctx: FeatureContext) {
     // `@import` must come before other rules, after the existing imports
     const content = current.split('\n');
     let index = 0;
+    let inImport = false;
     for (let i = 0; i < content.length; i++) {
-      if (content[i].trimStart().startsWith('@import')) index = i + 1;
+      if (content[i].trimStart().startsWith('@import')) inImport = true;
+      // an import can span lines, it ends at `;`
+      if (inImport && content[i].includes(';')) {
+        inImport = false;
+        index = i + 1;
+      }
     }
     content.splice(index, 0, ...missing);
     await fs.mkdir(path.dirname(path.join(cwd, file)), { recursive: true });

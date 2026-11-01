@@ -1,8 +1,10 @@
 import path from 'node:path';
 import type { ImportDeclaration } from 'oxc-parser';
 import type { Feature, FeatureContext } from '@/features';
-import { findSource } from './utils';
+import { enableProcessedMarkdown } from '@/codemod';
+import { astroModule, findSource, requiresManaged } from './utils';
 import { docs } from './docs';
+import { astroPage } from './docs/templates';
 
 const providers = {
   openrouter: { label: 'AI SDK', hint: 'default to OpenRouter', env: 'OPENROUTER_API_KEY' },
@@ -32,18 +34,30 @@ export const ai: Feature<{ provider: AIProvider }> = {
     },
   },
   supports: (project) => {
-    if (project.framework === 'astro') return 'Astro is not supported by this feature';
+    const managed = requiresManaged(project);
+    if (managed !== true) return managed;
     return project.static ? 'AI chat requires a server to run the chat route handler.' : true;
   },
   async apply(ctx, { provider }) {
+    const { cwd, baseDir, info, config, source, framework } = ctx.project;
     await ctx.install(`ai/${provider}`);
     ctx.env(providers[provider].env, '');
-    if (ctx.project.source.dynamic) await readDynamicSource(ctx);
+    // the search index of the chat route reads the processed Markdown of pages
+    if (source.collections) {
+      await ctx.source(source.collections, (file) => {
+        if (!enableProcessedMarkdown(file))
+          throw new Error(`cannot enable \`includeProcessedMarkdown\` in ${source.collections}`);
+      });
+    }
+    if (source.dynamic) await readDynamicSource(ctx);
 
-    const { cwd, baseDir, info, config } = ctx.project;
     // e.g. `./components` -> `@/components/ai/layout`
     const clientLayoutImport = `@/${path.posix.join(config.aliases.componentsDir, 'ai/layout')}`;
-    const layout = await findSource(cwd, path.join(baseDir, info.routesDir), '<DocsLayout');
+    // on Astro, the docs layout is rendered by the `page` module of the Fumadocs integration
+    const layout =
+      framework === 'astro'
+        ? await astroModule(ctx, 'page', astroPage())
+        : await findSource(cwd, path.join(baseDir, info.routesDir), '<DocsLayout');
     let layoutModule: string | undefined;
     let wired = false;
 

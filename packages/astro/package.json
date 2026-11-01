@@ -23,12 +23,17 @@
     "./config": "./dist/config.js",
     "./loaders": "./dist/loaders.js",
     "./plugins/asyncapi": "./dist/plugins/asyncapi.js",
+    "./plugins/content-source": "./dist/plugins/content-source.js",
     "./plugins/flexsearch": "./dist/plugins/flexsearch.js",
     "./plugins/git": "./dist/plugins/git.js",
     "./plugins/graphql": "./dist/plugins/graphql.js",
+    "./plugins/link-validation": "./dist/plugins/link-validation.js",
     "./plugins/llms.txt": "./dist/plugins/llms.txt.js",
+    "./plugins/mcp": "./dist/plugins/mcp.js",
+    "./plugins/notion": "./dist/plugins/notion.js",
     "./plugins/openapi": "./dist/plugins/openapi.js",
     "./plugins/orama-search": "./dist/plugins/orama-search.js",
+    "./plugins/sanity": "./dist/plugins/sanity.js",
     "./plugins/takumi": "./dist/plugins/takumi.js",
     "./source": "./dist/source.js",
     "./package.json": "./package.json",
@@ -56,6 +61,10 @@
     "@astrojs/react": "^7.1.1",
     "@fumadocs/asyncapi": "workspace:*",
     "@fumadocs/graphql": "workspace:*",
+    "@fumadocs/notion": "workspace:*",
+    "@fumadocs/sanity": "workspace:*",
+    "@modelcontextprotocol/server": "2.3.1",
+    "@portabletext/react": "^8.0.1",
     "@types/estree-jsx": "^1.0.5",
     "@types/hast": "^3.0.5",
     "@types/node": "26.6.5",
@@ -65,6 +74,7 @@
     "fumadocs-core": "workspace:*",
     "fumadocs-openapi": "workspace:*",
     "fumadocs-ui": "workspace:@fumadocs/base-ui@*",
+    "next-validate-link": "^1.6.7",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "tsconfig": "workspace:*",
@@ -76,10 +86,15 @@
     "@astrojs/react": "^7.0.0",
     "@fumadocs/asyncapi": "^0.5.4",
     "@fumadocs/graphql": "^0.4.2",
+    "@fumadocs/notion": "^0.2.3",
+    "@fumadocs/sanity": "^0.2.3",
+    "@modelcontextprotocol/server": "2.x.x",
+    "@portabletext/react": "^8.0.0",
     "astro": "^7.4.0",
     "fumadocs-core": "^16.17.8",
     "fumadocs-openapi": "^12.5.7",
     "fumadocs-ui": "^16.17.8",
+    "next-validate-link": "^1.6.7",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
   },
@@ -90,10 +105,25 @@
     "@fumadocs/graphql": {
       "optional": true
     },
+    "@fumadocs/notion": {
+      "optional": true
+    },
+    "@fumadocs/sanity": {
+      "optional": true
+    },
+    "@modelcontextprotocol/server": {
+      "optional": true
+    },
+    "@portabletext/react": {
+      "optional": true
+    },
     "fumadocs-openapi": {
       "optional": true
     },
     "fumadocs-ui": {
+      "optional": true
+    },
+    "next-validate-link": {
       "optional": true
     }
   }

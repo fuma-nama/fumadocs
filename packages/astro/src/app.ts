@@ -2,7 +2,7 @@ import { AsyncLocalStorage } from 'node:async_hooks';
 import type { APIContext, MiddlewareNext } from 'astro';
 import type { FC, ReactNode } from 'react';
 import config from 'virtual:fumadocs/app';
-import { server } from 'virtual:fumadocs/config';
+import { onDemand, server } from 'virtual:fumadocs/config';
 import { components } from 'virtual:fumadocs/components';
 import { defineI18n, type TranslationExtension, type TranslationsAPI } from 'fumadocs-core/i18n';
 import type * as PageTree from 'fumadocs-core/page-tree';
@@ -16,6 +16,7 @@ import { NoProcessedMarkdownError } from './shared';
 import { toPageBody } from './island-node';
 import { llmsPlugin } from './plugins/llms.txt';
 import { oramaSearchPlugin } from './plugins/orama-search';
+import { contentSourcePlugin } from './plugins/content-source';
 import DocsPage from './ui/DocsPage.astro';
 
 /** an Astro component, rendered on the server */
@@ -173,6 +174,8 @@ export interface App {
   getText: (page: AnyPage) => Promise<string>;
   /** with the table of contents of `body` */
   getPageData: (page: AnyPage, body?: PageBody) => Promise<DocsPageData>;
+  /** the routes of docs pages and plugins */
+  getRoutes: () => Promise<Route[]>;
 }
 
 function flatten(plugins: PluginOption[], out: Plugin[] = []): Plugin[] {
@@ -186,7 +189,8 @@ function flatten(plugins: PluginOption[], out: Plugin[] = []): Plugin[] {
 function resolvePlugins(): Plugin[] {
   const plugins = flatten(config.plugins ?? []);
   if (config.preset !== false) {
-    const preset = [llmsPlugin()];
+    // content sources render their pages with no setup
+    const preset = [llmsPlugin(), contentSourcePlugin()];
     // the built-in index serves the built-in search engine and dialog only
     if (!useSearch && !SearchDialog) preset.push(oramaSearchPlugin());
     for (const plugin of preset) {
@@ -239,6 +243,9 @@ export const app: App = {
       throw error;
     }
   },
+  getRoutes() {
+    return getRoutes();
+  },
   async getPageData(page, body) {
     const {
       title = page.slugs.at(-1) ?? '',
@@ -263,10 +270,7 @@ export const app: App = {
       toc: body?.toc ?? [],
       full,
       // from content sources, like the last edit of a CMS
-      lastModified:
-        lastModified instanceof Date || typeof lastModified === 'string'
-          ? new Date(lastModified)
-          : undefined,
+      lastModified: toDate(lastModified),
     };
     for (const plugin of this.plugins) {
       if (plugin.transformPage) data = await plugin.transformPage.call(this, page, data);
@@ -310,6 +314,13 @@ export function getProviderData(
     i18n: translations && i18nProvider(translations, lang),
     search: app.plugins.some((plugin) => plugin.name === 'search'),
   };
+}
+
+/** a valid date, island props can't serialize an invalid one */
+function toDate(value: unknown): Date | undefined {
+  if (!(value instanceof Date) && typeof value !== 'string') return;
+  const date = new Date(value);
+  if (!Number.isNaN(date.getTime())) return date;
 }
 
 /** the language of a URL, by its prefix like the URLs of pages */
@@ -371,7 +382,8 @@ export async function getStaticPaths<T extends Route['type']>(type: T, param: st
     if (route.type === 'file' && (route.prerender === false || !route.GET)) continue;
     const path = app.toPath(route.url).split('/').filter(Boolean).join('/');
     paths.push({
-      params: { [param]: path || undefined },
+      // page URLs are encoded, like spaces in file names
+      params: { [param]: decodeURI(path) || undefined },
       props: { route: route as Extract<Route, { type: T }> },
     });
   }
@@ -383,20 +395,26 @@ const methods: Method[] = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'];
 /** with `trailingSlash`, a URL matches with or without the slash */
 const trimSlash = (url: string) => url.replace(/(.)\/$/, '$1');
 
-let serverRoutes: Promise<Map<string, FileRoute>> | undefined;
+let serverRoutes: Promise<Map<string, Route>> | undefined;
 
-/** the response of the file route with `prerender: false` at the URL, `undefined` when there's none */
-export async function renderServerRoute(context: APIContext): Promise<Response | undefined> {
+/** the route rendered on request at the URL: file routes with `prerender: false`, and pages with `output: 'server'` */
+export async function findServerRoute(pathname: string): Promise<Route | undefined> {
   serverRoutes ??= getRoutes().then((list) => {
-    const map = new Map<string, FileRoute>();
+    const map = new Map<string, Route>();
     for (const route of list) {
-      if (route.type === 'file' && route.prerender === false) map.set(trimSlash(route.url), route);
+      if (route.type === 'file' ? route.prerender === false : onDemand)
+        map.set(trimSlash(route.url), route);
     }
     return map;
   });
-  const route = (await serverRoutes).get(trimSlash(decodeURI(context.url.pathname)));
-  if (!route) return;
+  return (await serverRoutes).get(trimSlash(decodeURI(pathname)));
+}
 
+/** the response of a file route to the request, by its method */
+export function handleFileRoute(
+  route: FileRoute,
+  context: APIContext,
+): Response | Promise<Response> {
   const { method } = context.request;
   const handler = route[method === 'HEAD' ? 'GET' : (method as Method)];
   if (handler) return handler(context);

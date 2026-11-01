@@ -178,10 +178,13 @@ export const docs = defineDocs({
     files[`webmcp/${framework}/components/webmcp.tsx`] = webmcp({
       static: false,
       i18n: false,
-      tanstack,
+      framework,
     });
-    const mcp = mcpRoute(framework);
-    files[`mcp/${framework}/${mcp.file}`] = mcpTemplates(framework, mcp, src);
+    // `mcpPlugin()` serves it on Astro
+    if (framework !== 'astro') {
+      const mcp = mcpRoute(framework);
+      files[`mcp/${framework}/${mcp.file}`] = mcpTemplates(framework, mcp, src);
+    }
     // the Fumadocs integration serves the routes on Astro
     if (framework === 'astro') {
       files[`${base}/astro.config.mjs`] = codemod(

@@ -22,7 +22,8 @@ interface AutoFilesProps extends Partial<ToMdxOptions> {
 function parseFileTree(code: string) {
   const lines = code.split(/\r?\n/);
   const stack = new Map<number, Node>();
-  let root: Node | undefined;
+  // top-level entries, several are wrapped in a folder without name
+  const roots: Node[] = [];
 
   for (const line of lines) {
     const name = line.replace(/^[\s│├└─]+/, '');
@@ -41,7 +42,7 @@ function parseFileTree(code: string) {
       : { type: 'file', name, depth };
     stack.set(column, node);
     if (!parent) {
-      root = node;
+      roots.push(node);
       continue;
     }
 
@@ -52,7 +53,8 @@ function parseFileTree(code: string) {
     (parent as FolderNode).children.push(node);
   }
 
-  return root;
+  if (roots.length <= 1) return roots[0];
+  return { type: 'folder', name: '', children: roots, depth: -1 } satisfies FolderNode;
 }
 
 function buildFileTreeFromGlob(dir: string, files: string[]): Node {
@@ -97,7 +99,10 @@ function defaultToMdx(node: Node, options: ToMdxOptions, depth = 0): MdxJsxFlowE
       type: 'mdxJsxFlowElement',
       name: 'Files',
       attributes: [],
-      children: [defaultToMdx(node, options, depth + 1)],
+      children:
+        node.type === 'folder' && node.name === ''
+          ? node.children.map((item) => defaultToMdx(item, options, depth + 1))
+          : [defaultToMdx(node, options, depth + 1)],
     };
   }
 

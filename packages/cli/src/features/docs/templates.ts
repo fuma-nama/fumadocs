@@ -609,6 +609,7 @@ import {
   DocsPage,
   DocsTitle,
   MarkdownCopyButton,
+  PageLastUpdate,
   ViewOptionsPopover,
 } from '${layout}/page';
 import type { DocsPageProps } from '@fumadocs/astro/config';
@@ -622,13 +623,14 @@ export default function Docs({ tree, page, layout, children }: DocsPageProps) {
       <DocsPage toc={page.toc} full={page.full}>
         <DocsTitle>{page.title}</DocsTitle>
         <DocsDescription>{page.description}</DocsDescription>
-        {page.markdownUrl && (
+        {(page.markdownUrl || page.githubUrl) && (
           <div className="flex flex-row gap-2 items-center border-b -mt-4 pb-6">
-            <MarkdownCopyButton markdownUrl={page.markdownUrl} />
-            <ViewOptionsPopover markdownUrl={page.markdownUrl} />
+            {page.markdownUrl && <MarkdownCopyButton markdownUrl={page.markdownUrl} />}
+            <ViewOptionsPopover markdownUrl={page.markdownUrl} githubUrl={page.githubUrl} />
           </div>
         )}
         {children}
+        {page.lastModified && <PageLastUpdate date={page.lastModified} />}
       </DocsPage>
     </DocsLayout>
   );

@@ -3,7 +3,12 @@ import { lazy, type ReactNode } from 'react';
 import { RootProvider } from 'fumadocs-ui/provider/astro';
 import type { I18nProviderProps } from 'fumadocs-ui/contexts/i18n';
 import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
-import { baseOptions, SearchDialog, useSearch } from 'virtual:fumadocs/layout';
+import {
+  baseOptions,
+  Provider as LayoutProvider,
+  SearchDialog,
+  useSearch,
+} from 'virtual:fumadocs/layout';
 
 const Dialog = SearchDialog ?? lazy(() => import('./search'));
 
@@ -35,13 +40,13 @@ export function Provider({
       i18n={i18n}
       search={search || SearchDialog || useSearch ? { SearchDialog: Dialog } : { enabled: false }}
     >
-      {children}
+      {LayoutProvider ? <LayoutProvider>{children}</LayoutProvider> : children}
     </RootProvider>
   );
 }
 
 /**
- * For islands of the content, they are React trees of their own: without the theme and search of the layout.
+ * For islands of the content, they are React trees of their own: without the theme, search and `Provider` of the layout.
  */
 export function ContentProvider({ provider: { pathname, params, i18n }, children }: ProviderProps) {
   return (

@@ -2,9 +2,15 @@ import path from 'node:path';
 import type { Feature } from '@/features';
 import type { Framework } from '@/project';
 import { type FormattedRoute, formatRoute, routeModule } from '@/project/route';
-import { addReactRouterPrerenderArray } from '@/codemod';
+import { addReactRouterPrerenderArray, addVitePlugin } from '@/codemod';
 import { addDocsLlms, llms } from './llms';
-import { registerReactRouterRoutes, requiresMarkdown, type SourceRef, sourceRef } from './utils';
+import {
+  registerReactRouterRoutes,
+  requiresManaged,
+  requiresMarkdown,
+  type SourceRef,
+  sourceRef,
+} from './utils';
 
 const server = ({
   ref,
@@ -42,25 +48,37 @@ export const mcp: Feature = {
   title: 'MCP Server',
   description: 'a MCP server for AI agents to search and read your docs, at /api/mcp',
   requires: [llms],
-  supports: (project) =>
-    project.static ? 'MCP requires a server at runtime' : requiresMarkdown(project),
+  supports(project) {
+    if (project.static) return 'MCP requires a server at runtime';
+    // `mcpPlugin()` reads the pages of every source
+    return project.framework === 'astro' ? requiresManaged(project) : requiresMarkdown(project);
+  },
   async apply(ctx) {
-    const { baseDir, framework } = ctx.project;
+    const { baseDir, framework, fumadocsConfig } = ctx.project;
     ctx.addDependencies({ '@modelcontextprotocol/server': null, zod: null });
-    // the LLM routes of Astro come from the Fumadocs integration, without `docsLlms`
-    await addDocsLlms(ctx);
-
-    const route = mcpRoute(framework);
-    await ctx.write(
-      path.join(baseDir, route.file),
-      templates(framework, route, sourceRef(ctx.project.source.dynamic)),
-    );
-
-    if (framework === 'react-router') {
-      await registerReactRouterRoutes(ctx, [route]);
-      await ctx.source('react-router.config.ts', (file) => {
-        addReactRouterPrerenderArray(file, 'excluded', [`/${route.path}`]);
-      });
+    if (framework === 'astro') {
+      let added = false;
+      if (fumadocsConfig)
+        await ctx.source(fumadocsConfig, (file) => {
+          added = addVitePlugin(file, { name: 'mcpPlugin', from: '@fumadocs/astro/plugins/mcp' });
+        });
+      if (!added)
+        ctx.note(
+          "Add `mcpPlugin()` from '@fumadocs/astro/plugins/mcp' to the `plugins` of your Fumadocs config.",
+        );
+    } else {
+      await addDocsLlms(ctx);
+      const route = mcpRoute(framework);
+      await ctx.write(
+        path.join(baseDir, route.file),
+        templates(framework, route, sourceRef(ctx.project.source.dynamic)),
+      );
+      if (framework === 'react-router') {
+        await registerReactRouterRoutes(ctx, [route]);
+        await ctx.source('react-router.config.ts', (file) => {
+          addReactRouterPrerenderArray(file, 'excluded', [`/${route.path}`]);
+        });
+      }
     }
 
     ctx.note(`Connect AI agents to your docs with the MCP server:
