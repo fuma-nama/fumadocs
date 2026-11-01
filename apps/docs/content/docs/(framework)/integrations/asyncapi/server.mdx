@@ -10,8 +10,7 @@ The main config for Fumadocs AsyncAPI.
 > It should not be referenced in browser environments.
 
 <Callout title="Astro">
-  There is no Astro plugin for AsyncAPI yet, the Astro tabs use the [setup without
-  config](/docs/astro/without-config).
+  [`asyncapiPlugin()`](/docs/astro/asyncapi) serves the documents of your server.
 </Callout>
 
 ### `input`
@@ -141,19 +140,6 @@ import { asyncapi } from '@/lib/asyncapi';
 export async function GET(_: Request, { params }: ApiContext<'/api/asyncapi/[id]'>) {
   return Response.json((await asyncapi.getSchema(params.id)).bundled);
 }
-```
-
-```ts tab="Astro" title="src/pages/api/asyncapi/[id].ts"
-import type { APIRoute, GetStaticPaths } from 'astro';
-import { asyncapi } from '@/lib/asyncapi';
-
-export const getStaticPaths = (async () => {
-  return Object.keys(await asyncapi.getSchemas()).map((id) => ({ params: { id } }));
-}) satisfies GetStaticPaths;
-
-export const GET: APIRoute = async ({ params }) => {
-  return Response.json((await asyncapi.getSchema(params.id!)).bundled);
-};
 ```
 
 On Tanstack Start, route loaders run on both sides, call a server function only when the browser doesn't have the document yet:

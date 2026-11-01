@@ -61,6 +61,15 @@ export default defineConfig({
 });
 ```
 
+```js title="astro.config.mjs" tab="Astro"
+fumadocs({
+  rehypeCodeOptions: {
+    // enabled by default on Astro
+    // configure options here
+  },
+});
+```
+
 ### Highlighter
 
 The plugin uses Shiki, `rehypeCodeFromHighlighter` takes another [highlighter](/docs/headless/utils/shiki) like Highlights. It has the options other than Shiki's, and a function is created with the transformers of the plugin:

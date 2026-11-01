@@ -59,3 +59,30 @@ export default defineConfig({
 ```
 
 Your own dialog can search it with `useStaticSearch()` of `fumadocs-core/search/client`.
+
+### FlexSearch
+
+To index your pages with [FlexSearch](/docs/search/flexsearch) instead, add its plugin and search engine:
+
+```npm
+npm i flexsearch
+```
+
+```ts title="src/fumadocs.config.ts"
+import { flexsearchPlugin } from '@fumadocs/astro/plugins/flexsearch';
+
+export default defineConfig({
+  // ...
+  plugins: [flexsearchPlugin()], // [!code ++]
+});
+```
+
+```tsx title="src/lib/layout.shared.tsx"
+import { useFlexsearchStatic } from 'fumadocs-core/search/client/flexsearch-static';
+
+export function useSearch({ locale }: { locale?: string }) {
+  return useFlexsearchStatic({ locale });
+}
+```
+
+The plugin takes the [options of `flexsearchFromSource()`](/docs/headless/search/flexsearch#from-source), like a [tag](/docs/search/flexsearch#tag-filter) for your own dialog to filter by.

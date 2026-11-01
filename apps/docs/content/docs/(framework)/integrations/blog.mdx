@@ -13,7 +13,7 @@ It installs the components to `components/blog`, and the utilities of posts to `
 
 Define a collection for your posts with `blogPageSchema`, and register your authors:
 
-```ts title="lib/source.ts"
+```ts tab="Fumadocs MDX" title="lib/source.ts"
 import { defineCollections } from 'fumadocs-mdx/macro';
 import { loader } from 'fumadocs-core/source';
 import { type BlogAuthor, blogPageSchema } from '@/lib/blog';
@@ -27,6 +27,45 @@ const blog = defineCollections({
 export const blogSource = loader({
   baseUrl: '/blog',
   source: blog.toFumadocsSource(),
+});
+
+export const blogAuthors: Record<string, BlogAuthor> = {
+  fuma: {
+    name: 'Fuma Nama',
+    title: 'Maintainer',
+    url: 'https://fuma-nama.dev',
+    image: 'https://avatars.githubusercontent.com/u/76240755',
+  },
+};
+```
+
+```js tab="Astro" title="astro.config.mjs"
+fumadocs({
+  collections: {
+    docs: { dir: 'content/docs' },
+    blog: { dir: 'content/blog' }, // [!code ++]
+  },
+});
+```
+
+```ts tab="Astro" title="src/content.config.ts"
+import { blogPageSchema } from './lib/blog'; // [!code ++]
+
+export const collections = {
+  // ...
+  blog: defineCollection({ loader: pageLoader('blog'), schema: blogPageSchema }), // [!code ++]
+};
+```
+
+```ts tab="Astro" title="src/lib/source.ts"
+import { getCollection } from 'astro:content';
+import { loader } from 'fumadocs-core/source';
+import { toFumadocsSource } from '@fumadocs/astro/source';
+import type { BlogAuthor } from './blog';
+
+export const blogSource = loader({
+  baseUrl: '/blog',
+  source: toFumadocsSource(await getCollection('blog')),
 });
 
 export const blogAuthors: Record<string, BlogAuthor> = {
@@ -68,9 +107,14 @@ image: /blog/hello-world.png
 
 `getPosts()` resolves the authors and tags of pages, newest first. Render them in your routes under `app/(home)`, so they share the [Home Layout](/docs/ui/layouts/home-layout).
 
+<Callout title="Astro">
+  Render them in your own pages with `HomeLayout.astro`, see [Your Own
+  Pages](/docs/astro/layouts#your-own-pages).
+</Callout>
+
 ### Posts
 
-```tsx title="app/(home)/blog/page.tsx"
+```tsx tab="Next.js" title="app/(home)/blog/page.tsx"
 import { blogAuthors, blogSource } from '@/lib/source';
 import { getPosts } from '@/lib/blog';
 import { BlogCards } from '@/components/blog';
@@ -84,11 +128,26 @@ export default function Page() {
 }
 ```
 
+```astro tab="Astro" title="src/pages/blog/index.astro"
+---
+import HomeLayout from '@fumadocs/astro/components/HomeLayout.astro';
+import { blogAuthors, blogSource } from '@/lib/source';
+import { getPosts } from '@/lib/blog';
+import { BlogCards } from '@/components/blog';
+---
+
+<HomeLayout title="Blog">
+  <div class="mx-auto w-full max-w-(--fd-layout-width) px-4 py-12">
+    <BlogCards posts={getPosts(blogSource.getPages(), blogAuthors)} />
+  </div>
+</HomeLayout>
+```
+
 ### Post
 
 `findPost()` finds a post along with the newer and older posts. With `toc`, a floating panel shows the table of contents and a share button.
 
-```tsx title="app/(home)/blog/[slug]/page.tsx"
+```tsx tab="Next.js" title="app/(home)/blog/[slug]/page.tsx"
 import { notFound } from 'next/navigation';
 import { blogAuthors, blogSource } from '@/lib/source';
 import { findPost, getPosts } from '@/lib/blog';
@@ -134,11 +193,61 @@ export default async function Page(props: PageProps<'/blog/[slug]'>) {
 }
 ```
 
+```astro tab="Astro" title="src/pages/blog/[slug].astro"
+---
+import type { GetStaticPaths, InferGetStaticPropsType } from 'astro';
+import HomeLayout from '@fumadocs/astro/components/HomeLayout.astro';
+import { blogAuthors, blogSource } from '@/lib/source';
+import { findPost, getPosts } from '@/lib/blog';
+import {
+  BlogAuthors,
+  BlogBackLink,
+  BlogDate,
+  BlogDescription,
+  BlogHeader,
+  BlogPage,
+  BlogPostNav,
+  BlogTags,
+  BlogTitle,
+} from '@/components/blog';
+
+export const getStaticPaths = (() => {
+  return blogSource.getPages().map((page) => ({ params: { slug: page.slugs[0] }, props: { page } }));
+}) satisfies GetStaticPaths;
+
+type Props = InferGetStaticPropsType<typeof getStaticPaths>;
+
+const { page } = Astro.props;
+const { post, newer, older } = findPost(getPosts(blogSource.getPages(), blogAuthors), page.url)!;
+const { body: Body, toc } = await page.data.load();
+---
+
+<HomeLayout title={post.title} description={post.description}>
+  <BlogPage client:load toc={toc}>
+    <BlogHeader>
+      <BlogBackLink href="/blog" />
+      <BlogTitle>{post.title}</BlogTitle>
+      <BlogDescription>{post.description}</BlogDescription>
+      <BlogAuthors authors={post.authors} />
+      <BlogTags tags={post.tags} />
+      {post.date && <BlogDate date={post.date} />}
+    </BlogHeader>
+    <Body />
+    <BlogPostNav newer={newer} older={older} />
+  </BlogPage>
+</HomeLayout>
+```
+
+<Callout title="Astro">
+  `BlogPage` hydrates with `client:load` for the floating panel, its children stay static. `<Body />
+  ` renders the content as an island with typography styles, it needs no `BlogBody`.
+</Callout>
+
 ### Tags
 
 List all tags with `getTags()`:
 
-```tsx title="app/(home)/blog/tags/page.tsx"
+```tsx tab="Next.js" title="app/(home)/blog/tags/page.tsx"
 import { blogSource } from '@/lib/source';
 import { getPosts, getTags } from '@/lib/blog';
 import { BlogHeader, BlogTagCards, BlogTitle } from '@/components/blog';
@@ -157,9 +266,29 @@ export default function Page() {
 }
 ```
 
+```astro tab="Astro" title="src/pages/blog/tags/index.astro"
+---
+import HomeLayout from '@fumadocs/astro/components/HomeLayout.astro';
+import { blogSource } from '@/lib/source';
+import { getPosts, getTags } from '@/lib/blog';
+import { BlogHeader, BlogTagCards, BlogTitle } from '@/components/blog';
+
+const tags = getTags(getPosts(blogSource.getPages()));
+---
+
+<HomeLayout title="All Tags">
+  <div class="mx-auto flex w-full max-w-(--fd-layout-width) flex-col gap-4 px-4 py-12">
+    <BlogHeader>
+      <BlogTitle>All Tags</BlogTitle>
+    </BlogHeader>
+    <BlogTagCards tags={tags} />
+  </div>
+</HomeLayout>
+```
+
 And the posts of a tag with `getTagPosts()`, it returns `undefined` for unknown tags:
 
-```tsx title="app/(home)/blog/tags/[tag]/page.tsx"
+```tsx tab="Next.js" title="app/(home)/blog/tags/[tag]/page.tsx"
 import { notFound } from 'next/navigation';
 import { blogAuthors, blogSource } from '@/lib/source';
 import { getPosts, getTagPosts, getTags } from '@/lib/blog';
@@ -185,6 +314,37 @@ export function generateStaticParams() {
 }
 ```
 
+```astro tab="Astro" title="src/pages/blog/tags/[tag].astro"
+---
+import type { GetStaticPaths, InferGetStaticPropsType } from 'astro';
+import HomeLayout from '@fumadocs/astro/components/HomeLayout.astro';
+import { blogAuthors, blogSource } from '@/lib/source';
+import { getPosts, getTagPosts, getTags } from '@/lib/blog';
+import { BlogCards, BlogHeader, BlogTitle } from '@/components/blog';
+
+export const getStaticPaths = (() => {
+  const posts = getPosts(blogSource.getPages(), blogAuthors);
+  return getTags(posts).map((tag) => ({
+    params: { tag: tag.slug },
+    props: getTagPosts(posts, tag.slug)!,
+  }));
+}) satisfies GetStaticPaths;
+
+type Props = InferGetStaticPropsType<typeof getStaticPaths>;
+
+const { tag, posts } = Astro.props;
+---
+
+<HomeLayout title={tag.name}>
+  <div class="mx-auto flex w-full max-w-(--fd-layout-width) flex-col gap-4 px-4 py-12">
+    <BlogHeader>
+      <BlogTitle>{tag.name}</BlogTitle>
+    </BlogHeader>
+    <BlogCards posts={posts} />
+  </div>
+</HomeLayout>
+```
+
 ## Internationalization
 
 Pass the pages of a locale to `getPosts()`, like `blogSource.getPages(lang)`.
@@ -196,5 +356,10 @@ import { i18n } from '@/lib/i18n';
 
 export const getBlogUrl = createGetUrl('/blog', i18n);
 ```
+
+<Callout title="Astro">
+  Create the pages under `src/pages/[...lang]/blog` with a path for each language, see [Your Own
+  Pages](/docs/astro/internationalization#your-own-pages).
+</Callout>
 
 To publish a feed of your posts, see [RSS Feed](/docs/guides/rss).

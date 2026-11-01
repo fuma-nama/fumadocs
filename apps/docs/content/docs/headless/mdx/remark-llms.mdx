@@ -36,6 +36,13 @@ export default defineDocs({
 });
 ```
 
+```js title="astro.config.mjs" tab="Astro"
+fumadocs({
+  // `true`, or the options of `remarkLLMs`
+  includeProcessedMarkdown: true,
+});
+```
+
 ```ts tab="MDX Compiler"
 import { compile } from '@mdx-js/mdx';
 import { remarkLLMs } from 'fumadocs-core/mdx-plugins/remark-llms';
@@ -45,7 +52,7 @@ await compile('...', {
 });
 ```
 
-With Fumadocs MDX, read it from your pages:
+With Fumadocs MDX and Astro, read it from your pages:
 
 ```ts
 const markdown = await page.data.getText('processed');
@@ -127,6 +134,11 @@ import { _markdown as Markdown } from './page.mdx';
 
 const markdown = await renderToMarkdown(<Markdown components={getMDXComponents()} />);
 ```
+
+<Callout title="Astro">
+  `getText()` renders it with the MDX components of the collection by default, see [MDX
+  Components](/docs/astro/llms#mdx-components).
+</Callout>
 
 Components define their Markdown form with `asMarkdown()`, others are kept as JSX, see [Markdown Rendering](/docs/headless/utils/markdown).
 

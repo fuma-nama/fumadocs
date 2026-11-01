@@ -9,13 +9,17 @@ For people migrating from Docusaurus, you can enable this remark plugin to suppo
 
 ## Usage
 
-It requires `remark-directive` to work.
+It requires the directive syntax, from `remark-directive` or the `directive` feature of Sätteri.
 
-```npm
+```npm tab="Fumadocs MDX"
 npm i remark-directive
 ```
 
-Configure both plugins in your config.
+```npm tab="Astro"
+npm i @fumadocs/satteri @astrojs/markdown-satteri
+```
+
+Configure both in your config.
 
 ```ts title="source.config.ts" tab="Fumadocs MDX"
 import remarkDirective from 'remark-directive';
@@ -26,6 +30,24 @@ export default defineConfig({
   mdxOptions: {
     remarkPlugins: [remarkDirective, remarkDirectiveAdmonition],
   },
+});
+```
+
+```js title="astro.config.mjs" tab="Astro"
+import { defineConfig } from 'astro/config';
+import { satteri } from '@astrojs/markdown-satteri';
+import fumadocs from '@fumadocs/astro';
+import { remarkDirectiveAdmonition } from '@fumadocs/satteri/remark-directive-admonition';
+
+export default defineConfig({
+  markdown: {
+    processor: satteri({ features: { directive: true } }),
+  },
+  integrations: [
+    fumadocs({
+      mdastPlugins: [remarkDirectiveAdmonition()],
+    }),
+  ],
 });
 ```
 

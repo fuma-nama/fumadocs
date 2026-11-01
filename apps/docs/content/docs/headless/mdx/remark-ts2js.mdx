@@ -15,6 +15,10 @@ npm i fumadocs-docgen
 npm i @fumadocs/satteri
 ```
 
+```npm tab="Astro"
+npm i @fumadocs/satteri
+```
+
 Add the remark plugin:
 
 ```ts title="source.config.ts" tab="Fumadocs MDX"
@@ -40,6 +44,14 @@ export default defineConfig({
       };
     },
   },
+});
+```
+
+```js title="astro.config.mjs" tab="Astro"
+import { remarkTs2js } from '@fumadocs/satteri/remark-ts2js';
+
+fumadocs({
+  mdastPlugins: [remarkTs2js()],
 });
 ```
 

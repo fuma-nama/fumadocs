@@ -6,8 +6,7 @@ description: Generating docs for GraphQL schema.
 ## Setup
 
 <Callout title="Astro">
-  There is no Astro plugin for GraphQL yet, the Astro tabs use the [setup without
-  config](/docs/astro/without-config).
+  Use [`graphqlPlugin()`](/docs/astro/graphql) of the Astro integration instead.
 </Callout>
 
 Install the required packages.
@@ -198,28 +197,6 @@ export const source = loader(
 );
 ```
 
-```ts tab="Astro" title="src/lib/source.ts"
-import { getCollection } from 'astro:content';
-import { loader } from 'fumadocs-core/source';
-import { toFumadocsSource } from '@fumadocs/astro/source';
-import { graphql } from '@/lib/graphql'; // [!code ++]
-
-export const source = loader(
-  // [!code ++:6]
-  {
-    docs: toFumadocsSource(await getCollection('docs'), await getCollection('meta')),
-    graphql: await graphql.staticSource({
-      baseDir: 'graphql',
-    }),
-  },
-  {
-    baseUrl: '/docs',
-    // [!code ++:2] optional: adds a query/mutation/subscription badge to each page item in page tree
-    plugins: [graphql.loaderPlugin()],
-  },
-);
-```
-
 It generates a page per operation, grouped into folders by kind (e.g. `queries/`). Pages of named types are [opt-in](/docs/integrations/graphql/server#includeoperations--includetypes).
 
 **It will change the type of your pages**, make sure to update all references to your `source`, and update your page renderer:
@@ -388,56 +365,6 @@ export default function Page({ slugs }: PageProps<'/docs/[...slugs]'>) {
 
   // ...
 }
-```
-
-```astro tab="Astro" title="src/pages/docs/[...slug].astro"
----
-// [!code ++:2]
-import { DocsBody } from 'fumadocs-ui/layouts/docs/page';
-import { GraphQLPage } from '@/components/api-page';
-// ...
-// [!code word:page.type]
-const { page } = Astro.props;
-const { body: Content, toc } = page.type === 'docs' ? await page.data.load() : { body: undefined, toc: [] };
-const pageTree = await source.serializePageTree(source.getPageTree());
----
-
-<Layout title={page.data.title} description={page.data.description}>
-  <Docs
-    client:load
-    transition:persist="docs"
-    pathname={Astro.url.pathname}
-    params={Astro.params}
-    tree={pageTree}
-    title={page.data.title}
-    description={page.type === 'docs' ? page.data.description : undefined}
-    toc={toc}
-    full={page.type === 'graphql'}
-  >
-    <!-- [!code highlight:9] -->
-    {
-      page.type === 'graphql' ? (
-        <DocsBody>
-          <GraphQLPage client:load {...page.data.getGraphQLPageProps()} />
-        </DocsBody>
-      ) : (
-        Content && <Content />
-      )
-    }
-  </Docs>
-</Layout>
-```
-
-```tsx tab="Astro" title="src/components/docs.tsx"
-export interface DocsProps extends ProviderProps {
-  // ...
-  full?: boolean; // [!code ++]
-}
-
-// [!code word:full]
-export function Docs({ tree, title, description, toc, full, children, ...props }: DocsProps) {
-  // ...
-          <DocsPage toc={toc} full={full}>
 ```
 
 <Callout type='warn' title="Ensure the migration is complete!">

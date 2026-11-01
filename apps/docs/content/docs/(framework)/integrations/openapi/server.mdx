@@ -10,8 +10,8 @@ The main config for Fumadocs OpenAPI.
 > It should not be referenced in browser environments.
 
 <Callout title="Astro">
-  [`openapiPlugin()`](/docs/astro/openapi) doesn't support these options yet, the Astro tabs use the
-  [setup without config](/docs/astro/without-config).
+  [`openapiPlugin()`](/docs/astro/openapi) serves the documents and the proxy of your server, your
+  own routes at the same paths replace them.
 </Callout>
 
 ### `input`
@@ -128,19 +128,6 @@ import { openapi } from '@/lib/openapi';
 export async function GET(_: Request, { params }: ApiContext<'/api/openapi/[id]'>) {
   return Response.json((await openapi.getSchema(params.id)).bundled);
 }
-```
-
-```ts tab="Astro" title="src/pages/api/openapi/[id].ts"
-import type { APIRoute, GetStaticPaths } from 'astro';
-import { openapi } from '@/lib/openapi';
-
-export const getStaticPaths = (async () => {
-  return Object.keys(await openapi.getSchemas()).map((id) => ({ params: { id } }));
-}) satisfies GetStaticPaths;
-
-export const GET: APIRoute = async ({ params }) => {
-  return Response.json((await openapi.getSchema(params.id!)).bundled);
-};
 ```
 
 On Tanstack Start, route loaders run on both sides, call a server function only when the browser doesn't have the document yet:

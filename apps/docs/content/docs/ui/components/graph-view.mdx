@@ -12,9 +12,9 @@ You can install this from CLI:
 npx @fumadocs/cli add graph-view
 ```
 
-Enable `extractLinkReferences` on Fumadocs MDX.
+Enable `extractLinkReferences` on your content source.
 
-```ts title="source.config.ts"
+```ts title="source.config.ts" tab="Fumadocs MDX"
 import { defineDocs } from 'fumadocs-mdx/config';
 
 export const docs = defineDocs({
@@ -24,6 +24,12 @@ export const docs = defineDocs({
       extractLinkReferences: true,
     },
   },
+});
+```
+
+```js title="astro.config.mjs" tab="Astro"
+fumadocs({
+  extractLinkReferences: true, // [!code ++]
 });
 ```
 
@@ -44,3 +50,33 @@ export function PageBody() {
   );
 }
 ```
+
+<Callout title="Astro">
+
+Render the graph in an Astro component, like `src/components/Graph.astro`, and import it in your MDX files or own pages.
+
+```tsx title="src/components/graph.tsx"
+import { AstroProvider } from 'fumadocs-core/framework/astro';
+import { navigate } from 'astro:transitions/client';
+import { GraphView, type GraphViewProps } from './graph-view';
+
+// a separate island, it needs a framework provider of its own
+export function Graph({ pathname, ...props }: GraphViewProps & { pathname: string }) {
+  return (
+    <AstroProvider pathname={pathname} navigate={navigate}>
+      <GraphView {...props} />
+    </AstroProvider>
+  );
+}
+```
+
+```astro title="src/components/Graph.astro"
+---
+import { Graph } from './graph';
+import { buildGraph } from '@/lib/build-graph';
+---
+
+<Graph client:load graph={buildGraph()} pathname={Astro.url.pathname} />
+```
+
+</Callout>

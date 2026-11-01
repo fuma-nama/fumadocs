@@ -1,0 +1,71 @@
+---
+title: AsyncAPI
+description: Generate docs pages from your AsyncAPI schema.
+---
+
+## Setup
+
+`asyncapiPlugin()` renders the pages of [Fumadocs AsyncAPI](/docs/integrations/asyncapi), with the interactive playground.
+
+```npm
+npm i @fumadocs/asyncapi shiki
+```
+
+Add its styles:
+
+```css title="src/styles/global.css"
+@import 'tailwindcss';
+@import 'fumadocs-ui/css/neutral.css';
+@import 'fumadocs-ui/css/preset.css';
+/* [!code ++] */
+@import '@fumadocs/asyncapi/css/preset.css';
+```
+
+Create the [AsyncAPI server](/docs/integrations/asyncapi/server) from your schema:
+
+```ts title="src/lib/asyncapi.ts"
+import { createAsyncAPI } from '@fumadocs/asyncapi/server';
+
+export const asyncapi = createAsyncAPI({
+  input: ['./asyncapi.yaml'],
+});
+```
+
+Add its pages to your source with `multiple()`:
+
+```ts title="src/lib/source.ts"
+import { getCollection } from 'astro:content';
+import { loader, multiple } from 'fumadocs-core/source'; // [!code ++]
+import { toFumadocsSource } from '@fumadocs/astro/source';
+import { asyncapi } from './asyncapi'; // [!code ++]
+
+export const source = loader({
+  source: multiple({
+    docs: toFumadocsSource(await getCollection('docs'), await getCollection('meta')),
+    asyncapi: await asyncapi.staticSource({ baseDir: 'asyncapi' }), // [!code ++]
+  }),
+  baseUrl: '/docs',
+  // adds the direction of messages to each page in the sidebar [!code ++]
+  plugins: [asyncapi.loaderPlugin()],
+});
+```
+
+It generates a page per operation under `/docs/asyncapi`, see [Generating Pages](/docs/integrations/asyncapi/generate-files) to customize them.
+
+Render them with the plugin:
+
+```ts title="src/fumadocs.config.ts"
+import { defineConfig } from '@fumadocs/astro/config';
+import { asyncapiPlugin } from '@fumadocs/astro/plugins/asyncapi'; // [!code ++]
+import { source } from './lib/source';
+import { asyncapi } from './lib/asyncapi'; // [!code ++]
+
+export default defineConfig({
+  source,
+  plugins: [asyncapiPlugin({ server: asyncapi })], // [!code ++]
+});
+```
+
+The plugin serves the documents left out by [`includeDocument: false`](/docs/integrations/asyncapi/server#loading-documents-once), so pages load them once per browser session.
+
+To customize the pages, create `<AsyncAPIPage />` with [`createAsyncAPIPage()`](/docs/integrations/asyncapi/api-page) and add it to your [MDX components](/docs/astro/content#mdx-components), [lazily](/docs/astro/content#heavy-components).

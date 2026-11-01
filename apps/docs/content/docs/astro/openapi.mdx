@@ -21,13 +21,11 @@ Add its styles:
 @import 'fumadocs-openapi/css/preset.css';
 ```
 
-Create the OpenAPI server from your schema:
+Create the [OpenAPI server](/docs/integrations/openapi/server) from your schema:
 
 <include cwd meta='title="src/lib/openapi.ts"'>
   ../../examples/astro/src/lib/openapi.ts
 </include>
-
-### Pages
 
 Add its pages to your source with `multiple()`:
 
@@ -56,13 +54,14 @@ Render them with the plugin:
 import { defineConfig } from '@fumadocs/astro/config';
 import { openapiPlugin } from '@fumadocs/astro/plugins/openapi'; // [!code ++]
 import { source } from './lib/source';
+import { openapi } from './lib/openapi'; // [!code ++]
 
 export default defineConfig({
   source,
-  plugins: [openapiPlugin()], // [!code ++]
+  plugins: [openapiPlugin({ server: openapi })], // [!code ++]
 });
 ```
 
-The pages use the full width, and their Markdown for LLMs is the description of the operation.
+The plugin follows your server: it serves the documents left out by [`includeDocument: false`](/docs/integrations/openapi/server#loading-documents-once), and [the proxy](/docs/integrations/openapi/server#creating-proxy) at `proxyUrl` when it is a pathname, which requires an [adapter](https://docs.astro.build/en/guides/on-demand-rendering/).
 
-> The plugin renders with the default options of `createOpenAPIPage()`, the [proxy](/docs/integrations/openapi/server#creating-proxy) and the [OAuth redirect](/docs/integrations/openapi/server#oauth-redirect) aren't supported yet.
+To customize the pages, create `<OpenAPIPage />` with [`createOpenAPIPage()`](/docs/integrations/openapi/api-page) and add it to your [MDX components](/docs/astro/content#mdx-components), [lazily](/docs/astro/content#heavy-components).

@@ -1,0 +1,52 @@
+---
+title: SEO
+description: Sitemap, robots.txt and RSS feeds.
+---
+
+## Sitemap
+
+Use [`@astrojs/sitemap`](https://docs.astro.build/en/guides/integrations-guide/sitemap), it lists every page of your site, including docs pages and your own pages.
+
+```npm
+npx astro add sitemap
+```
+
+It requires [`site`](https://docs.astro.build/en/reference/configuration-reference/#site):
+
+```js title="astro.config.mjs"
+import { defineConfig } from 'astro/config';
+import fumadocs from '@fumadocs/astro';
+import sitemap from '@astrojs/sitemap';
+
+export default defineConfig({
+  site: 'https://example.com', // [!code ++]
+  integrations: [fumadocs(), sitemap()],
+});
+```
+
+With [i18n](/docs/astro/internationalization), pass the languages of Fumadocs to its `i18n` option for the `hreflang` links of pages:
+
+```js title="astro.config.mjs"
+sitemap({
+  i18n: {
+    defaultLocale: 'en',
+    // language -> `hreflang`
+    locales: { en: 'en', cn: 'zh-CN' },
+  },
+});
+```
+
+## robots.txt
+
+Put it in `public/`, with the sitemap:
+
+```txt title="public/robots.txt"
+User-agent: *
+Allow: /
+
+Sitemap: https://example.com/sitemap-index.xml
+```
+
+## RSS Feed
+
+See [RSS Feed](/docs/guides/rss).

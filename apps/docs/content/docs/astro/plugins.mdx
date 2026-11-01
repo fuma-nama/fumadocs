@@ -18,14 +18,16 @@ export default defineConfig({
 });
 ```
 
-| Plugin                | Import                                 | Feature                           |
-| --------------------- | -------------------------------------- | --------------------------------- |
-| `oramaSearchPlugin()` | `@fumadocs/astro/plugins/orama-search` | [Search](/docs/astro/search)      |
-| `llmsPlugin()`        | `@fumadocs/astro/plugins/llms.txt`     | [LLMs](/docs/astro/llms)          |
-| `takumiPlugin()`      | `@fumadocs/astro/plugins/takumi`       | [OG Images](/docs/astro/og-image) |
-| `openapiPlugin()`     | `@fumadocs/astro/plugins/openapi`      | [OpenAPI](/docs/astro/openapi)    |
-
-The routes of plugins are prerendered at build time.
+| Plugin                | Import                                 | Feature                                     |
+| --------------------- | -------------------------------------- | ------------------------------------------- |
+| `oramaSearchPlugin()` | `@fumadocs/astro/plugins/orama-search` | [Search](/docs/astro/search)                |
+| `flexsearchPlugin()`  | `@fumadocs/astro/plugins/flexsearch`   | [FlexSearch](/docs/astro/search#flexsearch) |
+| `llmsPlugin()`        | `@fumadocs/astro/plugins/llms.txt`     | [LLMs](/docs/astro/llms)                    |
+| `takumiPlugin()`      | `@fumadocs/astro/plugins/takumi`       | [OG Images](/docs/astro/og-image)           |
+| `gitPlugin()`         | `@fumadocs/astro/plugins/git`          | [Git](/docs/astro/git)                      |
+| `openapiPlugin()`     | `@fumadocs/astro/plugins/openapi`      | [OpenAPI](/docs/astro/openapi)              |
+| `asyncapiPlugin()`    | `@fumadocs/astro/plugins/asyncapi`     | [AsyncAPI](/docs/astro/asyncapi)            |
+| `graphqlPlugin()`     | `@fumadocs/astro/plugins/graphql`      | [GraphQL](/docs/astro/graphql)              |
 
 ### Default Plugins
 
@@ -83,3 +85,46 @@ An item of `plugins` can also be an array of plugins, `false` and `undefined` ar
 ```ts
 plugins: [myPlugin(), import.meta.env.PROD && takumiPlugin()];
 ```
+
+### Content Sources
+
+Pages from other [content sources](/docs/headless/source-api/source), joined with `multiple()`, are rendered by a plugin. `getBody()` returns their content as React nodes, rendered with your MDX components (`this.components`) so they hydrate like MDX content:
+
+```ts title="src/lib/local-md-plugin.ts"
+import type { Plugin } from '@fumadocs/astro/config';
+
+export function localMdPlugin(): Plugin {
+  return {
+    name: 'local-md',
+    async getBody(page) {
+      if (!('content' in page.data)) return;
+      const { body, toc } = await (await page.data.load()).render(this.components);
+      return { node: body, toc };
+    },
+    getText(page) {
+      if ('content' in page.data) return page.data.content;
+    },
+  };
+}
+```
+
+A `lastModified` date on page data shows as the last updated time of pages.
+
+### Server Routes
+
+Routes are generated at build time. Set `prerender: false` to handle requests on the server, it requires an [adapter of Astro](https://docs.astro.build/en/guides/on-demand-rendering/):
+
+```ts
+routes() {
+  return [
+    {
+      type: 'file',
+      url: `${this.base}/api/feedback`,
+      prerender: false,
+      POST: async ({ request }) => Response.json(await request.json()),
+    },
+  ];
+},
+```
+
+A `middleware` hook runs as an [Astro middleware](https://docs.astro.build/en/guides/middleware/), for prerendered pages at build time too, see `context.isPrerendered`.

@@ -49,6 +49,18 @@ export default defineConfig({
 });
 ```
 
+```npm tab="Astro"
+npm i @fumadocs/satteri
+```
+
+```js tab="Astro" title="astro.config.mjs"
+import { remarkMdxFiles } from '@fumadocs/satteri/remark-mdx-files';
+
+fumadocs({
+  mdastPlugins: [remarkMdxFiles()],
+});
+```
+
 ```ts tab="MDX Compiler"
 import { compile } from '@mdx-js/mdx';
 import { remarkMdxFiles } from 'fumadocs-core/mdx-plugins';

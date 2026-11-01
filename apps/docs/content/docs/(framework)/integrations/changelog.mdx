@@ -188,6 +188,7 @@ export const getStaticPaths = (async () => {
       token: import.meta.env.GITHUB_TOKEN,
       page,
     });
+    if (releases.entries.length === 0) break;
     paths.push({
       params: { page: page > 1 ? String(page) : undefined },
       props: { page, ...releases },
@@ -214,7 +215,10 @@ const href = (page: number) => (page > 1 ? `/changelog/${page}` : '/changelog');
 </HomeLayout>
 ```
 
-On Astro, the pages are generated at build time, see [Your Own Pages](/docs/astro/layouts#your-own-pages). The timeline is a child of the island, it renders on the server only, without interactivity like copy buttons.
+<Callout title="Astro">
+  The pages are [your own pages](/docs/astro/layouts#your-own-pages), generated at build time. The
+  timeline renders on the server only, so copy buttons in release notes don't hydrate.
+</Callout>
 
 ## Sources
 
@@ -261,3 +265,8 @@ export default function Page() {
   );
 }
 ```
+
+<Callout title="Astro">
+  `body` takes React nodes, not Astro components. Pass the Markdown of pages as `content` instead,
+  like `await page.data.getText('raw')`.
+</Callout>
