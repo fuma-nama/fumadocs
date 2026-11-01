@@ -239,7 +239,7 @@ export const llms: Feature = {
     if (!file) return false;
     const content = await fs.readFile(path.join(cwd, file), 'utf-8').catch(() => '');
     return framework === 'astro'
-      ? /includeProcessedMarkdown:\s*true/.test(content)
+      ? /includeProcessedMarkdown:\s*(?:true|\{)/.test(content)
       : /export const docsLlms\b/.test(content);
   },
   async apply(ctx) {
@@ -253,7 +253,7 @@ export const llms: Feature = {
     }
     if (framework === 'astro') {
       ctx.note(
-        'The Fumadocs integration serves `llms.txt`, `llms-full.txt` and the Markdown of pages at `<page>.md`, docs pages show their page actions.',
+        '`llmsPlugin()` serves `llms.txt`, `llms-full.txt` and the Markdown of pages at `<page>.md`, it is a default plugin unless `preset: false` (then add it to your Fumadocs config).',
       );
       return;
     }
