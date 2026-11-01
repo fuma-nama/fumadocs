@@ -16,7 +16,7 @@ import { applySatteriPreset, type DefaultSatteriOptions } from '@fumadocs/satter
 import { remarkInclude } from '@fumadocs/satteri/remark-include';
 import { remarkLlms, type LLMsOptions } from '@fumadocs/satteri/remark-llms';
 import { islandPlugin } from './island-plugin';
-import { dataKey, type FumadocsData } from './shared';
+import { dataKey, trimSlash, type FumadocsData } from './shared';
 import { output } from './sitemap';
 import type { Route } from './app';
 
@@ -329,10 +329,7 @@ export const { baseOptions, Provider, SearchDialog, useSearch } = { ...layout };
         const collectionOf = ({ fileURL, sourceFormat }: PluginFactoryContext) => {
           if (!fileURL || sourceFormat !== 'mdx') return;
           const file = fileURLToPath(fileURL);
-          return resolved.find(({ dir }) => {
-            const relative = path.relative(dir, file);
-            return !relative.startsWith('..') && !path.isAbsolute(relative);
-          });
+          return resolved.find(({ dir }) => isInside(dir, file));
         };
 
         satteri.mdastPlugins.push((ctx) => {
@@ -439,11 +436,6 @@ interface DevServer {
  * Collections are left to Astro, which reloads their content itself.
  */
 function contentReloadPlugin(app: string, collections: string[]) {
-  const isIn = (dir: string, file: string) => {
-    const relative = path.relative(dir, file);
-    return !relative.startsWith('..') && !path.isAbsolute(relative);
-  };
-
   return {
     name: '@fumadocs/astro:content-reload',
     configureServer(server: DevServer) {
@@ -451,10 +443,10 @@ function contentReloadPlugin(app: string, collections: string[]) {
       if (!ssr?.runner) return;
       async function onFile(file: string) {
         if (ssr!.moduleGraph.getModulesByFile(file)?.size) return;
-        if (collections.some((dir) => isIn(dir, file))) return;
+        if (collections.some((dir) => isInside(dir, file))) return;
         const { app: runtime } = (await ssr!.runner!.import(app)) as typeof import('./app');
         for (const page of runtime.getPages()) {
-          if (!page.absolutePath || !isIn(path.dirname(page.absolutePath), file)) continue;
+          if (!page.absolutePath || !isInside(path.dirname(page.absolutePath), file)) continue;
           ssr!.hot.send({ type: 'full-reload' });
           server.environments.client?.hot.send({ type: 'full-reload' });
           return;
@@ -475,8 +467,6 @@ function contentReloadPlugin(app: string, collections: string[]) {
  * The dev server of Astro rejects other forms than `trailingSlash` before routing, so the URL is rewritten before it.
  */
 function trailingSlashPlugin(trailingSlash: 'always' | 'never', app: string) {
-  const trim = (url: string) => url.replace(/(.)\/$/, '$1');
-
   return {
     name: '@fumadocs/astro:trailing-slash',
     configureServer(server: DevServer) {
@@ -490,7 +480,7 @@ function trailingSlashPlugin(trailingSlash: 'always' | 'never', app: string) {
         if (list === routes) return urls;
         routes = list;
         urls = new Set();
-        for (const route of list) if (route.type === 'file') urls.add(trim(route.url));
+        for (const route of list) if (route.type === 'file') urls.add(trimSlash(route.url));
         return urls;
       }
 
@@ -501,7 +491,7 @@ function trailingSlashPlugin(trailingSlash: 'always' | 'never', app: string) {
           return next();
         getUrls()
           .then((files) => {
-            if (!files.has(trim(decodeURI(pathname)))) return;
+            if (!files.has(trimSlash(decodeURI(pathname)))) return;
             req.url =
               (trailingSlash === 'always' ? `${pathname}/` : pathname.slice(0, -1)) + url.search;
           })
@@ -521,6 +511,11 @@ interface ResolvedCollection {
   dir: string;
   mdastPlugins: MdastPluginEntry[];
   hastPlugins: HastPluginEntry[];
+}
+
+function isInside(dir: string, file: string): boolean {
+  const relative = path.relative(dir, file);
+  return !relative.startsWith('..') && !path.isAbsolute(relative);
 }
 
 /** content can be in a symlinked directory, MDX files are resolved to their real paths */

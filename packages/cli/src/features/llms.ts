@@ -9,22 +9,16 @@ import {
   routeModule,
   type RouteDescriptor,
 } from '@/project/route';
-import {
-  addImport,
-  addNextRewrites,
-  addProxyMatcher,
-  addTanstackPrerender,
-  enableProcessedMarkdown,
-} from '@/codemod';
+import { addImport, addNextRewrites, addProxyMatcher, addTanstackPrerender } from '@/codemod';
 import { docs, findNextProxy } from './docs';
 import {
   addExport,
   addPageUrl,
+  includeProcessedMarkdown,
   type SourceRef,
   sourceRef,
   registerReactRouterRoutes,
-  requiresManaged,
-  requiresMarkdown,
+  requiresManagedMarkdown,
   sharedRoute,
 } from './utils';
 
@@ -230,10 +224,7 @@ export const llms: Feature = {
   title: 'LLM Routes',
   description: 'serve docs as Markdown for LLMs: llms.txt, llms-full.txt and per-page Markdown',
   requires: [docs],
-  supports: (project) => {
-    const managed = requiresManaged(project);
-    return managed === true ? requiresMarkdown(project) : managed;
-  },
+  supports: requiresManagedMarkdown,
   async detect({ cwd, baseDir, framework, fumadocsConfig }) {
     const file = framework === 'astro' ? fumadocsConfig : path.join(baseDir, 'lib/source.ts');
     if (!file) return false;
@@ -246,12 +237,7 @@ export const llms: Feature = {
   async apply(ctx) {
     const { baseDir, i18n, source, configFile, framework } = ctx.project;
     // runtime content sources already give raw Markdown
-    if (source.collections) {
-      await ctx.source(source.collections, (file) => {
-        if (!enableProcessedMarkdown(file))
-          throw new Error(`cannot enable \`includeProcessedMarkdown\` in ${source.collections}`);
-      });
-    }
+    await includeProcessedMarkdown(ctx);
     if (framework === 'astro') {
       ctx.note(
         '`llmsPlugin()` serves `llms.txt`, `llms-full.txt` and the Markdown of pages at `<page>.md`, it is a default plugin unless `preset: false` (then add it to your Fumadocs config).',
@@ -270,12 +256,8 @@ export const llms: Feature = {
       await addPageUrl(ctx, 'getPageMarkdownUrl', markdownUrl(i18n !== null));
     }
     const routes = llmsRoutes(framework, i18n, docsRoute, contentRoute);
-    for (const [route, content] of templates(
-      framework,
-      routes,
-      i18n,
-      sourceRef(ctx.project.source.dynamic),
-    ))
+    const src = sourceRef(source.dynamic);
+    for (const [route, content] of templates(framework, routes, i18n, src))
       await ctx.write(path.join(baseDir, route.file), content);
 
     if (framework === 'react-router') {

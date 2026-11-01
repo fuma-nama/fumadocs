@@ -1,12 +1,13 @@
 import { generateOGImage } from 'fumadocs-ui/og/takumi';
 import type { AnyPage, App, Plugin, Route } from '../app';
+import { pagePath } from '../shared';
 
 /**
  * OG images of pages with Takumi, requires `takumi-js`.
  */
 export function takumiPlugin({ prefix = '/og' }: { prefix?: string } = {}): Plugin {
   function imageUrl(app: App, page: AnyPage) {
-    return `${app.base}${prefix.replace(/\/$/, '')}${app.toPath(page.url).replace(/\/$/, '')}/image.webp`;
+    return `${app.base}${prefix.replace(/\/$/, '')}${pagePath(app, page)}/image.webp`;
   }
 
   return {

@@ -3,6 +3,7 @@ import { registerSearchTool, registerSourceTools } from 'fumadocs-core/mcp';
 import { createFromSource } from 'fumadocs-core/search/server';
 import { llms } from 'fumadocs-core/source';
 import type { App, Plugin, RouteHandler } from '../app';
+import { pageMarkdown } from '../shared';
 
 export interface MCPOptions {
   /** options of `createFromSource()`, for the `search` tool */
@@ -19,11 +20,7 @@ export function mcpPlugin({ search, tools }: MCPOptions = {}): Plugin {
     name: 'mcp',
     routes() {
       const searchServer = createFromSource(this.source, search);
-      const output = llms(this.source, {
-        renderPage: async (page) => `# ${(await this.getPageData(page)).title} (${page.url})
-
-${await this.getText(page)}`,
-      });
+      const output = llms(this.source, { renderPage: (page) => pageMarkdown(this, page) });
       // stateless, a server per request
       const handler = createMcpHandler(async () => {
         const server = new McpServer({ name: this.config.title ?? 'docs', version: '1.0.0' });

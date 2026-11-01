@@ -1,5 +1,6 @@
 import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
 import type { TOCItemType } from 'fumadocs-core/toc';
+import type { AnyPage, App } from './app';
 
 /** the key in `remarkPluginFrontmatter` holding {@link FumadocsData} */
 export const dataKey = '_fumadocs';
@@ -37,4 +38,26 @@ export function loadOnce<T>(data: { load: () => Promise<T> }): Promise<T> {
   let result = loaded.get(data) as Promise<T> | undefined;
   if (!result) loaded.set(data, (result = data.load()));
   return result;
+}
+
+/** with `trailingSlash`, a URL matches with or without the slash */
+export function trimSlash(url: string): string {
+  return url.replace(/(.)\/$/, '$1');
+}
+
+/** the URL of a page without `base` and the trailing slash, `''` for the root, for the files of pages like `<path>.md` */
+export function pagePath(app: App, page: AnyPage): string {
+  return app.toPath(page.url).replace(/\/$/, '');
+}
+
+/** the Markdown of a page for LLMs, with its title and URL */
+export async function pageMarkdown(app: App, page: AnyPage): Promise<string> {
+  return `# ${(await app.getPageData(page)).title} (${page.url})
+
+${await app.getText(page)}`;
+}
+
+/** the page data of an integration, by one of its methods like `getOpenAPIPageProps()` */
+export function isPageDataOf<T extends object>(data: object, method: keyof T): data is T {
+  return typeof (data as T)[method] === 'function';
 }

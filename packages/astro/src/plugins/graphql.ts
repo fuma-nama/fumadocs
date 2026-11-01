@@ -1,6 +1,7 @@
 import type { GraphQLPageData, GraphQLServer } from '@fumadocs/graphql/server';
 import { graphqlTranslations } from '@fumadocs/graphql/i18n';
 import type { Plugin, Route } from '../app';
+import { isPageDataOf } from '../shared';
 import { schemaUrl } from '../ui/graphql';
 import GraphQLPage from '../ui/GraphQLPage.astro';
 
@@ -9,9 +10,8 @@ export interface GraphQLPluginOptions {
   server: GraphQLServer;
 }
 
-function isGraphQL(data: object): data is GraphQLPageData {
-  return 'getGraphQLPageProps' in data && typeof data.getGraphQLPageProps === 'function';
-}
+const isGraphQL = (data: object): data is GraphQLPageData =>
+  isPageDataOf<GraphQLPageData>(data, 'getGraphQLPageProps');
 
 /**
  * Render the pages of `graphql.staticSource()` and serve their schemas, requires `@fumadocs/graphql`.

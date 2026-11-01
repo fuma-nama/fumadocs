@@ -3,8 +3,7 @@ import type { Feature } from '@/features';
 import type { Framework } from '@/project';
 import { addImport, appendJsxChildren, findJsxElement } from '@/codemod';
 import { llms } from './llms';
-import { astroModule, findSource, requiresManaged, requiresMarkdown } from './utils';
-import { layoutShared } from './docs/templates';
+import { astroModule, findSource, requiresManagedMarkdown } from './utils';
 
 interface Input {
   static: boolean;
@@ -161,10 +160,7 @@ export const webmcp: Feature = {
   description:
     'expose tools to AI agents in the browser (experimental): search, read and open docs pages',
   requires: [llms],
-  supports: (project) => {
-    const managed = requiresManaged(project);
-    return managed === true ? requiresMarkdown(project) : managed;
-  },
+  supports: requiresManagedMarkdown,
   async apply(ctx) {
     const { cwd, baseDir, i18n, framework } = ctx.project;
     await ctx.write(
@@ -174,7 +170,7 @@ export const webmcp: Feature = {
 
     if (framework === 'astro') {
       // the Fumadocs integration renders the root provider, with the `Provider` of the layout module in it
-      const layout = await astroModule(ctx, 'layout', layoutShared(null));
+      const layout = await astroModule(ctx, 'layout');
       let edited = false;
       if (layout)
         await ctx.source(layout, (file) => {

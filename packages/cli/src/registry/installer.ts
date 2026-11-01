@@ -5,6 +5,7 @@ import { reuseUI, type InstallerPlugin, type IOInterface } from 'fuma-cli/regist
 import type { RegistryConnector } from 'fuma-cli/registry/connector';
 import { UIRegistries } from '@/commands/shared';
 import type { LoadedConfig } from '@/config';
+import { formatRoute } from '@/project/route';
 
 export class FumadocsComponentInstaller extends InteractiveInstaller {
   constructor(
@@ -46,7 +47,12 @@ function astroEndpoints(): InstallerPlugin {
     name: 'astro-endpoints',
     resolveId(file) {
       if (file.info.type === 'route-handler')
-        return { id: path.join(this.baseDir, 'pages', `${file.info.route}.ts`) };
+        return {
+          id: path.join(
+            this.baseDir,
+            formatRoute({ segments: [file.info.route] }, 'astro', null).file,
+          ),
+        };
     },
     async writeBundle(files) {
       for (const file of files) {

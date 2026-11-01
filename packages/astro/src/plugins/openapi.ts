@@ -1,6 +1,7 @@
 import type { OpenAPIPageData, OpenAPIServer } from 'fumadocs-openapi/server';
 import { openapiTranslations } from 'fumadocs-openapi/i18n';
 import type { Plugin, Route, RouteHandler } from '../app';
+import { isPageDataOf } from '../shared';
 import { documentUrl } from '../ui/openapi';
 import OpenAPIPage from '../ui/OpenAPIPage.astro';
 
@@ -9,9 +10,8 @@ export interface OpenAPIPluginOptions {
   server: OpenAPIServer;
 }
 
-function isOpenAPI(data: object): data is OpenAPIPageData {
-  return 'getOpenAPIPageProps' in data && typeof data.getOpenAPIPageProps === 'function';
-}
+const isOpenAPI = (data: object): data is OpenAPIPageData =>
+  isPageDataOf<OpenAPIPageData>(data, 'getOpenAPIPageProps');
 
 /**
  * Render the pages of `openapi.staticSource()` and serve the routes of its server, requires `fumadocs-openapi`.
@@ -27,10 +27,6 @@ export function openapiPlugin({ server }: OpenAPIPluginOptions): Plugin {
     async routes() {
       const routes: Route[] = [];
       if (serveProxy) {
-        if (!this.server)
-          throw new Error(
-            '[Fumadocs] the proxy at `proxyUrl` of `createOpenAPI()` renders on request, add an adapter to Astro.',
-          );
         const { handle } = server.createProxy();
         const handler: RouteHandler = ({ request }) => handle(request);
         routes.push({

@@ -57,43 +57,7 @@ function parseFileTree(code: string) {
   return { type: 'folder', name: '', children: roots, depth: -1 } satisfies FolderNode;
 }
 
-function buildFileTreeFromGlob(dir: string, files: string[]): Node {
-  const nodeMap = new Map<string, FolderNode>();
-  const root: FolderNode = { depth: 0, type: 'folder', name: path.basename(dir), children: [] };
-  nodeMap.set('', root);
-
-  for (const file of files) {
-    const parts = path
-      .normalize(file)
-      .split(path.sep)
-      .filter((part) => part.length > 0);
-    let currentPath = '';
-    let current = root;
-
-    for (let i = 0; i < parts.length; i++) {
-      const name = parts[i]!;
-      if (i === parts.length - 1) {
-        current.children.push({ depth: i + 1, type: 'file', name });
-        continue;
-      }
-
-      const nextPath = path.join(currentPath, name);
-      let folder = nodeMap.get(nextPath);
-      if (!folder) {
-        folder = { depth: i + 1, type: 'folder', name, children: [] };
-        nodeMap.set(nextPath, folder);
-        current.children.push(folder);
-      }
-
-      current = folder;
-      currentPath = nextPath;
-    }
-  }
-
-  return root;
-}
-
-function defaultToMdx(node: Node, options: ToMdxOptions, depth = 0): MdxJsxFlowElement {
+function defaultToMDX(node: Node, options: ToMdxOptions, depth = 0): MdxJsxFlowElement {
   if (depth === 0) {
     return {
       type: 'mdxJsxFlowElement',
@@ -101,8 +65,8 @@ function defaultToMdx(node: Node, options: ToMdxOptions, depth = 0): MdxJsxFlowE
       attributes: [],
       children:
         node.type === 'folder' && node.name === ''
-          ? node.children.map((item) => defaultToMdx(item, options, depth + 1))
-          : [defaultToMdx(node, options, depth + 1)],
+          ? node.children.map((item) => defaultToMDX(item, options, depth + 1))
+          : [defaultToMDX(node, options, depth + 1)],
     };
   }
 
@@ -118,9 +82,12 @@ function defaultToMdx(node: Node, options: ToMdxOptions, depth = 0): MdxJsxFlowE
     attributes.push({ type: 'mdxJsxAttribute', name: 'defaultOpen', value: null });
   }
 
-  const children: MdxJsxFlowElement[] = [];
-  for (const item of node.children) children.push(defaultToMdx(item, options, depth + 1));
-  return { type: 'mdxJsxFlowElement', name: 'Folder', attributes, children };
+  return {
+    type: 'mdxJsxFlowElement',
+    name: 'Folder',
+    attributes,
+    children: node.children.map((item) => defaultToMDX(item, options, depth + 1)),
+  };
 }
 
 /**
@@ -129,7 +96,7 @@ function defaultToMdx(node: Node, options: ToMdxOptions, depth = 0): MdxJsxFlowE
  */
 export function remarkMdxFiles({
   lang = 'files',
-  toMdx = defaultToMdx,
+  toMdx = defaultToMDX,
 }: RemarkMdxFilesOptions = {}) {
   return defineMdastPlugin({
     name: 'remark-mdx-files',
@@ -180,4 +147,41 @@ export function remarkMdxFiles({
       );
     },
   });
+}
+
+function buildFileTreeFromGlob(dir: string, files: string[]): Node {
+  const nodeMap = new Map<string, FolderNode>();
+  const root: FolderNode = { depth: 0, type: 'folder', name: path.basename(dir), children: [] };
+  nodeMap.set('', root);
+
+  for (const file of files) {
+    const parts = path
+      .normalize(file)
+      .split(path.sep)
+      .filter((part) => part.length > 0);
+    let currentPath = '';
+    let current = root;
+
+    for (let i = 0; i < parts.length; i++) {
+      const name = parts[i]!;
+      const nextPath = path.join(currentPath, name);
+
+      if (i === parts.length - 1) {
+        current.children.push({ depth: i + 1, type: 'file', name });
+      } else {
+        let folder = nodeMap.get(nextPath);
+
+        if (!folder) {
+          folder = { depth: i + 1, type: 'folder', name, children: [] };
+          nodeMap.set(nextPath, folder);
+          current.children.push(folder);
+        }
+
+        current = folder;
+        currentPath = nextPath;
+      }
+    }
+  }
+
+  return root;
 }

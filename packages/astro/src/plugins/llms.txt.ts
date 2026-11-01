@@ -1,9 +1,7 @@
 import { isMarkdownPreferred } from 'fumadocs-core/negotiation';
 import { llms } from 'fumadocs-core/source';
 import type { AnyPage, App, Plugin, Route } from '../app';
-
-/** with `trailingSlash`, a URL matches with or without the slash */
-const trimSlash = (url: string) => url.replace(/(.)\/$/, '$1');
+import { pageMarkdown, pagePath, trimSlash } from '../shared';
 
 /**
  * `llms.txt`, `llms-full.txt` and the Markdown of pages: `/docs/page.md`, `/index.md` for the root page.
@@ -12,17 +10,13 @@ const trimSlash = (url: string) => url.replace(/(.)\/$/, '$1');
  */
 export function llmsPlugin(): Plugin {
   function markdownUrl(app: App, page: AnyPage) {
-    const path = app.toPath(page.url).replace(/\/$/, '');
+    const path = pagePath(app, page);
     return `${app.base}${path ? `${path}.md` : '/index.md'}`;
   }
 
   let output: ReturnType<typeof createOutput> | undefined;
   function createOutput(app: App) {
-    return llms(app.source, {
-      renderPage: async (page) => `# ${(await app.getPageData(page)).title} (${page.url})
-
-${await app.getText(page)}`,
-    });
+    return llms(app.source, { renderPage: (page) => pageMarkdown(app, page) });
   }
 
   let pages: Map<string, AnyPage> | undefined;

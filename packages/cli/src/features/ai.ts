@@ -1,10 +1,8 @@
 import path from 'node:path';
 import type { ImportDeclaration } from 'oxc-parser';
 import type { Feature, FeatureContext } from '@/features';
-import { enableProcessedMarkdown } from '@/codemod';
-import { astroModule, findSource, requiresManaged } from './utils';
+import { astroModule, findSource, includeProcessedMarkdown, requiresManaged } from './utils';
 import { docs } from './docs';
-import { astroPage } from './docs/templates';
 
 const providers = {
   openrouter: { label: 'AI SDK', hint: 'default to OpenRouter', env: 'OPENROUTER_API_KEY' },
@@ -43,12 +41,7 @@ export const ai: Feature<{ provider: AIProvider }> = {
     await ctx.install(`ai/${provider}`);
     ctx.env(providers[provider].env, '');
     // the search index of the chat route reads the processed Markdown of pages
-    if (source.collections) {
-      await ctx.source(source.collections, (file) => {
-        if (!enableProcessedMarkdown(file))
-          throw new Error(`cannot enable \`includeProcessedMarkdown\` in ${source.collections}`);
-      });
-    }
+    await includeProcessedMarkdown(ctx);
     if (source.dynamic) await readDynamicSource(ctx);
 
     // e.g. `./components` -> `@/components/ai/layout`
@@ -56,7 +49,7 @@ export const ai: Feature<{ provider: AIProvider }> = {
     // on Astro, the docs layout is rendered by the `page` module of the Fumadocs integration
     const layout =
       framework === 'astro'
-        ? await astroModule(ctx, 'page', astroPage())
+        ? await astroModule(ctx, 'page')
         : await findSource(cwd, path.join(baseDir, info.routesDir), '<DocsLayout');
     let layoutModule: string | undefined;
     let wired = false;

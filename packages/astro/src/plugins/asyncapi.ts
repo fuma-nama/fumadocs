@@ -1,6 +1,7 @@
 import type { AsyncAPIPageData, AsyncAPIServer } from '@fumadocs/asyncapi/server';
 import { asyncapiTranslations } from '@fumadocs/asyncapi/i18n';
 import type { Plugin, Route } from '../app';
+import { isPageDataOf } from '../shared';
 import { documentUrl } from '../ui/asyncapi';
 import AsyncAPIPage from '../ui/AsyncAPIPage.astro';
 
@@ -9,9 +10,8 @@ export interface AsyncAPIPluginOptions {
   server: AsyncAPIServer;
 }
 
-function isAsyncAPI(data: object): data is AsyncAPIPageData {
-  return 'getAsyncAPIPageProps' in data && typeof data.getAsyncAPIPageProps === 'function';
-}
+const isAsyncAPI = (data: object): data is AsyncAPIPageData =>
+  isPageDataOf<AsyncAPIPageData>(data, 'getAsyncAPIPageProps');
 
 /**
  * Render the pages of `asyncapi.staticSource()` and serve their documents, requires `@fumadocs/asyncapi`.

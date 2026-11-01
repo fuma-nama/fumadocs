@@ -3,7 +3,6 @@ import path from 'node:path';
 import type { Feature, FeatureContext } from '@/features';
 import { addImport, appendJsxChildren, findJsxElement } from '@/codemod';
 import { docs } from './docs';
-import { astroPage } from './docs/templates';
 import { astroModule, findSource, requiresManaged } from './utils';
 
 /** Astro Actions are the server functions of Astro, they validate the feedback with its schema */
@@ -54,7 +53,7 @@ export const feedback: Feature = {
     // Astro renders docs pages with the `page` module of the Fumadocs integration
     const page =
       framework === 'astro'
-        ? await astroModule(ctx, 'page', astroPage())
+        ? await astroModule(ctx, 'page')
         : await findSource(cwd, path.join(baseDir, info.routesDir), '<DocsPage');
     const edited =
       page !== undefined &&

@@ -3,10 +3,11 @@ import path from 'node:path';
 import type { Feature } from '@/features';
 import type { Framework, I18nInfo } from '@/project';
 import { type FormattedRoute, formatRoute, reactRouterTypes } from '@/project/route';
-import { addElements, addVitePlugin, getConfigObject, getProperty } from '@/codemod';
+import { addElements, getConfigObject, getProperty } from '@/codemod';
 import { docs } from './docs';
 import { extendNextProxy } from './llms';
 import {
+  addAstroPlugin,
   addPageUrl,
   registerReactRouterRoutes,
   requiresManaged,
@@ -143,24 +144,13 @@ export const og: Feature<{ engine: Engine }> = {
     return content.includes(fumadocsConfig ? 'takumiPlugin(' : 'getPageImageUrl');
   },
   async apply(ctx, { engine }) {
-    const { baseDir, configFile, fumadocsConfig, i18n, source, framework } = ctx.project;
+    const { baseDir, configFile, i18n, source, framework } = ctx.project;
     if (engine === 'next-og' && framework !== 'next')
       throw new Error('next/og is only available on Next.js');
     if (engine === 'takumi') ctx.addDependencies({ 'takumi-js': null });
     if (framework === 'astro') {
-      let added = false;
-      if (fumadocsConfig)
-        await ctx.source(fumadocsConfig, (file) => {
-          added = addVitePlugin(file, {
-            name: 'takumiPlugin',
-            from: '@fumadocs/astro/plugins/takumi',
-          });
-        });
-      ctx.note(
-        added
-          ? 'Docs pages link their image with `og:image`, served under `/og`.'
-          : "Add `takumiPlugin()` from '@fumadocs/astro/plugins/takumi' to the `plugins` of your Fumadocs config.",
-      );
+      if (await addAstroPlugin(ctx, 'takumiPlugin', '@fumadocs/astro/plugins/takumi'))
+        ctx.note('Docs pages link their image with `og:image`, served under `/og`.');
       return;
     }
 

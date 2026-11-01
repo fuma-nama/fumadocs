@@ -2,9 +2,10 @@ import path from 'node:path';
 import type { Feature } from '@/features';
 import type { Framework } from '@/project';
 import { type FormattedRoute, formatRoute, routeModule } from '@/project/route';
-import { addReactRouterPrerenderArray, addVitePlugin } from '@/codemod';
+import { addReactRouterPrerenderArray } from '@/codemod';
 import { addDocsLlms, llms } from './llms';
 import {
+  addAstroPlugin,
   registerReactRouterRoutes,
   requiresManaged,
   requiresMarkdown,
@@ -54,18 +55,10 @@ export const mcp: Feature = {
     return project.framework === 'astro' ? requiresManaged(project) : requiresMarkdown(project);
   },
   async apply(ctx) {
-    const { baseDir, framework, fumadocsConfig } = ctx.project;
+    const { baseDir, framework } = ctx.project;
     ctx.addDependencies({ '@modelcontextprotocol/server': null, zod: null });
     if (framework === 'astro') {
-      let added = false;
-      if (fumadocsConfig)
-        await ctx.source(fumadocsConfig, (file) => {
-          added = addVitePlugin(file, { name: 'mcpPlugin', from: '@fumadocs/astro/plugins/mcp' });
-        });
-      if (!added)
-        ctx.note(
-          "Add `mcpPlugin()` from '@fumadocs/astro/plugins/mcp' to the `plugins` of your Fumadocs config.",
-        );
+      await addAstroPlugin(ctx, 'mcpPlugin', '@fumadocs/astro/plugins/mcp');
     } else {
       await addDocsLlms(ctx);
       const route = mcpRoute(framework);

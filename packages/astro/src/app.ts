@@ -12,7 +12,7 @@ import { i18nProvider } from 'fumadocs-ui/i18n';
 import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
 import { SearchDialog, useSearch } from 'virtual:fumadocs/layout';
 import type { ProviderData } from './ui/provider';
-import { NoProcessedMarkdownError } from './shared';
+import { NoProcessedMarkdownError, trimSlash } from './shared';
 import { toPageBody } from './island-node';
 import { llmsPlugin } from './plugins/llms.txt';
 import { oramaSearchPlugin } from './plugins/orama-search';
@@ -292,9 +292,13 @@ async function collectionBody(page: AnyPage): Promise<PageBody | undefined> {
 }
 
 /** the UI translations of a language */
-export function getTranslations() {
+let translations: FumadocsConfig['translations'] | null;
+
+/** the same for every page, created once */
+function getTranslations() {
+  if (translations !== undefined) return translations ?? undefined;
   const i18n = app.source._i18n;
-  const translations = config.translations ?? (i18n && defineI18n(i18n).translations());
+  translations = config.translations ?? (i18n ? defineI18n(i18n).translations() : null);
   if (!translations) return;
   for (const plugin of app.plugins) {
     if (plugin.translations) translations.extend(plugin.translations);
@@ -391,9 +395,6 @@ export async function getStaticPaths<T extends Route['type']>(type: T, param: st
 }
 
 const methods: Method[] = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'];
-
-/** with `trailingSlash`, a URL matches with or without the slash */
-const trimSlash = (url: string) => url.replace(/(.)\/$/, '$1');
 
 let serverRoutes: Promise<Map<string, Route>> | undefined;
 

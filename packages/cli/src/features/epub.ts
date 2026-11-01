@@ -2,9 +2,15 @@ import path from 'node:path';
 import type { Feature } from '@/features';
 import type { Framework } from '@/project';
 import { type FormattedRoute, formatRoute, routeModule } from '@/project/route';
-import { addReactRouterPrerenderArray, enableProcessedMarkdown } from '@/codemod';
+import { addReactRouterPrerenderArray } from '@/codemod';
 import { docs } from './docs';
-import { registerReactRouterRoutes, requiresMarkdown, type SourceRef, sourceRef } from './utils';
+import {
+  includeProcessedMarkdown,
+  registerReactRouterRoutes,
+  requiresMarkdown,
+  type SourceRef,
+  sourceRef,
+} from './utils';
 
 /** Astro inlines `import.meta.env` at build time, `getSecret()` reads secrets at runtime */
 const api = ({ dynamic, ref }: SourceRef, astro: boolean) => `import { ${ref} } from '@/lib/source';
@@ -36,15 +42,10 @@ export const epub: Feature = {
   supports: (project) =>
     project.static ? 'the export route needs a server at runtime' : requiresMarkdown(project),
   async apply(ctx) {
-    const { baseDir, source, framework } = ctx.project;
+    const { baseDir, framework } = ctx.project;
     ctx.addDependencies({ 'fumadocs-epub': null });
 
-    if (source.collections) {
-      await ctx.source(source.collections, (file) => {
-        if (!enableProcessedMarkdown(file))
-          throw new Error(`cannot enable \`includeProcessedMarkdown\` in ${source.collections}`);
-      });
-    }
+    await includeProcessedMarkdown(ctx);
 
     const route = formatRoute({ segments: ['export/epub'] }, framework, null);
     await ctx.write(

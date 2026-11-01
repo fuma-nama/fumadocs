@@ -3,8 +3,16 @@ import path from 'node:path';
 import type { Project } from '@/project';
 import type { FormattedRoute } from '@/project/route';
 import type { FeatureContext, PackageJson } from '@/features';
-import { addImport, addReactRouterRoute, ensureAstroOption, type SourceFile } from '@/codemod';
+import {
+  addImport,
+  addReactRouterRoute,
+  addVitePlugin,
+  enableProcessedMarkdown,
+  ensureAstroOption,
+  type SourceFile,
+} from '@/codemod';
 import { exists } from '@/utils/fs';
+import { astroPage, layoutShared } from './docs/templates';
 
 /** the shallowest `.ts`/`.tsx` file under `dir` whose content includes `needle`, relative to `cwd` */
 export async function findSource(
@@ -110,7 +118,43 @@ export const requiresManaged = (project: Project) =>
   project.fumadocsConfig !== undefined ||
   'requires `src/fumadocs.config.ts` of `@fumadocs/astro`, run `fumadocs feature docs` to set up the managed integration';
 
-const astroModules = { layout: 'lib/layout.shared.tsx', page: 'components/docs.tsx' };
+/** features reading page Markdown, from the managed setup on Astro */
+export const requiresManagedMarkdown = (project: Project) => {
+  const managed = requiresManaged(project);
+  return managed === true ? requiresMarkdown(project) : managed;
+};
+
+/** enable `includeProcessedMarkdown` on the collections of the project, if any */
+export async function includeProcessedMarkdown(ctx: FeatureContext) {
+  const { collections } = ctx.project.source;
+  if (!collections) return;
+  await ctx.source(collections, (file) => {
+    if (!enableProcessedMarkdown(file))
+      throw new Error(`cannot enable \`includeProcessedMarkdown\` in ${collections}`);
+  });
+}
+
+/**
+ * Add a plugin to the `plugins` of the Fumadocs config on Astro, otherwise note it
+ *
+ * @returns `false` if it cannot be added
+ */
+export async function addAstroPlugin(ctx: FeatureContext, name: string, from: string) {
+  const { fumadocsConfig } = ctx.project;
+  let added = false;
+  if (fumadocsConfig)
+    await ctx.source(fumadocsConfig, (file) => {
+      added = addVitePlugin(file, { name, from });
+    });
+  if (!added)
+    ctx.note(`Add \`${name}()\` from '${from}' to the \`plugins\` of your Fumadocs config.`);
+  return added;
+}
+
+const astroModules = {
+  layout: { file: 'lib/layout.shared.tsx', content: layoutShared(null) },
+  page: { file: 'components/docs.tsx', content: astroPage() },
+};
 
 /**
  * The file of a module option of the Fumadocs integration in an Astro config, set to the default path when missing
@@ -122,7 +166,7 @@ export function astroModuleFile(
   project: Project,
   name: keyof typeof astroModules,
 ): string | undefined {
-  const fallback = `./${posix(path.join(project.baseDir, astroModules[name]))}`;
+  const fallback = `./${posix(path.join(project.baseDir, astroModules[name].file))}`;
   const specifier = ensureAstroOption(file, name, fallback);
   if (specifier?.startsWith('.')) return path.normalize(specifier);
 }
@@ -135,7 +179,7 @@ export function astroModuleFile(
 export async function astroModule(
   ctx: FeatureContext,
   name: keyof typeof astroModules,
-  content: string,
+  content = astroModules[name].content,
 ): Promise<string | undefined> {
   const { cwd, configFile } = ctx.project;
   if (!configFile) return;

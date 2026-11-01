@@ -1,6 +1,7 @@
 import type { FileObject, ScanResult, UrlMeta, ValidateConfig } from 'next-validate-link';
 import { publicDir, root, srcDir } from 'virtual:fumadocs/config';
 import type { App, Plugin } from '../app';
+import { trimSlash } from '../shared';
 
 export type LinkValidationOptions = Omit<ValidateConfig, 'scanned'>;
 
@@ -33,7 +34,7 @@ async function validateLinks(app: App, options: LinkValidationOptions) {
   const scanned: ScanResult = { urls: new Map(), fallbackUrls: [] };
   // with `trailingSlash`, a link has the slash or not
   const add = (url: string, meta: UrlMeta = {}) => {
-    const trimmed = url.replace(/(.)\/$/, '$1');
+    const trimmed = trimSlash(url);
     scanned.urls.set(trimmed, meta);
     scanned.urls.set(trimmed.endsWith('/') ? trimmed : `${trimmed}/`, meta);
   };

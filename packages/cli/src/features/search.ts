@@ -13,7 +13,6 @@ import {
   findJsxElement,
 } from '@/codemod';
 import { docs } from './docs';
-import { layoutShared } from './docs/templates';
 import {
   astroModule,
   astroModuleFile,
@@ -560,7 +559,7 @@ export const search: Feature<{ provider: SearchProvider }> = {
 
     if (framework === 'astro') {
       // the Fumadocs integration takes the dialog from the layout module
-      const layout = await astroModule(ctx, 'layout', layoutShared(null));
+      const layout = await astroModule(ctx, 'layout');
       const edited =
         layout !== undefined &&
         (await ctx.source(layout, (file) => {
