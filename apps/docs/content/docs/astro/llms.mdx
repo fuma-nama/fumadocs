@@ -15,6 +15,20 @@ Your site serves the Markdown of your docs by default, from `llmsPlugin()`:
 
 Docs pages link to their Markdown in the page actions, as `page.markdownUrl`.
 
+### `Accept`
+
+A request for a page that prefers Markdown (`Accept: text/markdown`) gets its Markdown with `Vary: Accept`. It requires docs pages rendered on request, with [`output: 'server'`](https://docs.astro.build/en/guides/on-demand-rendering/):
+
+```js title="astro.config.mjs"
+export default defineConfig({
+  output: 'server', // [!code ++]
+  adapter: node({ mode: 'standalone' }),
+  // ...
+});
+```
+
+Prerendered pages are static files, hosts serve them without running Astro.
+
 ## Processed Markdown
 
 The routes serve the source of your MDX files by default. To serve the processed Markdown of [Remark LLMs](/docs/headless/mdx/remark-llms), enable `includeProcessedMarkdown`, it takes the same options:
@@ -56,4 +70,49 @@ await page.data.getText('processed');
 
 // with `output: 'function'`, render with other components
 await page.data.getText('processed', { components });
+```
+
+## MCP Server
+
+`mcpPlugin()` serves a [MCP server](/docs/integrations/llms#mcp-server) at `/api/mcp`, with tools to list, read and search your pages. It renders on request, with an [adapter](https://docs.astro.build/en/guides/on-demand-rendering/).
+
+```npm
+npm i @modelcontextprotocol/server zod
+```
+
+```ts title="src/fumadocs.config.ts"
+import { defineConfig } from '@fumadocs/astro/config';
+import { mcpPlugin } from '@fumadocs/astro/plugins/mcp'; // [!code ++]
+import { source } from './lib/source';
+
+export default defineConfig({
+  source,
+  plugins: [mcpPlugin()], // [!code ++]
+});
+```
+
+Or with Fumadocs CLI:
+
+```npm
+npx @fumadocs/cli feature mcp
+```
+
+Pages are read like the [Markdown routes](#routes), from every content source.
+
+<auto-type-table path="./props.ts" name="MCPOptions" />
+
+For example, register a tool with `tools`:
+
+```ts title="src/fumadocs.config.ts"
+import { z } from 'zod';
+
+mcpPlugin({
+  tools(server) {
+    server.registerTool(
+      'get_site_name',
+      { description: 'The name of the site', inputSchema: z.object({}) },
+      async () => ({ content: [{ type: 'text', text: this.config.title ?? '' }] }),
+    );
+  },
+});
 ```

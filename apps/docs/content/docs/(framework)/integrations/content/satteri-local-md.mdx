@@ -88,6 +88,11 @@ Pass a function to build the options lazily.
 
 ## Usage
 
+<Callout title="Astro">
+  Pass `await getSource()` as `source`, the pages render with no setup, see [Other Content
+  Sources](/docs/astro/content#other-content-sources).
+</Callout>
+
 Read the source in your route or layout and render it with Fumadocs UI, exactly as with `@fumadocs/local-md`:
 
 ```tsx title="app/docs/layout.tsx"

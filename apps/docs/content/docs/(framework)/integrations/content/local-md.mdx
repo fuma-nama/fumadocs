@@ -67,6 +67,11 @@ const docs = localMd({
 
 ## Usage
 
+<Callout title="Astro">
+  Pass `await getSource()` as `source`, the pages render with no setup, see [Other Content
+  Sources](/docs/astro/content#other-content-sources).
+</Callout>
+
 `getSource()` returns a normal [content loader](/docs/headless/source-api), render pages with it:
 
 ```tsx tab="Next.js" title="app/docs/layout.tsx"

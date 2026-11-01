@@ -63,6 +63,11 @@ export function getSource() {
 
 The example keeps its vault in `public/vault`, allowing Next.js to serve attachments at the URLs returned by `url`. You can keep the vault elsewhere when your app serves or uploads its attachments separately.
 
+<Callout title="Astro">
+  Pass `await getSource()` as `source`, the pages render with no setup. Add `fumadocs-obsidian/ui`
+  to your MDX components, see [Other Content Sources](/docs/astro/content#other-content-sources).
+</Callout>
+
 Then load and render a page:
 
 ```tsx title="app/docs/[[...slug]]/page.tsx"

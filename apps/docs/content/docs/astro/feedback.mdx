@@ -1,0 +1,48 @@
+---
+title: Feedback
+description: Receive feedback from your readers.
+---
+
+## Setup
+
+The [Feedback](/docs/integrations/feedback) component sends feedback from the browser, handle it on your server with an [Astro Action](https://docs.astro.build/en/guides/actions/). Actions render on request, with an [adapter](https://docs.astro.build/en/guides/on-demand-rendering/).
+
+```npm
+npx @fumadocs/cli feature feedback
+```
+
+It installs the component, adds it to your [`page` module](/docs/astro/layouts#docs-page), and creates the action:
+
+```ts title="src/actions/index.ts"
+import { defineAction } from 'astro:actions';
+import { pageFeedback, type ActionResponse } from '@/components/feedback/schema';
+
+export const server = {
+  pageFeedback: defineAction({
+    // validates the input
+    input: pageFeedback,
+    async handler(feedback): Promise<ActionResponse> {
+      console.log(feedback);
+      return {};
+    },
+  }),
+};
+```
+
+The component calls it in `onSendAction`:
+
+```tsx title="src/components/docs.tsx"
+import { actions } from 'astro:actions';
+import { Feedback } from '@/components/feedback/client';
+
+<DocsPage toc={page.toc} full={page.full}>
+  {children}
+  <Feedback onSendAction={actions.pageFeedback.orThrow} /> {/* [!code ++] */}
+</DocsPage>;
+```
+
+For [block feedback](/docs/integrations/feedback#feedback-block), add a `blockFeedback` action with the `blockFeedback` schema, and pass it to `FeedbackText` the same way.
+
+Without an adapter, the CLI keeps `onSendAction` in the browser, send the feedback from there, like to your analytics.
+
+To report feedback to GitHub Discussions, call `onPageFeedbackAction()` of the [GitHub integration](/docs/integrations/feedback#integrating-with-github-discussion) in the handler.

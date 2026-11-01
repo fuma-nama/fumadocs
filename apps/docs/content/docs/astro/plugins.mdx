@@ -18,16 +18,20 @@ export default defineConfig({
 });
 ```
 
-| Plugin                | Import                                 | Feature                                     |
-| --------------------- | -------------------------------------- | ------------------------------------------- |
-| `oramaSearchPlugin()` | `@fumadocs/astro/plugins/orama-search` | [Search](/docs/astro/search)                |
-| `flexsearchPlugin()`  | `@fumadocs/astro/plugins/flexsearch`   | [FlexSearch](/docs/astro/search#flexsearch) |
-| `llmsPlugin()`        | `@fumadocs/astro/plugins/llms.txt`     | [LLMs](/docs/astro/llms)                    |
-| `takumiPlugin()`      | `@fumadocs/astro/plugins/takumi`       | [OG Images](/docs/astro/og-image)           |
-| `gitPlugin()`         | `@fumadocs/astro/plugins/git`          | [Git](/docs/astro/git)                      |
-| `openapiPlugin()`     | `@fumadocs/astro/plugins/openapi`      | [OpenAPI](/docs/astro/openapi)              |
-| `asyncapiPlugin()`    | `@fumadocs/astro/plugins/asyncapi`     | [AsyncAPI](/docs/astro/asyncapi)            |
-| `graphqlPlugin()`     | `@fumadocs/astro/plugins/graphql`      | [GraphQL](/docs/astro/graphql)              |
+| Plugin                   | Import                                    | Feature                                      |
+| ------------------------ | ----------------------------------------- | -------------------------------------------- |
+| `oramaSearchPlugin()`    | `@fumadocs/astro/plugins/orama-search`    | [Search](/docs/astro/search)                 |
+| `flexsearchPlugin()`     | `@fumadocs/astro/plugins/flexsearch`      | [FlexSearch](/docs/astro/search#flexsearch)  |
+| `llmsPlugin()`           | `@fumadocs/astro/plugins/llms.txt`        | [LLMs](/docs/astro/llms)                     |
+| `takumiPlugin()`         | `@fumadocs/astro/plugins/takumi`          | [OG Images](/docs/astro/og-image)            |
+| `gitPlugin()`            | `@fumadocs/astro/plugins/git`             | [Git](/docs/astro/git)                       |
+| `linkValidationPlugin()` | `@fumadocs/astro/plugins/link-validation` | [Validate Links](/docs/astro/validate-links) |
+| `mcpPlugin()`            | `@fumadocs/astro/plugins/mcp`             | [MCP](/docs/astro/llms#mcp-server)           |
+| `openapiPlugin()`        | `@fumadocs/astro/plugins/openapi`         | [OpenAPI](/docs/astro/openapi)               |
+| `asyncapiPlugin()`       | `@fumadocs/astro/plugins/asyncapi`        | [AsyncAPI](/docs/astro/asyncapi)             |
+| `graphqlPlugin()`        | `@fumadocs/astro/plugins/graphql`         | [GraphQL](/docs/astro/graphql)               |
+| `notionPlugin()`         | `@fumadocs/astro/plugins/notion`          | [Notion](/docs/integrations/content/notion)  |
+| `sanityPlugin()`         | `@fumadocs/astro/plugins/sanity`          | [Sanity](/docs/integrations/content/sanity)  |
 
 ### Default Plugins
 
@@ -88,27 +92,36 @@ plugins: [myPlugin(), import.meta.env.PROD && takumiPlugin()];
 
 ### Content Sources
 
-Pages from other [content sources](/docs/headless/source-api/source), joined with `multiple()`, are rendered by a plugin. `getBody()` returns their content as React nodes, rendered with your MDX components (`this.components`) so they hydrate like MDX content:
+The pages of your own [content source](/docs/headless/source-api/source) are rendered by a plugin, the official ones have [plugins](/docs/astro/content#other-content-sources). `getBody()` returns their content as React nodes, rendered with your MDX components (`this.components`) so they hydrate like MDX content.
 
-```ts title="src/lib/local-md-plugin.ts"
+For example, pages with MDX from a CMS, compiled by [MDX Remote](/docs/integrations/content/mdx-remote):
+
+```ts title="src/lib/cms-plugin.ts"
 import type { Plugin } from '@fumadocs/astro/config';
+import { createCompiler } from '@fumadocs/mdx-remote';
+import { createElement } from 'react';
 
-export function localMdPlugin(): Plugin {
+const compiler = createCompiler();
+
+/** renders pages with MDX in `page.data.mdx` */
+export function cmsPlugin(): Plugin {
   return {
-    name: 'local-md',
+    name: 'cms',
     async getBody(page) {
-      if (!('content' in page.data)) return;
-      const { body, toc } = await (await page.data.load()).render(this.components);
-      return { node: body, toc };
+      const { mdx } = page.data as { mdx?: string };
+      if (typeof mdx !== 'string') return;
+      const { body, toc } = await compiler.compile({ source: mdx });
+      return { node: createElement(body, { components: this.components }), toc };
     },
     getText(page) {
-      if ('content' in page.data) return page.data.content;
+      const { mdx } = page.data as { mdx?: string };
+      if (typeof mdx === 'string') return mdx;
     },
   };
 }
 ```
 
-A `lastModified` date on page data shows as the last updated time of pages.
+Search indexes the `structuredData` of page data, and a `lastModified` date shows as the last updated time of pages.
 
 ### Server Routes
 
