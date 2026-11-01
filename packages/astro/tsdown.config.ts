@@ -15,6 +15,7 @@ export default defineConfig({
     'src/config.ts',
     'src/app.ts',
     'src/navigation.ts',
+    'src/markdown.ts',
     'src/ui/*.{ts,tsx}',
     'src/plugins/*.ts',
     'src/routes/*.ts',
@@ -28,7 +29,14 @@ export default defineConfig({
   // imported by the generated code and `.astro` files
   exports: {
     enabled: true,
-    exclude: ['./island', './navigation', './app', /^(\.\/)?routes\//, /^(\.\/)?ui\//],
+    exclude: [
+      './island',
+      './navigation',
+      './markdown',
+      './app',
+      /^(\.\/)?routes\//,
+      /^(\.\/)?ui\//,
+    ],
     customExports: {
       './components/*': './dist/components/*',
     },

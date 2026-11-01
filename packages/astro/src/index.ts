@@ -14,7 +14,7 @@ import type {
 } from 'satteri';
 import { applySatteriPreset, type DefaultSatteriOptions } from '@fumadocs/satteri/preset';
 import { remarkInclude } from '@fumadocs/satteri/remark-include';
-import { remarkLlms } from '@fumadocs/satteri/remark-llms';
+import { remarkLlms, type LLMsOptions } from '@fumadocs/satteri/remark-llms';
 import { islandPlugin } from './island-plugin';
 import { dataKey, type FumadocsData } from './shared';
 
@@ -37,11 +37,13 @@ export interface CollectionOptions extends Pick<
   components?: string;
 
   /**
-   * Enable `getText('processed')` on pages.
+   * Enable `getText('processed')` on pages, `true` or the options of `remarkLLMs`.
+   *
+   * With `output: 'function'`, JSX elements are rendered by the MDX components, which define their Markdown form with `asMarkdown()`.
    *
    * @defaultValue false
    */
-  includeProcessedMarkdown?: boolean;
+  includeProcessedMarkdown?: boolean | Omit<LLMsOptions, 'as'>;
 }
 
 export interface FumadocsOptions extends CollectionOptions {
@@ -123,6 +125,21 @@ const exportData: HastPluginDefinition = {
   },
 };
 
+/** register the function output of `remarkLlms()` for `getText('processed')`, with the MDX components of the island */
+function registerMarkdown(root: string, island?: string): MdastPluginEntry {
+  return ({ fileURL }) => ({
+    name: 'fumadocs-astro-markdown',
+    after(tree, ctx) {
+      const file = path.relative(root, fileURLToPath(fileURL!)).replaceAll(path.sep, '/');
+      ctx.prependChild(tree, {
+        type: 'mdxjsEsm',
+        value: `import { registerMarkdown as _registerMarkdown } from ${JSON.stringify(internalModule('markdown'))};
+${island ? `import { components as _components } from ${JSON.stringify(island)};\n` : ''}export const _fumadocsMarkdown = _registerMarkdown(${JSON.stringify(file)}, _markdown${island ? ', _components' : ''});`,
+      });
+    },
+  });
+}
+
 /**
  * The Astro integration of Fumadocs, it runs the MDX features of Fumadocs on the Sätteri processor of Astro.
  *
@@ -172,20 +189,26 @@ export default function fumadocs({
           };
           dirs[name] = dir;
           let island: HastPluginEntry;
+          let islandId: string | undefined;
           if (components || appFile) {
-            const id = `virtual:fumadocs/island/${name}`;
+            const id = (islandId = `virtual:fumadocs/island/${name}`);
             // resolved from the project rather than this package
-            modules[id] = appFile
-              ? // with the providers of Fumadocs pages
-                `import components from ${userModule(root, components ?? 'fumadocs-ui/mdx')};
-import { createContentIsland } from ${JSON.stringify(internalModule('ui/content'))};
+            modules[id] =
+              `import components from ${userModule(root, components ?? 'fumadocs-ui/mdx')};
+${
+  appFile
+    ? // with the providers of Fumadocs pages
+      `import { createContentIsland } from ${JSON.stringify(internalModule('ui/content'))};
 export const FumadocsIsland = createContentIsland(components);`
-              : `import components from ${userModule(root, components!)};
-import { createIsland } from ${JSON.stringify(islandFile)};
-export const FumadocsIsland = createIsland(components);`;
+    : `import { createIsland } from ${JSON.stringify(islandFile)};
+export const FumadocsIsland = createIsland(components);`
+}
+export { components };`;
             // the plugin has the state of a file
             island = () => islandPlugin(id);
           }
+          const llms =
+            includeProcessedMarkdown === true ? {} : includeProcessedMarkdown || undefined;
 
           const preset = await applySatteriPreset({
             ...options,
@@ -202,7 +225,9 @@ export const FumadocsIsland = createIsland(components);`;
             mdastPlugins: [
               include,
               preset.mdastPlugins,
-              includeProcessedMarkdown && remarkLlms({ as: '' }),
+              llms?.output === 'function'
+                ? [remarkLlms({ ...llms, as: '_markdown' }), registerMarkdown(root, islandId)]
+                : llms && remarkLlms({ ...llms, as: '' }),
               hideCode,
             ],
             hastPlugins: [restoreCode, preset.hastPlugins, exportData, island],

@@ -10,3 +10,4 @@ packages:
 - Replace the search engine with `useSearch()` or the dialog with `SearchDialog`, exported from the `layout` module.
 - Add `takumiPlugin()` for OG images and `openapiPlugin()` for OpenAPI pages.
 - Add `HomeLayout.astro` for your own pages.
+- Support `includeProcessedMarkdown: { output: 'function' }`: MDX components define their Markdown form with `asMarkdown()`.

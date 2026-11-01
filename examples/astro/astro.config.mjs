@@ -9,7 +9,7 @@ export default defineConfig({
       components: './src/components/mdx.tsx',
       layout: './src/lib/layout.shared.tsx',
       page: './src/components/docs.tsx',
-      includeProcessedMarkdown: true,
+      includeProcessedMarkdown: { output: 'function' },
     }),
   ],
   vite: {

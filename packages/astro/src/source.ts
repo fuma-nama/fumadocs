@@ -1,8 +1,10 @@
 import { render } from 'astro:content';
 import type { AstroComponentFactory } from 'astro/runtime/server/index.js';
+import type { ElementType } from 'react';
 import type { MetaData, PageData, StaticSource, VirtualFile } from 'fumadocs-core/source';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
 import type { TOCItemType } from 'fumadocs-core/toc';
+import { renderMarkdown } from './markdown';
 import { dataKey, type FumadocsData } from './shared';
 
 /** an entry of `pageLoader()` */
@@ -35,8 +37,17 @@ export type AstroPageData<Entry extends PageEntry = PageEntry> = Entry['data'] &
    * - `raw`: the source file, without frontmatter.
    * - `processed`: the Markdown processed by Fumadocs, requires `includeProcessedMarkdown`.
    */
-  getText: (type: 'raw' | 'processed') => Promise<string>;
+  getText: (type: 'raw' | 'processed', options?: GetTextOptions) => Promise<string>;
 };
+
+export interface GetTextOptions {
+  /**
+   * MDX components for JSX elements in the output, only available with `output: 'function'` in `includeProcessedMarkdown`.
+   *
+   * @defaultValue the MDX components of the collection
+   */
+  components?: Record<string, ElementType>;
+}
 
 /**
  * Create a Fumadocs source from Astro content collections, loaded by `pageLoader()` and `metaLoader()`.
@@ -71,9 +82,13 @@ function pageData<Entry extends PageEntry>(entry: Entry): AstroPageData<Entry> {
     async structuredData() {
       return (await compile()).data.structuredData;
     },
-    async getText(type) {
+    async getText(type, options) {
       if (type === 'raw') return entry.body ?? '';
       const { markdown } = (await compile()).data;
+      // compiling registers the function output
+      const rendered =
+        entry.filePath && (await renderMarkdown(entry.filePath, options?.components));
+      if (rendered !== undefined) return rendered;
       if (markdown === undefined)
         throw new Error(
           "getText('processed') requires `includeProcessedMarkdown` in the options of the Fumadocs integration.",
