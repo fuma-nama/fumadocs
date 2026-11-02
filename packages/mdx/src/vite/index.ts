@@ -1,4 +1,4 @@
-import { type Plugin, runnerImport } from 'vite';
+import { type Plugin, type UserConfig, runnerImport } from 'vite';
 import { buildConfig } from '@/config/build';
 import { createMdxLoader } from '@/loaders/mdx';
 import { toVite } from '@/loaders/adapter';
@@ -14,13 +14,15 @@ import type { MacroEvaluator } from '@/macro/eval';
 import { MacroModuleId, resolveMacroOptions, type MacroPluginOption } from '@/macro/options';
 import type { GlobalConfig } from '@/config';
 
-function createMacroEvaluator(root: string): MacroEvaluator {
+function createMacroEvaluator(root: string, resolve: UserConfig['resolve']): MacroEvaluator {
   return async ({ entry, transform }) => {
     const inputs = new Set<string>();
     inputs.add(entry);
 
     const { dependencies } = await runnerImport(entry, {
       root,
+      // without a config file, so the app's aliases like `resolve.tsconfigPaths` apply
+      resolve,
       plugins: [
         {
           name: 'fumadocs-mdx:macro-config',
@@ -112,7 +114,7 @@ export default function mdx(
             root: core.root,
             outDir: core.outDir,
             isDev: env.command === 'serve',
-            evaluator: createMacroEvaluator(core.root),
+            evaluator: createMacroEvaluator(core.root, config.resolve),
           });
         }
 
