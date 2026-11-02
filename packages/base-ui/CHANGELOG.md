@@ -1,3 +1,13 @@
+## @fumadocs/base-ui@16.17.10
+
+### Use `ScrollArea.Content` for Base UI
+
+
+
+### Cheaper restyles on DOM changes in layouts
+
+- The `layout:` variant matches direct children of the layout (up to three levels down in Spacious), so inserting or removing nodes no longer re-checks the whole layout for its variables.
+
 ## @fumadocs/base-ui@16.17.9
 
 ### Keep the theme on Astro navigations
