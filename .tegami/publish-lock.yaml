@@ -1,130 +1,198 @@
 core:changelogs:
-  - content: "---\npackages:\n  fumadocs-openapi:\n    type: patch\n---\n\n### Fix OAuth handler redirects that other subdomains could control\n\n`createOAuthHandler()` read the page to return to from a cookie, which other subdomains could set to send authorization codes and tokens to another site. The page is now kept in `sessionStorage`, and the handler sends users back from the browser.\n\nIt loads its script from the same route, Content Security Policies need to allow `'self'` scripts there (without `'strict-dynamic'`), or leave the route out.\n"
-    filename: 2026-10-30-openapi-oauth-handler-session-storage.md
+  - content: "---\npackages:\n  \"@fumadocs/astro\":\n    type: patch\n---\n\n### Managed setup\n\n- With `src/fumadocs.config.ts`, Fumadocs creates the routes of docs pages, search, `llms.txt` and the 404 page, and renders the layout.\n- Customize the UI with the `layout` and `page` options, your own React modules; `css` loads your stylesheet.\n- Replace the search engine with `useSearch()` or the dialog with `SearchDialog`, exported from the `layout` module.\n- Add `takumiPlugin()` for OG images and `openapiPlugin()` for OpenAPI pages.\n- Add `HomeLayout.astro` for your own pages.\n- Support `includeProcessedMarkdown: { output: 'function' }`: MDX components define their Markdown form with `asMarkdown()`.\n"
+    filename: 2026-11-01-astro-managed-setup.md
+    v: 0.0.0
+  - content: "---\npackages:\n  fumadocs-openapi:\n    type: patch\n  \"@fumadocs/asyncapi\":\n    type: patch\n  \"@fumadocs/language\":\n    type: patch\n---\n\n### Unions of `const` members and `string` suggest their values\n\n- In the playground, a `oneOf`/`anyOf` of `const` strings and `string` is one input that suggests the `const` members, labelled by their `title` and filtered as you type, while it still takes any string, instead of a switch between members.\n"
+    filename: 2026-10-30-openapi-suggested-values.md
+    v: 0.0.0
+  - content: "---\npackages:\n  \"@fumadocs/cli\":\n    type: patch\n  create-fumadocs-app:\n    type: patch\n---\n\n### Managed setup of Astro\n\n- Set up Astro with the managed setup of `@fumadocs/astro`, without routes, layouts or providers in your app.\n- On Astro, `og`, `llms`, `search`, `feedback` and `customise` extend `src/fumadocs.config.ts` and the `layout` and `page` modules.\n"
+    filename: 2026-11-01-cli-astro-managed-setup.md
+    v: 0.0.0
+  - content: "---\npackages:\n  npm:@fumadocs/base-ui:\n    type: patch\n---\n\n## Use `ScrollArea.Content` for Base UI\n"
+    filename: 2026-10-31-mvvynku6.md
+    v: 0.0.0
+  - content: "---\npackages:\n  fumadocs-ui:\n    type: patch\n  \"@fumadocs/base-ui\":\n    type: patch\n---\n\n### Cheaper restyles on DOM changes in layouts\n\n- The `layout:` variant matches direct children of the layout (up to three levels down in Spacious), so inserting or removing nodes no longer re-checks the whole layout for its variables.\n"
+    filename: 2026-11-01-layout-variant-child.md
+    v: 0.0.0
+  - content: "---\npackages:\n  \"@fumadocs/notion\":\n    type: patch\n---\n\n### Safer file proxy and links\n\n- `createNotionFileHandler()` caches each file once for all forms of its IDs (case, dashes).\n- `//host` and `/\\host` links and embeds are treated as other hosts, not paths of the site.\n"
+    filename: 2026-11-02-notion-file-proxy.md
+    v: 0.0.0
+  - content: "---\npackages:\n  \"@fumadocs/tailwind\":\n    type: patch\n---\n\n### Cheaper restyles in `prose` content\n\n- Table row borders check only a cell's own row, so an element that stops or starts being a last child (for example when a node is appended to the page) no longer restyles its whole subtree.\n"
+    filename: 2026-11-01-prose-table-rows.md
     v: 0.0.0
 core:packages:
+  - changelogIds:
+      - 2026-11-01-astro-managed-setup.md
+    id: npm:@fumadocs/astro
+    updated: true
   - id: npm:@fumadocs/ai-chat
-    updated: false
-  - id: npm:@fumadocs/astro
-    updated: false
-  - id: npm:@fumadocs/asyncapi
-    updated: false
-  - id: npm:@fumadocs/base-ui
-    updated: false
-  - id: npm:@fumadocs/basehub
-    updated: false
-  - id: npm:@fumadocs/changelog
-    updated: false
-  - id: npm:@fumadocs/cli
-    updated: false
-  - id: npm:@fumadocs/content
-    updated: false
-  - id: npm:@fumadocs/content-collections
-    updated: false
-  - id: npm:fumadocs-core
-    updated: false
-  - id: npm:create-fumadocs-app
-    updated: false
-  - id: npm:create-fumadocs-versions
-    updated: false
-  - id: npm:fumadocs-docgen
-    updated: false
-  - id: npm:fumadocs-epub
-    updated: false
-  - id: npm:@fumadocs/graphql
-    updated: false
-  - id: npm:@fumari/image-size
-    updated: false
-  - id: npm:@fumadocs/json-schema
-    updated: false
-  - id: npm:@fumadocs/language
-    updated: false
-  - id: npm:@fumadocs/local-content
-    updated: false
-  - id: npm:@fumadocs/local-html
-    updated: false
-  - id: npm:@fumadocs/local-md
-    updated: false
-  - id: npm:fumadocs-mdx
-    updated: false
-  - id: npm:@fumadocs/mdx-remote
-    updated: false
-  - id: npm:@fumadocs/notion
-    updated: false
-  - id: npm:fumadocs-obsidian
     updated: false
   - changelogIds:
-      - 2026-10-30-openapi-oauth-handler-session-storage.md
-    id: npm:fumadocs-openapi
+      - 2026-10-30-openapi-suggested-values.md
+    id: npm:@fumadocs/asyncapi
     updated: true
+  - id: npm:@fumadocs/basehub
+    updated: false
+  - changelogIds:
+      - 2026-11-01-cli-astro-managed-setup.md
+    id: npm:@fumadocs/cli
+    updated: true
+  - changelogIds:
+      - 2026-10-31-mvvynku6.md
+      - 2026-11-01-layout-variant-child.md
+    id: npm:@fumadocs/base-ui
+    updated: true
+  - id: npm:@fumadocs/changelog
+    updated: false
+  - id: npm:@fumadocs/content
+    updated: false
+  - id: npm:@fumadocs/content-collections
+    updated: false
+  - id: npm:fumadocs-core
+    updated: true
+  - id: npm:create-fumadocs-versions
+    updated: true
+  - changelogIds:
+      - 2026-11-01-cli-astro-managed-setup.md
+    id: npm:create-fumadocs-app
+    updated: true
+  - id: npm:fumadocs-docgen
+    updated: false
+  - id: npm:@fumadocs/graphql
+    updated: false
+  - id: npm:fumadocs-epub
+    updated: false
+  - id: npm:@fumari/image-size
+    updated: false
+  - id: npm:@fumadocs/json-schema
+    updated: false
+  - changelogIds:
+      - 2026-10-30-openapi-suggested-values.md
+    id: npm:@fumadocs/language
+    updated: true
+  - id: npm:@fumadocs/local-content
+    updated: false
+  - id: npm:@fumadocs/local-md
+    updated: false
+  - id: npm:@fumadocs/local-html
+    updated: false
+  - id: npm:@fumadocs/mdx-remote
+    updated: false
+  - id: npm:fumadocs-mdx
+    updated: false
+  - changelogIds:
+      - 2026-11-02-notion-file-proxy.md
+    id: npm:@fumadocs/notion
+    updated: true
+  - id: npm:fumadocs-obsidian
+    updated: false
   - id: npm:@fumadocs/openapi-standalone
     updated: false
+  - changelogIds:
+      - 2026-10-30-openapi-suggested-values.md
+    id: npm:fumadocs-openapi
+    updated: true
   - id: npm:fumadocs-preview
     updated: false
   - id: npm:fumadocs-python
     updated: false
-  - id: npm:fumadocs-ui
+  - changelogIds:
+      - 2026-11-01-layout-variant-child.md
+    id: npm:fumadocs-ui
+    updated: true
+  - id: npm:@fumadocs/satteri
     updated: false
   - id: npm:@fumadocs/sanity
     updated: false
-  - id: npm:@fumadocs/satteri
-    updated: false
   - id: npm:@fumadocs/shadcn
-    updated: false
-  - id: npm:shared-api
     updated: false
   - id: npm:@fumari/stf
     updated: false
+  - id: npm:shared-api
+    updated: false
   - id: npm:@fumadocs/story
     updated: false
-  - id: npm:@fumadocs/tailwind
-    updated: false
+  - changelogIds:
+      - 2026-11-01-prose-table-rows.md
+    id: npm:@fumadocs/tailwind
+    updated: true
   - id: npm:fumadocs-twoslash
-    updated: false
-  - id: npm:fumadocs-typescript
     updated: false
   - id: npm:@fumadocs/vite
     updated: false
+  - id: npm:fumadocs-typescript
+    updated: false
 npm:packages:
-  - id: npm:@fumadocs/ai-chat
   - id: npm:@fumadocs/astro
+  - id: npm:@fumadocs/ai-chat
   - id: npm:@fumadocs/asyncapi
-  - id: npm:@fumadocs/base-ui
   - id: npm:@fumadocs/basehub
-  - id: npm:@fumadocs/changelog
   - id: npm:@fumadocs/cli
+  - id: npm:@fumadocs/base-ui
+  - id: npm:@fumadocs/changelog
   - id: npm:@fumadocs/content
   - id: npm:@fumadocs/content-collections
   - id: npm:fumadocs-core
-  - id: npm:create-fumadocs-app
   - id: npm:create-fumadocs-versions
+  - id: npm:create-fumadocs-app
   - id: npm:fumadocs-docgen
-  - id: npm:fumadocs-epub
   - id: npm:@fumadocs/graphql
+  - id: npm:fumadocs-epub
   - id: npm:@fumari/image-size
   - id: npm:@fumadocs/json-schema
   - id: npm:@fumadocs/language
   - id: npm:@fumadocs/local-content
-  - id: npm:@fumadocs/local-html
   - id: npm:@fumadocs/local-md
-  - id: npm:fumadocs-mdx
+  - id: npm:@fumadocs/local-html
   - id: npm:@fumadocs/mdx-remote
+  - id: npm:fumadocs-mdx
   - id: npm:@fumadocs/notion
   - id: npm:fumadocs-obsidian
-  - id: npm:fumadocs-openapi
   - id: npm:@fumadocs/openapi-standalone
+  - id: npm:fumadocs-openapi
   - id: npm:fumadocs-preview
   - id: npm:fumadocs-python
   - id: npm:fumadocs-ui
-  - id: npm:@fumadocs/sanity
   - id: npm:@fumadocs/satteri
+  - id: npm:@fumadocs/sanity
   - id: npm:@fumadocs/shadcn
-  - id: npm:shared-api
   - id: npm:@fumari/stf
+  - id: npm:shared-api
   - id: npm:@fumadocs/story
   - id: npm:@fumadocs/tailwind
   - id: npm:fumadocs-twoslash
-  - id: npm:fumadocs-typescript
   - id: npm:@fumadocs/vite
+  - id: npm:fumadocs-typescript
+  - id: npm:example-astro
   - id: npm:example-openapi
   - id: npm:example-tanstack-start-openapi
+  - id: npm:example-asyncapi
+  - id: npm:docs
+  - id: npm:example-astro-i18n
+  - id: npm:example-i18n
+  - id: npm:example-react-router-i18n
+  - id: npm:example-tanstack-start-i18n
+  - id: npm:example-waku-i18n
+  - id: npm:example-astro-min
+  - id: npm:example-base-ui
+  - id: npm:example-content-collections
+  - id: npm:example-graphql
+  - id: npm:example-marble-cms
+  - id: npm:example-next
+  - id: npm:example-next-local-md
+  - id: npm:example-next-local-html
+  - id: npm:example-next-min
+  - id: npm:example-next-shadcn
+  - id: npm:example-next-static
+  - id: npm:example-obsidian
+  - id: npm:example-python
+  - id: npm:example-react-router
+  - id: npm:example-react-router-min
+  - id: npm:example-react-router-rsc
+  - id: npm:example-tanstack-start
+  - id: npm:example-react-router-spa
+  - id: npm:example-tanstack-start-spa
+  - id: npm:example-tanstack-start-story
+  - id: npm:example-tanstack-start-min
+  - id: npm:example-tanstack-start-local-md
+  - id: npm:example-waku

@@ -13,7 +13,7 @@ It installs the components to `components/blog`, and the utilities of posts to `
 
 Define a collection for your posts with `blogPageSchema`, and register your authors:
 
-```ts title="lib/source.ts"
+```ts tab="Fumadocs MDX" title="lib/source.ts"
 import { defineCollections } from 'fumadocs-mdx/macro';
 import { loader } from 'fumadocs-core/source';
 import { type BlogAuthor, blogPageSchema } from '@/lib/blog';
@@ -70,7 +70,7 @@ image: /blog/hello-world.png
 
 ### Posts
 
-```tsx title="app/(home)/blog/page.tsx"
+```tsx tab="Next.js" title="app/(home)/blog/page.tsx"
 import { blogAuthors, blogSource } from '@/lib/source';
 import { getPosts } from '@/lib/blog';
 import { BlogCards } from '@/components/blog';
@@ -88,7 +88,7 @@ export default function Page() {
 
 `findPost()` finds a post along with the newer and older posts. With `toc`, a floating panel shows the table of contents and a share button.
 
-```tsx title="app/(home)/blog/[slug]/page.tsx"
+```tsx tab="Next.js" title="app/(home)/blog/[slug]/page.tsx"
 import { notFound } from 'next/navigation';
 import { blogAuthors, blogSource } from '@/lib/source';
 import { findPost, getPosts } from '@/lib/blog';
@@ -138,7 +138,7 @@ export default async function Page(props: PageProps<'/blog/[slug]'>) {
 
 List all tags with `getTags()`:
 
-```tsx title="app/(home)/blog/tags/page.tsx"
+```tsx tab="Next.js" title="app/(home)/blog/tags/page.tsx"
 import { blogSource } from '@/lib/source';
 import { getPosts, getTags } from '@/lib/blog';
 import { BlogHeader, BlogTagCards, BlogTitle } from '@/components/blog';
@@ -159,7 +159,7 @@ export default function Page() {
 
 And the posts of a tag with `getTagPosts()`, it returns `undefined` for unknown tags:
 
-```tsx title="app/(home)/blog/tags/[tag]/page.tsx"
+```tsx tab="Next.js" title="app/(home)/blog/tags/[tag]/page.tsx"
 import { notFound } from 'next/navigation';
 import { blogAuthors, blogSource } from '@/lib/source';
 import { getPosts, getTagPosts, getTags } from '@/lib/blog';

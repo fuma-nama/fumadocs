@@ -9,9 +9,14 @@ const EMBEDDABLE_HOSTS = new Set([
   'loom.com',
 ]);
 
+/** a path of this site, not `//host` or `/\host` which browsers resolve to another host */
+function isSitePath(value: string): boolean {
+  return /^\/(?![/\\])/.test(value);
+}
+
 export function getSafeHref(value: string | null | undefined): string | undefined {
   if (!value) return;
-  if (value.startsWith('/')) return value;
+  if (isSitePath(value)) return value;
 
   try {
     const { protocol } = new URL(value);
@@ -22,7 +27,7 @@ export function getSafeHref(value: string | null | undefined): string | undefine
 }
 
 export function getUrlHost(value: string): string {
-  if (value.startsWith('/')) return 'This site';
+  if (isSitePath(value)) return 'This site';
 
   try {
     return new URL(value).hostname.replace(/^www\./, '');
@@ -41,7 +46,7 @@ export function getUrlLabel(value: string): string {
  * embeddable host. Unknown hosts fall back to a link card rather than a broken or unsafe frame.
  */
 export function getEmbedUrl(value: string): string | undefined {
-  if (value.startsWith('/')) return value;
+  if (isSitePath(value)) return value;
   const href = getSafeHref(value);
   if (!href) return;
 

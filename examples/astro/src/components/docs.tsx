@@ -1,53 +1,32 @@
-import { type SerializedPageTree, useFumadocsLoader } from 'fumadocs-core/source/client';
-import type { TOCItemType } from 'fumadocs-core/toc';
 import { DocsLayout } from 'fumadocs-ui/layouts/docs';
 import {
   DocsDescription,
   DocsPage,
   DocsTitle,
   MarkdownCopyButton,
+  PageLastUpdate,
   ViewOptionsPopover,
 } from 'fumadocs-ui/layouts/docs/page';
-import { Provider, type ProviderProps } from '@/components/provider';
-import { baseOptions } from '@/lib/layout.shared';
-
-export interface DocsProps extends ProviderProps {
-  tree: SerializedPageTree;
-  title: string;
-  description?: string;
-  toc: TOCItemType[];
-  markdownUrl: string;
-  githubUrl: string;
-}
+import type { DocsPageProps } from '@fumadocs/astro/config';
 
 /**
- * The React island of docs pages, the content is passed as children.
+ * The docs page, the content is passed as children.
  */
-export function Docs({
-  tree,
-  title,
-  description,
-  toc,
-  markdownUrl,
-  githubUrl,
-  children,
-  ...props
-}: DocsProps) {
-  const data = useFumadocsLoader({ tree });
-
+export default function Docs({ tree, page, layout, children }: DocsPageProps) {
   return (
-    <Provider {...props}>
-      <DocsLayout {...baseOptions()} tree={data.tree}>
-        <DocsPage toc={toc}>
-          <DocsTitle>{title}</DocsTitle>
-          <DocsDescription>{description}</DocsDescription>
+    <DocsLayout {...layout} tree={tree}>
+      <DocsPage toc={page.toc} full={page.full}>
+        <DocsTitle>{page.title}</DocsTitle>
+        <DocsDescription>{page.description}</DocsDescription>
+        {page.markdownUrl && (
           <div className="flex flex-row gap-2 items-center border-b -mt-4 pb-6">
-            <MarkdownCopyButton markdownUrl={markdownUrl} />
-            <ViewOptionsPopover markdownUrl={markdownUrl} githubUrl={githubUrl} />
+            <MarkdownCopyButton markdownUrl={page.markdownUrl} />
+            <ViewOptionsPopover markdownUrl={page.markdownUrl} githubUrl={page.githubUrl} />
           </div>
-          {children}
-        </DocsPage>
-      </DocsLayout>
-    </Provider>
+        )}
+        {children}
+        {page.lastModified && <PageLastUpdate date={page.lastModified} />}
+      </DocsPage>
+    </DocsLayout>
   );
 }

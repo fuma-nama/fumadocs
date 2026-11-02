@@ -78,7 +78,7 @@ const server = flexsearchFromSource(source, {
       url: page.url,
       id: page.url,
       structuredData: page.data.structuredData,
-      // use your desired value, like page.slugs[0] [!code ++]
+      // use your desired value, like page.slugs[0] [!code ++:2]
       tag: '<value>',
     };
   },
@@ -150,7 +150,7 @@ import { Charset } from 'flexsearch';
 
 const server = flexsearchFromSource(source, {
   localeMap: {
-    // [locale]: Flexsearch options [!code ++]
+    // [locale]: Flexsearch options [!code ++:2]
     jp: { encoder: Charset.CJK },
   },
 });
@@ -165,7 +165,7 @@ import { Charset } from 'flexsearch';
 const server = flexsearchI18n({
   i18n, // [!code ++]
   localeMap: {
-    // [locale]: Flexsearch options [!code ++]
+    // [locale]: Flexsearch options [!code ++:2]
     jp: { encoder: Charset.CJK },
   },
   indexes: source.getPages().map((page) => ({

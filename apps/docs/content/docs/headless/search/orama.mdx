@@ -29,10 +29,6 @@ Create the server from source object.
   ../../examples/waku/src/pages/_api/api/search.ts
 </include>
 
-<include cwd meta='tab="Astro" title="src/pages/api/search.ts"'>
-  ../../examples/astro/src/pages/api/search.ts
-</include>
-
 ### From Search Indexes
 
 Create the server from search indexes, each index needs a `structuredData` field.
@@ -113,28 +109,6 @@ export const { GET } = createSearchAPI('advanced', {
 });
 ```
 
-```ts tab="Astro" title="src/pages/api/search.ts"
-import type { APIRoute } from 'astro';
-import { createSearchAPI } from 'fumadocs-core/search/server';
-import { source } from '@/lib/source';
-
-const server = createSearchAPI('advanced', {
-  indexes: () =>
-    Promise.all(
-      source.getPages().map(async (page) => ({
-        title: page.data.title,
-        description: page.data.description,
-        url: page.url,
-        id: page.url,
-        structuredData: await page.data.structuredData(),
-      })),
-    ),
-});
-
-// Astro builds a static site by default, see Static Mode below
-export const GET: APIRoute = () => server.staticGET();
-```
-
 ### Searching Documents
 
 You can search documents using:
@@ -168,7 +142,7 @@ const server = createFromSource(source, {
       url: page.url,
       id: page.url,
       structuredData: page.data.structuredData,
-      // use your desired value, like page.slugs[0] [!code ++]
+      // use your desired value, like page.slugs[0] [!code ++:2]
       tag: '<value>',
     };
   },
@@ -250,13 +224,6 @@ export const { staticGET: GET } = createFromSource(source);
 export const getConfig = async () => ({
   render: 'static',
 });
-```
-
-```ts tab="Astro" title="src/pages/api/search.ts"
-import type { APIRoute } from 'astro';
-
-// [!code highlight]
-export const GET: APIRoute = () => server.staticGET();
 ```
 
 > `staticGET` is also available on `createSearchAPI`.
@@ -357,7 +324,7 @@ This also applies to **Static Mode**, pass `locale` to `useStaticSearch()` inste
 
     const server = createFromSource(source, {
       localeMap: {
-        // [locale]: search options [!code ++:2]
+        // [locale]: search options [!code ++:3]
         ru: { language: 'russian' },
         en: { language: 'english' },
       },

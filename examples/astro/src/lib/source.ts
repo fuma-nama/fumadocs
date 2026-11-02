@@ -1,15 +1,14 @@
 import { getCollection } from 'astro:content';
-import { llms, loader } from 'fumadocs-core/source';
+import { loader } from 'fumadocs-core/source';
 import { toFumadocsSource } from '@fumadocs/astro/source';
+import { openapi } from './openapi';
 import { docsRoute } from './shared';
 
 export const source = loader({
-  source: toFumadocsSource(await getCollection('docs'), await getCollection('meta')),
+  source: {
+    docs: toFumadocsSource(await getCollection('docs'), await getCollection('meta')),
+    api: await openapi.staticSource({ baseDir: 'api' }),
+  },
   baseUrl: docsRoute,
-});
-
-export const docsLlms = llms(source, {
-  renderPage: async (page) => `# ${page.data.title} (${page.url})
-
-${await page.data.getText('processed')}`,
+  plugins: [openapi.loaderPlugin()],
 });

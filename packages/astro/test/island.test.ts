@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest';
 import { type HastNode, type HastPluginDefinition, mdxToJs } from 'satteri';
 import { islandPlugin } from '@/island-plugin';
 import { createIsland } from '@/island';
+import { serializeIsland, Slot } from '@/mdx-runtime';
 import components from './fixtures/components';
 
 const FumadocsIsland = createIsland(components);
@@ -42,7 +43,7 @@ async function compile(source: string, plugins: HastPluginDefinition[] = []) {
   };
 
   const { code } = await mdxToJs(source, {
-    hastPlugins: [...plugins, islandPlugin('/island.js'), capture],
+    hastPlugins: [...plugins, islandPlugin('/island.js', '/runtime.js', false), capture],
     jsxImportSource: 'astro',
   });
   return { code, island: island! };
@@ -55,7 +56,10 @@ function render({ tree, props, slots }: Captured, contentProps: object = {}): st
 
   return renderToStaticMarkup(
     createElement(FumadocsIsland, {
-      tree: new Function(`return ${tree}`)() as string,
+      tree: new Function('_serializeIsland', '_Slot', `return ${tree}`)(
+        serializeIsland,
+        Slot,
+      ) as string,
       props: new Function('props', `return ${props}`)({ components: {}, ...contentProps }),
       ...placeholders,
     }),
@@ -192,7 +196,15 @@ describe('content island', () => {
   it('throws on functions in props', async () => {
     const { island } = await compile('<Card title="Card" onClick={() => {}} />');
 
-    expect(() => render(island)).toThrow(/"onClick" is a function/);
+    expect(() => render(island)).toThrow(/must be serializable.*\.onClick/);
+  });
+
+  it('keeps dates and maps in props', async () => {
+    const { island } = await compile(
+      "<Time date={new Date('2020-01-01T00:00:00Z')} counts={new Map([['a', 1]])} />",
+    );
+
+    expect(render(island)).toBe('<time data-count="1">2020-01-01T00:00:00.000Z</time>');
   });
 
   it('throws on unknown components', async () => {

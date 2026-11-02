@@ -15,7 +15,8 @@ export interface ChangelogTimelineEntry extends ChangelogEntry {
 
 const { Markdown } = createMarkdownRenderer({
   remarkPlugins: [remarkGfm],
-  rehypePlugins: [[rehypeCode, { fallbackLanguage: 'plaintext' }]],
+  // `tab` wraps code blocks in MDX elements, which Markdown can't render
+  rehypePlugins: [[rehypeCode, { fallbackLanguage: 'plaintext', tab: false }]],
 });
 
 const mdxComponents = {

@@ -2,8 +2,13 @@ import { expect, test } from 'vitest';
 import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
+import type { RegistryConnector } from 'fuma-cli/registry/connector';
 import { getDefaultConfig } from '@/config';
 import { loadProject } from '@/project';
+import { runFeature } from '@/features';
+import { docs } from '@/features/docs';
+import { mcp } from '@/features/mcp';
+import { search } from '@/features/search';
 
 async function project(files: Record<string, string>) {
   const cwd = await fs.mkdtemp(path.join(os.tmpdir(), 'fumadocs-cli-'));
@@ -63,10 +68,11 @@ export const source = loader({
   baseUrl: docsRoute,
 });`,
   };
-  const { framework, baseDir, static: isStatic, source } = await project(files);
+  const { framework, baseDir, static: isStatic, source, fumadocsConfig } = await project(files);
   expect(framework).toBe('astro');
   expect(baseDir).toBe('src');
   expect(isStatic).toBe(true);
+  expect(fumadocsConfig).toBeUndefined();
   expect(source).toEqual({
     loader: true,
     dynamic: false,
@@ -81,6 +87,9 @@ export const source = loader({
     'astro.config.mjs': `export default defineConfig({ output: 'server', integrations: [fumadocs()] });`,
   });
   expect(server.static).toBe(false);
+
+  const managed = await project({ ...files, 'src/fumadocs.config.ts': '' });
+  expect(managed.fumadocsConfig).toBe('src/fumadocs.config.ts');
 });
 
 test('project: other content sources', async () => {
@@ -91,4 +100,100 @@ test('project: other content sources', async () => {
   });
   expect(source.collections).toBeNull();
   expect(source.loader).toBe(true);
+});
+
+test('search: register the dialog in the layout module of Astro', async () => {
+  const managed = await project({
+    'package.json': JSON.stringify({ dependencies: { astro: '7.4.2' } }),
+    'astro.config.mjs': `import fumadocs from '@fumadocs/astro';
+
+export default defineConfig({
+  integrations: [fumadocs({ components: './src/components/mdx.tsx' })],
+});
+`,
+    'src/pages/index.astro': '',
+    'src/fumadocs.config.ts': '',
+    'src/lib/source.ts': `import { toFumadocsSource } from '@fumadocs/astro/source';
+export const source = loader({ baseUrl: '/docs', source: toFumadocsSource([], []) });`,
+  });
+  const read = (file: string) => fs.readFile(path.join(managed.cwd, file), 'utf-8');
+  expect(await search.detect!(managed)).toBe(false);
+
+  await runFeature(
+    search,
+    { provider: 'algolia' },
+    {
+      project: managed,
+      connector: {} as RegistryConnector,
+      io: { log: () => {}, confirmOverwrite: async () => true, installDependencies: false },
+    },
+  );
+  expect(await read('astro.config.mjs')).toContain(
+    "fumadocs({ components: './src/components/mdx.tsx', layout: './src/lib/layout.shared.tsx' })",
+  );
+  expect(await read('src/lib/layout.shared.tsx')).toContain(
+    "}\n\nexport { default as SearchDialog } from '@/components/search';\n",
+  );
+  expect(await read('src/pages/static.json.ts')).toContain('toDocuments(source)');
+  expect(await search.detect!(managed)).toBe(true);
+});
+
+test('docs: keep the home page of Astro with i18n', async () => {
+  const app = await project({
+    'package.json': JSON.stringify({ dependencies: { astro: '7.4.2' } }),
+    'astro.config.mjs': `import { defineConfig } from 'astro/config';
+
+export default defineConfig({});
+`,
+    'src/pages/index.astro': 'home',
+  });
+  await runFeature(
+    docs,
+    { i18n: true },
+    {
+      project: app,
+      connector: {} as RegistryConnector,
+      io: { log: () => {}, confirmOverwrite: async () => true, installDependencies: false },
+    },
+  );
+  expect(await fs.readFile(path.join(app.cwd, 'src/pages/index.astro'), 'utf-8')).toBe('home');
+  await expect(fs.access(path.join(app.cwd, 'src/pages/[...lang]/index.astro'))).rejects.toThrow();
+  expect(await fs.readFile(path.join(app.cwd, 'src/lib/source.ts'), 'utf-8')).toContain('i18n,');
+});
+
+test('mcp: add the plugin to the Fumadocs config of Astro', async () => {
+  const app = await project({
+    'package.json': JSON.stringify({ dependencies: { astro: '7.4.2' } }),
+    // processed Markdown is off for docs, `mcpPlugin()` reads the raw files
+    'astro.config.mjs': `export default defineConfig({
+  output: 'server',
+  integrations: [fumadocs({ collections: { docs: { includeProcessedMarkdown: false } } })],
+});
+`,
+    'src/pages/index.astro': '',
+    'src/fumadocs.config.ts': `import { defineConfig } from '@fumadocs/astro/config';
+import { source } from './lib/source';
+
+export default defineConfig({ source });
+`,
+    'src/lib/source.ts': `import { toFumadocsSource } from '@fumadocs/astro/source';
+export const source = loader({ baseUrl: '/docs', source: toFumadocsSource([], []) });`,
+  });
+  const read = (file: string) => fs.readFile(path.join(app.cwd, file), 'utf-8');
+
+  await runFeature(
+    mcp,
+    {},
+    {
+      project: app,
+      connector: {} as RegistryConnector,
+      io: { log: () => {}, confirmOverwrite: async () => true, installDependencies: false },
+    },
+  );
+  expect(await read('src/fumadocs.config.ts')).toContain('plugins: [mcpPlugin()]');
+  expect(await read('src/fumadocs.config.ts')).toContain(
+    "import { mcpPlugin } from '@fumadocs/astro/plugins/mcp';",
+  );
+  await expect(fs.access(path.join(app.cwd, 'src/pages/api/mcp.ts'))).rejects.toThrow();
+  expect(await read('src/lib/source.ts')).not.toContain('docsLlms');
 });

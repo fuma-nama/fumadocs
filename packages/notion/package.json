@@ -1,6 +1,6 @@
 {
   "name": "@fumadocs/notion",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "The official Notion integration for Fumadocs",
   "keywords": [
     "Docs",
@@ -35,6 +35,10 @@
     "./file": {
       "types": "./dist/file.d.ts",
       "import": "./dist/file.js"
+    },
+    "./client": {
+      "types": "./dist/client.d.ts",
+      "import": "./dist/client.js"
     },
     "./css/*": "./css/*",
     "./package.json": "./package.json"

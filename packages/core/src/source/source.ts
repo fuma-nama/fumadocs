@@ -144,6 +144,8 @@ export function multiple<T extends Record<string, StaticSource>>(
   const out: Record<string, StaticSource> = {};
   for (const k in sources) {
     out[k] = {
+      // keep the options of each source, like `baseDir`
+      ...sources[k],
       files: sources[k].files.map((file) => ({ ...file, data: { ...file.data, type: k } })),
     };
   }

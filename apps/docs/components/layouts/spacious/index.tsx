@@ -1,4 +1,4 @@
-import { baseOptions, linkItems, logo } from '@/components/layouts/shared';
+import { baseOptions, linkItems } from '@/components/layouts/shared';
 import { source } from '@/lib/source';
 import { AIChat } from '@/components/inkeep/search';
 import { getSection } from '@/lib/source/navigation';
@@ -33,15 +33,6 @@ export function Spacious({ children }: { children: ReactNode }) {
         tree={source.getPageTree()}
         // just icon items
         links={linkItems.filter((item) => item.type === 'icon')}
-        nav={{
-          ...base.nav,
-          title: (
-            <>
-              {logo}
-              <span className="font-medium in-[.uwu]:hidden">Fumadocs</span>
-            </>
-          ),
-        }}
         tabs={tabs}
       >
         {children}

@@ -16,6 +16,10 @@ const config: NextConfig = {
   },
   allowedDevOrigins: ['192.168.52.84'],
   serverExternalPackages: ['ts-morph', 'typescript', 'shiki', '@takumi-rs/core'],
+  // the landing page reads the theme presets when it re-renders
+  outputFileTracingIncludes: {
+    '/': ['./node_modules/fumadocs-ui/css/**/*.css'],
+  },
   images: {
     remotePatterns: [
       {

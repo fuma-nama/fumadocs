@@ -1,6 +1,6 @@
 {
   "name": "example-astro",
-  "version": "0.0.48",
+  "version": "0.0.49",
   "private": true,
   "type": "module",
   "scripts": {
@@ -16,10 +16,12 @@
     "@fumadocs/astro": "workspace:*",
     "astro": "^7.4.2",
     "fumadocs-core": "workspace:*",
+    "fumadocs-openapi": "workspace:*",
     "fumadocs-ui": "workspace:@fumadocs/base-ui@*",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "sharp": "^0.35.5",
+    "shiki": "^4.5.0",
     "takumi-js": "^2.17.1"
   },
   "devDependencies": {

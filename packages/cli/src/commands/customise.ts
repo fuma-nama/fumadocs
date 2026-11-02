@@ -3,17 +3,23 @@ import path from 'node:path';
 import { cancel, group, intro, log, outro, select, type Option } from '@clack/prompts';
 import picocolors from 'picocolors';
 import { parseSourceFile } from '@/codemod';
-import { frameworks } from '@/project';
+import { frameworks, loadProject, type Project } from '@/project';
 import type { Target } from '@/commands/add';
 import { UIRegistries } from '@/commands/shared';
 import { LoadedConfig } from '@/config';
 import { RegistryConnector } from 'fuma-cli/registry/connector';
 import { FumadocsComponentInstaller } from '@/registry/installer';
+import { runFeature } from '@/features';
+import { astroPage } from '@/features/docs/templates';
+import { astroModule, requiresManaged } from '@/features/utils';
 
 interface TargetInfo {
   targets: Target[];
   id: string;
-  print?: () => void | Promise<void>;
+  /** the layout of docs pages, defaults to `id` */
+  layout?: string;
+  /** `files` render the docs layouts */
+  print?: (files: string[]) => void | Promise<void>;
 }
 
 interface SlotPrintInfo {
@@ -26,6 +32,13 @@ interface SlotPrintInfo {
 
 export async function customise(config: LoadedConfig, connector: RegistryConnector) {
   intro(picocolors.bgBlack(picocolors.whiteBright('Customize Fumadocs UI')));
+  // Astro renders docs pages with the `page` module of the Fumadocs integration
+  const astro = config.framework === 'astro' ? await loadProject(config) : undefined;
+  const supported = astro ? requiresManaged(astro) : true;
+  if (supported !== true) {
+    cancel(supported);
+    process.exit(1);
+  }
 
   const installer = new FumadocsComponentInstaller(connector, config);
   const subRegistry = UIRegistries[config.uiLibrary];
@@ -42,9 +55,9 @@ export async function customise(config: LoadedConfig, connector: RegistryConnect
               value: {
                 id: 'docs',
                 targets: [{ subRegistry, name: 'layouts/docs' }],
-                print: () =>
+                print: (files) =>
                   printLayout(
-                    config,
+                    files,
                     ['fumadocs-ui/layouts/docs', '@/layouts/docs'],
                     ['fumadocs-ui/layouts/docs/page', '@/layouts/docs/page'],
                   ),
@@ -56,9 +69,9 @@ export async function customise(config: LoadedConfig, connector: RegistryConnect
               value: {
                 id: 'notebook',
                 targets: [{ subRegistry, name: 'layouts/notebook' }],
-                print: () =>
+                print: (files) =>
                   printLayout(
-                    config,
+                    files,
                     ['fumadocs-ui/layouts/notebook', '@/layouts/notebook'],
                     ['fumadocs-ui/layouts/notebook/page', '@/layouts/notebook/page'],
                   ),
@@ -70,9 +83,9 @@ export async function customise(config: LoadedConfig, connector: RegistryConnect
               value: {
                 id: 'flux',
                 targets: [{ subRegistry, name: 'layouts/flux' }],
-                print: () =>
+                print: (files) =>
                   printLayout(
-                    config,
+                    files,
                     ['fumadocs-ui/layouts/flux', '@/layouts/flux'],
                     ['fumadocs-ui/layouts/flux/page', '@/layouts/flux/page'],
                   ),
@@ -84,9 +97,9 @@ export async function customise(config: LoadedConfig, connector: RegistryConnect
               value: {
                 id: 'glass',
                 targets: [{ subRegistry, name: 'layouts/glass' }],
-                print: () =>
+                print: (files) =>
                   printLayout(
-                    config,
+                    files,
                     ['fumadocs-ui/layouts/glass', '@/layouts/glass'],
                     ['fumadocs-ui/layouts/glass/page', '@/layouts/glass/page'],
                   ),
@@ -100,9 +113,9 @@ export async function customise(config: LoadedConfig, connector: RegistryConnect
                     value: {
                       id: 'spacious',
                       targets: [{ subRegistry, name: 'layouts/spacious' }],
-                      print: () =>
+                      print: (files: string[]) =>
                         printLayout(
-                          config,
+                          files,
                           ['fumadocs-ui/layouts/spacious', '@/layouts/spacious'],
                           ['fumadocs-ui/layouts/spacious/page', '@/layouts/spacious/page'],
                         ),
@@ -116,7 +129,8 @@ export async function customise(config: LoadedConfig, connector: RegistryConnect
               value: {
                 id: 'home',
                 targets: [{ subRegistry, name: 'layouts/home' }],
-                print: () => printLayout(config, ['fumadocs-ui/layouts/home', '@/layouts/home']),
+                print: (files) =>
+                  printLayout(files, ['fumadocs-ui/layouts/home', '@/layouts/home']),
               },
               hint: 'the layout for other non-docs pages',
             },
@@ -139,6 +153,7 @@ export async function customise(config: LoadedConfig, connector: RegistryConnect
             hint: `only replace a part of layout${isPage ? "'s page" : ''}, useful for adjusting details`,
             value: {
               id,
+              layout: selected.id,
               targets: [{ subRegistry, name: id }],
               print() {
                 printSlot({
@@ -166,10 +181,11 @@ export async function customise(config: LoadedConfig, connector: RegistryConnect
               hint: 'for those who want to build their own UI from ground up',
               value: {
                 id: 'docs-min',
+                layout: 'docs',
                 targets: [{ name: 'layouts/docs-min' }],
-                print: () =>
+                print: (files) =>
                   printLayout(
-                    config,
+                    files,
                     ['fumadocs-ui/layouts/docs', '@/layouts/docs'],
                     ['fumadocs-ui/layouts/docs/page', '@/layouts/docs/page'],
                   ),
@@ -193,20 +209,61 @@ export async function customise(config: LoadedConfig, connector: RegistryConnect
     await installer.installInteractive(target.name, target.subRegistry);
   }
 
-  await targetInfo.print?.();
+  await targetInfo.print?.(
+    astro ? await writeAstroPage(astro, connector, targetInfo) : await routeFiles(config),
+  );
 
   outro(picocolors.bold('Have fun!'));
 }
 
-/** point the imports of route files at the installed layouts */
-export async function rewriteLayoutImports(config: LoadedConfig, map: Map<string, string>) {
+/** the route files of the framework */
+export async function routeFiles(config: LoadedConfig) {
   const dir = path.join(config.baseDir, frameworks[config.framework].routesDir);
   const entries = await fs.readdir(dir, { recursive: true, withFileTypes: true }).catch(() => []);
+  const files: string[] = [];
+  for (const entry of entries) {
+    if (entry.isFile() && entry.name.endsWith('.tsx'))
+      files.push(path.join(entry.parentPath, entry.name));
+  }
+  return files;
+}
+
+/** the `page` module of the Fumadocs integration, created to render the layout of the target */
+async function writeAstroPage(
+  project: Project,
+  connector: RegistryConnector,
+  { id, layout = id }: TargetInfo,
+): Promise<string[]> {
+  if (id === 'home') return [];
+  let file: string | undefined;
+  await runFeature(
+    {
+      id: 'customise',
+      title: 'Docs Page',
+      description: 'the page module of the Fumadocs integration',
+      async apply(ctx) {
+        file = await astroModule(ctx, 'page', astroPage(`fumadocs-ui/layouts/${layout}`));
+      },
+    },
+    {},
+    {
+      project,
+      connector,
+      io: {
+        installDependencies: true,
+        log: (message) => log.info(message),
+        confirmOverwrite: async () => false,
+      },
+    },
+  );
+  return file ? [file] : [];
+}
+
+/** point the imports of `files` at the installed layouts */
+export async function rewriteLayoutImports(files: string[], map: Map<string, string>) {
   const updated: string[] = [];
 
-  for (const entry of entries) {
-    if (!entry.isFile() || !entry.name.endsWith('.tsx')) continue;
-    const file = path.join(entry.parentPath, entry.name);
+  for (const file of files) {
     const source = parseSourceFile(file, await fs.readFile(file, 'utf-8'));
     for (const node of source.program.body) {
       if (node.type !== 'ImportDeclaration') continue;
@@ -221,9 +278,9 @@ export async function rewriteLayoutImports(config: LoadedConfig, map: Map<string
   return updated;
 }
 
-async function printLayout(config: LoadedConfig, ...maps: [from: string, to: string][]) {
+async function printLayout(files: string[], ...maps: [from: string, to: string][]) {
   intro(picocolors.bold('What is Next?'));
-  const updated = await rewriteLayoutImports(config, new Map(maps));
+  const updated = await rewriteLayoutImports(files, new Map(maps));
 
   log.info(
     [

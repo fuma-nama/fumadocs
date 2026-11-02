@@ -62,7 +62,7 @@ export const roundedTable = {
   'th:first-child': {
     'border-inline-start': 'none',
   },
-  'th:not(tr:last-child *), td:not(tr:last-child *)': {
+  'th:not(tr:last-child > th), td:not(tr:last-child > td)': {
     'border-bottom': '1px solid var(--color-fd-border)',
   },
   td: {

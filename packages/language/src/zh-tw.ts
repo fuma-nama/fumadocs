@@ -223,6 +223,7 @@ const translations = {
   'Server URL(playground server select)': '伺服器 URL',
   'Service Unavailable(playground status info)': '服務無法使用',
   'Successful(playground status info)': '成功',
+  'Suggestions(playground)': '建議',
   'Switch Field(playground)': '切換欄位',
   'Test(scalar API client)': '測試',
   'The client ID of your OAuth application.(OAuth dialog)': '你的 OAuth 應用程式用戶端 ID。',
