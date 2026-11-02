@@ -42,11 +42,11 @@ import { graphql } from './graphql'; // [!code ++]
 export const source = loader({
   source: {
     docs: toFumadocsSource(await getCollection('docs'), await getCollection('meta')),
-    // `baseUrl` of the loader, to link types and operations [!code ++]
+    // `baseUrl` of the loader, to link types and operations [!code ++:2]
     graphql: await graphql.staticSource({ baseDir: 'graphql', baseUrl: '/docs' }),
   },
   baseUrl: '/docs',
-  // adds the kind of items to each page in the sidebar [!code ++]
+  // adds the kind of items to each page in the sidebar [!code ++:2]
   plugins: [graphql.loaderPlugin()],
 });
 ```

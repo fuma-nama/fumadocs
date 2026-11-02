@@ -45,7 +45,7 @@ export const source = loader({
     asyncapi: await asyncapi.staticSource({ baseDir: 'asyncapi' }), // [!code ++]
   },
   baseUrl: '/docs',
-  // adds the direction of messages to each page in the sidebar [!code ++]
+  // adds the direction of messages to each page in the sidebar [!code ++:2]
   plugins: [asyncapi.loaderPlugin()],
 });
 ```

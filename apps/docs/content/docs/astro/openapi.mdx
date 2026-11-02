@@ -41,7 +41,7 @@ export const source = loader({
     api: await openapi.staticSource({ baseDir: 'api' }), // [!code ++]
   },
   baseUrl: '/docs',
-  // adds a badge to each page in the sidebar [!code ++]
+  // adds a badge to each page in the sidebar [!code ++:2]
   plugins: [openapi.loaderPlugin()],
 });
 ```

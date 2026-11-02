@@ -142,7 +142,7 @@ const server = createFromSource(source, {
       url: page.url,
       id: page.url,
       structuredData: page.data.structuredData,
-      // use your desired value, like page.slugs[0] [!code ++]
+      // use your desired value, like page.slugs[0] [!code ++:2]
       tag: '<value>',
     };
   },
@@ -324,7 +324,7 @@ This also applies to **Static Mode**, pass `locale` to `useStaticSearch()` inste
 
     const server = createFromSource(source, {
       localeMap: {
-        // [locale]: search options [!code ++:2]
+        // [locale]: search options [!code ++:3]
         ru: { language: 'russian' },
         en: { language: 'english' },
       },
