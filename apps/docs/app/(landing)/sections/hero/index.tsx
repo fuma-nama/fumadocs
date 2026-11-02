@@ -69,7 +69,11 @@ export function Hero() {
           {frameworks.map((framework, i) => (
             <span key={framework.name}>
               {i > 0 && <> ·&nbsp;</>}
-              <Link href={framework.href} className={`whitespace-nowrap text-lp-ink ${invert}`}>
+              <Link
+                href={framework.href}
+                prefetch={false}
+                className={`whitespace-nowrap text-lp-ink ${invert}`}
+              >
                 {framework.name}
               </Link>
             </span>

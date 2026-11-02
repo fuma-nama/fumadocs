@@ -1,9 +1,12 @@
 'use client';
 
+import Image from 'next/image';
+import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import { type ReactNode, useId } from 'react';
+import { type ComponentProps, type ReactNode, useId } from 'react';
 import { cn } from '@/lib/cn';
 import { getSection } from '@/lib/source/navigation';
+import LogoImage from '@/public/logo.png';
 
 export function Body({ children }: { children: ReactNode }): React.ReactElement {
   const mode = useMode();
@@ -35,5 +38,30 @@ export function FumadocsIcon(props: React.SVGProps<SVGSVGElement>) {
         </linearGradient>
       </defs>
     </svg>
+  );
+}
+
+export function Logo() {
+  return (
+    <>
+      <Image
+        alt="Fumadocs"
+        src={LogoImage}
+        sizes="100px"
+        className="hidden w-22 in-[.uwu]:block"
+        aria-label="Fumadocs"
+      />
+      <FumadocsIcon className="size-5 in-[.uwu]:hidden" />
+    </>
+  );
+}
+
+/** the nav's title, never prefetched: every page shows it, and the landing page is a heavy one */
+export function NavTitle({ href = '/', ...props }: ComponentProps<'a'>) {
+  return (
+    <Link href={href} prefetch={false} {...props}>
+      <Logo />
+      <span className="font-medium in-[.uwu]:hidden">Fumadocs</span>
+    </Link>
   );
 }
