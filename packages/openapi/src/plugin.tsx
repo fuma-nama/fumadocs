@@ -1,9 +1,10 @@
-import type { ApiRoute, AppShape, Awaitable, Plugin } from '@fumapress/core';
+import type { ApiRoute, Plugin } from 'fumadocs-core/framework/plugin';
 import type { PageData } from 'fumadocs-core/source';
 import type { ComponentType } from 'react';
 import { openapiTranslations } from '@/i18n';
 import type { CreateProxyOptions, OpenAPIPageData, OpenAPIServer, Proxy } from '@/server';
-import { OpenAPIPage } from '@/ui/fumapress';
+import type { Awaitable } from '@/types';
+import { OpenAPIPage } from '@/ui/plugin';
 import type { OpenAPIPageProps } from '@/utils/pages/builder';
 import { renderedDocuments } from '@/utils/document/rendered';
 
@@ -43,12 +44,12 @@ function isOpenAPIPage(data: PageData): data is OpenAPIPageData {
 /**
  * Render the pages of `server.staticSource()` and serve the routes of its server.
  */
-export function openapiPlugin<C extends AppShape = AppShape>({
+export function openapiPlugin({
   server,
   disableLoaderPlugin = false,
   ClientAPIPage = OpenAPIPage,
   createProxy,
-}: OpenAPIPluginOptions): Plugin<C> {
+}: OpenAPIPluginOptions): Plugin {
   const { proxyUrl, includeDocument = true } = server.options;
   // a pathname of the site, other URLs are proxies elsewhere
   const proxyPath = proxyUrl?.startsWith('/') && !proxyUrl.startsWith('//') ? proxyUrl : undefined;

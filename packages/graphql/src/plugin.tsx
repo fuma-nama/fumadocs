@@ -1,9 +1,9 @@
-import type { AppShape, Plugin } from '@fumapress/core';
+import type { Plugin } from 'fumadocs-core/framework/plugin';
 import type { PageData } from 'fumadocs-core/source';
 import type { ComponentType } from 'react';
 import { graphqlTranslations } from '@/i18n';
 import type { GraphQLPageData, GraphQLServer } from '@/server';
-import { GraphQLPage } from '@/ui/fumapress';
+import { GraphQLPage } from '@/ui/plugin';
 import type { GraphQLPageProps } from '@/utils/create-page';
 import { renderedSchemas } from '@/utils/rendered';
 
@@ -34,11 +34,11 @@ function isGraphQLPageData(data: PageData): data is GraphQLPageData {
 /**
  * Render the pages of `server.staticSource()` and `server.dynamicSource()`, and serve their schemas.
  */
-export function graphqlPlugin<C extends AppShape = AppShape>({
+export function graphqlPlugin({
   server,
   disableLoaderPlugin = false,
   ClientAPIPage = GraphQLPage,
-}: GraphQLPluginOptions): Plugin<C> {
+}: GraphQLPluginOptions): Plugin {
   const { includeSchema = true } = server.options;
 
   return {

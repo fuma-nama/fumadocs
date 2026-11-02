@@ -1,9 +1,9 @@
-import type { AppShape, Plugin } from '@fumapress/core';
+import type { Plugin } from 'fumadocs-core/framework/plugin';
 import type { PageData } from 'fumadocs-core/source';
 import type { ComponentType } from 'react';
 import { asyncapiTranslations } from '@/i18n';
 import type { AsyncAPIPageData, AsyncAPIServer } from '@/server';
-import { AsyncAPIPage } from '@/ui/fumapress';
+import { AsyncAPIPage } from '@/ui/plugin';
 import type { AsyncAPIPageProps } from '@/utils/create-page';
 import { renderedDocuments } from '@/utils/document/rendered';
 
@@ -34,11 +34,11 @@ function isAsyncAPIPage(data: PageData): data is AsyncAPIPageData {
 /**
  * Render the pages of `server.staticSource()` and serve their documents.
  */
-export function asyncapiPlugin<C extends AppShape = AppShape>({
+export function asyncapiPlugin({
   server,
   disableLoaderPlugin = false,
   ClientAPIPage = AsyncAPIPage,
-}: AsyncAPIPluginOptions): Plugin<C> {
+}: AsyncAPIPluginOptions): Plugin {
   const { includeDocument = true } = server.options;
 
   return {

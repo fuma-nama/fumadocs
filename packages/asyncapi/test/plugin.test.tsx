@@ -2,9 +2,10 @@ import { fileURLToPath } from 'node:url';
 import type { ReactElement } from 'react';
 import { prerender } from 'react-dom/static';
 import { afterEach, describe, expect, test, vi } from 'vitest';
+import type { PluginContext } from 'fumadocs-core/framework/plugin';
 import { flattenTree } from 'fumadocs-core/page-tree';
-import { createPress, type InferAppShape } from '@fumapress/core';
-import { asyncapiPlugin, AsyncAPIPage, type AsyncAPIPluginOptions } from '@/fumapress';
+import { loader } from 'fumadocs-core/source';
+import { asyncapiPlugin, AsyncAPIPage, type AsyncAPIPluginOptions } from '@/plugin';
 import { createAsyncAPI, type AsyncAPIOptions } from '@/server';
 
 const streetlights = fileURLToPath(new URL('./fixtures/streetlights.yaml', import.meta.url));
@@ -14,18 +15,15 @@ async function createSite(
   options: Omit<AsyncAPIPluginOptions, 'server'> = {},
 ) {
   const server = createAsyncAPI({ input: { streetlights }, ...serverOptions });
-  const content = await server.staticSource();
-  const ctx = await createPress(
-    {
-      content,
-      preset: false,
-      site: { baseUrl: 'https://example.com/docs' },
-      plugins: [asyncapiPlugin<InferAppShape<typeof content>>({ server, ...options })],
-    },
-    { base: '/docs' },
-  );
-  const page = (await ctx.getLoader()).getPages()[0];
-  return { ctx, page, server };
+  const plugin = asyncapiPlugin({ server, ...options });
+  const ctx: PluginContext = {
+    mode: 'default',
+    withBase: (pathname) => `/docs${pathname}`,
+    getLoader: () => source,
+  };
+  const { plugins } = await plugin.configureLoader!.call(ctx, { baseUrl: '/' });
+  const source = loader(await server.staticSource(), { baseUrl: '/', plugins });
+  return { ctx, plugin, source, page: source.getPages()[0], server };
 }
 
 afterEach(() => {
@@ -34,16 +32,22 @@ afterEach(() => {
 
 describe('asyncapiPlugin()', () => {
   test('renders pages with the client page', async () => {
-    const { ctx, page } = await createSite();
-    const node = (await ctx.getPageBody(page))?.node as ReactElement<Record<string, unknown>>;
+    const { ctx, plugin, page } = await createSite();
+    const node = (await plugin.getPageBody!.call(ctx, page))?.node as ReactElement<
+      Record<string, unknown>
+    >;
 
     expect(node.type).toBe(AsyncAPIPage);
     expect(node.props.payload).toEqual({ bundled: expect.any(Object) });
-    expect(await ctx.getPageText(page)).toBe(await page.data.getText('processed'));
-    expect(await ctx.getPageToc(page)).toBe(page.data.toc);
-    expect(await ctx.getPageStructuredData(page)).toBe(page.data.structuredData);
-    expect(await ctx.getPageData(page)).toMatchObject({ full: true, toc: page.data.toc });
-    expect(await ctx.getRoutes()).toEqual([]);
+    expect(await plugin.getPageText!.call(ctx, page)).toBe(await page.data.getText('processed'));
+    expect(await plugin.getPageToc!.call(ctx, page)).toBe(page.data.toc);
+    expect(await plugin.getPageStructuredData!.call(ctx, page)).toBe(page.data.structuredData);
+    const data = { title: '', url: page.url, path: page.path, locale: page.locale, toc: [] };
+    expect(await plugin.transformPage!.call(ctx, data, page)).toEqual({ ...data, full: true });
+    expect(await plugin.transformPage!.call(ctx, { ...data, full: false }, page)).toMatchObject({
+      full: false,
+    });
+    expect(await plugin.routes!.call(ctx)).toBeUndefined();
   });
 
   test('adds the loader plugin unless disabled', async () => {
@@ -52,21 +56,20 @@ describe('asyncapiPlugin()', () => {
       [false, 'object'],
       [true, 'string'],
     ] as const) {
-      const { ctx } = await createSite({}, { disableLoaderPlugin });
-      const [item] = flattenTree((await ctx.getLoader()).pageTree.children);
+      const { source } = await createSite({}, { disableLoaderPlugin });
+      const [item] = flattenTree(source.pageTree.children);
       expect(item.name).toBeTypeOf(type);
     }
   });
 
   test('serves documents left out of page props', async () => {
     const fetch = vi.spyOn(globalThis, 'fetch');
-    const { ctx, page, server } = await createSite({ includeDocument: false });
-    const [route] = await ctx.getRoutes();
+    const { ctx, plugin, page, server } = await createSite({ includeDocument: false });
+    const [route] = (await plugin.routes!.call(ctx))!;
     const { bundled } = await server.getSchema('streetlights');
 
     expect(route).toMatchObject({
       path: '/api/asyncapi/[id]',
-      render: 'static',
       staticPaths: ['streetlights'],
     });
     const found = await route.GET!(
@@ -81,7 +84,9 @@ describe('asyncapiPlugin()', () => {
       expect(missing.status).toBe(404);
     }
 
-    const node = (await ctx.getPageBody(page))?.node as ReactElement<Record<string, unknown>>;
+    const node = (await plugin.getPageBody!.call(ctx, page))?.node as ReactElement<
+      Record<string, unknown>
+    >;
     expect(node.props.document).toBe('/docs/api/asyncapi/streetlights');
     expect(node.props.payload).toEqual({});
 

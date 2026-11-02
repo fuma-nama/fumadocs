@@ -1,9 +1,10 @@
 import type { SanityClient } from '@sanity/client';
-import { createPress, type InferAppShape } from '@fumapress/core';
+import type { PluginContext } from 'fumadocs-core/framework/plugin';
+import { dynamicLoader } from 'fumadocs-core/source';
 import { PortableText } from '@portabletext/react';
 import { describe, expect, it, vi } from 'vitest';
 import { createSanitySource } from '@/index';
-import { sanityPlugin, type SanityPluginOptions } from '@/fumapress';
+import { sanityPlugin, type SanityPluginOptions } from '@/plugin';
 
 const body = [
   {
@@ -54,62 +55,71 @@ function createClient() {
 
 async function createSite(options?: SanityPluginOptions) {
   const { fetch, client } = createClient();
-  const content = {
-    docs: { files: [{ type: 'page' as const, path: 'index.mdx', data: { title: 'Home' } }] },
-    sanity: createSanitySource({ client, docType: 'docs' }),
+  const plugin = sanityPlugin(options);
+  const ctx: PluginContext = {
+    mode: 'default',
+    withBase: (pathname) => pathname,
+    getLoader: () => content.get(),
   };
-  const ctx = await createPress(
+  const content = dynamicLoader(
     {
-      content,
-      preset: false,
-      site: { baseUrl: 'https://example.com' },
-      // plugins in an inline config don't infer the types of the site
-      plugins: [sanityPlugin<InferAppShape<typeof content>>(options)],
+      docs: { files: [{ type: 'page' as const, path: 'index.mdx', data: { title: 'Home' } }] },
+      sanity: createSanitySource({ client, docType: 'docs' }),
     },
-    { base: '/' },
+    { baseUrl: '/' },
   );
-  const loader = await ctx.getLoader();
-  return { ctx, fetch, page: loader.getPage(['getting-started'])!, other: loader.getPage([])! };
+  const output = await content.get();
+  return {
+    plugin,
+    ctx,
+    fetch,
+    page: output.getPage(['getting-started'])!,
+    other: output.getPage([])!,
+  };
 }
 
 describe('sanityPlugin', () => {
   it('renders the Portable Text body with custom components', async () => {
     const components: SanityPluginOptions['components'] = { types: { callout: () => null } };
-    const { ctx, page } = await createSite({ components });
+    const { plugin, ctx, page } = await createSite({ components });
 
-    expect((await ctx.getPageBody(page))?.node).toMatchObject({
+    expect((await plugin.getPageBody!.call(ctx, page))?.node).toMatchObject({
       type: PortableText,
       props: { value: body, components },
     });
   });
 
   it('reads the text, TOC and dates of documents, loading each once', async () => {
-    const { ctx, fetch, page } = await createSite();
+    const { plugin, ctx, fetch, page } = await createSite();
 
-    expect(await ctx.getPageText(page)).toBe('Introduction\n\nHello world\n\n');
-    expect(await ctx.getPageToc(page)).toEqual([
+    expect(await plugin.getPageText!.call(ctx, page)).toBe('Introduction\n\nHello world\n\n');
+    expect(await plugin.getPageToc!.call(ctx, page)).toEqual([
       { depth: 2, title: 'Introduction', url: '#intro' },
     ]);
-    expect(await ctx.getPageCreatedAt(page)).toEqual(new Date('2026-01-01T00:00:00Z'));
-    expect(await ctx.getPageData(page)).toMatchObject({
-      title: 'Getting Started',
-      lastModified: new Date('2026-02-01T00:00:00Z'),
-    });
-    expect(await ctx.getPageStructuredData(page)).toEqual({
+    expect(await plugin.getPageCreatedAt!.call(ctx, page)).toEqual(
+      new Date('2026-01-01T00:00:00Z'),
+    );
+    expect(await plugin.getPageLastModified!.call(ctx, page)).toEqual(
+      new Date('2026-02-01T00:00:00Z'),
+    );
+    expect(await plugin.getPageStructuredData!.call(ctx, page)).toEqual({
       headings: [{ id: 'intro', content: 'Introduction' }],
       contents: [{ heading: 'intro', content: 'Hello world' }],
     });
-    await ctx.getPageBody(page);
+    await plugin.getPageBody!.call(ctx, page);
 
     const loads = fetch.mock.calls.filter(([query]) => query.includes('"_toc"'));
     expect(loads).toHaveLength(1);
   });
 
   it('leaves other pages to other plugins', async () => {
-    const { ctx, other } = await createSite();
+    const { plugin, ctx, other } = await createSite();
 
-    expect(await ctx.getPageBody(other)).toBeUndefined();
-    expect(await ctx.getPageText(other)).toBeUndefined();
-    expect(await ctx.getPageLastModified(other)).toBeUndefined();
+    expect(await plugin.getPageBody!.call(ctx, other)).toBeUndefined();
+    expect(await plugin.getPageText!.call(ctx, other)).toBeUndefined();
+    expect(await plugin.getPageToc!.call(ctx, other)).toBeUndefined();
+    expect(await plugin.getPageStructuredData!.call(ctx, other)).toBeUndefined();
+    expect(await plugin.getPageCreatedAt!.call(ctx, other)).toBeUndefined();
+    expect(await plugin.getPageLastModified!.call(ctx, other)).toBeUndefined();
   });
 });

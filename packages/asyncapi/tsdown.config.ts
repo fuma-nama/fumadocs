@@ -9,7 +9,7 @@ export default defineConfig({
   target: 'es2023',
   entry: [
     './src/{index,index.browser,i18n}.ts',
-    './src/{fumapress,operation,playground}.tsx',
+    './src/{plugin,operation,playground}.tsx',
     './src/ui/index.tsx',
     './src/server/index.tsx',
   ],

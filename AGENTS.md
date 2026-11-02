@@ -80,6 +80,14 @@ Fumadocs runs on Next.js and Waku (RSC), React Router and TanStack Start (with a
 - Don't run `fumadocs add` non-interactively in the repo: its prompt defaults to installing dependencies and rewrites the lockfile. Test installs through `FumadocsComponentInstaller` with a local registry connector from a scratch script.
 - Templates in `packages/create-app/template` are synced from `examples/` with `pnpm --filter create-fumadocs-app sync`: change the example, then sync. `template/astro` is maintained by hand (the setup of `fumadocs feature docs`).
 
+## Framework plugins
+
+`fumadocs-core/framework/plugin` is the plugin API of integrations, exported from their `./plugin` subpath (`fumadocs-openapi/plugin`, ...). Fumadocs ships no engine for it: Fumapress (`@fumapress/core`, in its own repo) runs the plugins and extends the API.
+
+- Plugins use only that API, never Fumapress types. Dependencies go one way, Fumapress to Fumadocs.
+- Extend the API only when no existing hook fits, and keep it complete on its own.
+- Test plugins without an engine: a `PluginContext` object and a loader built from `configureLoader`, hooks called with `.call(ctx, ...)`.
+
 ## Astro integration
 
 `packages/astro` (`@fumadocs/astro`) aims at Fumapress parity with an Astro-native setup. Every integration either works in Astro as-is or gets a plugin in `packages/astro/src/plugins`.

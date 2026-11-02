@@ -1,10 +1,10 @@
-import type { AppShape, Plugin } from '@fumapress/core';
 import {
   PortableText,
   toPlainText,
   type PortableTextBlock,
   type PortableTextProps,
 } from '@portabletext/react';
+import type { Plugin } from 'fumadocs-core/framework/plugin';
 import type { PageData } from 'fumadocs-core/source';
 import type { BaseDoc, DocToPage, DocToPageLoaded } from './index';
 
@@ -27,9 +27,7 @@ function isSanityPageData(data: PageData): data is SanityPageData {
 /**
  * Render the Portable Text `body` of documents from `createSanitySource()`, with their dates.
  */
-export function sanityPlugin<C extends AppShape = AppShape>({
-  components,
-}: SanityPluginOptions = {}): Plugin<C> {
+export function sanityPlugin({ components }: SanityPluginOptions = {}): Plugin {
   // the source creates new page data when the `_updatedAt` of a document changes, so a document loaded per page data stays fresh
   const loaded = new WeakMap<SanityPageData, Promise<DocToPageLoaded<SanityDoc>>>();
   function load(data: SanityPageData) {

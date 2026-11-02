@@ -1,4 +1,4 @@
-import type { AppShape, Plugin } from '@fumapress/core';
+import type { Plugin } from 'fumadocs-core/framework/plugin';
 import type { PageData } from 'fumadocs-core/source';
 import {
   blocksToPlainText,
@@ -34,10 +34,10 @@ export interface NotionPluginOptions extends Pick<
 /**
  * Render the pages of a Notion data source from `createNotion()`, with their table of contents, search index and dates.
  */
-export function notionPlugin<C extends AppShape = AppShape>(
+export function notionPlugin(
   notion: NotionIntegration,
   { fileProxy = true, ...options }: NotionPluginOptions = {},
-): Plugin<C> {
+): Plugin {
   const filePath = (typeof fileProxy === 'object' && fileProxy.path) || '/api/notion/file';
   const handler = fileProxy && createNotionFileHandler(notion);
   const dataSourceId = toNotionId(notion.dataSourceId);

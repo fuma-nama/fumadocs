@@ -28,7 +28,7 @@
     "./client": "./dist/client.js",
     "./dev/vite": "./dist/dev/vite.js",
     "./dev/ws": "./dist/dev/ws.js",
-    "./fumapress": "./dist/fumapress.js",
+    "./plugin": "./dist/plugin.js",
     "./ui": "./dist/ui/index.js",
     "./package.json": "./package.json",
     "./css/*": "./css/*"
@@ -57,7 +57,6 @@
     "zod": "^4.6.7"
   },
   "devDependencies": {
-    "@fumapress/core": "workspace:*",
     "@tailwindcss/oxide": "^4.3.3",
     "@types/hast": "^3.0.5",
     "@types/mdast": "^4.0.4",
@@ -75,18 +74,14 @@
     "vitest": "^5.0.5"
   },
   "peerDependencies": {
-    "@fumapress/core": "0.x.x",
     "@types/hast": "*",
     "@types/mdx": "*",
     "@types/react": "*",
-    "fumadocs-core": "^16.17.8",
+    "fumadocs-core": "^16.17.11",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
   },
   "peerDependenciesMeta": {
-    "@fumapress/core": {
-      "optional": true
-    },
     "@types/hast": {
       "optional": true
     },

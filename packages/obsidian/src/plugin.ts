@@ -1,6 +1,7 @@
 import path from 'node:path';
 import type { StandardSchemaV1 } from '@standard-schema/spec';
-import type { AppShape, Context, Plugin } from '@fumapress/core';
+import type { Plugin, PluginContext } from 'fumadocs-core/framework/plugin';
+import type { Page } from 'fumadocs-core/source';
 import type { MDXComponents } from 'mdx/types';
 import { createElement, type ComponentProps } from 'react';
 import type { ObsidianRendererResult } from './renderer';
@@ -15,24 +16,24 @@ export interface ObsidianPluginOptions {
 /**
  * Render the pages of an Obsidian vault from `obsidian()`, with relative links resolved to the URLs of their pages.
  */
-export function obsidianPlugin<C extends AppShape = AppShape>(
+export function obsidianPlugin(
   vault: ObsidianSource<StandardSchemaV1, StandardSchemaV1>,
   { components }: ObsidianPluginOptions = {},
-): Plugin<C> {
+): Plugin {
   // a vault change creates new pages, so their results stay valid
   const rendered = new WeakMap<ObsidianPage, Promise<ObsidianRendererResult>>();
   const Link = components?.a ?? 'a';
 
   /** pages of this vault, other local sources have the same page data */
-  function isVaultPage(page: C['page']): page is C['page'] & { data: ObsidianPage } {
+  function isVaultPage(page: Page): page is Page & { data: ObsidianPage } {
     if (!page.absolutePath) return false;
     const relative = path.relative(vault.dir, page.absolutePath);
     return relative !== '..' && !relative.startsWith(`..${path.sep}`) && !path.isAbsolute(relative);
   }
 
   function render(
-    ctx: Context<C>,
-    page: C['page'] & { data: ObsidianPage },
+    ctx: PluginContext,
+    page: Page & { data: ObsidianPage },
   ): Promise<ObsidianRendererResult> {
     let result = rendered.get(page.data);
     if (!result) {

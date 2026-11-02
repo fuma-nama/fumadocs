@@ -24,10 +24,10 @@
       "browser": "./dist/index.browser.js",
       "import": "./dist/index.js"
     },
-    "./fumapress": "./dist/fumapress.js",
     "./i18n": "./dist/i18n.js",
     "./operation": "./dist/operation.js",
     "./playground": "./dist/playground.js",
+    "./plugin": "./dist/plugin.js",
     "./server": "./dist/server/index.js",
     "./ui": "./dist/ui/index.js",
     "./package.json": "./package.json",
@@ -62,7 +62,6 @@
     "yaml": "^2.9.1"
   },
   "devDependencies": {
-    "@fumapress/core": "workspace:*",
     "@tailwindcss/oxide": "^4.3.3",
     "@types/node": "26.6.5",
     "@types/react": "^19.3.0",
@@ -77,18 +76,14 @@
     "tsdown": "0.23.1"
   },
   "peerDependencies": {
-    "@fumapress/core": "0.x.x",
     "@types/react": "*",
-    "fumadocs-core": "^16.17.8",
+    "fumadocs-core": "^16.17.11",
     "fumadocs-ui": "^16.17.8",
     "json-schema-typed": "*",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
   },
   "peerDependenciesMeta": {
-    "@fumapress/core": {
-      "optional": true
-    },
     "json-schema-typed": {
       "optional": true
     },
