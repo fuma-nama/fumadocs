@@ -1,0 +1,74 @@
+---
+title: Asyntai AI Chatbot
+description: Let readers ask questions and get answers from your docs.
+---
+
+> This is a community-maintained integration.
+
+Readers often cannot find the page they need, or they have a question that the search box does not answer. They leave, or they open a support ticket.
+
+[Asyntai](https://asyntai.com/documentation/integrations/nextjs/) adds an AI chat assistant to your Fumadocs site. It reads your published pages and answers readers from them, in more than 80 languages. The [`nextjs-ai-chatbot`](https://www.npmjs.com/package/nextjs-ai-chatbot) package adds the chat widget with one component. There is a free plan.
+
+## Setup
+
+You need an Asyntai widget ID. It starts with `asyntai_`, and you find it on the **Install** page of your Asyntai dashboard.
+
+### 1. Install the package
+
+```package-install
+nextjs-ai-chatbot
+```
+
+### 2. Add the component
+
+Put `<AsyntaiChatbot />` at the end of the `<body>` in your root layout. It works in Server Components. Keep the rest of your layout as it is.
+
+```tsx title="app/layout.tsx"
+import { RootProvider } from 'fumadocs-ui/provider/next';
+import { AsyntaiChatbot } from 'nextjs-ai-chatbot';
+import type { ReactNode } from 'react';
+
+export default function Layout({ children }: { children: ReactNode }) {
+  return (
+    <html lang="en" suppressHydrationWarning>
+      <body className="flex flex-col min-h-screen">
+        <RootProvider>{children}</RootProvider>
+        <AsyntaiChatbot widgetId="asyntai_YOURWIDGETID" />
+      </body>
+    </html>
+  );
+}
+```
+
+The widget loads after the page's `load` event, so your docs always render first. Fumadocs changes pages without a full reload, and the chat stays on screen while the reader moves through your docs.
+
+### 3. Add your docs in the dashboard
+
+Add the URL of your docs site in the Asyntai dashboard. The assistant then answers from the same pages the widget sits on.
+
+## Widget ID from an environment variable
+
+You can leave `widgetId` out and set it in `.env` instead:
+
+```bash title=".env"
+NEXT_PUBLIC_ASYNTAI_WIDGET_ID=asyntai_YOURWIDGETID
+```
+
+Set it where you run `next build`, because Next.js reads `NEXT_PUBLIC_` values at build time.
+
+## Without the package
+
+You can add the widget by hand with `next/script`:
+
+```tsx title="app/layout.tsx"
+import Script from 'next/script';
+
+<Script
+  id="asyntai-chatbot"
+  src="https://widget.asyntai.com/static/js/chat-widget.js"
+  data-asyntai-id="asyntai_YOURWIDGETID"
+  strategy="lazyOnload"
+/>;
+```
+
+See the [package README](https://github.com/asyntai/nextjs-ai-chatbot) for every option, and the [Asyntai docs](https://asyntai.com/documentation/integrations/nextjs/) for the dashboard.
