@@ -3,7 +3,7 @@ import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { getDefaultConfig } from '@/config';
-import { rewriteLayoutImports, routeFiles } from '@/commands/customise';
+import { rewriteLayoutImports } from '@/commands/customise';
 
 test('config: align with shadcn aliases', async () => {
   const config = await getDefaultConfig(path.join(__dirname, 'fixtures/shadcn'));
@@ -30,11 +30,10 @@ test('customise: rewrite layout imports of route files', async () => {
   const config = await getDefaultConfig(cwd);
   const prev = process.cwd();
   process.chdir(cwd);
-  const updated = await routeFiles(config)
-    .then((files) =>
-      rewriteLayoutImports(files, new Map([['fumadocs-ui/layouts/docs', '@/layouts/docs']])),
-    )
-    .finally(() => process.chdir(prev));
+  const updated = await rewriteLayoutImports(
+    config,
+    new Map([['fumadocs-ui/layouts/docs', '@/layouts/docs']]),
+  ).finally(() => process.chdir(prev));
   expect(updated).toEqual(['app/(docs)/layout.tsx']);
   expect(await fs.readFile(file, 'utf-8')).toBe(
     "import { DocsLayout } from '@/layouts/docs';\nimport { baseOptions } from '@/lib/layout.shared';\n",

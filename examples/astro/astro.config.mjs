@@ -7,8 +7,6 @@ export default defineConfig({
   integrations: [
     fumadocs({
       components: './src/components/mdx.tsx',
-      layout: './src/lib/layout.shared.tsx',
-      page: './src/components/docs.tsx',
       includeProcessedMarkdown: { output: 'function' },
     }),
   ],

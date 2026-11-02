@@ -22,9 +22,9 @@ export interface TemplateInfo {
   label: string;
   appDir: string;
   /**
-   * path to root provider, relative to `appDir`, none when the framework integration renders it
+   * path to root provider, relative to `appDir``
    */
-  rootProviderPath?: string;
+  rootProviderPath: string;
   hint?: string;
   /**
    * rename files when copying from template
@@ -83,6 +83,7 @@ export const templates: TemplateInfo[] = [
     value: 'astro',
     label: 'Astro: Content Collections',
     appDir: 'src',
+    rootProviderPath: 'components/provider.tsx',
   },
 ];
 
