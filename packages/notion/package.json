@@ -40,6 +40,10 @@
       "types": "./dist/client.d.ts",
       "import": "./dist/client.js"
     },
+    "./fumapress": {
+      "types": "./dist/fumapress.d.ts",
+      "import": "./dist/fumapress.js"
+    },
     "./css/*": "./css/*",
     "./package.json": "./package.json"
   },
@@ -60,6 +64,7 @@
     "lucide-react": "^1.61.0"
   },
   "devDependencies": {
+    "@fumapress/core": "workspace:*",
     "@notionhq/client": "^5.27.1",
     "@tailwindcss/oxide": "^4.3.3",
     "@types/node": "26.6.5",
@@ -75,6 +80,7 @@
     "vitest": "^5.0.5"
   },
   "peerDependencies": {
+    "@fumapress/core": "0.x.x",
     "@notionhq/client": "^5.23.0",
     "@types/react": "*",
     "fumadocs-core": "^16.8.0",
@@ -83,6 +89,9 @@
     "react-dom": "^19.2.0"
   },
   "peerDependenciesMeta": {
+    "@fumapress/core": {
+      "optional": true
+    },
     "@types/react": {
       "optional": true
     }

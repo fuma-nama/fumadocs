@@ -18,6 +18,7 @@
   "exports": {
     ".": "./dist/index.mjs",
     "./client": "./dist/client.mjs",
+    "./fumapress": "./dist/fumapress.mjs",
     "./package.json": "./package.json"
   },
   "publishConfig": {
@@ -35,6 +36,7 @@
     "@portabletext/react": "^8.0.1"
   },
   "devDependencies": {
+    "@fumapress/core": "workspace:*",
     "@sanity/client": "^8.10.1",
     "@sanity/types": "^6.20.0",
     "@types/node": "26.6.5",
@@ -51,6 +53,7 @@
     "vitest": "^5.0.5"
   },
   "peerDependencies": {
+    "@fumapress/core": "0.x.x",
     "@sanity/client": "^7.22.0 || ^8.0.0",
     "@sanity/types": "*",
     "@types/react": "*",
@@ -60,6 +63,9 @@
     "react-dom": "^19.2.0"
   },
   "peerDependenciesMeta": {
+    "@fumapress/core": {
+      "optional": true
+    },
     "@sanity/types": {
       "optional": true
     },

@@ -1,0 +1,73 @@
+{
+  "name": "@fumapress/core",
+  "version": "0.0.0",
+  "description": "The framework-agnostic core of Fumapress: plugins, content hooks and API routes",
+  "keywords": [
+    "Docs",
+    "Fumadocs",
+    "Fumapress"
+  ],
+  "homepage": "https://press.fumadocs.dev",
+  "license": "MIT",
+  "author": "Fuma Nama",
+  "repository": "github:fuma-nama/fumadocs",
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": "./dist/index.js",
+    "./plugins/*": "./dist/plugins/*.js",
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "clean": "rimraf dist",
+    "dev": "tsdown --watch",
+    "lint": "oxlint .",
+    "test": "vitest run",
+    "types:check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "xml-js": "^1.6.11"
+  },
+  "devDependencies": {
+    "@types/node": "26.6.5",
+    "@types/react": "^19.3.0",
+    "flexsearch": "^0.8.212",
+    "fumadocs-core": "workspace:*",
+    "fumadocs-ui": "workspace:@fumadocs/base-ui@*",
+    "react": "^19.3.1",
+    "takumi-js": "^2.17.1",
+    "tsconfig": "workspace:*",
+    "tsdown": "0.23.1",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.5"
+  },
+  "peerDependencies": {
+    "@types/react": "*",
+    "flexsearch": "*",
+    "fumadocs-core": "^16.17.0",
+    "fumadocs-ui": "^16.17.0",
+    "react": "^19.2.0",
+    "takumi-js": "^2.14.0"
+  },
+  "peerDependenciesMeta": {
+    "@types/react": {
+      "optional": true
+    },
+    "flexsearch": {
+      "optional": true
+    },
+    "fumadocs-ui": {
+      "optional": true
+    },
+    "takumi-js": {
+      "optional": true
+    }
+  }
+}

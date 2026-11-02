@@ -21,6 +21,7 @@
   ],
   "exports": {
     ".": "./dist/index.js",
+    "./fumapress": "./dist/fumapress.js",
     "./i18n": "./dist/i18n.js",
     "./operation": "./dist/operation.js",
     "./playground": "./dist/playground/index.js",
@@ -56,6 +57,7 @@
     "shiki": "^4.5.0"
   },
   "devDependencies": {
+    "@fumapress/core": "workspace:*",
     "@tailwindcss/oxide": "^4.3.3",
     "@types/node": "26.6.5",
     "@types/react": "^19.3.0",
@@ -71,6 +73,7 @@
     "tsdown": "0.23.1"
   },
   "peerDependencies": {
+    "@fumapress/core": "0.x.x",
     "@types/react": "*",
     "fumadocs-core": "^16.17.8",
     "fumadocs-ui": "^16.17.8",
@@ -80,6 +83,9 @@
     "react-dom": "^19.2.0"
   },
   "peerDependenciesMeta": {
+    "@fumapress/core": {
+      "optional": true
+    },
     "@types/react": {
       "optional": true
     },

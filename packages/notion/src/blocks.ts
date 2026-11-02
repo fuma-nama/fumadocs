@@ -16,6 +16,11 @@ export type NotionAssetBlock = NotionBlockOfType<
 export type NotionColor = NotionBlockOfType<'paragraph'>['paragraph']['color'];
 export type NotionPageIcon = NonNullable<NotionBlockOfType<'callout'>['callout']['icon']>;
 
+/** Notion IDs are UUIDs, the same in any case and with or without dashes */
+export function toNotionId(value: string): string {
+  return value.replaceAll('-', '').toLowerCase();
+}
+
 export function richTextToPlainText(value: RichTextItemResponse[]): string {
   return value.map((item) => item.plain_text).join('');
 }

@@ -4,7 +4,14 @@ import path from 'node:path';
 import { defineConfig } from 'tsdown';
 
 export default defineConfig({
-  entry: ['src/index.ts', 'src/source.ts', 'src/renderer.tsx', 'src/file.ts', 'src/client.ts'],
+  entry: [
+    'src/index.ts',
+    'src/source.ts',
+    'src/renderer.tsx',
+    'src/file.ts',
+    'src/client.ts',
+    'src/fumapress.tsx',
+  ],
   format: 'esm',
   target: 'es2023',
   fixedExtension: false,
