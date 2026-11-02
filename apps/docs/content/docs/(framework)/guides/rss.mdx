@@ -101,13 +101,6 @@ export async function getConfig() {
 }
 ```
 
-```ts tab="Astro" title="src/pages/rss.xml.ts"
-import type { APIRoute } from 'astro';
-import { getRSS } from '@/lib/rss';
-
-export const GET: APIRoute = () => new Response(getRSS());
-```
-
 ### Link the Feed
 
 Link it from your pages, so feed readers can discover it:
@@ -150,9 +143,5 @@ export const Route = createRootRoute({
 
 ```tsx tab="Waku" title="pages/_layout.tsx"
 // React hoists it into `<head>`
-<link rel="alternate" type="application/rss+xml" title="Fumadocs Blog" href="/rss.xml" />
-```
-
-```astro tab="Astro" title="src/components/Head.astro"
 <link rel="alternate" type="application/rss+xml" title="Fumadocs Blog" href="/rss.xml" />
 ```

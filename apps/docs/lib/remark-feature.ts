@@ -36,7 +36,7 @@ declare module 'satteri' {
   }
 }
 
-const frameworks = ['next', 'react-router', 'tanstack-start', 'waku', 'astro'] as const;
+const frameworks = ['next', 'react-router', 'tanstack-start', 'waku'] as const;
 
 /** the docs show the setup of a Fumadocs MDX source */
 const src = sourceRef(false);
@@ -47,7 +47,6 @@ const baseDirs = {
   'react-router': 'app',
   'tanstack-start': 'src',
   waku: 'src',
-  astro: 'src',
 };
 
 const frameworkNames = {
@@ -55,7 +54,6 @@ const frameworkNames = {
   'react-router': 'React Router',
   'tanstack-start': 'Tanstack Start',
   waku: 'Waku',
-  astro: 'Astro',
 };
 
 const buildCommands = {
@@ -63,7 +61,6 @@ const buildCommands = {
   'react-router': 'react-router build',
   'tanstack-start': 'vite build',
   waku: 'waku build',
-  astro: 'astro build',
 };
 
 const searchProviders = [
@@ -73,18 +70,6 @@ const searchProviders = [
   'typesense',
   'mixedbread',
 ] as const;
-
-const astroConfig = `import { defineConfig } from 'astro/config';
-import fumadocs from '@fumadocs/astro';
-
-export default defineConfig({
-  integrations: [
-    fumadocs({
-      components: './src/components/mdx.tsx',
-    }),
-  ],
-});
-`;
 
 const routesConfig = `import { index, route, type RouteConfig } from '@react-router/dev/routes';
 
@@ -180,20 +165,8 @@ export const docs = defineDocs({
       i18n: false,
       framework,
     });
-    // `mcpPlugin()` serves it on Astro
-    if (framework !== 'astro') {
-      const mcp = mcpRoute(framework);
-      files[`mcp/${framework}/${mcp.file}`] = mcpTemplates(framework, mcp, src);
-    }
-    // the Fumadocs integration serves the routes on Astro
-    if (framework === 'astro') {
-      files[`${base}/astro.config.mjs`] = codemod(
-        'astro.config.mjs',
-        astroConfig,
-        enableProcessedMarkdown,
-      );
-      continue;
-    }
+    const mcp = mcpRoute(framework);
+    files[`mcp/${framework}/${mcp.file}`] = mcpTemplates(framework, mcp, src);
     const routes = llmsRoutes(framework, null, '/docs', '/llms.mdx/docs');
     for (const [route, content] of templates(framework, routes, null, src)) {
       files[`${base}/${route.file}`] = content;
@@ -234,11 +207,10 @@ export default config;
     const route = staticJson(framework);
     const routeFile = path.posix.join(baseDir, route.file);
     const output = staticOutput(framework, framework === 'tanstack-start' ? viteConfig : '');
-    // collections are async in the React Router, TanStack Start and Astro templates
+    // collections are async in the React Router and TanStack Start templates
     const source = {
       dynamic: false,
-      async:
-        framework === 'react-router' || framework === 'tanstack-start' || framework === 'astro',
+      async: framework === 'react-router' || framework === 'tanstack-start',
       dir: 'content/docs',
     };
     const registration: [string, string][] = [];
@@ -265,8 +237,6 @@ export default config;
     ];
 
     for (const provider of searchProviders) {
-      // it searches on a server, Astro builds a static site
-      if (provider === 'mixedbread' && framework === 'astro') continue;
       const entries: [string, string][] = [];
       for (const [file, value] of searchTemplates(
         provider,

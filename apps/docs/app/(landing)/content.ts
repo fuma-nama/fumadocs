@@ -66,7 +66,7 @@ export const copy = {
     claims: [
       'Brings powerful features for\u00a0your\u00a0docs\u00a0workflows.',
       'High customizability to fit your preferences.',
-      'Works seamlessly with any React framework, Astro, CMS, anything.',
+      'Works seamlessly with any React framework, CMS, anything.',
     ],
     /** the hands-on tabs, each with its line and its docs */
     tabs: {
@@ -129,7 +129,6 @@ export const frameworks = [
   { name: 'React Router', href: '/docs/manual-installation/react-router' },
   { name: 'TanStack Start', href: '/docs/manual-installation/tanstack-start' },
   { name: 'Waku', href: '/docs/manual-installation/waku' },
-  { name: 'Astro', href: '/docs/manual-installation/astro' },
 ];
 
 export interface Quote {

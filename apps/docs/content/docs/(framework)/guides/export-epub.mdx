@@ -42,13 +42,6 @@ export const docs = defineDocs({
 });
 ```
 
-```js tab="Astro" title="astro.config.mjs"
-fumadocs({
-  // [!code ++]
-  includeProcessedMarkdown: true,
-});
-```
-
 ### Create Export Route
 
 `createEpubExportAPI` builds the route handler. It is guarded by `secret`: without a matching `Authorization: Bearer <secret>` header the request is rejected, and the route answers `503` when the secret itself is unset.
@@ -125,24 +118,6 @@ export const { GET } = createEpubExportAPI({
 });
 ```
 
-```ts tab="Astro" title="src/pages/export/epub.ts"
-import type { APIRoute } from 'astro';
-import { getSecret } from 'astro:env/server';
-import { source } from '@/lib/source';
-import { createEpubExportAPI } from 'fumadocs-epub';
-
-const api = createEpubExportAPI({
-  source,
-  title: 'My Documentation',
-  secret: getSecret('EXPORT_SECRET'),
-});
-
-// renders on request, requires an adapter
-export const prerender = false;
-
-export const GET: APIRoute = ({ request }) => api.GET(request);
-```
-
 For a public endpoint, or to build the file yourself (e.g. in a script), call `exportEpub()` directly and return the buffer.
 
 ### Using the CLI
@@ -151,10 +126,10 @@ You can also export EPUB via the Fumadocs CLI:
 
 ```bash
 fumadocs export epub --framework next
-# or: astro | tanstack-start | react-router | waku
+# or: tanstack-start | react-router | waku
 ```
 
-This fetches from your running server (Next.js and Astro) or copies from the build output (other frameworks). Run a production build first for the other frameworks.
+This fetches from your running server (Next.js) or copies from the build output (other frameworks). Run a production build first for the other frameworks.
 
 ## Options
 

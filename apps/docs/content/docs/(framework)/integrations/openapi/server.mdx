@@ -61,7 +61,7 @@ export const openapi = createOpenAPI({
 });
 ```
 
-On Next.js, Waku, React Router and Astro, `<OpenAPIPage />` loads each document once per browser session with `loadDocument`, it also runs during server rendering:
+On Next.js, Waku and React Router, `<OpenAPIPage />` loads each document once per browser session with `loadDocument`, it also runs during server rendering:
 
 ```tsx title="components/api-page.tsx"
 'use client';
@@ -70,7 +70,7 @@ import { createOpenAPIPage } from 'fumadocs-openapi/ui';
 
 export const OpenAPIPage = createOpenAPIPage({
   async loadDocument(id) {
-    // `import.meta.env.SSR` on Waku, React Router and Astro
+    // `import.meta.env.SSR` on Waku and React Router
     if (typeof window === 'undefined') {
       // the browser starts downloading it with the page
       preload(`/api/openapi/${id}`, { as: 'fetch', crossOrigin: 'anonymous' });
@@ -233,18 +233,6 @@ import { openapi } from '@/lib/openapi';
 export const { GET, HEAD, PUT, POST, PATCH, DELETE } = openapi.createProxy();
 ```
 
-```ts tab="Astro" title="src/pages/api/proxy.ts"
-import type { APIRoute } from 'astro';
-import { openapi } from '@/lib/openapi';
-
-// rendered on demand, it requires an adapter
-export const prerender = false;
-
-const proxy = openapi.createProxy();
-
-export const ALL: APIRoute = ({ request }) => proxy.handle(request);
-```
-
 And set the proxy URL in `createOpenAPI`.
 
 ```ts title="lib/openapi.ts"
@@ -332,18 +320,6 @@ export const Route = createFileRoute('/api/oauth')({
 import { openapi } from '@/lib/openapi';
 
 export const GET = openapi.createOAuthHandler();
-```
-
-```ts tab="Astro" title="src/pages/api/oauth.ts"
-import type { APIRoute } from 'astro';
-import { openapi } from '@/lib/openapi';
-
-// rendered on demand, it requires an adapter
-export const prerender = false;
-
-const handler = openapi.createOAuthHandler();
-
-export const GET: APIRoute = ({ request }) => handler(request);
 ```
 
 Pass its URL to `createOpenAPIPage()`, and register the full URL (e.g. `https://docs.example.com/api/oauth`) on your OAuth provider.

@@ -163,6 +163,5 @@ export const OPTIONS: Record<SwapLayer, Option[]> = {
       look: 'grey',
     },
     { title: 'Waku', short: 'Waku', name: 'waku', line: 'Same docs, on Waku.', look: 'paper' },
-    { title: 'Astro', short: 'Astro', name: 'astro', line: 'Same docs, on Astro.', look: 'ink' },
   ],
 };

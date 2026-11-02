@@ -49,11 +49,6 @@ const items = [
     value: 'mdx',
   },
   {
-    name: 'Astro',
-    description: 'Only results about Fumadocs Astro',
-    value: 'astro',
-  },
-  {
     name: 'CLI',
     description: 'Only results about Fumadocs CLI',
     value: 'cli',

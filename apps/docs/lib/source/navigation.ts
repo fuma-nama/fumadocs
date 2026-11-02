@@ -6,7 +6,6 @@ export function getSection(path: string | undefined) {
     {
       ui: 'ui',
       mdx: 'mdx',
-      astro: 'astro',
       cli: 'cli',
       headless: 'headless',
     }[dir] ?? 'framework'
