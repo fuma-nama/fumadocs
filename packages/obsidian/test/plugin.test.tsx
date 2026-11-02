@@ -48,7 +48,6 @@ describe('obsidianPlugin', () => {
     });
 
     const text = await plugin.getPageText!.call(ctx, page);
-    expect(text).toContain('## Introduction!!');
     expect(text).toContain('I love Fumadocs.');
     expect(text).not.toContain('hidden');
   });

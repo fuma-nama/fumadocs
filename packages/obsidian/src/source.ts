@@ -72,8 +72,8 @@ export interface ObsidianConfig<
 }
 
 export interface ObsidianSource<
-  FrontmatterSchema extends StandardSchemaV1,
-  MetaSchema extends StandardSchemaV1,
+  FrontmatterSchema extends StandardSchemaV1 = StandardSchemaV1,
+  MetaSchema extends StandardSchemaV1 = StandardSchemaV1,
 > extends LocalSource<
   ObsidianPage<StandardSchemaV1.InferOutput<FrontmatterSchema>>,
   StandardSchemaV1.InferOutput<MetaSchema> & MetaData

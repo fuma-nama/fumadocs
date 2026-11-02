@@ -1,5 +1,6 @@
 import type { Plugin } from 'fumadocs-core/framework/plugin';
 import type { PageData } from 'fumadocs-core/source';
+import type { ComponentType } from 'react';
 import {
   blocksToPlainText,
   blocksToStructuredData,
@@ -29,6 +30,9 @@ export interface NotionPluginOptions extends Pick<
    * @defaultValue true
    */
   fileProxy?: boolean | Pick<NotionFileUrlResolverOptions, 'path'>;
+
+  /** replace the block renderer, it receives the props of `NotionRenderer` */
+  Renderer?: ComponentType<NotionRendererProps>;
 }
 
 /**
@@ -36,7 +40,7 @@ export interface NotionPluginOptions extends Pick<
  */
 export function notionPlugin(
   notion: NotionIntegration,
-  { fileProxy = true, ...options }: NotionPluginOptions = {},
+  { fileProxy = true, Renderer = NotionRenderer, ...options }: NotionPluginOptions = {},
 ): Plugin {
   const filePath = (typeof fileProxy === 'object' && fileProxy.path) || '/api/notion/file';
   const handler = fileProxy && createNotionFileHandler(notion);
@@ -92,7 +96,7 @@ export function notionPlugin(
       const { blocks } = await load(data);
       return {
         node: (
-          <NotionRenderer
+          <Renderer
             {...options}
             blocks={blocks}
             getFileUrl={

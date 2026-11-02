@@ -1,5 +1,4 @@
 import path from 'node:path';
-import type { StandardSchemaV1 } from '@standard-schema/spec';
 import type { Plugin, PluginContext } from 'fumadocs-core/framework/plugin';
 import type { Page } from 'fumadocs-core/source';
 import type { MDXComponents } from 'mdx/types';
@@ -17,7 +16,7 @@ export interface ObsidianPluginOptions {
  * Render the pages of an Obsidian vault from `obsidian()`, with relative links resolved to the URLs of their pages.
  */
 export function obsidianPlugin(
-  vault: ObsidianSource<StandardSchemaV1, StandardSchemaV1>,
+  vault: ObsidianSource,
   { components }: ObsidianPluginOptions = {},
 ): Plugin {
   // a vault change creates new pages, so their results stay valid
@@ -67,19 +66,8 @@ export function obsidianPlugin(
     // from the compiled page, its source has Obsidian syntax and hidden comments
     async getPageText(page) {
       if (!isVaultPage(page)) return;
-      const { headings, contents } = await page.data.structuredData();
-      const titles = new Map(headings.map((item) => [item.id, item.content]));
-      const lines: string[] = [];
-      let heading: string | undefined;
-      for (const item of contents) {
-        if (item.heading !== heading) {
-          heading = item.heading;
-          const title = heading && titles.get(heading);
-          if (title) lines.push(`## ${title}`);
-        }
-        lines.push(item.content);
-      }
-      return lines.join('\n\n');
+      const { contents } = await page.data.structuredData();
+      return contents.map((item) => item.content).join('\n\n');
     },
   };
 }

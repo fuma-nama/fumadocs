@@ -113,8 +113,9 @@ describe('sanityPlugin', () => {
   });
 
   it('leaves other pages to other plugins', async () => {
-    const { plugin, ctx, other } = await createSite();
+    const { plugin, ctx, page, other } = await createSite();
 
+    expect(await sanityPlugin({ docType: 'blog' }).getPageBody!.call(ctx, page)).toBeUndefined();
     expect(await plugin.getPageBody!.call(ctx, other)).toBeUndefined();
     expect(await plugin.getPageText!.call(ctx, other)).toBeUndefined();
     expect(await plugin.getPageToc!.call(ctx, other)).toBeUndefined();
