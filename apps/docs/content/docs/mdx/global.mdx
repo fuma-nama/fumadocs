@@ -19,31 +19,52 @@ export default defineConfig({
 
 ### MDX Options
 
-Customize the [default MDX preset](/docs/mdx/mdx).
+Customize the [default preset](/docs/mdx/mdx) of collections. `mdxOptions` applies to collections compiled with unified, and `satteriOptions` to collections with `compiler: 'satteri'`.
 
-```ts title="source.config.ts"
+```ts tab="unified" title="source.config.ts"
 import { defineConfig } from 'fumadocs-mdx/config';
-import rehypeKatex from 'rehype-katex';
-import remarkMath from 'remark-math';
+import { myPlugin } from './remark-plugin';
 
 export default defineConfig({
   mdxOptions: {
-    remarkPlugins: [remarkMath],
     // When order matters
-    rehypePlugins: (v) => [rehypeKatex, ...v],
+    remarkPlugins: (v) => [myPlugin, ...v],
+  },
+});
+```
+
+```ts tab="Sätteri" title="source.config.ts"
+import { defineConfig } from 'fumadocs-mdx/config';
+import { myPlugin } from './mdast-plugin';
+
+export default defineConfig({
+  satteriOptions: {
+    // When order matters
+    mdastPlugins: (v) => [myPlugin(), ...v],
   },
 });
 ```
 
 Or using the minimal preset:
 
-```ts title="source.config.ts"
+```ts tab="unified" title="source.config.ts"
 import { defineConfig } from 'fumadocs-mdx/config';
 
 export default defineConfig({
   mdxOptions: {
     preset: 'minimal',
     // now it accepts only MDX processor options
+  },
+});
+```
+
+```ts tab="Sätteri" title="source.config.ts"
+import { defineConfig } from 'fumadocs-mdx/config';
+
+export default defineConfig({
+  satteriOptions: {
+    preset: 'minimal',
+    // now it accepts only Sätteri compile options
   },
 });
 ```

@@ -118,7 +118,7 @@ export const docs = defineDocs({
 });
 ```
 
-```ts tab="Tanstack Start" title="src/lib/source.ts"
+```ts tab="TanStack Start" title="src/lib/source.ts"
 import { loader } from 'fumadocs-core/source';
 import { defineDocs } from 'fumadocs-mdx/macro'; // [!code --]
 // [!code ++:2]
@@ -150,7 +150,7 @@ export const source = loader(
 );
 ```
 
-```ts tab="Tanstack Start" title="src/lib/collections.ts"
+```ts tab="TanStack Start" title="src/lib/collections.ts"
 import { defineDocs } from 'fumadocs-mdx/macro';
 
 export const docs = defineDocs({
@@ -282,7 +282,7 @@ export default function Page({ loaderData }: Route.ComponentProps) {
 }
 ```
 
-```tsx tab="Tanstack Start" title="src/routes/docs/$.tsx"
+```tsx tab="TanStack Start" title="src/routes/docs/$.tsx"
 import { docs, source } from '@/lib/source'; // [!code --]
 // [!code ++:3]
 import { docs } from '@/lib/collections';

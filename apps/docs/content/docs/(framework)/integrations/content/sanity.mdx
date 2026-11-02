@@ -69,7 +69,9 @@ Install the integration:
 npm i @fumadocs/sanity
 ```
 
-```ts title="lib/source.ts" tab="Next.js (live preview)"
+Live preview uses `sanityFetch` from `next-sanity/live`, so it's only available on Next.js. Pass the Sanity client on other frameworks.
+
+```ts title="lib/source.ts" tab="Live Preview"
 import { dynamicLoader } from 'fumadocs-core/source';
 import { createSanitySource } from '@fumadocs/sanity';
 // the live preview client
@@ -92,7 +94,7 @@ export async function getSource() {
 }
 ```
 
-```ts title="lib/source.ts" tab="Others"
+```ts title="lib/source.ts" tab="Client"
 import { dynamicLoader } from 'fumadocs-core/source';
 import { createSanitySource } from '@fumadocs/sanity';
 // the Sanity client
@@ -188,7 +190,7 @@ export default function Page({ loaderData }: Route.ComponentProps) {
 }
 ```
 
-```tsx tab="Tanstack Start" title="src/routes/docs/$.tsx"
+```tsx tab="TanStack Start" title="src/routes/docs/$.tsx"
 import { createFileRoute, notFound } from '@tanstack/react-router';
 import { createServerFn } from '@tanstack/react-start';
 import { useFumadocsLoader } from 'fumadocs-core/source/client';

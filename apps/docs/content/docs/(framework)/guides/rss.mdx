@@ -74,7 +74,7 @@ export default [
 ] satisfies RouteConfig;
 ```
 
-```ts tab="Tanstack Start" title="src/routes/rss[.]xml.ts"
+```ts tab="TanStack Start" title="src/routes/rss[.]xml.ts"
 import { createFileRoute } from '@tanstack/react-router';
 import { getRSS } from '@/lib/rss';
 
@@ -130,7 +130,7 @@ export const links: Route.LinksFunction = () => [
 ];
 ```
 
-```tsx tab="Tanstack Start" title="src/routes/__root.tsx"
+```tsx tab="TanStack Start" title="src/routes/__root.tsx"
 export const Route = createRootRoute({
   head: () => ({
     links: [

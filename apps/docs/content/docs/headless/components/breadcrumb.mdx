@@ -13,11 +13,11 @@ It exports a `useBreadcrumb` hook:
 
 ```ts twoslash
 declare const tree: any;
-import { usePathname } from 'next/navigation';
 // ---cut---
 import { useBreadcrumb } from 'fumadocs-core/breadcrumb';
+// or the hook provided by your React framework
+import { usePathname } from 'fumadocs-core/framework';
 
-// obtain `pathname` using the hook provided by your React framework.
 const pathname = usePathname();
 const items = useBreadcrumb(pathname, tree);
 //    ^?
@@ -25,16 +25,16 @@ const items = useBreadcrumb(pathname, tree);
 
 ### Example
 
-A styled example for Next.js.
+A styled example. `usePathname()` and `Link` of Fumadocs work on every framework with its [framework provider](/docs/headless#installation).
 
 ```tsx
 'use client';
-import { usePathname } from 'next/navigation';
+import { usePathname } from 'fumadocs-core/framework';
 import { useBreadcrumb } from 'fumadocs-core/breadcrumb';
 import type { PageTree } from 'fumadocs-core/page-tree';
 import { Fragment } from 'react';
 import { ChevronRight } from 'lucide-react';
-import Link from 'next/link';
+import Link from 'fumadocs-core/link';
 
 export function Breadcrumb({ tree }: { tree: PageTree.Root }) {
   const pathname = usePathname();

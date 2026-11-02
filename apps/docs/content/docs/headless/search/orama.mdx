@@ -21,7 +21,7 @@ Create the server from source object.
   ../../examples/react-router-min/app/routes/search.ts
 </include>
 
-<include cwd meta='tab="Tanstack Start" title="src/routes/api/search.ts"'>
+<include cwd meta='tab="TanStack Start" title="src/routes/api/search.ts"'>
   ../../examples/tanstack-start-min/src/routes/api/search.ts
 </include>
 
@@ -70,7 +70,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 }
 ```
 
-```ts tab="Tanstack Start" title="src/routes/api/search.ts"
+```ts tab="TanStack Start" title="src/routes/api/search.ts"
 import { createFileRoute } from '@tanstack/react-router';
 import { source } from '@/lib/source';
 import { createSearchAPI } from 'fumadocs-core/search/server';
@@ -183,7 +183,7 @@ export async function loader() {
 }
 ```
 
-```ts tab="Tanstack Start" title="src/routes/api/search.ts"
+```ts tab="TanStack Start" title="src/routes/api/search.ts"
 import { createFileRoute } from '@tanstack/react-router';
 
 export const Route = createFileRoute('/api/search')({
@@ -196,7 +196,7 @@ export const Route = createFileRoute('/api/search')({
 });
 ```
 
-```ts tab="Tanstack Start" title="vite.config.ts"
+```ts tab="TanStack Start" title="vite.config.ts"
 import { tanstackStart } from '@tanstack/react-start/plugin/vite';
 import { defineConfig } from 'vite';
 

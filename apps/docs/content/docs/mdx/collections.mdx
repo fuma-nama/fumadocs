@@ -90,7 +90,7 @@ export const blog = defineCollections({
 
 ### `mdxOptions`
 
-Customize MDX options at the collection level.
+Customize MDX options at the collection level, for collections compiled with unified.
 
 > This API is only available on `doc` type.
 
@@ -99,6 +99,7 @@ import { defineCollections } from 'fumadocs-mdx/config';
 
 export const blog = defineCollections({
   type: 'doc',
+  dir: './content/blog',
   mdxOptions: {
     // mdx options
   },
@@ -111,15 +112,38 @@ You have full control over MDX options.
 You can use [`applyMdxPreset`](/docs/mdx/mdx) to apply the default MDX preset.
 
 ```ts title="source.config.ts"
-import { defineCollections } from 'fumadocs-mdx/config';
+import { applyMdxPreset, defineCollections } from 'fumadocs-mdx/config';
 
 export const blog = defineCollections({
   type: 'doc',
+  dir: './content/blog',
   mdxOptions: applyMdxPreset({
     // extend the preset
   }),
 });
 ```
+
+### `compiler`
+
+> This API is only available on `doc` type.
+
+Compile the collection with [Sätteri](/docs/mdx/mdx#satteri) instead of unified, and pass `satteriOptions` in place of `mdxOptions`.
+
+```ts title="source.config.ts"
+import { defineCollections } from 'fumadocs-mdx/config';
+
+export const blog = defineCollections({
+  type: 'doc',
+  dir: './content/blog',
+  compiler: 'satteri',
+  // optional, defaults to the global `satteriOptions`
+  satteriOptions: {
+    // Sätteri options
+  },
+});
+```
+
+Unlike `mdxOptions`, the collection-level `satteriOptions` keeps the default preset unless you pass `preset: 'minimal'`. It replaces the global `satteriOptions` instead of merging with them.
 
 ### `postprocess`
 

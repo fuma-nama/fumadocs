@@ -88,7 +88,7 @@ With [`async`](/docs/mdx/async) enabled, only the frontmatter is bundled upfront
 import { use } from 'react';
 import { docs } from '@/lib/source';
 
-// in your route loader (React Router, Tanstack Start)
+// in your route loader (React Router, TanStack Start)
 export async function loader({ path }: { path: string }) {
   await docs.getPage(path)?.preload();
   return { path };
@@ -114,7 +114,7 @@ Since the content is loaded lazily, wrap the page in a `<Suspense>` boundary unl
 
 ## Configuration
 
-The Macro API is enabled by default. Pass `macro` to limit which modules may use it, or `false` to disable it.
+The Macro API is enabled by default. Pass `macro` to limit which modules may use it, or `false` to disable it. On React Router and TanStack Start, pass it to the Vite plugin.
 
 ```js tab="Next.js" title="next.config.mjs"
 import { createMDX } from 'fumadocs-mdx/next';
@@ -141,6 +141,23 @@ export default {
     }),
   ],
 };
+```
+
+```ts tab="Waku" title="waku.config.ts"
+import { defineConfig } from 'waku/config';
+import { fumadocsMdx } from 'fumadocs-mdx/vite';
+
+export default defineConfig({
+  vite: {
+    plugins: [
+      fumadocsMdx({
+        macro: {
+          include: ['src/**/*.ts', 'src/**/*.tsx'],
+        },
+      }),
+    ],
+  },
+});
 ```
 
 ```js tab="Node.js"

@@ -38,9 +38,9 @@ import { File, Folder, Files } from 'fumadocs-ui/components/files';
 
 ## Remark Plugin
 
-You can enable [`remark-mdx-files`](/docs/headless/mdx/remark-mdx-files) for additional feature & syntax.
+[`remark-mdx-files`](/docs/headless/mdx/remark-mdx-files) is a remark plugin for additional features and syntax.
 
-```tsx title="source.config.ts (Fumadocs MDX)"
+```ts tab="unified" title="source.config.ts"
 import { remarkMdxFiles } from 'fumadocs-core/mdx-plugins/remark-mdx-files';
 import { defineConfig } from 'fumadocs-mdx/config';
 
@@ -48,6 +48,24 @@ export default defineConfig({
   mdxOptions: {
     // [!code ++]
     remarkPlugins: [remarkMdxFiles],
+  },
+});
+```
+
+```ts tab="Sätteri" title="source.config.ts"
+import { remarkMdxFiles } from '@fumadocs/satteri/remark-mdx-files';
+import { defineConfig, defineDocs } from 'fumadocs-mdx/config';
+
+export const docs = defineDocs({
+  docs: {
+    compiler: 'satteri',
+  },
+});
+
+export default defineConfig({
+  satteriOptions: {
+    // [!code ++]
+    mdastPlugins: [remarkMdxFiles()],
   },
 });
 ```

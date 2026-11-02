@@ -135,7 +135,7 @@ export const graphql = createGraphQL({
 });
 ```
 
-On Next.js, Waku and React Router, `<GraphQLPage />` loads the SDL of each schema once per browser session with `loadSchema`, it also runs during server rendering:
+On Next.js, React Router and Waku, `<GraphQLPage />` loads the SDL of each schema once per browser session with `loadSchema`, which also runs during server rendering:
 
 ```tsx title="components/api-page.tsx"
 'use client';
@@ -199,7 +199,7 @@ export async function GET(_: Request, { params }: ApiContext<'/api/graphql-schem
 }
 ```
 
-On Tanstack Start, route loaders run on both sides, call a server function only when the browser doesn't have the schema yet:
+TanStack Start route loaders run on both the server and the browser, so it skips `loadSchema` and the route above. Call a server function only when the browser doesn't have the schema yet:
 
 ```tsx title="src/routes/docs/$.tsx"
 import { createServerFn } from '@tanstack/react-start';

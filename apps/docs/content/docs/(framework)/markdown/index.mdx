@@ -74,7 +74,7 @@ You can use the [`schema`](/docs/mdx/collections#schema-1) option to add frontma
 
 ### Auto Links
 
-Internal links use the `<Link />` component of your React framework (e.g. `next/link`) to allow prefetching and avoid hard-reload.
+Internal links use the `<Link />` component of your React framework to allow prefetching and avoid hard-reload.
 
 External links will get the default `rel="noreferrer noopener" target="_blank"` attributes for security.
 
@@ -92,13 +92,10 @@ Useful for adding links.
 import { HomeIcon } from 'lucide-react';
 
 <Cards>
-  <Card
-    href="https://nextjs.org/docs/app/building-your-application/data-fetching/fetching-caching-and-revalidating"
-    title="Fetching, Caching, and Revalidating"
-  >
-    Learn more about caching in Next.js
+  <Card href="/docs" title="Documentation">
+    Browse the full documentation.
   </Card>
-  <Card title="href is optional">Learn more about `fetch` in Next.js.</Card>
+  <Card title="href is optional">Cards can hold plain content too.</Card>
   <Card icon={<HomeIcon />} href="/" title="Home">
     You can include icons too.
   </Card>
@@ -106,13 +103,10 @@ import { HomeIcon } from 'lucide-react';
 ```
 
 <Cards>
-  <Card
-    href="https://nextjs.org/docs/app/building-your-application/data-fetching/fetching-caching-and-revalidating"
-    title="Fetching, Caching, and Revalidating"
-  >
-    Learn more about caching in Next.js
+  <Card href="/docs" title="Documentation">
+    Browse the full documentation.
   </Card>
-  <Card title="href is optional">Learn more about `fetch` in Next.js.</Card>
+  <Card title="href is optional">Cards can hold plain content too.</Card>
   <Card icon={<HomeIcon />} href="/" title="Home">
     You can include icons too.
   </Card>
@@ -362,9 +356,9 @@ console.log('B');
 
 #### MDX in Tab Groups
 
-While disabled by default, you use MDX in tab values by configuring the remark plugin:
+Tab groups come from the `remarkCodeTab` remark plugin, which Fumadocs MDX enables by default. To use MDX in tab values, enable its `parseMdx` option:
 
-```ts tab="Fumadocs MDX" title="source.config.ts"
+```ts tab="unified" title="source.config.ts"
 import { defineConfig } from 'fumadocs-mdx/config';
 
 export default defineConfig({
@@ -376,19 +370,21 @@ export default defineConfig({
 });
 ```
 
-```ts tab="MDX Compiler"
-import { compile } from '@mdx-js/mdx';
-import { remarkCodeTab } from 'fumadocs-core/mdx-plugins';
+```ts tab="Sätteri" title="source.config.ts"
+import { defineConfig, defineDocs } from 'fumadocs-mdx/config';
 
-await compile('...', {
-  remarkPlugins: [
-    [
-      remarkCodeTab,
-      {
-        parseMdx: true, // [!code ++]
-      },
-    ],
-  ],
+export const docs = defineDocs({
+  docs: {
+    compiler: 'satteri',
+  },
+});
+
+export default defineConfig({
+  satteriOptions: {
+    remarkCodeTabOptions: {
+      parseMdx: true, // [!code ++]
+    },
+  },
 });
 ```
 
@@ -412,9 +408,7 @@ console.log('B');
 
 ### Include
 
-> Available on **Fumadocs MDX** and **Local Markdown**, see [`remark-include`](/docs/headless/mdx/remark-include) for others.
-
-Reference another file (can also be a Markdown/MDX document).
+Reference another file (can also be a Markdown/MDX document). Fumadocs MDX always enables it with [Remark Include](/docs/headless/mdx/remark-include).
 Specify the target file path in `<include>` tag (relative to the MDX file itself).
 
 ```mdx title="page.mdx"

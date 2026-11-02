@@ -61,7 +61,7 @@ export const openapi = createOpenAPI({
 });
 ```
 
-On Next.js, Waku and React Router, `<OpenAPIPage />` loads each document once per browser session with `loadDocument`, it also runs during server rendering:
+On Next.js, React Router and Waku, `<OpenAPIPage />` loads each document once per browser session with `loadDocument`, which also runs during server rendering:
 
 ```tsx title="components/api-page.tsx"
 'use client';
@@ -125,7 +125,7 @@ export async function GET(_: Request, { params }: ApiContext<'/api/openapi/[id]'
 }
 ```
 
-On Tanstack Start, route loaders run on both sides, call a server function only when the browser doesn't have the document yet:
+TanStack Start route loaders run on both the server and the browser, so it skips `loadDocument` and the route above. Call a server function only when the browser doesn't have the document yet:
 
 ```tsx title="src/routes/docs/$.tsx"
 import { createServerFn } from '@tanstack/react-start';
@@ -160,7 +160,7 @@ function Page() {
 }
 ```
 
-- With generated MDX files, only Tanstack Start needs a change: put documents in `preloaded.docs` instead.
+- With generated MDX files, only TanStack Start needs a change: put documents in `preloaded.docs` instead.
 - For the [UI installed by Fumadocs CLI](/docs/integrations/openapi/api-page#full-ui), pass `loadDocument` to `createOpenAPIRenderer()`.
 - Browsers keep each document until a reload. With `disableCache`, leave `includeDocument` on.
 
@@ -209,7 +209,7 @@ export default [
 ] satisfies RouteConfig;
 ```
 
-```ts tab="Tanstack Start" title="src/routes/api/proxy.ts"
+```ts tab="TanStack Start" title="src/routes/api/proxy.ts"
 import { openapi } from '@/lib/openapi';
 import { createFileRoute } from '@tanstack/react-router';
 
@@ -246,10 +246,10 @@ export const openapi = createOpenAPI({
 ### Allowed Origins
 
 By default, the proxy accepts any public origin, refuses hosts on private networks (e.g. `localhost`), and doesn't forward your site's cookies.
-List the origins to restrict it, or to proxy private APIs:
+List the origins in your proxy route to restrict it, or to proxy private APIs:
 
-```ts title="app/api/proxy/route.ts"
-export const { GET, HEAD, PUT, POST, PATCH, DELETE } = openapi.createProxy({
+```ts
+openapi.createProxy({
   // strings or regular expressions
   allowedOrigins: ['https://api.example.com', 'http://localhost:8080'],
 });
@@ -264,8 +264,8 @@ Redirects are checked by the same rules.
 
 Use `filterRequest` to refuse requests, for example to only allow reads:
 
-```ts title="app/api/proxy/route.ts"
-export const { GET, HEAD, PUT, POST, PATCH, DELETE } = openapi.createProxy({
+```ts
+openapi.createProxy({
   // proxied requests that return false are refused
   filterRequest: (request) => request.method === 'GET',
 });
@@ -301,7 +301,7 @@ export default [
 ] satisfies RouteConfig;
 ```
 
-```ts tab="Tanstack Start" title="src/routes/api/oauth.ts"
+```ts tab="TanStack Start" title="src/routes/api/oauth.ts"
 import { openapi } from '@/lib/openapi';
 import { createFileRoute } from '@tanstack/react-router';
 

@@ -11,7 +11,7 @@ npm install takumi-js
 
 `takumi-js` loads a native binding (`@takumi-rs/core`) on Node.js. Keep it out of the server bundle for Next.js by marking it external:
 
-```ts title="next.config.ts" tab="Next.js"
+```ts title="next.config.ts"
 import type { NextConfig } from 'next';
 
 const config: NextConfig = {
@@ -20,7 +20,7 @@ const config: NextConfig = {
 };
 ```
 
-There are no actions needed for Vite-based frameworks.
+React Router, TanStack Start and Waku need no changes.
 
 ## Metadata Image
 
@@ -122,25 +122,30 @@ return {
 };
 ```
 
-```tsx tab="Vite Based Framework" title="app/lib/source.ts"
-// [!code ++:5]
-export function getPageImageUrl(page: (typeof source)['$inferPage']) {
+```ts tab="Waku" title="src/lib/shared.ts"
+import { createGetUrl } from 'fumadocs-core/source';
+
+// [!code ++:7]
+const getImageUrl = createGetUrl('/og/docs');
+
+export function getPageImageUrl(page: { slugs: string[]; locale?: string }) {
   const segments = [...page.slugs, 'image.webp'];
 
-  return '/' + [page.locale, 'og', 'docs', ...segments].filter(Boolean).join('/');
+  return { segments, url: getImageUrl(segments, page.locale) };
 }
 ```
 
-```tsx tab="Vite Based Framework" title="app/routes/docs.tsx"
+```tsx tab="Waku" title="src/pages/docs/[...slugs].tsx"
 // [!code ++]
-import { getPageImageUrl } from '@/lib/source';
+import { getPageImageUrl } from '@/lib/shared';
 
-// Somewhere in your component or client loader
+// Somewhere in your page component
 return (
-  <>
+  <DocsPage toc={page.data.toc}>
     {/* [!code ++] */}
-    <meta property="og:image" content={getPageImageUrl(page)} />
-  </>
+    <meta property="og:image" content={getPageImageUrl(page).url} />
+    {/* ... */}
+  </DocsPage>
 );
 ```
 
@@ -199,34 +204,39 @@ export function loader({ params }: Route.LoaderArgs) {
 }
 ```
 
-```tsx tab="Waku" title="src/pages/_api/og/docs/[...slugs]/image.webp.tsx"
-import { source } from '@/lib/source';
-import { generateOGImage } from 'fumadocs-ui/og/takumi';
-import { ApiContext } from 'waku/router';
+```ts tab="React Router" title="app/routes.ts"
+import { type RouteConfig, route } from '@react-router/dev/routes';
 
-export async function GET(_: Request, { params }: ApiContext<'/og/docs/[...slugs]/image.webp'>) {
-  const page = source.getPage(params.slugs);
+export default [
+  // [!code ++]
+  route('/og/docs/*', 'routes/docs.og.tsx'),
+] satisfies RouteConfig;
+```
 
-  if (!page) return new Response(undefined, { status: 404 });
+```ts tab="React Router" title="react-router.config.ts"
+import type { Config } from '@react-router/dev/config';
+import { glob } from 'node:fs/promises';
+import { createGetUrl, getSlugs } from 'fumadocs-core/source';
+import { getPageImagePath } from './app/lib/shared';
 
-  return generateOGImage({
-    title: page.data.title,
-    description: page.data.description,
-    site: 'My App',
-    format: 'webp',
-  });
-}
+const getUrl = createGetUrl('/docs');
 
-export async function getConfig() {
-  const pages = source
-    .generateParams()
-    .map((item) => (item.lang ? [item.lang, ...item.slug] : item.slug));
+export default {
+  ssr: true,
+  // [!code ++:12]
+  async prerender({ getStaticPaths }) {
+    const paths = [...getStaticPaths()];
 
-  return {
-    render: 'static' as const,
-    staticPaths: pages,
-  } as const;
-}
+    for await (const entry of glob('**/*.mdx', { cwd: 'content/docs' })) {
+      const slugs = getSlugs(entry);
+
+      paths.push(getUrl(slugs));
+      paths.push(getPageImagePath(slugs));
+    }
+
+    return paths;
+  },
+} satisfies Config;
 ```
 
 ```ts tab="TanStack Start" title="src/routes/og/docs/$.ts"
@@ -280,42 +290,34 @@ export default defineConfig({
 });
 ```
 
-```ts tab="React Router" title="app/routes.ts"
-import { type RouteConfig, route } from '@react-router/dev/routes';
+```tsx tab="Waku" title="src/pages/_api/og/docs/[...slugs]/image.webp.tsx"
+import { source } from '@/lib/source';
+import { generateOGImage } from 'fumadocs-ui/og/takumi';
+import { ApiContext } from 'waku/router';
 
-export default [
-  // [!code ++]
-  route('/og/docs/*', 'routes/docs.og.tsx'),
-] satisfies RouteConfig;
-```
+export async function GET(_: Request, { params }: ApiContext<'/og/docs/[...slugs]/image.webp'>) {
+  const page = source.getPage(params.slugs);
 
-```ts tab="React Router" title="react-router.config.ts"
-import type { Config } from '@react-router/dev/config';
-import { glob } from 'node:fs/promises';
-import { createGetUrl, getSlugs } from 'fumadocs-core/source';
-import { getPageImagePath } from './app/lib/shared';
+  if (!page) return new Response(undefined, { status: 404 });
 
-const getUrl = createGetUrl('/docs');
+  return generateOGImage({
+    title: page.data.title,
+    description: page.data.description,
+    site: 'My App',
+    format: 'webp',
+  });
+}
 
-export default {
-  ssr: true,
-  future: {
-    v8_middleware: true,
-  },
-  // [!code ++:12]
-  async prerender({ getStaticPaths }) {
-    const paths = [...getStaticPaths()];
+export async function getConfig() {
+  const pages = source
+    .generateParams()
+    .map((item) => (item.lang ? [item.lang, ...item.slug] : item.slug));
 
-    for await (const entry of glob('**/*.mdx', { cwd: 'content/docs' })) {
-      const slugs = getSlugs(entry);
-
-      paths.push(getUrl(slugs));
-      paths.push(getPageImagePath(slugs));
-    }
-
-    return paths;
-  },
-} satisfies Config;
+  return {
+    render: 'static' as const,
+    staticPaths: pages,
+  } as const;
+}
 ```
 
 > Takumi comes with pre-bundled full-axis (100-900) [`Geist`](https://vercel.com/font) and `Geist Mono` fonts, so you don't need to worry about it.

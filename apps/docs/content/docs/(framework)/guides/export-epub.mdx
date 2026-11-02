@@ -29,7 +29,7 @@ npm install fumadocs-epub
 
 EPUB export requires `includeProcessedMarkdown` in your docs collection config:
 
-```ts tab="Fumadocs MDX" title="source.config.ts"
+```ts title="source.config.ts"
 import { defineDocs } from 'fumadocs-mdx/config';
 
 export const docs = defineDocs({
@@ -87,7 +87,7 @@ export default [
 ] satisfies RouteConfig;
 ```
 
-```ts tab="Tanstack Start" title="src/routes/export/epub.ts"
+```ts tab="TanStack Start" title="src/routes/export/epub.ts"
 import { createFileRoute } from '@tanstack/react-router';
 import { source } from '@/lib/source';
 import { createEpubExportAPI } from 'fumadocs-epub';
@@ -129,7 +129,7 @@ fumadocs export epub --framework next
 # or: tanstack-start | react-router | waku
 ```
 
-This fetches from your running server (Next.js) or copies from the build output (other frameworks). Run a production build first for the other frameworks.
+On Next.js, this fetches from your running server. On React Router, TanStack Start and Waku, it copies from the build output, so run a production build first.
 
 ## Options
 
@@ -190,6 +190,6 @@ const buffer = await exportEpub({
 
 Images in your MDX are resolved automatically:
 
-- **Relative paths** (e.g. `./image.png`) — resolved relative to the page file
-- **Public paths** (e.g. `/og.png`) — resolved from the `public` directory
-- **Remote URLs** (e.g. `https://...`) — embedded as-is
+- **Relative paths** (e.g. `./image.png`): resolved relative to the page file
+- **Public paths** (e.g. `/og.png`): resolved from the `public` directory
+- **Remote URLs** (e.g. `https://...`): embedded as-is
