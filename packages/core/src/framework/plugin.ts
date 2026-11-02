@@ -117,10 +117,7 @@ export interface HeadTag {
 
 /** the rendered content of a page */
 export interface PageBody {
-  /**
-   * React content. Client components hydrate: through `'use client'` on React Server Components, and when
-   * registered as MDX components on Astro, others render on the server.
-   */
+  /** React content: client components (`'use client'`) hydrate, others render on the server. */
   node: ReactNode;
 }
 

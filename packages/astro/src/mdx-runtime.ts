@@ -1,14 +1,12 @@
-import { AsyncLocalStorage } from 'node:async_hooks';
 import { DevalueError, stringify } from 'devalue';
 import type { MDXComponents } from 'mdx/types';
 import type { ElementType, ReactNode } from 'react';
 import { Fragment, jsx, jsxs } from 'react/jsx-runtime';
 import type { IslandNode } from './island';
-import type { ProviderData } from './ui/provider';
 
 /*
- * The runtime of compiled MDX files. It doesn't import the app: MDX modules importing it are in a
- * cycle with the source of every page, which makes the builds of Astro quadratic.
+ * The runtime of compiled MDX files. It never imports the source of pages: MDX modules importing it
+ * would be in a cycle with every page, which makes the builds of Astro quadratic.
  */
 
 /** a slot of the island, rendered by Astro */
@@ -27,19 +25,6 @@ export function serializeIsland(nodes: IslandNode[]): string {
       { cause: error },
     );
   }
-}
-
-/** the props of providers for the request being rendered, created when an island needs them */
-export const requests = new AsyncLocalStorage<() => ProviderData>();
-
-/** the props of content islands, `provider` defaults to the request, like content rendered on your pages */
-export function getIslandProps({
-  components: _components,
-  children: _children,
-  ...props
-}: Record<string, unknown>): Record<string, unknown> {
-  const provider = props.provider ? undefined : requests.getStore()?.();
-  return provider ? { ...props, provider } : props;
 }
 
 const AstroFragment: unique symbol = Symbol.for('astro:fragment');

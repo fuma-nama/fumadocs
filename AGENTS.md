@@ -59,7 +59,6 @@ Fumadocs runs on Next.js and Waku (RSC), React Router and TanStack Start (with a
 ## Internationalization
 
 - Every UI string goes through `useTranslations({ note })` from `@fuma-translate/react`, e.g. `t('Close Banner', { note: 'aria-label' })`. The build regenerates `src/.translations/{index.ts,keys.json}` in each UI package; commit them in both packages.
-- Astro plugins with UI declare their strings through the plugin's `translations` field.
 - Routing features must handle `fumadocs-core/i18n` setups: every `hideLocale` mode, the locale in generated URLs (search, Markdown, OG images, sitemaps) and per-locale page trees. Check against `examples/i18n`, `react-router-i18n`, `tanstack-start-i18n`, `waku-i18n` and `astro-i18n`.
 
 ## Accessibility
@@ -78,7 +77,7 @@ Fumadocs runs on Next.js and Waku (RSC), React Router and TanStack Start (with a
 - A vendored file may only import files matched by its registry's `files` rules or public exports of other packages, type-only imports included. Tests, `tsc` and lint don't catch this: run `node ./scripts/pre-build.ts` in `apps/docs` after changing imports in vendored UI.
 - CLI features (`packages/cli/src/features`) support every framework in `src/project/index.ts`, including Astro and static output, or return the reason from `supports()`.
 - Don't run `fumadocs add` non-interactively in the repo: its prompt defaults to installing dependencies and rewrites the lockfile. Test installs through `FumadocsComponentInstaller` with a local registry connector from a scratch script.
-- Templates in `packages/create-app/template` are synced from `examples/` with `pnpm --filter create-fumadocs-app sync`: change the example, then sync. `template/astro` is maintained by hand (the setup of `fumadocs feature docs`).
+- Templates in `packages/create-app/template` are synced from `examples/` with `pnpm --filter create-fumadocs-app sync`: change the example, then sync.
 
 ## Framework plugins
 
@@ -90,14 +89,13 @@ Fumadocs runs on Next.js and Waku (RSC), React Router and TanStack Start (with a
 
 ## Astro integration
 
-`packages/astro` (`@fumadocs/astro`) aims at Fumapress parity with an Astro-native setup. Every integration either works in Astro as-is or gets a plugin in `packages/astro/src/plugins`.
+`packages/astro` (`@fumadocs/astro`) is the low-level integration: it compiles content collections with Fumadocs and renders their MDX as React islands, users own their routes like on React Router. The managed runtime with plugins is `@fumapress/astro`, in the Fumapress repo.
 
-- Plugins use the `Plugin` contract in `src/app.ts` (`routes`, `getBody`, `getText`, `transformPage`, `middleware`, `translations`). Extend that contract only when no existing hook fits.
-- Overrides go through existing concepts: page components by name in the user's MDX components module, search through the layout module's `useSearch` provider hook or `SearchDialog`, routes through users' own Astro routes. Rejected before, don't reintroduce: per-plugin layout exports, a `searchEngine` field, `oauth`/`proxy` plugin options, plugins with their own blog/changelog UI.
+- Modules imported by the content island (the MDX components module and what it imports) must not import anything that imports the source: it puts every page in a cycle with the source and Astro's build slows superlinearly.
+- MDX components hydrate by name from the collection's `components` module, and their props must be serializable.
+- Page Markdown lives at `<page>.md`.
 - Search composes a per-provider hook from `fumadocs-core/search/client` (`useStaticSearch`, `useFetchSearch`, ...) with the dialog parts of `fumadocs-ui/components/dialog/search`. Never pass `SearchClient`s or route through `experimental_useSearch` when a provider hook exists.
-- Page Markdown lives at `<page>.md`. Read the equivalent Fumapress plugin before porting one.
-- Compiled MDX must not import `app.ts` (it puts every page in a cycle with the source and Astro's build slows superlinearly).
-- Plugins must stay flexible across setups: i18n with `hideLocale`, `base`/`trailingSlash`/`build.format`, static versus server, custom `page` module or layouts, custom search, `multiple()` sources, users' own pages, overriding or skipping plugin output, typed frontmatter.
+- Check changes across setups: i18n with `hideLocale`, `base`/`trailingSlash`/`build.format`, static versus an adapter.
 - Astro needs Node >= 22.23.4.
 
 ## Docs

@@ -10,41 +10,15 @@ export default defineConfig({
   entry: [
     'src/index.ts',
     'src/island.tsx',
-    'src/island-node.tsx',
     'src/loaders.ts',
     'src/source.ts',
-    'src/config.ts',
-    'src/app.ts',
     'src/navigation.ts',
     'src/mdx-runtime.ts',
-    'src/ui/*.{ts,tsx}',
-    'src/plugins/*.ts',
-    'src/routes/*.ts',
   ],
-  // `.astro` files are compiled by Astro
-  copy: [
-    { from: 'src/routes/*.astro', to: 'dist/routes' },
-    { from: 'src/ui/*.astro', to: 'dist/ui' },
-    { from: 'src/components/*.astro', to: 'dist/components' },
-  ],
-  // imported by the generated code and `.astro` files
-  exports: {
-    enabled: true,
-    exclude: [
-      './island',
-      './island-node',
-      './navigation',
-      './mdx-runtime',
-      './app',
-      /^(\.\/)?routes\//,
-      /^(\.\/)?ui\//,
-    ],
-    customExports: {
-      './components/*': './dist/components/*',
-    },
-  },
+  // imported by the generated code
+  exports: { enabled: true, exclude: ['./island', './navigation', './mdx-runtime'] },
   deps: {
     onlyBundle: [],
-    neverBundle: [/^astro:/, /^virtual:/, /\.astro$/],
+    neverBundle: [/^astro:/, /^virtual:/],
   },
 });

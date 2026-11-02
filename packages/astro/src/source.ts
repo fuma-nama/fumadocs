@@ -44,6 +44,8 @@ export type AstroPageData<Entry extends PageEntry = PageEntry> = Entry['data'] &
   getText: (type: 'raw' | 'processed', options?: GetTextOptions) => Promise<string>;
   /** the links of content, with `extractLinkReferences` */
   extractedReferences?: ExtractedReference[];
+  /** the date of its last commit, with `lastModified` */
+  lastModified?: Date;
 };
 
 export interface GetTextOptions {

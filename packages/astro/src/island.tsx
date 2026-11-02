@@ -1,5 +1,4 @@
 import { parse } from 'devalue';
-import { createElement, Fragment, type ComponentType, type ReactNode } from 'react';
 import type { Expression, Program } from 'estree-jsx';
 import type { ElementContent, Properties, Root } from 'hast';
 import type { MDXComponents } from 'mdx/types';
@@ -11,13 +10,11 @@ export interface FumadocsIslandProps {
   tree: string;
   /** props of `<Content />`, passed to `wrapper` */
   props: Record<string, unknown>;
-  /** the tree of React content: elements have React props, and are created as they are */
-  react?: boolean;
   /** slots rendered by Astro */
   [slot: string]: unknown;
 }
 
-/** a node of the island tree, see `island-plugin.ts` for MDX, and `island-node.tsx` for React content */
+/** a node of the island tree, see `island-plugin.ts` */
 export type IslandNode =
   | string
   | Slot
@@ -56,32 +53,13 @@ export function createIsland(components: MDXComponents) {
   // like MDX, `wrapper` is the layout of content
   const Wrapper = components.wrapper;
 
-  function toReact(node: IslandNode): ReactNode {
-    // text, and slots replaced by their content when parsed
-    if (!Array.isArray(node)) return node as ReactNode;
-    if (node[0] === 1) {
-      const [, name, props, ...children] = node;
-      const type =
-        name === null ? Fragment : evaluator.evaluateExpression({ type: 'Identifier', name });
-      return createElement(type as ComponentType, props, ...children.map(toReact));
-    }
-
-    const [tagName, props, ...children] = node;
-    return createElement(tagName, props || null, ...children.map(toReact));
-  }
-
-  return function FumadocsIsland({ tree, props, react, ...slots }: FumadocsIslandProps) {
+  return function FumadocsIsland({ tree, props, ...slots }: FumadocsIslandProps) {
     const nodes: IslandNode[] = parse(tree, {
       // own slots only, names like `constructor` aren't slots
       slot: (name: string) => (Object.hasOwn(slots, name) ? slots[name] : undefined),
     });
-    let content: ReactNode;
-    if (react) {
-      content = createElement(Fragment, null, ...nodes.map(toReact));
-    } else {
-      const root: Root = { type: 'root', children: nodes.map(decode) };
-      content = toJsx(root, { components, evaluator });
-    }
+    const root: Root = { type: 'root', children: nodes.map(decode) };
+    const content = toJsx(root, { components, evaluator });
     return Wrapper ? <Wrapper {...props}>{content}</Wrapper> : content;
   };
 }
