@@ -10,7 +10,7 @@ import {
   type LayoutTab,
   useLinkItems,
 } from '../shared';
-import { AIChatPanel } from '../shared/client';
+import { AIChatPanel, SkipToContent } from '../shared/client';
 import { TreeContextProvider } from '@/contexts/tree';
 import { Container } from './slots/container';
 import {
@@ -121,6 +121,7 @@ export function LayoutBody(
           collapsible={sidebarProps.collapsible}
         >
           <slots.container {...containerProps}>
+            <SkipToContent />
             {navEnabled && <slots.header />}
             <slots.sidebar.root {...sidebarProps} />
             {children}

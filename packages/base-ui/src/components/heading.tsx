@@ -39,7 +39,7 @@ export function Heading<T extends Types = 'h1'>({ as, ...props }: HeadingProps<T
             variant: 'ghost',
             size: 'icon-xs',
           }),
-          'not-prose shrink-0 text-fd-muted-foreground opacity-0 transition-opacity group-hover/heading:opacity-100',
+          'not-prose shrink-0 text-fd-muted-foreground opacity-0 transition-opacity group-hover/heading:opacity-100 focus-visible:opacity-100',
         )}
         onClick={onCopy}
       >

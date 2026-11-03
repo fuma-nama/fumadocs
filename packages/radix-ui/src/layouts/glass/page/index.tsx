@@ -46,6 +46,7 @@ export function DocsPage({ full = false, toc = Empty, tableOfContent, children }
     >
       <TOCProvider toc={toc}>
         <div
+          id="nd-page"
           data-fd-full={full}
           className={cn(
             'flex flex-col gap-2 p-6 pb-16 min-w-0 [grid-area:main] md:pt-16 md:pb-8',

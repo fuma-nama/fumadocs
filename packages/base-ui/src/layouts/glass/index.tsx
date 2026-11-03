@@ -12,7 +12,7 @@ import {
   type LinkItemType,
   useLinkItems,
 } from '@/layouts/shared';
-import { AIChatPanel } from '@/layouts/shared/client';
+import { AIChatPanel, SkipToContent } from '@/layouts/shared/client';
 import { TreeContextProvider } from '@/contexts/tree';
 import { createContext, type FC, use, useMemo } from 'react';
 import {
@@ -119,6 +119,7 @@ export function DocsLayout(props: DocsLayoutProps) {
               gridTemplate: `"left left-margin main right-margin right" 1fr / var(--fd-left-width) ${leftSpace} 1fr minmax(calc(50% - var(--fd-main-width)/2 - var(--fd-right-width) + min(${leftSpace}, 0px)), auto) var(--fd-right-width)`,
             }}
           >
+            <SkipToContent />
             <slots.sidebar.drawer />
             <slots.sidebar.main />
             <slots.header />

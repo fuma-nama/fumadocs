@@ -23,7 +23,7 @@ import {
   type BaseSlots,
   type BaseSlotsProps,
 } from '../shared';
-import { AIChatPanel } from '../shared/client';
+import { AIChatPanel, SkipToContent } from '../shared/client';
 import { TreeContextProvider, useTabsGroups, useTreePath } from '@/contexts/tree';
 import { Header } from './slots/header';
 import { Container } from './slots/container';
@@ -125,6 +125,7 @@ export function LayoutBody(
           collapsible={sidebarEnabled && sidebarProps.collapsible}
         >
           <slots.container {...containerProps}>
+            <SkipToContent />
             {navEnabled && <slots.header />}
             {sidebarEnabled && <slots.sidebar.root {...sidebarProps} />}
             {tabMode === 'top' && tabs.length > 0 && (

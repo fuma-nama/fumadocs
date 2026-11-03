@@ -190,5 +190,5 @@ function useCollectionIndex() {
  * only escape whitespaces in values in simple mode
  */
 function escapeValue(v: string): string {
-  return v.toLowerCase().replace(/\s/, '-');
+  return v.toLowerCase().replace(/\s+/g, '-');
 }

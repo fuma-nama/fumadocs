@@ -68,6 +68,7 @@ const translations = {
   'Search(search dialog)': '搜尋',
   'Search(search trigger)': '搜尋',
   'Show Sidebar(sidebar)': '顯示側邊欄',
+  'Skip to Content(skip link)': '跳至內容',
   'System(theme switcher)(aria-label)': '系統',
   'Table of Contents(inline table of contents)': '目錄',
   'The page you are looking for might have been removed, had its name changed, or is temporarily unavailable.(404 not found page)':

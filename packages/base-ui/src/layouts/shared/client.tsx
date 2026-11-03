@@ -3,6 +3,7 @@ import { usePathname } from 'fumadocs-core/framework';
 import Link from 'fumadocs-core/link';
 import { useI18n } from '@/contexts/i18n';
 import { cn } from '@/utils/cn';
+import { useTranslations } from '@fuma-translate/react';
 import { type FC, type ComponentProps, type ReactNode, useState } from 'react';
 import { isLinkItemActive, type BaseLayoutProps, type LinkItemType } from '.';
 import {
@@ -161,4 +162,14 @@ export function baseSlots({ useProps }: { useProps: () => BaseSlotsProps }) {
       };
     },
   };
+}
+
+export function SkipToContent() {
+  const t = useTranslations({ note: 'skip link' });
+
+  return (
+    <a href="#nd-page" className="sr-only">
+      {t('Skip to Content')}
+    </a>
+  );
 }
