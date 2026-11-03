@@ -17,6 +17,7 @@ export interface LLMsConfig<Page = unknown> {
     item: PageTree.Root | PageTree.Item | PageTree.Folder,
     ctx: Context,
   ) => string;
+  renderUrl?: (item: PageTree.Item, ctx: Context) => string;
 
   /**
    * Render a page as Markdown, required by `page()` and `full()`.
@@ -118,7 +119,7 @@ export function llms<C extends LoaderConfig = LoaderConfig>(
     switch (node.type) {
       case 'page': {
         return formatListItem(
-          formatMarkdownLink(renderName(node, ctx), node.url),
+          formatMarkdownLink(renderName(node, ctx), config.renderUrl?.(node, ctx) ?? node.url),
           renderDescription(node, ctx),
           indent,
         );

@@ -26,6 +26,13 @@ test('llms: index', () => {
   expect(output.indexNode(docs.pageTree.children[0])).toBe('- [Index](/docs): hello');
 });
 
+test('llms: renderUrl', () => {
+  const output = llms(docs, { renderUrl: (item) => `/sub${item.url}` });
+
+  expect(output.index()).toContain('- [Index](/sub/docs): hello');
+  expect(output.index()).toContain('  - [Page](/sub/docs/nested/page): world');
+});
+
 test('llms: page & full', async () => {
   const output = llms(docs, { renderPage });
 
