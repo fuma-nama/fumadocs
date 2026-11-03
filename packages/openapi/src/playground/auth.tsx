@@ -668,6 +668,8 @@ export interface AuthFields {
   mapValues: <T>(values: T) => T;
   /** restore the persisted values, returns a cleanup */
   init: () => () => void;
+  /** reset stored auth values of the active requirement back to defaults */
+  reset: () => void;
 }
 
 export interface AuthFieldsOptions {
@@ -744,7 +746,13 @@ export function useAuthFields(
           continue;
         const value = page.get(field.fieldName);
 
-        if (value != null) sessionStorage.setItem(field.storageKey, JSON.stringify(value));
+        if (value != null) {
+          try {
+            sessionStorage.setItem(field.storageKey, JSON.stringify(value));
+          } catch {
+            // ignore storage errors
+          }
+        }
       }
     },
   });
@@ -766,12 +774,36 @@ export function useAuthFields(
       },
       [page, fields],
     ),
+    reset: useCallback(() => {
+      for (const field of fields) {
+        try {
+          sessionStorage.removeItem(field.storageKey);
+        } catch {
+          // ignore storage errors
+        }
+        page.update(field.fieldName, field.defaultValue);
+      }
+    }, [page, fields]),
     init: useCallback(() => {
       for (const field of fields) {
         page.init(field.fieldName, () => {
-          const stored = sessionStorage.getItem(field.storageKey);
-          const parsed: unknown = stored ? JSON.parse(stored) : undefined;
-          return typeof parsed === typeof field.defaultValue ? parsed : field.defaultValue;
+          try {
+            const stored = sessionStorage.getItem(field.storageKey);
+            if (!stored) return field.defaultValue;
+            const parsed: unknown = JSON.parse(stored);
+            if (field.defaultValue === null) return parsed === null ? null : field.defaultValue;
+            if (typeof field.defaultValue === 'object') {
+              return parsed && typeof parsed === 'object' && !Array.isArray(parsed)
+                ? parsed
+                : field.defaultValue;
+            }
+            if (typeof field.defaultValue === 'string' && parsed === '') {
+              return field.defaultValue;
+            }
+            return typeof parsed === typeof field.defaultValue ? parsed : field.defaultValue;
+          } catch {
+            return field.defaultValue;
+          }
         });
       }
 

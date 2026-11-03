@@ -373,3 +373,46 @@ test('encodes auth fields with their providers', async () => {
     { header: { 'X-Token': 'token' } },
   ]);
 });
+
+test('supports clearing auth fields and safely parsing session storage', async () => {
+  const engine = new DataEngine();
+  const storage: Record<string, string> = {};
+  const mockSessionStorage = {
+    getItem: (k: string) => storage[k] ?? null,
+    setItem: (k: string, v: string) => {
+      storage[k] = v;
+    },
+    removeItem: (k: string) => {
+      delete storage[k];
+    },
+  };
+  vi.stubGlobal('sessionStorage', mockSessionStorage);
+
+  try {
+    await render('/museum-hours', 'get', () => {
+      const { operation } = useOperation();
+      const page = usePlaygroundAuth().stf.dataEngine;
+      const auth = useAuthFields(engine, { operation });
+
+      auth.init()();
+      expect(page.get(['auth', 'MuseumPlaceholderAuth'])).toEqual({ username: '', password: '' });
+
+      page.update(['auth', 'MuseumPlaceholderAuth'], { username: 'admin', password: '123' });
+      expect(storage['fumadocs-openapi-auth-MuseumPlaceholderAuth']).toBe(
+        JSON.stringify({ username: 'admin', password: '123' }),
+      );
+
+      auth.reset();
+      expect(storage['fumadocs-openapi-auth-MuseumPlaceholderAuth']).toBeUndefined();
+      expect(page.get(['auth', 'MuseumPlaceholderAuth'])).toEqual({ username: '', password: '' });
+
+      storage['fumadocs-openapi-auth-MuseumPlaceholderAuth'] = '{corrupt-json';
+      auth.init()();
+      expect(page.get(['auth', 'MuseumPlaceholderAuth'])).toEqual({ username: '', password: '' });
+
+      return null;
+    });
+  } finally {
+    vi.unstubAllGlobals();
+  }
+});

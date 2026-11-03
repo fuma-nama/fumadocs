@@ -99,6 +99,8 @@ export interface PlaygroundAuth {
   authorize: (field: AuthField, input: OAuthInput) => Promise<string | undefined>;
   /** a flow started here has returned to the page */
   flowReturned: boolean;
+  /** reset stored auth values of the active requirement back to defaults */
+  clear: () => void;
 }
 
 export interface OAuthInput extends Pick<
@@ -243,6 +245,9 @@ export function usePlayground({
         return token;
       },
       flowReturned,
+      clear() {
+        auth.reset();
+      },
     },
     isSending,
     response,

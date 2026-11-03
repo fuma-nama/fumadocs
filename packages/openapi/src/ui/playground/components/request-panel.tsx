@@ -248,7 +248,7 @@ function AuthSection({
   onAuthorize: (target: AuthTarget) => void;
 }) {
   const t = useTranslations({ note: 'playground' });
-  const { requirements, selected, select, fields } = auth;
+  const { requirements, selected, select, fields, clear } = auth;
   const items = requirements.map((requirement, i) => ({
     value: i,
     label: (
@@ -270,22 +270,36 @@ function AuthSection({
       icon={KeyRound}
       title={t('Authorization')}
       actions={
-        items.length > 1 ? (
-          <Select items={items} value={selected} onValueChange={(v) => v !== null && select(v)}>
-            <SelectTrigger className="h-7 w-auto max-w-60 gap-1.5 @sm:-me-2 border-0 bg-transparent px-2 text-xs hover:bg-fd-accent focus:ring-0 focus-visible:ring-2">
-              <SelectValue className="truncate" />
-            </SelectTrigger>
-            <SelectContent align="end">
-              {items.map(({ value, label }) => (
-                <SelectItem key={value} value={value} className="text-xs">
-                  {label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        ) : (
-          <span className="truncate text-xs text-fd-muted-foreground">{items[0]?.label}</span>
-        )
+        <div className="flex items-center gap-1">
+          {items.length > 1 ? (
+            <Select items={items} value={selected} onValueChange={(v) => v !== null && select(v)}>
+              <SelectTrigger className="h-7 w-auto max-w-60 gap-1.5 @sm:-me-2 border-0 bg-transparent px-2 text-xs hover:bg-fd-accent focus:ring-0 focus-visible:ring-2">
+                <SelectValue className="truncate" />
+              </SelectTrigger>
+              <SelectContent align="end">
+                {items.map(({ value, label }) => (
+                  <SelectItem key={value} value={value} className="text-xs">
+                    {label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          ) : (
+            <span className="truncate text-xs text-fd-muted-foreground">{items[0]?.label}</span>
+          )}
+          <button
+            type="button"
+            title={t('Clear', { note: 'action' })}
+            aria-label={t('Clear', { note: 'action' })}
+            onClick={clear}
+            className={cn(
+              buttonVariants({ variant: 'ghost', size: 'sm' }),
+              'h-7 px-1.5 text-xs text-fd-muted-foreground hover:text-fd-foreground',
+            )}
+          >
+            {t('Clear')}
+          </button>
+        </div>
       }
     >
       {fields.map((field) => {
