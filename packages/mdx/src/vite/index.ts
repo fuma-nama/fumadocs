@@ -13,6 +13,7 @@ import { mdxLoaderGlob, metaLoaderGlob } from '@/loaders';
 import type { MacroEvaluator } from '@/macro/eval';
 import { MacroModuleId, resolveMacroOptions, type MacroPluginOption } from '@/macro/options';
 import type { GlobalConfig } from '@/config';
+import type { PluginApi } from '@vitejs/plugin-rsc';
 
 function createMacroEvaluator(root: string, resolve: UserConfig['resolve']): MacroEvaluator {
   return async ({ entry, transform }) => {
@@ -90,6 +91,7 @@ export default function mdx(
 ): Plugin[] {
   const { updateViteConfig = true } = pluginOptions;
   let managed: ManagedCore;
+  let rsc: PluginApi | undefined;
   const metaPlugin: Plugin = {
     name: 'fumadocs-mdx:meta',
   };
@@ -121,7 +123,10 @@ export default function mdx(
         await managed.reload();
 
         const configLoader = createIntegratedConfigLoader(core);
-        const mdxLoader = toVite(createMdxLoader(configLoader));
+        const mdxLoader = toVite(createMdxLoader(configLoader), () => ({
+          // the scan build of Vite RSC replaces modules with their imports
+          importsOnly: rsc?.manager.isScanBuild,
+        }));
         const metaLoader = toVite(
           createMetaLoader(configLoader, {
             // vite has built-in plugin for JSON files
@@ -183,6 +188,13 @@ export default function mdx(
 
         const { getConfig } = await import('@fumadocs/vite');
         return getConfig({ root: core.root, isBuild: env.command === 'build' });
+      },
+      async configResolved(config) {
+        if (config.command !== 'build') return;
+        rsc = await import('@vitejs/plugin-rsc').then(
+          (mod) => mod.getPluginApi(config),
+          () => undefined,
+        );
       },
       async buildStart() {
         // macro-only projects have no config file, index files shouldn't be emitted

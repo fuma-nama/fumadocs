@@ -15,6 +15,10 @@ export interface BuildMDXOptions {
 
   environment: 'bundler' | 'runtime';
   isDevelopment: boolean;
+  /**
+   * Only the imports of the output are read, like in the scan build of Vite RSC.
+   */
+  importsOnly?: boolean;
   _compiler?: CompilerOptions;
 }
 
