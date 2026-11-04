@@ -3,6 +3,6 @@ packages:
   'fumadocs-preview': patch
 ---
 
-### Deduplicate Waku in preview bundle
+### Fix blank pages
 
-- Deduplicate `waku`, `react` and `react-dom` in the preview build to prevent duplicate router context instances (#3783).
+- Fix pages failing to render with `Missing Router`.

@@ -174,4 +174,4 @@ const searchTool: ReturnType<
   },
 });
 
-type SearchTool = typeof searchTool;
+export type SearchTool = typeof searchTool;
