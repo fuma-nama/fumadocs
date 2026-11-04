@@ -18,24 +18,24 @@ export interface PluginContext<out Config extends LoaderConfig = LoaderConfig> {
   mode: BuildMode;
   /** prefix `pathname` with the base path of the site, a route of `path` is served at `withBase(path)` in every trailing slash setting */
   withBase(pathname: string): string;
-  /** the content loader, from `configure()` of frameworks on */
+  /** the content loader, created from the results of `configureLoader` */
   getLoader(): Awaitable<LoaderOutput<Config>>;
 }
 
-/** options of the content loader, `plugins` as an array to add to */
+/** options of the content loader, with `plugins` as an array */
 export interface PluginLoaderOptions extends Omit<LoaderOptions, 'plugins'> {
   plugins?: LoaderPluginOption[];
 }
 
 /**
- * A plugin of a framework: the routes, head tags and content hooks of an integration like OpenAPI, written once for every framework.
+ * A plugin of a framework: the routes and content hooks of an integration like OpenAPI, written once for every framework.
  *
  * Hooks run with the site as `this`, in the order of the framework, and combine in one of four ways:
  *
- * - setup (`init`, `configure`, `build`): run in order.
+ * - setup (`init`): run in order.
  * - contribute (`configureLoader`, `transformPage`): each plugin receives the options of the site or the base data of the page, frameworks merge the fields each result changes.
  * - resolve (`getPage*`): the first plugin returning a value other than `undefined` wins.
- * - collect (`head`, `apiRoutes`): the results of every plugin, in order.
+ * - collect (`apiRoutes`): the results of every plugin, in order.
  *
  * `middleware` runs as a chain. Frameworks run every hook, with their site as `Context` and their page data as `Data`, and may extend the contract with their own.
  *
@@ -64,12 +64,6 @@ export interface Plugin<
     options: Readonly<PluginLoaderOptions>,
   ) => Awaitable<Partial<PluginLoaderOptions> | undefined>;
 
-  /** runs after the content loader is created */
-  configure?: (this: Context) => Awaitable<void>;
-
-  /** runs once after the site is built, not on dev or production servers; throw to fail the build */
-  build?: (this: Context, output: BuildOutput) => Awaitable<void>;
-
   /** the rendered content of a page, implemented by content sources */
   getPageBody?: (this: Context, page: Config['page']) => Awaitable<PageBody | undefined>;
 
@@ -94,9 +88,6 @@ export interface Plugin<
     page: Config['page'],
   ) => Awaitable<Partial<Data> | undefined>;
 
-  /** tags in `<head>`, of every page without `page`, of a content page with it */
-  head?: (this: Context, env: { page?: Config['page'] }) => Awaitable<HeadTag[] | undefined>;
-
   apiRoutes?: (this: Context) => Awaitable<ApiRoute[] | undefined>;
 
   /**
@@ -109,21 +100,6 @@ export interface Plugin<
     request: Request,
     next: (rewrite?: string) => Promise<Response>,
   ) => Promise<Response>;
-}
-
-/** the build output, given by the framework */
-export interface BuildOutput {
-  /** write a file to the output directory, `path` is relative to it, without the base path */
-  emitFile: (path: string, content: string | Uint8Array) => Promise<void>;
-}
-
-/** a tag in `<head>`, rendered in order */
-export interface HeadTag {
-  tag: 'title' | 'meta' | 'link' | 'script' | 'style';
-  /** HTML attributes, like `hreflang` */
-  attrs?: Record<string, string>;
-  /** text content, for `title`, `script` and `style` */
-  children?: string;
 }
 
 /** the rendered content of a page */
