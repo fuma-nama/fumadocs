@@ -12,7 +12,7 @@ import {
   type LinkItemType,
   useLinkItems,
 } from '@/layouts/shared';
-import { AIChatPanel } from '@/layouts/shared/client';
+import { AIChatContext, AIChatPanel } from '@/layouts/shared/client';
 import { TreeContextProvider } from '@/contexts/tree';
 import { createContext, type FC, use, useMemo } from 'react';
 import {
@@ -75,7 +75,8 @@ const { useBaseSlots } = baseSlots({
 });
 
 export function DocsLayout(props: DocsLayoutProps) {
-  const { tree, tabs: defaultTabs, aiChat, children, slots: defaultSlots = {} } = props;
+  const { tree, tabs: defaultTabs, children, slots: defaultSlots = {} } = props;
+  const aiChat = props.aiChat ?? use(AIChatContext);
   const linkItems = useLinkItems(props);
   const { baseSlots, baseProps } = useBaseSlots(props);
 

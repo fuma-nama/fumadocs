@@ -10,7 +10,7 @@ import {
   type LayoutTab,
   useLinkItems,
 } from '../shared';
-import { AIChatPanel } from '../shared/client';
+import { AIChatContext, AIChatPanel, AIChatTrigger } from '../shared/client';
 import { TreeContextProvider } from '@/contexts/tree';
 import { Container } from './slots/container';
 import {
@@ -79,9 +79,10 @@ export function LayoutBody(
     tabs,
     tree,
     containerProps,
-    aiChat,
     children,
   } = props;
+  const contextAIChat = use(AIChatContext);
+  const aiChat = props.aiChat ?? contextAIChat;
   const isTop = useIsScrollTop({ enabled: navTransparentMode === 'top' }) ?? true;
   const isNavTransparent = navTransparentMode === 'top' ? isTop : navTransparentMode === 'always';
   const { baseSlots, baseProps } = useBaseSlots(props);
@@ -132,6 +133,7 @@ export function LayoutBody(
                 {aiChat.panel}
               </AIChatPanel>
             )}
+            {!props.aiChat && contextAIChat && <AIChatTrigger {...contextAIChat} />}
           </slots.container>
         </slots.sidebar.provider>
       </LayoutContext>
