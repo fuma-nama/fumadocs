@@ -23,8 +23,10 @@ async function createSite(
     getLoader: () => source,
   };
   await plugin.init?.call(ctx);
-  const { plugins } = await plugin.configureLoader!.call(ctx, { baseUrl: '/' });
-  const source = loader(await server.staticSource(), { baseUrl: '/', plugins });
+  const source = loader(await server.staticSource(), {
+    baseUrl: '/',
+    plugins: (await plugin.configureLoader!.call(ctx, { baseUrl: '/' }))?.plugins,
+  });
   return { ctx, plugin, source, page: source.getPages()[0], server };
 }
 

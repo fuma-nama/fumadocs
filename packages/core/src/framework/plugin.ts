@@ -16,7 +16,7 @@ export type BuildMode = 'static' | 'dynamic' | 'default';
 /** the site, `this` in plugin hooks; frameworks extend it */
 export interface PluginContext<out Config extends LoaderConfig = LoaderConfig> {
   mode: BuildMode;
-  /** prefix `pathname` with the base path of the site */
+  /** prefix `pathname` with the base path of the site, a route of `path` is served at `withBase(path)` in every trailing slash setting */
   withBase(pathname: string): string;
   /** the content loader, from `configure()` of frameworks on */
   getLoader(): Awaitable<LoaderOutput<Config>>;
@@ -30,14 +30,16 @@ export interface PluginLoaderOptions extends Omit<LoaderOptions, 'plugins'> {
 /**
  * A plugin of a framework: the routes, head tags and content hooks of an integration like OpenAPI, written once for every framework.
  *
- * Hooks run with the site as `this`, in plugin order (see `enforce`), and combine in one of four ways:
+ * Hooks run with the site as `this`, in the order of the framework, and combine in one of four ways:
  *
  * - setup (`init`, `configure`, `build`): run in order.
- * - transform (`configureLoader`, `transformPage`): each plugin receives the result of the previous one.
+ * - contribute (`configureLoader`, `transformPage`): each plugin receives the options of the site or the base data of the page, frameworks merge the fields each result changes.
  * - resolve (`getPage*`): the first plugin returning a value other than `undefined` wins.
  * - collect (`head`, `routes`): the results of every plugin, in order.
  *
  * `middleware` runs as a chain. Frameworks run every hook, with their site as `Context` and their page data as `Data`, and may extend the contract with their own.
+ *
+ * Hooks are properties, so their `this` and page are checked strictly: a plugin for any site fits every site, not the other way round.
  */
 export interface Plugin<
   in Config extends LoaderConfig = LoaderConfig,
@@ -46,58 +48,63 @@ export interface Plugin<
 > {
   name?: string;
 
-  /** run before (`pre`) or after (`post`) the other plugins */
-  enforce?: 'pre' | 'post';
-
   /** UI translations of the plugin */
   translations?: TranslationExtension;
 
   /** runs before the content loader is created */
-  init?(this: Context): Awaitable<void>;
+  init?: (this: Context) => Awaitable<void>;
 
-  configureLoader?(this: Context, options: PluginLoaderOptions): Awaitable<PluginLoaderOptions>;
+  /**
+   * Contribute options to the content loader, given the options of the site.
+   *
+   * Frameworks collect the `plugins` of every result, other options have one writer.
+   */
+  configureLoader?: (
+    this: Context,
+    options: Readonly<PluginLoaderOptions>,
+  ) => Awaitable<Partial<PluginLoaderOptions> | undefined>;
 
   /** runs after the content loader is created */
-  configure?(this: Context): Awaitable<void>;
+  configure?: (this: Context) => Awaitable<void>;
 
   /** runs once after the site is built, not on dev or production servers; throw to fail the build */
-  build?(this: Context, output: BuildOutput): Awaitable<void>;
+  build?: (this: Context, output: BuildOutput) => Awaitable<void>;
 
   /** the rendered content of a page, implemented by content sources */
-  getPageBody?(this: Context, page: Config['page']): Awaitable<PageBody | undefined>;
+  getPageBody?: (this: Context, page: Config['page']) => Awaitable<PageBody | undefined>;
 
   /** the Markdown of a page, for LLMs */
-  getPageText?(this: Context, page: Config['page']): Awaitable<string | undefined>;
+  getPageText?: (this: Context, page: Config['page']) => Awaitable<string | undefined>;
 
-  getPageToc?(this: Context, page: Config['page']): Awaitable<TOCItemType[] | undefined>;
+  getPageToc?: (this: Context, page: Config['page']) => Awaitable<TOCItemType[] | undefined>;
 
   /** the text of a page for search indexes */
-  getPageStructuredData?(
+  getPageStructuredData?: (
     this: Context,
     page: Config['page'],
-  ): Awaitable<StructuredData | undefined>;
+  ) => Awaitable<StructuredData | undefined>;
 
-  getPageCreatedAt?(this: Context, page: Config['page']): Awaitable<Date | undefined>;
+  getPageCreatedAt?: (this: Context, page: Config['page']) => Awaitable<Date | undefined>;
 
-  getPageLastModified?(this: Context, page: Config['page']): Awaitable<Date | undefined>;
+  getPageLastModified?: (this: Context, page: Config['page']) => Awaitable<Date | undefined>;
 
-  transformPage?(this: Context, data: Data, page: Config['page']): Awaitable<Data>;
+  transformPage?: (this: Context, data: Data, page: Config['page']) => Awaitable<Data>;
 
   /** tags in `<head>`, of every page without `page`, of a content page with it */
-  head?(this: Context, env: { page?: Config['page'] }): Awaitable<HeadTag[] | undefined>;
+  head?: (this: Context, env: { page?: Config['page'] }) => Awaitable<HeadTag[] | undefined>;
 
-  routes?(this: Context): Awaitable<ApiRoute[] | undefined>;
+  routes?: (this: Context) => Awaitable<ApiRoute[] | undefined>;
 
   /**
    * Runs for requests served on demand, prerendered routes skip it.
    *
    * Call `next()` to continue, or `next(path)` to serve another path instead, without the base path like the paths of routes.
    */
-  middleware?(
+  middleware?: (
     this: Context,
     request: Request,
     next: (rewrite?: string) => Promise<Response>,
-  ): Promise<Response>;
+  ) => Promise<Response>;
 }
 
 /** the build output, given by the framework */

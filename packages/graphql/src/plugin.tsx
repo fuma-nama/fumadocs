@@ -6,6 +6,7 @@ import type { GraphQLPageData, GraphQLServer } from '@/server';
 import { GraphQLPage } from '@/ui/plugin';
 import type { GraphQLPageProps } from '@/utils/create-page';
 import { renderedSchemas } from '@/utils/rendered';
+import { documentsRoute } from 'shared-api/utils/rendered-documents';
 
 export { GraphQLPage };
 
@@ -44,23 +45,13 @@ export function graphqlPlugin({
   return {
     name: 'graphql',
     translations: graphqlTranslations(),
-    configureLoader(options) {
-      if (disableLoaderPlugin) return options;
-      return { ...options, plugins: [...(options.plugins ?? []), server.loaderPlugin()] };
+    configureLoader() {
+      if (!disableLoaderPlugin) return { plugins: [server.loaderPlugin()] };
     },
     async routes() {
       if (includeSchema) return;
       return [
-        {
-          path: `${schemasPath}/[id]`,
-          staticPaths: Object.keys(await server.getSchemas()),
-          async GET(_, { params: { id } }) {
-            const schemas = await server.getSchemas();
-            if (typeof id === 'string' && Object.hasOwn(schemas, id))
-              return new Response(schemas[id].sdl);
-            return new Response('Not Found', { status: 404 });
-          },
-        },
+        await documentsRoute(schemasPath, server.getSchemas, (schema) => new Response(schema.sdl)),
       ];
     },
     getPageBody({ data }) {
@@ -69,7 +60,7 @@ export function graphqlPlugin({
       if (!includeSchema) {
         // keyed by URL, the browser fetches it from there
         props.schema = this.withBase(`${schemasPath}/${props.schema}`);
-        renderedSchemas().set(props.schema, data.getSchema().sdl);
+        renderedSchemas.set(props.schema, data.getSchema().sdl);
       }
 
       return { node: <ClientAPIPage {...props} /> };

@@ -1,9 +1,4 @@
-// React Server Components render pages and server-render client components in separate module
-// graphs, so the schemas of rendered pages are shared through `globalThis`
-const key = Symbol.for('fumadocs-graphql.rendered-schemas');
+import { createRenderedDocuments } from 'shared-api/utils/rendered-documents';
 
-/** the SDL of schemas left out of page props (`includeSchema: false`) for server rendering, by URL */
-export function renderedSchemas(): Map<string, string> {
-  const holder = globalThis as typeof globalThis & { [key]?: Map<string, string> };
-  return (holder[key] ??= new Map());
-}
+/** the SDL of schemas left out of page props (`includeSchema: false`) */
+export const renderedSchemas = createRenderedDocuments<string>('graphqlPlugin');

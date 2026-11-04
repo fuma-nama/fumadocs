@@ -6,6 +6,7 @@ import type { AsyncAPIPageData, AsyncAPIServer } from '@/server';
 import { AsyncAPIPage } from '@/ui/plugin';
 import type { AsyncAPIPageProps } from '@/utils/create-page';
 import { renderedDocuments } from '@/utils/document/rendered';
+import { documentsRoute } from 'shared-api/utils/rendered-documents';
 
 export { AsyncAPIPage };
 
@@ -44,23 +45,15 @@ export function asyncapiPlugin({
   return {
     name: 'asyncapi',
     translations: asyncapiTranslations(),
-    configureLoader(options) {
-      if (disableLoaderPlugin) return options;
-      return { ...options, plugins: [...(options.plugins ?? []), server.loaderPlugin()] };
+    configureLoader() {
+      if (!disableLoaderPlugin) return { plugins: [server.loaderPlugin()] };
     },
     async routes() {
       if (includeDocument) return;
       return [
-        {
-          path: `${documentsPath}/[id]`,
-          staticPaths: Object.keys(await server.getSchemas()),
-          async GET(_, { params: { id } }) {
-            const schemas = await server.getSchemas();
-            if (typeof id === 'string' && Object.hasOwn(schemas, id))
-              return Response.json(schemas[id].bundled);
-            return new Response('Not Found', { status: 404 });
-          },
-        },
+        await documentsRoute(documentsPath, server.getSchemas, (schema) =>
+          Response.json(schema.bundled),
+        ),
       ];
     },
     getPageBody({ data }) {
@@ -69,7 +62,7 @@ export function asyncapiPlugin({
       if (!includeDocument) {
         // keyed by URL, the browser fetches it from there
         props.document = this.withBase(`${documentsPath}/${props.document}`);
-        renderedDocuments().set(props.document, data.getSchema().bundled);
+        renderedDocuments.set(props.document, data.getSchema().bundled);
       }
 
       return { node: <ClientAPIPage {...props} /> };

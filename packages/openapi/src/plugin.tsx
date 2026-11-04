@@ -7,6 +7,7 @@ import type { Awaitable } from '@/types';
 import { OpenAPIPage } from '@/ui/plugin';
 import type { OpenAPIPageProps } from '@/utils/pages/builder';
 import { renderedDocuments } from '@/utils/document/rendered';
+import { documentsRoute } from 'shared-api/utils/rendered-documents';
 
 export { OpenAPIPage };
 
@@ -68,9 +69,8 @@ export function openapiPlugin({
           '[Fumadocs OpenAPI] the proxy of `openapiPlugin()` needs a server, set `createProxy: false` in static mode and serve it elsewhere.',
         );
     },
-    configureLoader(options) {
-      if (disableLoaderPlugin) return options;
-      return { ...options, plugins: [...(options.plugins ?? []), server.loaderPlugin()] };
+    configureLoader() {
+      if (!disableLoaderPlugin) return { plugins: [server.loaderPlugin()] };
     },
     async routes() {
       const routes: ApiRoute[] = [];
@@ -83,16 +83,11 @@ export function openapiPlugin({
       }
       if (includeDocument) return routes;
 
-      routes.push({
-        path: `${documentsPath}/[id]`,
-        staticPaths: Object.keys(await server.getSchemas()),
-        async GET(_, { params: { id } }) {
-          const schemas = await server.getSchemas();
-          if (typeof id === 'string' && Object.hasOwn(schemas, id))
-            return Response.json(schemas[id].bundled);
-          return new Response('Not Found', { status: 404 });
-        },
-      });
+      routes.push(
+        await documentsRoute(documentsPath, server.getSchemas, (schema) =>
+          Response.json(schema.bundled),
+        ),
+      );
       return routes;
     },
     getPageBody({ data }) {
@@ -101,7 +96,7 @@ export function openapiPlugin({
       if (!includeDocument) {
         // keyed by URL, the browser fetches it from there
         props.document = this.withBase(`${documentsPath}/${props.document}`);
-        renderedDocuments().set(props.document, data.getSchema().bundled);
+        renderedDocuments.set(props.document, data.getSchema().bundled);
       }
 
       return {

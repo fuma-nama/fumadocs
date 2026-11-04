@@ -28,7 +28,7 @@ async function createSite(
       docs: { files: [{ type: 'page', path: 'index.mdx', data: { title: 'Home' } }] },
       graphql: await server.staticSource({ baseDir: 'api' }),
     },
-    await plugin.configureLoader!.call(ctx, { baseUrl: '/' }),
+    { baseUrl: '/', ...(await plugin.configureLoader!.call(ctx, { baseUrl: '/' })) },
   );
   const output = await content.get();
 
