@@ -4,7 +4,7 @@ import { bundle } from '@fumadocs/json-schema/bundle';
 /**
  * Process input document to a Fumadocs AsyncAPI compatible format.
  */
-export async function loadDocument(input: string | AsyncAPIObject): Promise<{
+export async function parseDocument(input: string | AsyncAPIObject): Promise<{
   bundled: AsyncAPIObject;
 }> {
   const bundled = await bundle<AsyncAPIObject>(input).catch((e: unknown) => {

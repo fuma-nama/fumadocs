@@ -34,11 +34,15 @@ export function createRenderedDocuments<Document>(plugin: string) {
 }
 
 /** the route serving the document of each ID at `<path>/[id]` */
-export async function documentsRoute<Schema>(
-  path: string,
-  getSchemas: () => Promise<Record<string, Schema>>,
-  toResponse: (schema: Schema) => Response,
-): Promise<ApiRoute> {
+export async function documentsRoute<Schema>({
+  path,
+  getSchemas,
+  toResponse,
+}: {
+  path: string;
+  getSchemas: () => Promise<Record<string, Schema>>;
+  toResponse: (schema: Schema) => Response;
+}): Promise<ApiRoute> {
   return {
     path: `${path}/[id]`,
     staticPaths: Object.keys(await getSchemas()),

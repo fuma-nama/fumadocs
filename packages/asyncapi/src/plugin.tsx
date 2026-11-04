@@ -3,12 +3,12 @@ import type { PageData } from 'fumadocs-core/source';
 import type { ComponentType } from 'react';
 import { asyncapiTranslations } from '@/i18n';
 import type { AsyncAPIPageData, AsyncAPIServer } from '@/server';
-import { AsyncAPIPage } from '@/ui/plugin';
+import { AsyncAPIPage, loadDocument } from '@/ui/plugin';
 import type { AsyncAPIPageProps } from '@/utils/create-page';
 import { renderedDocuments } from '@/utils/document/rendered';
 import { documentsRoute } from 'shared-api/utils/rendered-documents';
 
-export { AsyncAPIPage };
+export { AsyncAPIPage, loadDocument };
 
 export interface AsyncAPIPluginOptions {
   /** created with `createAsyncAPI()` */
@@ -18,7 +18,7 @@ export interface AsyncAPIPluginOptions {
   disableLoaderPlugin?: boolean;
 
   /**
-   * A client component created with `createAsyncAPIPage()`, for its options. With `includeDocument: false`, `document` is its URL: load it with `loadDocument`.
+   * A client component created with `createAsyncAPIPage()`, for its options. With `includeDocument: false`, `document` is its URL: pass `loadDocument` of this module to `createAsyncAPIPage()`.
    *
    * @defaultValue `AsyncAPIPage`
    */
@@ -48,12 +48,14 @@ export function asyncapiPlugin({
     configureLoader() {
       if (!disableLoaderPlugin) return { plugins: [server.loaderPlugin()] };
     },
-    async routes() {
+    async apiRoutes() {
       if (includeDocument) return;
       return [
-        await documentsRoute(documentsPath, server.getSchemas, (schema) =>
-          Response.json(schema.bundled),
-        ),
+        await documentsRoute({
+          path: documentsPath,
+          getSchemas: server.getSchemas,
+          toResponse: (schema) => Response.json(schema.bundled),
+        }),
       ];
     },
     getPageBody({ data }) {
@@ -77,7 +79,7 @@ export function asyncapiPlugin({
       if (isAsyncAPIPage(data)) return data.structuredData;
     },
     transformPage(data, page) {
-      return isAsyncAPIPage(page.data) ? { ...data, full: data.full ?? true } : data;
+      if (isAsyncAPIPage(page.data)) return { full: data.full ?? true };
     },
   };
 }

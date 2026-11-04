@@ -35,7 +35,7 @@ export interface PluginLoaderOptions extends Omit<LoaderOptions, 'plugins'> {
  * - setup (`init`, `configure`, `build`): run in order.
  * - contribute (`configureLoader`, `transformPage`): each plugin receives the options of the site or the base data of the page, frameworks merge the fields each result changes.
  * - resolve (`getPage*`): the first plugin returning a value other than `undefined` wins.
- * - collect (`head`, `routes`): the results of every plugin, in order.
+ * - collect (`head`, `apiRoutes`): the results of every plugin, in order.
  *
  * `middleware` runs as a chain. Frameworks run every hook, with their site as `Context` and their page data as `Data`, and may extend the contract with their own.
  *
@@ -88,12 +88,16 @@ export interface Plugin<
 
   getPageLastModified?: (this: Context, page: Config['page']) => Awaitable<Date | undefined>;
 
-  transformPage?: (this: Context, data: Data, page: Config['page']) => Awaitable<Data>;
+  transformPage?: (
+    this: Context,
+    data: Readonly<Data>,
+    page: Config['page'],
+  ) => Awaitable<Partial<Data> | undefined>;
 
   /** tags in `<head>`, of every page without `page`, of a content page with it */
   head?: (this: Context, env: { page?: Config['page'] }) => Awaitable<HeadTag[] | undefined>;
 
-  routes?: (this: Context) => Awaitable<ApiRoute[] | undefined>;
+  apiRoutes?: (this: Context) => Awaitable<ApiRoute[] | undefined>;
 
   /**
    * Runs for requests served on demand, prerendered routes skip it.

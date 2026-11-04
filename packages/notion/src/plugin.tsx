@@ -79,7 +79,7 @@ export function notionPlugin({
           '[@fumadocs/notion] `notionPlugin()` serves Notion files on request, which `mode: "static"` has no server for. Set `fileProxy: false` and serve durable file URLs.',
         );
     },
-    routes() {
+    apiRoutes() {
       if (!handler) return;
       return [
         {

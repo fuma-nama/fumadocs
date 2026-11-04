@@ -1,4 +1,4 @@
-import { loadDocument } from '@/utils/document/load';
+import { parseDocument } from '@/utils/document/load';
 import type { AsyncAPIObject, Awaitable } from '@/types';
 import fs from 'node:fs';
 import type {
@@ -89,7 +89,7 @@ export function createAsyncAPI(options: AsyncAPIOptions = {}): AsyncAPIServer {
     let output = disableCache ? undefined : docCache.get(id);
     if (!output) {
       const raw = input[id];
-      output = Promise.resolve(typeof raw === 'function' ? raw() : raw).then(loadDocument);
+      output = Promise.resolve(typeof raw === 'function' ? raw() : raw).then(parseDocument);
       if (!disableCache) docCache.set(id, output);
     }
 
@@ -177,7 +177,7 @@ export function createAsyncAPI(options: AsyncAPIOptions = {}): AsyncAPIServer {
         },
       };
     },
-    loaderPlugin: asyncapiPlugin,
+    loaderPlugin,
   };
 }
 
@@ -186,7 +186,14 @@ export interface InternalAsyncAPIMeta {
   preload?: string[];
 }
 
+/**
+ * @deprecated use `loaderPlugin()` of `createAsyncAPI()`
+ */
 export function asyncapiPlugin(): LoaderPlugin {
+  return loaderPlugin();
+}
+
+function loaderPlugin(): LoaderPlugin {
   return {
     name: 'fumadocs:asyncapi',
     enforce: 'pre',

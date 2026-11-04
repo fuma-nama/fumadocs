@@ -120,7 +120,7 @@ describe('notionPlugin', () => {
 
   it('serves files of pages in the source only', async () => {
     const { ctx, plugin, client } = await createSite();
-    const [route] = (await plugin.routes!.call(ctx)) ?? [];
+    const [route] = (await plugin.apiRoutes!.call(ctx)) ?? [];
     expect(route).toMatchObject({ path: '/api/notion/file', render: 'dynamic' });
     const get = (page: string) =>
       route.GET!(
@@ -140,7 +140,7 @@ describe('notionPlugin', () => {
   it('renders the file URLs of Notion without the file proxy', async () => {
     const { ctx, plugin, page } = await createSite({ fileProxy: false }, 'static');
 
-    expect(await plugin.routes!.call(ctx)).toBeUndefined();
+    expect(await plugin.apiRoutes!.call(ctx)).toBeUndefined();
     const html = await renderHtml((await plugin.getPageBody!.call(ctx, page))?.node);
     expect(html).toContain('src="https://notion.example/signed"');
   });

@@ -1,6 +1,6 @@
 import { createProxy } from '@/server/proxy';
 import { createOAuthHandler } from '@/server/oauth';
-import { loadDocument } from '@/utils/document/load';
+import { parseDocument } from '@/utils/document/load';
 import type { Document, Awaitable } from '@/types';
 import type {
   DynamicSource,
@@ -122,7 +122,7 @@ export function createOpenAPI(options: OpenAPIOptions = {}): OpenAPIServer {
     }
 
     const raw = resolvedInput[schemaId];
-    const output = Promise.resolve(typeof raw === 'function' ? raw() : raw).then(loadDocument);
+    const output = Promise.resolve(typeof raw === 'function' ? raw() : raw).then(parseDocument);
     if (!disableCache) docCache.set(schemaId, output);
     return output;
   }
@@ -227,16 +227,18 @@ export function createOpenAPI(options: OpenAPIOptions = {}): OpenAPIServer {
         },
       };
     },
-    loaderPlugin() {
-      return openapiPlugin();
-    },
+    loaderPlugin,
   };
 }
 
 /**
- * Fumadocs Source API integration, pass this to `plugins` array in `loader()`.
+ * @deprecated use `loaderPlugin()` of `createOpenAPI()`
  */
 export function openapiPlugin(): LoaderPlugin {
+  return loaderPlugin();
+}
+
+function loaderPlugin(): LoaderPlugin {
   return {
     name: 'fumadocs:openapi',
     enforce: 'pre',

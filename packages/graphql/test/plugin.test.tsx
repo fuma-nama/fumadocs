@@ -61,9 +61,7 @@ describe('graphqlPlugin', () => {
     });
     expect(
       await plugin.transformPage!.call(ctx, { ...page, title: 'orders', toc: [] }, page),
-    ).toMatchObject({
-      full: true,
-    });
+    ).toEqual({ full: true });
   });
 
   test('leaves other pages to other plugins', async () => {
@@ -75,8 +73,9 @@ describe('graphqlPlugin', () => {
     expect(await plugin.getPageText!.call(ctx, page)).toBeUndefined();
     expect(await plugin.getPageToc!.call(ctx, page)).toBeUndefined();
     expect(await plugin.getPageStructuredData!.call(ctx, page)).toBeUndefined();
-    const data = await plugin.transformPage!.call(ctx, { ...page, title: 'Home', toc: [] }, page);
-    expect(data.full).toBeUndefined();
+    expect(
+      await plugin.transformPage!.call(ctx, { ...page, title: 'Home', toc: [] }, page),
+    ).toBeUndefined();
   });
 
   test('adds the loader plugin unless disabled', async () => {
@@ -98,12 +97,12 @@ describe('graphqlPlugin', () => {
 
   test('serves schemas left out of page props', async () => {
     const included = await createSite();
-    expect(await included.plugin.routes!.call(included.ctx)).toBeUndefined();
+    expect(await included.plugin.apiRoutes!.call(included.ctx)).toBeUndefined();
 
     const fetch = vi.spyOn(globalThis, 'fetch');
     const site = await createSite({ includeSchema: false });
     const { plugin, ctx } = site;
-    const [route] = (await plugin.routes!.call(ctx))!;
+    const [route] = (await plugin.apiRoutes!.call(ctx))!;
     expect(route).toMatchObject({ path: '/api/graphql-schema/[id]', staticPaths: ['store'] });
 
     const request = new Request('https://example.com/docs/api/graphql-schema/store');

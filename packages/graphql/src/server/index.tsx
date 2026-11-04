@@ -9,7 +9,7 @@ import type {
 } from 'fumadocs-core/source';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
 import type { TOCItemType } from 'fumadocs-core/toc';
-import { loadSchema, type GraphQLSchemaInput, type LoadedSchema } from '@/utils/load-schema';
+import { parseSchema, type GraphQLSchemaInput, type LoadedSchema } from '@/utils/load-schema';
 import type { Awaitable } from '@/types';
 import {
   getPageProps,
@@ -103,7 +103,7 @@ export function createGraphQL(options: GraphQLOptions = {}): GraphQLServer {
     }
 
     const raw = resolvedInput[schemaId];
-    const output = Promise.resolve(typeof raw === 'function' ? raw() : raw).then(loadSchema);
+    const output = Promise.resolve(typeof raw === 'function' ? raw() : raw).then(parseSchema);
     if (!disableCache) docCache.set(schemaId, output);
     return output;
   }
@@ -243,9 +243,7 @@ export function createGraphQL(options: GraphQLOptions = {}): GraphQLServer {
         },
       };
     },
-    loaderPlugin() {
-      return graphqlPlugin();
-    },
+    loaderPlugin,
   };
 }
 
@@ -257,7 +255,14 @@ export interface InternalGraphQLMeta {
 
 const OperationKindSet = new Set(['query', 'mutation', 'subscription']);
 
+/**
+ * @deprecated use `loaderPlugin()` of `createGraphQL()`
+ */
 export function graphqlPlugin(): LoaderPlugin {
+  return loaderPlugin();
+}
+
+function loaderPlugin(): LoaderPlugin {
   return {
     name: 'fumadocs:graphql',
     enforce: 'pre',

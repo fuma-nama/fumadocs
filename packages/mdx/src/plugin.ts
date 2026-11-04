@@ -33,7 +33,7 @@ export function mdxPlugin<Config extends LoaderConfig = LoaderConfig>({
   }
 
   return {
-    name: 'fumadocs-mdx',
+    name: 'mdx',
     async getPageBody(page) {
       if (!isEntry(page.data)) return;
       const { body } = await load(page.data);

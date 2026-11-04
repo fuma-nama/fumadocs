@@ -3,12 +3,12 @@ import type { PageData } from 'fumadocs-core/source';
 import type { ComponentType } from 'react';
 import { graphqlTranslations } from '@/i18n';
 import type { GraphQLPageData, GraphQLServer } from '@/server';
-import { GraphQLPage } from '@/ui/plugin';
+import { GraphQLPage, loadSchema } from '@/ui/plugin';
 import type { GraphQLPageProps } from '@/utils/create-page';
 import { renderedSchemas } from '@/utils/rendered';
 import { documentsRoute } from 'shared-api/utils/rendered-documents';
 
-export { GraphQLPage };
+export { GraphQLPage, loadSchema };
 
 export interface GraphQLPluginOptions {
   /** created with `createGraphQL()` */
@@ -18,7 +18,7 @@ export interface GraphQLPluginOptions {
   disableLoaderPlugin?: boolean;
 
   /**
-   * A client component created with `createGraphQLPage()`, for its options. With `includeSchema: false`, `schema` is its URL: load it with `loadSchema`.
+   * A client component created with `createGraphQLPage()`, for its options. With `includeSchema: false`, `schema` is its URL: pass `loadSchema` of this module to `createGraphQLPage()`.
    *
    * @defaultValue `GraphQLPage`
    */
@@ -48,10 +48,14 @@ export function graphqlPlugin({
     configureLoader() {
       if (!disableLoaderPlugin) return { plugins: [server.loaderPlugin()] };
     },
-    async routes() {
+    async apiRoutes() {
       if (includeSchema) return;
       return [
-        await documentsRoute(schemasPath, server.getSchemas, (schema) => new Response(schema.sdl)),
+        await documentsRoute({
+          path: schemasPath,
+          getSchemas: server.getSchemas,
+          toResponse: (schema) => new Response(schema.sdl),
+        }),
       ];
     },
     getPageBody({ data }) {
@@ -75,7 +79,7 @@ export function graphqlPlugin({
       if (isGraphQLPageData(data)) return data.structuredData;
     },
     transformPage(data, page) {
-      return isGraphQLPageData(page.data) ? { ...data, full: data.full ?? true } : data;
+      if (isGraphQLPageData(page.data)) return { full: data.full ?? true };
     },
   };
 }

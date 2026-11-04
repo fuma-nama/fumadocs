@@ -4,12 +4,12 @@ import type { ComponentType } from 'react';
 import { openapiTranslations } from '@/i18n';
 import type { CreateProxyOptions, OpenAPIPageData, OpenAPIServer, Proxy } from '@/server';
 import type { Awaitable } from '@/types';
-import { OpenAPIPage } from '@/ui/plugin';
+import { OpenAPIPage, loadDocument } from '@/ui/plugin';
 import type { OpenAPIPageProps } from '@/utils/pages/builder';
 import { renderedDocuments } from '@/utils/document/rendered';
 import { documentsRoute } from 'shared-api/utils/rendered-documents';
 
-export { OpenAPIPage };
+export { OpenAPIPage, loadDocument };
 
 export interface OpenAPIPluginOptions {
   /** created with `createOpenAPI()` */
@@ -19,7 +19,7 @@ export interface OpenAPIPluginOptions {
   disableLoaderPlugin?: boolean;
 
   /**
-   * A client component created with `createOpenAPIPage()`, for its options. With `includeDocument: false`, `document` is the URL of the document: load it with `loadDocument`.
+   * A client component created with `createOpenAPIPage()`, for its options. With `includeDocument: false`, `document` is the URL of the document: pass `loadDocument` of this module to `createOpenAPIPage()`.
    *
    * @defaultValue `OpenAPIPage`
    */
@@ -72,7 +72,7 @@ export function openapiPlugin({
     configureLoader() {
       if (!disableLoaderPlugin) return { plugins: [server.loaderPlugin()] };
     },
-    async routes() {
+    async apiRoutes() {
       const routes: ApiRoute[] = [];
       if (proxy && proxyPath) {
         const { handle } =
@@ -84,9 +84,11 @@ export function openapiPlugin({
       if (includeDocument) return routes;
 
       routes.push(
-        await documentsRoute(documentsPath, server.getSchemas, (schema) =>
-          Response.json(schema.bundled),
-        ),
+        await documentsRoute({
+          path: documentsPath,
+          getSchemas: server.getSchemas,
+          toResponse: (schema) => Response.json(schema.bundled),
+        }),
       );
       return routes;
     },
@@ -108,6 +110,9 @@ export function openapiPlugin({
         ),
       };
     },
+    getPageText({ data }) {
+      if (isOpenAPIPage(data)) return data.description ?? '';
+    },
     getPageToc({ data }) {
       if (isOpenAPIPage(data)) return data.toc;
     },
@@ -115,7 +120,7 @@ export function openapiPlugin({
       if (isOpenAPIPage(data)) return data.structuredData;
     },
     transformPage(data, page) {
-      return isOpenAPIPage(page.data) ? { ...data, full: data.full ?? true } : data;
+      if (isOpenAPIPage(page.data)) return { full: data.full ?? true };
     },
   };
 }

@@ -45,11 +45,11 @@ describe('asyncapiPlugin()', () => {
     expect(await plugin.getPageToc!.call(ctx, page)).toBe(page.data.toc);
     expect(await plugin.getPageStructuredData!.call(ctx, page)).toBe(page.data.structuredData);
     const data = { title: '', url: page.url, path: page.path, locale: page.locale, toc: [] };
-    expect(await plugin.transformPage!.call(ctx, data, page)).toEqual({ ...data, full: true });
-    expect(await plugin.transformPage!.call(ctx, { ...data, full: false }, page)).toMatchObject({
+    expect(await plugin.transformPage!.call(ctx, data, page)).toEqual({ full: true });
+    expect(await plugin.transformPage!.call(ctx, { ...data, full: false }, page)).toEqual({
       full: false,
     });
-    expect(await plugin.routes!.call(ctx)).toBeUndefined();
+    expect(await plugin.apiRoutes!.call(ctx)).toBeUndefined();
   });
 
   test('adds the loader plugin unless disabled', async () => {
@@ -67,7 +67,7 @@ describe('asyncapiPlugin()', () => {
   test('serves documents left out of page props', async () => {
     const fetch = vi.spyOn(globalThis, 'fetch');
     const { ctx, plugin, page, server } = await createSite({ includeDocument: false });
-    const [route] = (await plugin.routes!.call(ctx))!;
+    const [route] = (await plugin.apiRoutes!.call(ctx))!;
     const { bundled } = await server.getSchema('streetlights');
 
     expect(route).toMatchObject({

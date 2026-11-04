@@ -3,7 +3,7 @@ import path from 'node:path';
 import { afterEach, describe, expect, test, vi } from 'vitest';
 import { createGraphQL, type GraphQLPageData } from '@/server';
 import { loadExamples } from '@/utils/examples';
-import { type LoadedSchema, loadSchema } from '@/utils/load-schema';
+import { type LoadedSchema, parseSchema } from '@/utils/load-schema';
 
 const cwd = fileURLToPath(new URL('./', import.meta.url));
 const schemaFile = path.join(cwd, './fixtures/store.graphql');
@@ -14,7 +14,7 @@ async function load(
   inputs: Record<string, string> = { store: schemaFile },
 ) {
   const schemas: Record<string, LoadedSchema> = {};
-  for (const [id, sdl] of Object.entries(inputs)) schemas[id] = await loadSchema(sdl);
+  for (const [id, sdl] of Object.entries(inputs)) schemas[id] = await parseSchema(sdl);
   return loadExamples(input, schemas);
 }
 

@@ -2,7 +2,7 @@ import { fileURLToPath } from 'node:url';
 import { renderToString } from 'react-dom/server';
 import { prerender } from 'react-dom/static';
 import { expect, test, vi } from 'vitest';
-import { loadDocument } from '@/utils/document/load';
+import { parseDocument } from '@/utils/document/load';
 import { createOpenAPIRenderer } from '@/index.browser';
 import type { PageOperationProps } from '@/operation';
 import {
@@ -38,7 +38,7 @@ async function render(
     pathItem: PathItemObject;
   },
 ) {
-  const { bundled } = await loadDocument(museum);
+  const { bundled } = await parseDocument(museum);
   const OpenAPIPage = createOpenAPIRenderer({
     codeUsages: registerDefault(createCodeUsageGeneratorRegistry()),
     components: {
@@ -285,7 +285,7 @@ test('generates inline code samples from functions', async () => {
 });
 
 test('renders the operations and webhooks of a page', async () => {
-  const { bundled } = await loadDocument(museum);
+  const { bundled } = await parseDocument(museum);
   const doc = {
     ...(bundled as Document),
     webhooks: { newExhibition: { post: { summary: 'New exhibition' } } },
@@ -318,7 +318,7 @@ test('renders the operations and webhooks of a page', async () => {
 });
 
 test('loads documents left out of page props', async () => {
-  const { bundled } = await loadDocument(museum);
+  const { bundled } = await parseDocument(museum);
   const load = vi.fn(async () => bundled as Document);
   const Operation = ({ operation }: PageOperationProps) => <h2>{operation.summary}</h2>;
   const OpenAPIPage = createOpenAPIRenderer({

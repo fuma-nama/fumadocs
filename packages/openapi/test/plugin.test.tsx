@@ -45,11 +45,12 @@ describe('openapiPlugin()', () => {
       bundled: expect.any(Object),
       proxyUrl: '/docs/api/proxy',
     });
+    expect(await plugin.getPageText!.call(ctx, page)).toBe(page.data.description ?? '');
     expect(await plugin.getPageToc!.call(ctx, page)).toBe(page.data.toc);
     expect(await plugin.getPageStructuredData!.call(ctx, page)).toBe(page.data.structuredData);
     const data = { title: '', url: page.url, path: page.path, locale: page.locale, toc: [] };
-    expect(await plugin.transformPage!.call(ctx, data, page)).toEqual({ ...data, full: true });
-    expect(await plugin.transformPage!.call(ctx, { ...data, full: false }, page)).toMatchObject({
+    expect(await plugin.transformPage!.call(ctx, data, page)).toEqual({ full: true });
+    expect(await plugin.transformPage!.call(ctx, { ...data, full: false }, page)).toEqual({
       full: false,
     });
   });
@@ -68,12 +69,12 @@ describe('openapiPlugin()', () => {
 
   test('serves the proxy at a pathname', async () => {
     const { ctx, plugin } = await createSite({ proxyUrl: '/api/proxy' });
-    expect(await plugin.routes!.call(ctx)).toEqual([
+    expect(await plugin.apiRoutes!.call(ctx)).toEqual([
       { path: '/api/proxy', render: 'dynamic', ALL: expect.any(Function) },
     ]);
 
     const off = await createSite({ proxyUrl: '/api/proxy' }, { createProxy: false });
-    expect(await off.plugin.routes!.call(off.ctx)).toEqual([]);
+    expect(await off.plugin.apiRoutes!.call(off.ctx)).toEqual([]);
   });
 
   test('serves your own proxy', async () => {
@@ -82,7 +83,7 @@ describe('openapiPlugin()', () => {
       { proxyUrl: '/api/proxy' },
       { createProxy: async () => ({ handle }) as never },
     );
-    expect(await plugin.routes!.call(ctx)).toEqual([
+    expect(await plugin.apiRoutes!.call(ctx)).toEqual([
       { path: '/api/proxy', render: 'dynamic', ALL: handle },
     ]);
   });
@@ -100,7 +101,7 @@ describe('openapiPlugin()', () => {
       Record<string, unknown>
     >;
 
-    expect(await plugin.routes!.call(ctx)).toEqual([]);
+    expect(await plugin.apiRoutes!.call(ctx)).toEqual([]);
     expect(node.props.payload).toMatchObject({ proxyUrl: 'https://proxy.example.com' });
     await expect(
       createSite({ proxyUrl: 'https://proxy.example.com' }, { createProxy: true }),
@@ -119,7 +120,7 @@ describe('openapiPlugin()', () => {
   test('serves documents left out of page props', async () => {
     const fetch = vi.spyOn(globalThis, 'fetch');
     const { ctx, plugin, page, server } = await createSite({ includeDocument: false });
-    const [route] = (await plugin.routes!.call(ctx))!;
+    const [route] = (await plugin.apiRoutes!.call(ctx))!;
     const { bundled } = await server.getSchema('museum');
 
     expect(route).toMatchObject({

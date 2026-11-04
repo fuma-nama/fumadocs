@@ -5,7 +5,7 @@ import { bundle } from '@fumadocs/json-schema/bundle';
 /**
  * Process input document to a Fumadocs OpenAPI compatible format
  */
-export async function loadDocument(input: string | Document): Promise<{
+export async function parseDocument(input: string | Document): Promise<{
   bundled: Document;
 }> {
   try {
