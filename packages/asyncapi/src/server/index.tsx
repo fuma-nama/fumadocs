@@ -177,7 +177,7 @@ export function createAsyncAPI(options: AsyncAPIOptions = {}): AsyncAPIServer {
         },
       };
     },
-    loaderPlugin: asyncapiPlugin,
+    loaderPlugin,
   };
 }
 
@@ -186,7 +186,14 @@ export interface InternalAsyncAPIMeta {
   preload?: string[];
 }
 
+/**
+ * @deprecated use `loaderPlugin()` of `createAsyncAPI()` instead
+ */
 export function asyncapiPlugin(): LoaderPlugin {
+  return loaderPlugin();
+}
+
+function loaderPlugin(): LoaderPlugin {
   return {
     name: 'fumadocs:asyncapi',
     enforce: 'pre',

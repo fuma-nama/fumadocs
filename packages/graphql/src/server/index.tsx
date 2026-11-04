@@ -243,9 +243,7 @@ export function createGraphQL(options: GraphQLOptions = {}): GraphQLServer {
         },
       };
     },
-    loaderPlugin() {
-      return graphqlPlugin();
-    },
+    loaderPlugin,
   };
 }
 
@@ -257,7 +255,14 @@ export interface InternalGraphQLMeta {
 
 const OperationKindSet = new Set(['query', 'mutation', 'subscription']);
 
+/**
+ * @deprecated use `loaderPlugin()` of `createGraphQL()` instead
+ */
 export function graphqlPlugin(): LoaderPlugin {
+  return loaderPlugin();
+}
+
+function loaderPlugin(): LoaderPlugin {
   return {
     name: 'fumadocs:graphql',
     enforce: 'pre',

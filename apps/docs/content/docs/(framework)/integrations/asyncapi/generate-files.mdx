@@ -303,12 +303,12 @@ export default function Page({ slugs }: PageProps<'/docs/[...slugs]'>) {
 Add the plugin to your `loader()`:
 
 ```ts title="lib/source.ts"
-import { asyncapiPlugin } from '@fumadocs/asyncapi/server';
+import { asyncapi } from '@/lib/asyncapi';
 import { loader } from 'fumadocs-core/source';
 
 export const source = loader({
   // [!code ++:2] optional: adds the direction of messages to each page item in page tree
-  plugins: [asyncapiPlugin()],
+  plugins: [asyncapi.loaderPlugin()],
 });
 ```
 

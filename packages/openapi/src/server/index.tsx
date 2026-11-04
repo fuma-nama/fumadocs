@@ -227,16 +227,18 @@ export function createOpenAPI(options: OpenAPIOptions = {}): OpenAPIServer {
         },
       };
     },
-    loaderPlugin() {
-      return openapiPlugin();
-    },
+    loaderPlugin,
   };
 }
 
 /**
- * Fumadocs Source API integration, pass this to `plugins` array in `loader()`.
+ * @deprecated use `loaderPlugin()` of `createOpenAPI()` instead
  */
 export function openapiPlugin(): LoaderPlugin {
+  return loaderPlugin();
+}
+
+function loaderPlugin(): LoaderPlugin {
   return {
     name: 'fumadocs:openapi',
     enforce: 'pre',
