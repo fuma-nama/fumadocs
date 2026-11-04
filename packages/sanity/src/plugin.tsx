@@ -8,29 +8,26 @@ import type { Plugin } from 'fumadocs-core/framework/plugin';
 import type { PageData } from 'fumadocs-core/source';
 import type { BaseDoc, DocToPage, DocToPageLoaded } from './index';
 
-export interface SanityPluginOptions extends Pick<PortableTextProps, 'components'> {
-  /** only render documents of this `_type`, like the `docType` of `createSanitySource()` */
-  docType?: BaseDoc['_type'];
-}
+/** the components of Portable Text, for your block types */
+export type SanityPluginOptions = Pick<PortableTextProps, 'components'>;
 
 type SanityDoc = BaseDoc & { _createdAt?: string; body?: PortableTextBlock[] };
 
 type SanityPageData = DocToPage<SanityDoc>;
 
+function isSanityPageData(data: PageData): data is SanityPageData {
+  return (
+    '_id' in data &&
+    typeof data._id === 'string' &&
+    'load' in data &&
+    typeof data.load === 'function'
+  );
+}
+
 /**
  * Render the Portable Text `body` of documents from `createSanitySource()`, with their dates.
  */
-export function sanityPlugin({ components, docType }: SanityPluginOptions = {}): Plugin {
-  function isSanityPageData(data: PageData): data is SanityPageData {
-    return (
-      '_id' in data &&
-      typeof data._id === 'string' &&
-      (docType === undefined || ('_type' in data && data._type === docType)) &&
-      'load' in data &&
-      typeof data.load === 'function'
-    );
-  }
-
+export function sanityPlugin({ components }: SanityPluginOptions = {}): Plugin {
   // the source creates new page data when the `_updatedAt` of a document changes, so a document loaded per page data stays fresh
   const loaded = new WeakMap<SanityPageData, Promise<DocToPageLoaded<SanityDoc>>>();
   function load(data: SanityPageData) {

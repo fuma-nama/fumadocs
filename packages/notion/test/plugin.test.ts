@@ -145,16 +145,6 @@ describe('notionPlugin', () => {
     expect(html).toContain('src="https://notion.example/signed"');
   });
 
-  it('renders with a custom renderer', async () => {
-    const Renderer = () => null;
-    const { ctx, plugin, page } = await createSite({ Renderer });
-
-    expect((await plugin.getPageBody!.call(ctx, page))?.node).toMatchObject({
-      type: Renderer,
-      props: { highlightCode: false, blocks: [{ id: headingId }, { id: imageId }] },
-    });
-  });
-
   it('requires a server for the file proxy', async () => {
     await expect(createSite({}, 'static')).rejects.toThrow('Set `fileProxy: false`');
   });
