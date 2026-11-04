@@ -172,6 +172,68 @@ export const getConfig = async () => ({ render: 'dynamic' }) as const;
 export { default, getConfig } from './[page]';
 ```
 
+```astro tab="Astro" title="src/pages/changelog/[...page].astro"
+---
+import { getSecret } from 'astro:env/server';
+import { githubReleases } from '@fumadocs/changelog/github';
+import Layout from '@/layouts/Layout.astro';
+import { Changelog } from '@/components/changelog-page';
+
+// render per request, needs an adapter
+export const prerender = false;
+
+const page = Number(Astro.params.page ?? 1);
+const { entries, nextPage } = await githubReleases({
+  owner: 'fuma-nama',
+  repo: 'fumadocs',
+  token: getSecret('GITHUB_TOKEN'),
+  page,
+});
+if (entries.length === 0) return Astro.rewrite('/404');
+---
+
+<Layout title="Changelog">
+  <Changelog
+    client:load
+    pathname={Astro.url.pathname}
+    params={Astro.params}
+    entries={entries}
+    newer={page > 1 ? `/changelog/${page - 1}` : undefined}
+    older={nextPage ? `/changelog/${nextPage}` : undefined}
+  />
+</Layout>
+```
+
+```tsx tab="Astro" title="src/components/changelog-page.tsx"
+import { HomeLayout } from 'fumadocs-ui/layouts/home';
+import { baseOptions } from '@/lib/layout.shared';
+import { Provider, type ProviderProps } from '@/components/provider';
+import {
+  ChangelogPagination,
+  ChangelogTimeline,
+  type ChangelogTimelineEntry,
+} from '@/components/changelog';
+
+export interface ChangelogProps extends ProviderProps {
+  entries: ChangelogTimelineEntry[];
+  newer?: string;
+  older?: string;
+}
+
+export function Changelog({ entries, newer, older, ...props }: ChangelogProps) {
+  return (
+    <Provider {...props}>
+      <HomeLayout {...baseOptions()}>
+        <div className="mx-auto flex w-full max-w-[900px] flex-col gap-10 px-4 py-12">
+          <ChangelogTimeline entries={entries} />
+          <ChangelogPagination newer={newer} older={older} />
+        </div>
+      </HomeLayout>
+    </Provider>
+  );
+}
+```
+
 ## Sources
 
 ### GitHub Releases

@@ -129,6 +129,7 @@ export const frameworks = [
   { name: 'React Router', href: '/docs/manual-installation/react-router' },
   { name: 'TanStack Start', href: '/docs/manual-installation/tanstack-start' },
   { name: 'Waku', href: '/docs/manual-installation/waku' },
+  { name: 'Astro', href: '/docs/manual-installation/astro' },
 ];
 
 export interface Quote {

@@ -42,6 +42,21 @@ export const docs = defineDocs({
 });
 ```
 
+On Astro, enable it in the integration options:
+
+```js title="astro.config.mjs"
+import { defineConfig } from 'astro/config';
+import fumadocs from '@fumadocs/astro';
+
+export default defineConfig({
+  integrations: [
+    fumadocs({
+      includeProcessedMarkdown: { output: 'function' }, // [!code ++]
+    }),
+  ],
+});
+```
+
 ### Create Export Route
 
 `createEpubExportAPI` builds the route handler. It is guarded by `secret`: without a matching `Authorization: Bearer <secret>` header the request is rejected, and the route answers `503` when the secret itself is unset.
@@ -118,6 +133,24 @@ export const { GET } = createEpubExportAPI({
 });
 ```
 
+```ts tab="Astro" title="src/pages/export/epub.ts"
+import type { APIRoute } from 'astro';
+import { source } from '@/lib/source';
+import { createEpubExportAPI } from 'fumadocs-epub';
+import { getSecret } from 'astro:env/server';
+
+// render per request, needs an adapter
+export const prerender = false;
+
+const api = createEpubExportAPI({
+  source,
+  title: 'My Documentation',
+  secret: getSecret('EXPORT_SECRET'),
+});
+
+export const GET: APIRoute = ({ request }) => api.GET(request);
+```
+
 For a public endpoint, or to build the file yourself (e.g. in a script), call `exportEpub()` directly and return the buffer.
 
 ### Using the CLI
@@ -126,10 +159,10 @@ You can also export EPUB via the Fumadocs CLI:
 
 ```bash
 fumadocs export epub --framework next
-# or: tanstack-start | react-router | waku
+# or: tanstack-start | react-router | waku | astro
 ```
 
-On Next.js, this fetches from your running server. On React Router, TanStack Start and Waku, it copies from the build output, so run a production build first.
+On Next.js and Astro, this fetches from your running server on port `3000` (Next.js) or `4321` (Astro) unless `PORT` is set. On React Router, TanStack Start and Waku, it copies from the build output, so run a production build first.
 
 ## Options
 

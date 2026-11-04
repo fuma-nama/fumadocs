@@ -85,6 +85,7 @@ It's important to pre-render pages (especially the frequently visited ones) to i
 - React Router: return the paths from `prerender` in `react-router.config.ts`.
 - TanStack Start: enable `prerender` of the `tanstackStart()` Vite plugin.
 - Waku: return `staticPaths` from the `getConfig` export of the page.
+- Astro: return the params from `getStaticPaths()` of the page.
 
 When pre-rendering pages from a remote source, make sure to optimize repeated reads during the build phase.
 For example, if you're fetching content via GitHub API, it is better to clone the repository content locally for pre-rendering.

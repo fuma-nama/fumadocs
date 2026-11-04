@@ -13,7 +13,7 @@ It installs the components to `components/blog`, and the utilities of posts to `
 
 Define a collection for your posts with `blogPageSchema`, and register your authors:
 
-```ts title="lib/source.ts"
+```ts tab="Fumadocs MDX" title="lib/source.ts"
 import { defineCollections } from 'fumadocs-mdx/macro';
 import { loader } from 'fumadocs-core/source';
 import { type BlogAuthor, blogPageSchema } from './blog';
@@ -28,6 +28,57 @@ export const blog = defineCollections({
 export const blogSource = loader({
   baseUrl: '/blog',
   source: blog.toFumadocsSource(),
+});
+
+export const blogAuthors: Record<string, BlogAuthor> = {
+  fuma: {
+    name: 'Fuma Nama',
+    title: 'Maintainer',
+    url: 'https://fuma-nama.dev',
+    image: 'https://avatars.githubusercontent.com/u/76240755',
+  },
+};
+```
+
+```js tab="Astro" title="astro.config.mjs"
+import { defineConfig } from 'astro/config';
+import fumadocs from '@fumadocs/astro';
+
+export default defineConfig({
+  integrations: [
+    fumadocs({
+      components: './src/components/mdx.tsx',
+      // [!code ++:4]
+      collections: {
+        docs: { dir: 'content/docs' },
+        blog: { dir: 'content/blog' },
+      },
+    }),
+  ],
+});
+```
+
+```ts tab="Astro" title="src/content.config.ts"
+import { defineCollection } from 'astro:content';
+import { metaLoader, pageLoader } from '@fumadocs/astro/loaders';
+import { blogPageSchema } from '@/lib/blog'; // [!code ++]
+
+export const collections = {
+  docs: defineCollection({ loader: pageLoader() }),
+  meta: defineCollection({ loader: metaLoader() }),
+  blog: defineCollection({ loader: pageLoader('blog'), schema: blogPageSchema }), // [!code ++]
+};
+```
+
+```ts tab="Astro" title="src/lib/source.ts"
+import { getCollection } from 'astro:content';
+import { loader } from 'fumadocs-core/source';
+import { toFumadocsSource } from '@fumadocs/astro/source';
+import type { BlogAuthor } from './blog';
+
+export const blogSource = loader({
+  baseUrl: '/blog',
+  source: toFumadocsSource(await getCollection('blog')),
 });
 
 export const blogAuthors: Record<string, BlogAuthor> = {
@@ -163,6 +214,44 @@ export default function Page() {
 }
 
 export const getConfig = async () => ({ render: 'static' }) as const;
+```
+
+```astro tab="Astro" title="src/pages/blog/index.astro"
+---
+import Layout from '@/layouts/Layout.astro';
+import { BlogPosts } from '@/components/blog-posts';
+import { blogAuthors, blogSource } from '@/lib/source';
+import { getPosts } from '@/lib/blog';
+---
+
+<Layout title="Blog">
+  <BlogPosts
+    client:load
+    pathname={Astro.url.pathname}
+    params={Astro.params}
+    posts={getPosts(blogSource.getPages(), blogAuthors)}
+  />
+</Layout>
+```
+
+```tsx tab="Astro" title="src/components/blog-posts.tsx"
+import { HomeLayout } from 'fumadocs-ui/layouts/home';
+import { baseOptions } from '@/lib/layout.shared';
+import { Provider, type ProviderProps } from '@/components/provider';
+import type { BlogPost } from '@/lib/blog';
+import { BlogCards } from '@/components/blog';
+
+export function BlogPosts({ posts, ...props }: ProviderProps & { posts: BlogPost[] }) {
+  return (
+    <Provider {...props}>
+      <HomeLayout {...baseOptions()}>
+        <div className="mx-auto w-full max-w-(--fd-layout-width) px-4 py-12">
+          <BlogCards posts={posts} />
+        </div>
+      </HomeLayout>
+    </Provider>
+  );
+}
 ```
 
 ### Post
@@ -384,6 +473,93 @@ export async function getConfig() {
 }
 ```
 
+```astro tab="Astro" title="src/pages/blog/[slug].astro"
+---
+import type { GetStaticPaths, InferGetStaticPropsType } from 'astro';
+import Layout from '@/layouts/Layout.astro';
+import { BlogPostPage } from '@/components/blog-post';
+import { blogAuthors, blogSource } from '@/lib/source';
+import { findPost, getPosts } from '@/lib/blog';
+
+export const getStaticPaths = (() => {
+  const posts = getPosts(blogSource.getPages(), blogAuthors);
+
+  return blogSource.getPages().map((page) => ({
+    params: { slug: decodeURI(page.slugs[0]) },
+    props: { page, ...findPost(posts, page.url)! },
+  }));
+}) satisfies GetStaticPaths;
+
+type Props = InferGetStaticPropsType<typeof getStaticPaths>;
+
+const { page, post, newer, older } = Astro.props;
+const { body: Content, toc } = await page.data.load();
+---
+
+<Layout title={post.title} description={post.description}>
+  <BlogPostPage
+    client:load
+    pathname={Astro.url.pathname}
+    params={Astro.params}
+    post={post}
+    newer={newer}
+    older={older}
+    toc={toc}
+  >
+    <Content />
+  </BlogPostPage>
+</Layout>
+```
+
+```tsx tab="Astro" title="src/components/blog-post.tsx"
+import type { TOCItemType } from 'fumadocs-core/toc';
+import { HomeLayout } from 'fumadocs-ui/layouts/home';
+import { baseOptions } from '@/lib/layout.shared';
+import { Provider, type ProviderProps } from '@/components/provider';
+import type { BlogPost } from '@/lib/blog';
+import {
+  BlogAuthors,
+  BlogBackLink,
+  BlogBody,
+  BlogDate,
+  BlogDescription,
+  BlogHeader,
+  BlogPage,
+  BlogPostNav,
+  BlogTags,
+  BlogTitle,
+} from '@/components/blog';
+
+export interface BlogPostPageProps extends ProviderProps {
+  post: BlogPost;
+  newer?: BlogPost;
+  older?: BlogPost;
+  toc: TOCItemType[];
+}
+
+/** the content is passed as children */
+export function BlogPostPage({ post, newer, older, toc, children, ...props }: BlogPostPageProps) {
+  return (
+    <Provider {...props}>
+      <HomeLayout {...baseOptions()}>
+        <BlogPage toc={toc}>
+          <BlogHeader>
+            <BlogBackLink href="/blog" />
+            <BlogTitle>{post.title}</BlogTitle>
+            <BlogDescription>{post.description}</BlogDescription>
+            <BlogAuthors authors={post.authors} />
+            <BlogTags tags={post.tags} />
+            {post.date && <BlogDate date={post.date} />}
+          </BlogHeader>
+          <BlogBody>{children}</BlogBody>
+          <BlogPostNav newer={newer} older={older} />
+        </BlogPage>
+      </HomeLayout>
+    </Provider>
+  );
+}
+```
+
 ### Tags
 
 List all tags with `getTags()`:
@@ -484,6 +660,50 @@ export default function Page() {
 }
 
 export const getConfig = async () => ({ render: 'static' }) as const;
+```
+
+```astro tab="Astro" title="src/pages/blog/tags/index.astro"
+---
+import Layout from '@/layouts/Layout.astro';
+import { BlogTagsPage } from '@/components/blog-tags';
+import { blogSource } from '@/lib/source';
+import { getPosts, getTags } from '@/lib/blog';
+---
+
+<Layout title="All Tags">
+  <BlogTagsPage
+    client:load
+    pathname={Astro.url.pathname}
+    params={Astro.params}
+    tags={getTags(getPosts(blogSource.getPages()))}
+  />
+</Layout>
+```
+
+```tsx tab="Astro" title="src/components/blog-tags.tsx"
+import { HomeLayout } from 'fumadocs-ui/layouts/home';
+import { baseOptions } from '@/lib/layout.shared';
+import { Provider, type ProviderProps } from '@/components/provider';
+import type { BlogTag } from '@/lib/blog';
+import { BlogHeader, BlogTagCards, BlogTitle } from '@/components/blog';
+
+export function BlogTagsPage({
+  tags,
+  ...props
+}: ProviderProps & { tags: (BlogTag & { count: number })[] }) {
+  return (
+    <Provider {...props}>
+      <HomeLayout {...baseOptions()}>
+        <div className="mx-auto flex w-full max-w-(--fd-layout-width) flex-col gap-4 px-4 py-12">
+          <BlogHeader>
+            <BlogTitle>All Tags</BlogTitle>
+          </BlogHeader>
+          <BlogTagCards tags={tags} />
+        </div>
+      </HomeLayout>
+    </Provider>
+  );
+}
 ```
 
 And the posts of a tag with `getTagPosts()`, which returns `undefined` for unknown tags:
@@ -608,6 +828,66 @@ export async function getConfig() {
     render: 'static',
     staticPaths: getTags(getPosts(blogSource.getPages())).map((tag) => tag.slug),
   } as const;
+}
+```
+
+```astro tab="Astro" title="src/pages/blog/tags/[tag].astro"
+---
+import type { GetStaticPaths, InferGetStaticPropsType } from 'astro';
+import Layout from '@/layouts/Layout.astro';
+import { BlogTagPage } from '@/components/blog-tag';
+import { blogAuthors, blogSource } from '@/lib/source';
+import { getPosts, getTagPosts, getTags } from '@/lib/blog';
+
+export const getStaticPaths = (() => {
+  const posts = getPosts(blogSource.getPages(), blogAuthors);
+
+  return getTags(posts).map((tag) => ({
+    params: { tag: tag.slug },
+    props: getTagPosts(posts, tag.slug)!,
+  }));
+}) satisfies GetStaticPaths;
+
+type Props = InferGetStaticPropsType<typeof getStaticPaths>;
+
+const { tag, posts } = Astro.props;
+---
+
+<Layout title={tag.name}>
+  <BlogTagPage
+    client:load
+    pathname={Astro.url.pathname}
+    params={Astro.params}
+    tag={tag}
+    posts={posts}
+  />
+</Layout>
+```
+
+```tsx tab="Astro" title="src/components/blog-tag.tsx"
+import { HomeLayout } from 'fumadocs-ui/layouts/home';
+import { baseOptions } from '@/lib/layout.shared';
+import { Provider, type ProviderProps } from '@/components/provider';
+import type { BlogPost, BlogTag } from '@/lib/blog';
+import { BlogCards, BlogHeader, BlogTitle } from '@/components/blog';
+
+export function BlogTagPage({
+  tag,
+  posts,
+  ...props
+}: ProviderProps & { tag: BlogTag; posts: BlogPost[] }) {
+  return (
+    <Provider {...props}>
+      <HomeLayout {...baseOptions()}>
+        <div className="mx-auto flex w-full max-w-(--fd-layout-width) flex-col gap-4 px-4 py-12">
+          <BlogHeader>
+            <BlogTitle>{tag.name}</BlogTitle>
+          </BlogHeader>
+          <BlogCards posts={posts} />
+        </div>
+      </HomeLayout>
+    </Provider>
+  );
 }
 ```
 

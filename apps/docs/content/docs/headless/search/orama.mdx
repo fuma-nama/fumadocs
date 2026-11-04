@@ -29,6 +29,19 @@ Create the server from source object.
   ../../examples/waku/src/pages/_api/api/search.ts
 </include>
 
+```ts tab="Astro" title="src/pages/api/search.ts"
+import type { APIRoute } from 'astro';
+import { createFromSource } from 'fumadocs-core/search/server';
+import { source } from '@/lib/source';
+
+// render per request, needs an adapter
+export const prerender = false;
+
+const server = createFromSource(source);
+
+export const GET: APIRoute = ({ request }) => server.GET(request);
+```
+
 ### From Search Indexes
 
 Create the server from search indexes, each index needs a `structuredData` field.
@@ -107,6 +120,31 @@ export const { GET } = createSearchAPI('advanced', {
     structuredData: page.data.structuredData,
   })),
 });
+```
+
+```ts tab="Astro" title="src/pages/api/search.ts"
+import type { APIRoute } from 'astro';
+import { createSearchAPI } from 'fumadocs-core/search/server';
+import { source } from '@/lib/source';
+
+const server = createSearchAPI('advanced', {
+  // `structuredData` is loaded on demand
+  indexes: () =>
+    Promise.all(
+      source.getPages().map(async (page) => ({
+        title: page.data.title,
+        description: page.data.description,
+        url: page.url,
+        id: page.url,
+        structuredData: await page.data.structuredData(),
+      })),
+    ),
+});
+
+// render per request, needs an adapter
+export const prerender = false;
+
+export const GET: APIRoute = ({ request }) => server.GET(request);
 ```
 
 ### Searching Documents
@@ -224,6 +262,17 @@ export const { staticGET: GET } = createFromSource(source);
 export const getConfig = async () => ({
   render: 'static',
 });
+```
+
+```ts tab="Astro" title="src/pages/api/search.ts"
+import type { APIRoute } from 'astro';
+import { createFromSource } from 'fumadocs-core/search/server';
+import { source } from '@/lib/source';
+
+const server = createFromSource(source);
+
+// prerendered by default [!code highlight]
+export const GET: APIRoute = () => server.staticGET();
 ```
 
 > `staticGET` is also available on `createSearchAPI`.

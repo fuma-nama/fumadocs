@@ -24,7 +24,7 @@ Since the search functionality is powered by remote servers, static export works
 
 ### Deployment [step]
 
-<Tabs items={['Next.js', 'React Router', 'TanStack Start', 'Waku']}>
+<Tabs items={['Next.js', 'React Router', 'TanStack Start', 'Waku', 'Astro']}>
 
 <Tab value="Next.js">
 
@@ -124,6 +124,14 @@ export default defineConfig({
 Waku can serve your site statically when all pages are configured with `static` render mode.
 
 See [Deployment](https://waku.gg/#deployment) for details.
+
+</Tab>
+
+<Tab value="Astro">
+
+Astro outputs a static site by default (`output: 'static'`). Docs routes set `export const prerender = true`, so they stay static when an adapter is added for server output. The search API uses `staticGET()`.
+
+See [Astro Deployment](https://docs.astro.build/en/guides/deploy/) for details.
 
 </Tab>
 

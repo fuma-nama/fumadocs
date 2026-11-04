@@ -20,7 +20,7 @@ const config: NextConfig = {
 };
 ```
 
-React Router, TanStack Start and Waku need no changes.
+React Router, TanStack Start, Waku and Astro need no changes.
 
 ## Metadata Image
 
@@ -147,6 +147,55 @@ return (
     {/* ... */}
   </DocsPage>
 );
+```
+
+```ts tab="Astro" title="src/lib/shared.ts"
+import { createGetUrl } from 'fumadocs-core/source';
+
+// [!code ++:7]
+const getImageUrl = createGetUrl('/og/docs');
+
+export function getPageImageUrl(page: { slugs: string[]; locale?: string }) {
+  const segments = [...page.slugs, 'image.webp'];
+
+  return { segments, url: getImageUrl(segments, page.locale) };
+}
+```
+
+```astro tab="Astro" title="src/pages/docs/[...slug].astro"
+---
+import Layout from '@/layouts/Layout.astro';
+// [!code ++]
+import { getPageImageUrl } from '@/lib/shared';
+---
+
+<Layout
+  title={page.data.title}
+  description={page.data.description}
+  image={getPageImageUrl(page).url}
+>
+  {/* ... */}
+</Layout>
+```
+
+```astro tab="Astro" title="src/layouts/Layout.astro"
+---
+interface Props {
+  title: string;
+  description?: string;
+  image?: string;
+}
+
+const { title, description, image } = Astro.props;
+---
+
+<html lang="en">
+  <head>
+    {/* [!code ++] */}
+    {image && <meta property="og:image" content={image} />}
+  </head>
+  <body><slot /></body>
+</html>
 ```
 
 > We append `image.webp` to the end of slugs so that we can access it via `/og/docs/my-page/image.webp`, which results in smaller image sizes. You could use `image.png` if you prefer.
@@ -319,6 +368,10 @@ export async function getConfig() {
   } as const;
 }
 ```
+
+<include cwd meta='tab="Astro" title="src/pages/og/docs/[...slug]/image.webp.ts"'>
+  ../../examples/astro/src/pages/og/docs/[...slug]/image.webp.ts
+</include>
 
 > Takumi comes with pre-bundled full-axis (100-900) [`Geist`](https://vercel.com/font) and `Geist Mono` fonts, so you don't need to worry about it.
 

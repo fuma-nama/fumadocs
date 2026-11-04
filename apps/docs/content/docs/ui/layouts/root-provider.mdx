@@ -74,6 +74,20 @@ export default function Layout({ children }) {
 }
 ```
 
+```jsx tab="Astro"
+import { navigate } from 'astro:transitions/client';
+import { RootProvider } from 'fumadocs-ui/provider/astro';
+
+// Rendered inside a React island, pass pathname and params from the Astro page.
+export function Provider({ pathname, params, children }) {
+  return (
+    <RootProvider pathname={pathname} params={params} navigate={navigate}>
+      {children}
+    </RootProvider>
+  );
+}
+```
+
 ### Search Dialog
 
 Customize or disable the search dialog with `search` option.

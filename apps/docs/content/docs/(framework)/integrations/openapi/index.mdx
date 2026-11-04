@@ -186,6 +186,28 @@ export const source = loader(
 );
 ```
 
+```ts tab="Astro" title="src/lib/source.ts"
+import { getCollection } from 'astro:content';
+import { loader } from 'fumadocs-core/source';
+import { toFumadocsSource } from '@fumadocs/astro/source';
+import { openapi } from '@/lib/openapi'; // [!code ++]
+
+export const source = loader(
+  // [!code ++:6]
+  {
+    docs: toFumadocsSource(await getCollection('docs'), await getCollection('meta')),
+    openapi: await openapi.staticSource({
+      baseDir: 'openapi',
+    }),
+  },
+  {
+    baseUrl: '/docs',
+    // [!code ++:2] optional: adds a badge to each page item in page tree
+    plugins: [openapi.loaderPlugin()],
+  },
+);
+```
+
 It generates a page per operation by default, see [Generating Pages](/docs/integrations/openapi/generate-files) to customize them.
 
 **It will change the type of your pages**, make sure to update all references to your `source`.
@@ -364,6 +386,76 @@ export default function Page({ slugs }: PageProps<'/docs/[...slugs]'>) {
   }
 
   // ...
+}
+```
+
+```astro tab="Astro" title="src/pages/docs/[...slug].astro"
+---
+import type { GetStaticPaths, InferGetStaticPropsType } from 'astro';
+import Layout from '@/layouts/Layout.astro';
+import { Docs } from '@/components/docs';
+import { OpenAPIDocs } from '@/components/openapi-docs'; // [!code ++]
+import { source } from '@/lib/source';
+
+export const prerender = true;
+
+export const getStaticPaths = (() => {
+  return source.getPages().map((page) => ({
+    params: { slug: decodeURI(page.slugs.join('/')) || undefined },
+    props: { page },
+  }));
+}) satisfies GetStaticPaths;
+
+type Props = InferGetStaticPropsType<typeof getStaticPaths>;
+
+const { page } = Astro.props;
+const pageTree = await source.serializePageTree(source.getPageTree());
+---
+
+{/* [!code ++:13] */}
+{page.type === 'openapi' && (
+  <Layout title={page.data.title ?? 'My App'}>
+    <OpenAPIDocs
+      client:load
+      pathname={Astro.url.pathname}
+      params={Astro.params}
+      tree={pageTree}
+      title={page.data.title}
+      props={page.data.getOpenAPIPageProps()}
+    />
+  </Layout>
+)}
+```
+
+```tsx tab="Astro" title="src/components/openapi-docs.tsx"
+import { type SerializedPageTree, useFumadocsLoader } from 'fumadocs-core/source/client';
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+import { DocsBody, DocsPage, DocsTitle } from 'fumadocs-ui/layouts/docs/page';
+import { OpenAPIPage } from '@/components/api-page';
+import { Provider, type ProviderProps } from '@/components/provider';
+import { baseOptions } from '@/lib/layout.shared';
+import type { OpenAPIPageProps } from 'fumadocs-openapi/ui';
+
+export function OpenAPIDocs({
+  tree,
+  title,
+  props,
+  ...rest
+}: ProviderProps & { tree: SerializedPageTree; title?: string; props: OpenAPIPageProps }) {
+  const data = useFumadocsLoader({ tree });
+
+  return (
+    <Provider {...rest}>
+      <DocsLayout {...baseOptions()} tree={data.tree}>
+        <DocsPage full>
+          <DocsTitle>{title}</DocsTitle>
+          <DocsBody>
+            <OpenAPIPage {...props} />
+          </DocsBody>
+        </DocsPage>
+      </DocsLayout>
+    </Provider>
+  );
 }
 ```
 

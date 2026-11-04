@@ -105,6 +105,8 @@ const scanned = await scanURLs({
 });
 ```
 
+Astro is left out: its `source` reads `astro:content`, which only exists inside Astro, so a script can't import it.
+
 ### Running Lint
 
 To access the `source` object outside of app runtime, configure [Fumadocs MDX Loader](/docs/mdx/loader/bun) for Bun.

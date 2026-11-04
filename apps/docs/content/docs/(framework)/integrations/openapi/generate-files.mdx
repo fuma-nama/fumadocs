@@ -315,6 +315,18 @@ export default function Page({ slugs }: PageProps<'/docs/[...slugs]'>) {
 }
 ```
 
+```tsx tab="Astro" title="src/components/mdx.tsx"
+import { OpenAPIPage } from '@/components/api-page'; // [!code ++]
+
+export default getMDXComponents({
+  wrapper: DocsBody,
+  // [!code ++]
+  OpenAPIPage: (props) => <OpenAPIPage {...props} preloaded={{ docs: {} }} />,
+});
+```
+
+Astro can't preload documents per page in the MDX components module, so pass [`loadDocument`](/docs/integrations/openapi/server#loading-documents-once) to load them.
+
 Add the plugin to your `loader()`:
 
 ```ts title="lib/source.ts"

@@ -284,6 +284,81 @@ export async function getConfig() {
 }
 ```
 
+```astro tab="Astro" title="src/pages/docs/[...slug].astro"
+---
+import type { GetStaticPaths, InferGetStaticPropsType } from 'astro';
+import Layout from '@/layouts/Layout.astro';
+import { Docs } from '@/components/docs';
+import { getSource } from '@/lib/source';
+
+export const prerender = true;
+
+export const getStaticPaths = (async () => {
+  const source = await getSource();
+  return source.getPages().map((page) => ({
+    params: { slug: decodeURI(page.slugs.join('/')) || undefined },
+    props: { page },
+  }));
+}) satisfies GetStaticPaths;
+
+type Props = InferGetStaticPropsType<typeof getStaticPaths>;
+
+const { page } = Astro.props;
+const source = await getSource();
+const pageTree = await source.serializePageTree(source.getPageTree());
+const { title, description, _toc, body } = await page.data.load();
+---
+
+<Layout title={page.data.title}>
+  <Docs
+    client:load
+    pathname={Astro.url.pathname}
+    params={Astro.params}
+    tree={pageTree}
+    title={title}
+    description={description}
+    toc={_toc}
+    body={body}
+  />
+</Layout>
+```
+
+```tsx tab="Astro" title="src/components/docs.tsx"
+import { type SerializedPageTree, useFumadocsLoader } from 'fumadocs-core/source/client';
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+import { DocsBody, DocsDescription, DocsPage, DocsTitle } from 'fumadocs-ui/layouts/docs/page';
+import { renderToc } from '@fumadocs/sanity/client';
+import type { PortableTextBlock, PortableTextProps } from '@portabletext/react';
+import { Provider, type ProviderProps } from '@/components/provider';
+import { CustomPortableText } from '@/components/sanity';
+
+export interface DocsProps extends ProviderProps {
+  tree: SerializedPageTree;
+  title?: string;
+  description?: string;
+  toc: PortableTextBlock[];
+  body?: PortableTextProps['value'];
+}
+
+export function Docs({ tree, title, description, toc, body, ...props }: DocsProps) {
+  const data = useFumadocsLoader({ tree });
+
+  return (
+    <Provider {...props}>
+      <DocsLayout tree={data.tree}>
+        <DocsPage toc={renderToc({ toc, render: (block) => <CustomPortableText value={block} /> })}>
+          <DocsTitle>{title}</DocsTitle>
+          <DocsDescription>{description}</DocsDescription>
+          <DocsBody>
+            <CustomPortableText value={body!} />
+          </DocsBody>
+        </DocsPage>
+      </DocsLayout>
+    </Provider>
+  );
+}
+```
+
 ### Done [step]
 
 Create documents under the `docs` type in your studio editor, new content will be displayed in the docs route.

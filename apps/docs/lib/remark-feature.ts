@@ -14,6 +14,7 @@ import {
   llmsRoutes,
   markdownRewrite,
   markdownUrl,
+  suffixMarkdownUrl,
   tanstackMarkdownUrl,
   templates,
 } from '@fumadocs/cli/features/llms';
@@ -36,7 +37,7 @@ declare module 'satteri' {
   }
 }
 
-const frameworks = ['next', 'react-router', 'tanstack-start', 'waku'] as const;
+const frameworks = ['next', 'react-router', 'tanstack-start', 'waku', 'astro'] as const;
 
 /** the docs show the setup of a Fumadocs MDX source */
 const src = sourceRef(false);
@@ -47,13 +48,15 @@ const baseDirs = {
   'react-router': 'app',
   'tanstack-start': 'src',
   waku: 'src',
+  astro: 'src',
 };
 
 const frameworkNames = {
   next: 'Next.js',
   'react-router': 'React Router',
-  'tanstack-start': 'Tanstack Start',
+  'tanstack-start': 'TanStack Start',
   waku: 'Waku',
+  astro: 'Astro',
 };
 
 const buildCommands = {
@@ -61,6 +64,7 @@ const buildCommands = {
   'react-router': 'react-router build',
   'tanstack-start': 'vite build',
   waku: 'waku build',
+  astro: 'astro build',
 };
 
 const searchProviders = [
@@ -176,6 +180,11 @@ export const docs = defineDocs({
         `import { createGetUrl } from 'fumadocs-core/source';\n\nexport const docsRoute = '/docs';\n${tanstackMarkdownUrl(false)}\n`;
       continue;
     }
+    if (framework === 'astro') {
+      files[`${base}/lib/shared.ts`] =
+        `import { createGetUrl } from 'fumadocs-core/source';\n\nexport const docsRoute = '/docs';\n${suffixMarkdownUrl(false)}\n`;
+      continue;
+    }
     files[`${base}/lib/shared.ts`] =
       `import { createGetUrl } from 'fumadocs-core/source';\n\nexport const docsContentRoute = '/llms.mdx/docs';\n${markdownUrl(false)}\n`;
     if (framework === 'react-router') {
@@ -207,10 +216,11 @@ export default config;
     const route = staticJson(framework);
     const routeFile = path.posix.join(baseDir, route.file);
     const output = staticOutput(framework, framework === 'tanstack-start' ? viteConfig : '');
-    // collections are async in the React Router and TanStack Start templates
+    // collections are async in the React Router and TanStack Start templates, and on Astro
     const source = {
       dynamic: false,
-      async: framework === 'react-router' || framework === 'tanstack-start',
+      async:
+        framework === 'react-router' || framework === 'tanstack-start' || framework === 'astro',
       dir: 'content/docs',
     };
     const registration: [string, string][] = [];

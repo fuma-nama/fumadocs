@@ -105,7 +105,7 @@ Content is in `apps/docs/content/docs`; navigation is `meta.json`.
 - Concise, progressive disclosure. Show API usage as type-checked code blocks, not prose. Keep every block a reader copies, cut caveats the example already avoids.
 - Explain each page on its own terms. No redundant tables that repeat the sidebar or another page. Link a noun phrase that names its target, at most one or two links per short paragraph. Files of one step go in one code block tab group (`tab="<path>"`). A single file is a titled code block, not tabs.
 - No em-dashes or AI filler. Plain sentences, no comma splices.
-- Shared guides treat Next.js, React Router, TanStack Start and Waku alike: per-framework code gets a tab for each, or one sentence says why a framework is left out.
+- Shared guides treat Next.js, React Router, TanStack Start, Waku and Astro alike: per-framework code gets a tab for each, or one sentence says why a framework is left out.
 - Markdown plugin pages split only `unified` and `Sätteri` tabs, both as Fumadocs MDX `source.config.ts`, and say whether it's a remark or rehype plugin. Don't name other setups.
 - Prefer showing a composition in docs over adding a layout-only component.
 - `pnpm lint` in `apps/docs` imports everything reachable from MDX in plain Node: no `next/*` imports there (use `fumadocs-core/framework`, `React.lazy`).

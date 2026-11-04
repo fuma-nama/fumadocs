@@ -46,6 +46,21 @@ It requires `includeProcessedMarkdown`:
 
 <feature title="source.config.ts">llms/source.config.ts</feature>
 
+On Astro, enable it in the integration options instead:
+
+```js title="astro.config.mjs"
+import { defineConfig } from 'astro/config';
+import fumadocs from '@fumadocs/astro';
+
+export default defineConfig({
+  integrations: [
+    fumadocs({
+      includeProcessedMarkdown: { output: 'function' }, // [!code ++]
+    }),
+  ],
+});
+```
+
 MDX components appear as JSX syntax by default, you can render them into meaningful Markdown with the [`output` option](/docs/headless/mdx/remark-llms#output).
 
 ### `llms.txt`
@@ -72,6 +87,10 @@ An index of all pages, generated from the page tree.
   llms/waku/pages/_api/llms.txt.ts
 </feature>
 
+<feature tab="Astro" title="src/pages/llms.txt.ts">
+  llms/astro/pages/llms.txt.ts
+</feature>
+
 ### `llms-full.txt`
 
 The content of all pages in a single file.
@@ -90,6 +109,10 @@ The content of all pages in a single file.
 
 <feature tab="Waku" title="pages/_api/llms-full.txt.ts">
   llms/waku/pages/_api/llms-full.txt.ts
+</feature>
+
+<feature tab="Astro" title="src/pages/llms-full.txt.ts">
+  llms/astro/pages/llms-full.txt.ts
 </feature>
 
 ### `*.md` [#md-extension]
@@ -148,6 +171,14 @@ export const middleware = [serverMiddleware];
 
 <feature tab="Waku" title="pages/_api/llms.mdx/docs/[...slug]/content.md.ts">
   llms/waku/pages/_api/llms.mdx/docs/[...slug]/content.md.ts
+</feature>
+
+<feature tab="Astro" title="src/lib/shared.ts">
+  llms/astro/lib/shared.ts
+</feature>
+
+<feature tab="Astro" title="src/pages/docs/[...slug].md.ts">
+  llms/astro/pages/docs/[...slug].md.ts
 </feature>
 
 #### `Accept`
@@ -229,6 +260,8 @@ export const startInstance = createStart(() => ({
 }));
 ```
 
+Astro is left out: its middleware only runs for pages rendered on request, while docs pages are prerendered.
+
 Because the same URL now has two representations, the response needs `Vary: Accept` to prevent cache collisions.
 
 <Callout title="Next.js">
@@ -288,6 +321,12 @@ The tools come from [`fumadocs-core/mcp`](/docs/headless/utils/mcp), see linked 
   mcp/waku/pages/_api/api/mcp.ts
 </feature>
 
+<feature tab="Astro" title="src/pages/api/mcp.ts">
+  mcp/astro/pages/api/mcp.ts
+</feature>
+
+On Astro, the route renders per request, it needs an adapter.
+
 Connect an agent to it with:
 
 ```json
@@ -316,13 +355,13 @@ npx @fumadocs/cli feature webmcp
 It creates a `WebMCP` component on top of the [LLM routes](#docs-for-llm), you can render it inside `<RootProvider />`.
 
 - `search_docs` queries the search API route, you can use [other clients](/docs/search) than `fetchClient`.
-- `read_page` fetches the Markdown of a page, `/docs/page.md` on TanStack Start.
+- `read_page` fetches the Markdown of a page, `/docs/page.md` on TanStack Start and Astro.
 
 ## Ask AI
 
 ![AI Search](/docs/ai-search.png)
 
-You can install the AI chat dialog using Fumadocs CLI.
+You can install the AI chat dialog using Fumadocs CLI (not available on Astro).
 
 <Tabs items={['AI SDK', 'LLMGateway', 'Inkeep AI']}>
 <Tab>

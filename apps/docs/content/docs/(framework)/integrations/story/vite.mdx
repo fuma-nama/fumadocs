@@ -18,12 +18,23 @@ Add the Tailwind CSS preset.
 
 Add the Vite plugin:
 
-```ts title="vite.config.ts"
+```ts tab="Vite" title="vite.config.ts"
 import { defineConfig } from 'vite';
 import story from '@fumadocs/story/vite';
 
 export default defineConfig({
   plugins: [story()],
+});
+```
+
+```js tab="Astro" title="astro.config.mjs"
+import { defineConfig } from 'astro/config';
+import story from '@fumadocs/story/vite';
+
+export default defineConfig({
+  vite: {
+    plugins: [story()],
+  },
 });
 ```
 

@@ -186,6 +186,28 @@ export const source = loader(
 );
 ```
 
+```ts tab="Astro" title="src/lib/source.ts"
+import { getCollection } from 'astro:content';
+import { loader } from 'fumadocs-core/source';
+import { toFumadocsSource } from '@fumadocs/astro/source';
+import { asyncapi } from '@/lib/asyncapi'; // [!code ++]
+
+export const source = loader(
+  // [!code ++:6]
+  {
+    docs: toFumadocsSource(await getCollection('docs'), await getCollection('meta')),
+    asyncapi: await asyncapi.staticSource({
+      baseDir: 'asyncapi',
+    }),
+  },
+  {
+    baseUrl: '/docs',
+    // [!code ++:2] optional: adds the direction of messages to each page item in page tree
+    plugins: [asyncapi.loaderPlugin()],
+  },
+);
+```
+
 It generates a page per operation by default, see [Generating Pages](/docs/integrations/asyncapi/generate-files) to customize them.
 
 **It will change the type of your pages**, make sure to update all references to your `source`.
@@ -373,6 +395,76 @@ export default function Page({ slugs }: PageProps<'/docs/[...slugs]'>) {
   }
 
   // ...
+}
+```
+
+```astro tab="Astro" title="src/pages/docs/[...slug].astro"
+---
+import type { GetStaticPaths, InferGetStaticPropsType } from 'astro';
+import Layout from '@/layouts/Layout.astro';
+import { Docs } from '@/components/docs';
+import { AsyncAPIDocs } from '@/components/asyncapi-docs'; // [!code ++]
+import { source } from '@/lib/source';
+
+export const prerender = true;
+
+export const getStaticPaths = (() => {
+  return source.getPages().map((page) => ({
+    params: { slug: decodeURI(page.slugs.join('/')) || undefined },
+    props: { page },
+  }));
+}) satisfies GetStaticPaths;
+
+type Props = InferGetStaticPropsType<typeof getStaticPaths>;
+
+const { page } = Astro.props;
+const pageTree = await source.serializePageTree(source.getPageTree());
+---
+
+{/* [!code ++:13] */}
+{page.type === 'asyncapi' && (
+  <Layout title={page.data.title ?? 'My App'}>
+    <AsyncAPIDocs
+      client:load
+      pathname={Astro.url.pathname}
+      params={Astro.params}
+      tree={pageTree}
+      title={page.data.title}
+      props={page.data.getAsyncAPIPageProps()}
+    />
+  </Layout>
+)}
+```
+
+```tsx tab="Astro" title="src/components/asyncapi-docs.tsx"
+import { type SerializedPageTree, useFumadocsLoader } from 'fumadocs-core/source/client';
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+import { DocsBody, DocsPage, DocsTitle } from 'fumadocs-ui/layouts/docs/page';
+import { AsyncAPIPage } from '@/components/api-page';
+import { Provider, type ProviderProps } from '@/components/provider';
+import { baseOptions } from '@/lib/layout.shared';
+import type { AsyncAPIPageProps } from '@fumadocs/asyncapi/ui';
+
+export function AsyncAPIDocs({
+  tree,
+  title,
+  props,
+  ...rest
+}: ProviderProps & { tree: SerializedPageTree; title?: string; props: AsyncAPIPageProps }) {
+  const data = useFumadocsLoader({ tree });
+
+  return (
+    <Provider {...rest}>
+      <DocsLayout {...baseOptions()} tree={data.tree}>
+        <DocsPage full>
+          <DocsTitle>{title}</DocsTitle>
+          <DocsBody>
+            <AsyncAPIPage {...props} />
+          </DocsBody>
+        </DocsPage>
+      </DocsLayout>
+    </Provider>
+  );
 }
 ```
 

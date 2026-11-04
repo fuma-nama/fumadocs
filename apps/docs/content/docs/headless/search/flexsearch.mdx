@@ -59,6 +59,19 @@ import { flexsearchFromSource } from 'fumadocs-core/search/flexsearch';
 export const { GET } = flexsearchFromSource(source);
 ```
 
+```ts tab="Astro" title="src/pages/api/search.ts"
+import type { APIRoute } from 'astro';
+import { flexsearchFromSource } from 'fumadocs-core/search/flexsearch';
+import { source } from '@/lib/source';
+
+// render per request, needs an adapter
+export const prerender = false;
+
+const server = flexsearchFromSource(source);
+
+export const GET: APIRoute = ({ request }) => server.GET(request);
+```
+
 ### From Search Indexes
 
 Create the server from search indexes, each index needs a `structuredData` field.
@@ -197,6 +210,17 @@ export const { staticGET: GET } = flexsearchFromSource(source);
 export const getConfig = async () => ({
   render: 'static',
 });
+```
+
+```ts tab="Astro" title="src/pages/api/search.ts"
+import type { APIRoute } from 'astro';
+import { flexsearchFromSource } from 'fumadocs-core/search/flexsearch';
+import { source } from '@/lib/source';
+
+const server = flexsearchFromSource(source);
+
+// prerendered by default [!code highlight]
+export const GET: APIRoute = () => server.staticGET();
 ```
 
 > `staticGET` is also available on `flexsearch()`.

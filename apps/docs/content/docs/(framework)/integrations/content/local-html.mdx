@@ -225,6 +225,80 @@ export default async function Page({ slugs }: PageProps<'/docs/[...slugs]'>) {
 export const getConfig = async () => ({ render: 'dynamic' }) as const;
 ```
 
+```astro tab="Astro" title="src/pages/docs/[...slug].astro"
+---
+import type { GetStaticPaths, InferGetStaticPropsType } from 'astro';
+import Layout from '@/layouts/Layout.astro';
+import { Docs } from '@/components/docs';
+import { getSource } from '@/lib/source';
+
+export const prerender = true;
+
+export const getStaticPaths = (async () => {
+  const source = await getSource();
+  return source.getPages().map((page) => ({
+    params: { slug: decodeURI(page.slugs.join('/')) || undefined },
+    props: { page },
+  }));
+}) satisfies GetStaticPaths;
+
+type Props = InferGetStaticPropsType<typeof getStaticPaths>;
+
+const { page } = Astro.props;
+const source = await getSource();
+const pageTree = await source.serializePageTree(source.getPageTree());
+const renderer = await page.data.load();
+---
+
+<Layout title={page.data.title}>
+  <Docs
+    client:load
+    pathname={Astro.url.pathname}
+    params={Astro.params}
+    tree={pageTree}
+    title={page.data.title}
+    description={page.data.description}
+    render={renderer.serialize()}
+  />
+</Layout>
+```
+
+```tsx tab="Astro" title="src/components/docs.tsx"
+import { useMemo } from 'react';
+import { type SerializedPageTree, useFumadocsLoader } from 'fumadocs-core/source/client';
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+import { DocsBody, DocsDescription, DocsPage, DocsTitle } from 'fumadocs-ui/layouts/docs/page';
+import { rendererFromSerialized } from '@fumadocs/local-html/client';
+import type { HtmlRendererOptions } from '@fumadocs/local-html';
+import { Provider, type ProviderProps } from '@/components/provider';
+
+export interface DocsProps extends ProviderProps {
+  tree: SerializedPageTree;
+  title: string;
+  description?: string;
+  // the syntax tree, rendered in the island
+  render: HtmlRendererOptions;
+}
+
+export function Docs({ tree, title, description, render, ...props }: DocsProps) {
+  const data = useFumadocsLoader({ tree });
+  const renderer = useMemo(() => rendererFromSerialized(render), [render]);
+  const { body, toc } = renderer.renderSync();
+
+  return (
+    <Provider {...props}>
+      <DocsLayout tree={data.tree}>
+        <DocsPage toc={toc}>
+          <DocsTitle>{title}</DocsTitle>
+          <DocsDescription>{description}</DocsDescription>
+          <DocsBody>{body}</DocsBody>
+        </DocsPage>
+      </DocsLayout>
+    </Provider>
+  );
+}
+```
+
 Pass components to `render()` or `renderSync()` to map HTML tags onto your own, like headings with anchors:
 
 ```tsx

@@ -150,6 +150,25 @@ export default async function Page({ slugs }: PageProps<'/docs/[...slugs]'>) {
 export const getConfig = async () => ({ render: 'dynamic' }) as const;
 ```
 
+```astro tab="Astro" title="src/pages/docs/[...slug].astro"
+---
+import { source } from '@/lib/source';
+
+// render per request, needs an adapter
+export const prerender = false;
+
+const slugs = Astro.params.slug?.split('/').filter((v) => v.length > 0) ?? [];
+const user = await getUser(Astro.request);
+const page = source.getPage(slugs);
+
+if (!page || page.data.permission !== user.permission) {
+  return Astro.rewrite('/404');
+}
+---
+
+<!-- render page... -->
+```
+
 Note that it is up to you to manage the page tree (sidebar items), search and other details.
 
 This approach offers the best flexibility, but it doesn't rely on Fumadocs itself for access control. The setup may take longer and be more complicated. Consult the docs of your React framework when implementing it.

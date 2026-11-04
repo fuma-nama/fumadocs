@@ -90,6 +90,23 @@ export const { GET } = createMixedbreadSearchAPI({
 });
 ```
 
+```ts tab="Astro" title="src/pages/api/search.ts"
+import type { APIRoute } from 'astro';
+import { createMixedbreadSearchAPI } from 'fumadocs-core/search/mixedbread';
+import Mixedbread from '@mixedbread/sdk';
+import { getSecret } from 'astro:env/server';
+
+// render per request, needs an adapter
+export const prerender = false;
+
+const server = createMixedbreadSearchAPI({
+  client: new Mixedbread({ apiKey: getSecret('MXBAI_API_KEY') }),
+  storeIdentifier: getSecret('MIXEDBREAD_STORE_ID')!,
+});
+
+export const GET: APIRoute = ({ request }) => server.GET(request);
+```
+
 ### Search UI
 
 You can consider different options for implementing the UI:

@@ -188,6 +188,22 @@ export async function getConfig() {
 }
 ```
 
+```astro tab="Astro" title="src/pages/docs/[...slug].astro"
+---
+import type { GetStaticPaths } from 'astro';
+import { source } from '@/lib/source';
+
+export const prerender = true;
+
+export const getStaticPaths = (() => {
+  return source.getPages().map((page) => ({
+    params: { slug: decodeURI(page.slugs.join('/')) || undefined },
+    props: { page },
+  }));
+}) satisfies GetStaticPaths;
+---
+```
+
 React Router and TanStack Start pre-render by URL. List the `url` of `source.getPages()` instead.
 
 ### Language Entries
