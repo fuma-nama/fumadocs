@@ -22,7 +22,7 @@ export interface TemplateInfo {
   label: string;
   appDir: string;
   /**
-   * path to root provider, relative to `appDir``
+   * path to root provider, relative to `appDir`
    */
   rootProviderPath: string;
   hint?: string;
