@@ -8,17 +8,7 @@ packages:
 - Refactored: `@fumadocs/astro` is the integration for your own routes again.
 - `src/fumadocs.config.ts`, `@fumadocs/astro/config`, `@fumadocs/astro/plugins/*`, `HomeLayout.astro` and `ReactContent.astro` moved to `@fumapress/astro`.
 - Removed the `layout` and `page` options, use `ui.renderPage` of `@fumapress/astro`.
+- Integrations export their plugin from `<pkg>/plugin`, the git plugin is `site.git` and the MCP plugin is `mcpPlugin()` of `@fumapress/ai`.
+- Open Graph images moved from `/og/<page>/image.webp` to `<page>.webp`.
 - Added the `lastModified` collection option: `page.data.lastModified` is the date of the page's last commit.
-
-| Before                                                       | Now                                                    |
-| ------------------------------------------------------------ | ------------------------------------------------------ |
-| `src/fumadocs.config.ts`                                     | `press.config.tsx` with `createPress()`                |
-| `fumadocs({ layout, page })`                                 | `press()`, with `ui.renderPage` in `press.config.tsx`  |
-| `plugins/openapi`, `asyncapi`, `graphql`, `notion`, `sanity` | `<pkg>/plugin`                                         |
-| `plugins/takumi`, `llms.txt`, search, `link-validation`      | `@fumapress/astro/plugins/*` and `recommendedPreset()` |
-| `plugins/git`                                                | `site.git` and `lastModified`                          |
-| `plugins/mcp`                                                | `mcpPlugin()` of `@fumapress/ai`                       |
-| `baseOptions`                                                | `ui.baseOptions`                                       |
-| `head` component                                             | `head()` tags                                          |
-| `css` option, `src/styles/global.css`                        | `src/app.css`                                          |
-| `/og/<page>/image.webp`                                      | `<page>.webp`                                          |
+- `toFumadocsSource()` accepts `baseDir` as its third argument.
