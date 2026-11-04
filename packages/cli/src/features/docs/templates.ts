@@ -678,7 +678,7 @@ import { source } from '@/lib/source';
 
 const server = createFromSource(source);
 
-export const GET: APIRoute = ${input.static ? '() => server.staticGET()' : '({ request }) => server.GET(request)'};
+${input.static ? 'export const GET: APIRoute = () => server.staticGET();' : 'export const prerender = false;\nexport const GET: APIRoute = ({ request }) => server.GET(request);'}
 `,
     };
   },

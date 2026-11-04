@@ -126,7 +126,7 @@ export interface RouteModule {
   methods?: string[];
   /** Next.js: never revalidate the route */
   revalidate?: boolean;
-  /** Waku & Astro: prerender the route */
+  /** Waku & Astro: prerender the route, otherwise Astro renders it on request in every output mode */
   static?: boolean;
 }
 
@@ -138,7 +138,7 @@ export function routeModule(framework: Framework, route: FormattedRoute, mod: Ro
 
   if (framework === 'astro') {
     const out: string[] = [];
-    if (isStatic) out.push('export const prerender = true;\n');
+    out.push(`export const prerender = ${isStatic === true};\n`);
     for (const method of methods)
       out.push(
         `export const ${method}: APIRoute = async (${request ? '{ request }' : ''}) => ${body};\n`,
@@ -202,7 +202,7 @@ ${out.join('\n')}
  * With i18n, the route is under the locale segment, and reads `i18n` of `@/lib/i18n` for an optional locale.
  */
 export function astroPagePaths(i18n: I18nInfo | null, index?: string) {
-  const slug = `page.slugs.join('/') || ${index ? `'${index}'` : 'undefined'}`;
+  const slug = `decodeURI(page.slugs.join('/')) || ${index ? `'${index}'` : 'undefined'}`;
   const prerender = 'export const prerender = true;\n\n';
   if (!i18n)
     return `${prerender}export const getStaticPaths = (() => {

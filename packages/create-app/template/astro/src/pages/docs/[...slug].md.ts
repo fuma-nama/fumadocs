@@ -5,7 +5,7 @@ export const prerender = true;
 
 export const getStaticPaths = (() => {
   return source.getPages().map((page) => ({
-    params: { slug: page.slugs.join('/') || 'index' },
+    params: { slug: decodeURI(page.slugs.join('/')) || 'index' },
     props: { page },
   }));
 }) satisfies GetStaticPaths;

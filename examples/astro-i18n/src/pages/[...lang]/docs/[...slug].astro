@@ -15,7 +15,7 @@ export const getStaticPaths = (() => {
         params: {
           // the default language has no prefix
           lang: language === i18n.defaultLanguage ? undefined : language,
-          slug: page.slugs.join('/') || undefined,
+          slug: decodeURI(page.slugs.join('/')) || undefined,
         },
         props: { lang: language, page },
       });

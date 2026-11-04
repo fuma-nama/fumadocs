@@ -7,6 +7,7 @@ import { getDefaultConfig } from '@/config';
 import { loadProject, type Project } from '@/project';
 import { type AnyFeature, runFeature } from '@/features';
 import { ai } from '@/features/ai';
+import { epub } from '@/features/epub';
 import { llms } from '@/features/llms';
 import { mcp } from '@/features/mcp';
 
@@ -174,11 +175,30 @@ export const source = loader({ baseUrl: '/docs', source: toFumadocsSource([], []
   await run(llms, {}, app);
 
   expect(await read(app, 'src/pages/docs/[...slug].md.ts')).toContain(
-    "params: { slug: page.slugs.join('/') || 'index' },",
+    "params: { slug: decodeURI(page.slugs.join('/')) || 'index' },",
   );
   const shared = await read(app, 'src/lib/shared.ts');
   expect(shared).toContain("export const docsRoute = '/docs';");
   expect(shared).toContain("segments.push('index.md');");
   expect(shared).not.toContain('decodeMarkdownUrl');
   await expect(fs.access(path.join(app.cwd, 'src/pages/llms.mdx'))).rejects.toThrow();
+});
+
+test('mcp & epub: Astro routes render on request with static output and an adapter', async () => {
+  const app = await project({
+    'package.json': JSON.stringify({ dependencies: { astro: '7.4.2' } }),
+    'astro.config.mjs': `import fumadocs from '@fumadocs/astro';
+
+export default defineConfig({ output: 'static', adapter: node(), integrations: [fumadocs()] });
+`,
+    'src/lib/source.ts': `import { toFumadocsSource } from '@fumadocs/astro/source';
+export const source = loader({ baseUrl: '/docs', source: toFumadocsSource([], []) });`,
+  });
+  expect(app.static).toBe(false);
+  await run(llms, {}, app);
+  await run(mcp, {}, app);
+  await run(epub, {}, app);
+
+  expect(await read(app, 'src/pages/api/mcp.ts')).toContain('export const prerender = false;');
+  expect(await read(app, 'src/pages/export/epub.ts')).toContain('export const prerender = false;');
 });

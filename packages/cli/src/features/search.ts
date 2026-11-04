@@ -404,6 +404,7 @@ export const { GET } = server;
 `,
         astro: `import type { APIRoute } from 'astro';
 ${server(true)}
+export const prerender = false;
 export const GET: APIRoute = ({ request }) => server.GET(request);
 `,
       };
