@@ -4,7 +4,7 @@ import type { ComponentType } from 'react';
 import { openapiTranslations } from '@/i18n';
 import type { CreateProxyOptions, OpenAPIPageData, OpenAPIServer, Proxy } from '@/server';
 import type { Awaitable } from '@/types';
-import { OpenAPIPage } from '@/ui/plugin';
+import { OpenAPIPage } from '@/ui/press';
 import type { OpenAPIPageProps } from '@/utils/pages/builder';
 
 export interface OpenAPIPluginOptions {
@@ -38,7 +38,7 @@ function isOpenAPIPage(data: PageData): data is OpenAPIPageData {
 /**
  * Render the pages of `server.staticSource()` and serve the routes of its server.
  */
-export function openapiPlugin({
+export default function openapiPlugin({
   server,
   disableLoaderPlugin = false,
   ClientAPIPage,

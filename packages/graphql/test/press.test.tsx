@@ -5,8 +5,8 @@ import type { PluginContext } from 'fumadocs-core/framework/plugin';
 import type { I18nConfig } from 'fumadocs-core/i18n';
 import { dynamicLoader, type _Internal } from 'fumadocs-core/source';
 import { createGraphQL, type GraphQLOptions } from '@/server';
-import { graphqlPlugin, type GraphQLPluginOptions } from '@/plugin';
-import { GraphQLPage } from '@/ui/plugin';
+import graphqlPlugin, { type GraphQLPluginOptions } from '@/press';
+import { GraphQLPage } from '@/ui/press';
 
 const file = fileURLToPath(new URL('./fixtures/store.graphql', import.meta.url));
 

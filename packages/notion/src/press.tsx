@@ -37,7 +37,7 @@ export interface NotionPluginOptions extends Pick<
 /**
  * Render the pages of a Notion data source from `createNotion()`, with their table of contents, search index and dates.
  */
-export function notionPlugin({
+export default function notionPlugin({
   notion,
   fileProxy = true,
   ...options

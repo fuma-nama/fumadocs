@@ -40,9 +40,9 @@
       "types": "./dist/client.d.ts",
       "import": "./dist/client.js"
     },
-    "./plugin": {
-      "types": "./dist/plugin.d.ts",
-      "import": "./dist/plugin.js"
+    "./press": {
+      "types": "./dist/press.d.ts",
+      "import": "./dist/press.js"
     },
     "./css/*": "./css/*",
     "./package.json": "./package.json"

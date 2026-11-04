@@ -18,7 +18,7 @@ type Entry = DocMethods & (DocData | Pick<AsyncDocCollectionEntry, 'load'>);
 /**
  * Render the pages of Fumadocs MDX collections: their body, Markdown, table of contents, structured data and dates.
  */
-export function mdxPlugin<Config extends LoaderConfig = LoaderConfig>({
+export default function mdxPlugin<Config extends LoaderConfig = LoaderConfig>({
   components,
 }: MdxPluginOptions = {}): Plugin<Config> {
   const Link = components?.a ?? 'a';

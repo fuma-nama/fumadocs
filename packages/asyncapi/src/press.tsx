@@ -3,7 +3,7 @@ import type { PageData } from 'fumadocs-core/source';
 import type { ComponentType } from 'react';
 import { asyncapiTranslations } from '@/i18n';
 import type { AsyncAPIPageData, AsyncAPIServer } from '@/server';
-import { AsyncAPIPage } from '@/ui/plugin';
+import { AsyncAPIPage } from '@/ui/press';
 import type { AsyncAPIPageProps } from '@/utils/create-page';
 
 export interface AsyncAPIPluginOptions {
@@ -28,7 +28,7 @@ function isAsyncAPIPage(data: PageData): data is AsyncAPIPageData {
 /**
  * Render the pages of `server.staticSource()`.
  */
-export function asyncapiPlugin({
+export default function asyncapiPlugin({
   server,
   disableLoaderPlugin = false,
   ClientAPIPage,

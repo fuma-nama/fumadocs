@@ -4,7 +4,7 @@ import type { PluginContext } from 'fumadocs-core/framework/plugin';
 import { dynamicLoader } from 'fumadocs-core/source/dynamic';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
-import { obsidianPlugin } from '@/plugin';
+import obsidianPlugin from '@/press';
 import { obsidian } from '@/index';
 
 const fixturesDir = path.join(path.dirname(fileURLToPath(import.meta.url)), 'fixtures');

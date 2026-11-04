@@ -6,7 +6,7 @@ export default defineConfig({
   },
   target: 'es2023',
   format: 'esm',
-  entry: ['./src/{index,client}.ts', './src/plugin.tsx'],
+  entry: ['./src/{index,client}.ts', './src/press.tsx'],
   deps: {
     onlyBundle: [],
   },

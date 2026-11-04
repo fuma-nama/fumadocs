@@ -4,7 +4,7 @@ import { dynamicLoader } from 'fumadocs-core/source';
 import { PortableText } from '@portabletext/react';
 import { describe, expect, it, vi } from 'vitest';
 import { createSanitySource } from '@/index';
-import { sanityPlugin, type SanityPluginOptions } from '@/plugin';
+import sanityPlugin, { type SanityPluginOptions } from '@/press';
 
 const body = [
   {

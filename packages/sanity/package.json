@@ -18,7 +18,7 @@
   "exports": {
     ".": "./dist/index.mjs",
     "./client": "./dist/client.mjs",
-    "./plugin": "./dist/plugin.mjs",
+    "./press": "./dist/press.mjs",
     "./package.json": "./package.json"
   },
   "publishConfig": {

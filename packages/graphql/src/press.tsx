@@ -3,7 +3,7 @@ import type { PageData } from 'fumadocs-core/source';
 import type { ComponentType } from 'react';
 import { graphqlTranslations } from '@/i18n';
 import type { GraphQLPageData, GraphQLServer } from '@/server';
-import { GraphQLPage } from '@/ui/plugin';
+import { GraphQLPage } from '@/ui/press';
 import type { GraphQLPageProps } from '@/utils/create-page';
 
 export interface GraphQLPluginOptions {
@@ -28,7 +28,7 @@ function isGraphQLPageData(data: PageData): data is GraphQLPageData {
 /**
  * Render the pages of `server.staticSource()` and `server.dynamicSource()`.
  */
-export function graphqlPlugin({
+export default function graphqlPlugin({
   server,
   disableLoaderPlugin = false,
   ClientAPIPage,

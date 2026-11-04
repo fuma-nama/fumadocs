@@ -18,7 +18,7 @@ export interface ObsidianPluginOptions {
 /**
  * Render the pages of an Obsidian vault from `obsidian()`, with relative links resolved to the URLs of their pages.
  */
-export function obsidianPlugin({ vault, components }: ObsidianPluginOptions): Plugin {
+export default function obsidianPlugin({ vault, components }: ObsidianPluginOptions): Plugin {
   // a vault change creates new pages, so their results stay valid
   const rendered = new WeakMap<ObsidianPage, Promise<ObsidianRendererResult>>();
   const Link = components?.a ?? 'a';

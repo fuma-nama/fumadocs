@@ -4,7 +4,7 @@ import type { PluginContext } from 'fumadocs-core/framework/plugin';
 import { asMarkdown } from 'fumadocs-core/server';
 import { loader } from 'fumadocs-core/source';
 import type { MDXComponents, MDXProps } from 'mdx/types';
-import { mdxPlugin, type MdxPluginOptions } from '@/plugin';
+import mdxPlugin, { type MdxPluginOptions } from '@/press';
 import { server, toFumadocsSource } from '@/runtime/server';
 
 const lastModified = new Date('2026-11-03');

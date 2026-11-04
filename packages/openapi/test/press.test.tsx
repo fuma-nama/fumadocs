@@ -4,8 +4,8 @@ import { describe, expect, test } from 'vitest';
 import type { BuildMode, PluginContext } from 'fumadocs-core/framework/plugin';
 import { flattenTree } from 'fumadocs-core/page-tree';
 import { loader } from 'fumadocs-core/source';
-import { openapiPlugin, type OpenAPIPluginOptions } from '@/plugin';
-import { OpenAPIPage } from '@/ui/plugin';
+import openapiPlugin, { type OpenAPIPluginOptions } from '@/press';
+import { OpenAPIPage } from '@/ui/press';
 import { createOpenAPI, type OpenAPIOptions } from '@/server';
 
 const museum = fileURLToPath(new URL('./fixtures/museum.yaml', import.meta.url));

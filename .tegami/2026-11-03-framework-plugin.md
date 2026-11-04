@@ -12,4 +12,4 @@ packages:
 ### Framework plugins
 
 - Added `fumadocs-core/framework/plugin`: the plugin API for integrations to add routes and page content to frameworks.
-- Integrations export their plugin from `/plugin`: `openapiPlugin()`, `asyncapiPlugin()`, `graphqlPlugin()`, `notionPlugin()`, `obsidianPlugin()` and `sanityPlugin()`.
+- Integrations export their plugin as the default export of `/press`: `openapiPlugin()`, `asyncapiPlugin()`, `graphqlPlugin()`, `notionPlugin()`, `obsidianPlugin()` and `sanityPlugin()`.

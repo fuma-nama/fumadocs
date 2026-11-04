@@ -10,7 +10,7 @@ export default defineConfig({
     'src/renderer.tsx',
     'src/file.ts',
     'src/client.ts',
-    'src/plugin.tsx',
+    'src/press.tsx',
   ],
   format: 'esm',
   target: 'es2023',

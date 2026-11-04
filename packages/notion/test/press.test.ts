@@ -3,7 +3,7 @@ import type { BuildMode, PluginContext } from 'fumadocs-core/framework/plugin';
 import { dynamicLoader } from 'fumadocs-core/source/dynamic';
 import { renderToReadableStream } from 'react-dom/server';
 import { describe, expect, it, vi } from 'vitest';
-import { notionPlugin, type NotionPluginOptions } from '../src/plugin';
+import notionPlugin, { type NotionPluginOptions } from '../src/press';
 import { createNotion } from '../src/source';
 import { block, dataSourceId, page, pageId, richText } from './fixtures';
 

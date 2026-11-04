@@ -4,8 +4,8 @@ import { describe, expect, test } from 'vitest';
 import type { PluginContext } from 'fumadocs-core/framework/plugin';
 import { flattenTree } from 'fumadocs-core/page-tree';
 import { loader } from 'fumadocs-core/source';
-import { asyncapiPlugin, type AsyncAPIPluginOptions } from '@/plugin';
-import { AsyncAPIPage } from '@/ui/plugin';
+import asyncapiPlugin, { type AsyncAPIPluginOptions } from '@/press';
+import { AsyncAPIPage } from '@/ui/press';
 import { createAsyncAPI, type AsyncAPIOptions } from '@/server';
 
 const streetlights = fileURLToPath(new URL('./fixtures/streetlights.yaml', import.meta.url));

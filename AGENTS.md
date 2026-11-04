@@ -19,7 +19,7 @@ A published docs framework: `fumadocs-core` (headless), two UI packages, content
 - No backward-compat layers, fallbacks or migrations, except: deprecated APIs keep working in full, and public APIs with consumers stay compatible through a redesign. Legacy entry points are thin wrappers over one main function, never a parallel path.
 - No chained `map`/`filter`/`flatMap`; mind time and space complexity.
 - React: read react.dev, don't guess. Derive during render, act in event handlers, `useSyncExternalStore` for external stores and client-only checks, `useEffectEvent` instead of lint-disabled deps, ref callbacks with cleanup for DOM resources, `use()` of a cached promise under `<Suspense>` for async data. Create-once objects go in `useMemo(() => ..., [])`.
-- One name per concept. No parallel lists of the same things, renamed duplicates, positional tuples or look-alike names. When two things share a name (like `openapiPlugin` of `fumadocs-openapi/server` and `fumadocs-openapi/plugin`), keep both names clean by scoping them (a namespace import, or the module that owns each) rather than inventing messy local names.
+- One name per concept. No parallel lists of the same things, renamed duplicates, positional tuples or look-alike names. When two things share a name (like the loader plugin and the framework plugin of `fumadocs-openapi`), keep both names clean by scoping them (`loaderPlugin()` of the object that owns it, the default export of the module that owns it) rather than inventing messy local names.
 - Types follow the structure of the code. Before writing one, work out which module owns the concept and how it relates to other types (it extends a contract, a field is another type's member, an option passes through to a library). Then express that relation:
   - derive with `extends`, `Pick`/`Omit` and indexed access, and reference the upstream exported type (bump the peer range if needed), so a change to the source type reaches every dependent type;
   - keep each type in the module that owns its concept (a plugin contract in the runtime module, options next to the integration), so its location tells who owns it. No `types.ts` collecting contracts.
@@ -81,7 +81,7 @@ Fumadocs runs on Next.js and Waku (RSC), React Router and TanStack Start (with a
 
 ## Framework plugins
 
-`fumadocs-core/framework/plugin` is the plugin API of integrations, exported from their `./plugin` subpath (`fumadocs-openapi/plugin`, ...). Fumadocs ships no engine for it: Fumapress (`@fumapress/core`, in its own repo) runs the plugins and extends the API.
+`fumadocs-core/framework/plugin` is the plugin API of integrations. Like Vite plugins, each is the default export of the integration's `./press` subpath, a function named `<name>Plugin` (`export default function openapiPlugin()` in `fumadocs-openapi/press`), with its option types as named exports. Fumadocs ships no engine for it: Fumapress (`@fumapress/core`, in its own repo) runs the plugins and extends the API.
 
 - Plugins use only that API, never Fumapress types. Dependencies go one way, Fumapress to Fumadocs.
 - Extend the API only when no existing hook fits, and keep it complete on its own.

@@ -28,7 +28,7 @@
     "./client": "./dist/client.js",
     "./dev/vite": "./dist/dev/vite.js",
     "./dev/ws": "./dist/dev/ws.js",
-    "./plugin": "./dist/plugin.js",
+    "./press": "./dist/press.js",
     "./ui": "./dist/ui/index.js",
     "./package.json": "./package.json",
     "./css/*": "./css/*"
