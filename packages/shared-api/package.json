@@ -34,7 +34,6 @@
     "./utils/document-cache": "./dist/utils/document-cache.js",
     "./utils/id-to-title": "./dist/utils/id-to-title.js",
     "./utils/is-plain-object": "./dist/utils/is-plain-object.js",
-    "./utils/rendered-documents": "./dist/utils/rendered-documents.js",
     "./utils/url": "./dist/utils/url.js",
     "./utils/use-query": "./dist/utils/use-query.js",
     "./utils/use-server-store": "./dist/utils/use-server-store.js",

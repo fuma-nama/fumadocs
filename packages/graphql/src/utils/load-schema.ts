@@ -46,7 +46,7 @@ export async function readGraphQL(input: string): Promise<string> {
  * - an introspection result (`IntrospectionQuery`).
  * - a `GraphQLSchema` instance.
  */
-export async function parseSchema(input: GraphQLSchemaInput): Promise<LoadedSchema> {
+export async function loadSchema(input: GraphQLSchemaInput): Promise<LoadedSchema> {
   try {
     if (input instanceof GraphQLSchema) {
       return { schema: input, sdl: printSchema(input) };

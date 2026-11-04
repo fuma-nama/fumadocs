@@ -1,13 +1,12 @@
 import { fileURLToPath } from 'node:url';
-import fs from 'node:fs';
 import { isValidElement, type ReactElement } from 'react';
-import { prerender } from 'react-dom/static';
-import { afterEach, describe, expect, test, vi } from 'vitest';
+import { describe, expect, test } from 'vitest';
 import type { PluginContext } from 'fumadocs-core/framework/plugin';
 import type { I18nConfig } from 'fumadocs-core/i18n';
 import { dynamicLoader, type _Internal } from 'fumadocs-core/source';
 import { createGraphQL, type GraphQLOptions } from '@/server';
-import { graphqlPlugin, GraphQLPage, type GraphQLPluginOptions } from '@/plugin';
+import { graphqlPlugin, type GraphQLPluginOptions } from '@/plugin';
+import { GraphQLPage } from '@/ui/plugin';
 
 const file = fileURLToPath(new URL('./fixtures/store.graphql', import.meta.url));
 
@@ -40,10 +39,6 @@ function getPage({ output }: Awaited<ReturnType<typeof createSite>>, slugs: stri
   if (!page) throw new Error(`missing page ${slugs.join('/')}`);
   return page;
 }
-
-afterEach(() => {
-  vi.restoreAllMocks();
-});
 
 describe('graphqlPlugin', () => {
   test('renders GraphQL pages with their content', async () => {
@@ -95,33 +90,18 @@ describe('graphqlPlugin', () => {
     }
   });
 
-  test('serves schemas left out of page props', async () => {
-    const included = await createSite();
-    expect(await included.plugin.apiRoutes!.call(included.ctx)).toBeUndefined();
+  test('needs `ClientAPIPage` for schemas left out of page props', async () => {
+    await expect(createSite({ includeSchema: false })).rejects.toThrow(
+      'pass a `ClientAPIPage` made with `createGraphQLPage({ loadSchema })`',
+    );
 
-    const fetch = vi.spyOn(globalThis, 'fetch');
-    const site = await createSite({ includeSchema: false });
-    const { plugin, ctx } = site;
-    const [route] = (await plugin.apiRoutes!.call(ctx))!;
-    expect(route).toMatchObject({ path: '/api/graphql-schema/[id]', staticPaths: ['store'] });
-
-    const request = new Request('https://example.com/docs/api/graphql-schema/store');
-    const res = await route.GET!(request, { params: { id: 'store' } });
-    expect(await res.text()).toBe(fs.readFileSync(file, 'utf8'));
-    expect((await route.GET!(request, { params: { id: 'toString' } })).status).toBe(404);
-
+    const ClientAPIPage = () => null;
+    const site = await createSite({ includeSchema: false }, { ClientAPIPage });
     const page = getPage(site, ['api', 'queries', 'orders']);
-    const node = (await plugin.getPageBody!.call(ctx, page))?.node as ReactElement<
+    const node = (await site.plugin.getPageBody!.call(site.ctx, page))?.node as ReactElement<
       Record<string, unknown>
     >;
-    expect(node.props.schema).toBe('/docs/api/graphql-schema/store');
+    expect(node.props.schema).toBe('store');
     expect(node.props.payload).not.toHaveProperty('sdl');
-
-    // server rendering reads the schema of the rendered page
-    const { prelude } = await prerender(node);
-    const html = await new Response(prelude).text();
-    expect(html).toContain('List all orders.');
-    expect(html).toContain('rel="preload" href="/docs/api/graphql-schema/store"');
-    expect(fetch).not.toHaveBeenCalled();
   });
 });

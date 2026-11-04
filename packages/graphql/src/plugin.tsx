@@ -3,12 +3,8 @@ import type { PageData } from 'fumadocs-core/source';
 import type { ComponentType } from 'react';
 import { graphqlTranslations } from '@/i18n';
 import type { GraphQLPageData, GraphQLServer } from '@/server';
-import { GraphQLPage, loadSchema } from '@/ui/plugin';
+import { GraphQLPage } from '@/ui/plugin';
 import type { GraphQLPageProps } from '@/utils/create-page';
-import { renderedSchemas } from '@/utils/rendered';
-import { documentsRoute } from 'shared-api/utils/rendered-documents';
-
-export { GraphQLPage, loadSchema };
 
 export interface GraphQLPluginOptions {
   /** created with `createGraphQL()` */
@@ -18,29 +14,31 @@ export interface GraphQLPluginOptions {
   disableLoaderPlugin?: boolean;
 
   /**
-   * A client component created with `createGraphQLPage()`, for its options. With `includeSchema: false`, `schema` is its URL: pass `loadSchema` of this module to `createGraphQLPage()`.
+   * A client component created with `createGraphQLPage()`, for its options. Required with `includeSchema: false`: pass `loadSchema` to `createGraphQLPage()`.
    *
-   * @defaultValue `GraphQLPage`
+   * @defaultValue `createGraphQLPage()`
    */
   ClientAPIPage?: ComponentType<GraphQLPageProps>;
 }
-
-/** schemas left out of page props are served at `/api/graphql-schema/<id>` */
-const schemasPath = '/api/graphql-schema';
 
 function isGraphQLPageData(data: PageData): data is GraphQLPageData {
   return 'getGraphQLPageProps' in data && typeof data.getGraphQLPageProps === 'function';
 }
 
 /**
- * Render the pages of `server.staticSource()` and `server.dynamicSource()`, and serve their schemas.
+ * Render the pages of `server.staticSource()` and `server.dynamicSource()`.
  */
 export function graphqlPlugin({
   server,
   disableLoaderPlugin = false,
-  ClientAPIPage = GraphQLPage,
+  ClientAPIPage,
 }: GraphQLPluginOptions): Plugin {
   const { includeSchema = true } = server.options;
+  if (!includeSchema && !ClientAPIPage)
+    throw new Error(
+      '[Fumadocs GraphQL] `includeSchema: false` leaves schemas out of page props, pass a `ClientAPIPage` made with `createGraphQLPage({ loadSchema })` to `graphqlPlugin()`.',
+    );
+  const Page = ClientAPIPage ?? GraphQLPage;
 
   return {
     name: 'graphql',
@@ -48,26 +46,9 @@ export function graphqlPlugin({
     configureLoader() {
       if (!disableLoaderPlugin) return { plugins: [server.loaderPlugin()] };
     },
-    async apiRoutes() {
-      if (includeSchema) return;
-      return [
-        await documentsRoute({
-          path: schemasPath,
-          getSchemas: server.getSchemas,
-          toResponse: (schema) => new Response(schema.sdl),
-        }),
-      ];
-    },
     getPageBody({ data }) {
       if (!isGraphQLPageData(data)) return;
-      const props = data.getGraphQLPageProps();
-      if (!includeSchema) {
-        // keyed by URL, the browser fetches it from there
-        props.schema = this.withBase(`${schemasPath}/${props.schema}`);
-        renderedSchemas.set(props.schema, data.getSchema().sdl);
-      }
-
-      return { node: <ClientAPIPage {...props} /> };
+      return { node: <Page {...data.getGraphQLPageProps()} /> };
     },
     getPageText({ data }) {
       if (isGraphQLPageData(data)) return data.getText('processed');

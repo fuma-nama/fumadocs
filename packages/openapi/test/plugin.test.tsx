@@ -1,11 +1,11 @@
 import { fileURLToPath } from 'node:url';
 import type { ReactElement } from 'react';
-import { prerender } from 'react-dom/static';
-import { afterEach, describe, expect, test, vi } from 'vitest';
+import { describe, expect, test } from 'vitest';
 import type { BuildMode, PluginContext } from 'fumadocs-core/framework/plugin';
 import { flattenTree } from 'fumadocs-core/page-tree';
 import { loader } from 'fumadocs-core/source';
-import { openapiPlugin, OpenAPIPage, type OpenAPIPluginOptions } from '@/plugin';
+import { openapiPlugin, type OpenAPIPluginOptions } from '@/plugin';
+import { OpenAPIPage } from '@/ui/plugin';
 import { createOpenAPI, type OpenAPIOptions } from '@/server';
 
 const museum = fileURLToPath(new URL('./fixtures/museum.yaml', import.meta.url));
@@ -29,10 +29,6 @@ async function createSite(
   });
   return { ctx, plugin, source, page: source.getPages()[0], server };
 }
-
-afterEach(() => {
-  vi.restoreAllMocks();
-});
 
 describe('openapiPlugin()', () => {
   test('renders pages with the client page', async () => {
@@ -117,38 +113,17 @@ describe('openapiPlugin()', () => {
     );
   });
 
-  test('serves documents left out of page props', async () => {
-    const fetch = vi.spyOn(globalThis, 'fetch');
-    const { ctx, plugin, page, server } = await createSite({ includeDocument: false });
-    const [route] = (await plugin.apiRoutes!.call(ctx))!;
-    const { bundled } = await server.getSchema('museum');
+  test('needs `ClientAPIPage` for documents left out of page props', async () => {
+    await expect(createSite({ includeDocument: false })).rejects.toThrow(
+      'pass a `ClientAPIPage` made with `createOpenAPIPage({ loadDocument })`',
+    );
 
-    expect(route).toMatchObject({
-      path: '/api/openapi/[id]',
-      staticPaths: ['museum'],
-    });
-    const found = await route.GET!(new Request('https://example.com/docs/api/openapi/museum'), {
-      params: { id: 'museum' },
-    });
-    expect(await found.json()).toEqual(JSON.parse(JSON.stringify(bundled)));
-    for (const id of ['unknown', 'constructor']) {
-      const missing = await route.GET!(new Request(`https://example.com/docs/api/openapi/${id}`), {
-        params: { id },
-      });
-      expect(missing.status).toBe(404);
-    }
-
+    const ClientAPIPage = () => null;
+    const { ctx, plugin, page } = await createSite({ includeDocument: false }, { ClientAPIPage });
     const node = (await plugin.getPageBody!.call(ctx, page))?.node as ReactElement<
       Record<string, unknown>
     >;
-    expect(node.props.document).toBe('/docs/api/openapi/museum');
+    expect(node.props.document).toBe('museum');
     expect(node.props.payload).not.toHaveProperty('bundled');
-
-    // server rendering reads the document of the rendered page
-    const { prelude } = await prerender(node);
-    const html = await new Response(prelude).text();
-    expect(html).toContain(page.data.getOpenAPIPageProps().operations![0].path);
-    expect(html).toContain('rel="preload" href="/docs/api/openapi/museum"');
-    expect(fetch).not.toHaveBeenCalled();
   });
 });

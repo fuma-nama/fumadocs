@@ -4,12 +4,8 @@ import type { ComponentType } from 'react';
 import { openapiTranslations } from '@/i18n';
 import type { CreateProxyOptions, OpenAPIPageData, OpenAPIServer, Proxy } from '@/server';
 import type { Awaitable } from '@/types';
-import { OpenAPIPage, loadDocument } from '@/ui/plugin';
+import { OpenAPIPage } from '@/ui/plugin';
 import type { OpenAPIPageProps } from '@/utils/pages/builder';
-import { renderedDocuments } from '@/utils/document/rendered';
-import { documentsRoute } from 'shared-api/utils/rendered-documents';
-
-export { OpenAPIPage, loadDocument };
 
 export interface OpenAPIPluginOptions {
   /** created with `createOpenAPI()` */
@@ -19,9 +15,9 @@ export interface OpenAPIPluginOptions {
   disableLoaderPlugin?: boolean;
 
   /**
-   * A client component created with `createOpenAPIPage()`, for its options. With `includeDocument: false`, `document` is the URL of the document: pass `loadDocument` of this module to `createOpenAPIPage()`.
+   * A client component created with `createOpenAPIPage()`, for its options. Required with `includeDocument: false`: pass `loadDocument` to `createOpenAPIPage()`.
    *
-   * @defaultValue `OpenAPIPage`
+   * @defaultValue `createOpenAPIPage()`
    */
   ClientAPIPage?: ComponentType<OpenAPIPageProps>;
 
@@ -35,9 +31,6 @@ export interface OpenAPIPluginOptions {
   createProxy?: boolean | CreateProxyOptions | (() => Awaitable<Proxy>);
 }
 
-/** documents left out of page props are served at `/api/openapi/<id>` */
-const documentsPath = '/api/openapi';
-
 function isOpenAPIPage(data: PageData): data is OpenAPIPageData {
   return 'getOpenAPIPageProps' in data && typeof data.getOpenAPIPageProps === 'function';
 }
@@ -48,10 +41,15 @@ function isOpenAPIPage(data: PageData): data is OpenAPIPageData {
 export function openapiPlugin({
   server,
   disableLoaderPlugin = false,
-  ClientAPIPage = OpenAPIPage,
+  ClientAPIPage,
   createProxy,
 }: OpenAPIPluginOptions): Plugin {
   const { proxyUrl, includeDocument = true } = server.options;
+  if (!includeDocument && !ClientAPIPage)
+    throw new Error(
+      '[Fumadocs OpenAPI] `includeDocument: false` leaves documents out of page props, pass a `ClientAPIPage` made with `createOpenAPIPage({ loadDocument })` to `openapiPlugin()`.',
+    );
+  const Page = ClientAPIPage ?? OpenAPIPage;
   // a pathname of the site, other URLs are proxies elsewhere
   const proxyPath = proxyUrl?.startsWith('/') && !proxyUrl.startsWith('//') ? proxyUrl : undefined;
   const proxy = createProxy ?? proxyPath !== undefined;
@@ -81,29 +79,15 @@ export function openapiPlugin({
             : server.createProxy(proxy === true ? {} : proxy);
         routes.push({ path: proxyPath, render: 'dynamic', ALL: handle });
       }
-      if (includeDocument) return routes;
-
-      routes.push(
-        await documentsRoute({
-          path: documentsPath,
-          getSchemas: server.getSchemas,
-          toResponse: (schema) => Response.json(schema.bundled),
-        }),
-      );
       return routes;
     },
     getPageBody({ data }) {
       if (!isOpenAPIPage(data)) return;
       const { payload, ...props } = data.getOpenAPIPageProps();
-      if (!includeDocument) {
-        // keyed by URL, the browser fetches it from there
-        props.document = this.withBase(`${documentsPath}/${props.document}`);
-        renderedDocuments.set(props.document, data.getSchema().bundled);
-      }
 
       return {
         node: (
-          <ClientAPIPage
+          <Page
             {...props}
             payload={{ ...payload, proxyUrl: proxyPath ? this.withBase(proxyPath) : proxyUrl }}
           />

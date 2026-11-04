@@ -2,7 +2,7 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { expect, test } from 'vitest';
-import { parseDocument } from '@/utils/document/load';
+import { loadDocument } from '@/utils/document/load';
 import { dereferenceBundledDocument } from '@/utils/document/dereference';
 
 const cwd = fileURLToPath(new URL('./', import.meta.url));
@@ -60,7 +60,7 @@ paths:
 `,
   });
 
-  const { bundled } = await parseDocument(rootFile);
+  const { bundled } = await loadDocument(rootFile);
   // external documents are embedded into `x-ext`
   expect(bundled).toHaveProperty('x-ext');
 
@@ -134,7 +134,7 @@ paths:
     'upgrade-root.yaml',
   );
 
-  const { bundled } = await parseDocument(rootFile);
+  const { bundled } = await loadDocument(rootFile);
   const { dereferenced, resolve } = dereferenceBundledDocument(bundled);
 
   const body = resolve(dereferenced.paths?.['/email']?.post?.requestBody);
@@ -185,7 +185,7 @@ paths:
     'mixed-root.yaml',
   );
 
-  const { bundled } = await parseDocument(rootFile);
+  const { bundled } = await loadDocument(rootFile);
   const { dereferenced, resolve } = dereferenceBundledDocument(bundled);
 
   const body = resolve(dereferenced.paths?.['/email']?.post?.requestBody);
@@ -214,7 +214,7 @@ components:
 `,
   });
 
-  const { bundled } = await parseDocument({
+  const { bundled } = await loadDocument({
     openapi: '3.0.3',
     info: { title: 'Example API', version: '1.0.0' },
     paths: {},

@@ -2,13 +2,13 @@ import { fileURLToPath } from 'node:url';
 import { prerender } from 'react-dom/static';
 import { expect, test } from 'vitest';
 import { createOpenAPIPage } from '@/ui';
-import { parseDocument } from '@/utils/document/load';
+import { loadDocument } from '@/utils/document/load';
 import type { Document } from '@/types';
 
 const museum = fileURLToPath(new URL('./fixtures/museum.yaml', import.meta.url));
 
 async function readHtml(path: string, method: 'get' | 'post') {
-  const { bundled } = await parseDocument(museum);
+  const { bundled } = await loadDocument(museum);
   const OpenAPIPage = createOpenAPIPage({ playground: { enabled: false } });
   const { prelude } = await prerender(
     <OpenAPIPage payload={{ bundled: bundled as Document }} operations={[{ path, method }]} />,
