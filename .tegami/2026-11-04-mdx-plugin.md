@@ -1,6 +1,6 @@
 ---
 packages:
-  'fumadocs-mdx': patch
+  'fumadocs-mdx': minor
 ---
 
 ### Framework plugin

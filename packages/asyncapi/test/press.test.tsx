@@ -17,7 +17,6 @@ async function createSite(
   const server = createAsyncAPI({ input: { streetlights }, ...serverOptions });
   const plugin = asyncapiPlugin({ server, ...options });
   const ctx: PluginContext = {
-    mode: 'default',
     withBase: (pathname) => `/docs${pathname}`,
     getLoader: () => source,
   };
@@ -40,11 +39,7 @@ describe('asyncapiPlugin()', () => {
     expect(await plugin.getPageText!.call(ctx, page)).toBe(await page.data.getText('processed'));
     expect(await plugin.getPageToc!.call(ctx, page)).toBe(page.data.toc);
     expect(await plugin.getPageStructuredData!.call(ctx, page)).toBe(page.data.structuredData);
-    const data = { title: '', url: page.url, path: page.path, locale: page.locale, toc: [] };
-    expect(await plugin.transformPage!.call(ctx, data, page)).toEqual({ full: true });
-    expect(await plugin.transformPage!.call(ctx, { ...data, full: false }, page)).toEqual({
-      full: false,
-    });
+    expect(page.data.full).toBe(true);
   });
 
   test('adds the loader plugin unless disabled', async () => {

@@ -1,5 +1,5 @@
 import type { Client } from '@notionhq/client';
-import type { BuildMode, PluginContext } from 'fumadocs-core/framework/plugin';
+import type { ApiRoute, PluginContext } from 'fumadocs-core/framework/plugin';
 import { dynamicLoader } from 'fumadocs-core/source/dynamic';
 import { renderToReadableStream } from 'react-dom/server';
 import { describe, expect, it, vi } from 'vitest';
@@ -64,11 +64,7 @@ function createClient() {
   };
 }
 
-async function createSite(
-  options?: Omit<NotionPluginOptions, 'notion'>,
-  mode: BuildMode = 'default',
-  source = dataSourceId,
-) {
+async function createSite(options?: Omit<NotionPluginOptions, 'notion'>, source = dataSourceId) {
   const client = createClient();
   const content = createNotion({
     client: client as unknown as Client,
@@ -80,11 +76,9 @@ async function createSite(
     ...options,
   });
   const ctx: PluginContext = {
-    mode,
     withBase: (pathname) => `/docs${pathname}`,
     getLoader: () => loader,
   };
-  await plugin.init?.call(ctx);
   const loader = dynamicLoader(content, { baseUrl: '/' }).get();
   const notionPage = (await loader).getPage(['guide', 'introduction']);
   if (!notionPage) throw new Error('expected the Notion page');
@@ -120,12 +114,13 @@ describe('notionPlugin', () => {
 
   it('serves files of pages in the source only', async () => {
     const { ctx, plugin, client } = await createSite();
-    const [route] = (await plugin.apiRoutes!.call(ctx)) ?? [];
-    expect(route).toMatchObject({ path: '/api/notion/file', render: 'dynamic' });
+    const routes: ApiRoute[] = [];
+    await plugin.routes!.call(ctx, { createApi: (route) => routes.push(route) });
+    const [route] = routes;
+    expect(route.path).toBe('/api/notion/file');
     const get = (page: string) =>
       route.GET!(
         new Request(`https://example.com/docs/api/notion/file?page=${page}&block=${imageId}`),
-        { params: {} },
       );
 
     const response = await get(pageId.replaceAll('-', '').toUpperCase());
@@ -138,23 +133,17 @@ describe('notionPlugin', () => {
   });
 
   it('renders the file URLs of Notion without the file proxy', async () => {
-    const { ctx, plugin, page } = await createSite({ fileProxy: false }, 'static');
+    const { ctx, plugin, page } = await createSite({ fileProxy: false });
 
-    expect(await plugin.apiRoutes!.call(ctx)).toBeUndefined();
+    const createApi = vi.fn();
+    await plugin.routes!.call(ctx, { createApi });
+    expect(createApi).not.toHaveBeenCalled();
     const html = await renderHtml((await plugin.getPageBody!.call(ctx, page))?.node);
     expect(html).toContain('src="https://notion.example/signed"');
   });
 
-  it('requires a server for the file proxy', async () => {
-    await expect(createSite({}, 'static')).rejects.toThrow('Set `fileProxy: false`');
-  });
-
   it('ignores pages of other data sources', async () => {
-    const { ctx, plugin, page } = await createSite(
-      {},
-      'dynamic',
-      '99999999-9999-4999-8999-999999999999',
-    );
+    const { ctx, plugin, page } = await createSite({}, '99999999-9999-4999-8999-999999999999');
 
     await expect(plugin.getPageBody!.call(ctx, page)).resolves.toBeUndefined();
     await expect(plugin.getPageText!.call(ctx, page)).resolves.toBeUndefined();

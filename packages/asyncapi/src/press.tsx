@@ -59,8 +59,5 @@ export default function asyncapiPlugin({
     getPageStructuredData({ data }) {
       if (isAsyncAPIPage(data)) return data.structuredData;
     },
-    transformPage(data, page) {
-      if (isAsyncAPIPage(page.data)) return { full: data.full ?? true };
-    },
   };
 }

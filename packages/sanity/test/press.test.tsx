@@ -57,7 +57,6 @@ async function createSite(options?: SanityPluginOptions) {
   const { fetch, client } = createClient();
   const plugin = sanityPlugin(options);
   const ctx: PluginContext = {
-    mode: 'default',
     withBase: (pathname) => pathname,
     getLoader: () => content.get(),
   };

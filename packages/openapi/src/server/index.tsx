@@ -84,6 +84,7 @@ export interface OpenAPIServer {
 }
 
 export interface OpenAPIPageData extends PageData {
+  full: boolean;
   // `OpenAPIPageProps_Spec & {}` would be flattened into types that consumers cannot name
   getOpenAPIPageProps: () => Omit<OpenAPIPageProps_Spec, 'document'> & { document: string };
   getSchema: () => { id: string; bundled: Document };
@@ -156,6 +157,7 @@ export function createOpenAPI(options: OpenAPIOptions = {}): OpenAPIServer {
 
           return {
             ...entry.info,
+            full: true,
             getOpenAPIPageProps() {
               return {
                 payload: {

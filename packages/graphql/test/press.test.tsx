@@ -17,7 +17,6 @@ async function createSite(
   const server = createGraphQL({ input: { store: file }, ...options });
   const plugin = graphqlPlugin({ server, ...pluginOptions });
   const ctx: PluginContext = {
-    mode: 'default',
     withBase: (pathname) => `/docs${pathname}`,
     getLoader: () => content.get(),
   };
@@ -54,9 +53,7 @@ describe('graphqlPlugin', () => {
     expect(await plugin.getPageStructuredData!.call(ctx, page)).toMatchObject({
       contents: [{ content: 'List all orders.' }],
     });
-    expect(
-      await plugin.transformPage!.call(ctx, { ...page, title: 'orders', toc: [] }, page),
-    ).toEqual({ full: true });
+    expect(page.data).toMatchObject({ full: true });
   });
 
   test('leaves other pages to other plugins', async () => {
@@ -68,9 +65,6 @@ describe('graphqlPlugin', () => {
     expect(await plugin.getPageText!.call(ctx, page)).toBeUndefined();
     expect(await plugin.getPageToc!.call(ctx, page)).toBeUndefined();
     expect(await plugin.getPageStructuredData!.call(ctx, page)).toBeUndefined();
-    expect(
-      await plugin.transformPage!.call(ctx, { ...page, title: 'Home', toc: [] }, page),
-    ).toBeUndefined();
   });
 
   test('adds the loader plugin unless disabled', async () => {

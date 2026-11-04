@@ -1,7 +1,7 @@
 import { fileURLToPath } from 'node:url';
 import type { ReactElement } from 'react';
 import { describe, expect, test } from 'vitest';
-import type { BuildMode, PluginContext } from 'fumadocs-core/framework/plugin';
+import type { ApiRoute, Plugin, PluginContext } from 'fumadocs-core/framework/plugin';
 import { flattenTree } from 'fumadocs-core/page-tree';
 import { loader } from 'fumadocs-core/source';
 import openapiPlugin, { type OpenAPIPluginOptions } from '@/press';
@@ -10,19 +10,22 @@ import { createOpenAPI, type OpenAPIOptions } from '@/server';
 
 const museum = fileURLToPath(new URL('./fixtures/museum.yaml', import.meta.url));
 
+async function getRoutes(plugin: Plugin, ctx: PluginContext) {
+  const routes: ApiRoute[] = [];
+  await plugin.routes!.call(ctx, { createApi: (route) => routes.push(route) });
+  return routes;
+}
+
 async function createSite(
   serverOptions: OpenAPIOptions,
   options: Omit<OpenAPIPluginOptions, 'server'> = {},
-  mode: BuildMode = 'default',
 ) {
   const server = createOpenAPI({ input: { museum }, ...serverOptions });
   const plugin = openapiPlugin({ server, ...options });
   const ctx: PluginContext = {
-    mode,
     withBase: (pathname) => `/docs${pathname}`,
     getLoader: () => source,
   };
-  await plugin.init?.call(ctx);
   const source = loader(await server.staticSource(), {
     baseUrl: '/',
     plugins: (await plugin.configureLoader!.call(ctx, { baseUrl: '/' }))?.plugins,
@@ -44,11 +47,7 @@ describe('openapiPlugin()', () => {
     expect(await plugin.getPageText!.call(ctx, page)).toBe(page.data.description ?? '');
     expect(await plugin.getPageToc!.call(ctx, page)).toBe(page.data.toc);
     expect(await plugin.getPageStructuredData!.call(ctx, page)).toBe(page.data.structuredData);
-    const data = { title: '', url: page.url, path: page.path, locale: page.locale, toc: [] };
-    expect(await plugin.transformPage!.call(ctx, data, page)).toEqual({ full: true });
-    expect(await plugin.transformPage!.call(ctx, { ...data, full: false }, page)).toEqual({
-      full: false,
-    });
+    expect(page.data.full).toBe(true);
   });
 
   test('adds the loader plugin unless disabled', async () => {
@@ -65,12 +64,12 @@ describe('openapiPlugin()', () => {
 
   test('serves the proxy at a pathname', async () => {
     const { ctx, plugin } = await createSite({ proxyUrl: '/api/proxy' });
-    expect(await plugin.apiRoutes!.call(ctx)).toEqual([
-      { path: '/api/proxy', render: 'dynamic', ALL: expect.any(Function) },
+    expect(await getRoutes(plugin, ctx)).toEqual([
+      { path: '/api/proxy', ALL: expect.any(Function) },
     ]);
 
     const off = await createSite({ proxyUrl: '/api/proxy' }, { createProxy: false });
-    expect(await off.plugin.apiRoutes!.call(off.ctx)).toEqual([]);
+    expect(await getRoutes(off.plugin, off.ctx)).toEqual([]);
   });
 
   test('serves your own proxy', async () => {
@@ -79,9 +78,7 @@ describe('openapiPlugin()', () => {
       { proxyUrl: '/api/proxy' },
       { createProxy: async () => ({ handle }) as never },
     );
-    expect(await plugin.apiRoutes!.call(ctx)).toEqual([
-      { path: '/api/proxy', render: 'dynamic', ALL: handle },
-    ]);
+    expect(await getRoutes(plugin, ctx)).toEqual([{ path: '/api/proxy', ALL: handle }]);
   });
 
   test('renders pages with `ClientAPIPage`', async () => {
@@ -97,19 +94,13 @@ describe('openapiPlugin()', () => {
       Record<string, unknown>
     >;
 
-    expect(await plugin.apiRoutes!.call(ctx)).toEqual([]);
+    expect(await getRoutes(plugin, ctx)).toEqual([]);
     expect(node.props.payload).toMatchObject({ proxyUrl: 'https://proxy.example.com' });
     await expect(
       createSite({ proxyUrl: 'https://proxy.example.com' }, { createProxy: true }),
     ).rejects.toThrow('set `proxyUrl` of `createOpenAPI()` to a pathname');
     await expect(createSite({}, { createProxy: true })).rejects.toThrow(
       'set `proxyUrl` of `createOpenAPI()` to a pathname',
-    );
-  });
-
-  test('needs a server for the proxy', async () => {
-    await expect(createSite({ proxyUrl: '/api/proxy' }, {}, 'static')).rejects.toThrow(
-      'set `createProxy: false` in static mode',
     );
   });
 

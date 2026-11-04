@@ -1,4 +1,4 @@
-import type { ApiRoute, Plugin } from 'fumadocs-core/framework/plugin';
+import type { Plugin } from 'fumadocs-core/framework/plugin';
 import type { PageData } from 'fumadocs-core/source';
 import type { ComponentType } from 'react';
 import { openapiTranslations } from '@/i18n';
@@ -61,25 +61,16 @@ export default function openapiPlugin({
   return {
     name: 'openapi',
     translations: openapiTranslations(),
-    init() {
-      if (proxy && this.mode === 'static')
-        throw new Error(
-          '[Fumadocs OpenAPI] the proxy of `openapiPlugin()` needs a server, set `createProxy: false` in static mode and serve it elsewhere.',
-        );
-    },
     configureLoader() {
       if (!disableLoaderPlugin) return { plugins: [server.loaderPlugin()] };
     },
-    async apiRoutes() {
-      const routes: ApiRoute[] = [];
-      if (proxy && proxyPath) {
-        const { handle } =
-          typeof proxy === 'function'
-            ? await proxy()
-            : server.createProxy(proxy === true ? {} : proxy);
-        routes.push({ path: proxyPath, render: 'dynamic', ALL: handle });
-      }
-      return routes;
+    async routes({ createApi }) {
+      if (!proxy || !proxyPath) return;
+      const { handle } =
+        typeof proxy === 'function'
+          ? await proxy()
+          : server.createProxy(proxy === true ? {} : proxy);
+      createApi({ path: proxyPath, ALL: handle });
     },
     getPageBody({ data }) {
       if (!isOpenAPIPage(data)) return;
@@ -102,9 +93,6 @@ export default function openapiPlugin({
     },
     getPageStructuredData({ data }) {
       if (isOpenAPIPage(data)) return data.structuredData;
-    },
-    transformPage(data, page) {
-      if (isOpenAPIPage(page.data)) return { full: data.full ?? true };
     },
   };
 }

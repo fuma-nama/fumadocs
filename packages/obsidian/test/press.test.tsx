@@ -24,7 +24,6 @@ async function createSite(dir = fixturesDir) {
   });
   const loader = dynamicLoader(content, { baseUrl: '/' }).get();
   const ctx: PluginContext = {
-    mode: 'default',
     withBase: (pathname) => pathname,
     getLoader: () => loader,
   };

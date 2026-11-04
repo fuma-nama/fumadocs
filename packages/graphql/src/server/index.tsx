@@ -63,6 +63,7 @@ export interface GraphQLServer {
 
 export interface GraphQLPageData extends PageData {
   // `GraphQLPageProps & {}` would be flattened into types that consumers cannot name
+  full: boolean;
   getGraphQLPageProps: () => Omit<GraphQLPageProps, 'schema'> & { schema: string };
   getSchema: () => { id: string } & LoadedSchema;
   /** the items of page in Markdown, for LLMs */
@@ -178,6 +179,7 @@ export function createGraphQL(options: GraphQLOptions = {}): GraphQLServer {
 
           return {
             ...entry.info,
+            full: true,
             getGraphQLPageProps() {
               return {
                 schema: id,

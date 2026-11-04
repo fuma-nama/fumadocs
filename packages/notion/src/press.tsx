@@ -68,28 +68,19 @@ export default function notionPlugin({
 
   return {
     name: 'notion',
-    init() {
-      if (handler && this.mode === 'static')
-        throw new Error(
-          '[@fumadocs/notion] `notionPlugin()` serves Notion files on request, which `mode: "static"` has no server for. Set `fileProxy: false` and serve durable file URLs.',
-        );
-    },
-    apiRoutes() {
+    routes({ createApi }) {
       if (!handler) return;
-      return [
-        {
-          path: filePath,
-          render: 'dynamic',
-          GET: async (request) => {
-            // files of pages outside the source cost Notion API calls, they are rejected before
-            const id = toNotionId(new URL(request.url).searchParams.get('page') ?? '');
-            for (const { data } of (await this.getLoader()).getPages()) {
-              if (isNotionPage(data) && toNotionId(data.id) === id) return handler(request);
-            }
-            return new Response('Notion file not found', { status: 404 });
-          },
+      createApi({
+        path: filePath,
+        GET: async (request) => {
+          // files of pages outside the source cost Notion API calls, they are rejected before
+          const id = toNotionId(new URL(request.url).searchParams.get('page') ?? '');
+          for (const { data } of (await this.getLoader()).getPages()) {
+            if (isNotionPage(data) && toNotionId(data.id) === id) return handler(request);
+          }
+          return new Response('Notion file not found', { status: 404 });
         },
-      ];
+      });
     },
     async getPageBody({ data }) {
       if (!isNotionPage(data)) return;

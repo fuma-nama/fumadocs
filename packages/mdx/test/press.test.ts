@@ -33,7 +33,6 @@ async function createSite(async: boolean, options?: MdxPluginOptions) {
     : await create.doc('docs', 'content', { 'index.mdx': compiled });
   const plugin = mdxPlugin(options);
   const ctx: PluginContext = {
-    mode: 'default',
     withBase: (pathname) => pathname,
     getLoader: () => source,
   };

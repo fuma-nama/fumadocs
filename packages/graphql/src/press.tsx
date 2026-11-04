@@ -59,8 +59,5 @@ export default function graphqlPlugin({
     getPageStructuredData({ data }) {
       if (isGraphQLPageData(data)) return data.structuredData;
     },
-    transformPage(data, page) {
-      if (isGraphQLPageData(page.data)) return { full: data.full ?? true };
-    },
   };
 }
