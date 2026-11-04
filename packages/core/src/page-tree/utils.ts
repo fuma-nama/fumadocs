@@ -166,6 +166,27 @@ export function findPath(
 }
 
 /**
+ * Scope a page tree to the folder at the file path `path` (like `docs/guides`): its index page and children become the root's children, and the fallback tree is scoped the same way.
+ *
+ * @returns the scoped tree, or `undefined` when the tree has no folder at `path`
+ */
+export function scopeTree(tree: PageTree.Root, path: string): PageTree.Root | undefined {
+  // unlike `$id`, `$ref` is not prefixed on localized and fallback trees
+  const folder = findPath(
+    tree.children,
+    (node) => node.type === 'folder' && node.$ref?.folder === path,
+    { includeSeparator: false },
+  )?.at(-1);
+  if (folder?.type !== 'folder') return;
+
+  return {
+    ...tree,
+    children: folder.index ? [folder.index, ...folder.children] : folder.children,
+    fallback: tree.fallback && scopeTree(tree.fallback, path),
+  };
+}
+
+/**
  * Find the structural projection of `page` (under the root folder `from`) in `to`:
  * the page at the same file path relative to the root folder.
  */

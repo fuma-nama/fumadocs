@@ -1,7 +1,7 @@
 import { joinPath, splitPath } from '@/source/path';
 import { describe, expect, test } from 'vitest';
 import type { Folder, Item, Root } from '@/page-tree/definitions';
-import { findNeighbour, findProjection, findSiblings } from '@/page-tree/utils';
+import { findNeighbour, findProjection, findSiblings, scopeTree } from '@/page-tree/utils';
 import { getBreadcrumbItems } from '@/breadcrumb';
 import { createI18nMiddleware, DefaultFormatter } from '@/i18n/middleware';
 import { NextURL } from 'next/dist/server/web/next-url';
@@ -67,6 +67,46 @@ test('Find Projection', () => {
   expect(findProjection(v1, v2, shared)).toBeUndefined();
   // without file paths
   expect(findProjection({ ...v1, $ref: undefined }, v2, page)).toBeUndefined();
+});
+
+describe('scopeTree', () => {
+  const page = (url: string): Item => ({ type: 'page', name: url, url });
+  const folder = (path: string, children: Folder['children'], index?: Item): Folder => ({
+    type: 'folder',
+    $ref: { folder: path },
+    name: path,
+    children,
+    index,
+  });
+  const guides = folder('docs/guides', [page('/docs/guides/a')], page('/docs/guides'));
+  const docs = folder('docs', [page('/docs'), guides]);
+  const fallbackDocs = folder('docs', [folder('docs/guides', [page('/docs/guides/b')])]);
+  const tree: Root = {
+    name: 'root',
+    children: [docs, folder('blog', [page('/blog/hello')])],
+    fallback: { name: 'fallback', children: [fallbackDocs] },
+  };
+
+  test('scopes a top-level folder and the fallback tree', () => {
+    const result = scopeTree(tree, 'docs');
+    expect(result?.name).toBe('root');
+    expect(result?.children).toBe(docs.children);
+    expect(result?.fallback?.children).toBe(fallbackDocs.children);
+  });
+
+  test('scopes a nested folder with its index page first', () => {
+    const result = scopeTree(tree, 'docs/guides');
+    expect(result?.children).toEqual([guides.index, ...guides.children]);
+    expect(result?.fallback?.children).toEqual([page('/docs/guides/b')]);
+  });
+
+  test('drops the fallback tree without the folder', () => {
+    expect(scopeTree(tree, 'blog')?.fallback).toBeUndefined();
+  });
+
+  test('returns undefined for unknown folders', () => {
+    expect(scopeTree(tree, 'guides')).toBeUndefined();
+  });
 });
 
 describe('Path utilities', () => {
