@@ -37,7 +37,7 @@ export interface PluginLoaderOptions extends Omit<LoaderOptions, 'plugins'> {
  * - resolve (`getPage*`): the first plugin returning a value other than `undefined` wins.
  * - collect (`apiRoutes`): the results of every plugin, in order.
  *
- * `middleware` runs as a chain. Frameworks run every hook, with their site as `Context` and their page data as `Data`, and may extend the contract with their own.
+ * Frameworks run every hook, with their site as `Context` and their page data as `Data`, and may extend the contract with their own.
  *
  * Hooks are properties, so their `this` and page are checked strictly: a plugin for any site fits every site, not the other way round.
  */
@@ -89,17 +89,6 @@ export interface Plugin<
   ) => Awaitable<Partial<Data> | undefined>;
 
   apiRoutes?: (this: Context) => Awaitable<ApiRoute[] | undefined>;
-
-  /**
-   * Runs for requests served on demand, prerendered routes skip it.
-   *
-   * Call `next()` to continue, or `next(path)` to serve another path instead, without the base path like the paths of routes.
-   */
-  middleware?: (
-    this: Context,
-    request: Request,
-    next: (rewrite?: string) => Promise<Response>,
-  ) => Promise<Response>;
 }
 
 /** the rendered content of a page */
