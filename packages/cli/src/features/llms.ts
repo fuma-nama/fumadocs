@@ -42,7 +42,7 @@ export function getPageMarkdownUrl(page: { slugs: string[]; locale?: string }) {
 }`;
 
 /** the Markdown URL of a page with a `.md` suffix under the docs route, `/docs/index.md` for the root, on TanStack Start and Astro */
-export const suffixMarkdownUrl = (i18n: boolean) => `
+const suffixMarkdownUrl = (i18n: boolean) => `
 const getDocsUrl = createGetUrl(docsRoute${i18n ? ', i18n' : ''});
 
 export function getPageMarkdownUrl(page: { slugs: string[]; locale?: string }) {

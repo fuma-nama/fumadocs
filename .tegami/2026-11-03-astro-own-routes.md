@@ -8,7 +8,6 @@ packages:
 - Refactored: `@fumadocs/astro` is the integration for your own routes again.
 - `src/fumadocs.config.ts`, `@fumadocs/astro/config`, `@fumadocs/astro/plugins/*`, `HomeLayout.astro` and `ReactContent.astro` moved to `@fumapress/astro`.
 - Removed the `layout` and `page` options, use `ui.renderPage` of `@fumapress/astro`.
-- Integrations export their plugin from `<pkg>/plugin`, the git plugin is `site.git` and the MCP plugin is `mcpPlugin()` of `@fumapress/ai`.
-- Open Graph images moved from `/og/<page>/image.webp` to `<page>.webp`.
+- See `@fumapress/astro` for the plugins of the managed setup.
 - Added the `lastModified` collection option: `page.data.lastModified` is the date of the page's last commit.
 - `toFumadocsSource()` accepts `baseDir` as its third argument.

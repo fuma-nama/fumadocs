@@ -41,8 +41,12 @@ const serverMiddleware: Route.MiddlewareFunction = async ({ request }, next) => 
   const url = new URL(request.url);
   const result = isMarkdownPreferred(request) && rewriteLLM(url.pathname);
 
-  // redirect to the Markdown URL
-  if (result) return Response.redirect(new URL(result, url));
+  // the headers of `Response.redirect()` are immutable, build the response directly
+  if (result)
+    return new Response(null, {
+      status: 302,
+      headers: { Location: new URL(result, url).toString(), Vary: 'Accept' },
+    });
 
   return next();
 };
@@ -62,7 +66,7 @@ const llmMiddleware = createMiddleware().server(({ next, request }) => {
   const result = isMarkdownPreferred(request) && rewriteLLM(url.pathname);
 
   // redirect to the Markdown URL
-  if (result) throw redirect({ href: new URL(result, url).href });
+  if (result) throw redirect({ href: new URL(result, url).href, headers: { Vary: 'Accept' } });
 
   return next();
 });
