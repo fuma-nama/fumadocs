@@ -15,7 +15,8 @@ async function createSite(dir = fixturesDir) {
     url: (file) => `/vault/${file}`,
     remarkImageOptions: false,
   }).dynamicSource();
-  const plugin = obsidianPlugin(obsidian({ dir }), {
+  const plugin = obsidianPlugin({
+    vault: obsidian({ dir }),
     components: {
       Card: ({ href, children }) => <a href={href}>{children}</a>,
       a: (props) => <a data-link {...props} />,

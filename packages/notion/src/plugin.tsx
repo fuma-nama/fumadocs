@@ -24,6 +24,9 @@ export interface NotionPluginOptions extends Pick<
   NotionRendererProps,
   'components' | 'highlightCode'
 > {
+  /** the Notion data source from `createNotion()`, the one your content source reads */
+  notion: NotionIntegration;
+
   /**
    * Serve Notion-hosted files through a route on request, as their URLs expire after an hour. It needs a server, set it to `false` for static sites with durable file URLs.
    *
@@ -38,10 +41,12 @@ export interface NotionPluginOptions extends Pick<
 /**
  * Render the pages of a Notion data source from `createNotion()`, with their table of contents, search index and dates.
  */
-export function notionPlugin(
-  notion: NotionIntegration,
-  { fileProxy = true, Renderer = NotionRenderer, ...options }: NotionPluginOptions = {},
-): Plugin {
+export function notionPlugin({
+  notion,
+  fileProxy = true,
+  Renderer = NotionRenderer,
+  ...options
+}: NotionPluginOptions): Plugin {
   const filePath = (typeof fileProxy === 'object' && fileProxy.path) || '/api/notion/file';
   const handler = fileProxy && createNotionFileHandler(notion);
   const dataSourceId = toNotionId(notion.dataSourceId);

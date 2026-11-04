@@ -8,6 +8,9 @@ import type { ObsidianPage, ObsidianSource } from './source';
 import * as ObsidianComponents from './ui';
 
 export interface ObsidianPluginOptions {
+  /** the vault from `obsidian()`, the one your content source reads */
+  vault: ObsidianSource;
+
   /** components to render pages with, like the MDX components of Fumadocs UI, with the Obsidian components by default */
   components?: MDXComponents;
 }
@@ -15,10 +18,7 @@ export interface ObsidianPluginOptions {
 /**
  * Render the pages of an Obsidian vault from `obsidian()`, with relative links resolved to the URLs of their pages.
  */
-export function obsidianPlugin(
-  vault: ObsidianSource,
-  { components }: ObsidianPluginOptions = {},
-): Plugin {
+export function obsidianPlugin({ vault, components }: ObsidianPluginOptions): Plugin {
   // a vault change creates new pages, so their results stay valid
   const rendered = new WeakMap<ObsidianPage, Promise<ObsidianRendererResult>>();
   const Link = components?.a ?? 'a';

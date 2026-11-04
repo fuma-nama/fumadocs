@@ -65,7 +65,7 @@ function createClient() {
 }
 
 async function createSite(
-  options?: NotionPluginOptions,
+  options?: Omit<NotionPluginOptions, 'notion'>,
   mode: BuildMode = 'default',
   source = dataSourceId,
 ) {
@@ -74,10 +74,11 @@ async function createSite(
     client: client as unknown as Client,
     dataSourceId,
   }).dynamicSource();
-  const plugin = notionPlugin(
-    createNotion({ client: client as unknown as Client, dataSourceId: source }),
-    { highlightCode: false, ...options },
-  );
+  const plugin = notionPlugin({
+    notion: createNotion({ client: client as unknown as Client, dataSourceId: source }),
+    highlightCode: false,
+    ...options,
+  });
   const ctx: PluginContext = {
     mode,
     withBase: (pathname) => `/docs${pathname}`,
