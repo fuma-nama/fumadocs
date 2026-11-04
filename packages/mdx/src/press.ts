@@ -1,5 +1,5 @@
 import type { Plugin, PluginContext } from 'fumadocs-core/framework/plugin';
-import type { LoaderConfig } from 'fumadocs-core/source';
+import type { Page } from 'fumadocs-core/source';
 import type { MDXComponents } from 'mdx/types';
 import { createElement, type ComponentProps } from 'react';
 import type { AsyncDocCollectionEntry } from '@/runtime/server';
@@ -18,12 +18,10 @@ type Entry = DocMethods & (DocData | Pick<AsyncDocCollectionEntry, 'load'>);
 /**
  * Render the pages of Fumadocs MDX collections: their body, Markdown, table of contents, structured data and dates.
  */
-export default function mdxPlugin<Config extends LoaderConfig = LoaderConfig>({
-  components,
-}: MdxPluginOptions = {}): Plugin<Config> {
+export default function mdxPlugin({ components }: MdxPluginOptions = {}): Plugin {
   const Link = components?.a ?? 'a';
 
-  async function getComponents(ctx: PluginContext<Config>, page: Config['page']) {
+  async function getComponents(ctx: PluginContext, page: Page) {
     const loader = await ctx.getLoader();
     return {
       ...components,
