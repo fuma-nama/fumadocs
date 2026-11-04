@@ -52,7 +52,6 @@ export const ai: Feature<{ provider: AIProvider }> = {
     if (layout !== undefined) {
       await ctx.source(layout, (file) => {
         wired = file.code.includes(`'${clientLayoutImport}'`);
-        // `aiChat` takes client state, render the layout from a client component
         const declaration =
           !wired &&
           file.program.body.find(
@@ -75,10 +74,9 @@ export const ai: Feature<{ provider: AIProvider }> = {
     }
 
     if (layoutModule) {
-      await ctx.write(
-        path.join(baseDir, config.aliases.componentsDir, 'ai/layout.tsx'),
-        clientLayout(layoutModule),
-      );
+      const dir = path.join(baseDir, config.aliases.componentsDir, 'ai');
+      await ctx.write(path.join(dir, 'docked.tsx'), dockedChat);
+      await ctx.write(path.join(dir, 'layout.tsx'), chatLayout(layoutModule));
     } else if (!wired) {
       ctx.note(
         'Pass the AI chat to your docs layout, see https://fumadocs.dev/docs/integrations/llms#ask-ai.',
@@ -88,27 +86,40 @@ export const ai: Feature<{ provider: AIProvider }> = {
   },
 };
 
-/** a client component rendering the docs layout with the installed chat */
-function clientLayout(layoutModule: string) {
+/** the installed chat for docs layouts inside: `aiChat` takes client state, so the layout options stay on the server */
+const dockedChat = `'use client';
+import type { ReactNode } from 'react';
+import { AIChatOptionsProvider } from 'fumadocs-ui/layouts/shared';
+import { AIChatPanel, useAIChat } from './search';
+
+export function DockedAIChat({ children }: { children: ReactNode }) {
+  const { open, setOpen } = useAIChat();
+
+  return (
+    <AIChatOptionsProvider value={{ open, onOpenChange: setOpen, panel: <AIChatPanel /> }}>
+      {children}
+    </AIChatOptionsProvider>
+  );
+}
+`;
+
+/** the docs layout with the installed chat */
+function chatLayout(layoutModule: string) {
   // Glass and Spacious layouts have their own trigger
   const trigger = /\/(docs|notebook)$/.test(layoutModule);
 
-  return `'use client';
-import { DocsLayout as Layout, type DocsLayoutProps } from '${layoutModule}';
-import { AIChat, AIChatPanel,${trigger ? ' AIChatTrigger,' : ''} useAIChat } from './search';
+  return `import { DocsLayout as Layout, type DocsLayoutProps } from '${layoutModule}';
+import { AIChat${trigger ? ', AIChatTrigger' : ''} } from './search';
+import { DockedAIChat } from './docked';
 
 export function DocsLayout(props: DocsLayoutProps) {
   return (
     <AIChat>
-      <ChatLayout {...props} />${trigger ? '\n      <AIChatTrigger />' : ''}
+      <DockedAIChat>
+        <Layout {...props} />
+      </DockedAIChat>${trigger ? '\n      <AIChatTrigger />' : ''}
     </AIChat>
   );
-}
-
-function ChatLayout(props: DocsLayoutProps) {
-  const { open, setOpen } = useAIChat();
-
-  return <Layout {...props} aiChat={{ open, onOpenChange: setOpen, panel: <AIChatPanel /> }} />;
 }
 `;
 }

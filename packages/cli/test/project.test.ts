@@ -161,6 +161,25 @@ test('ai: the chat route reads processed Markdown', async () => {
   expect(await read(app, 'source.config.ts')).toContain('includeProcessedMarkdown: true');
 });
 
+test('ai: docks the chat in the docs layout', async () => {
+  const app = await project({
+    ...nextDocs,
+    'app/docs/layout.tsx': `import { DocsLayout } from 'fumadocs-ui/layouts/notebook';
+export default function Layout({ children }) {
+  return <DocsLayout tree={source.getPageTree()}>{children}</DocsLayout>;
+}`,
+  });
+  await run(ai, { provider: 'openrouter' }, app, ['ai/openrouter']);
+  expect(await read(app, 'app/docs/layout.tsx')).toContain(
+    "import { DocsLayout } from '@/components/ai/layout';",
+  );
+  const layout = await read(app, 'components/ai/layout.tsx');
+  expect(layout).not.toContain("'use client'");
+  expect(layout).toContain("from 'fumadocs-ui/layouts/notebook'");
+  expect(layout).toContain('<AIChatTrigger />');
+  expect(await read(app, 'components/ai/docked.tsx')).toContain('<AIChatOptionsProvider');
+});
+
 test('llms: Markdown of pages at `<page>.md` on Astro', async () => {
   const app = await project({
     'package.json': JSON.stringify({ dependencies: { astro: '7.4.2' } }),

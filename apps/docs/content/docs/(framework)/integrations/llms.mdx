@@ -381,62 +381,40 @@ INKEEP_API_KEY="..."
 </Tab>
 </Tabs>
 
-Docs layouts render the chat from their `aiChat` option, as it takes client state, create a client component for your layout, and use it in place of the original one:
+Docs layouts dock the chat of `AIChatOptionsProvider`. As the chat is client state, provide it from a client component:
 
-```tsx tab="Docs & Notebook" title="components/ai/layout.tsx"
+```tsx title="components/ai/docked.tsx"
 'use client';
-// or `fumadocs-ui/layouts/notebook`
-import { DocsLayout as Layout, type DocsLayoutProps } from 'fumadocs-ui/layouts/docs';
+import type { ReactNode } from 'react';
+import { AIChatOptionsProvider } from 'fumadocs-ui/layouts/shared';
 // the installed components
-import { AIChat, AIChatPanel, AIChatTrigger, useAIChat } from './search';
+import { AIChatPanel, useAIChat } from './search';
 
-export function DocsLayout(props: DocsLayoutProps) {
-  return (
-    <AIChat>
-      <ChatLayout {...props} />
-      <AIChatTrigger />
-    </AIChat>
-  );
-}
-
-function ChatLayout(props: DocsLayoutProps) {
+export function DockedAIChat({ children }: { children: ReactNode }) {
   const { open, setOpen } = useAIChat();
 
-  return <Layout {...props} aiChat={{ open, onOpenChange: setOpen, panel: <AIChatPanel /> }} />;
-}
-```
-
-```tsx tab="Docs & Notebook" title="layout.tsx"
-import { DocsLayout } from 'fumadocs-ui/layouts/docs'; // [!code --]
-import { DocsLayout } from '@/components/ai/layout'; // [!code ++]
-```
-
-```tsx tab="Glass & Spacious" title="components/ai/layout.tsx"
-'use client';
-// or `fumadocs-ui/layouts/spacious`
-import { DocsLayout as Layout, type DocsLayoutProps } from 'fumadocs-ui/layouts/glass';
-// the installed components
-import { AIChat, AIChatPanel, useAIChat } from './search';
-
-// the layout has its own Ask AI button
-export function DocsLayout(props: DocsLayoutProps) {
   return (
-    <AIChat>
-      <ChatLayout {...props} />
-    </AIChat>
+    <AIChatOptionsProvider value={{ open, onOpenChange: setOpen, panel: <AIChatPanel /> }}>
+      {children}
+    </AIChatOptionsProvider>
   );
 }
-
-function ChatLayout(props: DocsLayoutProps) {
-  const { open, setOpen } = useAIChat();
-
-  return <Layout {...props} aiChat={{ open, onOpenChange: setOpen, panel: <AIChatPanel /> }} />;
-}
 ```
 
-```tsx tab="Glass & Spacious" title="layout.tsx"
-import { DocsLayout } from 'fumadocs-ui/layouts/glass'; // [!code --]
-import { DocsLayout } from '@/components/ai/layout'; // [!code ++]
-```
+Wrap your docs layout with it:
 
-As the layout options are passed through a client component, they have to be serializable.
+```tsx title="layout.tsx"
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+import { AIChat, AIChatTrigger } from '@/components/ai/search';
+import { DockedAIChat } from '@/components/ai/docked';
+
+<AIChat>
+  <DockedAIChat>
+    <DocsLayout {...baseOptions()} tree={source.getPageTree()}>
+      {children}
+    </DocsLayout>
+  </DockedAIChat>
+  {/* Docs and Notebook layouts only, Glass and Spacious have their own button */}
+  <AIChatTrigger />
+</AIChat>;
+```

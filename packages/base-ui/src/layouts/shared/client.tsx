@@ -2,10 +2,7 @@
 import { usePathname } from 'fumadocs-core/framework';
 import Link from 'fumadocs-core/link';
 import { useI18n } from '@/contexts/i18n';
-import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/utils/cn';
-import { useTranslations } from '@fuma-translate/react';
-import { MessageCircleIcon } from 'lucide-react';
 import { type FC, type ComponentProps, type ReactNode, createContext, useState } from 'react';
 import { isLinkItemActive, type AIChatOptions, type BaseLayoutProps, type LinkItemType } from '.';
 import {
@@ -41,8 +38,6 @@ export const AIChatContext = createContext<AIChatOptions | undefined>(undefined)
 
 /**
  * The AI chat of docs layouts without an `aiChat` prop, for integrations that don't own the layout.
- *
- * The docs and notebook layouts add a floating button that toggles it, others have their own.
  */
 export function AIChatOptionsProvider({
   value,
@@ -52,27 +47,6 @@ export function AIChatOptionsProvider({
   children: ReactNode;
 }) {
   return <AIChatContext value={value}>{children}</AIChatContext>;
-}
-
-export function AIChatTrigger({ open, onOpenChange }: AIChatOptions) {
-  const t = useTranslations();
-
-  return (
-    <button
-      type="button"
-      aria-expanded={open}
-      className={cn(
-        buttonVariants({ variant: 'secondary' }),
-        'fixed inset-e-[calc(--spacing(4)+var(--removed-body-scroll-bar-size,0px))] bottom-4 z-20 gap-2 rounded-2xl text-fd-muted-foreground shadow-lg transition-[translate,opacity] motion-reduce:transition-none',
-        open && 'translate-y-10 opacity-0',
-      )}
-      inert={open}
-      onClick={() => onOpenChange(!open)}
-    >
-      <MessageCircleIcon aria-hidden className="size-4.5" />
-      {t('Ask AI', { note: 'AI chat button' })}
-    </button>
-  );
 }
 
 /**
