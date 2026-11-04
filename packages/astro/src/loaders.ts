@@ -102,16 +102,8 @@ async function getHistory(dir: string): Promise<History> {
   const stdout = await new Promise<string>((resolve) => {
     execFile(
       'git',
-      [
-        '-c',
-        'core.quotepath=off',
-        'log',
-        '--format=commit %H %aI',
-        '--name-only',
-        '--relative',
-        '--',
-        '.',
-      ],
+      // `-z`: file names as they are, unquoted
+      ['log', '-z', '--format=commit %H %aI', '--name-only', '--relative', '--', '.'],
       { cwd: dir, maxBuffer: Infinity },
       // without git, or the history, pages have no dates
       (error, out) => resolve(error ? '' : out),
@@ -121,7 +113,9 @@ async function getHistory(dir: string): Promise<History> {
   // newest first, the first date of a file is its last modified date
   const history: History = { dates: new Map() };
   let date: Date | undefined;
-  for (const line of stdout.split('\n')) {
+  for (let line of stdout.split('\0')) {
+    // the file names of a commit start on the line after its header
+    if (line.startsWith('\n')) line = line.slice(1);
     if (line.startsWith('commit ')) {
       const [, hash, iso] = line.split(' ');
       history.head ??= hash;
