@@ -3,8 +3,8 @@ import { usePathname } from 'fumadocs-core/framework';
 import Link from 'fumadocs-core/link';
 import { useI18n } from '@/contexts/i18n';
 import { cn } from '@/utils/cn';
-import { type FC, type ComponentProps, type ReactNode, createContext, useState } from 'react';
-import { isLinkItemActive, type AIChatOptions, type BaseLayoutProps, type LinkItemType } from '.';
+import { type FC, type ComponentProps, type ReactNode, useState } from 'react';
+import { isLinkItemActive, type BaseLayoutProps, type LinkItemType } from '.';
 import {
   type LanguageSelectProps,
   type LanguageSelectTextProps,
@@ -32,21 +32,6 @@ export function LinkItem({
       {props.children}
     </Link>
   );
-}
-
-export const AIChatContext = createContext<AIChatOptions | undefined>(undefined);
-
-/**
- * The AI chat of docs layouts without an `aiChat` prop, for integrations that don't own the layout.
- */
-export function AIChatOptionsProvider({
-  value,
-  children,
-}: {
-  value: AIChatOptions;
-  children: ReactNode;
-}) {
-  return <AIChatContext value={value}>{children}</AIChatContext>;
 }
 
 /**

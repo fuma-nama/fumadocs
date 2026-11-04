@@ -68,7 +68,6 @@ interface ThemeSwitchOptions extends ThemeSwitchProps {
   component?: ReactNode;
 }
 
-/** the AI chat of docs layouts, from their `aiChat` prop or else `AIChatOptionsProvider` */
 export interface AIChatOptions {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -324,10 +323,4 @@ export function isLinkItemActive(link: LinkItemType, pathname: string) {
   return isActive(link.url, pathname, link.active === 'nested-url');
 }
 
-export {
-  type BaseSlots,
-  type BaseSlotsProps,
-  baseSlots,
-  LinkItem,
-  AIChatOptionsProvider,
-} from './client';
+export { type BaseSlots, type BaseSlotsProps, baseSlots, LinkItem } from './client';

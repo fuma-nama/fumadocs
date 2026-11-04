@@ -23,7 +23,7 @@ import {
   type BaseSlots,
   type BaseSlotsProps,
 } from '../shared';
-import { AIChatContext, AIChatPanel } from '../shared/client';
+import { AIChatPanel } from '../shared/client';
 import { TreeContextProvider, useTabsGroups, useTreePath } from '@/contexts/tree';
 import { Header } from './slots/header';
 import { Container } from './slots/container';
@@ -85,9 +85,9 @@ export function LayoutBody(
     tabMode = 'auto',
     tree,
     containerProps,
+    aiChat,
     children,
   } = props;
-  const aiChat = props.aiChat ?? use(AIChatContext);
   const isTop = useIsScrollTop({ enabled: navTransparentMode === 'top' }) ?? true;
   const isNavTransparent = navTransparentMode === 'top' ? isTop : navTransparentMode === 'always';
   const { baseSlots, baseProps } = useBaseSlots(props);

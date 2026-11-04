@@ -36,13 +36,13 @@ export const ai: Feature<{ provider: AIProvider }> = {
     return project.static ? 'AI chat requires a server to run the chat route handler.' : true;
   },
   async apply(ctx, { provider }) {
+    const { cwd, baseDir, info, config, source } = ctx.project;
     await ctx.install(`ai/${provider}`);
     ctx.env(providers[provider].env, '');
     // the search index of the chat route reads the processed Markdown of pages
     await includeProcessedMarkdown(ctx);
-    if (ctx.project.source.dynamic) await readDynamicSource(ctx);
+    if (source.dynamic) await readDynamicSource(ctx);
 
-    const { cwd, baseDir, info, config } = ctx.project;
     // e.g. `./components` -> `@/components/ai/layout`
     const clientLayoutImport = `@/${path.posix.join(config.aliases.componentsDir, 'ai/layout')}`;
     const layout = await findSource(cwd, path.join(baseDir, info.routesDir), '<DocsLayout');
@@ -52,6 +52,7 @@ export const ai: Feature<{ provider: AIProvider }> = {
     if (layout !== undefined) {
       await ctx.source(layout, (file) => {
         wired = file.code.includes(`'${clientLayoutImport}'`);
+        // `aiChat` takes client state, render the layout from a client component
         const declaration =
           !wired &&
           file.program.body.find(
@@ -74,9 +75,10 @@ export const ai: Feature<{ provider: AIProvider }> = {
     }
 
     if (layoutModule) {
-      const dir = path.join(baseDir, config.aliases.componentsDir, 'ai');
-      await ctx.write(path.join(dir, 'docked.tsx'), dockedChat);
-      await ctx.write(path.join(dir, 'layout.tsx'), chatLayout(layoutModule));
+      await ctx.write(
+        path.join(baseDir, config.aliases.componentsDir, 'ai/layout.tsx'),
+        clientLayout(layoutModule),
+      );
     } else if (!wired) {
       ctx.note(
         'Pass the AI chat to your docs layout, see https://fumadocs.dev/docs/integrations/llms#ask-ai.',
@@ -86,40 +88,27 @@ export const ai: Feature<{ provider: AIProvider }> = {
   },
 };
 
-/** the installed chat for docs layouts inside: `aiChat` takes client state, so the layout options stay on the server */
-const dockedChat = `'use client';
-import type { ReactNode } from 'react';
-import { AIChatOptionsProvider } from 'fumadocs-ui/layouts/shared';
-import { AIChatPanel, useAIChat } from './search';
-
-export function DockedAIChat({ children }: { children: ReactNode }) {
-  const { open, setOpen } = useAIChat();
-
-  return (
-    <AIChatOptionsProvider value={{ open, onOpenChange: setOpen, panel: <AIChatPanel /> }}>
-      {children}
-    </AIChatOptionsProvider>
-  );
-}
-`;
-
-/** the docs layout with the installed chat */
-function chatLayout(layoutModule: string) {
+/** a client component rendering the docs layout with the installed chat */
+function clientLayout(layoutModule: string) {
   // Glass and Spacious layouts have their own trigger
   const trigger = /\/(docs|notebook)$/.test(layoutModule);
 
-  return `import { DocsLayout as Layout, type DocsLayoutProps } from '${layoutModule}';
-import { AIChat${trigger ? ', AIChatTrigger' : ''} } from './search';
-import { DockedAIChat } from './docked';
+  return `'use client';
+import { DocsLayout as Layout, type DocsLayoutProps } from '${layoutModule}';
+import { AIChat, AIChatPanel,${trigger ? ' AIChatTrigger,' : ''} useAIChat } from './search';
 
 export function DocsLayout(props: DocsLayoutProps) {
   return (
     <AIChat>
-      <DockedAIChat>
-        <Layout {...props} />
-      </DockedAIChat>${trigger ? '\n      <AIChatTrigger />' : ''}
+      <ChatLayout {...props} />${trigger ? '\n      <AIChatTrigger />' : ''}
     </AIChat>
   );
+}
+
+function ChatLayout(props: DocsLayoutProps) {
+  const { open, setOpen } = useAIChat();
+
+  return <Layout {...props} aiChat={{ open, onOpenChange: setOpen, panel: <AIChatPanel /> }} />;
 }
 `;
 }

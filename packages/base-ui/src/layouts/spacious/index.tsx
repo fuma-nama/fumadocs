@@ -22,7 +22,7 @@ import {
   type SidebarProviderProps,
 } from './slots/sidebar';
 import { Header } from './slots/header';
-import { AIChatContext, AIChatPanel } from '@/layouts/shared/client';
+import { AIChatPanel } from '@/layouts/shared/client';
 import { cn } from '@/utils/cn';
 import { HeaderActions } from './slots/actions';
 
@@ -75,8 +75,7 @@ const { useBaseSlots } = baseSlots({
 });
 
 export function DocsLayout(props: DocsLayoutProps) {
-  const { tree, tabs: tabsOptions, sidebar, slots: customSlots = {}, children } = props;
-  const aiChat = props.aiChat ?? use(AIChatContext);
+  const { tree, tabs: tabsOptions, aiChat, sidebar, slots: customSlots = {}, children } = props;
   const linkItems = useLinkItems(props);
   const { baseSlots, baseProps } = useBaseSlots(props);
   const tabs = useMemo(() => {
