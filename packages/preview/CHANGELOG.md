@@ -1,3 +1,9 @@
+## fumadocs-preview@0.2.6
+
+### Fix blank pages
+
+- Fix pages failing to render with `Missing Router`.
+
 ## fumadocs-preview@0.2.5
 
 ### Bring your own highlighter

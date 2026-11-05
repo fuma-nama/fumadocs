@@ -1,3 +1,17 @@
+## fumadocs-mdx@15.5.0
+
+### Aliases in macro collections on Vite
+
+- Collections of `fumadocs-mdx/macro` resolve the Vite aliases of your app, like `resolve.tsconfigPaths`.
+
+### Framework plugin
+
+- Added `mdxPlugin()` as the default export of `fumadocs-mdx/press`: it renders the pages of Fumadocs MDX collections in frameworks running `fumadocs-core/framework/plugin`, with your MDX `components` and relative links resolved.
+
+### Faster Vite RSC builds
+
+- Vite builds with React Server Components compile MDX files faster.
+
 ## fumadocs-mdx@15.4.10
 
 ### `remarkInclude` in `fumadocs-core`
