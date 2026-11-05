@@ -1,0 +1,2084 @@
+{
+  "name": "tomli",
+  "path": "tomli",
+  "filepath": "tomli/__init__.py",
+  "description": null,
+  "docstring": [],
+  "attributes": [
+    {
+      "name": "__all__",
+      "annotation": null,
+      "description": null,
+      "value": "('loads', 'load', 'TOMLDecodeError')"
+    },
+    {
+      "name": "__version__",
+      "annotation": null,
+      "description": null,
+      "value": "'2.5.0'"
+    }
+  ],
+  "modules": {
+    "_types": {
+      "name": "_types",
+      "path": "tomli._types",
+      "filepath": "tomli/_types.cpython-312-darwin.so",
+      "description": null,
+      "docstring": [],
+      "attributes": [
+        {
+          "name": "__file__",
+          "annotation": null,
+          "description": [
+            {
+              "kind": "text",
+              "value": "str(object='') -> str\nstr(bytes_or_buffer[, encoding[, errors]]) -> str\n\nCreate a new string object from the given object. If encoding or\nerrors is specified, then the object must expose a data buffer\nthat will be decoded using the given encoding and error handler.\nOtherwise, returns the result of object.__str__() (if defined)\nor repr(object).\nencoding defaults to sys.getdefaultencoding().\nerrors defaults to 'strict'."
+            }
+          ],
+          "value": "'tomli/_types.cpython-312-darwin.so'"
+        },
+        {
+          "name": "__name__",
+          "annotation": null,
+          "description": [
+            {
+              "kind": "text",
+              "value": "str(object='') -> str\nstr(bytes_or_buffer[, encoding[, errors]]) -> str\n\nCreate a new string object from the given object. If encoding or\nerrors is specified, then the object must expose a data buffer\nthat will be decoded using the given encoding and error handler.\nOtherwise, returns the result of object.__str__() (if defined)\nor repr(object).\nencoding defaults to sys.getdefaultencoding().\nerrors defaults to 'strict'."
+            }
+          ],
+          "value": "'tomli._types'"
+        },
+        {
+          "name": "__package__",
+          "annotation": null,
+          "description": [
+            {
+              "kind": "text",
+              "value": "str(object='') -> str\nstr(bytes_or_buffer[, encoding[, errors]]) -> str\n\nCreate a new string object from the given object. If encoding or\nerrors is specified, then the object must expose a data buffer\nthat will be decoded using the given encoding and error handler.\nOtherwise, returns the result of object.__str__() (if defined)\nor repr(object).\nencoding defaults to sys.getdefaultencoding().\nerrors defaults to 'strict'."
+            }
+          ],
+          "value": "'tomli'"
+        }
+      ],
+      "modules": {},
+      "classes": {},
+      "functions": {}
+    },
+    "_re": {
+      "name": "_re",
+      "path": "tomli._re",
+      "filepath": "tomli/_re.py",
+      "description": null,
+      "docstring": [],
+      "attributes": [
+        {
+          "name": "TYPE_CHECKING",
+          "annotation": null,
+          "description": null,
+          "value": "False"
+        },
+        {
+          "name": "RE_NUMBER",
+          "annotation": "Final",
+          "description": null,
+          "value": "re.compile('\\n0\\n(?:\\n    x[0-9A-Fa-f](?:_?[0-9A-Fa-f])*   # hex\\n    |\\n    b[01](?:_?[01])*                 # bin\\n    |\\n    o[0-7](?:_?[0-7])*               # oct\\n)\\n|\\n[+-]?(?:0|[1-9](?:_?[0-9])*)         # dec, integer part\\n(?P<floatpart>\\n    (?:\\\\.[0-9](?:_?[0-9])*)?         # optional fractional part\\n    (?:[eE][+-]?[0-9](?:_?[0-9])*)?  # optional exponent part\\n)\\n', flags=re.VERBOSE)"
+        },
+        {
+          "name": "RE_LOCALTIME",
+          "annotation": "Final",
+          "description": null,
+          "value": "re.compile(_TIME_RE_STR, flags=re.VERBOSE)"
+        },
+        {
+          "name": "RE_DATETIME",
+          "annotation": "Final",
+          "description": null,
+          "value": "re.compile(f'\\n([0-9]{{4}})-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])  # date, e.g. 1988-10-27\\n(?:\\n    [Tt ]\\n    {_TIME_RE_STR}\\n    (?:([Zz])|([+-])([01][0-9]|2[0-3]):([0-5][0-9]))?  # optional time offset\\n)?\\n', flags=re.VERBOSE)"
+        }
+      ],
+      "modules": {},
+      "classes": {},
+      "functions": {
+        "match_to_datetime": {
+          "name": "match_to_datetime",
+          "path": "tomli._re.match_to_datetime",
+          "signature": "(match) -> datetime | date",
+          "description": "Convert a `RE_DATETIME` match to `datetime.datetime` or `datetime.date`.\n\nRaises ValueError if the match does not correspond to a valid date\nor datetime.",
+          "parameters": [
+            {
+              "name": "match",
+              "annotation": "re.Match[str]",
+              "description": null,
+              "value": null
+            }
+          ],
+          "returns": {
+            "name": "",
+            "annotation": "datetime.datetime | datetime.date",
+            "description": null
+          },
+          "docstring": [],
+          "source": "def match_to_datetime(match: re.Match[str]) -> datetime | date:\n    \"\"\"Convert a `RE_DATETIME` match to `datetime.datetime` or `datetime.date`.\n\n    Raises ValueError if the match does not correspond to a valid date\n    or datetime.\n    \"\"\"\n    (\n        year_str,\n        month_str,\n        day_str,\n        hour_str,\n        minute_str,\n        sec_str,\n        micros_str,\n        zulu_time,\n        offset_sign_str,\n        offset_hour_str,\n        offset_minute_str,\n    ) = match.groups()\n    year, month, day = int(year_str), int(month_str), int(day_str)\n    if hour_str is None:\n        return date(year, month, day)\n    hour, minute = int(hour_str), int(minute_str)\n    sec = int(sec_str) if sec_str else 0\n    micros = int(micros_str.ljust(6, \"0\")) if micros_str else 0\n    if offset_sign_str:\n        tz: tzinfo | None = cached_tz(\n            offset_hour_str, offset_minute_str, offset_sign_str\n        )\n    elif zulu_time:\n        tz = timezone.utc\n    else:  # local date-time\n        tz = None\n    return datetime(year, month, day, hour, minute, sec, micros, tzinfo=tz)"
+        },
+        "cached_tz": {
+          "name": "cached_tz",
+          "path": "tomli._re.cached_tz",
+          "signature": "(hour_str, minute_str, sign_str) -> timezone",
+          "description": null,
+          "parameters": [
+            {
+              "name": "hour_str",
+              "annotation": "str",
+              "description": null,
+              "value": null
+            },
+            {
+              "name": "minute_str",
+              "annotation": "str",
+              "description": null,
+              "value": null
+            },
+            {
+              "name": "sign_str",
+              "annotation": "str",
+              "description": null,
+              "value": null
+            }
+          ],
+          "returns": {
+            "name": "",
+            "annotation": "datetime.timezone",
+            "description": null
+          },
+          "docstring": [],
+          "source": "@lru_cache(maxsize=None)\ndef cached_tz(hour_str: str, minute_str: str, sign_str: str) -> timezone:\n    sign = 1 if sign_str == \"+\" else -1\n    return timezone(\n        timedelta(\n            hours=sign * int(hour_str),\n            minutes=sign * int(minute_str),\n        )\n    )"
+        },
+        "match_to_localtime": {
+          "name": "match_to_localtime",
+          "path": "tomli._re.match_to_localtime",
+          "signature": "(match) -> time",
+          "description": null,
+          "parameters": [
+            {
+              "name": "match",
+              "annotation": "re.Match[str]",
+              "description": null,
+              "value": null
+            }
+          ],
+          "returns": {
+            "name": "",
+            "annotation": "datetime.time",
+            "description": null
+          },
+          "docstring": [],
+          "source": "def match_to_localtime(match: re.Match[str]) -> time:\n    hour_str, minute_str, sec_str, micros_str = match.groups()\n    sec = int(sec_str) if sec_str else 0\n    micros = int(micros_str.ljust(6, \"0\")) if micros_str else 0\n    return time(int(hour_str), int(minute_str), sec, micros)"
+        },
+        "match_to_number": {
+          "name": "match_to_number",
+          "path": "tomli._re.match_to_number",
+          "signature": "(match, parse_float) -> Any",
+          "description": null,
+          "parameters": [
+            {
+              "name": "match",
+              "annotation": "re.Match[str]",
+              "description": null,
+              "value": null
+            },
+            {
+              "name": "parse_float",
+              "annotation": "ParseFloat",
+              "description": null,
+              "value": null
+            }
+          ],
+          "returns": {
+            "name": "",
+            "annotation": "typing.Any",
+            "description": null
+          },
+          "docstring": [],
+          "source": "def match_to_number(match: re.Match[str], parse_float: ParseFloat) -> Any:\n    if match.group(\"floatpart\"):\n        return parse_float(match.group())\n    return int(match.group(), 0)"
+        }
+      }
+    },
+    "_parser": {
+      "name": "_parser",
+      "path": "tomli._parser",
+      "filepath": "tomli/_parser.cpython-312-darwin.so",
+      "description": null,
+      "docstring": [],
+      "attributes": [
+        {
+          "name": "ASCII_CTRL",
+          "annotation": null,
+          "description": [
+            {
+              "kind": "text",
+              "value": "frozenset() -> empty frozenset object\nfrozenset(iterable) -> frozenset object\n\nBuild an immutable unordered collection of unique elements."
+            }
+          ],
+          "value": "frozenset({'\\x17', '\\x19', '\\x0e', '\\x14', '\\x1f', '\\x16', '\\x15', '\\r', '\\x06', '\\x08', '\\x1d', '\\x07', '\\x03', '\\x1a', '\\x1e', '\\x10', '\\x18', '\\x12', '\\x0b', '\\x02', '\\x11', '\\n', '\\x04', '\\x0f', '\\t', '\\x00', '\\x13', '\\x7f', '\\x05', '\\x1b', '\\x1c', '\\x0c', '\\x01'})"
+        },
+        {
+          "name": "BARE_KEY_CHARS",
+          "annotation": null,
+          "description": [
+            {
+              "kind": "text",
+              "value": "frozenset() -> empty frozenset object\nfrozenset(iterable) -> frozenset object\n\nBuild an immutable unordered collection of unique elements."
+            }
+          ],
+          "value": "frozenset({'Y', 'O', 'H', 'P', 'M', 's', 'c', '9', 'Q', 'b', '6', '8', 'B', '7', 'p', 'o', '5', 'x', 'y', 'z', 'I', 'h', '4', 'C', '-', 't', 'f', 'E', 'u', 'F', 'g', 'G', 'a', 'J', 'N', 'V', 'K', 'r', 'd', 'l', 'q', 'S', '_', 'm', 'j', 'k', 'W', 'L', '1', 'R', '3', 'U', 'v', 'i', 'n', 'X', 'A', '2', 'T', 'e', 'D', 'Z', 'w', '0'})"
+        },
+        {
+          "name": "BASIC_STR_ESCAPE_REPLACEMENTS",
+          "annotation": null,
+          "description": null,
+          "value": "mappingproxy({'\\\\b': '\\x08', '\\\\t': '\\t', '\\\\n': '\\n', '\\\\f': '\\x0c', '\\\\r': '\\r', '\\\\e': '\\x1b', '\\\\\"': '\"', '\\\\\\\\': '\\\\'})"
+        },
+        {
+          "name": "HEXDIGIT_CHARS",
+          "annotation": null,
+          "description": [
+            {
+              "kind": "text",
+              "value": "frozenset() -> empty frozenset object\nfrozenset(iterable) -> frozenset object\n\nBuild an immutable unordered collection of unique elements."
+            }
+          ],
+          "value": "frozenset({'c', '9', 'b', '6', '8', 'B', '5', '4', 'C', '2', 'f', 'E', 'F', 'a', 'd', '1', '3', 'A', 'e', 'D', '7', '0'})"
+        },
+        {
+          "name": "ILLEGAL_BASIC_STR_CHARS",
+          "annotation": null,
+          "description": [
+            {
+              "kind": "text",
+              "value": "frozenset() -> empty frozenset object\nfrozenset(iterable) -> frozenset object\n\nBuild an immutable unordered collection of unique elements."
+            }
+          ],
+          "value": "frozenset({'\\x17', '\\x19', '\\x0e', '\\x14', '\\x1f', '\\x16', '\\x15', '\\r', '\\x06', '\\x08', '\\x1d', '\\x07', '\\x03', '\\x1a', '\\x1e', '\\x10', '\\x18', '\\x12', '\\x0b', '\\x02', '\\x11', '\\n', '\\x04', '\\x0f', '\\x00', '\\x13', '\\x7f', '\\x05', '\\x1b', '\\x1c', '\\x0c', '\\x01'})"
+        },
+        {
+          "name": "ILLEGAL_COMMENT_CHARS",
+          "annotation": null,
+          "description": [
+            {
+              "kind": "text",
+              "value": "frozenset() -> empty frozenset object\nfrozenset(iterable) -> frozenset object\n\nBuild an immutable unordered collection of unique elements."
+            }
+          ],
+          "value": "frozenset({'\\x17', '\\x19', '\\x0e', '\\x14', '\\x1f', '\\x16', '\\x15', '\\r', '\\x06', '\\x08', '\\x1d', '\\x07', '\\x03', '\\x1a', '\\x1e', '\\x10', '\\x18', '\\x12', '\\x0b', '\\x02', '\\x11', '\\n', '\\x04', '\\x0f', '\\x00', '\\x13', '\\x7f', '\\x05', '\\x1b', '\\x1c', '\\x0c', '\\x01'})"
+        },
+        {
+          "name": "ILLEGAL_LITERAL_STR_CHARS",
+          "annotation": null,
+          "description": [
+            {
+              "kind": "text",
+              "value": "frozenset() -> empty frozenset object\nfrozenset(iterable) -> frozenset object\n\nBuild an immutable unordered collection of unique elements."
+            }
+          ],
+          "value": "frozenset({'\\x17', '\\x19', '\\x0e', '\\x14', '\\x1f', '\\x16', '\\x15', '\\r', '\\x06', '\\x08', '\\x1d', '\\x07', '\\x03', '\\x1a', '\\x1e', '\\x10', '\\x18', '\\x12', '\\x0b', '\\x02', '\\x11', '\\n', '\\x04', '\\x0f', '\\x00', '\\x13', '\\x7f', '\\x05', '\\x1b', '\\x1c', '\\x0c', '\\x01'})"
+        },
+        {
+          "name": "ILLEGAL_MULTILINE_BASIC_STR_CHARS",
+          "annotation": null,
+          "description": [
+            {
+              "kind": "text",
+              "value": "frozenset() -> empty frozenset object\nfrozenset(iterable) -> frozenset object\n\nBuild an immutable unordered collection of unique elements."
+            }
+          ],
+          "value": "frozenset({'\\x17', '\\x19', '\\x0e', '\\x14', '\\x1f', '\\x16', '\\x15', '\\r', '\\x06', '\\x08', '\\x1d', '\\x07', '\\x03', '\\x1a', '\\x1e', '\\x10', '\\x18', '\\x12', '\\x0b', '\\x02', '\\x11', '\\x04', '\\x0f', '\\x00', '\\x13', '\\x7f', '\\x05', '\\x1b', '\\x1c', '\\x0c', '\\x01'})"
+        },
+        {
+          "name": "ILLEGAL_MULTILINE_LITERAL_STR_CHARS",
+          "annotation": null,
+          "description": [
+            {
+              "kind": "text",
+              "value": "frozenset() -> empty frozenset object\nfrozenset(iterable) -> frozenset object\n\nBuild an immutable unordered collection of unique elements."
+            }
+          ],
+          "value": "frozenset({'\\x17', '\\x19', '\\x0e', '\\x14', '\\x1f', '\\x16', '\\x15', '\\r', '\\x06', '\\x08', '\\x1d', '\\x07', '\\x03', '\\x1a', '\\x1e', '\\x10', '\\x18', '\\x12', '\\x0b', '\\x02', '\\x11', '\\x04', '\\x0f', '\\x00', '\\x13', '\\x7f', '\\x05', '\\x1b', '\\x1c', '\\x0c', '\\x01'})"
+        },
+        {
+          "name": "KEY_INITIAL_CHARS",
+          "annotation": null,
+          "description": [
+            {
+              "kind": "text",
+              "value": "frozenset() -> empty frozenset object\nfrozenset(iterable) -> frozenset object\n\nBuild an immutable unordered collection of unique elements."
+            }
+          ],
+          "value": "frozenset({'Y', 'P', 'M', 's', '9', 'Q', '\"', 'p', 'o', 'x', 'z', 'h', 'C', 't', 'f', 'E', 'u', 'J', '2', 'a', 'V', 'K', 'l', '_', 'j', 'k', '1', 'R', 'i', \"'\", 'A', 'T', 'D', 'Z', 'w', '0', 'O', 'H', 'c', 'b', '6', '8', 'B', '5', 'y', 'I', '4', '-', 'F', 'G', 'g', 'N', 'r', 'd', 'q', 'S', 'm', 'W', 'L', '3', 'U', 'v', 'n', 'X', 'e', '7'})"
+        },
+        {
+          "name": "MAX_INLINE_NESTING",
+          "annotation": null,
+          "description": [
+            {
+              "kind": "text",
+              "value": "int([x]) -> integer\nint(x, base=10) -> integer\n\nConvert a number or string to an integer, or return 0 if no arguments\nare given.  If x is a number, return x.__int__().  For floating-point\nnumbers, this truncates towards zero.\n\nIf x is not a number or if base is given, then x must be a string,\nbytes, or bytearray instance representing an integer literal in the\ngiven base.  The literal can be preceded by '+' or '-' and be surrounded\nby whitespace.  The base defaults to 10.  Valid bases are 0 and 2-36.\nBase 0 means to interpret the base from the string as an integer literal.\n>>> int('0b100', base=0)\n4"
+            }
+          ],
+          "value": "400"
+        },
+        {
+          "name": "MAX_KEY_PARTS",
+          "annotation": null,
+          "description": [
+            {
+              "kind": "text",
+              "value": "int([x]) -> integer\nint(x, base=10) -> integer\n\nConvert a number or string to an integer, or return 0 if no arguments\nare given.  If x is a number, return x.__int__().  For floating-point\nnumbers, this truncates towards zero.\n\nIf x is not a number or if base is given, then x must be a string,\nbytes, or bytearray instance representing an integer literal in the\ngiven base.  The literal can be preceded by '+' or '-' and be surrounded\nby whitespace.  The base defaults to 10.  Valid bases are 0 and 2-36.\nBase 0 means to interpret the base from the string as an integer literal.\n>>> int('0b100', base=0)\n4"
+            }
+          ],
+          "value": "1000"
+        },
+        {
+          "name": "RE_DATETIME",
+          "annotation": null,
+          "description": [
+            {
+              "kind": "text",
+              "value": "Compiled regular expression object."
+            }
+          ],
+          "value": "re.compile('\\n([0-9]{4})-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])  # date, e.g. 1988-10-27\\n(?:\\n    [Tt ]\\n    \\n([01][0-9]|2[0-3])             # hours\\n:([0-5][0-9])                  # minutes\\n(?:\\n    :([0-5, re.VERBOSE)"
+        },
+        {
+          "name": "RE_LOCALTIME",
+          "annotation": null,
+          "description": [
+            {
+              "kind": "text",
+              "value": "Compiled regular expression object."
+            }
+          ],
+          "value": "re.compile('\\n([01][0-9]|2[0-3])             # hours\\n:([0-5][0-9])                  # minutes\\n(?:\\n    :([0-5][0-9])              # optional seconds\\n    (?:\\\\.([0-9]{1,6})[0-9]*)?  # optional fractions of a s, re.VERBOSE)"
+        },
+        {
+          "name": "RE_NUMBER",
+          "annotation": null,
+          "description": [
+            {
+              "kind": "text",
+              "value": "Compiled regular expression object."
+            }
+          ],
+          "value": "re.compile('\\n0\\n(?:\\n    x[0-9A-Fa-f](?:_?[0-9A-Fa-f])*   # hex\\n    |\\n    b[01](?:_?[01])*                 # bin\\n    |\\n    o[0-7](?:_?[0-7])*               # oct\\n)\\n|\\n[+-]?(?:0|[1-9](?:_?[0-9])*)         , re.VERBOSE)"
+        },
+        {
+          "name": "TOML_WS",
+          "annotation": null,
+          "description": [
+            {
+              "kind": "text",
+              "value": "frozenset() -> empty frozenset object\nfrozenset(iterable) -> frozenset object\n\nBuild an immutable unordered collection of unique elements."
+            }
+          ],
+          "value": "frozenset({' ', '\\t'})"
+        },
+        {
+          "name": "TOML_WS_AND_NEWLINE",
+          "annotation": null,
+          "description": [
+            {
+              "kind": "text",
+              "value": "frozenset() -> empty frozenset object\nfrozenset(iterable) -> frozenset object\n\nBuild an immutable unordered collection of unique elements."
+            }
+          ],
+          "value": "frozenset({' ', '\\n', '\\t'})"
+        },
+        {
+          "name": "TYPE_CHECKING",
+          "annotation": null,
+          "description": [
+            {
+              "kind": "text",
+              "value": "bool(x) -> bool\n\nReturns True when the argument x is true, False otherwise.\nThe builtins True and False are the only two instances of the class bool.\nThe class bool is a subclass of the class int, and cannot be subclassed."
+            }
+          ],
+          "value": "False"
+        },
+        {
+          "name": "__file__",
+          "annotation": null,
+          "description": [
+            {
+              "kind": "text",
+              "value": "str(object='') -> str\nstr(bytes_or_buffer[, encoding[, errors]]) -> str\n\nCreate a new string object from the given object. If encoding or\nerrors is specified, then the object must expose a data buffer\nthat will be decoded using the given encoding and error handler.\nOtherwise, returns the result of object.__str__() (if defined)\nor repr(object).\nencoding defaults to sys.getdefaultencoding().\nerrors defaults to 'strict'."
+            }
+          ],
+          "value": "'tomli/_parser.cpython-312-darwin.so'"
+        },
+        {
+          "name": "__lazy_modules__",
+          "annotation": null,
+          "description": [
+            {
+              "kind": "text",
+              "value": "Built-in mutable sequence.\n\nIf no argument is given, the constructor creates a new empty list.\nThe argument must be an iterable if specified."
+            }
+          ],
+          "value": "['tomli._re', 'tomllib._re']"
+        },
+        {
+          "name": "__name__",
+          "annotation": null,
+          "description": [
+            {
+              "kind": "text",
+              "value": "str(object='') -> str\nstr(bytes_or_buffer[, encoding[, errors]]) -> str\n\nCreate a new string object from the given object. If encoding or\nerrors is specified, then the object must expose a data buffer\nthat will be decoded using the given encoding and error handler.\nOtherwise, returns the result of object.__str__() (if defined)\nor repr(object).\nencoding defaults to sys.getdefaultencoding().\nerrors defaults to 'strict'."
+            }
+          ],
+          "value": "'tomli._parser'"
+        },
+        {
+          "name": "__package__",
+          "annotation": null,
+          "description": [
+            {
+              "kind": "text",
+              "value": "str(object='') -> str\nstr(bytes_or_buffer[, encoding[, errors]]) -> str\n\nCreate a new string object from the given object. If encoding or\nerrors is specified, then the object must expose a data buffer\nthat will be decoded using the given encoding and error handler.\nOtherwise, returns the result of object.__str__() (if defined)\nor repr(object).\nencoding defaults to sys.getdefaultencoding().\nerrors defaults to 'strict'."
+            }
+          ],
+          "value": "'tomli'"
+        },
+        {
+          "name": "annotations",
+          "annotation": null,
+          "description": null,
+          "value": "_Feature((3, 7, 0, 'beta', 1), None, 16777216)"
+        }
+      ],
+      "modules": {},
+      "classes": {
+        "DEPRECATED_DEFAULT": {
+          "name": "DEPRECATED_DEFAULT",
+          "path": "tomli._parser.DEPRECATED_DEFAULT",
+          "description": null,
+          "parameters": [],
+          "attributes": [
+            {
+              "name": "__doc__",
+              "annotation": null,
+              "description": [
+                {
+                  "kind": "text",
+                  "value": "str(object='') -> str\nstr(bytes_or_buffer[, encoding[, errors]]) -> str\n\nCreate a new string object from the given object. If encoding or\nerrors is specified, then the object must expose a data buffer\nthat will be decoded using the given encoding and error handler.\nOtherwise, returns the result of object.__str__() (if defined)\nor repr(object).\nencoding defaults to sys.getdefaultencoding().\nerrors defaults to 'strict'."
+                }
+              ],
+              "value": "''"
+            },
+            {
+              "name": "__module__",
+              "annotation": null,
+              "description": [
+                {
+                  "kind": "text",
+                  "value": "str(object='') -> str\nstr(bytes_or_buffer[, encoding[, errors]]) -> str\n\nCreate a new string object from the given object. If encoding or\nerrors is specified, then the object must expose a data buffer\nthat will be decoded using the given encoding and error handler.\nOtherwise, returns the result of object.__str__() (if defined)\nor repr(object).\nencoding defaults to sys.getdefaultencoding().\nerrors defaults to 'strict'."
+                }
+              ],
+              "value": "'tomli._parser'"
+            },
+            {
+              "name": "__mypyc_attrs__",
+              "annotation": null,
+              "description": [
+                {
+                  "kind": "text",
+                  "value": "Built-in immutable sequence.\n\nIf no argument is given, the constructor returns an empty tuple.\nIf iterable is specified the tuple is initialized from iterable's items.\n\nIf the argument is a tuple, the return value is the same object."
+                }
+              ],
+              "value": "()"
+            }
+          ],
+          "docstring": [],
+          "functions": {
+            "__getstate__": {
+              "name": "__getstate__",
+              "path": "tomli._parser.DEPRECATED_DEFAULT.__getstate__",
+              "signature": "()",
+              "description": null,
+              "parameters": [],
+              "returns": {
+                "name": "",
+                "annotation": null,
+                "description": null
+              },
+              "docstring": [],
+              "source": ""
+            },
+            "__internal_mypyc_setup": {
+              "name": "__internal_mypyc_setup",
+              "path": "tomli._parser.DEPRECATED_DEFAULT.__internal_mypyc_setup",
+              "signature": "()",
+              "description": null,
+              "parameters": [],
+              "returns": {
+                "name": "",
+                "annotation": null,
+                "description": null
+              },
+              "docstring": [],
+              "source": ""
+            },
+            "__new__": {
+              "name": "__new__",
+              "path": "tomli._parser.DEPRECATED_DEFAULT.__new__",
+              "signature": "(**kwargs)",
+              "description": "Create and return a new object.  See help(type) for accurate signature.",
+              "parameters": [
+                {
+                  "name": "kwargs",
+                  "annotation": null,
+                  "description": null,
+                  "value": null
+                }
+              ],
+              "returns": {
+                "name": "",
+                "annotation": null,
+                "description": null
+              },
+              "docstring": [],
+              "source": ""
+            },
+            "__setstate__": {
+              "name": "__setstate__",
+              "path": "tomli._parser.DEPRECATED_DEFAULT.__setstate__",
+              "signature": "()",
+              "description": null,
+              "parameters": [],
+              "returns": {
+                "name": "",
+                "annotation": null,
+                "description": null
+              },
+              "docstring": [],
+              "source": ""
+            }
+          },
+          "source": "",
+          "inherited_members": {}
+        },
+        "Flags": {
+          "name": "Flags",
+          "path": "tomli._parser.Flags",
+          "description": null,
+          "parameters": [
+            {
+              "name": "args",
+              "annotation": null,
+              "description": null,
+              "value": null
+            },
+            {
+              "name": "kwargs",
+              "annotation": null,
+              "description": null,
+              "value": null
+            }
+          ],
+          "attributes": [
+            {
+              "name": "EXPLICIT_NEST",
+              "annotation": null,
+              "description": [
+                {
+                  "kind": "text",
+                  "value": "int([x]) -> integer\nint(x, base=10) -> integer\n\nConvert a number or string to an integer, or return 0 if no arguments\nare given.  If x is a number, return x.__int__().  For floating-point\nnumbers, this truncates towards zero.\n\nIf x is not a number or if base is given, then x must be a string,\nbytes, or bytearray instance representing an integer literal in the\ngiven base.  The literal can be preceded by '+' or '-' and be surrounded\nby whitespace.  The base defaults to 10.  Valid bases are 0 and 2-36.\nBase 0 means to interpret the base from the string as an integer literal.\n>>> int('0b100', base=0)\n4"
+                }
+              ],
+              "value": "1"
+            },
+            {
+              "name": "FROZEN",
+              "annotation": null,
+              "description": [
+                {
+                  "kind": "text",
+                  "value": "int([x]) -> integer\nint(x, base=10) -> integer\n\nConvert a number or string to an integer, or return 0 if no arguments\nare given.  If x is a number, return x.__int__().  For floating-point\nnumbers, this truncates towards zero.\n\nIf x is not a number or if base is given, then x must be a string,\nbytes, or bytearray instance representing an integer literal in the\ngiven base.  The literal can be preceded by '+' or '-' and be surrounded\nby whitespace.  The base defaults to 10.  Valid bases are 0 and 2-36.\nBase 0 means to interpret the base from the string as an integer literal.\n>>> int('0b100', base=0)\n4"
+                }
+              ],
+              "value": "0"
+            },
+            {
+              "name": "__doc__",
+              "annotation": null,
+              "description": [
+                {
+                  "kind": "text",
+                  "value": "str(object='') -> str\nstr(bytes_or_buffer[, encoding[, errors]]) -> str\n\nCreate a new string object from the given object. If encoding or\nerrors is specified, then the object must expose a data buffer\nthat will be decoded using the given encoding and error handler.\nOtherwise, returns the result of object.__str__() (if defined)\nor repr(object).\nencoding defaults to sys.getdefaultencoding().\nerrors defaults to 'strict'."
+                }
+              ],
+              "value": "''"
+            },
+            {
+              "name": "__module__",
+              "annotation": null,
+              "description": [
+                {
+                  "kind": "text",
+                  "value": "str(object='') -> str\nstr(bytes_or_buffer[, encoding[, errors]]) -> str\n\nCreate a new string object from the given object. If encoding or\nerrors is specified, then the object must expose a data buffer\nthat will be decoded using the given encoding and error handler.\nOtherwise, returns the result of object.__str__() (if defined)\nor repr(object).\nencoding defaults to sys.getdefaultencoding().\nerrors defaults to 'strict'."
+                }
+              ],
+              "value": "'tomli._parser'"
+            },
+            {
+              "name": "__mypyc_attrs__",
+              "annotation": null,
+              "description": [
+                {
+                  "kind": "text",
+                  "value": "Built-in immutable sequence.\n\nIf no argument is given, the constructor returns an empty tuple.\nIf iterable is specified the tuple is initialized from iterable's items.\n\nIf the argument is a tuple, the return value is the same object."
+                }
+              ],
+              "value": "('_flags', '_pending_flags')"
+            }
+          ],
+          "docstring": [],
+          "functions": {
+            "__getstate__": {
+              "name": "__getstate__",
+              "path": "tomli._parser.Flags.__getstate__",
+              "signature": "()",
+              "description": null,
+              "parameters": [],
+              "returns": {
+                "name": "",
+                "annotation": null,
+                "description": null
+              },
+              "docstring": [],
+              "source": ""
+            },
+            "__init__": {
+              "name": "__init__",
+              "path": "tomli._parser.Flags.__init__",
+              "signature": "(*args, **kwargs)",
+              "description": "Initialize self.  See help(type(self)) for accurate signature.",
+              "parameters": [
+                {
+                  "name": "args",
+                  "annotation": null,
+                  "description": null,
+                  "value": null
+                },
+                {
+                  "name": "kwargs",
+                  "annotation": null,
+                  "description": null,
+                  "value": null
+                }
+              ],
+              "returns": {
+                "name": "",
+                "annotation": null,
+                "description": null
+              },
+              "docstring": [],
+              "source": ""
+            },
+            "__internal_mypyc_setup": {
+              "name": "__internal_mypyc_setup",
+              "path": "tomli._parser.Flags.__internal_mypyc_setup",
+              "signature": "()",
+              "description": null,
+              "parameters": [],
+              "returns": {
+                "name": "",
+                "annotation": null,
+                "description": null
+              },
+              "docstring": [],
+              "source": ""
+            },
+            "__new__": {
+              "name": "__new__",
+              "path": "tomli._parser.Flags.__new__",
+              "signature": "(**kwargs)",
+              "description": "Create and return a new object.  See help(type) for accurate signature.",
+              "parameters": [
+                {
+                  "name": "kwargs",
+                  "annotation": null,
+                  "description": null,
+                  "value": null
+                }
+              ],
+              "returns": {
+                "name": "",
+                "annotation": null,
+                "description": null
+              },
+              "docstring": [],
+              "source": ""
+            },
+            "__setstate__": {
+              "name": "__setstate__",
+              "path": "tomli._parser.Flags.__setstate__",
+              "signature": "()",
+              "description": null,
+              "parameters": [],
+              "returns": {
+                "name": "",
+                "annotation": null,
+                "description": null
+              },
+              "docstring": [],
+              "source": ""
+            },
+            "add_pending": {
+              "name": "add_pending",
+              "path": "tomli._parser.Flags.add_pending",
+              "signature": "(key, flag)",
+              "description": null,
+              "parameters": [
+                {
+                  "name": "key",
+                  "annotation": null,
+                  "description": null,
+                  "value": null
+                },
+                {
+                  "name": "flag",
+                  "annotation": null,
+                  "description": null,
+                  "value": null
+                }
+              ],
+              "returns": {
+                "name": "",
+                "annotation": null,
+                "description": null
+              },
+              "docstring": [],
+              "source": ""
+            },
+            "finalize_pending": {
+              "name": "finalize_pending",
+              "path": "tomli._parser.Flags.finalize_pending",
+              "signature": "()",
+              "description": null,
+              "parameters": [],
+              "returns": {
+                "name": "",
+                "annotation": null,
+                "description": null
+              },
+              "docstring": [],
+              "source": ""
+            },
+            "is_": {
+              "name": "is_",
+              "path": "tomli._parser.Flags.is_",
+              "signature": "(key, flag)",
+              "description": null,
+              "parameters": [
+                {
+                  "name": "key",
+                  "annotation": null,
+                  "description": null,
+                  "value": null
+                },
+                {
+                  "name": "flag",
+                  "annotation": null,
+                  "description": null,
+                  "value": null
+                }
+              ],
+              "returns": {
+                "name": "",
+                "annotation": null,
+                "description": null
+              },
+              "docstring": [],
+              "source": ""
+            },
+            "set": {
+              "name": "set",
+              "path": "tomli._parser.Flags.set",
+              "signature": "(key, flag, *, recursive)",
+              "description": null,
+              "parameters": [
+                {
+                  "name": "key",
+                  "annotation": null,
+                  "description": null,
+                  "value": null
+                },
+                {
+                  "name": "flag",
+                  "annotation": null,
+                  "description": null,
+                  "value": null
+                },
+                {
+                  "name": "recursive",
+                  "annotation": null,
+                  "description": null,
+                  "value": null
+                }
+              ],
+              "returns": {
+                "name": "",
+                "annotation": null,
+                "description": null
+              },
+              "docstring": [],
+              "source": ""
+            },
+            "unset_all": {
+              "name": "unset_all",
+              "path": "tomli._parser.Flags.unset_all",
+              "signature": "(key)",
+              "description": null,
+              "parameters": [
+                {
+                  "name": "key",
+                  "annotation": null,
+                  "description": null,
+                  "value": null
+                }
+              ],
+              "returns": {
+                "name": "",
+                "annotation": null,
+                "description": null
+              },
+              "docstring": [],
+              "source": ""
+            }
+          },
+          "source": "",
+          "inherited_members": {}
+        },
+        "NestedDict": {
+          "name": "NestedDict",
+          "path": "tomli._parser.NestedDict",
+          "description": null,
+          "parameters": [
+            {
+              "name": "args",
+              "annotation": null,
+              "description": null,
+              "value": null
+            },
+            {
+              "name": "kwargs",
+              "annotation": null,
+              "description": null,
+              "value": null
+            }
+          ],
+          "attributes": [
+            {
+              "name": "__doc__",
+              "annotation": null,
+              "description": [
+                {
+                  "kind": "text",
+                  "value": "str(object='') -> str\nstr(bytes_or_buffer[, encoding[, errors]]) -> str\n\nCreate a new string object from the given object. If encoding or\nerrors is specified, then the object must expose a data buffer\nthat will be decoded using the given encoding and error handler.\nOtherwise, returns the result of object.__str__() (if defined)\nor repr(object).\nencoding defaults to sys.getdefaultencoding().\nerrors defaults to 'strict'."
+                }
+              ],
+              "value": "''"
+            },
+            {
+              "name": "__module__",
+              "annotation": null,
+              "description": [
+                {
+                  "kind": "text",
+                  "value": "str(object='') -> str\nstr(bytes_or_buffer[, encoding[, errors]]) -> str\n\nCreate a new string object from the given object. If encoding or\nerrors is specified, then the object must expose a data buffer\nthat will be decoded using the given encoding and error handler.\nOtherwise, returns the result of object.__str__() (if defined)\nor repr(object).\nencoding defaults to sys.getdefaultencoding().\nerrors defaults to 'strict'."
+                }
+              ],
+              "value": "'tomli._parser'"
+            },
+            {
+              "name": "__mypyc_attrs__",
+              "annotation": null,
+              "description": [
+                {
+                  "kind": "text",
+                  "value": "Built-in immutable sequence.\n\nIf no argument is given, the constructor returns an empty tuple.\nIf iterable is specified the tuple is initialized from iterable's items.\n\nIf the argument is a tuple, the return value is the same object."
+                }
+              ],
+              "value": "('dict',)"
+            },
+            {
+              "name": "dict",
+              "annotation": null,
+              "description": null,
+              "value": null
+            }
+          ],
+          "docstring": [],
+          "functions": {
+            "__getstate__": {
+              "name": "__getstate__",
+              "path": "tomli._parser.NestedDict.__getstate__",
+              "signature": "()",
+              "description": null,
+              "parameters": [],
+              "returns": {
+                "name": "",
+                "annotation": null,
+                "description": null
+              },
+              "docstring": [],
+              "source": ""
+            },
+            "__init__": {
+              "name": "__init__",
+              "path": "tomli._parser.NestedDict.__init__",
+              "signature": "(*args, **kwargs)",
+              "description": "Initialize self.  See help(type(self)) for accurate signature.",
+              "parameters": [
+                {
+                  "name": "args",
+                  "annotation": null,
+                  "description": null,
+                  "value": null
+                },
+                {
+                  "name": "kwargs",
+                  "annotation": null,
+                  "description": null,
+                  "value": null
+                }
+              ],
+              "returns": {
+                "name": "",
+                "annotation": null,
+                "description": null
+              },
+              "docstring": [],
+              "source": ""
+            },
+            "__internal_mypyc_setup": {
+              "name": "__internal_mypyc_setup",
+              "path": "tomli._parser.NestedDict.__internal_mypyc_setup",
+              "signature": "()",
+              "description": null,
+              "parameters": [],
+              "returns": {
+                "name": "",
+                "annotation": null,
+                "description": null
+              },
+              "docstring": [],
+              "source": ""
+            },
+            "__new__": {
+              "name": "__new__",
+              "path": "tomli._parser.NestedDict.__new__",
+              "signature": "(**kwargs)",
+              "description": "Create and return a new object.  See help(type) for accurate signature.",
+              "parameters": [
+                {
+                  "name": "kwargs",
+                  "annotation": null,
+                  "description": null,
+                  "value": null
+                }
+              ],
+              "returns": {
+                "name": "",
+                "annotation": null,
+                "description": null
+              },
+              "docstring": [],
+              "source": ""
+            },
+            "__setstate__": {
+              "name": "__setstate__",
+              "path": "tomli._parser.NestedDict.__setstate__",
+              "signature": "()",
+              "description": null,
+              "parameters": [],
+              "returns": {
+                "name": "",
+                "annotation": null,
+                "description": null
+              },
+              "docstring": [],
+              "source": ""
+            },
+            "append_nest_to_list": {
+              "name": "append_nest_to_list",
+              "path": "tomli._parser.NestedDict.append_nest_to_list",
+              "signature": "(key)",
+              "description": null,
+              "parameters": [
+                {
+                  "name": "key",
+                  "annotation": null,
+                  "description": null,
+                  "value": null
+                }
+              ],
+              "returns": {
+                "name": "",
+                "annotation": null,
+                "description": null
+              },
+              "docstring": [],
+              "source": ""
+            },
+            "get_or_create_nest": {
+              "name": "get_or_create_nest",
+              "path": "tomli._parser.NestedDict.get_or_create_nest",
+              "signature": "(key, *, access_lists=True)",
+              "description": null,
+              "parameters": [
+                {
+                  "name": "key",
+                  "annotation": null,
+                  "description": null,
+                  "value": null
+                },
+                {
+                  "name": "access_lists",
+                  "annotation": null,
+                  "description": null,
+                  "value": "True"
+                }
+              ],
+              "returns": {
+                "name": "",
+                "annotation": null,
+                "description": null
+              },
+              "docstring": [],
+              "source": ""
+            }
+          },
+          "source": "",
+          "inherited_members": {}
+        },
+        "Output": {
+          "name": "Output",
+          "path": "tomli._parser.Output",
+          "description": null,
+          "parameters": [
+            {
+              "name": "args",
+              "annotation": null,
+              "description": null,
+              "value": null
+            },
+            {
+              "name": "kwargs",
+              "annotation": null,
+              "description": null,
+              "value": null
+            }
+          ],
+          "attributes": [
+            {
+              "name": "__doc__",
+              "annotation": null,
+              "description": [
+                {
+                  "kind": "text",
+                  "value": "str(object='') -> str\nstr(bytes_or_buffer[, encoding[, errors]]) -> str\n\nCreate a new string object from the given object. If encoding or\nerrors is specified, then the object must expose a data buffer\nthat will be decoded using the given encoding and error handler.\nOtherwise, returns the result of object.__str__() (if defined)\nor repr(object).\nencoding defaults to sys.getdefaultencoding().\nerrors defaults to 'strict'."
+                }
+              ],
+              "value": "''"
+            },
+            {
+              "name": "__module__",
+              "annotation": null,
+              "description": [
+                {
+                  "kind": "text",
+                  "value": "str(object='') -> str\nstr(bytes_or_buffer[, encoding[, errors]]) -> str\n\nCreate a new string object from the given object. If encoding or\nerrors is specified, then the object must expose a data buffer\nthat will be decoded using the given encoding and error handler.\nOtherwise, returns the result of object.__str__() (if defined)\nor repr(object).\nencoding defaults to sys.getdefaultencoding().\nerrors defaults to 'strict'."
+                }
+              ],
+              "value": "'tomli._parser'"
+            },
+            {
+              "name": "__mypyc_attrs__",
+              "annotation": null,
+              "description": [
+                {
+                  "kind": "text",
+                  "value": "Built-in immutable sequence.\n\nIf no argument is given, the constructor returns an empty tuple.\nIf iterable is specified the tuple is initialized from iterable's items.\n\nIf the argument is a tuple, the return value is the same object."
+                }
+              ],
+              "value": "('data', 'flags')"
+            },
+            {
+              "name": "data",
+              "annotation": null,
+              "description": null,
+              "value": null
+            },
+            {
+              "name": "flags",
+              "annotation": null,
+              "description": null,
+              "value": null
+            }
+          ],
+          "docstring": [],
+          "functions": {
+            "__getstate__": {
+              "name": "__getstate__",
+              "path": "tomli._parser.Output.__getstate__",
+              "signature": "()",
+              "description": null,
+              "parameters": [],
+              "returns": {
+                "name": "",
+                "annotation": null,
+                "description": null
+              },
+              "docstring": [],
+              "source": ""
+            },
+            "__init__": {
+              "name": "__init__",
+              "path": "tomli._parser.Output.__init__",
+              "signature": "(*args, **kwargs)",
+              "description": "Initialize self.  See help(type(self)) for accurate signature.",
+              "parameters": [
+                {
+                  "name": "args",
+                  "annotation": null,
+                  "description": null,
+                  "value": null
+                },
+                {
+                  "name": "kwargs",
+                  "annotation": null,
+                  "description": null,
+                  "value": null
+                }
+              ],
+              "returns": {
+                "name": "",
+                "annotation": null,
+                "description": null
+              },
+              "docstring": [],
+              "source": ""
+            },
+            "__internal_mypyc_setup": {
+              "name": "__internal_mypyc_setup",
+              "path": "tomli._parser.Output.__internal_mypyc_setup",
+              "signature": "()",
+              "description": null,
+              "parameters": [],
+              "returns": {
+                "name": "",
+                "annotation": null,
+                "description": null
+              },
+              "docstring": [],
+              "source": ""
+            },
+            "__new__": {
+              "name": "__new__",
+              "path": "tomli._parser.Output.__new__",
+              "signature": "(**kwargs)",
+              "description": "Create and return a new object.  See help(type) for accurate signature.",
+              "parameters": [
+                {
+                  "name": "kwargs",
+                  "annotation": null,
+                  "description": null,
+                  "value": null
+                }
+              ],
+              "returns": {
+                "name": "",
+                "annotation": null,
+                "description": null
+              },
+              "docstring": [],
+              "source": ""
+            },
+            "__setstate__": {
+              "name": "__setstate__",
+              "path": "tomli._parser.Output.__setstate__",
+              "signature": "()",
+              "description": null,
+              "parameters": [],
+              "returns": {
+                "name": "",
+                "annotation": null,
+                "description": null
+              },
+              "docstring": [],
+              "source": ""
+            }
+          },
+          "source": "",
+          "inherited_members": {}
+        },
+        "TOMLDecodeError": {
+          "name": "TOMLDecodeError",
+          "path": "tomli._parser.TOMLDecodeError",
+          "description": null,
+          "parameters": [
+            {
+              "name": "args",
+              "annotation": null,
+              "description": null,
+              "value": null
+            },
+            {
+              "name": "kwargs",
+              "annotation": null,
+              "description": null,
+              "value": null
+            }
+          ],
+          "attributes": [
+            {
+              "name": "__dict__",
+              "annotation": null,
+              "description": null,
+              "value": "mappingproxy({'__init__': <slot wrapper '__init__' of 'TOMLDecodeError' objects>, '__setstate__': <method '__setstate__' of 'TOMLDecodeError' objects>, '__getstate__': <method '__getstate__' of 'TOMLDecodeError' objects>, '__dict__': <member '__dict__' of 'TOMLDecodeError' objects>, '__weakref__': <member '__weakref__' of 'TOMLDecodeError' objects>, '__doc__': None, '__module__': 'tomli._parser', '__mypyc_attrs__': ('__dict__',)})"
+            },
+            {
+              "name": "__module__",
+              "annotation": null,
+              "description": [
+                {
+                  "kind": "text",
+                  "value": "str(object='') -> str\nstr(bytes_or_buffer[, encoding[, errors]]) -> str\n\nCreate a new string object from the given object. If encoding or\nerrors is specified, then the object must expose a data buffer\nthat will be decoded using the given encoding and error handler.\nOtherwise, returns the result of object.__str__() (if defined)\nor repr(object).\nencoding defaults to sys.getdefaultencoding().\nerrors defaults to 'strict'."
+                }
+              ],
+              "value": "'tomli._parser'"
+            },
+            {
+              "name": "__mypyc_attrs__",
+              "annotation": null,
+              "description": [
+                {
+                  "kind": "text",
+                  "value": "Built-in immutable sequence.\n\nIf no argument is given, the constructor returns an empty tuple.\nIf iterable is specified the tuple is initialized from iterable's items.\n\nIf the argument is a tuple, the return value is the same object."
+                }
+              ],
+              "value": "('__dict__',)"
+            },
+            {
+              "name": "__weakref__",
+              "annotation": null,
+              "description": null,
+              "value": "<member '__weakref__' of 'TOMLDecodeError' objects>"
+            }
+          ],
+          "docstring": [],
+          "functions": {
+            "__getstate__": {
+              "name": "__getstate__",
+              "path": "tomli._parser.TOMLDecodeError.__getstate__",
+              "signature": "()",
+              "description": null,
+              "parameters": [],
+              "returns": {
+                "name": "",
+                "annotation": null,
+                "description": null
+              },
+              "docstring": [],
+              "source": ""
+            },
+            "__init__": {
+              "name": "__init__",
+              "path": "tomli._parser.TOMLDecodeError.__init__",
+              "signature": "(*args, **kwargs)",
+              "description": "Initialize self.  See help(type(self)) for accurate signature.",
+              "parameters": [
+                {
+                  "name": "args",
+                  "annotation": null,
+                  "description": null,
+                  "value": null
+                },
+                {
+                  "name": "kwargs",
+                  "annotation": null,
+                  "description": null,
+                  "value": null
+                }
+              ],
+              "returns": {
+                "name": "",
+                "annotation": null,
+                "description": null
+              },
+              "docstring": [],
+              "source": ""
+            },
+            "__setstate__": {
+              "name": "__setstate__",
+              "path": "tomli._parser.TOMLDecodeError.__setstate__",
+              "signature": "()",
+              "description": null,
+              "parameters": [],
+              "returns": {
+                "name": "",
+                "annotation": null,
+                "description": null
+              },
+              "docstring": [],
+              "source": ""
+            }
+          },
+          "source": "",
+          "inherited_members": {}
+        }
+      },
+      "functions": {
+        "create_dict_rule": {
+          "name": "create_dict_rule",
+          "path": "tomli._parser.create_dict_rule",
+          "signature": "(src, pos, out)",
+          "description": null,
+          "parameters": [
+            {
+              "name": "src",
+              "annotation": null,
+              "description": null,
+              "value": null
+            },
+            {
+              "name": "pos",
+              "annotation": null,
+              "description": null,
+              "value": null
+            },
+            {
+              "name": "out",
+              "annotation": null,
+              "description": null,
+              "value": null
+            }
+          ],
+          "returns": {
+            "name": "",
+            "annotation": null,
+            "description": null
+          },
+          "docstring": [],
+          "source": ""
+        },
+        "create_list_rule": {
+          "name": "create_list_rule",
+          "path": "tomli._parser.create_list_rule",
+          "signature": "(src, pos, out)",
+          "description": null,
+          "parameters": [
+            {
+              "name": "src",
+              "annotation": null,
+              "description": null,
+              "value": null
+            },
+            {
+              "name": "pos",
+              "annotation": null,
+              "description": null,
+              "value": null
+            },
+            {
+              "name": "out",
+              "annotation": null,
+              "description": null,
+              "value": null
+            }
+          ],
+          "returns": {
+            "name": "",
+            "annotation": null,
+            "description": null
+          },
+          "docstring": [],
+          "source": ""
+        },
+        "is_unicode_scalar_value": {
+          "name": "is_unicode_scalar_value",
+          "path": "tomli._parser.is_unicode_scalar_value",
+          "signature": "(codepoint)",
+          "description": null,
+          "parameters": [
+            {
+              "name": "codepoint",
+              "annotation": null,
+              "description": null,
+              "value": null
+            }
+          ],
+          "returns": {
+            "name": "",
+            "annotation": null,
+            "description": null
+          },
+          "docstring": [],
+          "source": ""
+        },
+        "key_value_rule": {
+          "name": "key_value_rule",
+          "path": "tomli._parser.key_value_rule",
+          "signature": "(src, pos, out, header, parse_float)",
+          "description": null,
+          "parameters": [
+            {
+              "name": "src",
+              "annotation": null,
+              "description": null,
+              "value": null
+            },
+            {
+              "name": "pos",
+              "annotation": null,
+              "description": null,
+              "value": null
+            },
+            {
+              "name": "out",
+              "annotation": null,
+              "description": null,
+              "value": null
+            },
+            {
+              "name": "header",
+              "annotation": null,
+              "description": null,
+              "value": null
+            },
+            {
+              "name": "parse_float",
+              "annotation": null,
+              "description": null,
+              "value": null
+            }
+          ],
+          "returns": {
+            "name": "",
+            "annotation": null,
+            "description": null
+          },
+          "docstring": [],
+          "source": ""
+        },
+        "load": {
+          "name": "load",
+          "path": "tomli._parser.load",
+          "signature": "()",
+          "description": null,
+          "parameters": [],
+          "returns": {
+            "name": "",
+            "annotation": null,
+            "description": null
+          },
+          "docstring": [],
+          "source": ""
+        },
+        "loads": {
+          "name": "loads",
+          "path": "tomli._parser.loads",
+          "signature": "()",
+          "description": null,
+          "parameters": [],
+          "returns": {
+            "name": "",
+            "annotation": null,
+            "description": null
+          },
+          "docstring": [],
+          "source": ""
+        },
+        "make_safe_parse_float": {
+          "name": "make_safe_parse_float",
+          "path": "tomli._parser.make_safe_parse_float",
+          "signature": "(parse_float)",
+          "description": null,
+          "parameters": [
+            {
+              "name": "parse_float",
+              "annotation": null,
+              "description": null,
+              "value": null
+            }
+          ],
+          "returns": {
+            "name": "",
+            "annotation": null,
+            "description": null
+          },
+          "docstring": [],
+          "source": ""
+        },
+        "parse_array": {
+          "name": "parse_array",
+          "path": "tomli._parser.parse_array",
+          "signature": "(src, pos, parse_float, nest_lvl)",
+          "description": null,
+          "parameters": [
+            {
+              "name": "src",
+              "annotation": null,
+              "description": null,
+              "value": null
+            },
+            {
+              "name": "pos",
+              "annotation": null,
+              "description": null,
+              "value": null
+            },
+            {
+              "name": "parse_float",
+              "annotation": null,
+              "description": null,
+              "value": null
+            },
+            {
+              "name": "nest_lvl",
+              "annotation": null,
+              "description": null,
+              "value": null
+            }
+          ],
+          "returns": {
+            "name": "",
+            "annotation": null,
+            "description": null
+          },
+          "docstring": [],
+          "source": ""
+        },
+        "parse_basic_str": {
+          "name": "parse_basic_str",
+          "path": "tomli._parser.parse_basic_str",
+          "signature": "(src, pos, *, multiline)",
+          "description": null,
+          "parameters": [
+            {
+              "name": "src",
+              "annotation": null,
+              "description": null,
+              "value": null
+            },
+            {
+              "name": "pos",
+              "annotation": null,
+              "description": null,
+              "value": null
+            },
+            {
+              "name": "multiline",
+              "annotation": null,
+              "description": null,
+              "value": null
+            }
+          ],
+          "returns": {
+            "name": "",
+            "annotation": null,
+            "description": null
+          },
+          "docstring": [],
+          "source": ""
+        },
+        "parse_basic_str_escape": {
+          "name": "parse_basic_str_escape",
+          "path": "tomli._parser.parse_basic_str_escape",
+          "signature": "(src, pos, *, multiline=False)",
+          "description": null,
+          "parameters": [
+            {
+              "name": "src",
+              "annotation": null,
+              "description": null,
+              "value": null
+            },
+            {
+              "name": "pos",
+              "annotation": null,
+              "description": null,
+              "value": null
+            },
+            {
+              "name": "multiline",
+              "annotation": null,
+              "description": null,
+              "value": "False"
+            }
+          ],
+          "returns": {
+            "name": "",
+            "annotation": null,
+            "description": null
+          },
+          "docstring": [],
+          "source": ""
+        },
+        "parse_basic_str_escape_multiline": {
+          "name": "parse_basic_str_escape_multiline",
+          "path": "tomli._parser.parse_basic_str_escape_multiline",
+          "signature": "(src, pos)",
+          "description": null,
+          "parameters": [
+            {
+              "name": "src",
+              "annotation": null,
+              "description": null,
+              "value": null
+            },
+            {
+              "name": "pos",
+              "annotation": null,
+              "description": null,
+              "value": null
+            }
+          ],
+          "returns": {
+            "name": "",
+            "annotation": null,
+            "description": null
+          },
+          "docstring": [],
+          "source": ""
+        },
+        "parse_hex_char": {
+          "name": "parse_hex_char",
+          "path": "tomli._parser.parse_hex_char",
+          "signature": "(src, pos, hex_len)",
+          "description": null,
+          "parameters": [
+            {
+              "name": "src",
+              "annotation": null,
+              "description": null,
+              "value": null
+            },
+            {
+              "name": "pos",
+              "annotation": null,
+              "description": null,
+              "value": null
+            },
+            {
+              "name": "hex_len",
+              "annotation": null,
+              "description": null,
+              "value": null
+            }
+          ],
+          "returns": {
+            "name": "",
+            "annotation": null,
+            "description": null
+          },
+          "docstring": [],
+          "source": ""
+        },
+        "parse_inline_table": {
+          "name": "parse_inline_table",
+          "path": "tomli._parser.parse_inline_table",
+          "signature": "(src, pos, parse_float, nest_lvl)",
+          "description": null,
+          "parameters": [
+            {
+              "name": "src",
+              "annotation": null,
+              "description": null,
+              "value": null
+            },
+            {
+              "name": "pos",
+              "annotation": null,
+              "description": null,
+              "value": null
+            },
+            {
+              "name": "parse_float",
+              "annotation": null,
+              "description": null,
+              "value": null
+            },
+            {
+              "name": "nest_lvl",
+              "annotation": null,
+              "description": null,
+              "value": null
+            }
+          ],
+          "returns": {
+            "name": "",
+            "annotation": null,
+            "description": null
+          },
+          "docstring": [],
+          "source": ""
+        },
+        "parse_key": {
+          "name": "parse_key",
+          "path": "tomli._parser.parse_key",
+          "signature": "(src, pos)",
+          "description": null,
+          "parameters": [
+            {
+              "name": "src",
+              "annotation": null,
+              "description": null,
+              "value": null
+            },
+            {
+              "name": "pos",
+              "annotation": null,
+              "description": null,
+              "value": null
+            }
+          ],
+          "returns": {
+            "name": "",
+            "annotation": null,
+            "description": null
+          },
+          "docstring": [],
+          "source": ""
+        },
+        "parse_key_part": {
+          "name": "parse_key_part",
+          "path": "tomli._parser.parse_key_part",
+          "signature": "(src, pos)",
+          "description": null,
+          "parameters": [
+            {
+              "name": "src",
+              "annotation": null,
+              "description": null,
+              "value": null
+            },
+            {
+              "name": "pos",
+              "annotation": null,
+              "description": null,
+              "value": null
+            }
+          ],
+          "returns": {
+            "name": "",
+            "annotation": null,
+            "description": null
+          },
+          "docstring": [],
+          "source": ""
+        },
+        "parse_key_value_pair": {
+          "name": "parse_key_value_pair",
+          "path": "tomli._parser.parse_key_value_pair",
+          "signature": "(src, pos, parse_float, nest_lvl)",
+          "description": null,
+          "parameters": [
+            {
+              "name": "src",
+              "annotation": null,
+              "description": null,
+              "value": null
+            },
+            {
+              "name": "pos",
+              "annotation": null,
+              "description": null,
+              "value": null
+            },
+            {
+              "name": "parse_float",
+              "annotation": null,
+              "description": null,
+              "value": null
+            },
+            {
+              "name": "nest_lvl",
+              "annotation": null,
+              "description": null,
+              "value": null
+            }
+          ],
+          "returns": {
+            "name": "",
+            "annotation": null,
+            "description": null
+          },
+          "docstring": [],
+          "source": ""
+        },
+        "parse_literal_str": {
+          "name": "parse_literal_str",
+          "path": "tomli._parser.parse_literal_str",
+          "signature": "(src, pos)",
+          "description": null,
+          "parameters": [
+            {
+              "name": "src",
+              "annotation": null,
+              "description": null,
+              "value": null
+            },
+            {
+              "name": "pos",
+              "annotation": null,
+              "description": null,
+              "value": null
+            }
+          ],
+          "returns": {
+            "name": "",
+            "annotation": null,
+            "description": null
+          },
+          "docstring": [],
+          "source": ""
+        },
+        "parse_multiline_str": {
+          "name": "parse_multiline_str",
+          "path": "tomli._parser.parse_multiline_str",
+          "signature": "(src, pos, *, literal)",
+          "description": null,
+          "parameters": [
+            {
+              "name": "src",
+              "annotation": null,
+              "description": null,
+              "value": null
+            },
+            {
+              "name": "pos",
+              "annotation": null,
+              "description": null,
+              "value": null
+            },
+            {
+              "name": "literal",
+              "annotation": null,
+              "description": null,
+              "value": null
+            }
+          ],
+          "returns": {
+            "name": "",
+            "annotation": null,
+            "description": null
+          },
+          "docstring": [],
+          "source": ""
+        },
+        "parse_one_line_basic_str": {
+          "name": "parse_one_line_basic_str",
+          "path": "tomli._parser.parse_one_line_basic_str",
+          "signature": "(src, pos)",
+          "description": null,
+          "parameters": [
+            {
+              "name": "src",
+              "annotation": null,
+              "description": null,
+              "value": null
+            },
+            {
+              "name": "pos",
+              "annotation": null,
+              "description": null,
+              "value": null
+            }
+          ],
+          "returns": {
+            "name": "",
+            "annotation": null,
+            "description": null
+          },
+          "docstring": [],
+          "source": ""
+        },
+        "parse_value": {
+          "name": "parse_value",
+          "path": "tomli._parser.parse_value",
+          "signature": "(src, pos, parse_float, nest_lvl)",
+          "description": null,
+          "parameters": [
+            {
+              "name": "src",
+              "annotation": null,
+              "description": null,
+              "value": null
+            },
+            {
+              "name": "pos",
+              "annotation": null,
+              "description": null,
+              "value": null
+            },
+            {
+              "name": "parse_float",
+              "annotation": null,
+              "description": null,
+              "value": null
+            },
+            {
+              "name": "nest_lvl",
+              "annotation": null,
+              "description": null,
+              "value": null
+            }
+          ],
+          "returns": {
+            "name": "",
+            "annotation": null,
+            "description": null
+          },
+          "docstring": [],
+          "source": ""
+        },
+        "skip_chars": {
+          "name": "skip_chars",
+          "path": "tomli._parser.skip_chars",
+          "signature": "(src, pos, chars)",
+          "description": null,
+          "parameters": [
+            {
+              "name": "src",
+              "annotation": null,
+              "description": null,
+              "value": null
+            },
+            {
+              "name": "pos",
+              "annotation": null,
+              "description": null,
+              "value": null
+            },
+            {
+              "name": "chars",
+              "annotation": null,
+              "description": null,
+              "value": null
+            }
+          ],
+          "returns": {
+            "name": "",
+            "annotation": null,
+            "description": null
+          },
+          "docstring": [],
+          "source": ""
+        },
+        "skip_comment": {
+          "name": "skip_comment",
+          "path": "tomli._parser.skip_comment",
+          "signature": "(src, pos)",
+          "description": null,
+          "parameters": [
+            {
+              "name": "src",
+              "annotation": null,
+              "description": null,
+              "value": null
+            },
+            {
+              "name": "pos",
+              "annotation": null,
+              "description": null,
+              "value": null
+            }
+          ],
+          "returns": {
+            "name": "",
+            "annotation": null,
+            "description": null
+          },
+          "docstring": [],
+          "source": ""
+        },
+        "skip_comments_and_array_ws": {
+          "name": "skip_comments_and_array_ws",
+          "path": "tomli._parser.skip_comments_and_array_ws",
+          "signature": "(src, pos)",
+          "description": null,
+          "parameters": [
+            {
+              "name": "src",
+              "annotation": null,
+              "description": null,
+              "value": null
+            },
+            {
+              "name": "pos",
+              "annotation": null,
+              "description": null,
+              "value": null
+            }
+          ],
+          "returns": {
+            "name": "",
+            "annotation": null,
+            "description": null
+          },
+          "docstring": [],
+          "source": ""
+        },
+        "skip_until": {
+          "name": "skip_until",
+          "path": "tomli._parser.skip_until",
+          "signature": "(src, pos, expect, *, error_on, error_on_eof)",
+          "description": null,
+          "parameters": [
+            {
+              "name": "src",
+              "annotation": null,
+              "description": null,
+              "value": null
+            },
+            {
+              "name": "pos",
+              "annotation": null,
+              "description": null,
+              "value": null
+            },
+            {
+              "name": "expect",
+              "annotation": null,
+              "description": null,
+              "value": null
+            },
+            {
+              "name": "error_on",
+              "annotation": null,
+              "description": null,
+              "value": null
+            },
+            {
+              "name": "error_on_eof",
+              "annotation": null,
+              "description": null,
+              "value": null
+            }
+          ],
+          "returns": {
+            "name": "",
+            "annotation": null,
+            "description": null
+          },
+          "docstring": [],
+          "source": ""
+        }
+      }
+    }
+  },
+  "classes": {},
+  "functions": {},
+  "version": "2.5.0"
+}

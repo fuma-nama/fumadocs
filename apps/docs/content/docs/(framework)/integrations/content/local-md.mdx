@@ -393,6 +393,28 @@ void watchWithDevServer(docs, { url: 'ws://127.0.0.1:8000/_fumadocs_local_md' })
 
 Both keep the loader in sync when local Markdown or MDX files, or the files they include, change. To wire up your own watcher instead, watch `docs.dir` and the files passed to `docs.onDependency()`, then call `docs.invalidateFile(path)` when one changes.
 
+### Nitro
+
+Frameworks that deploy through Nitro, like TanStack Start, need two changes in the Vite config:
+
+```ts title="vite.config.ts"
+import { defineConfig } from 'vite';
+import { nitro } from 'nitro/vite';
+
+export default defineConfig({
+  plugins: [
+    // Nitro can't bundle the Wasm imports of Shiki, its default entry inlines the binary
+    nitro({ wasm: false }),
+  ],
+  resolve: {
+    alias: [
+      // Nitro keeps the `require('react')` of this shim, which loads a second React at runtime
+      { find: /^use-sync-external-store\/shim$/, replacement: 'react' },
+    ],
+  },
+});
+```
+
 ### JavaScript Engine
 
 MDX files (`*.mdx`) run with `new Function`, they don't work where `eval()` is disallowed, like Cloudflare Workers.

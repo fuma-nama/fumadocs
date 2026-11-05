@@ -4,9 +4,10 @@ import type { Post } from '@usemarble/sdk/models';
 export async function getPosts(): Promise<Post[]> {
   const apiKey = process.env.MARBLE_API_KEY;
   if (!apiKey) {
-    throw new Error(
-      'MARBLE_API_KEY is required. Copy .env.example to .env.local and set your public API key.',
+    console.warn(
+      'MARBLE_API_KEY is not set, the docs are empty. Copy .env.example to .env.local and set your public API key.',
     );
+    return [];
   }
 
   const marble = new Marble({ apiKey });

@@ -1,2 +1,1 @@
-1. Use `pnpm python:generate` to generate `httpx.json` locally using Python.
-2. Run `pnpm dev`.
+The docs are generated from `tomli.json`, run `pnpm python:generate` to regenerate it with Python.
