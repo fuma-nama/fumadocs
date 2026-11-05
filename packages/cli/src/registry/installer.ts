@@ -33,10 +33,27 @@ export class FumadocsComponentInstaller extends InteractiveInstaller {
       // `components/ui/*` follow the API of Shadcn UI, reuse the ones of project along with its `cn`
       plugins: [
         reuseUI({ files: aliases.utils ? { 'utils/cn.ts': aliases.utils } : undefined }),
+        baseUIPackage(),
         ...(config.framework === 'astro' ? [astroEndpoints()] : []),
       ],
     });
   }
+}
+
+/**
+ * Projects install Base UI as `fumadocs-ui`, which other registries import. Its registry is compiled under the real package name, a second dependency on it would duplicate the package.
+ */
+function baseUIPackage(): InstallerPlugin {
+  return {
+    name: 'base-ui-package',
+    resolveId({ info: { dependencies } }) {
+      if (dependencies && '@fumadocs/base-ui' in dependencies) {
+        delete dependencies['@fumadocs/base-ui'];
+        dependencies['fumadocs-ui'] = 'npm:@fumadocs/base-ui';
+      }
+    },
+    transform: (code) => code.replaceAll(`'@fumadocs/base-ui/`, `'fumadocs-ui/`),
+  };
 }
 
 /**
