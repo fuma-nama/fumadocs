@@ -1,5 +1,6 @@
 import type { Framework, I18nInfo } from '@/project';
 import { astroPagePaths, localeSegment } from '@/project/route';
+import { sourceRef } from '@/features/utils';
 
 export interface TemplateInput {
   static: boolean;
@@ -646,7 +647,7 @@ import Layout from '@/layouts/Layout.astro';
 import { Docs } from '@/components/docs';
 ${input.i18n?.optionalLocale ? i18nImport : ''}import { source } from '@/lib/source';
 
-${astroPagePaths(input.i18n)}
+${astroPagePaths(input.i18n, sourceRef(false))}
 
 type Props = InferGetStaticPropsType<typeof getStaticPaths>;
 

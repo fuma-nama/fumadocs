@@ -163,7 +163,7 @@ export async function getConfig() {
   } as const;
 }
 `,
-  astro: (_route, i18n, src) => astroPageRoute(i18n, pageImports(src), markdown, 'index'),
+  astro: (_route, i18n, src) => astroPageRoute(i18n, src, pageImports(src), markdown, 'index'),
 };
 
 export function templates(

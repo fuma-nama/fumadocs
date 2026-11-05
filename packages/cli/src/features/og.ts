@@ -126,6 +126,7 @@ export async function getConfig() {
   astro: (_route, engine, i18n, src) =>
     astroPageRoute(
       i18n,
+      src,
       `${imports(engine)}\nimport { ${src.ref} } from '@/lib/source';`,
       image(engine),
     ),
