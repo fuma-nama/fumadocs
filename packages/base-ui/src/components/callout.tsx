@@ -1,5 +1,5 @@
 import { CircleCheck, CircleX, Info, Lightbulb, TriangleAlert } from 'lucide-react';
-import type { ComponentProps, ReactNode } from 'react';
+import type { ComponentProps, ReactNode, CSSProperties } from 'react';
 import { cn } from '@/utils/cn';
 
 export type CalloutType = 'info' | 'warn' | 'error' | 'success' | 'warning' | 'idea';
@@ -53,10 +53,12 @@ export function CalloutContainer({
         'flex gap-2 my-4 rounded-xl border bg-fd-card p-3 ps-1 text-sm text-fd-card-foreground',
         className,
       )}
-      style={{
-        '--callout-color': `var(--color-fd-${type}, var(--color-fd-muted))`,
-        ...style,
-      }}
+      style={
+        {
+          '--callout-color': `var(--color-fd-${type}, var(--color-fd-muted))`,
+          ...style,
+        } as CSSProperties
+      }
       {...props}
     >
       <div role="none" className="w-0.5 bg-(--callout-color)/50 rounded-sm" />

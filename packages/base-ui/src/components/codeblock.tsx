@@ -9,6 +9,7 @@ import {
   use,
   useMemo,
   useRef,
+  type CSSProperties,
 } from 'react';
 import { cn } from '@/utils/cn';
 import { useCopyButton } from '@/utils/use-copy-button';
@@ -132,14 +133,16 @@ export function CodeBlock({
           'text-[0.8125rem] py-3.5 overflow-auto max-h-[600px] fd-scroll-container focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-fd-ring',
           viewportProps.className,
         )}
-        style={{
-          // space for toolbar
-          '--padding-right': !title ? 'calc(var(--spacing) * 8)' : undefined,
-          counterSet: props['data-line-numbers']
-            ? `line ${Number(props['data-line-numbers-start'] ?? 1) - 1}`
-            : undefined,
-          ...viewportProps.style,
-        }}
+        style={
+          {
+            // space for toolbar
+            '--padding-right': !title ? 'calc(var(--spacing) * 8)' : undefined,
+            counterSet: props['data-line-numbers']
+              ? `line ${Number(props['data-line-numbers-start'] ?? 1) - 1}`
+              : undefined,
+            ...viewportProps.style,
+          } as CSSProperties
+        }
       >
         {children}
       </div>
