@@ -1,3 +1,4 @@
+import { jsx as astroJsx } from 'astro/jsx-runtime';
 import { DevalueError, stringify } from 'devalue';
 import type { MDXComponents } from 'mdx/types';
 import type { ElementType, ReactNode } from 'react';
@@ -14,17 +15,76 @@ export class Slot {
   constructor(readonly name: string) {}
 }
 
-/** the island tree for `FumadocsIsland`, props can have the types of Astro islands like dates and maps */
-export function serializeIsland(nodes: IslandNode[]): string {
-  try {
-    return stringify(nodes, { slot: (value) => value instanceof Slot && value.name });
-  } catch (error) {
-    if (!(error instanceof DevalueError)) throw error;
-    throw new Error(
-      `The props of MDX components must be serializable, ${error.message} at "${error.path}".`,
-      { cause: error },
-    );
+/**
+ * The root of compiled MDX: Astro renders the `components` of `<Content />` into slots of the island,
+ * what they wrap is another island without hydration.
+ */
+export function ContentIsland({
+  tree,
+  components = {},
+  children: island,
+}: {
+  tree: IslandNode[];
+  components?: Record<string, ElementType>;
+  /** `FumadocsIsland` with the slots of the document */
+  children: { type: ElementType; props: Record<string, unknown> };
+}) {
+  const root = island.props;
+  let count = 0;
+
+  function render(list: unknown[], start: number, slots: unknown[]) {
+    for (let i = start; i < list.length; i++) {
+      const node = list[i];
+      if (!Array.isArray(node)) continue;
+      const childrenAt = node[0] === 1 ? 3 : 2;
+      const name = node[childrenAt - 2];
+      if (!Object.hasOwn(components, name)) {
+        render(node, childrenAt, slots);
+        continue;
+      }
+
+      const content: IslandNode[] = node.slice(childrenAt);
+      const slot = `c${count++}`;
+      slots.push(
+        astroJsx(components[name], {
+          ...node[childrenAt - 1],
+          slot,
+          children: content.every((item) => typeof item === 'string')
+            ? content
+            : astroJsx(island.type, createIsland(content)),
+        }),
+      );
+      list[i] = new Slot(slot);
+    }
+    return slots;
   }
+
+  /** the tree and slots of an island, it takes the slots of the document that it uses from the root */
+  function createIsland(nodes: IslandNode[]) {
+    const props: Record<string, unknown> = { children: render(nodes, 0, []) };
+    try {
+      props.tree = stringify(nodes, {
+        slot(value) {
+          if (!(value instanceof Slot)) return false;
+          if (Object.hasOwn(root, value.name)) {
+            props[value.name] = root[value.name];
+            delete root[value.name];
+          }
+          return value.name;
+        },
+      });
+      return props;
+    } catch (error) {
+      if (!(error instanceof DevalueError)) throw error;
+      throw new Error(
+        `The props of MDX components must be serializable, ${error.message} at "${error.path}".`,
+        { cause: error },
+      );
+    }
+  }
+
+  const props = createIsland(tree);
+  return astroJsx(island.type, { ...root, ...props });
 }
 
 const AstroFragment: unique symbol = Symbol.for('astro:fragment');

@@ -40,6 +40,12 @@ return (
 );
 ```
 
+On Astro, pass it to `<Content />`, which renders it like Astro MDX:
+
+```astro title="src/pages/docs/[...slug].astro"
+<Content components={{ a: createRelativeLink(source, page) }} />
+```
+
 ```mdx
 [My Link](./file.mdx)
 ```

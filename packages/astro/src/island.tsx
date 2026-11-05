@@ -6,10 +6,10 @@ import { type Evaluator, toJsx } from 'fumadocs-core/utils/hast-to-jsx';
 import type { Slot } from './mdx-runtime';
 
 export interface FumadocsIslandProps {
-  /** the root children from `serializeIsland()`, as {@link IslandNode} */
+  /** the root children from `ContentIsland`, as {@link IslandNode} */
   tree: string;
-  /** props of `<Content />`, passed to `wrapper` */
-  props: Record<string, unknown>;
+  /** props of `<Content />`, passed to `wrapper`. Not on what the `components` of `<Content />` wrap, which aren't the layout of content */
+  props?: Record<string, unknown>;
   /** slots rendered by Astro */
   [slot: string]: unknown;
 }
@@ -60,7 +60,7 @@ export function createIsland(components: MDXComponents) {
     });
     const root: Root = { type: 'root', children: nodes.map(decode) };
     const content = toJsx(root, { components, evaluator });
-    return Wrapper ? <Wrapper {...props}>{content}</Wrapper> : content;
+    return Wrapper && props ? <Wrapper {...props}>{content}</Wrapper> : content;
   };
 }
 

@@ -1,10 +1,10 @@
-import { createElement } from 'react';
+import { type ComponentType, createElement, isValidElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import { type HastNode, type HastPluginDefinition, mdxToJs } from 'satteri';
 import { islandPlugin } from '@/island-plugin';
-import { createIsland } from '@/island';
-import { serializeIsland, Slot } from '@/mdx-runtime';
+import { createIsland, type IslandNode } from '@/island';
+import { ContentIsland, Slot } from '@/mdx-runtime';
 import components from './fixtures/components';
 
 const FumadocsIsland = createIsland(components);
@@ -21,22 +21,27 @@ async function compile(source: string, plugins: HastPluginDefinition[] = []) {
   const capture: HastPluginDefinition = {
     name: 'capture',
     mdxJsxFlowElement: {
-      filter: ['_FumadocsIsland'],
+      filter: ['_ContentIsland'],
       visit(node) {
-        const slots: Captured['slots'] = {};
         const values: Record<string, string> = {};
-        for (const attribute of node.attributes) {
-          if (
-            attribute.type === 'mdxJsxAttribute' &&
-            attribute.value &&
-            typeof attribute.value === 'object'
-          )
-            values[attribute.name] = (attribute.value as { value: string }).value;
-        }
-        for (const child of node.children) {
-          const name = (child as { attributes: { value: string }[] }).attributes[0].value;
-          slots[name] = (child as { children: HastNode[] }).children;
-        }
+        const attributes = (element: { attributes: unknown[] }) => {
+          for (const attribute of element.attributes as typeof node.attributes) {
+            if (
+              attribute.type === 'mdxJsxAttribute' &&
+              attribute.value &&
+              typeof attribute.value === 'object'
+            )
+              values[attribute.name] = (attribute.value as { value: string }).value;
+          }
+        };
+        const element = node.children[0] as unknown as {
+          attributes: unknown[];
+          children: { attributes: { value: string }[]; children: HastNode[] }[];
+        };
+        attributes(node);
+        attributes(element);
+        const slots: Captured['slots'] = {};
+        for (const child of element.children) slots[child.attributes[0].value] = child.children;
         island = { tree: values.tree, props: values.props, slots };
       },
     },
@@ -49,21 +54,38 @@ async function compile(source: string, plugins: HastPluginDefinition[] = []) {
   return { code, island: island! };
 }
 
-/** render with slots as placeholders, `contentProps` are the props of `<Content />` */
-function render({ tree, props, slots }: Captured, contentProps: object = {}): string {
-  const placeholders: Record<string, unknown> = {};
-  for (const name in slots) placeholders[name] = createElement('astro-slot', { name });
+/** the vnode of the island: slots of the document are placeholders, `contentProps` are the props of `<Content />` */
+function createContent({ tree, props, slots }: Captured, contentProps: object = {}) {
+  const content = { components: {}, ...contentProps };
+  const slotProps: Record<string, unknown> = {};
+  for (const name in slots)
+    slotProps[name] = Object.assign([createElement('astro-slot', { name })], { $$slot: true });
 
-  return renderToStaticMarkup(
-    createElement(FumadocsIsland, {
-      tree: new Function('_serializeIsland', '_Slot', `return ${tree}`)(
-        serializeIsland,
-        Slot,
-      ) as string,
-      props: new Function('props', `return ${props}`)({ components: {}, ...contentProps }),
-      ...placeholders,
-    }),
-  );
+  return ContentIsland({
+    tree: new Function('_Slot', 'props', `return ${tree}`)(Slot, content) as IslandNode[],
+    components: content.components,
+    children: {
+      type: FumadocsIsland,
+      props: { props: new Function('props', `return ${props}`)(content), ...slotProps },
+    },
+  }) as unknown as { type: ComponentType<object>; props: Record<string, unknown> };
+}
+
+function toHtml(vnode: { type: ComponentType<object>; props: Record<string, unknown> }): string {
+  const props: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(vnode.props))
+    props[key] =
+      Array.isArray(value) && '$$slot' in value
+        ? isValidElement(value[0])
+          ? value[0]
+          : createElement('astro-slot', { name: key })
+        : value;
+  return renderToStaticMarkup(createElement(vnode.type, props));
+}
+
+/** render with slots as placeholders */
+function render(island: Captured, contentProps: object = {}): string {
+  return toHtml(createContent(island, contentProps));
 }
 
 describe('content island', () => {
@@ -76,6 +98,36 @@ describe('content island', () => {
     expect(code).toContain('"client:load": true');
     expect(code).toContain('import { X } from "./x"');
     expect(render(island)).toBe('<h1>Hello</h1><p>World</p>');
+  });
+
+  it('renders the `components` of `<Content />` with Astro', async () => {
+    const { island } = await compile(
+      `[link](./a.mdx "title") text\n\n## **Bold**\n\n![image](./image.png)`,
+    );
+    const a = () => null;
+    const h2 = () => null;
+    const content = createContent(island, { components: { a, h2 } });
+
+    expect(toHtml(content)).toBe(
+      '<p><astro-slot name="c0"></astro-slot> text</p><astro-slot name="c1"></astro-slot><p><astro-slot name="s0"></astro-slot></p>',
+    );
+    const [link] = content.props.c0 as { type: unknown; props: object }[];
+    expect(link.type).toBe(a);
+    expect(link.props).toEqual({ href: './a.mdx', title: 'title', children: ['link'] });
+
+    // what it wraps is not only text: another island
+    const [heading] = content.props.c1 as { type: unknown; props: { children: object } }[];
+    expect(heading.type).toBe(h2);
+    expect(toHtml(heading.props.children as never)).toBe('<strong>Bold</strong>');
+  });
+
+  it('moves the slots wrapped by the `components` of `<Content />` to their island', async () => {
+    const { island } = await compile(`[![image](./image.png)](./a.mdx)`);
+    const content = createContent(island, { components: { a: () => null } });
+    const [link] = content.props.c0 as { props: { children: object } }[];
+
+    expect(content.props).not.toHaveProperty('s0');
+    expect(toHtml(link.props.children as never)).toBe('<astro-slot name="s0"></astro-slot>');
   });
 
   it('keeps context between provided components', async () => {
