@@ -535,15 +535,16 @@ export const search: Feature<{ provider: SearchProvider }> = {
     }
 
     const rootProvider = await findSource(project.cwd, baseDir, '<RootProvider');
-    const edited =
-      rootProvider !== undefined &&
-      (await ctx.source(rootProvider, (file) => {
+    let added = false;
+    if (rootProvider)
+      await ctx.source(rootProvider, (file) => {
         const element = findJsxElement(file, 'RootProvider')?.openingElement;
         if (!element || file.code.slice(element.start, element.end).includes('search=')) return;
         addJsxAttribute(file, element, 'search={{ SearchDialog }}');
         addImport(file, { from: '@/components/search', default: 'SearchDialog' });
-      }));
-    if (!edited)
+        added = true;
+      });
+    if (!added)
       ctx.note(
         'Pass `search={{ SearchDialog }}` from `@/components/search` to `<RootProvider />`.',
       );

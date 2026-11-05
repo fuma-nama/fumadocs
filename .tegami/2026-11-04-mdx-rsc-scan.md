@@ -5,4 +5,4 @@ packages:
 
 ### Faster Vite RSC builds
 
-- The Vite plugin compiles only the imports of MDX files in the scan build of `@vitejs/plugin-rsc`, instead of compiling them twice.
+- Vite builds with React Server Components compile MDX files faster.

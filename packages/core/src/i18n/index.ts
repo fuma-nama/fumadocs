@@ -155,7 +155,7 @@ export function defineI18n<const Languages extends string>(
           return this as never;
         },
         preset(lang, preset) {
-          Object.assign(translations[lang], preset.value);
+          Object.assign((translations[lang] ??= {}), preset.value);
           return this as never;
         },
       } as TranslationsAPI<string> as never;

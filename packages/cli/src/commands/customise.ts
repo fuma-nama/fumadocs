@@ -198,9 +198,12 @@ export async function customise(config: LoadedConfig, connector: RegistryConnect
   outro(picocolors.bold('Have fun!'));
 }
 
-/** point the imports of route files at the installed layouts */
+/** point the imports of route files at the installed layouts, Astro routes import them through React components */
 export async function rewriteLayoutImports(config: LoadedConfig, map: Map<string, string>) {
-  const dir = path.join(config.baseDir, frameworks[config.framework].routesDir);
+  const dir = path.join(
+    config.baseDir,
+    config.framework === 'astro' ? 'components' : frameworks[config.framework].routesDir,
+  );
   const entries = await fs.readdir(dir, { recursive: true, withFileTypes: true }).catch(() => []);
   const updated: string[] = [];
 
@@ -231,7 +234,7 @@ async function printLayout(config: LoadedConfig, ...maps: [from: string, to: str
       picocolors.dim('---'),
       updated.length > 0
         ? `Updated the imports of ${updated.join(', ')}.`
-        : 'Open your `layout.tsx` files, replace the imports of components:',
+        : 'Open the files using the layouts, replace the imports of components:',
       ...maps.map(([from, to]) => picocolors.greenBright(`"${from}" -> "${to}"`)),
     ].join('\n'),
   );

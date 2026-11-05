@@ -291,10 +291,10 @@ For other places, extract the locale from `Astro.params` or the path and prepend
 
 ```astro
 ---
-const lang = Astro.params.lang ?? 'en';
+const { lang } = Astro.params;
 ---
 
-<a href={`/${lang}/about`}>About Us</a>
+<a href={lang ? `/${lang}/about` : '/about'}>About Us</a>
 ```
 
 In addition, the [`fumadocs-core/dynamic-link`](/docs/headless/components/link#dynamic-hrefs) component supports dynamic hrefs, you can use it to prepend the locale prefix.

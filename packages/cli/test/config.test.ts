@@ -39,3 +39,21 @@ test('customise: rewrite layout imports of route files', async () => {
     "import { DocsLayout } from '@/layouts/docs';\nimport { baseOptions } from '@/lib/layout.shared';\n",
   );
 });
+
+test('customise: rewrite layout imports of React components on Astro', async () => {
+  const cwd = await fs.mkdtemp(path.join(os.tmpdir(), 'fumadocs-cli-'));
+  const file = path.join(cwd, 'src/components/docs.tsx');
+  await fs.mkdir(path.dirname(file), { recursive: true });
+  await fs.writeFile(path.join(cwd, 'package.json'), '{"dependencies":{"astro":"*"}}');
+  await fs.writeFile(path.join(cwd, 'astro.config.mjs'), 'export default {};');
+  await fs.writeFile(file, "import { DocsLayout } from 'fumadocs-ui/layouts/docs';\n");
+  const prev = process.cwd();
+  process.chdir(cwd);
+  const updated = await getDefaultConfig(cwd)
+    .then((config) =>
+      rewriteLayoutImports(config, new Map([['fumadocs-ui/layouts/docs', '@/layouts/docs']])),
+    )
+    .finally(() => process.chdir(prev));
+  expect(updated).toEqual(['src/components/docs.tsx']);
+  expect(await fs.readFile(file, 'utf-8')).toBe("import { DocsLayout } from '@/layouts/docs';\n");
+});

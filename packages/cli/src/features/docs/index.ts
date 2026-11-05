@@ -119,7 +119,7 @@ export const docs: Feature<{ i18n: boolean }> = {
       const content = await fs.readFile(path.join(project.cwd, layout), 'utf-8').catch(() => '');
       if (!content.includes('Astro.props'))
         ctx.note(
-          `Docs pages render in \`${layout}\` with \`title\` and \`description\` props, add them to its \`<head>\`.`,
+          `Docs pages render in \`${layout}\` with \`title\` and \`description\` props, create it if missing and add them to its \`<head>\`.`,
         );
       if (i18n)
         ctx.note(

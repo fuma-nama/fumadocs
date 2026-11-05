@@ -25,7 +25,7 @@ export default function obsidianPlugin({ vault, components }: ObsidianPluginOpti
 
   /** pages of this vault, other local sources have the same page data */
   function isVaultPage(page: Page): page is Page & { data: ObsidianPage } {
-    if (!page.absolutePath) return false;
+    if (!page.absolutePath || !('load' in page.data)) return false;
     const relative = path.relative(vault.dir, page.absolutePath);
     return relative !== '..' && !relative.startsWith(`..${path.sep}`) && !path.isAbsolute(relative);
   }
