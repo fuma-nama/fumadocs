@@ -9,7 +9,7 @@ import { buildMDX } from '@/loaders/mdx/build';
 
 const dir = path.join(path.dirname(fileURLToPath(import.meta.url)), 'fixtures/remark-include');
 
-test('buildMDX resolves includes', async () => {
+async function setup() {
   const core = createCore({
     configPath: 'source.config.ts',
     environment: 'test',
@@ -26,6 +26,11 @@ test('buildMDX resolves includes', async () => {
 
   const collection = config.collections.get('docs');
   if (collection?.type !== 'doc') throw new Error('missing collection');
+  return { core, collection };
+}
+
+test('buildMDX resolves includes', async () => {
+  const { core, collection } = await setup();
   const dependencies: string[] = [];
   const { code } = await buildMDX(core, collection, {
     filePath: path.join(dir, 'page.mdx'),
@@ -46,4 +51,51 @@ test('buildMDX resolves includes', async () => {
   expect(dependencies.sort()).toEqual(
     ['braces.md', 'code.ts', 'test.mdx'].map((file) => path.join(dir, file)),
   );
+});
+
+test('buildMDX with importsOnly keeps the imports of includes and plugins', async () => {
+  const { core, collection } = await setup();
+  const { code } = await buildMDX(core, collection, {
+    filePath: path.join(dir, 'page.mdx'),
+    source: [
+      "import { A } from './a';",
+      '# Title',
+      '> <include>./esm.mdx</include>',
+      '![image](./image.png)',
+    ].join('\n\n'),
+    environment: 'bundler',
+    isDevelopment: false,
+    importsOnly: true,
+  });
+
+  expect(code).toMatchInlineSnapshot(`
+    "import {Fragment as _Fragment, jsx as _jsx} from "react/jsx-runtime";
+    export let structuredData = {
+      "contents": [{
+        "heading": "title",
+        "content": "> import { Included } from './included';\\n>\\n>\\n>\\n> Included content."
+      }],
+      "headings": [{
+        "id": "title",
+        "content": "Title"
+      }]
+    };
+    import __img0 from "./image.png";
+    import {A} from './a';
+    import {Included} from './included';
+    export let toc = [];
+    function _createMdxContent(props) {
+      return _jsx(_Fragment, {});
+    }
+    export default function MDXContent(props = {}) {
+      const {wrapper: MDXLayout} = props.components || ({});
+      return MDXLayout ? _jsx(MDXLayout, {
+        ...props,
+        children: _jsx(_createMdxContent, {
+          ...props
+        })
+      }) : _createMdxContent(props);
+    }
+    "
+  `);
 });

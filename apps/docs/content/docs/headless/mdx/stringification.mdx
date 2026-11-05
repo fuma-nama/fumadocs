@@ -7,7 +7,7 @@ description: How Fumadocs turns your documents into Markdown.
 
 - Markdown stays as you wrote it, nothing is escaped or reformatted.
 - Remark plugins change it only by recording edits.
-- It's fast, no syntax tree is serialized.
+- It's fast, since no syntax tree is serialized.
 
 ## How It Works
 
@@ -16,7 +16,7 @@ The output is the source of your document, with the edits of plugins applied. No
 - A node with a `position` outputs its source.
 - A node without one, like those inserted by plugins, outputs nothing. Its plugin defines its Markdown instead.
 
-For example, [Remark Image](/docs/headless/mdx/remark-image) turns `![alt](/image.png)` into an `<img>` element, the output keeps `![alt](/image.png)`.
+For example, [Remark Image](/docs/headless/mdx/remark-image) turns `![alt](/image.png)` into an `<img>` element, and the output keeps `![alt](/image.png)`.
 
 ## Editing the Output
 
@@ -55,7 +55,7 @@ For search, a plugin adds the records of its nodes with [`data.structuredData`](
 
 ### Runtime Values
 
-For Markdown only known at runtime, output a JS expression with `s.expression()`. Remark LLMs evaluates it where it exports the Markdown, other outputs use the fallback:
+For Markdown only known at runtime, output a JS expression with `s.expression()`. Remark LLMs evaluates it where it exports the Markdown. Other outputs use the fallback:
 
 ```ts
 import type { Expression } from 'estree';
@@ -77,8 +77,6 @@ import { embedSource } from 'fumadocs-core/mdx-plugins/stringifier';
 embedSource(file, node, otherSource, otherTree.children);
 ```
 
-Other nodes parsed from a string must not keep their `position`, it doesn't point into your document.
+Other nodes parsed from a string must not keep their `position`, because it doesn't point into your document.
 
-<Callout title="Sätteri">
-  The Sätteri compiler of Fumadocs MDX works the same way, with its own versions of these plugins.
-</Callout>
+The helpers on this page are for unified plugins. On Sätteri, Remark LLMs and Remark Structure output Markdown the same way, with no public API to edit it.

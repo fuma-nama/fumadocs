@@ -63,6 +63,7 @@ export interface GraphQLServer {
 
 export interface GraphQLPageData extends PageData {
   // `GraphQLPageProps & {}` would be flattened into types that consumers cannot name
+  full: boolean;
   getGraphQLPageProps: () => Omit<GraphQLPageProps, 'schema'> & { schema: string };
   getSchema: () => { id: string } & LoadedSchema;
   /** the items of page in Markdown, for LLMs */
@@ -178,6 +179,7 @@ export function createGraphQL(options: GraphQLOptions = {}): GraphQLServer {
 
           return {
             ...entry.info,
+            full: true,
             getGraphQLPageProps() {
               return {
                 schema: id,
@@ -243,9 +245,7 @@ export function createGraphQL(options: GraphQLOptions = {}): GraphQLServer {
         },
       };
     },
-    loaderPlugin() {
-      return graphqlPlugin();
-    },
+    loaderPlugin,
   };
 }
 
@@ -257,7 +257,14 @@ export interface InternalGraphQLMeta {
 
 const OperationKindSet = new Set(['query', 'mutation', 'subscription']);
 
+/**
+ * @deprecated use `loaderPlugin()` of `createGraphQL()` instead
+ */
 export function graphqlPlugin(): LoaderPlugin {
+  return loaderPlugin();
+}
+
+function loaderPlugin(): LoaderPlugin {
   return {
     name: 'fumadocs:graphql',
     enforce: 'pre',

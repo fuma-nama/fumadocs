@@ -162,16 +162,49 @@ source.getNodeMeta(folderNode);
 
 ### Params
 
-A function to generate output for Next.js `generateStaticParams`.
+Generate the path params of every page, for pre-rendering pages.
 The generated parameter names will be `slug: string[]` and `lang: string` (i18n only).
 
-```ts title="app/[[...slug]]/page.tsx"
+```ts tab="Next.js" title="app/docs/[[...slug]]/page.tsx"
 import { source } from '@/lib/source';
 
 export function generateStaticParams() {
   return source.generateParams();
 }
 ```
+
+```ts tab="Waku" title="src/pages/docs/[...slugs].tsx"
+import { source } from '@/lib/source';
+
+export async function getConfig() {
+  const pages = source
+    .generateParams()
+    .map((item) => (item.lang ? [item.lang, ...item.slug] : item.slug));
+
+  return {
+    render: 'static' as const,
+    staticPaths: pages,
+  } as const;
+}
+```
+
+```astro tab="Astro" title="src/pages/docs/[...slug].astro"
+---
+import type { GetStaticPaths } from 'astro';
+import { source } from '@/lib/source';
+
+export const prerender = true;
+
+export const getStaticPaths = (() => {
+  return source.getPages().map((page) => ({
+    params: { slug: decodeURI(page.slugs.join('/')) || undefined },
+    props: { page },
+  }));
+}) satisfies GetStaticPaths;
+---
+```
+
+React Router and TanStack Start pre-render by URL. List the `url` of `source.getPages()` instead.
 
 ### Language Entries
 

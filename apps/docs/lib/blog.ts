@@ -97,9 +97,10 @@ export function findPost(
   url: string,
 ): { post: BlogPost; newer?: BlogPost; older?: BlogPost } | undefined {
   const index = posts.findIndex((post) => post.url === url);
-  if (index === -1) return;
+  const post = posts[index];
+  if (!post) return;
 
-  return { post: posts[index], newer: posts[index - 1], older: posts[index + 1] };
+  return { post, newer: posts[index - 1], older: posts[index + 1] };
 }
 
 /** tags of posts with their number of posts, most used first */

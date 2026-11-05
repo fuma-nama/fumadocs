@@ -5,24 +5,30 @@ description: Generate steps from headings
 
 ## Usage
 
-Add the remark plugin.
+Remark Steps is a remark plugin. Add it to your config:
 
-```ts tab="MDX Compiler"
-import { compile } from '@mdx-js/mdx';
-import { remarkSteps } from 'fumadocs-core/mdx-plugins/remark-steps';
-
-await compile('...', {
-  remarkPlugins: [remarkSteps],
-});
-```
-
-```ts title="source.config.ts" tab="Fumadocs MDX"
+```ts tab="unified" title="source.config.ts"
 import { defineConfig } from 'fumadocs-mdx/config';
 import { remarkSteps } from 'fumadocs-core/mdx-plugins/remark-steps';
 
 export default defineConfig({
   mdxOptions: {
     remarkPlugins: [remarkSteps],
+  },
+});
+```
+
+```ts tab="Sätteri" title="source.config.ts"
+import { defineConfig, defineDocs } from 'fumadocs-mdx/config';
+import { remarkSteps } from '@fumadocs/satteri/remark-steps';
+
+export const docs = defineDocs({
+  docs: { compiler: 'satteri' },
+});
+
+export default defineConfig({
+  satteriOptions: {
+    mdastPlugins: [remarkSteps()],
   },
 });
 ```

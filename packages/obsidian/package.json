@@ -28,6 +28,7 @@
     "./client": "./dist/client.js",
     "./dev/vite": "./dist/dev/vite.js",
     "./dev/ws": "./dist/dev/ws.js",
+    "./press": "./dist/press.js",
     "./ui": "./dist/ui/index.js",
     "./package.json": "./package.json",
     "./css/*": "./css/*"
@@ -76,7 +77,7 @@
     "@types/hast": "*",
     "@types/mdx": "*",
     "@types/react": "*",
-    "fumadocs-core": "^16.17.8",
+    "fumadocs-core": "^16.17.11",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
   },

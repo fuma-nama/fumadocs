@@ -5,13 +5,15 @@ description: Content negotiation utilities.
 
 ## Overview
 
-For React.js frameworks supporting middlewares, you can use the Negotiation API of Fumadocs for basic functionalities.
+For React frameworks supporting middlewares, you can use the Negotiation API of Fumadocs for basic functionalities.
+On Waku, use it in a [Hono middleware](https://hono.dev/docs/guides/middleware) in `src/middleware`.
+On Astro, use it in a [middleware](https://docs.astro.build/en/guides/middleware), which only runs for pages rendered on request.
 
 ### Accept Markdown
 
 Serve markdown or HTML depending on the `Accept` header, this can improve the experience for AI agents.
 
-```ts title="proxy.ts (Next.js)"
+```ts tab="Next.js" title="proxy.ts"
 import { NextRequest, NextResponse } from 'next/server';
 import { isMarkdownPreferred, rewritePath } from 'fumadocs-core/negotiation';
 
@@ -28,4 +30,49 @@ export default function proxy(request: NextRequest) {
 
   return NextResponse.next();
 }
+```
+
+```tsx tab="React Router" title="app/root.tsx"
+import type { Route } from './+types/root';
+import { isMarkdownPreferred, rewritePath } from 'fumadocs-core/negotiation';
+
+const { rewrite: rewriteLLM } = rewritePath('/docs/*path', '/llms.mdx/*path');
+
+const serverMiddleware: Route.MiddlewareFunction = async ({ request }, next) => {
+  const url = new URL(request.url);
+  const result = isMarkdownPreferred(request) && rewriteLLM(url.pathname);
+
+  // the headers of `Response.redirect()` are immutable, build the response directly
+  if (result)
+    return new Response(null, {
+      status: 302,
+      headers: { Location: new URL(result, url).toString(), Vary: 'Accept' },
+    });
+
+  return next();
+};
+
+export const middleware = [serverMiddleware];
+```
+
+```ts tab="TanStack Start" title="src/start.ts"
+import { createMiddleware, createStart } from '@tanstack/react-start';
+import { redirect } from '@tanstack/react-router';
+import { isMarkdownPreferred, rewritePath } from 'fumadocs-core/negotiation';
+
+const { rewrite: rewriteLLM } = rewritePath('/docs/*path', '/llms.mdx/*path');
+
+const llmMiddleware = createMiddleware().server(({ next, request }) => {
+  const url = new URL(request.url);
+  const result = isMarkdownPreferred(request) && rewriteLLM(url.pathname);
+
+  // redirect to the Markdown URL
+  if (result) throw redirect({ href: new URL(result, url).href, headers: { Vary: 'Accept' } });
+
+  return next();
+});
+
+export const startInstance = createStart(() => ({
+  requestMiddleware: [llmMiddleware],
+}));
 ```

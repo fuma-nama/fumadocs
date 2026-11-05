@@ -125,7 +125,7 @@ export const docs = defineDocs({
 });
 ```
 
-```ts tab="Tanstack Start" title="src/lib/source.ts"
+```ts tab="TanStack Start" title="src/lib/source.ts"
 import { loader } from 'fumadocs-core/source';
 import { defineDocs } from 'fumadocs-mdx/macro'; // [!code --]
 // [!code ++:2]
@@ -157,7 +157,7 @@ export const source = loader(
 );
 ```
 
-```ts tab="Tanstack Start" title="src/lib/collections.ts"
+```ts tab="TanStack Start" title="src/lib/collections.ts"
 import { defineDocs } from 'fumadocs-mdx/macro';
 
 export const docs = defineDocs({
@@ -181,6 +181,28 @@ export const source = loader(
   // [!code ++:6]
   {
     docs: docs.toFumadocsSource(),
+    graphql: await graphql.staticSource({
+      baseDir: 'graphql',
+    }),
+  },
+  {
+    baseUrl: '/docs',
+    // [!code ++:2] optional: adds a query/mutation/subscription badge to each page item in page tree
+    plugins: [graphql.loaderPlugin()],
+  },
+);
+```
+
+```ts tab="Astro" title="src/lib/source.ts"
+import { getCollection } from 'astro:content';
+import { loader } from 'fumadocs-core/source';
+import { toFumadocsSource } from '@fumadocs/astro/source';
+import { graphql } from '@/lib/graphql'; // [!code ++]
+
+export const source = loader(
+  // [!code ++:6]
+  {
+    docs: toFumadocsSource(await getCollection('docs'), await getCollection('meta')),
     graphql: await graphql.staticSource({
       baseDir: 'graphql',
     }),
@@ -268,7 +290,7 @@ export default function Page({ loaderData }: Route.ComponentProps) {
 }
 ```
 
-```tsx tab="Tanstack Start" title="src/routes/docs/$.tsx"
+```tsx tab="TanStack Start" title="src/routes/docs/$.tsx"
 import { docs, source } from '@/lib/source'; // [!code --]
 // [!code ++:4]
 import { docs } from '@/lib/collections';
@@ -360,6 +382,76 @@ export default function Page({ slugs }: PageProps<'/docs/[...slugs]'>) {
   }
 
   // ...
+}
+```
+
+```astro tab="Astro" title="src/pages/docs/[...slug].astro"
+---
+import type { GetStaticPaths, InferGetStaticPropsType } from 'astro';
+import Layout from '@/layouts/Layout.astro';
+import { Docs } from '@/components/docs';
+import { GraphQLDocs } from '@/components/graphql-docs'; // [!code ++]
+import { source } from '@/lib/source';
+
+export const prerender = true;
+
+export const getStaticPaths = (() => {
+  return source.getPages().map((page) => ({
+    params: { slug: decodeURI(page.slugs.join('/')) || undefined },
+    props: { page },
+  }));
+}) satisfies GetStaticPaths;
+
+type Props = InferGetStaticPropsType<typeof getStaticPaths>;
+
+const { page } = Astro.props;
+const pageTree = await source.serializePageTree(source.getPageTree());
+---
+
+{/* [!code ++:13] */}
+{page.type === 'graphql' && (
+  <Layout title={page.data.title ?? 'My App'}>
+    <GraphQLDocs
+      client:load
+      pathname={Astro.url.pathname}
+      params={Astro.params}
+      tree={pageTree}
+      title={page.data.title}
+      props={page.data.getGraphQLPageProps()}
+    />
+  </Layout>
+)}
+```
+
+```tsx tab="Astro" title="src/components/graphql-docs.tsx"
+import { type SerializedPageTree, useFumadocsLoader } from 'fumadocs-core/source/client';
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+import { DocsBody, DocsPage, DocsTitle } from 'fumadocs-ui/layouts/docs/page';
+import { GraphQLPage } from '@/components/api-page';
+import { Provider, type ProviderProps } from '@/components/provider';
+import { baseOptions } from '@/lib/layout.shared';
+import type { GraphQLPageProps } from '@fumadocs/graphql/ui';
+
+export function GraphQLDocs({
+  tree,
+  title,
+  props,
+  ...rest
+}: ProviderProps & { tree: SerializedPageTree; title?: string; props: GraphQLPageProps }) {
+  const data = useFumadocsLoader({ tree });
+
+  return (
+    <Provider {...rest}>
+      <DocsLayout {...baseOptions()} tree={data.tree}>
+        <DocsPage full>
+          <DocsTitle>{title}</DocsTitle>
+          <DocsBody>
+            <GraphQLPage {...props} />
+          </DocsBody>
+        </DocsPage>
+      </DocsLayout>
+    </Provider>
+  );
 }
 ```
 

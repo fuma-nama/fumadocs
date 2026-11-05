@@ -15,7 +15,7 @@ You can change the output paths of components in the config.
 
 ### Init
 
-Set up Fumadocs on an existing app, it supports Next.js, React Router, Tanstack Start and Waku.
+Set up Fumadocs on an existing app. It supports Next.js, React Router, TanStack Start, Waku and Astro.
 
 ```package-install
 npx @fumadocs/cli init
@@ -58,6 +58,7 @@ Features adapt to your setup:
 - Fumadocs MDX with the [Macro API](/docs/mdx/macro) or a `source.config.ts`, other content sources can't use `llms`, `mcp` and `epub`.
 - The `baseUrl` of your docs, `src/` directory, `next.config.ts`, i18n, static export and SPA modes.
 - React Router with file-based routes: the routes to register are printed instead.
+- Astro with `@fumadocs/astro` collections: `ai` is not available, `mcp` and `epub` need an adapter.
 
 The paths of routes are placed under the constants of `lib/shared.ts`.
 

@@ -1,7 +1,7 @@
 import path from 'node:path';
 import type { ImportDeclaration } from 'oxc-parser';
 import type { Feature, FeatureContext } from '@/features';
-import { astroModule, findSource, includeProcessedMarkdown, requiresManaged } from './utils';
+import { findSource, includeProcessedMarkdown } from './utils';
 import { docs } from './docs';
 
 const providers = {
@@ -32,12 +32,11 @@ export const ai: Feature<{ provider: AIProvider }> = {
     },
   },
   supports: (project) => {
-    const managed = requiresManaged(project);
-    if (managed !== true) return managed;
+    if (project.framework === 'astro') return 'Astro is not supported by this feature';
     return project.static ? 'AI chat requires a server to run the chat route handler.' : true;
   },
   async apply(ctx, { provider }) {
-    const { cwd, baseDir, info, config, source, framework } = ctx.project;
+    const { cwd, baseDir, info, config, source } = ctx.project;
     await ctx.install(`ai/${provider}`);
     ctx.env(providers[provider].env, '');
     // the search index of the chat route reads the processed Markdown of pages
@@ -46,11 +45,7 @@ export const ai: Feature<{ provider: AIProvider }> = {
 
     // e.g. `./components` -> `@/components/ai/layout`
     const clientLayoutImport = `@/${path.posix.join(config.aliases.componentsDir, 'ai/layout')}`;
-    // on Astro, the docs layout is rendered by the `page` module of the Fumadocs integration
-    const layout =
-      framework === 'astro'
-        ? await astroModule(ctx, 'page')
-        : await findSource(cwd, path.join(baseDir, info.routesDir), '<DocsLayout');
+    const layout = await findSource(cwd, path.join(baseDir, info.routesDir), '<DocsLayout');
     let layoutModule: string | undefined;
     let wired = false;
 

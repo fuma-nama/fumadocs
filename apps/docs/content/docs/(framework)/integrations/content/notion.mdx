@@ -95,9 +95,11 @@ The source paginates through every matching data-source row and lazily pulls eac
 
 ### Render Pages [step]
 
-Use the loader in your layout to build the page tree:
+`NotionRenderer` is an async Server Component, so it needs a framework with React Server Components, like Next.js and Waku.
 
-```tsx title="app/docs/layout.tsx"
+Use the loader in your layout to build the page tree. Load a page's blocks and render them with `NotionRenderer`. `blocksToTableOfContents()` produces the table of contents:
+
+```tsx tab="Next.js" title="app/docs/layout.tsx"
 import { getSource } from '@/lib/source';
 import { DocsLayout } from 'fumadocs-ui/layouts/docs';
 
@@ -108,9 +110,7 @@ export default async function Layout({ children }: LayoutProps<'/docs'>) {
 }
 ```
 
-Load a page's blocks and render them with `NotionRenderer`. `blocksToTableOfContents()` produces the table of contents:
-
-```tsx title="app/docs/[[...slug]]/page.tsx"
+```tsx tab="Next.js" title="app/docs/[[...slug]]/page.tsx"
 import { notFound } from 'next/navigation';
 import { getSource } from '@/lib/source';
 import {
@@ -145,13 +145,69 @@ export default async function Page({ params }: PageProps<'/docs/[[...slug]]'>) {
 }
 ```
 
+```tsx tab="Waku" title="src/pages/docs/_layout.tsx"
+import type { ReactNode } from 'react';
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+import { getSource } from '@/lib/source';
+
+export default async function Layout({ children }: { children: ReactNode }) {
+  const source = await getSource();
+
+  return <DocsLayout tree={source.getPageTree()}>{children}</DocsLayout>;
+}
+```
+
+```tsx tab="Waku" title="src/pages/docs/[...slugs].tsx"
+import type { PageProps } from 'waku/router';
+import { unstable_notFound } from 'waku/router/server';
+import { getSource } from '@/lib/source';
+import {
+  NotionRenderer,
+  blocksToTableOfContents,
+  createNotionFileUrlResolver,
+} from '@fumadocs/notion';
+import { DocsPage, DocsBody, DocsDescription, DocsTitle } from 'fumadocs-ui/layouts/docs/page';
+
+export default async function Page({ slugs }: PageProps<'/docs/[...slugs]'>) {
+  const source = await getSource();
+
+  const page = source.getPage(slugs);
+  if (!page) unstable_notFound();
+
+  // [!code highlight:2] load the page body
+  const { blocks } = await page.data.load();
+
+  return (
+    <DocsPage toc={blocksToTableOfContents(blocks)}>
+      <DocsTitle>{page.data.title}</DocsTitle>
+      <DocsDescription>{page.data.description}</DocsDescription>
+      <DocsBody>
+        <NotionRenderer
+          blocks={blocks}
+          getFileUrl={createNotionFileUrlResolver({ pageId: page.data.id })}
+        />
+      </DocsBody>
+    </DocsPage>
+  );
+}
+
+export const getConfig = async () => ({ render: 'dynamic' }) as const;
+```
+
 ### Notion Files [step]
 
 Notion-hosted file URLs (images, videos, PDFs) expire after about an hour, so they can't be embedded directly on a page that is cached or statically served.
 
 `createNotionFileUrlResolver()` routes those internal assets through a file handler that fetches a fresh signed URL on demand. Mount the handler with `createNotionFileHandler()`, it verifies that the requested block belongs to a page in your data source before redirecting:
 
-```ts title="app/api/notion/file/route.ts"
+```ts tab="Next.js" title="app/api/notion/file/route.ts"
+import { createNotionFileHandler } from '@fumadocs/notion';
+import { notion } from '@/lib/notion';
+
+export const GET = createNotionFileHandler(notion);
+```
+
+```ts tab="Waku" title="src/pages/_api/api/notion/file.ts"
 import { createNotionFileHandler } from '@fumadocs/notion';
 import { notion } from '@/lib/notion';
 

@@ -126,7 +126,7 @@ export interface RouteModule {
   methods?: string[];
   /** Next.js: never revalidate the route */
   revalidate?: boolean;
-  /** Waku & Astro: prerender the route */
+  /** Waku & Astro: prerender the route, otherwise Astro renders it on request in every output mode */
   static?: boolean;
 }
 
@@ -138,7 +138,7 @@ export function routeModule(framework: Framework, route: FormattedRoute, mod: Ro
 
   if (framework === 'astro') {
     const out: string[] = [];
-    if (isStatic) out.push('export const prerender = true;\n');
+    out.push(`export const prerender = ${isStatic === true};\n`);
     for (const method of methods)
       out.push(
         `export const ${method}: APIRoute = async (${request ? '{ request }' : ''}) => ${body};\n`,
@@ -196,6 +196,57 @@ ${out.join('\n')}
 `;
   }
 }
+
+/**
+ * `getStaticPaths()` of an Astro route per docs page, also prerendered with `output: 'server'`.
+ * With i18n, the route is under the locale segment, and reads `i18n` of `@/lib/i18n` for an optional locale.
+ */
+export function astroPagePaths(i18n: I18nInfo | null, index?: string) {
+  const slug = `decodeURI(page.slugs.join('/')) || ${index ? `'${index}'` : 'undefined'}`;
+  const prerender = 'export const prerender = true;\n\n';
+  if (!i18n)
+    return `${prerender}export const getStaticPaths = (() => {
+  return source.getPages().map((page) => ({
+    params: { slug: ${slug} },
+    props: { page },
+  }));
+}) satisfies GetStaticPaths;`;
+
+  return `${prerender}export const getStaticPaths = (() => {
+  const paths = [];
+  for (const { language, pages } of source.getLanguages()) {
+    for (const page of pages) {
+      paths.push({
+        params: {
+          ${i18n.optionalLocale ? '// the default language has no prefix\n          lang: language === i18n.defaultLanguage ? undefined : language' : 'lang: language'},
+          slug: ${slug},
+        },
+        props: { lang: language, page },
+      });
+    }
+  }
+  return paths;
+}) satisfies GetStaticPaths;`;
+}
+
+/** an Astro endpoint per docs page, `body` is the response of `page`, `index` is the slug of the root page */
+export const astroPageRoute = (
+  i18n: I18nInfo | null,
+  imports: string,
+  body: string,
+  index?: string,
+) =>
+  `import type { APIRoute, GetStaticPaths, InferGetStaticPropsType } from 'astro';
+${imports.trim()}
+${i18n?.optionalLocale ? "import { i18n } from '@/lib/i18n';\n" : ''}
+${astroPagePaths(i18n, index)}
+
+export const GET: APIRoute<InferGetStaticPropsType<typeof getStaticPaths>> = async ({
+  props: { page },
+}) => {
+  return ${body};
+};
+`;
 
 /** import of the generated types of a React Router route module */
 export const reactRouterTypes = (route: FormattedRoute) =>

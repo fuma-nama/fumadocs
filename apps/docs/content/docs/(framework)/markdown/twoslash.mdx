@@ -1,6 +1,6 @@
 ---
 title: Twoslash
-description: Use Typescript Twoslash in your docs
+description: Use TypeScript Twoslash in your docs
 ---
 
 ## Usage
@@ -12,9 +12,9 @@ Type information is resolved by the native TypeScript 7 compiler, from the worki
 fumadocs-twoslash
 ```
 
-For Next.js, you need to externalize the following deps:
+On Next.js, externalize `typescript` from the server bundle:
 
-```js title="next.config.mjs (Next.js)"
+```js title="next.config.mjs"
 const config = {
   reactStrictMode: true,
   // [!code ++]
@@ -22,9 +22,9 @@ const config = {
 };
 ```
 
-Add to your Shiki transformers.
+`transformerTwoslash` is a Shiki transformer. Add it to the transformers of the rehype code plugin:
 
-```ts tab="Fumadocs MDX" title="source.config.ts"
+```ts tab="unified" title="source.config.ts"
 import { defineConfig } from 'fumadocs-mdx/config';
 import { transformerTwoslash } from 'fumadocs-twoslash';
 import { rehypeCodeDefaultOptions } from 'fumadocs-core/mdx-plugins';
@@ -42,7 +42,31 @@ export default defineConfig({
 });
 ```
 
-Add styles, Tailwind CSS v4 is required.
+```ts tab="Sätteri" title="source.config.ts"
+import { defineConfig, defineDocs } from 'fumadocs-mdx/config';
+import { transformerTwoslash } from 'fumadocs-twoslash';
+import { rehypeCodeDefaultOptions } from 'fumadocs-core/mdx-plugins';
+
+export const docs = defineDocs({
+  docs: {
+    compiler: 'satteri',
+  },
+});
+
+export default defineConfig({
+  satteriOptions: {
+    rehypeCodeOptions: {
+      themes: {
+        light: 'github-light',
+        dark: 'github-dark',
+      },
+      transformers: [...(rehypeCodeDefaultOptions.transformers ?? []), transformerTwoslash()],
+    },
+  },
+});
+```
+
+Add styles. Tailwind CSS v4 is required.
 
 ```css title="Tailwind CSS"
 @import 'fumadocs-twoslash/twoslash.css';

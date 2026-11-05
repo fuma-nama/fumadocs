@@ -8,6 +8,8 @@ import { sync, toDocuments } from '@/search/meilisearch';
 import { meilisearchClient } from '@/search/client/meilisearch';
 import type Mixedbread from '@mixedbread/sdk';
 import { createMixedbreadSearchAPI, sync as syncMixedbread } from '@/search/mixedbread';
+import { flexsearch, flexsearchI18n } from '@/search/flexsearch';
+import { flexsearchStaticClient } from '@/search/client/flexsearch-static';
 
 test('Search API', async () => {
   const api = createSearchAPI('simple', {
@@ -96,6 +98,66 @@ test('Search API Advanced: table ids are metadata', async () => {
 
   expect(await api.search('string')).toContainEqual(expect.objectContaining({ table: 'table-0' }));
   expect(await api.search('table')).toHaveLength(0);
+});
+
+test('Flexsearch: static export matches server search', async () => {
+  const indexes = [
+    {
+      id: '/docs',
+      title: 'Introduction',
+      description: 'Getting started with layouts.',
+      structuredData: structure(
+        '## Layouts\n\nThe docs layout has a sidebar.\n\n## Search\n\nOpen the search dialog.',
+      ),
+      url: '/docs',
+      tag: 'guide',
+    },
+    {
+      id: '/docs/layout',
+      title: 'Docs Layout',
+      structuredData: structure('## Sidebar\n\nCustomise the sidebar tabs of a layout.'),
+      url: '/docs/layout',
+      tag: 'ui',
+    },
+  ];
+  const api = flexsearch({ indexes });
+  const i18nApi = flexsearchI18n({
+    i18n: { defaultLanguage: 'en', languages: ['en', 'fr'] },
+    indexes: indexes.flatMap((index) => [
+      { ...index, locale: 'en' },
+      { ...index, id: `/fr${index.id}`, url: `/fr${index.url}`, locale: 'fr' },
+    ]),
+  });
+  const exported: Record<string, unknown> = {
+    '/default.json': await api.export(),
+    '/i18n.json': await i18nApi.export(),
+  };
+  vi.stubGlobal('fetch', async (from: string) => Response.json(exported[from]));
+
+  for (const query of ['layout', 'yout', 'sidebar tabs', 'search', 'nothing']) {
+    for (const tag of [undefined, 'ui', ['guide', 'ui']]) {
+      const expected = await api.search(query, { tag });
+      expect(await flexsearchStaticClient({ from: '/default.json', tag }).search(query)).toEqual(
+        expected,
+      );
+
+      for (const locale of ['en', 'fr']) {
+        expect(
+          await flexsearchStaticClient({ from: '/i18n.json', locale, tag }).search(query),
+        ).toEqual(await i18nApi.search(query, { locale, tag }));
+      }
+    }
+  }
+
+  expect((await api.search('layout')).map((item) => item.id)).toEqual([
+    '/docs',
+    '/docs-1',
+    '/docs-3',
+    '/docs-0',
+    '/docs/layout',
+    '/docs/layout-1',
+  ]);
+  vi.unstubAllGlobals();
 });
 
 test('buildDocuments: page description duplicated in contents is indexed once', () => {

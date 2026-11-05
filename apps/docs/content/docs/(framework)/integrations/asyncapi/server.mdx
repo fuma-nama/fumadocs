@@ -74,7 +74,7 @@ export const asyncapi = createAsyncAPI({
 });
 ```
 
-On Next.js, Waku and React Router, `<AsyncAPIPage />` loads each document once per browser session with `loadDocument`, it also runs during server rendering:
+On Next.js, React Router, Waku and Astro, `<AsyncAPIPage />` loads each document once per browser session with `loadDocument`, which also runs during server rendering:
 
 ```tsx title="components/api-page.tsx"
 'use client';
@@ -138,7 +138,22 @@ export async function GET(_: Request, { params }: ApiContext<'/api/asyncapi/[id]
 }
 ```
 
-On Tanstack Start, route loaders run on both sides, call a server function only when the browser doesn't have the document yet:
+```ts tab="Astro" title="src/pages/api/asyncapi/[id].ts"
+import type { APIRoute, GetStaticPaths } from 'astro';
+import { asyncapi } from '@/lib/asyncapi';
+
+export const prerender = true;
+
+export const getStaticPaths = (async () => {
+  return Object.keys(await asyncapi.getSchemas()).map((id) => ({ params: { id } }));
+}) satisfies GetStaticPaths;
+
+export const GET: APIRoute = async ({ params }) => {
+  return Response.json((await asyncapi.getSchema(params.id!)).bundled);
+};
+```
+
+TanStack Start route loaders run on both the server and the browser, so it skips `loadDocument` and the route above. Call a server function only when the browser doesn't have the document yet:
 
 ```tsx title="src/routes/docs/$.tsx"
 import { createServerFn } from '@tanstack/react-start';
@@ -173,6 +188,6 @@ function Page() {
 }
 ```
 
-- With generated MDX files, only Tanstack Start needs a change: put documents in `preloaded.docs` instead.
+- With generated MDX files, only TanStack Start needs a change: put documents in `preloaded.docs` instead.
 - For the [UI installed by Fumadocs CLI](/docs/integrations/asyncapi/api-page#full-ui), pass `loadDocument` to `createAsyncAPIRenderer()`.
 - Browsers keep each document until a reload. With [`disableCache`](#disablecache), leave `includeDocument` on.

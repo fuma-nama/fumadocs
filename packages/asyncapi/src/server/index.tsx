@@ -57,6 +57,7 @@ export interface AsyncAPIServer {
 
 export interface AsyncAPIPageData extends PageData {
   // `AsyncAPIPageProps_Spec & {}` would be flattened into types that consumers cannot name
+  full: boolean;
   getAsyncAPIPageProps: () => Omit<AsyncAPIPageProps_Spec, 'document'> & { document: string };
   getSchema: () => { id: string; bundled: AsyncAPIObject };
   /** the operations of page in Markdown, for LLMs */
@@ -115,6 +116,7 @@ export function createAsyncAPI(options: AsyncAPIOptions = {}): AsyncAPIServer {
 
         return {
           ...entry.info,
+          full: true,
           getAsyncAPIPageProps() {
             return { payload: includeDocument ? { bundled } : {}, ...props };
           },
@@ -177,7 +179,7 @@ export function createAsyncAPI(options: AsyncAPIOptions = {}): AsyncAPIServer {
         },
       };
     },
-    loaderPlugin: asyncapiPlugin,
+    loaderPlugin,
   };
 }
 
@@ -186,7 +188,14 @@ export interface InternalAsyncAPIMeta {
   preload?: string[];
 }
 
+/**
+ * @deprecated use `loaderPlugin()` of `createAsyncAPI()` instead
+ */
 export function asyncapiPlugin(): LoaderPlugin {
+  return loaderPlugin();
+}
+
+function loaderPlugin(): LoaderPlugin {
   return {
     name: 'fumadocs:asyncapi',
     enforce: 'pre',

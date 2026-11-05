@@ -88,23 +88,12 @@ Pass a function to build the options lazily.
 
 ## Usage
 
-Read the source in your route or layout and render it with Fumadocs UI, exactly as with `@fumadocs/local-md`:
-
-```tsx title="app/docs/layout.tsx"
-import { getSource } from '@/lib/source';
-import { DocsLayout } from 'fumadocs-ui/layouts/docs';
-
-export default async function Layout({ children }: LayoutProps<'/docs'>) {
-  const docs = await getSource();
-
-  return <DocsLayout tree={docs.getPageTree()}>{children}</DocsLayout>;
-}
-```
+`getSource()` returns a normal [content loader](/docs/headless/source-api). Render pages on each framework exactly as with [`@fumadocs/local-md`](/docs/integrations/content/local-md#usage), importing from `@fumadocs/satteri/local-md` instead.
 
 Each page exposes `load()`, which compiles it once and returns a renderer:
 
 ```tsx
-const page = source.getPage(params.slug);
+const page = source.getPage(slugs);
 const { body, toc } = await (await page.data.load()).render();
 ```
 
@@ -112,17 +101,20 @@ The renderer also exposes `structuredData`, and `exports` for anything the docum
 
 ### Client Rendering
 
-`serialize()` returns a JSON-safe payload, so a server can hand a compiled page to the client:
+`serialize()` returns a JSON-safe payload, so a server can hand a compiled page to the client, like the loaders of React Router and TanStack Start:
 
-```tsx title="app/page.tsx"
+```tsx
 const serialized = (await page.data.load()).serialize();
 ```
 
 ```tsx title="components/content.tsx"
 'use client';
-import { rendererFromSerialized } from '@fumadocs/satteri/local-md/client';
+import {
+  rendererFromSerialized,
+  type MarkdownRendererSerializedOptions,
+} from '@fumadocs/satteri/local-md/client';
 
-export function Content({ serialized }) {
+export function Content({ serialized }: { serialized: MarkdownRendererSerializedOptions }) {
   return rendererFromSerialized(serialized).renderSync().body;
 }
 ```

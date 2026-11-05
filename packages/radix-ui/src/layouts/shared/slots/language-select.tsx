@@ -2,7 +2,7 @@
 import type { ComponentProps } from 'react';
 import { useI18n } from '@/contexts/i18n';
 import { useTranslations } from '@fuma-translate/react';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Popover, PopoverClose, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/components/ui/button';
 import type { VariantProps } from 'class-variance-authority';
@@ -39,9 +39,8 @@ export function LanguageSelect({
       <PopoverContent className="flex flex-col gap-0.5 p-1">
         <p className="p-2 text-xs font-medium text-fd-muted-foreground">{chooseLanguage}</p>
         {context.locales.map((item) => (
-          <button
+          <PopoverClose
             key={item.locale}
-            type="button"
             className={cn(
               'px-2 py-1.5 text-start text-sm rounded-lg transition-colors',
               item.locale === context.locale
@@ -53,7 +52,7 @@ export function LanguageSelect({
             }}
           >
             {item.name}
-          </button>
+          </PopoverClose>
         ))}
       </PopoverContent>
     </Popover>

@@ -5,28 +5,7 @@ description: Generate code blocks for package managers
 
 ## Usage
 
-Add the remark plugin.
-
-```ts tab="MDX Compiler"
-import { compile } from '@mdx-js/mdx';
-import { remarkNpm } from 'fumadocs-core/mdx-plugins';
-
-await compile('...', {
-  remarkPlugins: [remarkNpm],
-});
-```
-
-```ts title="source.config.ts" tab="Fumadocs MDX"
-import { defineConfig } from 'fumadocs-mdx/config';
-
-export default defineConfig({
-  mdxOptions: {
-    remarkNpmOptions: {
-      // it is enabled by default, customize it here
-    },
-  },
-});
-```
+Remark NPM is a remark plugin. Fumadocs MDX enables it by default. Pass options with `remarkNpmOptions`.
 
 Define the required components:
 
@@ -58,13 +37,6 @@ export function getMDXComponents(components?: MDXComponents) {
 }
 ```
 
-| Component            |                                                 |
-| -------------------- | ----------------------------------------------- |
-| CodeBlockTabs        | Accepts a `defaultValue` prop for default value |
-| CodeBlockTabsList    | N/A                                             |
-| CodeBlockTab         | Accepts a `value` prop                          |
-| CodeBlockTabsTrigger | Accepts a `value` prop                          |
-
 ### Input
 
 Create code blocks with `npm` as language.
@@ -78,6 +50,8 @@ npm i my-package
 npm i my-package -D
 ```
 ````
+
+`package-install` code blocks work too. They take package names, like `my-package`, and turn them into `npm install` commands.
 
 ### Output
 
@@ -105,9 +79,9 @@ npm i my-package
 
 ### Persistent
 
-When using with Fumadocs UI, you can enable persist the selected value with the `persist` option.
+When using with Fumadocs UI, you can persist the selected value with the `persist` option.
 
-```ts title="source.config.ts" tab="Fumadocs MDX"
+```ts tab="unified" title="source.config.ts"
 import { defineConfig } from 'fumadocs-mdx/config';
 
 export default defineConfig({
@@ -121,18 +95,21 @@ export default defineConfig({
 });
 ```
 
-```ts tab="MDX Compiler"
-import { compile } from '@mdx-js/mdx';
-import { remarkNpm, type RemarkNpmOptions } from 'fumadocs-core/mdx-plugins';
+```ts tab="Sätteri" title="source.config.ts"
+import { defineConfig, defineDocs } from 'fumadocs-mdx/config';
 
-const remarkNpmOptions: RemarkNpmOptions = {
-  persist: {
-    id: 'package-manager',
+export const docs = defineDocs({
+  docs: { compiler: 'satteri' },
+});
+
+export default defineConfig({
+  satteriOptions: {
+    remarkNpmOptions: {
+      persist: {
+        id: 'package-manager',
+      },
+    },
   },
-};
-
-await compile('...', {
-  remarkPlugins: [[remarkNpm, remarkNpmOptions]],
 });
 ```
 

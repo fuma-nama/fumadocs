@@ -74,8 +74,8 @@ npm create fumadocs-app
 
 It will ask you the built-in template to use:
 
-- **Framework**: Next.js, Waku, React Router, Tanstack Start.
-- **Content source**: Fumadocs MDX, or content collections.
+- **Framework**: Next.js, React Router, TanStack Start, Waku and Astro.
+- **Content source**: Fumadocs MDX, or Astro content collections.
 
 A new fumadocs app should be initialized, with following features configured by default:
 
@@ -122,28 +122,67 @@ Some common questions you may encounter.
 
   <Accordion id='change-base-url' title="How to change the base route of docs?">
 
-    Routing is handled by your React framework, you need to change the routing structure first.
+Routing is handled by your React framework. Move the docs route first (`/docs/*` -> `/info/*`).
 
-    For example, in Next.js, rename the route (`/docs/*` -> `/info/*`):
+<Tabs items={['Next.js', 'React Router', 'TanStack Start', 'Waku', 'Astro']}>
 
-    <Files>
-      <Folder name="app/docs" defaultOpen className="opacity-50" disabled>
-        <File name="layout.tsx" />
-      </Folder>
-      <Folder name="app/info" defaultOpen>
-        <File name="layout.tsx" />
-      </Folder>
-    </Files>
+<Tab value="Next.js">
 
-    Or rename from `/docs/*` to `/*` using a route group:
+Rename the route:
 
-    <Files>
-      <Folder name="app/(docs)" defaultOpen>
-        <File name="layout.tsx" />
-      </Folder>
-    </Files>
+<Files>
+  <Folder name="app/docs" defaultOpen className="opacity-50" disabled>
+    <File name="layout.tsx" />
+  </Folder>
+  <Folder name="app/info" defaultOpen>
+    <File name="layout.tsx" />
+  </Folder>
+</Files>
 
-    Finally, update the base URL of pages in `source.ts`:
+Or rename from `/docs/*` to `/*` using a route group:
+
+<Files>
+  <Folder name="app/(docs)" defaultOpen>
+    <File name="layout.tsx" />
+  </Folder>
+</Files>
+
+</Tab>
+
+<Tab value="React Router">
+
+```ts title="app/routes.ts"
+import { route, type RouteConfig } from '@react-router/dev/routes';
+
+export default [
+  route('info/*', 'routes/docs.tsx'), // [!code highlight]
+  // ...
+] satisfies RouteConfig;
+```
+
+</Tab>
+
+<Tab value="TanStack Start">
+
+Move `src/routes/docs/$.tsx` to `src/routes/info/$.tsx`.
+
+</Tab>
+
+<Tab value="Waku">
+
+Move `src/pages/docs` to `src/pages/info`.
+
+</Tab>
+
+<Tab value="Astro">
+
+Move `src/pages/docs` to `src/pages/info`.
+
+</Tab>
+
+</Tabs>
+
+Finally, update the base URL of pages in `source.ts`:
 
 ```ts title="lib/source.ts"
 import { loader } from 'fumadocs-core/source';
@@ -152,6 +191,8 @@ export const source = loader({
   baseUrl: '/info', // to the new value [!code highlight]
 });
 ```
+
+The templates define this value as `docsRoute` in `lib/shared.ts`, change it there so Markdown links follow.
 
   </Accordion>
 
@@ -179,6 +220,16 @@ export default defineConfig({
   },
 });
 ```
+
+  </Accordion>
+</Accordions>
+
+### For Astro
+
+<Accordions>
+  <Accordion id='astro-custom-docs-page' title='How to create a page in /docs without docs layout?'>
+
+    Create a standalone `.astro` page in `src/pages/docs/` that does not use the `Docs` island. Remove the matching MDX file from `content/docs` to avoid duplicated pages.
 
   </Accordion>
 </Accordions>

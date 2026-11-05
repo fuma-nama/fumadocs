@@ -44,6 +44,8 @@ export type AstroPageData<Entry extends PageEntry = PageEntry> = Entry['data'] &
   getText: (type: 'raw' | 'processed', options?: GetTextOptions) => Promise<string>;
   /** the links of content, with `extractLinkReferences` */
   extractedReferences?: ExtractedReference[];
+  /** the date of its last commit, with `lastModified` */
+  lastModified?: Date;
 };
 
 export interface GetTextOptions {
@@ -76,6 +78,7 @@ export class NoProcessedMarkdownError extends Error {
 export function toFumadocsSource<Page extends PageEntry, Meta extends MetaEntry>(
   pages: Page[],
   meta: Meta[] = [],
+  options?: Pick<StaticSource, 'baseDir'>,
 ): StaticSource<AstroSourceConfig<Page, Meta>> {
   const files: VirtualFile<AstroSourceConfig<Page, Meta>>[] = [];
   for (const entry of pages) {
@@ -88,7 +91,7 @@ export function toFumadocsSource<Page extends PageEntry, Meta extends MetaEntry>
     });
   }
   for (const entry of meta) files.push({ type: 'meta', path: entry.id, data: entry.data });
-  return { files };
+  return { files, baseDir: options?.baseDir };
 }
 
 function pageData<Entry extends PageEntry>(entry: Entry): AstroPageData<Entry> {

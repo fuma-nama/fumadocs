@@ -25,37 +25,37 @@ console.log('Hello World');
 
 ## Usage
 
-Add the rehype plugin.
+Rehype Code is a rehype plugin. Fumadocs MDX enables it by default. Pass options with `rehypeCodeOptions`:
 
-```ts tab="MDX Compiler"
-import { compile } from '@mdx-js/mdx';
-import { rehypeCode, type RehypeCodeOptions } from 'fumadocs-core/mdx-plugins';
-
-const rehypeCodeOptions: RehypeCodeOptions = {
-  themes: {
-    light: 'github-light',
-    dark: 'github-dark',
-  },
-};
-
-await compile('...', {
-  rehypePlugins: [
-    // using default settings
-    rehypeCode,
-    // or with custom options
-    [rehypeCode, rehypeCodeOptions],
-  ],
-});
-```
-
-```ts tab="Fumadocs MDX"
+```ts tab="unified" title="source.config.ts"
 import { defineConfig } from 'fumadocs-mdx/config';
 
 export default defineConfig({
   mdxOptions: {
     rehypeCodeOptions: {
-      // enabled by default on Fumadocs MDX
-      // configure options here
+      themes: {
+        light: 'github-light',
+        dark: 'github-dark',
+      },
+    },
+  },
+});
+```
+
+```ts tab="Sätteri" title="source.config.ts"
+import { defineConfig, defineDocs } from 'fumadocs-mdx/config';
+
+export const docs = defineDocs({
+  docs: { compiler: 'satteri' },
+});
+
+export default defineConfig({
+  satteriOptions: {
+    rehypeCodeOptions: {
+      themes: {
+        light: 'github-light',
+        dark: 'github-dark',
+      },
     },
   },
 });
@@ -63,19 +63,46 @@ export default defineConfig({
 
 ### Highlighter
 
-The plugin uses Shiki, `rehypeCodeFromHighlighter` takes another [highlighter](/docs/headless/utils/shiki) like Highlights. It has the options other than Shiki's, and a function is created with the transformers of the plugin:
+The plugin uses Shiki. `rehypeCodeFromHighlighter` takes another [highlighter](/docs/headless/utils/shiki) like Highlights instead, with the options other than Shiki's. Pass a function to create the highlighter with the transformers of the plugin.
 
-```ts
+Disable the default plugin and add it:
+
+```ts tab="unified" title="source.config.ts"
+import { defineConfig } from 'fumadocs-mdx/config';
 import { rehypeCodeFromHighlighter } from 'fumadocs-core/mdx-plugins/rehype-code.core';
-import { highlighter } from '@/lib/highlighter';
+import { highlighter } from './lib/highlighter';
 
-await compile('...', {
-  rehypePlugins: [
-    [
-      rehypeCodeFromHighlighter,
-      ({ transformers }) => highlighter.override({ shikiTransformers: transformers }),
+export default defineConfig({
+  mdxOptions: {
+    rehypeCodeOptions: false,
+    rehypePlugins: [
+      () =>
+        rehypeCodeFromHighlighter(({ transformers }) =>
+          highlighter.override({ shikiTransformers: transformers }),
+        ),
     ],
-  ],
+  },
+});
+```
+
+```ts tab="Sätteri" title="source.config.ts"
+import { defineConfig, defineDocs } from 'fumadocs-mdx/config';
+import { rehypeCodeFromHighlighter } from '@fumadocs/satteri/rehype-code';
+import { highlighter } from './lib/highlighter';
+
+export const docs = defineDocs({
+  docs: { compiler: 'satteri' },
+});
+
+export default defineConfig({
+  satteriOptions: {
+    rehypeCodeOptions: false,
+    hastPlugins: [
+      rehypeCodeFromHighlighter(({ transformers }) =>
+        highlighter.override({ shikiTransformers: transformers }),
+      ),
+    ],
+  },
 });
 ```
 

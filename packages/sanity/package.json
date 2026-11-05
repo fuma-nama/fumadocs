@@ -18,6 +18,7 @@
   "exports": {
     ".": "./dist/index.mjs",
     "./client": "./dist/client.mjs",
+    "./press": "./dist/press.mjs",
     "./package.json": "./package.json"
   },
   "publishConfig": {
@@ -54,7 +55,7 @@
     "@sanity/client": "^7.22.0 || ^8.0.0",
     "@sanity/types": "*",
     "@types/react": "*",
-    "fumadocs-core": "^16.15.0",
+    "fumadocs-core": "^16.17.11",
     "next-sanity": "^12.4.0 || ^13.0.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"

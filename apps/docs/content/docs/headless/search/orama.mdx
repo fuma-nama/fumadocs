@@ -21,13 +21,26 @@ Create the server from source object.
   ../../examples/react-router-min/app/routes/search.ts
 </include>
 
-<include cwd meta='tab="Tanstack Start" title="src/routes/api/search.ts"'>
+<include cwd meta='tab="TanStack Start" title="src/routes/api/search.ts"'>
   ../../examples/tanstack-start-min/src/routes/api/search.ts
 </include>
 
 <include cwd meta='tab="Waku" title="src/pages/_api/api/search.ts"'>
   ../../examples/waku/src/pages/_api/api/search.ts
 </include>
+
+```ts tab="Astro" title="src/pages/api/search.ts"
+import type { APIRoute } from 'astro';
+import { createFromSource } from 'fumadocs-core/search/server';
+import { source } from '@/lib/source';
+
+// render per request, needs an adapter
+export const prerender = false;
+
+const server = createFromSource(source);
+
+export const GET: APIRoute = ({ request }) => server.GET(request);
+```
 
 ### From Search Indexes
 
@@ -70,7 +83,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 }
 ```
 
-```ts tab="Tanstack Start" title="src/routes/api/search.ts"
+```ts tab="TanStack Start" title="src/routes/api/search.ts"
 import { createFileRoute } from '@tanstack/react-router';
 import { source } from '@/lib/source';
 import { createSearchAPI } from 'fumadocs-core/search/server';
@@ -107,6 +120,31 @@ export const { GET } = createSearchAPI('advanced', {
     structuredData: page.data.structuredData,
   })),
 });
+```
+
+```ts tab="Astro" title="src/pages/api/search.ts"
+import type { APIRoute } from 'astro';
+import { createSearchAPI } from 'fumadocs-core/search/server';
+import { source } from '@/lib/source';
+
+const server = createSearchAPI('advanced', {
+  // `structuredData` is loaded on demand
+  indexes: () =>
+    Promise.all(
+      source.getPages().map(async (page) => ({
+        title: page.data.title,
+        description: page.data.description,
+        url: page.url,
+        id: page.url,
+        structuredData: await page.data.structuredData(),
+      })),
+    ),
+});
+
+// render per request, needs an adapter
+export const prerender = false;
+
+export const GET: APIRoute = ({ request }) => server.GET(request);
 ```
 
 ### Searching Documents
@@ -183,7 +221,7 @@ export async function loader() {
 }
 ```
 
-```ts tab="Tanstack Start" title="src/routes/api/search.ts"
+```ts tab="TanStack Start" title="src/routes/api/search.ts"
 import { createFileRoute } from '@tanstack/react-router';
 
 export const Route = createFileRoute('/api/search')({
@@ -196,7 +234,7 @@ export const Route = createFileRoute('/api/search')({
 });
 ```
 
-```ts tab="Tanstack Start" title="vite.config.ts"
+```ts tab="TanStack Start" title="vite.config.ts"
 import { tanstackStart } from '@tanstack/react-start/plugin/vite';
 import { defineConfig } from 'vite';
 
@@ -224,6 +262,17 @@ export const { staticGET: GET } = createFromSource(source);
 export const getConfig = async () => ({
   render: 'static',
 });
+```
+
+```ts tab="Astro" title="src/pages/api/search.ts"
+import type { APIRoute } from 'astro';
+import { createFromSource } from 'fumadocs-core/search/server';
+import { source } from '@/lib/source';
+
+const server = createFromSource(source);
+
+// prerendered by default [!code highlight]
+export const GET: APIRoute = () => server.staticGET();
 ```
 
 > `staticGET` is also available on `createSearchAPI`.

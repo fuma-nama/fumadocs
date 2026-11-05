@@ -144,7 +144,7 @@ export default function Page({ loaderData }: Route.ComponentProps) {
 }
 ```
 
-```tsx tab="Tanstack Start" title="src/routes/docs/$.tsx"
+```tsx tab="TanStack Start" title="src/routes/docs/$.tsx"
 import { createFileRoute, notFound } from '@tanstack/react-router';
 import { createServerFn } from '@tanstack/react-start';
 import { useMemo } from 'react';
@@ -244,6 +244,78 @@ export async function getConfig() {
     render: 'static',
     staticPaths: source.generateParams().map((item) => item.slug),
   } as const;
+}
+```
+
+```astro tab="Astro" title="src/pages/docs/[...slug].astro"
+---
+import type { GetStaticPaths, InferGetStaticPropsType } from 'astro';
+import Layout from '@/layouts/Layout.astro';
+import { Docs } from '@/components/docs';
+import { getSource } from '@/lib/source';
+
+export const prerender = true;
+
+export const getStaticPaths = (async () => {
+  const source = await getSource();
+  return source.getPages().map((page) => ({
+    params: { slug: decodeURI(page.slugs.join('/')) || undefined },
+    props: { page },
+  }));
+}) satisfies GetStaticPaths;
+
+type Props = InferGetStaticPropsType<typeof getStaticPaths>;
+
+const { page } = Astro.props;
+const source = await getSource();
+const pageTree = await source.serializePageTree(source.getPageTree());
+const { serialize } = await page.data.load();
+---
+
+<Layout title={page.data.title}>
+  <Docs
+    client:load
+    pathname={Astro.url.pathname}
+    params={Astro.params}
+    tree={pageTree}
+    title={page.data.title}
+    render={serialize()}
+  />
+</Layout>
+```
+
+```tsx tab="Astro" title="src/components/docs.tsx"
+import { useMemo } from 'react';
+import { type SerializedPageTree, useFumadocsLoader } from 'fumadocs-core/source/client';
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+import { DocsBody, DocsPage, DocsTitle } from 'fumadocs-ui/layouts/docs/page';
+import { rendererFromSerialized } from '@fumadocs/local-md/client';
+import type { MarkdownRendererSerializedOptions } from '@fumadocs/local-md';
+import { Provider, type ProviderProps } from '@/components/provider';
+import { getMDXComponents } from '@/components/mdx';
+
+export interface DocsProps extends ProviderProps {
+  tree: SerializedPageTree;
+  title: string;
+  // the syntax tree, rendered in the island
+  render: MarkdownRendererSerializedOptions;
+}
+
+export function Docs({ tree, title, render, ...props }: DocsProps) {
+  const data = useFumadocsLoader({ tree });
+  const renderer = useMemo(() => rendererFromSerialized(render), [render]);
+  const { body, toc } = renderer.renderSync(getMDXComponents());
+
+  return (
+    <Provider {...props}>
+      <DocsLayout tree={data.tree}>
+        <DocsPage toc={toc}>
+          <DocsTitle>{title}</DocsTitle>
+          <DocsBody>{body}</DocsBody>
+        </DocsPage>
+      </DocsLayout>
+    </Provider>
+  );
 }
 ```
 

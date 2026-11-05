@@ -5,6 +5,8 @@ description: Reuse content from other files.
 
 ## Usage
 
+Fumadocs MDX always enables [Remark Include](/docs/headless/mdx/remark-include), on both unified and Sätteri.
+
 ### Content
 
 To display content from another Markdown/MDX file, specify its path relative to the file itself in the `<include>` tag.
@@ -25,7 +27,8 @@ Do not pass untrusted paths to `<include>`, it can embed any file on your machin
 
 <Callout title='For Markdown'>
 
-Markdown (`.md`) files do not support JSX syntax. To use `<include />`, you need to configure `remark-directive`.
+Markdown (`.md`) files do not support JSX syntax. Use the directive syntax instead.
+Sätteri parses directives by default. On unified, add the `remark-directive` remark plugin:
 
 ```ts title="source.config.ts"
 import { defineConfig } from 'fumadocs-mdx/config';
@@ -39,7 +42,7 @@ export default defineConfig({
 });
 ```
 
-You may also need `rehype-raw` for HTML comments & content.
+You may also need `rehype-raw` for HTML comments and content.
 
 </Callout>
 

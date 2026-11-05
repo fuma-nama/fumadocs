@@ -371,6 +371,7 @@ export function AIChatTrigger({ className }: { className?: string }) {
   return (
     <button
       type="button"
+      aria-expanded={open}
       className={cn(
         buttonVariants({ variant: 'secondary' }),
         'fixed inset-e-[calc(--spacing(4)+var(--removed-body-scroll-bar-size,0px))] bottom-4 z-20 gap-2 rounded-2xl text-fd-muted-foreground shadow-lg transition-[translate,opacity] motion-reduce:transition-none',
@@ -380,7 +381,7 @@ export function AIChatTrigger({ className }: { className?: string }) {
       inert={open}
       onClick={() => setOpen(!open)}
     >
-      <MessageCircleIcon className="size-4.5" />
+      <MessageCircleIcon aria-hidden className="size-4.5" />
       {t('Ask AI')}
     </button>
   );

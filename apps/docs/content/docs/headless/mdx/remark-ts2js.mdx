@@ -5,19 +5,19 @@ description: A remark plugin to transform TypeScript codeblocks into two tabs of
 
 ## Usage
 
-Install dependencies:
+Install the dependencies:
 
-```npm tab="Fumadocs MDX"
-npm i fumadocs-docgen
+```package-install tab="unified"
+fumadocs-docgen
 ```
 
-```npm tab="Satteri"
-npm i @fumadocs/satteri
+```package-install tab="Sätteri"
+@fumadocs/satteri
 ```
 
-Add the remark plugin:
+Remark TS to JS is a remark plugin. Add it to your config:
 
-```ts title="source.config.ts" tab="Fumadocs MDX"
+```ts tab="unified" title="source.config.ts"
 import { remarkTypeScriptToJavaScript } from 'fumadocs-docgen/remark-ts2js';
 import { defineConfig } from 'fumadocs-mdx/config';
 
@@ -28,47 +28,22 @@ export default defineConfig({
 });
 ```
 
-```ts title="source.config.ts" tab="Satteri"
+```ts tab="Sätteri" title="source.config.ts"
 import { remarkTs2js } from '@fumadocs/satteri/remark-ts2js';
+import { defineConfig, defineDocs } from 'fumadocs-mdx/config';
+
+export const docs = defineDocs({
+  docs: { compiler: 'satteri' },
+});
 
 export default defineConfig({
-  docs: {
-    compiler: 'satteri',
-    async satteriOptions() {
-      return {
-        mdastPlugins: [remarkTs2js()],
-      };
-    },
+  satteriOptions: {
+    mdastPlugins: [remarkTs2js()],
   },
 });
 ```
 
-```ts tab="MDX Compiler"
-import { remarkTypeScriptToJavaScript } from 'fumadocs-docgen/remark-ts2js';
-import { compile } from '@mdx-js/mdx';
-
-await compile('...', {
-  remarkPlugins: [remarkTypeScriptToJavaScript],
-});
-```
-
-Finally, make sure to define the required MDX components: `Tabs` and `Tab`.
-
-```tsx title="components/mdx.tsx (Fumadocs UI)"
-import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
-import defaultComponents from 'fumadocs-ui/mdx';
-import type { MDXComponents } from 'mdx/types';
-
-export function getMDXComponents(components?: MDXComponents) {
-  return {
-    ...defaultComponents,
-    // [!code ++:2]
-    Tab,
-    Tabs,
-    ...components,
-  } satisfies MDXComponents;
-}
-```
+It generates the same `CodeBlockTabs` components as [Remark NPM](/docs/headless/mdx/remark-npm#usage), which Fumadocs UI includes by default.
 
 You can now enable it on TypeScript/TSX codeblocks, like:
 

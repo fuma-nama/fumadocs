@@ -6,7 +6,7 @@ icon: SquareBookmark
 
 ## What is this?
 
-Fumadocs Core offers server-side functions and headless components to build docs on React.js frameworks like Next.js and Waku.
+Fumadocs Core offers server-side functions and headless components to build docs on React.js frameworks like Next.js, React Router, TanStack Start, Waku and Astro.
 
 - [Search](/docs/headless/search)
 - Breadcrumb, Sidebar, TOC Components
@@ -51,7 +51,7 @@ export function Root({ children }: { children: ReactNode }) {
 }
 ```
 
-```tsx tab="Tanstack Start/Router"
+```tsx tab="TanStack Start"
 import type { ReactNode } from 'react';
 import { TanstackProvider } from 'fumadocs-core/framework/tanstack';
 
@@ -66,6 +66,29 @@ import { WakuProvider } from 'fumadocs-core/framework/waku';
 
 export function Root({ children }: { children: ReactNode }) {
   return <WakuProvider>{children}</WakuProvider>;
+}
+```
+
+```tsx tab="Astro"
+import { navigate } from 'astro:transitions/client';
+import type { ReactNode } from 'react';
+import { AstroProvider } from 'fumadocs-core/framework/astro';
+
+// Rendered inside a React island, pass pathname and params from the Astro page.
+export function Root({
+  pathname,
+  params,
+  children,
+}: {
+  pathname: string;
+  params: Record<string, string | undefined>;
+  children: ReactNode;
+}) {
+  return (
+    <AstroProvider pathname={pathname} params={params} navigate={navigate}>
+      {children}
+    </AstroProvider>
+  );
 }
 ```
 

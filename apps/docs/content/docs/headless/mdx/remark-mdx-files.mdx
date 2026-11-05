@@ -36,9 +36,9 @@ and convert into:
 
 ## Setup
 
-Add the remark plugin:
+Remark Files is a remark plugin. Add it to your config:
 
-```tsx tab="Fumadocs MDX" title="source.config.ts"
+```ts tab="unified" title="source.config.ts"
 import { remarkMdxFiles } from 'fumadocs-core/mdx-plugins';
 import { defineConfig } from 'fumadocs-mdx/config';
 
@@ -49,12 +49,18 @@ export default defineConfig({
 });
 ```
 
-```ts tab="MDX Compiler"
-import { compile } from '@mdx-js/mdx';
-import { remarkMdxFiles } from 'fumadocs-core/mdx-plugins';
+```ts tab="Sätteri" title="source.config.ts"
+import { remarkMdxFiles } from '@fumadocs/satteri/remark-mdx-files';
+import { defineConfig, defineDocs } from 'fumadocs-mdx/config';
 
-await compile('...', {
-  remarkPlugins: [remarkMdxFiles],
+export const docs = defineDocs({
+  docs: { compiler: 'satteri' },
+});
+
+export default defineConfig({
+  satteriOptions: {
+    mdastPlugins: [remarkMdxFiles()],
+  },
 });
 ```
 

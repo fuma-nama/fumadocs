@@ -3,7 +3,7 @@ title: Remark Structure
 description: Extract search records from your documents.
 ---
 
-The `remarkStructure` plugin extracts the headings and contents of a document as records for [search](/docs/headless/search). Records keep the Markdown you wrote, see [Stringification](/docs/headless/mdx/stringification) for how it's generated.
+The `remarkStructure` plugin extracts the headings and contents of a document as records for [search](/docs/headless/search). Records keep the Markdown you wrote. See [Stringification](/docs/headless/mdx/stringification) for how it's generated.
 
 ```mdx tab="Input"
 ## Installation
@@ -34,28 +34,7 @@ Run the [command](/docs/cli) below.
 
 ## Usage
 
-```ts title="source.config.ts" tab="Fumadocs MDX"
-import { defineConfig } from 'fumadocs-mdx/config';
-
-export default defineConfig({
-  mdxOptions: {
-    // enabled by default, exported as `structuredData`
-    remarkStructureOptions: {},
-  },
-});
-```
-
-```ts tab="MDX Compiler"
-import { compile } from '@mdx-js/mdx';
-import { remarkStructure } from 'fumadocs-core/mdx-plugins';
-
-const file = await compile('...', {
-  // `exportAs` exports it from the document too
-  remarkPlugins: [[remarkStructure, { exportAs: 'structuredData' }]],
-});
-
-console.log(file.data.structuredData);
-```
+Remark Structure is a remark plugin. Fumadocs MDX enables it by default and exports the records as `structuredData`. Pass options with `remarkStructureOptions`.
 
 ## Records
 
@@ -67,9 +46,9 @@ Headings, paragraphs, blockquotes, tables and JSX elements are recorded (see `ty
 - A JSX element is a record when it has no children (see `mdxTypes`), or fits on one line.
 - Content inside a record isn't recorded again.
 
-By default, `File`, `TypeTable`, `Callout` and `Card` are kept as HTML tags:
+By default, `File`, `TypeTable`, `Callout` and `Card` are kept as HTML tags. Change it with `filterElement`:
 
-```ts title="source.config.ts"
+```ts tab="unified" title="source.config.ts"
 import { defineConfig } from 'fumadocs-mdx/config';
 
 export default defineConfig({
@@ -81,9 +60,25 @@ export default defineConfig({
 });
 ```
 
+```ts tab="Sätteri" title="source.config.ts"
+import { defineConfig, defineDocs } from 'fumadocs-mdx/config';
+
+export const docs = defineDocs({
+  docs: { compiler: 'satteri' },
+});
+
+export default defineConfig({
+  satteriOptions: {
+    remarkStructureOptions: {
+      filterElement: (node) => node.name === 'Callout' || node.name === 'Banner',
+    },
+  },
+});
+```
+
 ## Plugins
 
-Nodes inserted by plugins aren't recorded, a plugin adds the records of its node with `data.structuredData`:
+Nodes inserted by plugins aren't recorded. A plugin adds the records of its node with `data.structuredData`:
 
 ```ts
 node.data = {
@@ -98,6 +93,8 @@ node.data = {
 To change the Markdown of authored content in records only, edit the `search` namespace with [`replaceSource()`](/docs/headless/mdx/stringification#editing-the-output).
 
 ## As a Function
+
+On unified, `structure()` extracts the records from a string:
 
 ```ts
 import { structure } from 'fumadocs-core/mdx-plugins';

@@ -11,8 +11,8 @@ export type Framework = 'next' | 'react-router' | 'tanstack-start' | 'waku' | 'a
 export interface FrameworkInfo {
   /** import specifier of `RootProvider` */
   provider: string;
-  /** root file that imports the global CSS, relative to base dir; none on Astro, the Fumadocs integration renders the HTML shell */
-  rootFile?: string;
+  /** root file that imports the global CSS, relative to base dir */
+  rootFile: string;
   /** routes directory, relative to base dir */
   routesDir: string;
   /** config file candidates (relative to cwd) that register bundler plugins */
@@ -50,6 +50,7 @@ export const frameworks: Record<Framework, FrameworkInfo> = {
   },
   astro: {
     provider: 'fumadocs-ui/provider/astro',
+    rootFile: 'layouts/Layout.astro',
     routesDir: 'pages',
     configFiles: ['astro.config.mjs', 'astro.config.ts', 'astro.config.js', 'astro.config.mts'],
     // an adapter renders routes on request, even with static output
@@ -93,8 +94,6 @@ export interface Project {
   config: LoadedConfig;
   /** config file that registers bundler plugins, relative to `cwd` */
   configFile?: string;
-  /** Astro: `fumadocs.config.*` of the managed setup of `@fumadocs/astro`, relative to `cwd` */
-  fumadocsConfig?: string;
   packageJson: {
     dependencies?: Record<string, string>;
     devDependencies?: Record<string, string>;
@@ -138,16 +137,6 @@ export async function loadProject(
     isStatic = info.isStatic(configContent ?? '');
   }
 
-  let fumadocsConfig: string | undefined;
-  if (framework === 'astro') {
-    for (const ext of ['ts', 'tsx', 'js', 'mjs']) {
-      const file = path.join(config.baseDir, `fumadocs.config.${ext}`);
-      if (!(await exists(path.join(cwd, file)))) continue;
-      fumadocsConfig = file;
-      break;
-    }
-  }
-
   const read = (file: string) => fs.readFile(path.join(cwd, file), 'utf-8').catch(() => null);
   const i18nConfig = await read(path.join(config.baseDir, 'lib/i18n.ts'));
 
@@ -164,7 +153,6 @@ export async function loadProject(
     baseDir: config.baseDir,
     config,
     configFile,
-    fumadocsConfig,
     packageJson,
     source: await detectSource(cwd, config.baseDir, read, configFile, configContent),
   };

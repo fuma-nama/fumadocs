@@ -4,13 +4,30 @@ import type { SharedDocument } from '../server/build-doc';
 
 export type Doc = SharedDocument & DocumentData;
 
+export interface SearchIndex {
+  /**
+   * documents are keyed by their position, the exported index repeats the key for every indexed substring
+   */
+  document: Document<Doc>;
+  /** page id -> page document */
+  pages: Map<string, Doc>;
+}
+
+export function toSearchIndex(document: Document<Doc>): SearchIndex {
+  const pages = new Map<string, Doc>();
+  for (let key = 0, doc = document.get(key); doc; doc = document.get(++key)) {
+    if (doc.type === 'page') pages.set(doc.id, doc);
+  }
+  return { document, pages };
+}
+
 export async function search(
-  index: Document<Doc>,
+  { document, pages }: SearchIndex,
   query: string,
   tag?: string | string[],
   limit = 60,
 ) {
-  const arr = await index.searchAsync(query, {
+  const arr = await document.searchAsync(query, {
     index: 'content',
     limit,
     tag: tag
@@ -26,8 +43,8 @@ export async function search(
   // page id -> heading/content item
   const grouped = new Map<string, Doc[]>();
 
-  for (const id of results) {
-    const doc = index.get(id);
+  for (const key of results) {
+    const doc = document.get(key);
     if (!doc) continue;
     let list = grouped.get(doc.page_id);
     if (!list) {
@@ -41,7 +58,7 @@ export async function search(
   }
 
   for (const [page_id, items] of grouped) {
-    const page = index.get(page_id);
+    const page = pages.get(page_id);
     if (!page) continue;
 
     out.push({

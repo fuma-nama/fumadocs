@@ -97,7 +97,7 @@ npm install pele
 
 Map its fonts and colors to Fumadocs, so diagrams follow light/dark mode:
 
-<include cwd meta='title="app/global.css"'>
+<include cwd meta='title="global.css"'>
   ./app/global.css#pele
 </include>
 
@@ -227,15 +227,32 @@ Sit down: 5: Me
 
 ### As CodeBlock
 
-You can convert `mermaid` codeblocks into the MDX usage with the `remarkMdxMermaid` plugin.
+You can convert `mermaid` codeblocks into the MDX usage with `remarkMdxMermaid`, a remark plugin.
 
-```tsx tab="Fumadocs MDX" title="source.config.ts"
+```ts tab="unified" title="source.config.ts"
 import { remarkMdxMermaid } from 'fumadocs-core/mdx-plugins';
 import { defineConfig } from 'fumadocs-mdx/config';
 
 export default defineConfig({
   mdxOptions: {
     remarkPlugins: [remarkMdxMermaid],
+  },
+});
+```
+
+```ts tab="Sätteri" title="source.config.ts"
+import { remarkMdxMermaid } from '@fumadocs/satteri/remark-mdx-mermaid';
+import { defineConfig, defineDocs } from 'fumadocs-mdx/config';
+
+export const docs = defineDocs({
+  docs: {
+    compiler: 'satteri',
+  },
+});
+
+export default defineConfig({
+  satteriOptions: {
+    mdastPlugins: [remarkMdxMermaid()],
   },
 });
 ```

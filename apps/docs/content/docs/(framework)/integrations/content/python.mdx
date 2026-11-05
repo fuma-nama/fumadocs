@@ -13,6 +13,8 @@ description: Generate API references from Python packages.
 
 Every module and class becomes a page, with functions, attributes and parameters rendered by the included components.
 
+The components highlight code in async Server Components, so they need a framework with React Server Components, like Next.js and Waku.
+
 ## Setup
 
 Install the package:
@@ -75,7 +77,7 @@ export const source = loader(await python.staticSource(), {
 
 Then load and render a page:
 
-```tsx title="app/docs/[[...slug]]/page.tsx"
+```tsx tab="Next.js" title="app/docs/[[...slug]]/page.tsx"
 import { source } from '@/lib/source';
 import { notFound } from 'next/navigation';
 import { DocsBody, DocsPage, DocsTitle } from 'fumadocs-ui/layouts/docs/page';
@@ -93,6 +95,35 @@ export default async function Page({ params }: PageProps<'/docs/[[...slug]]'>) {
       <DocsBody>{body}</DocsBody>
     </DocsPage>
   );
+}
+```
+
+```tsx tab="Waku" title="src/pages/docs/[...slugs].tsx"
+import type { PageProps } from 'waku/router';
+import { unstable_notFound } from 'waku/router/server';
+import { DocsBody, DocsPage, DocsTitle } from 'fumadocs-ui/layouts/docs/page';
+import { source } from '@/lib/source';
+
+export default async function Page({ slugs }: PageProps<'/docs/[...slugs]'>) {
+  const page = source.getPage(slugs);
+  if (!page) unstable_notFound();
+
+  const data = await page.data.load();
+  const { body, toc } = await data.render();
+
+  return (
+    <DocsPage toc={toc}>
+      <DocsTitle>{page.data.title}</DocsTitle>
+      <DocsBody>{body}</DocsBody>
+    </DocsPage>
+  );
+}
+
+export async function getConfig() {
+  return {
+    render: 'static',
+    staticPaths: source.generateParams().map((item) => item.slug),
+  } as const;
 }
 ```
 
@@ -157,15 +188,17 @@ await rimraf('content/docs/httpx');
 await Python.write(Python.convert(content, { baseUrl: '/docs' }), 'content/docs');
 ```
 
-```tsx tab="mdx-components.tsx"
+```tsx tab="components/mdx.tsx"
 import defaultMdxComponents from 'fumadocs-ui/mdx';
 import type { MDXComponents } from 'mdx/types';
 import * as Python from 'fumadocs-python/components';
 
+const { createPythonComponents, ...PythonComponents } = Python;
+
 export function getMDXComponents(components?: MDXComponents): MDXComponents {
   return {
     ...defaultMdxComponents,
-    ...Python,
+    ...PythonComponents,
     ...components,
   };
 }
