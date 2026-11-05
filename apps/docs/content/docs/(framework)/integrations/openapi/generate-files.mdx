@@ -253,7 +253,7 @@ export default function Page({ loaderData }: Route.ComponentProps) {
 }
 ```
 
-```tsx tab="Tanstack Start" title="src/routes/docs/$.tsx"
+```tsx tab="TanStack Start" title="src/routes/docs/$.tsx"
 // [!code ++:3]
 import type { MDXComponents } from 'mdx/types';
 import { openapi } from '@/lib/openapi';
@@ -315,15 +315,27 @@ export default function Page({ slugs }: PageProps<'/docs/[...slugs]'>) {
 }
 ```
 
+```tsx tab="Astro" title="src/components/mdx.tsx"
+import { OpenAPIPage } from '@/components/api-page'; // [!code ++]
+
+export default getMDXComponents({
+  wrapper: DocsBody,
+  // [!code ++]
+  OpenAPIPage: (props) => <OpenAPIPage {...props} preloaded={{ docs: {} }} />,
+});
+```
+
+Astro can't preload documents per page in the MDX components module, so pass [`loadDocument`](/docs/integrations/openapi/server#loading-documents-once) to load them.
+
 Add the plugin to your `loader()`:
 
 ```ts title="lib/source.ts"
-import { openapiPlugin } from 'fumadocs-openapi/server';
+import { openapi } from '@/lib/openapi';
 import { loader } from 'fumadocs-core/source';
 
 export const source = loader({
   // [!code ++:2] optional: adds a badge to each page item in page tree
-  plugins: [openapiPlugin()],
+  plugins: [openapi.loaderPlugin()],
 });
 ```
 

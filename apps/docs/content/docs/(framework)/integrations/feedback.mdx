@@ -62,9 +62,9 @@ Validate the feedback before storing or sending it, anyone can call a server act
 
 You can also configure block-level feedback (e.g. a feedback popover as user select text).
 
-Add the `remark-block-id` plugin:
+Add `remarkBlockId`, a remark plugin that gives each block an ID:
 
-```tsx tab="Fumadocs MDX" title="source.config.ts"
+```ts tab="unified" title="source.config.ts"
 import {
   remarkBlockId,
   type RemarkBlockIdOptions,
@@ -80,6 +80,26 @@ export default defineConfig({
     remarkPlugins: [
       // [!code ++]
       [remarkBlockId, blockIdOptions],
+    ],
+  },
+});
+```
+
+```ts tab="Sätteri" title="source.config.ts"
+import { remarkBlockId } from '@fumadocs/satteri/remark-block-id';
+import { defineConfig, defineDocs } from 'fumadocs-mdx/config';
+
+export const docs = defineDocs({
+  docs: {
+    compiler: 'satteri',
+  },
+});
+
+export default defineConfig({
+  satteriOptions: {
+    mdastPlugins: [
+      // [!code ++]
+      remarkBlockId({ addDataAttribute: 'feedback' }),
     ],
   },
 });

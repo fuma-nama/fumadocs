@@ -228,7 +228,7 @@ export default function Page({ loaderData }: Route.ComponentProps) {
 }
 ```
 
-```tsx tab="Tanstack Start" title="src/routes/docs/$.tsx"
+```tsx tab="TanStack Start" title="src/routes/docs/$.tsx"
 // [!code ++:4]
 import type { MDXComponents } from 'mdx/types';
 import { asyncapi } from '@/lib/asyncapi';
@@ -300,15 +300,27 @@ export default function Page({ slugs }: PageProps<'/docs/[...slugs]'>) {
 }
 ```
 
+```tsx tab="Astro" title="src/components/mdx.tsx"
+import { AsyncAPIPage } from '@/components/api-page'; // [!code ++]
+
+export default getMDXComponents({
+  wrapper: DocsBody,
+  // [!code ++]
+  AsyncAPIPage: (props) => <AsyncAPIPage {...props} preloaded={{ docs: {} }} />,
+});
+```
+
+Astro can't preload documents per page in the MDX components module, so pass [`loadDocument`](/docs/integrations/asyncapi/server#loading-documents-once) to load them.
+
 Add the plugin to your `loader()`:
 
 ```ts title="lib/source.ts"
-import { asyncapiPlugin } from '@fumadocs/asyncapi/server';
+import { asyncapi } from '@/lib/asyncapi';
 import { loader } from 'fumadocs-core/source';
 
 export const source = loader({
   // [!code ++:2] optional: adds the direction of messages to each page item in page tree
-  plugins: [asyncapiPlugin()],
+  plugins: [asyncapi.loaderPlugin()],
 });
 ```
 

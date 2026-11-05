@@ -3,8 +3,7 @@ import type { SearchClient } from '../client';
 import { type UseSearchOptions, useSearch } from '../use-search';
 import type { SortedResult } from '@/search';
 import type { ExportedData } from '../flexsearch';
-import type { Document } from 'flexsearch';
-import { createDocument, search, type Doc } from '../flexsearch/utils';
+import { createDocument, search, toSearchIndex, type SearchIndex } from '../flexsearch/utils';
 import { BASE_PATH, join } from '@/utils/url';
 
 export interface FlexsearchStaticOptions {
@@ -19,10 +18,10 @@ export interface FlexsearchStaticOptions {
 function initDocument(data: Record<string, string>) {
   const document = createDocument();
   for (const [k, v] of Object.entries(data)) document.import(k, v);
-  return document;
+  return toSearchIndex(document);
 }
 
-const cacheMap = new Map<string, Promise<Map<string, Document<Doc>>>>();
+const cacheMap = new Map<string, Promise<Map<string, SearchIndex>>>();
 
 async function searchFlexsearchStatic(
   { from = join(BASE_PATH, '/api/search'), locale = '', tag }: FlexsearchStaticOptions,
@@ -51,7 +50,7 @@ async function init(from: string) {
     );
 
   const data = (await res.json()) as ExportedData;
-  const dbs = new Map<string, Document<Doc>>();
+  const dbs = new Map<string, SearchIndex>();
 
   if (data.type === 'i18n') {
     for (const [locale, map] of Object.entries(data.raw)) {

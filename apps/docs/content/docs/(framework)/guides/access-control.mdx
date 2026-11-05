@@ -78,18 +78,18 @@ This guarantees the protected content is filtered entirely, and without compromi
 
 ## Custom Implementation
 
-Without using Loader API, you can also implement your access control at framework-level (e.g. via Next.js routing & proxy).
+Without the Loader API, implement access control in your framework, such as in routes or middleware.
 
 For example, to limit access to certain pages:
 
-```tsx title="page.tsx"
+```tsx tab="Next.js" title="app/docs/[[...slug]]/page.tsx"
 import { notFound } from 'next/navigation';
 import { source } from '@/lib/source';
 
-export default async function Page({ params }) {
-  const { slugs } = await params;
+export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
+  const params = await props.params;
   const user = await getUser();
-  const page = source.getPage(slugs);
+  const page = source.getPage(params.slug);
 
   if (!page) notFound();
   if (page.data.permission !== user.permission) notFound();
@@ -98,8 +98,77 @@ export default async function Page({ params }) {
 }
 ```
 
-Note that it is up to you to manage the page tree (sidebar items), search and other details.
+```tsx tab="React Router" title="app/routes/docs.tsx"
+import type { Route } from './+types/docs';
+import { source } from '@/lib/source';
 
-This approach offers the best flexibility, but it doesn't rely on Fumadocs itself for access control, the setup may take longer and be more complicated.
+export async function loader({ params, request }: Route.LoaderArgs) {
+  const user = await getUser(request);
+  const page = source.getPage(params['*'].split('/').filter((v) => v.length > 0));
 
-It is better to consult the docs of your React.js framework when implementing.
+  if (!page) throw new Response('Not found', { status: 404 });
+  if (page.data.permission !== user.permission) throw new Response('Not found', { status: 404 });
+
+  // return page data...
+}
+```
+
+```tsx tab="TanStack Start" title="src/routes/docs/$.tsx"
+import { notFound } from '@tanstack/react-router';
+import { createServerFn } from '@tanstack/react-start';
+import { source } from '@/lib/source';
+
+const serverLoader = createServerFn({ method: 'GET' })
+  .validator((slugs: string[]) => slugs)
+  .handler(async ({ data: slugs }) => {
+    const user = await getUser();
+    const page = source.getPage(slugs);
+
+    if (!page) throw notFound();
+    if (page.data.permission !== user.permission) throw notFound();
+
+    // return page data...
+  });
+```
+
+```tsx tab="Waku" title="src/pages/docs/[...slugs].tsx"
+import type { PageProps } from 'waku/router';
+import { unstable_notFound } from 'waku/router/server';
+import { source } from '@/lib/source';
+
+export default async function Page({ slugs }: PageProps<'/docs/[...slugs]'>) {
+  const user = await getUser();
+  const page = source.getPage(slugs);
+
+  if (!page) unstable_notFound();
+  if (page.data.permission !== user.permission) unstable_notFound();
+
+  // render page...
+}
+
+// render per request, static pages are built without a user
+export const getConfig = async () => ({ render: 'dynamic' }) as const;
+```
+
+```astro tab="Astro" title="src/pages/docs/[...slug].astro"
+---
+import { source } from '@/lib/source';
+
+// render per request, needs an adapter
+export const prerender = false;
+
+const slugs = Astro.params.slug?.split('/').filter((v) => v.length > 0) ?? [];
+const user = await getUser(Astro.request);
+const page = source.getPage(slugs);
+
+if (!page || page.data.permission !== user.permission) {
+  return Astro.rewrite('/404');
+}
+---
+
+<!-- render page... -->
+```
+
+Note that it is up to you to manage the page tree (sidebar items), search, Markdown routes and other details.
+
+This approach offers the best flexibility, but it doesn't rely on Fumadocs itself for access control. The setup may take longer and be more complicated. Consult the docs of your React framework when implementing it.

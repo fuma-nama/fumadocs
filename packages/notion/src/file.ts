@@ -6,7 +6,13 @@ import {
   type BlockObjectResponse,
   type PageObjectResponse,
 } from '@notionhq/client';
-import { getAsset, getNotionFileUrl, isAssetBlock, type NotionAssetBlock } from './blocks';
+import {
+  getAsset,
+  getNotionFileUrl,
+  isAssetBlock,
+  toNotionId,
+  type NotionAssetBlock,
+} from './blocks';
 import type { NotionIntegration } from './source';
 
 const DEFAULT_FILE_PATH = '/api/notion/file';
@@ -201,10 +207,6 @@ function isNotionId(value: string): boolean {
   return /^(?:[0-9a-f]{32}|[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/i.test(
     value,
   );
-}
-
-function toNotionId(value: string): string {
-  return value.replaceAll('-', '').toLowerCase();
 }
 
 function sameNotionId(a: string, b: string): boolean {

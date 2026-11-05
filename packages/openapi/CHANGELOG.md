@@ -1,3 +1,15 @@
+## fumadocs-openapi@12.6.0
+
+### Framework plugins
+
+- Added `fumadocs-core/framework/plugin`: the plugin API for integrations to add routes and page content to frameworks.
+- Integrations export their plugin as the default export of `/press`: `openapiPlugin()`, `asyncapiPlugin()`, `graphqlPlugin()`, `notionPlugin()`, `obsidianPlugin()` and `sanityPlugin()`.
+- The pages of `staticSource()` and `dynamicSource()` of OpenAPI, AsyncAPI and GraphQL have `full: true` in their page data, like generated files.
+
+### Deprecated standalone loader plugins
+
+- Deprecated `openapiPlugin()`, `asyncapiPlugin()` and `graphqlPlugin()` of `/server`: use `loaderPlugin()` of `createOpenAPI()`, `createAsyncAPI()` and `createGraphQL()` instead.
+
 ## fumadocs-openapi@12.5.8
 
 ### Unions of `const` members and `string` suggest their values

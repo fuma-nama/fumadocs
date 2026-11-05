@@ -1,5 +1,6 @@
 import type { Framework, I18nInfo } from '@/project';
-import { localeSegment } from '@/project/route';
+import { astroPagePaths, localeSegment } from '@/project/route';
+import { sourceRef } from '@/features/utils';
 
 export interface TemplateInput {
   static: boolean;
@@ -41,7 +42,7 @@ export const source = loader({
 });
 `;
 
-export const layoutShared = (i18n: I18nInfo | null) =>
+const layoutShared = (i18n: I18nInfo | null) =>
   i18n
     ? `import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
 import { uiTranslations } from 'fumadocs-ui/i18n';
@@ -530,30 +531,24 @@ export default function Layout({ children }: { children: ReactNode }) {
     };
   },
 
-  astro: ({ i18n }) => ({
-    ...(i18n ? { 'lib/i18n.ts': i18nConfig(i18n.optionalLocale) } : {}),
-    'lib/source.ts': `import { getCollection } from 'astro:content';
+  astro: (input) => {
+    const i18n = input.i18n !== null;
+    return {
+      ...shared(input, false),
+      'lib/source.ts': `import { getCollection } from 'astro:content';
 import { loader } from 'fumadocs-core/source';
 import { toFumadocsSource } from '@fumadocs/astro/source';
-${i18n ? "import { i18n } from './i18n';\n" : ''}
+import { docsRoute } from './shared';
+${i18n ? i18nImport : ''}
 export const source = loader({
   source: toFumadocsSource(await getCollection('docs'), await getCollection('meta')),
-  baseUrl: '/docs',${i18n ? '\n  i18n,' : ''}
+  baseUrl: docsRoute,${i18n ? '\n  i18n,' : ''}
 });
 `,
-    'fumadocs.config.ts': `import { defineConfig } from '@fumadocs/astro/config';
-${i18n ? "import { uiTranslations } from 'fumadocs-ui/i18n';\nimport { zhTW } from '@fumadocs/language/zh-tw';\n" : ''}import { source } from './lib/source';
-${i18n ? "import { i18n } from './lib/i18n';\n" : ''}
-export default defineConfig({
-  source,
-  title: 'My App',${i18n ? "\n  translations: i18n.translations().extend(uiTranslations()).preset('cn', zhTW())," : ''}
-});
-`,
-    // the integration links the title to the home page of the locale
-    'lib/layout.shared.tsx': layoutShared(null),
-    'components/mdx.tsx': `import defaultMdxComponents from 'fumadocs-ui/mdx';
-${i18n ? "import { DynamicLink } from 'fumadocs-core/dynamic-link';\n" : ''}import type { MDXComponents } from 'mdx/types';
-
+      'components/mdx.tsx': `import defaultMdxComponents from 'fumadocs-ui/mdx';
+${i18n ? "import { DynamicLink } from 'fumadocs-core/dynamic-link';\n" : ''}import { DocsBody } from 'fumadocs-ui/layouts/docs/page';
+import type { MDXComponents } from 'mdx/types';
+${i18n ? "import { ContentProvider, type ProviderProps } from '@/components/provider';\n" : ''}
 export function getMDXComponents(components?: MDXComponents) {
   return {
     ...defaultMdxComponents,${i18n ? '\n    // links with the locale, like `/[lang]/docs`\n    DynamicLink,' : ''}
@@ -561,81 +556,134 @@ export function getMDXComponents(components?: MDXComponents) {
   } satisfies MDXComponents;
 }
 
-export default getMDXComponents();
-`,
-    [`pages/${localeSegment('astro', i18n)}index.astro`]: `---
 ${
   i18n
-    ? `import type { GetStaticPaths, InferGetStaticPropsType } from 'astro';
-import HomeLayout from '@fumadocs/astro/components/HomeLayout.astro';
-import { i18n } from '@/lib/i18n';
+    ? `// for the Fumadocs integration, \`wrapper\` receives the props of \`<Content />\`
+export default getMDXComponents({
+  wrapper: ({ children, ...props }: ProviderProps) => (
+    <ContentProvider {...props}>
+      <DocsBody>{children}</DocsBody>
+    </ContentProvider>
+  ),
+});`
+    : `// for the Fumadocs integration, \`wrapper\` gives the content its prose styles
+export default getMDXComponents({ wrapper: DocsBody });`
+}
+`,
+      'components/provider.tsx': `import { navigate } from 'astro:transitions/client';
+import type { ReactNode } from 'react';
+${providerImports(input)}
+export interface ProviderProps {${i18n ? '\n  lang: string;' : ''}
+  /** \`Astro.url.pathname\` */
+  pathname: string;
+  /** \`Astro.params\` */
+  params: Record<string, string | undefined>;
+  children?: ReactNode;
+}
 
-export const getStaticPaths = (() => {
-  return i18n.languages.map((lang) => ({
-    ${i18n.optionalLocale ? '// the default language has no prefix\n    params: { lang: lang === i18n.defaultLanguage ? undefined : lang },' : 'params: { lang },'}
-    props: { lang },
-  }));
-}) satisfies GetStaticPaths;
+export function Provider({ ${i18n ? 'lang, ' : ''}pathname, params, children }: ProviderProps) {
+  return (
+    <RootProvider pathname={pathname} params={params} navigate={navigate}${providerProps(input)}>
+      {children}
+    </RootProvider>
+  );
+}
+${
+  i18n
+    ? `
+/**
+ * For the MDX content, which is an island of its own.
+ */
+export function ContentProvider({ lang, pathname, params, children }: ProviderProps) {
+  return (
+    <RootProvider
+      pathname={pathname}
+      params={params}
+      navigate={navigate}
+      i18n={i18nProvider(translations, lang)}
+      theme={{ enabled: false }}
+      search={{ enabled: false }}
+    >
+      {children}
+    </RootProvider>
+  );
+}
+`
+    : ''
+}`,
+      'components/docs.tsx': `import { type SerializedPageTree, useFumadocsLoader } from 'fumadocs-core/source/client';
+import type { TOCItemType } from 'fumadocs-core/toc';
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+import { DocsDescription, DocsPage, DocsTitle } from 'fumadocs-ui/layouts/docs/page';
+import { Provider, type ProviderProps } from '@/components/provider';
+import { baseOptions } from '@/lib/layout.shared';
+
+export interface DocsProps extends ProviderProps {
+  tree: SerializedPageTree;
+  title: string;
+  description?: string;
+  toc: TOCItemType[];
+}
+
+export function Docs({ tree, title, description, toc, children, ...props }: DocsProps) {
+  const data = useFumadocsLoader({ tree });
+
+  return (
+    <Provider {...props}>
+      <DocsLayout {...baseOptions(${i18n ? 'props.lang' : ''})} tree={data.tree}>
+        <DocsPage toc={toc}>
+          <DocsTitle>{title}</DocsTitle>
+          <DocsDescription>{description}</DocsDescription>
+          {children}
+        </DocsPage>
+      </DocsLayout>
+    </Provider>
+  );
+}
+`,
+      [`pages/${localeSegment('astro', input.i18n)}docs/[...slug].astro`]: `---
+import type { GetStaticPaths, InferGetStaticPropsType } from 'astro';
+import Layout from '@/layouts/Layout.astro';
+import { Docs } from '@/components/docs';
+${input.i18n?.optionalLocale ? i18nImport : ''}import { source } from '@/lib/source';
+
+${astroPagePaths(input.i18n, sourceRef(false))}
 
 type Props = InferGetStaticPropsType<typeof getStaticPaths>;
 
-const { lang } = Astro.props;
-`
-    : "import HomeLayout from '@fumadocs/astro/components/HomeLayout.astro';\n"
-}---
+const { ${i18n ? 'lang, ' : ''}page } = Astro.props;
+const { body: Content, toc } = await page.data.load();
+const pageTree = await source.serializePageTree(source.getPageTree(${i18n ? 'lang' : ''}));
+${i18n ? 'const provider = { lang, pathname: Astro.url.pathname, params: Astro.params };\n' : ''}---
 
-<HomeLayout${i18n ? ' lang={lang}' : ''}>
-  <div class="p-4 flex flex-col items-center justify-center text-center flex-1">
-    <h1 class="text-xl font-bold mb-2">Fumadocs on Astro.</h1>
-    <p class="text-fd-muted-foreground mb-4">The truly flexible docs framework on React.js.</p>
-    <a
-      class="text-sm bg-fd-primary text-fd-primary-foreground rounded-full font-medium px-4 py-2.5"
-      href=${i18n ? (i18n.optionalLocale ? "{lang === i18n.defaultLanguage ? '/docs' : `/${lang}/docs`}" : '{`/${lang}/docs`}') : '"/docs"'}
-    >
-      Open Docs
-    </a>
-  </div>
-</HomeLayout>
+<Layout
+  title={page.data.title}
+  description={page.data.description}${i18n ? '\n  lang={lang}' : ''}
+>
+  <Docs
+    client:load
+    transition:persist="docs"
+    ${i18n ? '{...provider}' : 'pathname={Astro.url.pathname}\n    params={Astro.params}'}
+    tree={pageTree}
+    title={page.data.title}
+    description={page.data.description}
+    toc={toc}
+  >
+    <Content${i18n ? ' {...provider}' : ''} />
+  </Docs>
+</Layout>
 `,
-  }),
+      'pages/api/search.ts': `import type { APIRoute } from 'astro';
+import { createFromSource } from 'fumadocs-core/search/server';
+import { source } from '@/lib/source';
+
+const server = createFromSource(source);
+
+${input.static ? 'export const GET: APIRoute = () => server.staticGET();' : 'export const prerender = false;\nexport const GET: APIRoute = ({ request }) => server.GET(request);'}
+`,
+    };
+  },
 };
-
-/** the `page` module of the Fumadocs integration on Astro, `layout` is the import specifier of a docs layout */
-export const astroPage = (
-  layout = 'fumadocs-ui/layouts/docs',
-) => `import { DocsLayout } from '${layout}';
-import {
-  DocsDescription,
-  DocsPage,
-  DocsTitle,
-  MarkdownCopyButton,
-  PageLastUpdate,
-  ViewOptionsPopover,
-} from '${layout}/page';
-import type { DocsPageProps } from '@fumadocs/astro/config';
-
-/**
- * The docs page, the content is passed as children.
- */
-export default function Docs({ tree, page, layout, children }: DocsPageProps) {
-  return (
-    <DocsLayout {...layout} tree={tree}>
-      <DocsPage toc={page.toc} full={page.full}>
-        <DocsTitle>{page.title}</DocsTitle>
-        <DocsDescription>{page.description}</DocsDescription>
-        {(page.markdownUrl || page.githubUrl) && (
-          <div className="flex flex-row gap-2 items-center border-b -mt-4 pb-6">
-            {page.markdownUrl && <MarkdownCopyButton markdownUrl={page.markdownUrl} />}
-            <ViewOptionsPopover markdownUrl={page.markdownUrl} githubUrl={page.githubUrl} />
-          </div>
-        )}
-        {children}
-        {page.lastModified && <PageLastUpdate date={page.lastModified} />}
-      </DocsPage>
-    </DocsLayout>
-  );
-}
-`;
 
 export const astroContentConfig = `import { defineCollection } from 'astro:content';
 import { metaLoader, pageLoader } from '@fumadocs/astro/loaders';

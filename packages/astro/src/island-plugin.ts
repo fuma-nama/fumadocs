@@ -20,13 +20,8 @@ type JsxElement = MdxJsxFlowElementHast | MdxJsxTextElementHast;
  *
  * @param module - the module exporting `FumadocsIsland` of the collection
  * @param runtime - the runtime of compiled MDX files, `mdx-runtime.ts`
- * @param managed - pages with the providers of Fumadocs, from `getIslandProps()`
  */
-export function islandPlugin(
-  module: string,
-  runtime: string,
-  managed: boolean,
-): HastPluginDefinition {
+export function islandPlugin(module: string, runtime: string): HastPluginDefinition {
   // names declared by the ESM of document, rendered by Astro
   const locals = new Set<string>();
 
@@ -63,9 +58,7 @@ export function islandPlugin(
             // like MDX, `wrapper` receives the props of content
             value: {
               type: 'mdxJsxAttributeValueExpression',
-              value: managed
-                ? '_getIslandProps(props)'
-                : '(({ components: _, children: __, ...rest }) => rest)(props)',
+              value: '(({ components: _, children: __, ...rest }) => rest)(props)',
             },
           },
         ],
@@ -75,7 +68,7 @@ export function islandPlugin(
       ctx.prependChild(root, {
         type: 'mdxjsEsm',
         value: `import { FumadocsIsland as ${islandName} } from ${JSON.stringify(module)};
-import { serializeIsland as _serializeIsland, Slot as _Slot${managed ? ', getIslandProps as _getIslandProps' : ''} } from ${JSON.stringify(runtime)};`,
+import { serializeIsland as _serializeIsland, Slot as _Slot } from ${JSON.stringify(runtime)};`,
       });
     },
   };

@@ -1,3 +1,15 @@
+## @fumadocs/notion@0.3.0
+
+### Framework plugins
+
+- Added `fumadocs-core/framework/plugin`: the plugin API for integrations to add routes and page content to frameworks.
+- Integrations export their plugin as the default export of `/press`: `openapiPlugin()`, `asyncapiPlugin()`, `graphqlPlugin()`, `notionPlugin()`, `obsidianPlugin()` and `sanityPlugin()`.
+- The pages of `staticSource()` and `dynamicSource()` of OpenAPI, AsyncAPI and GraphQL have `full: true` in their page data, like generated files.
+
+### Deprecated `@fumadocs/notion/client`
+
+- Deprecated `@fumadocs/notion/client`: `NotionRenderer` hydrates its components through `'use client'`, they need no registration.
+
 ## @fumadocs/notion@0.2.4
 
 ### Safer file proxy and links

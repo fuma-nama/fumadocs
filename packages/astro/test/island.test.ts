@@ -43,7 +43,7 @@ async function compile(source: string, plugins: HastPluginDefinition[] = []) {
   };
 
   const { code } = await mdxToJs(source, {
-    hastPlugins: [...plugins, islandPlugin('/island.js', '/runtime.js', false), capture],
+    hastPlugins: [...plugins, islandPlugin('/island.js', '/runtime.js'), capture],
     jsxImportSource: 'astro',
   });
   return { code, island: island! };

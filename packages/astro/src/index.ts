@@ -1,9 +1,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import type { AstroConfig, AstroIntegration, HookParameters } from 'astro';
-import type { ComponentType, ReactNode } from 'react';
-import type { Connect, DevEnvironment, FSWatcher, Plugin, RunnableDevEnvironment } from 'vite';
+import type { AstroConfig, AstroIntegration } from 'astro';
+import type { FSWatcher, Plugin } from 'vite';
 import react from '@astrojs/react';
 import mdx from '@astrojs/mdx';
 import type { SatteriResolvedOptions } from '@astrojs/markdown-satteri';
@@ -17,13 +16,10 @@ import type {
 import { applySatteriPreset, type DefaultSatteriOptions } from '@fumadocs/satteri/preset';
 import { remarkInclude } from '@fumadocs/satteri/remark-include';
 import { remarkLlms, type LLMsOptions } from '@fumadocs/satteri/remark-llms';
-import type { UseSearchReturn } from 'fumadocs-core/search/client';
-import type { SharedProps as SearchDialogProps } from 'fumadocs-ui/components/dialog/search';
-import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
 import { islandPlugin } from './island-plugin';
-import { dataKey, trimSlash, type FumadocsData } from './shared';
+import { dataKey, type FumadocsData } from './shared';
 import { output } from './sitemap';
-import type * as AppModule from './app';
+import type * as RuntimeConfig from 'virtual:fumadocs/config';
 
 export { serializeSitemap } from './sitemap';
 
@@ -60,23 +56,18 @@ export interface CollectionOptions extends Pick<
    * @defaultValue false
    */
   extractLinkReferences?: boolean;
+
+  /**
+   * Add the date of the last commit to `page.data.lastModified`, from the git history of the content directory.
+   *
+   * @defaultValue false
+   */
+  lastModified?: boolean;
 }
 
 export interface CollectionConfig extends CollectionOptions {
   /** content directory, relative to the project root. Fumadocs only processes the MDX files in it */
   dir: string;
-}
-
-/** the exports of the `layout` module */
-export interface LayoutModule {
-  /** the options of Fumadocs UI layouts */
-  baseOptions?: (locale?: string) => BaseLayoutProps;
-  /** wraps the children of the root provider in layouts, for UI on every page like WebMCP */
-  Provider?: ComponentType<{ children: ReactNode }>;
-  /** your own search dialog, it replaces the built-in search index */
-  SearchDialog?: ComponentType<SearchDialogProps>;
-  /** the search hook of the built-in dialog like `useAlgoliaSearch()`, it replaces the built-in search index */
-  useSearch?: (options: { locale?: string }) => UseSearchReturn;
 }
 
 export interface FumadocsOptions extends CollectionOptions {
@@ -88,43 +79,7 @@ export interface FumadocsOptions extends CollectionOptions {
    * @defaultValue `{ docs: { dir: 'content/docs' } }`
    */
   collections?: Record<string, CollectionConfig>;
-
-  /**
-   * Module of the {@link LayoutModule}, it loads on every page. Requires `src/fumadocs.config.ts`.
-   *
-   * Exporting `useSearch` or `SearchDialog` replaces the built-in search index, add `oramaSearchPlugin()` to keep it.
-   */
-  layout?: string;
-
-  /**
-   * Module whose default export is the React component of docs pages, receiving `DocsPageProps`. Requires `src/fumadocs.config.ts`.
-   */
-  page?: string;
-
-  /**
-   * The global CSS of Fumadocs pages, like your Tailwind CSS file. Requires `src/fumadocs.config.ts`.
-   *
-   * @defaultValue `src/styles/global.css` when it exists
-   */
-  css?: string;
 }
-
-/** `virtual:fumadocs/config`, values of the build for the runtime */
-export interface RuntimeConfig {
-  /** by collection, for `pageLoader()` and `metaLoader()` */
-  loaders: Record<string, Pick<CollectionConfig, 'dir' | 'extractLinkReferences'>>;
-  /** the root directory of the project */
-  root: string;
-  srcDir: string;
-  publicDir: string;
-  /** has an adapter, routes can render on request */
-  server: boolean;
-  /** `output: 'server'`, pages render on request */
-  onDemand: boolean;
-}
-
-/** the default `components` module */
-const defaultComponents = 'fumadocs-ui/mdx';
 
 /** code blocks are renamed in mdast, so the syntax highlighter of Astro skips them */
 const hiddenPre = 'fumadocs-pre';
@@ -203,13 +158,11 @@ interface ResolvedCollection {
 interface SetupContext {
   root: string;
   satteri: SatteriResolvedOptions;
-  /** the runtime of `fumadocs.config.ts`, when it exists */
-  appModule?: string;
   /** `remarkInclude()` of the project */
   include: MdastPluginEntry;
   /** the generated modules by ID */
   modules: Record<string, string>;
-  runtime: RuntimeConfig;
+  runtime: typeof RuntimeConfig;
 }
 
 /**
@@ -219,91 +172,49 @@ interface SetupContext {
  */
 export default function fumadocs({
   collections = { docs: { dir: 'content/docs' } },
-  layout,
-  page,
-  css,
   ...defaults
 }: FumadocsOptions = {}): AstroIntegration {
   // kept across the config reloads of dev
   const includes = createIncludeTracker();
-  let hasConfig = false;
 
   return {
     name: '@fumadocs/astro',
     hooks: {
-      async 'astro:config:setup'(params) {
-        const { config } = params;
+      async 'astro:config:setup'({ config, injectScript, updateConfig }) {
         const root = fileURLToPath(config.root);
-        const srcDir = fileURLToPath(config.srcDir);
-        const appFile = resolveConfigFile(srcDir);
-        hasConfig = appFile !== undefined;
         const context: SetupContext = {
           root,
           satteri: getSatteriOptions(config),
-          appModule: appFile && internalModule('app'),
           include: remarkInclude({ cwd: root }),
-          modules: {
-            // for the React bodies and the UI of plugins
-            'virtual:fumadocs/components': `export { default as components } from ${userModule(root, defaults.components ?? defaultComponents)};`,
-          },
-          runtime: {
-            loaders: {},
-            root,
-            srcDir,
-            publicDir: fileURLToPath(config.publicDir),
-            server: config.adapter !== undefined,
-            onDemand: config.output === 'server',
-          },
+          modules: {},
+          runtime: { loaders: {}, root },
         };
 
         const resolved: ResolvedCollection[] = [];
         for (const [name, collection] of Object.entries(collections)) {
           resolved.push(await resolveCollection(name, { ...defaults, ...collection }, context));
         }
-        const { modules, runtime, appModule } = context;
+        const { modules, runtime } = context;
         modules['virtual:fumadocs/config'] = runtimeConfigModule(runtime);
-        if (appFile) {
-          Object.assign(
-            modules,
-            appModules(appFile, context, { components: defaults.components, layout, page, css }),
-          );
-          injectRoutes(params, runtime);
-        }
         addCollectionPlugins(context.satteri, resolved, includes);
 
         // on every page, as persisted islands can move to pages without content
-        params.injectScript(
+        injectScript(
           'page',
           `import { onBeforeSwap } from ${JSON.stringify(internalModule('navigation'))};
 document.addEventListener('astro:before-swap', onBeforeSwap);`,
         );
-        params.updateConfig({
+        updateConfig({
           integrations: missingIntegrations(config.integrations),
           vite: {
-            plugins: [
-              virtualPlugin(modules),
-              includes.plugin(),
-              appModule !== undefined &&
-                config.trailingSlash !== 'ignore' &&
-                trailingSlashPlugin(config.trailingSlash, appModule),
-              appModule !== undefined && contentReloadPlugin(appModule, resolved),
-            ],
+            plugins: [virtualPlugin(modules), includes.plugin()],
             optimizeDeps: { exclude: ['@fumadocs/astro'] },
             ssr: { noExternal: ['@fumadocs/astro'] },
           },
         });
       },
-      'astro:config:done'({ config, injectTypes }) {
+      'astro:config:done'({ config }) {
         output.base = config.base.replace(/\/$/, '');
-        if (!hasConfig) return;
-        // `.astro` components in `fumadocs.config.ts`, for `tsc` without the language tools of Astro
-        injectTypes({
-          filename: 'astro-modules.d.ts',
-          content: `declare module '*.astro' {
-  const component: import('astro/runtime/server/index.js').AstroComponentFactory;
-  export default component;
-}`,
-        });
       },
       // before `astro:build:done` of every integration, like the sitemap
       'astro:build:generated'({ dir }) {
@@ -337,15 +248,16 @@ async function resolveCollection(
     components,
     includeProcessedMarkdown,
     extractLinkReferences,
+    lastModified,
     ...options
   }: CollectionConfig,
-  { root, satteri, appModule, include, modules, runtime }: SetupContext,
+  { root, satteri, include, modules, runtime }: SetupContext,
 ): Promise<ResolvedCollection> {
-  runtime.loaders[name] = { dir, extractLinkReferences };
+  runtime.loaders[name] = { dir, extractLinkReferences, lastModified };
   let island: string | undefined;
-  if (components || appModule) {
+  if (components) {
     island = `virtual:fumadocs/island/${name}`;
-    modules[island] = islandModule(root, components, appModule !== undefined);
+    modules[island] = islandModule(root, components);
   }
   const llms = includeProcessedMarkdown === true ? {} : includeProcessedMarkdown || undefined;
   const preset = await applySatteriPreset({
@@ -374,8 +286,7 @@ async function resolveCollection(
       restoreCode,
       preset.hastPlugins,
       exportData,
-      island !== undefined &&
-        (() => islandPlugin(island, internalModule('mdx-runtime'), appModule !== undefined)),
+      island !== undefined && (() => islandPlugin(island, internalModule('mdx-runtime'))),
     ],
   };
 }
@@ -403,7 +314,7 @@ function addCollectionPlugins(
 }
 
 /** `virtual:fumadocs/config` */
-function runtimeConfigModule(runtime: RuntimeConfig): string {
+function runtimeConfigModule(runtime: typeof RuntimeConfig): string {
   let code = '';
   for (const [key, value] of Object.entries(runtime)) {
     code += `export const ${key} = ${JSON.stringify(value)};\n`;
@@ -411,75 +322,12 @@ function runtimeConfigModule(runtime: RuntimeConfig): string {
   return code;
 }
 
-/** the content island of the MDX components, `managed` with the providers of Fumadocs pages */
-function islandModule(root: string, components = defaultComponents, managed: boolean): string {
-  const [create, module] = managed
-    ? ['createContentIsland', 'ui/content']
-    : ['createIsland', 'island'];
+/** the content island of the MDX components */
+function islandModule(root: string, components: string): string {
   return `import components from ${userModule(root, components)};
-import { ${create} } from ${JSON.stringify(internalModule(module))};
-export const FumadocsIsland = ${create}(components);
+import { createIsland } from ${JSON.stringify(internalModule('island'))};
+export const FumadocsIsland = createIsland(components);
 export { components };`;
-}
-
-const layoutExports = [
-  'baseOptions',
-  'Provider',
-  'SearchDialog',
-  'useSearch',
-] satisfies (keyof LayoutModule)[];
-
-/** the modules of `fumadocs.config.ts` and the managed UI */
-function appModules(
-  appFile: string,
-  { root, runtime: { srcDir } }: SetupContext,
-  {
-    components,
-    layout,
-    page,
-    css,
-  }: Pick<FumadocsOptions, 'components' | 'layout' | 'page' | 'css'>,
-): Record<string, string> {
-  const globalCss = path.join(srcDir, 'styles/global.css');
-  let cssModule = '';
-  if (css) cssModule = `import ${userModule(root, css)};`;
-  else if (fs.existsSync(globalCss))
-    cssModule = `import ${JSON.stringify(globalCss.replaceAll(path.sep, '/'))};`;
-
-  return {
-    'virtual:fumadocs/app': `export { default } from ${JSON.stringify(appFile)};`,
-    // the content island of React bodies from plugins
-    'virtual:fumadocs/island': islandModule(root, components, true),
-    // a namespace, as the exports are optional
-    'virtual:fumadocs/layout': layout
-      ? `import * as layout from ${userModule(root, layout)};
-export const { ${layoutExports.join(', ')} } = { ...layout };`
-      : `export const { ${layoutExports.join(', ')} } = {};`,
-    'virtual:fumadocs/page': page
-      ? `export { default } from ${userModule(root, page)};`
-      : 'export default undefined;',
-    'virtual:fumadocs/css': cssModule,
-  };
-}
-
-/** the managed routes, the pages and files of the config can be at any path */
-function injectRoutes(
-  { injectRoute, addMiddleware }: HookParameters<'astro:config:setup'>,
-  { srcDir, server, onDemand }: RuntimeConfig,
-) {
-  const route = (pattern: string, file: string, prerender = true) =>
-    injectRoute({ pattern, entrypoint: new URL(`./routes/${file}`, import.meta.url), prerender });
-
-  // with `output: 'server'`, pages render on request like other Astro pages
-  if (!onDemand) route('[...fumadocsPage]', 'page.astro');
-  route('[...fumadocsFile]', 'file.js');
-  // routes rendered on request, Astro tries the prerendered routes of a pattern first
-  if (server) route('[...fumadocsServer]', 'server.astro', false);
-  addMiddleware({ order: 'pre', entrypoint: new URL('./routes/middleware.js', import.meta.url) });
-
-  const pages = path.join(srcDir, 'pages');
-  if (!['astro', 'md', 'mdx', 'html'].some((ext) => fs.existsSync(path.join(pages, `404.${ext}`))))
-    route('404', '404.astro');
 }
 
 /** in dev, a change of an included file updates the MDX files including it */
@@ -525,93 +373,6 @@ function createIncludeTracker() {
 
 type IncludeTracker = ReturnType<typeof createIncludeTracker>;
 
-/** the environment where Astro renders routes in dev, it can import modules */
-function isRunnable(
-  environment: DevEnvironment | undefined,
-): environment is RunnableDevEnvironment {
-  return environment !== undefined && 'runner' in environment;
-}
-
-/**
- * In dev, files of runtime content sources (like `@fumadocs/local-md`) aren't modules, a change reloads the pages to read them again.
- *
- * Collections are left to Astro, which reloads their content itself.
- */
-function contentReloadPlugin(appModule: string, collections: ResolvedCollection[]): Plugin {
-  return {
-    name: '@fumadocs/astro:content-reload',
-    configureServer(server) {
-      const { ssr, client } = server.environments;
-      if (!isRunnable(ssr)) return;
-      const onFile = async (file: string) => {
-        if (ssr.moduleGraph.getModulesByFile(file)?.size) return;
-        if (collections.some(({ dir }) => isInside(dir, file))) return;
-        const { app } = await ssr.runner.import<typeof AppModule>(appModule);
-        for (const page of app.getPages()) {
-          if (!page.absolutePath || !isInside(path.dirname(page.absolutePath), file)) continue;
-          ssr.hot.send({ type: 'full-reload' });
-          client?.hot.send({ type: 'full-reload' });
-          return;
-        }
-      };
-
-      const listener = (file: string) => void onFile(file).catch(() => undefined);
-      server.watcher.on('add', listener);
-      server.watcher.on('change', listener);
-      server.watcher.on('unlink', listener);
-    },
-  };
-}
-
-/**
- * In dev, the file routes like `/api/search` match with or without the trailing slash, as their files do in builds.
- *
- * The dev server of Astro rejects other forms than `trailingSlash` before routing, so the URL is rewritten before it.
- */
-function trailingSlashPlugin(
-  trailingSlash: Exclude<AstroConfig['trailingSlash'], 'ignore'>,
-  appModule: string,
-): Plugin {
-  return {
-    name: '@fumadocs/astro:trailing-slash',
-    configureServer(server) {
-      const { ssr } = server.environments;
-      if (!isRunnable(ssr)) return;
-      let routes: AppModule.Route[] | undefined;
-      let urls = new Set<string>();
-      const getUrls = async () => {
-        const list = await (await ssr.runner.import<typeof AppModule>(appModule)).getRoutes();
-        if (list === routes) return urls;
-        routes = list;
-        urls = new Set();
-        for (const route of list) if (route.type === 'file') urls.add(trimSlash(route.url));
-        return urls;
-      };
-
-      const handle: Connect.NextHandleFunction = (req, _res, next) => {
-        const url = new URL(req.url ?? '/', 'http://localhost');
-        const { pathname } = url;
-        if (pathname.endsWith('/') === (trailingSlash === 'always') || pathname.startsWith('/@'))
-          return next();
-        getUrls()
-          .then((files) => {
-            // encoded like the URLs of routes
-            if (!files.has(trimSlash(pathname))) return;
-            req.url =
-              (trailingSlash === 'always' ? `${pathname}/` : pathname.slice(0, -1)) + url.search;
-          })
-          // the route renders the error
-          .catch(() => undefined)
-          .finally(next);
-      };
-      // Astro adds its middlewares to the front of the stack after the other plugins, this goes before them
-      return () => {
-        server.middlewares.stack.unshift({ route: '', handle });
-      };
-    },
-  };
-}
-
 function isInside(dir: string, file: string): boolean {
   const relative = path.relative(dir, file);
   return !relative.startsWith('..') && !path.isAbsolute(relative);
@@ -631,14 +392,6 @@ function userModule(root: string, file: string): string {
   return JSON.stringify(
     file.startsWith('.') ? path.resolve(root, file).replaceAll(path.sep, '/') : file,
   );
-}
-
-/** the runtime config, its routes and UI are managed by Fumadocs */
-function resolveConfigFile(srcDir: string): string | undefined {
-  for (const ext of ['ts', 'tsx', 'js', 'mjs']) {
-    const candidate = path.join(srcDir, `fumadocs.config.${ext}`);
-    if (fs.existsSync(candidate)) return candidate.replaceAll(path.sep, '/');
-  }
 }
 
 /** a module of this package for the generated code, not a public export */

@@ -67,10 +67,7 @@ export function AnchorProvider({ toc, single = false, children }: AnchorProvider
   const observer = useMemo(() => new Observer(toc, single), [toc, single]);
 
   useEffect(() => {
-    observer.watch({
-      threshold: 0.9,
-    });
-
+    observer.watch();
     return () => observer.unwatch();
   }, [observer]);
 
@@ -82,7 +79,13 @@ export interface TOCItemProps extends ComponentProps<'a'> {
   onActiveChange?: (v: boolean) => void;
 }
 
-export function TOCItem({ ref, onActiveChange, autoScroll = true, ...props }: TOCItemProps) {
+export function TOCItem({
+  ref,
+  onActiveChange,
+  onClick,
+  autoScroll = true,
+  ...props
+}: TOCItemProps) {
   const id = props.href ? getItemId(props.href) : null;
   const containerRef = use(ScrollContext);
   const anchorRef = useRef<HTMLAnchorElement>(null);
@@ -119,7 +122,17 @@ export function TOCItem({ ref, onActiveChange, autoScroll = true, ...props }: TO
     return observer.subscribe(callback);
   }, [autoScroll, id, observer, containerRef]);
 
-  return <a ref={mergeRefs(anchorRef, ref)} data-active={String(active)} {...props} />;
+  return (
+    <a
+      ref={mergeRefs(anchorRef, ref)}
+      data-active={String(active)}
+      onClick={(e) => {
+        onClick?.(e);
+        if (id !== null && !e.defaultPrevented) observer.select(id);
+      }}
+      {...props}
+    />
+  );
 }
 
 function useObserver() {
@@ -178,7 +191,7 @@ export function useTOCSelector<T>(
 }
 
 /**
- * The estimated active heading ID
+ * The current heading ID
  */
 export function useActiveAnchor(): string | undefined {
   return useObserverValue((observer) => observer.activeAnchor);
@@ -202,13 +215,18 @@ function getItemId(url: string) {
 
 type ChangeListener = (items: TOCItemInfo[]) => void;
 
+/** a heading is in view when this ratio of it is visible */
+const VISIBLE_RATIO = 0.9;
+
 class Observer {
   items: TOCItemInfo[];
   /** ids of active items */
   activeAnchors: string[] = [];
-  /** id of the most recently activated item */
+  /** id of the current item: the last active one while it is in view, or the first one in view */
   activeAnchor: string | undefined;
   private observer: IntersectionObserver | null = null;
+  /** ids of headings in view, see `VISIBLE_RATIO` */
+  private visible = new Set<string>();
   private listeners = new Set<ChangeListener>();
 
   constructor(
@@ -238,10 +256,17 @@ class Observer {
     };
   };
 
-  watch(options?: IntersectionObserverInit) {
+  select(id: string) {
+    this.activeAnchor = id;
+    this.update();
+  }
+
+  watch() {
     if (this.observer) return;
 
-    this.observer = new IntersectionObserver(this.callback.bind(this), options);
+    this.observer = new IntersectionObserver(this.callback.bind(this), {
+      threshold: VISIBLE_RATIO,
+    });
     for (const item of this.items) {
       const element = document.getElementById(item.id);
       if (!element) continue;
@@ -252,72 +277,59 @@ class Observer {
   unwatch() {
     this.observer?.disconnect();
     this.observer = null;
+    this.visible.clear();
   }
 
   private callback(entries: IntersectionObserverEntry[]) {
-    if (entries.length === 0) return;
-
-    let hasActive = false;
-    const updated = this.items.map((item) => {
-      const entry = entries.find((entry) => entry.target.id === item.id);
-      let active = entry ? entry.isIntersecting : item.active && !item.fallback;
-      if (this.single && hasActive) active = false;
-
-      if (item.active !== active) {
-        item = {
-          ...item,
-          t: Date.now(),
-          active,
-          fallback: false,
-        };
-      }
-
-      if (active) hasActive = true;
-      return item;
-    });
-
-    if (!hasActive && entries[0].rootBounds) {
-      const viewTop = entries[0].rootBounds.top;
-      let min = Number.MAX_VALUE;
-      let fallbackIdx = -1;
-
-      for (let i = 0; i < updated.length; i++) {
-        const element = document.getElementById(updated[i].id);
-        if (!element) continue;
-
-        const d = Math.abs(viewTop - element.getBoundingClientRect().top);
-        if (d < min) {
-          fallbackIdx = i;
-          min = d;
-        }
-      }
-
-      if (fallbackIdx !== -1) {
-        updated[fallbackIdx] = {
-          ...updated[fallbackIdx],
-          active: true,
-          fallback: true,
-          t: Date.now(),
-        };
-      }
+    for (const entry of entries) {
+      if (entry.intersectionRatio >= VISIBLE_RATIO) this.visible.add(entry.target.id);
+      else this.visible.delete(entry.target.id);
     }
 
-    this.update(updated);
+    if (this.activeAnchor === undefined || !this.visible.has(this.activeAnchor)) {
+      this.activeAnchor =
+        this.items.find((item) => this.visible.has(item.id))?.id ??
+        this.findAbove(entries[0].rootBounds);
+    }
+    this.update();
   }
 
-  private update(next: TOCItemInfo[]) {
-    let latest: TOCItemInfo | undefined;
-    const activeAnchors: string[] = [];
-    for (const item of next) {
-      if (!item.active) continue;
+  /**
+   * Measure the last heading above the view, when no heading is in view.
+   *
+   * Headings can pass the view without intersecting it, so this cannot be tracked from entries.
+   */
+  private findAbove(root: DOMRectReadOnly | null): string | undefined {
+    if (!root) return;
+    // headings are entirely above or below the visible area, which contains the viewport center
+    const center = (root.top + root.bottom) / 2;
+    let id: string | undefined;
 
-      activeAnchors.push(item.id);
-      if (!latest || item.t > latest.t) latest = item;
+    for (const item of this.items) {
+      const rect = document.getElementById(item.id)?.getBoundingClientRect();
+      // skip hidden headings
+      if (!rect || rect.height === 0) continue;
+      if (rect.top >= center) break;
+      id = item.id;
     }
+    return id;
+  }
 
-    this.items = next;
+  private update() {
+    const activeAnchors: string[] = [];
+    const t = Date.now();
+    this.items = this.items.map((item) => {
+      const active =
+        this.single || this.visible.size === 0
+          ? item.id === this.activeAnchor
+          : this.visible.has(item.id);
+      const fallback = active && !this.visible.has(item.id);
+      if (active) activeAnchors.push(item.id);
+      return item.active === active && item.fallback === fallback
+        ? item
+        : { ...item, active, fallback, t };
+    });
     this.activeAnchors = activeAnchors;
-    this.activeAnchor = latest?.id;
-    for (const listener of this.listeners) listener(next);
+    for (const listener of this.listeners) listener(this.items);
   }
 }

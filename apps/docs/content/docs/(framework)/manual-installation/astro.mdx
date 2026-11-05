@@ -1,0 +1,100 @@
+---
+title: Astro
+description: Setup Fumadocs on Astro.
+---
+
+## Getting Started
+
+Before continuing, make sure to configure:
+
+- Node.js 22.23.4 or later (required by Astro).
+- Tailwind CSS 4.
+
+Astro uses its own content collections instead of Fumadocs MDX. `@fumadocs/astro` compiles collections with Fumadocs and renders MDX as React islands.
+
+### Installation
+
+```npm
+npm i fumadocs-core fumadocs-ui @fumadocs/astro @astrojs/react react react-dom @types/mdx
+```
+
+### Styles
+
+Add the following to your Tailwind CSS file:
+
+```css title="src/styles/global.css"
+@import 'tailwindcss';
+/* [!code ++:2] */
+@import 'fumadocs-ui/css/neutral.css';
+@import 'fumadocs-ui/css/preset.css';
+```
+
+### Create Pages
+
+Add the Fumadocs integration to your Astro config:
+
+```js title="astro.config.mjs"
+import { defineConfig } from 'astro/config';
+import tailwindcss from '@tailwindcss/vite';
+import fumadocs from '@fumadocs/astro';
+
+export default defineConfig({
+  integrations: [fumadocs({ components: './src/components/mdx.tsx' })],
+  vite: {
+    plugins: [tailwindcss()],
+  },
+});
+```
+
+Define your content collections:
+
+<include cwd meta='title="src/content.config.ts"'>
+  ../../examples/astro-min/src/content.config.ts
+</include>
+
+Create the Fumadocs source from your collections:
+
+<include cwd meta='title="src/lib/source.ts"'>
+  ../../examples/astro-min/src/lib/source.ts
+</include>
+
+To combine it with other sources in one `loader()`, pass `{ baseDir }` as the third argument of `toFumadocsSource()` to place its files under a directory.
+
+Create the following files:
+
+<include cwd meta='tab="src/components/mdx.tsx"'>
+  ../../examples/astro-min/src/components/mdx.tsx
+</include>
+<include cwd meta='tab="src/components/provider.tsx"'>
+  ../../examples/astro-min/src/components/provider.tsx
+</include>
+<include cwd meta='tab="src/components/search.tsx"'>
+  ../../examples/astro-min/src/components/search.tsx
+</include>
+<include cwd meta='tab="src/components/docs.tsx"'>
+  ../../examples/astro-min/src/components/docs.tsx
+</include>
+<include cwd meta='tab="src/lib/layout.shared.tsx"'>
+  ../../examples/astro-min/src/lib/layout.shared.tsx
+</include>
+<include cwd meta='tab="src/layouts/Layout.astro"'>
+  ../../examples/astro-min/src/layouts/Layout.astro
+</include>
+<include cwd meta='tab="src/pages/docs/[...slug].astro"'>
+  ../../examples/astro-min/src/pages/docs/[...slug].astro
+</include>
+<include cwd meta='tab="src/pages/api/search.ts"'>
+  ../../examples/astro-min/src/pages/api/search.ts
+</include>
+
+### Done
+
+You can start writing documents at `content/docs`:
+
+```mdx title="content/docs/index.mdx"
+---
+title: Hello World
+---
+
+I love Fumadocs
+```

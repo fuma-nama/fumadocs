@@ -24,7 +24,7 @@ Since the search functionality is powered by remote servers, static export works
 
 ### Deployment [step]
 
-<Tabs items={['Next.js', 'React Router', 'Tanstack Start', 'Waku']}>
+<Tabs items={['Next.js', 'React Router', 'TanStack Start', 'Waku', 'Astro']}>
 
 <Tab value="Next.js">
 
@@ -87,9 +87,9 @@ export default {
 
 </Tab>
 
-<Tab value="Tanstack Start">
+<Tab value="TanStack Start">
 
-Configure SPA mode and pre-rendering, refer to [SPA Mode](https://tanstack.com/start/latest/docs/framework/react/guide/spa-mode) for deploying SPA apps with Tanstack Start.
+Configure SPA mode and pre-rendering, refer to [SPA Mode](https://tanstack.com/start/latest/docs/framework/react/guide/spa-mode) for deploying SPA apps with TanStack Start.
 
 ```ts title="vite.config.ts"
 import { tanstackStart } from '@tanstack/react-start/plugin/vite';
@@ -101,7 +101,7 @@ export default defineConfig({
     tanstackStart({
       spa: {
         enabled: true,
-        // Tanstack Router will automatically crawl your pages [!code ++:4]
+        // TanStack Router will automatically crawl your pages [!code ++:4]
         prerender: {
           enabled: true,
         },
@@ -124,6 +124,14 @@ export default defineConfig({
 Waku can serve your site statically when all pages are configured with `static` render mode.
 
 See [Deployment](https://waku.gg/#deployment) for details.
+
+</Tab>
+
+<Tab value="Astro">
+
+Astro outputs a static site by default (`output: 'static'`). Docs routes set `export const prerender = true`, so they stay static when an adapter is added for server output. The search API uses `staticGET()`.
+
+See [Astro Deployment](https://docs.astro.build/en/guides/deploy/) for details.
 
 </Tab>
 

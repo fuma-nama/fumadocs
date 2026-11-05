@@ -5,15 +5,22 @@ description: Writing math equations in Markdown/MDX.
 
 ## Getting Started
 
-```package-install
+### Install
+
+```package-install tab="unified"
 remark-math rehype-katex katex
+```
+
+```package-install tab="Sätteri"
+katex
 ```
 
 ### Add Plugins
 
-Parse the math syntax and render it with KaTeX, the code varies by content source:
+On unified, `remark-math` is a remark plugin that parses math syntax, and `rehype-katex` is a rehype plugin that renders it with KaTeX.
+On Sätteri, math is a parser feature. Enable it, and the preset renders it with KaTeX.
 
-```ts title="source.config.ts"
+```ts tab="unified" title="source.config.ts"
 import rehypeKatex from 'rehype-katex';
 import remarkMath from 'remark-math';
 import { defineConfig } from 'fumadocs-mdx/config';
@@ -27,9 +34,25 @@ export default defineConfig({
 });
 ```
 
+```ts tab="Sätteri" title="source.config.ts"
+import { defineConfig, defineDocs } from 'fumadocs-mdx/config';
+
+export const docs = defineDocs({
+  docs: {
+    compiler: 'satteri',
+  },
+});
+
+export default defineConfig({
+  satteriOptions: {
+    features: { math: true },
+  },
+});
+```
+
 ### Add Stylesheet
 
-Add the following to root layout to make it looks great:
+Add the KaTeX stylesheet to your root layout:
 
 ```tsx title="layout.tsx"
 import 'katex/dist/katex.css';

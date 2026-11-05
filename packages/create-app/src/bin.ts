@@ -279,11 +279,7 @@ async function main(defaultName: string | undefined, config: CliOptions): Promis
 
   if (options.search !== 'orama') plugins.push(feature(search, { provider: options.search }));
   if (options.lint !== 'disabled') plugins.push(feature(lint, { linter: options.lint }));
-  // the other templates come with OG images, Astro always uses Takumi
-  if (
-    options.template === 'astro' ||
-    (options.ogImage === 'takumi' && options.template.startsWith('+next'))
-  )
+  if (options.ogImage === 'takumi' && options.template.startsWith('+next'))
     plugins.push(feature(og, { engine: 'takumi' }));
   if (options.aiChat) plugins.push(feature(ai, { provider: options.aiChat }));
 

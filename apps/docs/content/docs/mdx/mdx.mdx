@@ -5,6 +5,8 @@ description: Customize the default configurations for MDX processor.
 
 Fumadocs MDX provides MDX presets to simplify configurations of features like **syntax highlighting**.
 
+It compiles with unified by default. A collection can compile with [Sätteri](#satteri) instead, which has a preset of the same plugins.
+
 ## Default Preset
 
 A preset designed for documentation sites, it is enabled by default for global MDX options.
@@ -15,9 +17,14 @@ To override the defaults, it accepts an interface inherited from [`ProcessorOpti
 
 These plugins are applied by default:
 
-- [Remark Image](/docs/headless/mdx/remark-image) - Handle images.
+- Remark GFM - [GitHub Flavored Markdown](https://github.github.com/gfm).
 - [Remark Heading](/docs/headless/mdx/headings) - Extract table of contents.
+- [Remark Image](/docs/headless/mdx/remark-image) - Handle images.
+- [Remark Code Tab](/docs/markdown#tab-groups) - Code block tab groups.
+- [Remark NPM](/docs/headless/mdx/remark-npm) - Package manager commands.
 - [Remark Structure](/docs/headless/mdx/structure) - Generate search indexes.
+
+[Include](/docs/mdx/include) is always enabled, also outside the preset.
 
 Add other remark plugins with:
 
@@ -122,9 +129,47 @@ export const blog = defineCollections({
 });
 ```
 
+## Sätteri [#satteri]
+
+[Sätteri](https://github.com/bruits/satteri) is a compiler with its own plugin model. Install it:
+
+```package-install
+@fumadocs/satteri satteri
+```
+
+Set `compiler: 'satteri'` on a [collection](/docs/mdx/collections#compiler). It reads the global `satteriOptions`:
+
+```ts title="source.config.ts"
+import { defineConfig, defineDocs } from 'fumadocs-mdx/config';
+import { remarkSteps } from '@fumadocs/satteri/remark-steps';
+
+export const docs = defineDocs({
+  docs: {
+    compiler: 'satteri',
+  },
+});
+
+export default defineConfig({
+  satteriOptions: {
+    // in place of remark plugins, and `hastPlugins` in place of rehype plugins
+    mdastPlugins: [remarkSteps()],
+    // built-in plugins take the same options as in `mdxOptions`
+    rehypeCodeOptions: {
+      themes: { light: 'github-light', dark: 'github-dark' },
+    },
+  },
+});
+```
+
+Remark and rehype plugins don't run on Sätteri. Fumadocs ports its plugins to `@fumadocs/satteri/<name>`, like `@fumadocs/satteri/remark-steps`. Both plugin options accept an array or a function, like `mdxOptions`.
+
+The preset applies the same plugins as on unified. GFM and directives are parser `features` enabled by default, and `features: { math: true }` also renders [math](/docs/markdown/math) with KaTeX.
+
+The global `compiler` option only selects the compiler of MDX files outside collections.
+
 ## Source Map
 
-Source maps are disabled by default, since generating them slows down compilation.
+Source maps are disabled by default on unified, since generating them slows down compilation.
 
 To enable, install `source-map` and pass its generator to MDX options:
 

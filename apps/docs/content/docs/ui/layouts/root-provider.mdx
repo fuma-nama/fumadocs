@@ -37,7 +37,7 @@ export function Layout({ children }) {
 }
 ```
 
-```jsx tab="Tanstack"
+```jsx tab="TanStack Start"
 import {
   HeadContent,
   Scripts,
@@ -70,6 +70,20 @@ export default function Layout({ children }) {
         <RootProvider>{children}</RootProvider>
       </body>
     </html>
+  );
+}
+```
+
+```jsx tab="Astro"
+import { navigate } from 'astro:transitions/client';
+import { RootProvider } from 'fumadocs-ui/provider/astro';
+
+// Rendered inside a React island, pass pathname and params from the Astro page.
+export function Provider({ pathname, params, children }) {
+  return (
+    <RootProvider pathname={pathname} params={params} navigate={navigate}>
+      {children}
+    </RootProvider>
   );
 }
 ```

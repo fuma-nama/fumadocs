@@ -29,7 +29,7 @@ npm install fumadocs-epub
 
 EPUB export requires `includeProcessedMarkdown` in your docs collection config:
 
-```ts tab="Fumadocs MDX" title="source.config.ts"
+```ts title="source.config.ts"
 import { defineDocs } from 'fumadocs-mdx/config';
 
 export const docs = defineDocs({
@@ -39,6 +39,21 @@ export const docs = defineDocs({
       includeProcessedMarkdown: true,
     },
   },
+});
+```
+
+On Astro, enable it in the integration options:
+
+```js title="astro.config.mjs"
+import { defineConfig } from 'astro/config';
+import fumadocs from '@fumadocs/astro';
+
+export default defineConfig({
+  integrations: [
+    fumadocs({
+      includeProcessedMarkdown: { output: 'function' }, // [!code ++]
+    }),
+  ],
 });
 ```
 
@@ -87,7 +102,7 @@ export default [
 ] satisfies RouteConfig;
 ```
 
-```ts tab="Tanstack Start" title="src/routes/export/epub.ts"
+```ts tab="TanStack Start" title="src/routes/export/epub.ts"
 import { createFileRoute } from '@tanstack/react-router';
 import { source } from '@/lib/source';
 import { createEpubExportAPI } from 'fumadocs-epub';
@@ -118,6 +133,24 @@ export const { GET } = createEpubExportAPI({
 });
 ```
 
+```ts tab="Astro" title="src/pages/export/epub.ts"
+import type { APIRoute } from 'astro';
+import { source } from '@/lib/source';
+import { createEpubExportAPI } from 'fumadocs-epub';
+import { getSecret } from 'astro:env/server';
+
+// render per request, needs an adapter
+export const prerender = false;
+
+const api = createEpubExportAPI({
+  source,
+  title: 'My Documentation',
+  secret: getSecret('EXPORT_SECRET'),
+});
+
+export const GET: APIRoute = ({ request }) => api.GET(request);
+```
+
 For a public endpoint, or to build the file yourself (e.g. in a script), call `exportEpub()` directly and return the buffer.
 
 ### Using the CLI
@@ -126,10 +159,10 @@ You can also export EPUB via the Fumadocs CLI:
 
 ```bash
 fumadocs export epub --framework next
-# or: tanstack-start | react-router | waku
+# or: tanstack-start | react-router | waku | astro
 ```
 
-This fetches from your running server (Next.js) or copies from the build output (other frameworks). Run a production build first for the other frameworks.
+On Next.js and Astro, this fetches from your running server on port `3000` (Next.js) or `4321` (Astro) unless `PORT` is set. On React Router, TanStack Start and Waku, it copies from the build output, so run a production build first.
 
 ## Options
 
@@ -190,6 +223,6 @@ const buffer = await exportEpub({
 
 Images in your MDX are resolved automatically:
 
-- **Relative paths** (e.g. `./image.png`) — resolved relative to the page file
-- **Public paths** (e.g. `/og.png`) — resolved from the `public` directory
-- **Remote URLs** (e.g. `https://...`) — embedded as-is
+- **Relative paths** (e.g. `./image.png`): resolved relative to the page file
+- **Public paths** (e.g. `/og.png`): resolved from the `public` directory
+- **Remote URLs** (e.g. `https://...`): embedded as-is

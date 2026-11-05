@@ -3,32 +3,11 @@ title: Remark Image
 description: Adding size attributes to images.
 ---
 
-This plugin adds `width` and `height` attributes to your image elements, which is needed for Image Optimization on Next.js and some other frameworks.
+A remark plugin that adds `width` and `height` attributes to your image elements, which is needed for Image Optimization on Next.js and some other frameworks.
 
 ## Usage
 
-Add it to your Remark plugins.
-
-```ts tab="MDX Compiler"
-import { compile } from '@mdx-js/mdx';
-import { remarkImage } from 'fumadocs-core/mdx-plugins';
-
-await compile('...', {
-  remarkPlugins: [remarkImage],
-});
-```
-
-```ts title="source.config.ts" tab="Fumadocs MDX"
-import { defineConfig } from 'fumadocs-mdx/config';
-
-export default defineConfig({
-  mdxOptions: {
-    remarkImageOptions: {
-      // it is enabled by default, customize it here
-    },
-  },
-});
-```
+Fumadocs MDX enables it by default. Pass options with `remarkImageOptions`. The options are the same on unified and Sätteri.
 
 Supported:
 
@@ -38,14 +17,14 @@ Supported:
 
 ### How It Works
 
-For Next.js, it uses **static imports** to import local images, which supports the `placeholder` option of Next.js Image.
-Next.js can handle image imports with its built-in image loader.
+With `useImport`, local images become **static imports** for your bundler to handle. Fumadocs MDX enables it except in `dynamic` collections.
+On Next.js, the built-in image loader handles them, which supports the `placeholder` option of Next.js Image.
 
 Otherwise, it uses the file system or an HTTP request to download the image and obtain its size.
 
 <Callout type="warn">
 
-Do not pass untrusted image URLs, they are fetched when compiling, private hosts included. Set `external: false` to skip external images.
+Do not pass untrusted image URLs. They are fetched when compiling, private hosts included. Set `external: false` to skip external images.
 
 </Callout>
 
@@ -78,20 +57,27 @@ Where `./public/hello.png` points to the image in public directory.
 
 For Next.js, you can disable static imports on local images.
 
-```ts tab="MDX Compiler"
-import { compile } from '@mdx-js/mdx';
-import { remarkImage } from 'fumadocs-core/mdx-plugins';
-
-await compile('...', {
-  remarkPlugins: [[remarkImage, { useImport: false }]],
-});
-```
-
-```ts title="source.config.ts" tab="Fumadocs MDX"
+```ts tab="unified" title="source.config.ts"
 import { defineConfig } from 'fumadocs-mdx/config';
 
 export default defineConfig({
   mdxOptions: {
+    remarkImageOptions: {
+      useImport: false,
+    },
+  },
+});
+```
+
+```ts tab="Sätteri" title="source.config.ts"
+import { defineConfig, defineDocs } from 'fumadocs-mdx/config';
+
+export const docs = defineDocs({
+  docs: { compiler: 'satteri' },
+});
+
+export default defineConfig({
+  satteriOptions: {
     remarkImageOptions: {
       useImport: false,
     },
@@ -125,19 +111,9 @@ For images in public directory, you can just reference them without relative pat
 
 ### Example: Public Directory
 
-Customize the path of public directory
+Customize the path of public directory.
 
-```ts tab="MDX Compiler"
-import { compile } from '@mdx-js/mdx';
-import { remarkImage } from 'fumadocs-core/mdx-plugins';
-import path from 'node:path';
-
-await compile('...', {
-  remarkPlugins: [[remarkImage, { publicDir: path.join(process.cwd(), 'dir') }]],
-});
-```
-
-```ts title="source.config.ts" tab="Fumadocs MDX"
+```ts tab="unified" title="source.config.ts"
 import { defineConfig } from 'fumadocs-mdx/config';
 import path from 'node:path';
 
@@ -150,25 +126,21 @@ export default defineConfig({
 });
 ```
 
-You can pass a URL too.
+```ts tab="Sätteri" title="source.config.ts"
+import { defineConfig, defineDocs } from 'fumadocs-mdx/config';
+import path from 'node:path';
 
-```ts tab="MDX Compiler"
-import { compile } from '@mdx-js/mdx';
-import { remarkImage } from 'fumadocs-core/mdx-plugins';
-
-await compile('...', {
-  remarkPlugins: [[remarkImage, { publicDir: 'https://my-cdn.com/images' }]],
+export const docs = defineDocs({
+  docs: { compiler: 'satteri' },
 });
-```
-
-```ts title="source.config.ts" tab="Fumadocs MDX"
-import { defineConfig } from 'fumadocs-mdx/config';
 
 export default defineConfig({
-  mdxOptions: {
+  satteriOptions: {
     remarkImageOptions: {
-      publicDir: 'https://my-cdn.com/images',
+      publicDir: path.join(process.cwd(), 'dir'),
     },
   },
 });
 ```
+
+`publicDir` accepts a base URL too, like `https://my-cdn.com/images`.

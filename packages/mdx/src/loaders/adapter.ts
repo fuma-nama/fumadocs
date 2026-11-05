@@ -1,4 +1,4 @@
-import type { CompilerOptions } from '@/loaders/mdx/build';
+import type { BuildMDXOptions, CompilerOptions } from '@/loaders/mdx/build';
 import type { LoadFnOutput, LoadHook } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import fs from 'node:fs/promises';
@@ -9,7 +9,7 @@ import { ValidationError } from '@/utils/validation';
 import type { LoaderContext } from 'webpack';
 import { readFileSync } from 'node:fs';
 
-export interface LoaderInput {
+export interface LoaderInput extends Pick<BuildMDXOptions, 'importsOnly'> {
   development: boolean;
   compiler: CompilerOptions;
 
@@ -93,7 +93,10 @@ export interface ViteLoader {
   ) => Promise<TransformResult | null>;
 }
 
-export function toVite(loader: Loader): ViteLoader {
+export function toVite(
+  loader: Loader,
+  getInput?: () => Pick<LoaderInput, 'importsOnly'>,
+): ViteLoader {
   return {
     async transform(value, id) {
       const [file, query = ''] = id.split('?', 2);
@@ -105,6 +108,7 @@ export function toVite(loader: Loader): ViteLoader {
         }
 
         const result = await loader.load({
+          ...getInput?.(),
           filePath: file,
           query: parsedQuery,
           getSource() {

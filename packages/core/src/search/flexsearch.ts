@@ -6,7 +6,7 @@ import { buildDocuments } from './server/build-doc';
 import type { LoaderConfig, LoaderOutput } from '@/source';
 import type { Awaitable } from '@/types';
 import type { I18nConfig } from '@/i18n';
-import { createDocument, search, type Doc } from './flexsearch/utils';
+import { createDocument, search, toSearchIndex, type Doc } from './flexsearch/utils';
 
 export type Index = SharedIndex;
 export interface IndexWithLocale extends Index {
@@ -40,13 +40,14 @@ export interface I18nOptions extends Omit<Options, 'indexes'> {
 
 function server(options: Options): SearchServer {
   function initIndex(indexes: Index[]) {
-    const index = createDocument(options.document);
+    const document = createDocument(options.document);
+    const docs = buildDocuments(indexes);
 
-    for (const doc of buildDocuments(indexes)) {
-      index.add(doc.id, doc as Doc);
+    for (let key = 0; key < docs.length; key++) {
+      document.add(key, docs[key] as Doc);
     }
 
-    return index;
+    return toSearchIndex(document);
   }
 
   const indexPromise =
@@ -58,7 +59,7 @@ function server(options: Options): SearchServer {
     async export(): Promise<ExportedData> {
       const index = await indexPromise;
       const raw: Record<string, string> = {};
-      index.export((key, data) => {
+      index.document.export((key, data) => {
         raw[key] = data;
       });
       return { type: 'default', raw };

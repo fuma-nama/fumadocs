@@ -3,6 +3,7 @@ import path from 'node:path';
 import type { Feature, FeatureContext } from '@/features';
 import type { Framework, I18nInfo } from '@/project';
 import {
+  astroPageRoute,
   type FormattedRoute,
   formatRoute,
   reactRouterTypes,
@@ -18,7 +19,7 @@ import {
   type SourceRef,
   sourceRef,
   registerReactRouterRoutes,
-  requiresManagedMarkdown,
+  requiresMarkdown,
   sharedRoute,
 } from './utils';
 
@@ -40,8 +41,8 @@ export function getPageMarkdownUrl(page: { slugs: string[]; locale?: string }) {
   return { segments, url: getContentUrl(segments, page.locale) };
 }`;
 
-/** TanStack Start serves Markdown with a `.md` suffix under the docs route */
-export const tanstackMarkdownUrl = (i18n: boolean) => `
+/** the Markdown URL of a page with a `.md` suffix under the docs route, `/docs/index.md` for the root, on TanStack Start and Astro */
+export const suffixMarkdownUrl = (i18n: boolean) => `
 const getDocsUrl = createGetUrl(docsRoute${i18n ? ', i18n' : ''});
 
 export function getPageMarkdownUrl(page: { slugs: string[]; locale?: string }) {
@@ -53,7 +54,10 @@ export function getPageMarkdownUrl(page: { slugs: string[]; locale?: string }) {
   }
 
   return { segments, url: getDocsUrl(segments, page.locale) };
-}
+}`;
+
+/** TanStack Start also decodes the splat param of its `.md` route */
+export const tanstackMarkdownUrl = (i18n: boolean) => `${suffixMarkdownUrl(i18n)}
 
 /** @returns page slugs */
 export function decodeMarkdownUrl(segments: string[]) {
@@ -82,7 +86,7 @@ interface Routes {
 type Template = (route: FormattedRoute, i18n: I18nInfo | null, src: SourceRef) => string;
 
 /** the per-page Markdown route, the only one reading route params */
-const markdownTemplates: Record<Exclude<Framework, 'astro'>, Template> = {
+const markdownTemplates: Record<Framework, Template> = {
   next: (route, i18n, src) => `${pageImports(src)}
 import { notFound } from 'next/navigation';
 
@@ -159,11 +163,11 @@ export async function getConfig() {
   } as const;
 }
 `,
+  astro: (_route, i18n, src) => astroPageRoute(i18n, src, pageImports(src), markdown, 'index'),
 };
 
-/** the routes on Astro come from the Fumadocs integration */
 export function templates(
-  framework: Exclude<Framework, 'astro'>,
+  framework: Framework,
   routes: Routes,
   i18n: I18nInfo | null,
   src: SourceRef,
@@ -196,27 +200,17 @@ export function llmsRoutes(
     markdown: format(
       framework === 'tanstack-start'
         ? { segments: [docsRoute, '{$}.md'], locale: true }
-        : {
-            segments: [
-              contentRoute,
-              { param: 'slug', catchAll: true, optional: true, suffix: 'content.md' },
-            ],
-            locale: true,
-          },
+        : framework === 'astro'
+          ? { segments: [docsRoute, '[...slug].md'], locale: true }
+          : {
+              segments: [
+                contentRoute,
+                { param: 'slug', catchAll: true, optional: true, suffix: 'content.md' },
+              ],
+              locale: true,
+            },
     ),
   };
-}
-
-/** add `docsLlms` to `lib/source.ts` */
-export async function addDocsLlms(ctx: FeatureContext) {
-  const sourceFile = path.join(ctx.project.baseDir, 'lib/source.ts');
-  if (
-    await addExport(ctx, sourceFile, 'docsLlms', docsLlms(sourceRef(ctx.project.source.dynamic)))
-  ) {
-    await ctx.source(sourceFile, (file) =>
-      addImport(file, { from: 'fumadocs-core/source', named: ['llms'] }),
-    );
-  }
 }
 
 export const llms: Feature = {
@@ -224,39 +218,40 @@ export const llms: Feature = {
   title: 'LLM Routes',
   description: 'serve docs as Markdown for LLMs: llms.txt, llms-full.txt and per-page Markdown',
   requires: [docs],
-  supports: requiresManagedMarkdown,
-  async detect({ cwd, baseDir, framework, fumadocsConfig }) {
-    const file = framework === 'astro' ? fumadocsConfig : path.join(baseDir, 'lib/source.ts');
-    if (!file) return false;
-    const content = await fs.readFile(path.join(cwd, file), 'utf-8').catch(() => '');
-    // on Astro, `llmsPlugin()` serves the routes from any Markdown, it's a default plugin
-    return framework === 'astro'
-      ? !/preset:\s*false/.test(content) || content.includes('llmsPlugin(')
-      : /export const docsLlms\b/.test(content);
+  supports: requiresMarkdown,
+  // `mcp` and `webmcp` import `docsLlms`
+  async detect({ cwd, baseDir }) {
+    const content = await fs
+      .readFile(path.join(cwd, baseDir, 'lib/source.ts'), 'utf-8')
+      .catch(() => '');
+    return /export const docsLlms\b/.test(content);
   },
   async apply(ctx) {
     const { baseDir, i18n, source, configFile, framework } = ctx.project;
+    const sourceFile = path.join(baseDir, 'lib/source.ts');
+    const src = sourceRef(source.dynamic);
     // runtime content sources already give raw Markdown
     await includeProcessedMarkdown(ctx);
-    if (framework === 'astro') {
-      ctx.note(
-        '`llmsPlugin()` serves `llms.txt`, `llms-full.txt` and the Markdown of pages at `<page>.md`, it is a default plugin unless `preset: false` (then add it to your Fumadocs config).',
+    if (await addExport(ctx, sourceFile, 'docsLlms', docsLlms(src))) {
+      await ctx.source(sourceFile, (file) =>
+        addImport(file, { from: 'fumadocs-core/source', named: ['llms'] }),
       );
-      return;
     }
-    await addDocsLlms(ctx);
 
     const docsRoute = source.baseUrl.replace(/\/$/, '');
     let contentRoute = `/llms.mdx${docsRoute}`;
-    if (framework === 'tanstack-start') {
+    if (framework === 'tanstack-start' || framework === 'astro') {
       await sharedRoute(ctx, 'docsRoute', source.baseUrl);
-      await addPageUrl(ctx, 'getPageMarkdownUrl', tanstackMarkdownUrl(i18n !== null));
+      await addPageUrl(
+        ctx,
+        'getPageMarkdownUrl',
+        (framework === 'tanstack-start' ? tanstackMarkdownUrl : suffixMarkdownUrl)(i18n !== null),
+      );
     } else {
       contentRoute = await sharedRoute(ctx, 'docsContentRoute', contentRoute);
       await addPageUrl(ctx, 'getPageMarkdownUrl', markdownUrl(i18n !== null));
     }
     const routes = llmsRoutes(framework, i18n, docsRoute, contentRoute);
-    const src = sourceRef(source.dynamic);
     for (const [route, content] of templates(framework, routes, i18n, src))
       await ctx.write(path.join(baseDir, route.file), content);
 

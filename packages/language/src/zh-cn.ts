@@ -68,6 +68,7 @@ const translations = {
   'Search(search dialog)': '搜索',
   'Search(search trigger)': '搜索',
   'Show Sidebar(sidebar)': '显示侧边栏',
+  'Skip to Content(skip link)': '跳到内容',
   'System(theme switcher)(aria-label)': '系统',
   'Table of Contents(inline table of contents)': '目录',
   'The page you are looking for might have been removed, had its name changed, or is temporarily unavailable.(404 not found page)':

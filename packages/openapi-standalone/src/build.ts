@@ -11,7 +11,7 @@ import {
 import { createFromSource } from 'fumadocs-core/search/server';
 import type * as PageTree from 'fumadocs-core/page-tree';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
-import { createOpenAPI, type OpenAPIPageData, openapiPlugin } from 'fumadocs-openapi/server';
+import { createOpenAPI, type OpenAPIPageData } from 'fumadocs-openapi/server';
 import type { Document, GeneratedPageProps, ServerObject } from 'fumadocs-openapi';
 import type { OverviewPageData, PageData, SiteData } from './app/types';
 import type { RenderInput } from './render';
@@ -138,7 +138,10 @@ export async function buildSite({
   }
 
   const siteSource: Source<SiteConfig> = { files };
-  const source = loader(siteSource, { baseUrl: base || '/', plugins: [openapiPlugin()] });
+  const source = loader(siteSource, {
+    baseUrl: base || '/',
+    plugins: [createOpenAPI().loaderPlugin()],
+  });
   const tree = source.getPageTree();
   const outFiles = new Map<string, string>();
 

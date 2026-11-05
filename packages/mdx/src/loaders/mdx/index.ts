@@ -24,7 +24,7 @@ type CacheEntry = z.infer<typeof cacheEntry>;
 
 export function createMdxLoader({ getCore }: ConfigLoader): Loader {
   return {
-    async load({ getSource, development: isDevelopment, query, compiler, filePath }) {
+    async load({ getSource, development: isDevelopment, query, compiler, filePath, importsOnly }) {
       let core = await getCore();
       // macro collections live on the root core, read it before switching to a workspace
       const macro = core.macro;
@@ -43,7 +43,7 @@ export function createMdxLoader({ getCore }: ConfigLoader): Loader {
       let after: (() => Promise<void>) | undefined;
 
       const { experimentalBuildCache = false } = core.getConfig().global;
-      if (!isDevelopment && experimentalBuildCache && only === 'all') {
+      if (!isDevelopment && !importsOnly && experimentalBuildCache && only === 'all') {
         const cacheDir = experimentalBuildCache;
         // macro ids contain path separators, keep the key a valid file name
         const scope = (macroId ?? collectionName ?? 'global').replace(/[^a-zA-Z0-9_-]/g, '_');
@@ -106,6 +106,7 @@ export function createMdxLoader({ getCore }: ConfigLoader): Loader {
         source: '\n'.repeat(countLines(matter.matter)) + matter.content,
         filePath,
         frontmatter: matter.data as Record<string, unknown>,
+        importsOnly,
         _compiler: compiler,
         environment: 'bundler',
       });

@@ -4,20 +4,19 @@ description: Use Admonition in Fumadocs
 ---
 
 In Docusaurus, there's an [Admonition syntax](https://docusaurus.io/docs/markdown-features/admonitions).
-
 For people migrating from Docusaurus, you can enable this remark plugin to support the Admonition syntax.
 
 ## Usage
 
-It requires the directive syntax, from `remark-directive` or the `directive` feature of Sätteri.
+It requires the directive syntax. On unified, install `remark-directive`:
 
-```npm tab="Fumadocs MDX"
-npm i remark-directive
+```package-install
+remark-directive
 ```
 
-Configure both in your config.
+Sätteri parses directives with its `directive` feature, which Fumadocs MDX enables by default.
 
-```ts title="source.config.ts" tab="Fumadocs MDX"
+```ts tab="unified" title="source.config.ts"
 import remarkDirective from 'remark-directive';
 import { remarkDirectiveAdmonition } from 'fumadocs-core/mdx-plugins';
 import { defineConfig } from 'fumadocs-mdx/config';
@@ -29,13 +28,18 @@ export default defineConfig({
 });
 ```
 
-```ts tab="MDX Compiler"
-import remarkDirective from 'remark-directive';
-import { remarkDirectiveAdmonition } from 'fumadocs-core/mdx-plugins';
-import { compile } from '@mdx-js/mdx';
+```ts tab="Sätteri" title="source.config.ts"
+import { remarkDirectiveAdmonition } from '@fumadocs/satteri/remark-directive-admonition';
+import { defineConfig, defineDocs } from 'fumadocs-mdx/config';
 
-await compile('...', {
-  remarkPlugins: [remarkDirective, remarkDirectiveAdmonition],
+export const docs = defineDocs({
+  docs: { compiler: 'satteri' },
+});
+
+export default defineConfig({
+  satteriOptions: {
+    mdastPlugins: [remarkDirectiveAdmonition()],
+  },
 });
 ```
 

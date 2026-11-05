@@ -6,7 +6,6 @@ import {
   addImport,
   addJsxAttribute,
   addVitePlugin,
-  ensureAstroOption,
   findJsxElement,
   type SourceFile,
   wrapNextConfig,
@@ -82,17 +81,6 @@ export const docs: Feature<{ i18n: boolean }> = {
       provider: project.info.provider,
       providerProps: providerProps.map((prop) => ` ${prop}`).join(''),
     });
-    // `[...lang]` also matches `/`, the existing home page stays
-    if (
-      framework === 'astro' &&
-      i18n?.optionalLocale &&
-      (await exists(path.join(project.cwd, baseDir, 'pages/index.astro')))
-    ) {
-      delete files[`pages/${localeSegment('astro', i18n)}index.astro`];
-      ctx.note(
-        'Kept `pages/index.astro`, move it to `pages/[...lang]/index.astro` to serve every language.',
-      );
-    }
     for (const [file, content] of Object.entries(files)) {
       await ctx.write(path.posix.join(baseDir, file), content);
     }
@@ -104,7 +92,8 @@ export const docs: Feature<{ i18n: boolean }> = {
 
     await configureBundler(ctx);
     await configureCss(ctx);
-    await suppressHydrationWarning(ctx);
+    // Astro renders `<html>` without React
+    if (framework !== 'astro') await suppressHydrationWarning(ctx);
     if (framework === 'react-router') await configureRoutes(ctx, i18n);
 
     const tsconfig = await fs
@@ -124,6 +113,18 @@ export const docs: Feature<{ i18n: boolean }> = {
       ctx.note(
         'When prerendering, list the docs pages with `source.getPages().map((page) => page.url)` instead of globbing content files, see https://fumadocs.dev/docs/internationalization/react-router.',
       );
+    }
+    if (framework === 'astro') {
+      const layout = path.join(baseDir, project.info.rootFile);
+      const content = await fs.readFile(path.join(project.cwd, layout), 'utf-8').catch(() => '');
+      if (!content.includes('Astro.props'))
+        ctx.note(
+          `Docs pages render in \`${layout}\` with \`title\` and \`description\` props, create it if missing and add them to its \`<head>\`.`,
+        );
+      if (i18n)
+        ctx.note(
+          `Docs pages pass the locale as \`lang\` to \`${layout}\`, set it on \`<html lang>\`.`,
+        );
     }
     if (i18n) {
       ctx.note(
@@ -162,16 +163,19 @@ async function configureProxy(ctx: FeatureContext) {
 function bundlerEdits({ framework, baseDir }: Project): ((file: SourceFile) => boolean)[] {
   if (framework === 'next') return [wrapNextConfig];
   if (framework === 'astro') {
-    const option = (name: string, file: string) => (source: SourceFile) =>
-      ensureAstroOption(source, name, `./${path.posix.join(baseDir, file)}`) !== undefined;
     return [
       // it adds the React and MDX integrations
       (file) =>
-        addVitePlugin(file, { name: 'fumadocs', from: '@fumadocs/astro', default: true }, [
-          'integrations',
-        ]),
-      option('components', 'components/mdx.tsx'),
-      option('layout', 'lib/layout.shared.tsx'),
+        addVitePlugin(
+          file,
+          {
+            name: 'fumadocs',
+            from: '@fumadocs/astro',
+            call: `fumadocs({ components: './${path.posix.join(baseDir, 'components/mdx.tsx')}' })`,
+            default: true,
+          },
+          ['integrations'],
+        ),
       (file) =>
         addVitePlugin(file, { name: 'tailwindcss', from: '@tailwindcss/vite', default: true }, [
           'vite',
@@ -212,7 +216,7 @@ async function configureBundler(ctx: FeatureContext) {
     );
   } else if (framework === 'astro') {
     ctx.note(
-      "Add `fumadocs({ components: './src/components/mdx.tsx', layout: './src/lib/layout.shared.tsx' })` from '@fumadocs/astro' to the integrations of your Astro config, and `tailwindcss()` from '@tailwindcss/vite' to its Vite plugins.",
+      'Add the integrations of Fumadocs to your Astro config, see https://fumadocs.dev/docs/manual-installation/astro.',
     );
   } else {
     ctx.note(
@@ -238,7 +242,6 @@ async function configureCollections(ctx: FeatureContext) {
 
 /** resolve the global CSS file imported by the root file */
 async function findCssEntry({ cwd, baseDir, info }: Project): Promise<string | undefined> {
-  if (!info.rootFile) return;
   const rootFile = path.join(baseDir, info.rootFile);
   const content = await fs.readFile(path.join(cwd, rootFile), 'utf-8').catch(() => '');
   const match = /import\s+(?:\w+\s+from\s+)?['"]([^'"]+\.css)(?:\?url)?['"]/.exec(content);
@@ -250,35 +253,8 @@ async function findCssEntry({ cwd, baseDir, info }: Project): Promise<string | u
 }
 
 async function configureCss(ctx: FeatureContext) {
-  const { cwd, baseDir, framework } = ctx.project;
+  const { cwd } = ctx.project;
   const preset = (await exists(path.join(cwd, 'components.json'))) ? 'shadcn' : 'neutral';
-  if (framework === 'astro') {
-    // the Fumadocs integration loads it on every page
-    const file = path.join(baseDir, 'styles/global.css');
-    const current = await fs.readFile(path.join(cwd, file), 'utf-8').catch(() => '');
-    const lines = cssImports(preset);
-    if (!/@import\s+['"]tailwindcss['"]/.test(current)) lines.unshift("@import 'tailwindcss';");
-    const missing = lines.filter((line) => !current.includes(line));
-    if (missing.length === 0) return;
-    // `@import` must come before other rules, after the existing imports
-    const content = current.split('\n');
-    let index = 0;
-    let inImport = false;
-    for (let i = 0; i < content.length; i++) {
-      if (content[i].trimStart().startsWith('@import')) inImport = true;
-      // an import can span lines, it ends at `;`
-      if (inImport && content[i].includes(';')) {
-        inImport = false;
-        index = i + 1;
-      }
-    }
-    content.splice(index, 0, ...missing);
-    await fs.mkdir(path.dirname(path.join(cwd, file)), { recursive: true });
-    await fs.writeFile(path.join(cwd, file), content.join('\n').replace(/\n*$/, '\n'));
-    ctx.log(`updated ${file}`);
-    return;
-  }
-
   const entry = await findCssEntry(ctx.project);
   if (entry && (await exists(path.join(cwd, entry)))) {
     await ctx.append(entry, cssImports(preset));
@@ -293,8 +269,6 @@ async function configureCss(ctx: FeatureContext) {
 /** `next-themes` sets the theme class on `<html>`, React warns about the mismatch without this attribute */
 async function suppressHydrationWarning(ctx: FeatureContext) {
   const { baseDir, info } = ctx.project;
-  // Astro renders `<html>` without React
-  if (!info.rootFile) return;
   const edited = await ctx.source(path.join(baseDir, info.rootFile), (file) => {
     const html = findJsxElement(file, 'html')?.openingElement;
     if (!html || file.code.slice(html.start, html.end).includes('suppressHydrationWarning')) return;

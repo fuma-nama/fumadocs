@@ -4,7 +4,7 @@
     "paths": {
       "@/*": ["./src/*"]
     },
-    "types": ["@types/node", "@types/hast", "astro/client"],
+    "types": ["@types/node", "@types/hast", "astro/client", "fumadocs-ui/mdx"],
     "jsx": "react-jsx",
     "noEmit": true,
     "lib": ["ESNext", "DOM"],

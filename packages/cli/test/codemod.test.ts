@@ -16,7 +16,7 @@ import {
   prependJsxChildren,
 } from '@/codemod/shared';
 import { addVitePlugin, wrapNextConfig } from '@/codemod/config';
-import { enableProcessedMarkdown, ensureAstroOption } from '@/codemod/source';
+import { enableProcessedMarkdown } from '@/codemod/source';
 
 async function createSourceFile(templatePath: string) {
   const content = await fs.readFile(path.join(__dirname, templatePath), 'utf-8');
@@ -365,89 +365,6 @@ export default defineConfig({
   const disabled = config('fumadocs({ includeProcessedMarkdown: false })');
   expect(enableProcessedMarkdown(disabled)).toBe(true);
   expect(disabled.s.toString()).toContain('fumadocs({ includeProcessedMarkdown: true })');
-});
-
-test('ensure astro option', () => {
-  const config = (integration: string) =>
-    parseSourceFile(
-      'astro.config.mjs',
-      `import fumadocs from '@fumadocs/astro';
-
-export default defineConfig({
-  integrations: [${integration}],
-});
-`,
-    );
-  const layout = './src/lib/layout.shared.tsx';
-  const options = config("fumadocs({ components: './src/components/mdx.tsx' })");
-  expect(ensureAstroOption(options, 'layout', layout)).toBe(layout);
-  expect(options.s.toString()).toContain(
-    `fumadocs({ components: './src/components/mdx.tsx', layout: '${layout}' })`,
-  );
-
-  const empty = config('fumadocs()');
-  expect(ensureAstroOption(empty, 'layout', layout)).toBe(layout);
-  expect(empty.s.toString()).toContain(`fumadocs({ layout: '${layout}' })`);
-
-  const existing = config("fumadocs({ layout: './src/layout.tsx' })");
-  expect(ensureAstroOption(existing, 'layout', layout)).toBe('./src/layout.tsx');
-  expect(existing.s.hasChanged()).toBe(false);
-
-  expect(
-    ensureAstroOption(parseSourceFile('astro.config.mjs', 'export default {};'), 'layout', layout),
-  ).toBeUndefined();
-});
-
-test('add plugin to fumadocs config', () => {
-  const plugin = { name: 'takumiPlugin', from: '@fumadocs/astro/plugins/takumi' };
-  const file = parseSourceFile(
-    'fumadocs.config.ts',
-    `import { defineConfig } from '@fumadocs/astro/config';
-import { source } from './lib/source';
-
-export default defineConfig({
-  source,
-  title: 'My App',
-});
-`,
-  );
-  expect(addVitePlugin(file, plugin)).toBe(true);
-  expect(file.s.toString()).toMatchInlineSnapshot(`
-    "import { defineConfig } from '@fumadocs/astro/config';
-    import { source } from './lib/source';
-    import { takumiPlugin } from '@fumadocs/astro/plugins/takumi';
-
-    export default defineConfig({
-      source,
-      title: 'My App',
-      plugins: [takumiPlugin()],
-    });
-    "
-  `);
-
-  const plugins = parseSourceFile(
-    'fumadocs.config.ts',
-    `import { defineConfig } from '@fumadocs/astro/config';
-import { openapiPlugin } from '@fumadocs/astro/plugins/openapi';
-
-export default defineConfig({
-  source,
-  plugins: [openapiPlugin()],
-});
-`,
-  );
-  expect(addVitePlugin(plugins, plugin)).toBe(true);
-  expect(plugins.s.toString()).toMatchInlineSnapshot(`
-    "import { defineConfig } from '@fumadocs/astro/config';
-    import { openapiPlugin } from '@fumadocs/astro/plugins/openapi';
-    import { takumiPlugin } from '@fumadocs/astro/plugins/takumi';
-
-    export default defineConfig({
-      source,
-      plugins: [openapiPlugin(), takumiPlugin()],
-    });
-    "
-  `);
 });
 
 test('transform react router config: add exclude', async () => {

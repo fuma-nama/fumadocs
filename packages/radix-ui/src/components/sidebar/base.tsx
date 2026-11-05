@@ -109,6 +109,15 @@ export function SidebarProvider({
     { enabled: collapsible && mode === 'full', ignoreTyping: true },
   );
 
+  useHotKey(
+    (e) => {
+      if (e.key !== 'Escape') return;
+      e.preventDefault();
+      setOpen(false);
+    },
+    { enabled: open && mode === 'drawer', ignoreTyping: true },
+  );
+
   return (
     <SidebarContext
       value={useMemo(
@@ -247,6 +256,8 @@ export function SidebarDrawerOverlay(props: ComponentProps<'div'>) {
 export function SidebarDrawerContent({ className, children, ...props }: ComponentProps<'aside'>) {
   const { open, mode } = useSidebar();
   const state = open ? 'open' : 'closed';
+  // where focus came from before entering the drawer
+  const returnFocusRef = useRef<HTMLElement>(null);
 
   if (mode !== 'drawer') return;
   return (
@@ -256,6 +267,16 @@ export function SidebarDrawerContent({ className, children, ...props }: Componen
           id="nd-sidebar-mobile"
           data-state={state}
           className={cn(!present && 'invisible', className)}
+          onFocus={(e) => {
+            if (!e.currentTarget.contains(e.relatedTarget))
+              returnFocusRef.current =
+                e.relatedTarget instanceof HTMLElement ? e.relatedTarget : null;
+          }}
+          onAnimationEnd={(e) => {
+            // give focus back before the drawer becomes invisible
+            if (!open && e.currentTarget.contains(document.activeElement))
+              returnFocusRef.current?.focus();
+          }}
           {...props}
         >
           {children}

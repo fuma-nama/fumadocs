@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-core",
-  "version": "16.17.10",
+  "version": "16.18.0",
   "description": "The React.js library for building a documentation website",
   "keywords": [
     "Docs",
@@ -30,6 +30,7 @@
     "./framework": "./dist/framework/index.js",
     "./framework/astro": "./dist/framework/astro.js",
     "./framework/next": "./dist/framework/next.js",
+    "./framework/plugin": "./dist/framework/plugin.js",
     "./framework/react-router": "./dist/framework/react-router.js",
     "./framework/tanstack": "./dist/framework/tanstack.js",
     "./framework/waku": "./dist/framework/waku.js",

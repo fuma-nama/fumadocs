@@ -110,10 +110,68 @@ export const story = defineStory({
 
 Create a page at `src` to render the component, it receives the arguments from the story panel:
 
-```tsx title="app/story/my-layout/page.tsx"
+```tsx tab="Next.js" title="app/story/my-layout/page.tsx"
 import { story } from '@/components/my-layout.story';
 
 export default function Page() {
+  return <story.Frame />;
+}
+```
+
+```tsx tab="React Router" title="app/routes/story.my-layout.tsx"
+import { story } from '@/components/my-layout.story';
+
+export default function Page() {
+  return <story.Frame />;
+}
+```
+
+```ts tab="React Router" title="app/routes.ts"
+import { route, type RouteConfig } from '@react-router/dev/routes';
+
+export default [
+  // [!code ++]
+  route('story/my-layout', 'routes/story.my-layout.tsx'),
+  // ...
+] satisfies RouteConfig;
+```
+
+```tsx tab="TanStack Start" title="src/routes/story/my-layout.tsx"
+import { createFileRoute } from '@tanstack/react-router';
+import { story } from '@/components/my-layout.story';
+
+export const Route = createFileRoute('/story/my-layout')({
+  component: () => <story.Frame />,
+});
+```
+
+```tsx tab="Waku" title="src/pages/story/my-layout.tsx"
+import { story } from '@/components/my-layout.story';
+
+export default function Page() {
+  return <story.Frame />;
+}
+
+export const getConfig = async () => ({ render: 'static' }) as const;
+```
+
+```astro tab="Astro" title="src/pages/story/my-layout.astro"
+---
+import Layout from '@/layouts/Layout.astro';
+import { StoryFrame } from '@/components/story-frame';
+
+export const prerender = true;
+---
+
+<Layout title="Story">
+  <StoryFrame client:load />
+</Layout>
+```
+
+```tsx tab="Astro" title="src/components/story-frame.tsx"
+import { story } from '@/components/my-layout.story';
+
+export function StoryFrame() {
   return <story.Frame />;
 }
 ```

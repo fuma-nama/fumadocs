@@ -61,11 +61,11 @@ export function getSource() {
 }
 ```
 
-The example keeps its vault in `public/vault`, allowing Next.js to serve attachments at the URLs returned by `url`. You can keep the vault elsewhere when your app serves or uploads its attachments separately.
+The example keeps its vault in `public/vault`, allowing your framework to serve attachments at the URLs returned by `url`. You can keep the vault elsewhere when your app serves or uploads its attachments separately.
 
 Then load and render a page:
 
-```tsx title="app/docs/[[...slug]]/page.tsx"
+```tsx tab="Next.js" title="app/docs/[[...slug]]/page.tsx"
 import { getSource } from '@/lib/source';
 import { notFound } from 'next/navigation';
 import defaultMdxComponents, { createRelativeLink } from 'fumadocs-ui/mdx';
@@ -89,6 +89,200 @@ export default async function Page({ params }: PageProps<'/docs/[[...slug]]'>) {
     <DocsPage toc={toc}>
       <DocsBody>{body}</DocsBody>
     </DocsPage>
+  );
+}
+```
+
+```tsx tab="React Router" title="app/routes/docs.tsx"
+import type { Route } from './+types/docs';
+import { useMemo } from 'react';
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+import { DocsBody, DocsPage } from 'fumadocs-ui/layouts/docs/page';
+import defaultMdxComponents from 'fumadocs-ui/mdx';
+import { useFumadocsLoader } from 'fumadocs-core/source/client';
+import * as ObsidianComponents from 'fumadocs-obsidian/ui';
+import { rendererFromSerialized } from 'fumadocs-obsidian/client';
+import { getSource } from '@/lib/source';
+
+export async function loader({ params }: Route.LoaderArgs) {
+  const source = await getSource();
+  const page = source.getPage(params['*'].split('/').filter((v) => v.length > 0));
+  if (!page) throw new Response('Not found', { status: 404 });
+
+  return {
+    // the syntax tree, rendered on the client
+    render: (await page.data.load()).serialize(),
+    pageTree: await source.serializePageTree(source.getPageTree()),
+  };
+}
+
+export default function Page({ loaderData }: Route.ComponentProps) {
+  const { render, pageTree } = useFumadocsLoader(loaderData);
+  const renderer = useMemo(() => rendererFromSerialized(render), [render]);
+  const { body, toc } = renderer.renderSync({ ...defaultMdxComponents, ...ObsidianComponents });
+
+  return (
+    <DocsLayout tree={pageTree}>
+      <DocsPage toc={toc}>
+        <DocsBody>{body}</DocsBody>
+      </DocsPage>
+    </DocsLayout>
+  );
+}
+```
+
+```tsx tab="TanStack Start" title="src/routes/docs/$.tsx"
+import { createFileRoute, notFound } from '@tanstack/react-router';
+import { createServerFn } from '@tanstack/react-start';
+import { useMemo } from 'react';
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+import { DocsBody, DocsPage } from 'fumadocs-ui/layouts/docs/page';
+import defaultMdxComponents from 'fumadocs-ui/mdx';
+import { useFumadocsLoader } from 'fumadocs-core/source/client';
+import * as ObsidianComponents from 'fumadocs-obsidian/ui';
+import { rendererFromSerialized, type ObsidianRendererOptions } from 'fumadocs-obsidian/client';
+import { getSource } from '@/lib/source';
+
+// the type-level check of server function results can't verify the syntax tree,
+// register it as serializable (install `@tanstack/router-core` if it isn't resolvable)
+declare module '@tanstack/router-core' {
+  interface SerializableExtensions {
+    fumadocsObsidianRenderer: ObsidianRendererOptions;
+  }
+}
+
+export const Route = createFileRoute('/docs/$')({
+  component: Page,
+  loader: ({ params }) => serverLoader({ data: params._splat?.split('/') ?? [] }),
+});
+
+const serverLoader = createServerFn({
+  method: 'GET',
+})
+  .validator((slugs: string[]) => slugs)
+  .handler(async ({ data: slugs }) => {
+    const source = await getSource();
+    const page = source.getPage(slugs);
+    if (!page) throw notFound();
+
+    return {
+      // the syntax tree, rendered on the client
+      render: (await page.data.load()).serialize(),
+      pageTree: await source.serializePageTree(source.getPageTree()),
+    };
+  });
+
+function Page() {
+  const { render, pageTree } = useFumadocsLoader(Route.useLoaderData());
+  const renderer = useMemo(() => rendererFromSerialized(render), [render]);
+  const { body, toc } = renderer.renderSync({ ...defaultMdxComponents, ...ObsidianComponents });
+
+  return (
+    <DocsLayout tree={pageTree}>
+      <DocsPage toc={toc}>
+        <DocsBody>{body}</DocsBody>
+      </DocsPage>
+    </DocsLayout>
+  );
+}
+```
+
+```tsx tab="Waku" title="src/pages/docs/[...slugs].tsx"
+import type { PageProps } from 'waku/router';
+import { unstable_notFound } from 'waku/router/server';
+import defaultMdxComponents, { createRelativeLink } from 'fumadocs-ui/mdx';
+import * as ObsidianComponents from 'fumadocs-obsidian/ui';
+import { DocsBody, DocsPage } from 'fumadocs-ui/layouts/docs/page';
+import { getSource } from '@/lib/source';
+
+export default async function Page({ slugs }: PageProps<'/docs/[...slugs]'>) {
+  const source = await getSource();
+  const page = source.getPage(slugs);
+  if (!page) unstable_notFound();
+
+  const { body, toc } = await (
+    await page.data.load()
+  ).render({
+    ...defaultMdxComponents,
+    ...ObsidianComponents,
+    a: createRelativeLink(source, page),
+  });
+
+  return (
+    <DocsPage toc={toc}>
+      <DocsBody>{body}</DocsBody>
+    </DocsPage>
+  );
+}
+
+export const getConfig = async () => ({ render: 'dynamic' }) as const;
+```
+
+```astro tab="Astro" title="src/pages/docs/[...slug].astro"
+---
+import type { GetStaticPaths, InferGetStaticPropsType } from 'astro';
+import Layout from '@/layouts/Layout.astro';
+import { Docs } from '@/components/docs';
+import { getSource } from '@/lib/source';
+
+export const prerender = true;
+
+export const getStaticPaths = (async () => {
+  const source = await getSource();
+  return source.getPages().map((page) => ({
+    params: { slug: decodeURI(page.slugs.join('/')) || undefined },
+    props: { page },
+  }));
+}) satisfies GetStaticPaths;
+
+type Props = InferGetStaticPropsType<typeof getStaticPaths>;
+
+const { page } = Astro.props;
+const source = await getSource();
+const pageTree = await source.serializePageTree(source.getPageTree());
+const renderer = await page.data.load();
+---
+
+<Layout title={page.data.title}>
+  <Docs
+    client:load
+    pathname={Astro.url.pathname}
+    params={Astro.params}
+    tree={pageTree}
+    render={renderer.serialize()}
+  />
+</Layout>
+```
+
+```tsx tab="Astro" title="src/components/docs.tsx"
+import { useMemo } from 'react';
+import { type SerializedPageTree, useFumadocsLoader } from 'fumadocs-core/source/client';
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+import { DocsBody, DocsPage } from 'fumadocs-ui/layouts/docs/page';
+import defaultMdxComponents from 'fumadocs-ui/mdx';
+import * as ObsidianComponents from 'fumadocs-obsidian/ui';
+import { rendererFromSerialized, type ObsidianRendererOptions } from 'fumadocs-obsidian/client';
+import { Provider, type ProviderProps } from '@/components/provider';
+
+export interface DocsProps extends ProviderProps {
+  tree: SerializedPageTree;
+  // the syntax tree, rendered in the island
+  render: ObsidianRendererOptions;
+}
+
+export function Docs({ tree, render, ...props }: DocsProps) {
+  const data = useFumadocsLoader({ tree });
+  const renderer = useMemo(() => rendererFromSerialized(render), [render]);
+  const { body, toc } = renderer.renderSync({ ...defaultMdxComponents, ...ObsidianComponents });
+
+  return (
+    <Provider {...props}>
+      <DocsLayout tree={data.tree}>
+        <DocsPage toc={toc}>
+          <DocsBody>{body}</DocsBody>
+        </DocsPage>
+      </DocsLayout>
+    </Provider>
   );
 }
 ```

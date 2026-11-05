@@ -22,7 +22,7 @@ import {
   type SidebarProviderProps,
 } from './slots/sidebar';
 import { Header } from './slots/header';
-import { AIChatPanel } from '@/layouts/shared/client';
+import { AIChatPanel, SkipToContent } from '@/layouts/shared/client';
 import { cn } from '@/utils/cn';
 import { HeaderActions } from './slots/actions';
 
@@ -109,6 +109,7 @@ export function DocsLayout(props: DocsLayoutProps) {
 "sidebar main right" 1fr / var(--fd-sidebar-col) minmax(0, 1fr) auto`,
             }}
           >
+            <SkipToContent />
             <slots.sidebar.main />
             <slots.header />
             {children}

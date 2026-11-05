@@ -33,7 +33,9 @@ export const highlighter = createShikiHighlighter(() => defaultShikiFactory.getO
 
 ## Usage
 
-```ts tab="MDX" title="source.config.ts"
+`rehypeCodeFromHighlighter` is a rehype plugin. Use it in place of the default Shiki plugin of Fumadocs MDX:
+
+```ts tab="unified" title="source.config.ts"
 import { defineConfig } from 'fumadocs-mdx/config';
 import { rehypeCodeFromHighlighter } from 'fumadocs-core/mdx-plugins/rehype-code.core';
 import { highlighter } from './lib/highlighter';
@@ -43,16 +45,43 @@ export default defineConfig({
     // disable the default Shiki plugin
     rehypeCodeOptions: false,
     rehypePlugins: (v) => [
-      [
-        rehypeCodeFromHighlighter,
-        // created with the transformers of Fumadocs, like notations and icons
-        ({ transformers }) => highlighter.override({ shikiTransformers: transformers }),
-      ],
+      () =>
+        rehypeCodeFromHighlighter(
+          // created with the transformers of Fumadocs, like notations and icons
+          ({ transformers }) => highlighter.override({ shikiTransformers: transformers }),
+        ),
       ...v,
     ],
   },
 });
 ```
+
+```ts tab="Sätteri" title="source.config.ts"
+import { defineConfig, defineDocs } from 'fumadocs-mdx/config';
+import { rehypeCodeFromHighlighter } from '@fumadocs/satteri/rehype-code';
+import { highlighter } from './lib/highlighter';
+
+export const docs = defineDocs({
+  docs: {
+    compiler: 'satteri',
+  },
+});
+
+export default defineConfig({
+  satteriOptions: {
+    // disable the default Shiki plugin
+    rehypeCodeOptions: false,
+    hastPlugins: [
+      rehypeCodeFromHighlighter(
+        // created with the transformers of Fumadocs, like notations and icons
+        ({ transformers }) => highlighter.override({ shikiTransformers: transformers }),
+      ),
+    ],
+  },
+});
+```
+
+Pass it to the code block components:
 
 ```tsx tab="Server Code Block" title="components/codeblock.tsx"
 import { createServerCodeBlock } from 'fumadocs-ui/components/codeblock.rsc';
@@ -73,7 +102,7 @@ Integrations take it in their main entry:
 
 | Integration                                                                                      | Option                                                                              |
 | ------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------- |
-| [Sätteri](/docs/integrations/content/satteri-local-md)                                           | `rehypeCodeFromHighlighter()` from `@fumadocs/satteri/rehype-code` in `hastPlugins` |
+| [Local Markdown (Sätteri)](/docs/integrations/content/satteri-local-md)                          | `rehypeCodeFromHighlighter()` from `@fumadocs/satteri/rehype-code` in `hastPlugins` |
 | [Python](/docs/integrations/content/python), [Local HTML](/docs/integrations/content/local-html) | `createPython({ highlighter })`, `localHtml({ highlighter })`                       |
 | [OpenAPI](/docs/integrations/openapi), GraphQL, AsyncAPI                                         | `createOpenAPIPage({ highlighter })`                                                |
 | [Type Table](/docs/ui/components/auto-type-table)                                                | `remarkAutoTypeTable({ highlighter })`, `<AutoTypeTable highlighter />`             |

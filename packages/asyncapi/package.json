@@ -1,6 +1,6 @@
 {
   "name": "@fumadocs/asyncapi",
-  "version": "0.5.5",
+  "version": "0.6.0",
   "description": "Generate docs for your AsyncAPI spec",
   "keywords": [
     "Docs",
@@ -27,6 +27,7 @@
     "./i18n": "./dist/i18n.js",
     "./operation": "./dist/operation.js",
     "./playground": "./dist/playground.js",
+    "./press": "./dist/press.js",
     "./server": "./dist/server/index.js",
     "./ui": "./dist/ui/index.js",
     "./package.json": "./package.json",
@@ -76,7 +77,7 @@
   },
   "peerDependencies": {
     "@types/react": "*",
-    "fumadocs-core": "^16.17.8",
+    "fumadocs-core": "^16.17.11",
     "fumadocs-ui": "^16.17.8",
     "json-schema-typed": "*",
     "react": "^19.2.0",

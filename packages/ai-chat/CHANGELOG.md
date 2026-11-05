@@ -1,3 +1,9 @@
+## @fumadocs/ai-chat@0.1.3
+
+### Accessible Ask AI button
+
+- The Ask AI button announces whether the chat is open.
+
 ## @fumadocs/ai-chat@0.1.2
 
 ### Bring your own highlighter

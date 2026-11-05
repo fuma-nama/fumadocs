@@ -22,7 +22,7 @@ For more robust control, you can use lower level APIs directly.
 You can either hardcode the page tree, or write some code to generate one.
 See [Definitions of Page Tree](/docs/headless/page-tree).
 
-Pass your page tree to `DocsLayout` (usually in a `layout.tsx`):
+Pass your page tree to `DocsLayout` in your docs layout:
 
 ```tsx title="layout.tsx"
 import { DocsLayout } from 'fumadocs-ui/layouts/docs';
@@ -56,14 +56,16 @@ For docs page, it's the same logic:
 
 You may need table of contents, which can be generated on your own, or using the [`getTableOfContents`](/docs/headless/utils/get-toc) utility (Markdown/MDX only).
 
-```tsx
+Render it in the docs route of your framework:
+
+```tsx title="components/docs-page.tsx"
 import { DocsPage, DocsBody } from 'fumadocs-ui/layouts/docs/page';
 import { getPage } from './my-content-source';
-import { notFound } from 'next/navigation';
 
-export default function Page({ params }: { params: { slug?: string[] } }) {
-  const page = getPage(params.slug);
-  if (!page) notFound();
+export function Page({ slugs }: { slugs: string[] }) {
+  const page = getPage(slugs);
+  // respond with 404 using the API of your framework
+  if (!page) return null;
 
   return (
     <DocsPage toc={page.tableOfContents}>
@@ -75,15 +77,15 @@ export default function Page({ params }: { params: { slug?: string[] } }) {
 
 #### Pre-rendering [step]
 
-The mechanism for pre-rendering differs depending on your React.js framework.
+The mechanism for pre-rendering differs depending on your React framework.
 
 It's important to pre-render pages (especially the frequently visited ones) to improve initial load time.
 
-<Callout title='In Next.js'>
-
-Define the [`generateStaticParams`](https://nextjs.org/docs/app/api-reference/functions/generate-static-params) function to populate dynamic & catch-all routes.
-
-</Callout>
+- Next.js: define the [`generateStaticParams`](https://nextjs.org/docs/app/api-reference/functions/generate-static-params) function to populate dynamic & catch-all routes.
+- React Router: return the paths from `prerender` in `react-router.config.ts`.
+- TanStack Start: enable `prerender` of the `tanstackStart()` Vite plugin.
+- Waku: return `staticPaths` from the `getConfig` export of the page.
+- Astro: return the params from `getStaticPaths()` of the page.
 
 When pre-rendering pages from a remote source, make sure to optimize repeated reads during the build phase.
 For example, if you're fetching content via GitHub API, it is better to clone the repository content locally for pre-rendering.

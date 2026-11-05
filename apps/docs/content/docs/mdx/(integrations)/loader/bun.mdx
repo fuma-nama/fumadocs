@@ -26,15 +26,15 @@ Now running any script with Bun, you can access your content files directly.
 Optionally, you can re-generate the `.source` folder.
 
 It is useful when the folder could be missing,
-or you are using Vite, which defaults to generating code with Vite-specific APIs.
+or you are on a Vite framework (React Router, TanStack Start, Waku), which defaults to generating code with Vite-specific APIs.
 
-```ts title="preload.ts" tab="Next.js"
+```ts title="scripts/preload.ts" tab="Next.js"
 import { postInstall } from 'fumadocs-mdx/next';
 
 await postInstall({ configPath: 'source.config.ts' });
 ```
 
-```ts title="preload.ts" tab="Vite"
+```ts title="scripts/preload.ts" tab="Vite"
 import { postInstall } from 'fumadocs-mdx/vite';
 
 await postInstall({

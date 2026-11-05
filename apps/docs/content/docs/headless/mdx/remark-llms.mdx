@@ -3,7 +3,7 @@ title: Remark LLMs
 description: Export the Markdown of your documents for LLMs.
 ---
 
-The `remarkLLMs` plugin exports the Markdown of a document as `_markdown`, for LLMs. It keeps the Markdown you wrote, see [Stringification](/docs/headless/mdx/stringification) for how it's generated.
+The `remarkLLMs` plugin exports the Markdown of a document as `_markdown`, for LLMs. It keeps the Markdown you wrote. See [Stringification](/docs/headless/mdx/stringification) for how it's generated.
 
 ```mdx tab="Input"
 import { Callout } from 'fumadocs-ui/components/callout';
@@ -23,10 +23,12 @@ ESM is removed, headings get their IDs (see `headingIds`), and included content 
 
 ## Usage
 
-```ts title="source.config.ts" tab="Fumadocs MDX"
+`remarkLLMs` is a remark plugin. Enable it in Fumadocs MDX with `includeProcessedMarkdown`, on both unified and Sätteri:
+
+```ts title="source.config.ts"
 import { defineDocs } from 'fumadocs-mdx/config';
 
-export default defineDocs({
+export const docs = defineDocs({
   docs: {
     postprocess: {
       // `true`, or the options of `remarkLLMs`
@@ -36,16 +38,7 @@ export default defineDocs({
 });
 ```
 
-```ts tab="MDX Compiler"
-import { compile } from '@mdx-js/mdx';
-import { remarkLLMs } from 'fumadocs-core/mdx-plugins/remark-llms';
-
-await compile('...', {
-  remarkPlugins: [remarkLLMs],
-});
-```
-
-With Fumadocs MDX, read it from your pages:
+Read it from your pages:
 
 ```ts
 const markdown = await page.data.getText('processed');
@@ -75,6 +68,8 @@ JSX elements are kept as you wrote them. To change them:
 | `mdxAsPlaceholder`   | Turned into placeholders, rendered at runtime |
 | `output: 'function'` | Rendered by their components, into Markdown   |
 
+On Sätteri, `filterElement` and `mdxAsPlaceholder` are unavailable.
+
 ### Placeholders
 
 List the components to output as placeholders:
@@ -100,7 +95,7 @@ const markdown = await renderPlaceholder(await page.data.getText('processed'), {
 
 ### Function Output [#output]
 
-With `output: 'function'`, `_markdown` is a component: Markdown stays as you wrote it, JSX elements are rendered by your components.
+With `output: 'function'`, `_markdown` is a component: Markdown stays as you wrote it and JSX elements are rendered by your components.
 
 ```ts
 import type { LLMsOptions } from 'fumadocs-core/mdx-plugins/remark-llms';
@@ -112,7 +107,7 @@ const llmsOptions: LLMsOptions = {
 
 Render it with your components:
 
-```tsx tab="Fumadocs MDX"
+```tsx
 import { getMDXComponents } from '@/components/mdx';
 
 const markdown = await page.data.getText('processed', {
@@ -120,15 +115,7 @@ const markdown = await page.data.getText('processed', {
 });
 ```
 
-```tsx tab="MDX Compiler"
-import { renderToMarkdown } from 'fumadocs-core/server';
-import { getMDXComponents } from '@/components/mdx';
-import { _markdown as Markdown } from './page.mdx';
-
-const markdown = await renderToMarkdown(<Markdown components={getMDXComponents()} />);
-```
-
-Components define their Markdown form with `asMarkdown()`, others are kept as JSX, see [Markdown Rendering](/docs/headless/utils/markdown).
+Components define their Markdown form with `asMarkdown()`. Others are kept as JSX. See [Markdown Rendering](/docs/headless/utils/markdown).
 
 ## Options
 

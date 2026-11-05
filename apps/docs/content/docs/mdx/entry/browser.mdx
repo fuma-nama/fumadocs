@@ -61,13 +61,44 @@ function Page() {
 
 ## Examples
 
-The examples below are for non-RSC usage. Prefer RSC when possible for better client performance.
+The examples below are for non-RSC usage on React Router and TanStack Start. On Next.js and Waku, prefer RSC with the [server entry](/docs/mdx/entry/server) for better client performance.
 
-The example apps in our repository use the [Macro API](/docs/mdx/macro) for this instead, they are a good reference for a complete setup.
+The example apps in our repository use the [Macro API](/docs/mdx/macro) for this instead. They are a good reference for a complete setup.
 
-### Tanstack Start
+```tsx tab="React Router" title="app/routes/docs.tsx"
+import type { Route } from './+types/docs';
+import { source } from '@/lib/source';
+import browserCollections from 'collections/browser';
 
-```tsx title="src/routes/docs/$.tsx"
+export async function loader({ params }: Route.LoaderArgs) {
+  const slugs = params['*'].split('/').filter((v) => v.length > 0);
+  const page = source.getPage(slugs);
+  if (!page) throw new Response('Not found', { status: 404 });
+
+  return {
+    path: page.path,
+  };
+}
+
+const clientLoader = browserCollections.docs.createClientLoader({
+  component({ frontmatter, default: MDX }) {
+    return (
+      <div className="prose">
+        <h1>{frontmatter.title}</h1>
+        <MDX />
+      </div>
+    );
+  },
+});
+
+export default function Page(props: Route.ComponentProps) {
+  const { path } = props.loaderData;
+
+  return clientLoader.useContent(path);
+}
+```
+
+```tsx tab="TanStack Start" title="src/routes/docs/$.tsx"
 import { createFileRoute, notFound } from '@tanstack/react-router';
 import { createServerFn } from '@tanstack/react-start';
 import { source } from '@/lib/source';
@@ -110,40 +141,5 @@ function Page() {
   const data = Route.useLoaderData();
 
   return clientLoader.useContent(data.path);
-}
-```
-
-### React Router
-
-```tsx
-import type { Route } from './+types/docs';
-import { source } from '@/lib/source';
-import browserCollections from 'collections/browser';
-
-export async function loader({ params }: Route.LoaderArgs) {
-  const slugs = params['*'].split('/').filter((v) => v.length > 0);
-  const page = source.getPage(slugs);
-  if (!page) throw new Response('Not found', { status: 404 });
-
-  return {
-    path: page.path,
-  };
-}
-
-const clientLoader = browserCollections.docs.createClientLoader({
-  component({ frontmatter, default: MDX }) {
-    return (
-      <div className="prose">
-        <h1>{frontmatter.title}</h1>
-        <MDX />
-      </div>
-    );
-  },
-});
-
-export default function Page(props: Route.ComponentProps) {
-  const { path } = props.loaderData;
-
-  return clientLoader.useContent(path);
 }
 ```

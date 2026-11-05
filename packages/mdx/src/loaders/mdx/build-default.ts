@@ -4,7 +4,10 @@ import type { Core } from '@/core';
 import { createProcessor, type ProcessorOptions } from '@mdx-js/mdx';
 import { remarkInclude } from 'fumadocs-core/mdx-plugins/remark-include';
 import { VFile } from 'vfile';
+import type { Transformer } from 'unified';
+import type { Nodes, Root, RootContent } from 'mdast';
 import { type PostprocessOptions, remarkPostprocess } from './remark-postprocess';
+import { walk } from './mdast-utils';
 import { resolveLastModified } from './last-modified';
 import type { BuildMDXOptions } from './build';
 
@@ -30,13 +33,21 @@ declare module 'vfile' {
 export async function buildJSMDX(
   core: Core,
   collection: DocCollectionItem | undefined,
-  { filePath, frontmatter, source, _compiler, environment, isDevelopment }: BuildMDXOptions,
+  {
+    filePath,
+    frontmatter,
+    source,
+    _compiler,
+    environment,
+    isDevelopment,
+    importsOnly = false,
+  }: BuildMDXOptions,
 ) {
   const mdxOptions = await getMDXOptions(core.getConfig(), collection, environment);
 
   function getProcessor(format: 'md' | 'mdx') {
     const cache = core.cache as Map<string, Processor>;
-    const key = `build-mdx:${collection?.name ?? 'global'}:${format}`;
+    const key = `build-mdx:${collection?.name ?? 'global'}:${format}:${importsOnly}`;
     let processor = cache.get(key);
 
     if (!processor) {
@@ -52,7 +63,7 @@ export async function buildJSMDX(
         remarkPlugins: [
           [remarkInclude, { getProcessor }],
           ...(mdxOptions.remarkPlugins ?? []),
-          [remarkPostprocess, postprocessOptions],
+          importsOnly ? remarkImportsOnly : [remarkPostprocess, postprocessOptions],
         ],
         format,
       });
@@ -84,6 +95,22 @@ export async function buildJSMDX(
 
   const out = await getProcessor(filePath.endsWith('.mdx') ? 'mdx' : 'md').process(vfile);
   return { code: String(out.value), map: out.map };
+}
+
+/**
+ * Keep only the ESM, after the remark plugins that may add imports, so the other plugins have nothing to process.
+ */
+function remarkImportsOnly(): Transformer<Root, Root> {
+  return (tree) => {
+    const esm: RootContent[] = [];
+    // ESM can be nested, e.g. from `<include>`
+    walk<Nodes>(tree, (node) => {
+      if (node.type !== 'mdxjsEsm') return;
+      esm.push(node);
+      return 'skip';
+    });
+    tree.children = esm;
+  };
 }
 
 const mdxOptionsCache = new WeakMap<

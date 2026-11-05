@@ -7,6 +7,8 @@ export default defineConfig({
   vite: {
     resolve: {
       tsconfigPaths: true,
+      // workspace packages may link another instance of `waku`, the bundle must hold only one
+      dedupe: ['waku'],
     },
 
     plugins: [

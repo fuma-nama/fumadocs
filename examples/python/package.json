@@ -1,12 +1,12 @@
 {
   "name": "example-python",
-  "version": "0.0.51",
+  "version": "0.0.52",
   "private": true,
   "scripts": {
     "build": "next build",
     "dev": "next dev",
     "start": "next start",
-    "python:generate": "pip3 install ./node_modules/fumadocs-python && fumapy-generate httpx",
+    "python:generate": "pip3 install ./node_modules/fumadocs-python tomli && fumapy-generate tomli",
     "types:check": "next typegen && tsc --noEmit"
   },
   "dependencies": {

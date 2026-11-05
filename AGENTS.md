@@ -19,7 +19,7 @@ A published docs framework: `fumadocs-core` (headless), two UI packages, content
 - No backward-compat layers, fallbacks or migrations, except: deprecated APIs keep working in full, and public APIs with consumers stay compatible through a redesign. Legacy entry points are thin wrappers over one main function, never a parallel path.
 - No chained `map`/`filter`/`flatMap`; mind time and space complexity.
 - React: read react.dev, don't guess. Derive during render, act in event handlers, `useSyncExternalStore` for external stores and client-only checks, `useEffectEvent` instead of lint-disabled deps, ref callbacks with cleanup for DOM resources, `use()` of a cached promise under `<Suspense>` for async data. Create-once objects go in `useMemo(() => ..., [])`.
-- One name per concept. No parallel lists of the same things, renamed duplicates, positional tuples, look-alike names or import aliases dodging a local name.
+- One name per concept. No parallel lists of the same things, renamed duplicates, positional tuples or look-alike names. When two things share a name (like the loader plugin and the framework plugin of `fumadocs-openapi`), keep both names clean by scoping them (`loaderPlugin()` of the object that owns it, the default export of the module that owns it) rather than inventing messy local names.
 - Types follow the structure of the code. Before writing one, work out which module owns the concept and how it relates to other types (it extends a contract, a field is another type's member, an option passes through to a library). Then express that relation:
   - derive with `extends`, `Pick`/`Omit` and indexed access, and reference the upstream exported type (bump the peer range if needed), so a change to the source type reaches every dependent type;
   - keep each type in the module that owns its concept (a plugin contract in the runtime module, options next to the integration), so its location tells who owns it. No `types.ts` collecting contracts.
@@ -59,7 +59,6 @@ Fumadocs runs on Next.js and Waku (RSC), React Router and TanStack Start (with a
 ## Internationalization
 
 - Every UI string goes through `useTranslations({ note })` from `@fuma-translate/react`, e.g. `t('Close Banner', { note: 'aria-label' })`. The build regenerates `src/.translations/{index.ts,keys.json}` in each UI package; commit them in both packages.
-- Astro plugins with UI declare their strings through the plugin's `translations` field.
 - Routing features must handle `fumadocs-core/i18n` setups: every `hideLocale` mode, the locale in generated URLs (search, Markdown, OG images, sitemaps) and per-locale page trees. Check against `examples/i18n`, `react-router-i18n`, `tanstack-start-i18n`, `waku-i18n` and `astro-i18n`.
 
 ## Accessibility
@@ -78,18 +77,25 @@ Fumadocs runs on Next.js and Waku (RSC), React Router and TanStack Start (with a
 - A vendored file may only import files matched by its registry's `files` rules or public exports of other packages, type-only imports included. Tests, `tsc` and lint don't catch this: run `node ./scripts/pre-build.ts` in `apps/docs` after changing imports in vendored UI.
 - CLI features (`packages/cli/src/features`) support every framework in `src/project/index.ts`, including Astro and static output, or return the reason from `supports()`.
 - Don't run `fumadocs add` non-interactively in the repo: its prompt defaults to installing dependencies and rewrites the lockfile. Test installs through `FumadocsComponentInstaller` with a local registry connector from a scratch script.
-- Templates in `packages/create-app/template` are synced from `examples/` with `pnpm --filter create-fumadocs-app sync`: change the example, then sync. `template/astro` is maintained by hand (the setup of `fumadocs feature docs`).
+- Templates in `packages/create-app/template` are synced from `examples/` with `pnpm --filter create-fumadocs-app sync`: change the example, then sync.
+
+## Framework plugins
+
+`fumadocs-core/framework/plugin` is the plugin API of integrations. Like Vite plugins, each is the default export of the integration's `./press` subpath, a function named `<name>Plugin` (`export default function openapiPlugin()` in `fumadocs-openapi/press`), with its option types as named exports. Fumadocs ships no engine for it: Fumapress (`@fumapress/core`, in its own repo) runs the plugins and extends the API.
+
+- Plugins use only that API, never Fumapress types. Dependencies go one way, Fumapress to Fumadocs.
+- Extend the API only when no existing hook fits, and keep it complete on its own.
+- Test plugins without an engine: a `PluginContext` object and a loader built from `configureLoader`, hooks called with `.call(ctx, ...)`.
 
 ## Astro integration
 
-`packages/astro` (`@fumadocs/astro`) aims at Fumapress parity with an Astro-native setup. Every integration either works in Astro as-is or gets a plugin in `packages/astro/src/plugins`.
+`packages/astro` (`@fumadocs/astro`) is the low-level integration: it compiles content collections with Fumadocs and renders their MDX as React islands, users own their routes like on React Router. The managed runtime with plugins is `@fumapress/astro`, in the Fumapress repo.
 
-- Plugins use the `Plugin` contract in `src/app.ts` (`routes`, `getBody`, `getText`, `transformPage`, `middleware`, `translations`). Extend that contract only when no existing hook fits.
-- Overrides go through existing concepts: page components by name in the user's MDX components module, search through the layout module's `useSearch` provider hook or `SearchDialog`, routes through users' own Astro routes. Rejected before, don't reintroduce: per-plugin layout exports, a `searchEngine` field, `oauth`/`proxy` plugin options, plugins with their own blog/changelog UI.
+- Modules imported by the content island (the MDX components module and what it imports) must not import anything that imports the source: it puts every page in a cycle with the source and Astro's build slows superlinearly.
+- MDX components hydrate by name from the collection's `components` module, and their props must be serializable.
+- Page Markdown lives at `<page>.md`.
 - Search composes a per-provider hook from `fumadocs-core/search/client` (`useStaticSearch`, `useFetchSearch`, ...) with the dialog parts of `fumadocs-ui/components/dialog/search`. Never pass `SearchClient`s or route through `experimental_useSearch` when a provider hook exists.
-- Page Markdown lives at `<page>.md`. Read the equivalent Fumapress plugin before porting one.
-- Compiled MDX must not import `app.ts` (it puts every page in a cycle with the source and Astro's build slows superlinearly).
-- Plugins must stay flexible across setups: i18n with `hideLocale`, `base`/`trailingSlash`/`build.format`, static versus server, custom `page` module or layouts, custom search, `multiple()` sources, users' own pages, overriding or skipping plugin output, typed frontmatter.
+- Check changes across setups: i18n with `hideLocale`, `base`/`trailingSlash`/`build.format`, static versus an adapter.
 - Astro needs Node >= 22.23.4.
 
 ## Docs
@@ -99,7 +105,8 @@ Content is in `apps/docs/content/docs`; navigation is `meta.json`.
 - Concise, progressive disclosure. Show API usage as type-checked code blocks, not prose. Keep every block a reader copies, cut caveats the example already avoids.
 - Explain each page on its own terms. No redundant tables that repeat the sidebar or another page. Link a noun phrase that names its target, at most one or two links per short paragraph. Files of one step go in one code block tab group (`tab="<path>"`). A single file is a titled code block, not tabs.
 - No em-dashes or AI filler. Plain sentences, no comma splices.
-- The Astro root (`docs/astro`) is the entry for Astro: its pages link to shared guides, and shared guides carry no Astro callouts or links back.
+- Shared guides treat Next.js, React Router, TanStack Start, Waku and Astro alike: per-framework code gets a tab for each, or one sentence says why a framework is left out.
+- Markdown plugin pages split only `unified` and `Sätteri` tabs, both as Fumadocs MDX `source.config.ts`, and say whether it's a remark or rehype plugin. Don't name other setups.
 - Prefer showing a composition in docs over adding a layout-only component.
 - `pnpm lint` in `apps/docs` imports everything reachable from MDX in plain Node: no `next/*` imports there (use `fumadocs-core/framework`, `React.lazy`).
 

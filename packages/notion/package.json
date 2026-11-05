@@ -1,6 +1,6 @@
 {
   "name": "@fumadocs/notion",
-  "version": "0.2.4",
+  "version": "0.3.0",
   "description": "The official Notion integration for Fumadocs",
   "keywords": [
     "Docs",
@@ -40,6 +40,10 @@
       "types": "./dist/client.d.ts",
       "import": "./dist/client.js"
     },
+    "./press": {
+      "types": "./dist/press.d.ts",
+      "import": "./dist/press.js"
+    },
     "./css/*": "./css/*",
     "./package.json": "./package.json"
   },
@@ -77,7 +81,7 @@
   "peerDependencies": {
     "@notionhq/client": "^5.23.0",
     "@types/react": "*",
-    "fumadocs-core": "^16.8.0",
+    "fumadocs-core": "^16.17.11",
     "fumadocs-ui": "^16.8.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"

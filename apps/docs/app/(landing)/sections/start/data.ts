@@ -40,6 +40,7 @@ const templates: Option[] = [
   { label: 'React Router SPA: Fumadocs MDX (not RSC)', hint: SPA_HINT },
   { label: 'Tanstack Start: Fumadocs MDX (not RSC)' },
   { label: 'Tanstack Start SPA: Fumadocs MDX (not RSC)', hint: SPA_HINT },
+  { label: 'Astro: Content Collections' },
 ];
 
 const linters: Option[] = [

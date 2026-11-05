@@ -121,7 +121,8 @@ export interface LoaderOutput<Config extends LoaderConfig = LoaderConfig> {
    *
    * - relative file paths, like `./my/page.mdx`.
    */
-  resolveHref: (href: string, parent: Config['page']) => string;
+  // a method: its page parameter would make a typed loader unassignable to `LoaderOutput`
+  resolveHref(href: string, parent: Config['page']): string;
 
   /**
    * @internal

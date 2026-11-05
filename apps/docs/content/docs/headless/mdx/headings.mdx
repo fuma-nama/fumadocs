@@ -5,31 +5,7 @@ description: Process headings from your document
 
 ## Remark Heading
 
-Applies ids to headings.
-
-```ts title="MDX Compiler"
-import { compile } from '@mdx-js/mdx';
-import { remarkHeading } from 'fumadocs-core/mdx-plugins';
-
-await compile('...', {
-  remarkPlugins: [remarkHeading],
-});
-```
-
-> This plugin is included by default on Fumadocs MDX.
-
-### Extract TOC
-
-By default, it extracts the headings (table of contents) of a document to `vfile.data.toc`.
-You can disable it with:
-
-```ts
-import { remarkHeading } from 'fumadocs-core/mdx-plugins';
-
-export default {
-  remarkPlugins: [[remarkHeading, { generateToc: false }]],
-};
-```
+A remark plugin that applies ids to headings. Fumadocs MDX enables it by default. Pass options with `remarkHeadingOptions`.
 
 ### Custom Ids [#custom-heading-id]
 
@@ -39,27 +15,48 @@ You can customize the heading id with `[#slug]`.
 # heading [#slug]
 ```
 
-### Output
+To disable it:
 
-An array of `TOCItemType`.
+```ts tab="unified" title="source.config.ts"
+import { defineConfig } from 'fumadocs-mdx/config';
+
+export default defineConfig({
+  mdxOptions: {
+    remarkHeadingOptions: {
+      customId: false,
+    },
+  },
+});
+```
+
+```ts tab="Sätteri" title="source.config.ts"
+import { defineConfig, defineDocs } from 'fumadocs-mdx/config';
+
+export const docs = defineDocs({
+  docs: { compiler: 'satteri' },
+});
+
+export default defineConfig({
+  satteriOptions: {
+    remarkHeadingOptions: {
+      customId: false,
+    },
+  },
+});
+```
+
+### Extract TOC
+
+By default, it also extracts the headings (table of contents) of a document to the file data as `toc`, an array of `TOCItemType`.
+Fumadocs MDX turns it off with `generateToc: false` and exports the table of contents with [Rehype TOC](#rehype-toc) instead.
 
 <auto-type-table path="../props.ts" name="TOCItemType" />
 
 ## Rehype TOC
 
-Exports table of contents (an array of `TOCItemType`), it allows JSX nodes which is not possible with a Remark plugin.
+A rehype plugin that exports the table of contents (an array of `TOCItemType`). Unlike Remark Heading, it keeps JSX nodes in heading titles.
 
-> It requires MDX.js.
-
-### Usage
-
-```ts
-import { rehypeToc } from 'fumadocs-core/mdx-plugins';
-
-export default {
-  rehypePlugins: [rehypeToc],
-};
-```
+Fumadocs MDX enables it by default. On Sätteri, pass options with `rehypeTocOptions`.
 
 ### Output
 

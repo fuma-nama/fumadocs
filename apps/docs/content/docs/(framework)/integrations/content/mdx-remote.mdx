@@ -110,7 +110,7 @@ export default function Page({ loaderData }: Route.ComponentProps) {
 }
 ```
 
-```tsx tab="Tanstack Start" title="src/routes/docs/$.tsx"
+```tsx tab="TanStack Start" title="src/routes/docs/$.tsx"
 import { createFileRoute } from '@tanstack/react-router';
 import { createServerFn } from '@tanstack/react-start';
 import { useMemo } from 'react';
@@ -185,6 +185,74 @@ export async function getConfig() {
     // the slugs of all pages
     staticPaths: [[], ['getting-started']],
   } as const;
+}
+```
+
+```astro tab="Astro" title="src/pages/docs/[...slug].astro"
+---
+import type { GetStaticPaths, InferGetStaticPropsType } from 'astro';
+import Layout from '@/layouts/Layout.astro';
+import { Docs } from '@/components/docs';
+import { compiler } from '@/lib/compiler';
+import { getPage, source } from '@/lib/source';
+
+export const prerender = true;
+
+export const getStaticPaths = (() => {
+  return source.getPages().map((page) => ({
+    params: { slug: decodeURI(page.slugs.join('/')) || undefined },
+    props: { page },
+  }));
+}) satisfies GetStaticPaths;
+
+type Props = InferGetStaticPropsType<typeof getStaticPaths>;
+
+const { page } = Astro.props;
+const pageTree = await source.serializePageTree(source.getPageTree());
+// compile to JavaScript, it runs in the island
+const compiled = String(await compiler.compileFile(getPage(page.slugs).content));
+---
+
+<Layout title={page.data.title}>
+  <Docs
+    client:load
+    pathname={Astro.url.pathname}
+    params={Astro.params}
+    tree={pageTree}
+    compiled={compiled}
+  />
+</Layout>
+```
+
+```tsx tab="Astro" title="src/components/docs.tsx"
+import { useMemo } from 'react';
+import { executeMdxSync } from '@fumadocs/mdx-remote/client';
+import { type SerializedPageTree, useFumadocsLoader } from 'fumadocs-core/source/client';
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+import { DocsBody, DocsPage } from 'fumadocs-ui/layouts/docs/page';
+import { Provider, type ProviderProps } from '@/components/provider';
+import { getMDXComponents } from '@/components/mdx';
+
+export interface DocsProps extends ProviderProps {
+  tree: SerializedPageTree;
+  compiled: string;
+}
+
+export function Docs({ tree, compiled, ...props }: DocsProps) {
+  const data = useFumadocsLoader({ tree });
+  const { default: MdxContent, toc } = useMemo(() => executeMdxSync(compiled), [compiled]);
+
+  return (
+    <Provider {...props}>
+      <DocsLayout tree={data.tree}>
+        <DocsPage toc={toc}>
+          <DocsBody>
+            <MdxContent components={getMDXComponents()} />
+          </DocsBody>
+        </DocsPage>
+      </DocsLayout>
+    </Provider>
+  );
 }
 ```
 

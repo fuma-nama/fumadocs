@@ -5,6 +5,8 @@ description: Use Fumadocs MDX with Vite
 
 ## Setup
 
+The plugin works with React Router, TanStack Start, Waku and other Vite apps. Next.js has [its own setup](/docs/mdx/next). Astro uses its own content collections with [`@fumadocs/astro`](/docs/manual-installation/astro) instead of Fumadocs MDX.
+
 <div className="fd-steps [&_h3]:fd-step">
 
 ### Installation
@@ -15,15 +17,30 @@ npm i fumadocs-mdx fumadocs-core @types/mdx
 
 Add the Vite plugin:
 
-```ts tab="Vite" title="vite.config.ts"
+```ts tab="React Router" title="vite.config.ts"
 import { defineConfig } from 'vite';
+import { reactRouter } from '@react-router/dev/vite';
 import { fumadocsMdx } from 'fumadocs-mdx/vite';
 
 export default defineConfig({
   plugins: [
-    // [!code ++]
-    fumadocsMdx(),
-    // ...
+    fumadocsMdx(), // [!code ++]
+    reactRouter(),
+  ],
+});
+```
+
+```ts tab="TanStack Start" title="vite.config.ts"
+import { defineConfig } from 'vite';
+import { tanstackStart } from '@tanstack/react-start/plugin/vite';
+import react from '@vitejs/plugin-react';
+import { fumadocsMdx } from 'fumadocs-mdx/vite';
+
+export default defineConfig({
+  plugins: [
+    fumadocsMdx(), // [!code ++]
+    tanstackStart(),
+    react(),
   ],
 });
 ```
@@ -50,7 +67,7 @@ export default defineConfig({
 
 Create a `lib/source.ts` file:
 
-```ts title="app/lib/source.ts"
+```ts title="lib/source.ts"
 import { defineDocs } from 'fumadocs-mdx/macro';
 import { loader } from 'fumadocs-core/source';
 

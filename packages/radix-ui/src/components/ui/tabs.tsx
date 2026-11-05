@@ -188,14 +188,13 @@ export function Tabs({
 
 export function TabsContent({
   value,
+  id,
   ref,
   ...props
 }: ComponentProps<typeof Primitive.TabsContent>) {
   const { valueToIdMap, panels } = useTabContext();
-
-  if (props.id) {
-    valueToIdMap.set(value, props.id);
-  }
+  // `id` is the tab's URL hash, the panel keeps the primitive's id that triggers point `aria-controls` at
+  if (id) valueToIdMap.set(value, id);
 
   return (
     <Primitive.TabsContent

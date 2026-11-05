@@ -56,10 +56,9 @@ export interface TranslationsAPI<Languages extends string = string, Keys extends
 
   config: I18nConfig<Languages>;
 
-  get: {
-    (lang: Languages): Partial<Record<Keys, string>>;
-    (lang: string): Partial<Record<Keys, string>> | undefined;
-  };
+  // methods: their language parameter would make the API of some languages unassignable to the API of any language
+  get(lang: Languages): Partial<Record<Keys, string>>;
+  get(lang: string): Partial<Record<Keys, string>> | undefined;
   /** register allowed translation keys */
   extend<const NewKeys extends string>(
     extension: TranslationExtension<NewKeys>,
@@ -79,7 +78,7 @@ export interface TranslationsAPI<Languages extends string = string, Keys extends
     },
   ): TranslationsAPI<Languages, Keys>;
   /** add language pack */
-  preset: (lang: Languages, preset: TranslationPreset<Keys>) => TranslationsAPI<Languages, Keys>;
+  preset(lang: Languages, preset: TranslationPreset<Keys>): TranslationsAPI<Languages, Keys>;
 }
 
 export interface I18nAPI<Languages extends string = string> extends I18nConfig<Languages> {
@@ -156,7 +155,7 @@ export function defineI18n<const Languages extends string>(
           return this as never;
         },
         preset(lang, preset) {
-          Object.assign(translations[lang], preset.value);
+          Object.assign((translations[lang] ??= {}), preset.value);
           return this as never;
         },
       } as TranslationsAPI<string> as never;
