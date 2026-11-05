@@ -1,3 +1,18 @@
+## @fumadocs/cli@1.8.0
+
+### Astro with your own routes
+
+- Refactored: set up Astro with your own routes, layout and provider again, the managed setup moved to `@fumapress/astro`.
+- On Astro, `og`, `llms`, `search`, `feedback` and `customise` write to your routes and components instead of `src/fumadocs.config.ts`.
+- On Astro, `llms` serves the Markdown of pages at `<page>.md`, `/docs/index.md` for the root page.
+- On Astro, routes that need a server (`mcp`, `epub`, server search) render on request with `output: 'static'` too.
+- On Astro, generated and template routes build pages whose file names need URI encoding, like spaces.
+- Removed the managed setup helpers: `ensureAstroOption` of `@fumadocs/cli/codemod`, `requiresManaged`, `requiresManagedMarkdown`, `addAstroPlugin`, `astroModule`, `astroModuleFile` and `addDocsLlms` of the features.
+
+### Base UI installs
+
+- Installed components import Base UI as `fumadocs-ui`, without adding a second `@fumadocs/base-ui` dependency.
+
 ## @fumadocs/cli@1.7.7
 
 ### Managed setup of Astro

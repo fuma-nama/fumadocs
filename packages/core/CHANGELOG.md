@@ -1,3 +1,33 @@
+## fumadocs-core@16.18.0
+
+### Typed loaders fit `LoaderOutput`
+
+- A loader typed by its content source and the translations of some languages are assignable to `LoaderOutput` and `TranslationsAPI`.
+
+### Accessibility fixes
+
+- Docs layouts render a visually hidden "Skip to Content" link as the first focusable element.
+- Escape closes the mobile sidebar drawer, and focus returns to the trigger when the drawer closes.
+- The heading "Copy Anchor Link" button is visible on keyboard focus.
+- A `Tab` `id` only links to the tab by URL hash, panels keep the ids that tab triggers point `aria-controls` at.
+- Multi-word tab labels produce ids without spaces.
+- TOC `single` mode highlights the clicked item and no longer skips headings while scrolling.
+- `DocsPage` `editOnGithub` defaults `sha` to `main` as documented.
+
+### Framework plugins
+
+- Added `fumadocs-core/framework/plugin`: the plugin API for integrations to add routes and page content to frameworks.
+- Integrations export their plugin as the default export of `/press`: `openapiPlugin()`, `asyncapiPlugin()`, `graphqlPlugin()`, `notionPlugin()`, `obsidianPlugin()` and `sanityPlugin()`.
+- The pages of `staticSource()` and `dynamicSource()` of OpenAPI, AsyncAPI and GraphQL have `full: true` in their page data, like generated files.
+
+### Smaller static Flexsearch index
+
+- The exported Flexsearch index is about 80% smaller, search results are unchanged.
+
+### `renderUrl` option of `llms()`
+
+- `llms()` accepts `renderUrl` to change the links of pages.
+
 ## fumadocs-core@16.17.9
 
 ### Copy the page tree on deserialization

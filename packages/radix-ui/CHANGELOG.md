@@ -1,3 +1,23 @@
+## fumadocs-ui@16.18.0
+
+### Hidden GitHub navigation icon
+
+- Hide the decorative GitHub navigation icon from assistive technology to avoid an unnamed SVG image in the accessibility tree. The link retains its GitHub label.
+
+### Accessibility fixes
+
+- Docs layouts render a visually hidden "Skip to Content" link as the first focusable element.
+- Escape closes the mobile sidebar drawer, and focus returns to the trigger when the drawer closes.
+- The heading "Copy Anchor Link" button is visible on keyboard focus.
+- A `Tab` `id` only links to the tab by URL hash, panels keep the ids that tab triggers point `aria-controls` at.
+- Multi-word tab labels produce ids without spaces.
+- TOC `single` mode highlights the clicked item and no longer skips headings while scrolling.
+- `DocsPage` `editOnGithub` defaults `sha` to `main` as documented.
+
+### Language switcher closes on selection
+
+- The language switcher closes after choosing a language.
+
 ## fumadocs-ui@16.17.10
 
 ### Cheaper restyles on DOM changes in layouts
