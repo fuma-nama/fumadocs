@@ -15,10 +15,14 @@ import { createFromSource } from 'fumadocs-core/search/server';
 import { docsLlms, ${ref} } from '@/lib/source';
 
 const handler = createMcpHandler(() => {
-  const mcp = new McpServer({
-    name: 'docs',
-    version: '1.0.0',
-  });
+  const mcp = new McpServer(
+    {
+      name: 'docs',
+      version: '1.0.0',
+    },
+    // the tools never change, a stream to watch them would hold a serverless function open
+    { capabilities: { tools: { listChanged: false } } },
+  );
 
   registerSourceTools(mcp, ${ref}, docsLlms);
   registerSearchTool(mcp, createFromSource(${ref}));

@@ -4,3 +4,4 @@ content/docs/openapi/**/*.mdx
 
 public/r
 public/registry
+.type-tables

@@ -10,6 +10,10 @@ const markdownVersions = new Map([
   ['/showcase', '/showcase.md'],
 ]);
 
+export const config = {
+  matcher: ['/', '/showcase', '/docs.md', '/docs.mdx', '/docs/:path*'],
+};
+
 export default function proxy(request: NextRequest) {
   const result = rewriteMd(request.nextUrl.pathname);
   if (result) {

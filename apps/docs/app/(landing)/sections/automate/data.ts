@@ -16,6 +16,10 @@ ${EDIT}
 export const BEFORE = SOURCE.replace(`${EDIT}\n`, '');
 export const EDIT_LINE = SOURCE.split('\n').indexOf(EDIT);
 
+/** the type's name in the source, and where the build keeps the tables generated from it */
+export const TYPE_NAME = 'ButtonProps';
+export const TYPE_TABLES = '.type-tables';
+
 /** the page the source documents */
 export const PAGE = { title: 'Button', description: 'A button, or a link with href.' };
 
