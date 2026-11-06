@@ -7,7 +7,7 @@ import { Edit } from 'lucide-react';
 import { Footer } from './slots/footer';
 import { Breadcrumb } from './slots/breadcrumb';
 import { TOC, type TOCProps, TOCProvider } from './slots/toc';
-import { TOCItemType } from 'fumadocs-core/toc';
+import type { TOCItemType } from 'fumadocs-core/toc';
 
 export interface DocsPageProps extends ComponentProps<'article'> {
   toc?: TOCItemType[];

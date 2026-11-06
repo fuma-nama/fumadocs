@@ -54,15 +54,15 @@ function ThumbTrack({ items, thumbBox }: { items: Primitive.TOCItemType[]; thumb
       const update = (infos: Primitive.TOCItemInfo[]) => {
         let start = -1;
         let end = -1;
-        for (let i = 0; i < infos.length; i++) {
-          if (!infos[i].active || !positions.has(infos[i].original.url)) continue;
+        for (const [i, info] of infos.entries()) {
+          if (!info.active || !positions.has(info.original.url)) continue;
           if (start === -1) start = i;
           end = i;
         }
         if (start === -1) return;
 
-        const first = positions.get(infos[start].original.url)!;
-        const last = positions.get(infos[end].original.url)!;
+        const first = positions.get(infos[start]!.original.url)!;
+        const last = positions.get(infos[end]!.original.url)!;
         svg.style.clipPath = `polygon(0 ${first.top}px, 100% ${first.top}px, 100% ${last.bottom}px, 0 ${last.bottom}px)`;
         if (!thumb) return;
 
@@ -73,7 +73,7 @@ function ThumbTrack({ items, thumbBox }: { items: Primitive.TOCItemType[]; thumb
             (previous.start === start && previous.end === end && previous.isUp));
         previous = { start, end, isUp };
         thumb.style.offsetDistance = `${isUp ? first.offset : last.offset + last.bottom - last.top}px`;
-        thumb.style.opacity = infos[isUp ? start : end].original._step === undefined ? '1' : '0';
+        thumb.style.opacity = infos[isUp ? start : end]!.original._step === undefined ? '1' : '0';
       };
 
       // called after layout and before paint, so the track never lags behind the items
@@ -123,7 +123,7 @@ function ThumbTrack({ items, thumbBox }: { items: Primitive.TOCItemType[]; thumb
           if (item._step === undefined) continue;
           const position = positions.get(item.url);
           const g = steps[step++];
-          if (position)
+          if (position && g)
             g.setAttribute(
               'transform',
               `translate(${position.x}, ${(position.top + position.bottom) / 2})`,
@@ -199,8 +199,8 @@ export function TOCItem({
     const isLast = index === items.length - 1;
 
     const l1 = getLineOffset(item.depth);
-    const l0 = isFirst ? l1 : getLineOffset(items[index - 1].depth);
-    const l2 = isLast ? l1 : getLineOffset(items[index + 1].depth);
+    const l0 = getLineOffset(items[index - 1]?.depth ?? item.depth);
+    const l2 = getLineOffset(items[index + 1]?.depth ?? item.depth);
 
     return {
       isFirst,

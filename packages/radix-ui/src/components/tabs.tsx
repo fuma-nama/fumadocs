@@ -78,7 +78,7 @@ export function Tabs({
   items,
   label,
   defaultIndex = 0,
-  defaultValue = items ? escapeValue(items[defaultIndex]) : undefined,
+  defaultValue = items ? escapeValue(items[defaultIndex]!) : undefined,
   ...props
 }: TabsProps) {
   const collection = useMemo<CollectionKey[]>(() => [], []);
