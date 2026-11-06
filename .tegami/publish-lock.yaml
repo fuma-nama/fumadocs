@@ -1,51 +1,31 @@
 core:changelogs:
-  - content: "---\npackages:\n  \"@fumadocs/astro\":\n    type: patch\n  fumadocs-ui:\n    type: patch\n  \"@fumadocs/base-ui\":\n    type: patch\n---\n\n### `components` of `<Content />` on Astro\n\n- The `components` of `<Content />` render like in Astro MDX, `.astro` components included, so `createRelativeLink()` resolves relative links.\n"
-    filename: 2026-11-05-astro-relative-links.md
-    v: 0.0.0
-  - content: "---\npackages:\n  fumadocs-ui:\n    type: patch\n  \"@fumadocs/base-ui\":\n    type: patch\n---\n\n### Installed components\n\n- Installed components type-check on projects without Takumi or Vite types.\n"
-    filename: 2026-11-05-ui-vendored-types.md
-    v: 0.0.0
-  - content: "---\npackages:\n  fumadocs-ui:\n    type: patch\n  \"@fumadocs/base-ui\":\n    type: patch\n---\n\n### Installed components\n\n- Installed components build and type-check on projects with `verbatimModuleSyntax` or `noUncheckedIndexedAccess`.\n"
-    filename: 2026-11-06-vendored-ui-types.md
-    v: 0.0.0
-  - content: "---\npackages:\n  \"@fumadocs/cli\":\n    type: patch\n---\n\n### Fumapress sites\n\n- The CLI recognizes Fumapress sites by `press.config`. `add` and `customize` install UI as usual, and what Fumapress provides by plugins is refused.\n- `fumadocs feature` says why a feature is unavailable on your project before asking you to set up what it requires.\n"
-    filename: 2026-11-06-cli-feature-reason.md
-    v: 0.0.0
-  - content: "---\npackages:\n  fumadocs-core:\n    type: patch\n---\n\n### Fix same-page anchors on React Router\n\n- Same-page anchors like TOC items and heading links now create history entries with their own key, so `<ScrollRestoration />` no longer overrides their scroll and restores the right position on back and forward.\n"
-    filename: 2026-11-06-react-router-hash-links.md
+  - content: "---\npackages:\n  \"@fumadocs/cli\":\n    type: patch\n---\n\n### Keep MCP routes from holding serverless functions open\n\n- The generated MCP route no longer lets clients open a stream that lasts until the function times out.\n"
+    filename: 2026-11-07-mcp-no-listen-stream.md
     v: 0.0.0
 core:packages:
   - id: npm:@fumadocs/ai-chat
     updated: false
-  - changelogIds:
-      - 2026-11-05-astro-relative-links.md
-    id: npm:@fumadocs/astro
-    updated: true
+  - id: npm:@fumadocs/astro
+    updated: false
   - id: npm:@fumadocs/asyncapi
     updated: false
-  - changelogIds:
-      - 2026-11-05-astro-relative-links.md
-      - 2026-11-05-ui-vendored-types.md
-      - 2026-11-06-vendored-ui-types.md
-    id: npm:@fumadocs/base-ui
-    updated: true
+  - id: npm:@fumadocs/base-ui
+    updated: false
   - id: npm:@fumadocs/basehub
     updated: false
   - id: npm:@fumadocs/changelog
     updated: false
   - changelogIds:
-      - 2026-11-06-cli-feature-reason.md
+      - 2026-11-07-mcp-no-listen-stream.md
     id: npm:@fumadocs/cli
     updated: true
   - id: npm:@fumadocs/content
     updated: false
   - id: npm:@fumadocs/content-collections
     updated: false
+  - id: npm:fumadocs-core
+    updated: false
   - id: npm:create-fumadocs-app
-    updated: true
-  - changelogIds:
-      - 2026-11-06-react-router-hash-links.md
-    id: npm:fumadocs-core
     updated: true
   - id: npm:create-fumadocs-versions
     updated: true
@@ -61,21 +41,21 @@ core:packages:
     updated: false
   - id: npm:@fumadocs/language
     updated: false
-  - id: npm:@fumadocs/local-content
-    updated: false
   - id: npm:@fumadocs/local-html
     updated: false
-  - id: npm:@fumadocs/local-md
+  - id: npm:@fumadocs/local-content
     updated: false
   - id: npm:fumadocs-mdx
+    updated: false
+  - id: npm:@fumadocs/local-md
     updated: false
   - id: npm:@fumadocs/mdx-remote
     updated: false
   - id: npm:@fumadocs/notion
     updated: false
-  - id: npm:fumadocs-openapi
-    updated: false
   - id: npm:fumadocs-obsidian
+    updated: false
+  - id: npm:fumadocs-openapi
     updated: false
   - id: npm:@fumadocs/openapi-standalone
     updated: false
@@ -83,12 +63,8 @@ core:packages:
     updated: false
   - id: npm:fumadocs-python
     updated: false
-  - changelogIds:
-      - 2026-11-05-astro-relative-links.md
-      - 2026-11-05-ui-vendored-types.md
-      - 2026-11-06-vendored-ui-types.md
-    id: npm:fumadocs-ui
-    updated: true
+  - id: npm:fumadocs-ui
+    updated: false
   - id: npm:@fumadocs/sanity
     updated: false
   - id: npm:@fumadocs/satteri
@@ -119,8 +95,8 @@ npm:packages:
   - id: npm:@fumadocs/cli
   - id: npm:@fumadocs/content
   - id: npm:@fumadocs/content-collections
-  - id: npm:create-fumadocs-app
   - id: npm:fumadocs-core
+  - id: npm:create-fumadocs-app
   - id: npm:create-fumadocs-versions
   - id: npm:fumadocs-docgen
   - id: npm:fumadocs-epub
@@ -128,14 +104,14 @@ npm:packages:
   - id: npm:@fumari/image-size
   - id: npm:@fumadocs/json-schema
   - id: npm:@fumadocs/language
-  - id: npm:@fumadocs/local-content
   - id: npm:@fumadocs/local-html
-  - id: npm:@fumadocs/local-md
+  - id: npm:@fumadocs/local-content
   - id: npm:fumadocs-mdx
+  - id: npm:@fumadocs/local-md
   - id: npm:@fumadocs/mdx-remote
   - id: npm:@fumadocs/notion
-  - id: npm:fumadocs-openapi
   - id: npm:fumadocs-obsidian
+  - id: npm:fumadocs-openapi
   - id: npm:@fumadocs/openapi-standalone
   - id: npm:fumadocs-preview
   - id: npm:fumadocs-python
@@ -150,36 +126,3 @@ npm:packages:
   - id: npm:fumadocs-twoslash
   - id: npm:fumadocs-typescript
   - id: npm:@fumadocs/vite
-  - id: npm:example-astro
-  - id: npm:example-astro-i18n
-  - id: npm:example-astro-min
-  - id: npm:docs
-  - id: npm:example-asyncapi
-  - id: npm:example-base-ui
-  - id: npm:example-content-collections
-  - id: npm:example-graphql
-  - id: npm:example-i18n
-  - id: npm:example-marble-cms
-  - id: npm:example-next
-  - id: npm:example-next-local-html
-  - id: npm:example-next-local-md
-  - id: npm:example-next-min
-  - id: npm:example-next-shadcn
-  - id: npm:example-next-static
-  - id: npm:example-obsidian
-  - id: npm:example-openapi
-  - id: npm:example-python
-  - id: npm:example-react-router-i18n
-  - id: npm:example-react-router
-  - id: npm:example-react-router-min
-  - id: npm:example-react-router-rsc
-  - id: npm:example-react-router-spa
-  - id: npm:example-tanstack-start-i18n
-  - id: npm:example-tanstack-start
-  - id: npm:example-tanstack-start-local-md
-  - id: npm:example-tanstack-start-min
-  - id: npm:example-tanstack-start-openapi
-  - id: npm:example-tanstack-start-spa
-  - id: npm:example-tanstack-start-story
-  - id: npm:example-waku
-  - id: npm:example-waku-i18n
