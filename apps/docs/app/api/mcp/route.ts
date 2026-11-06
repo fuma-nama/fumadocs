@@ -15,10 +15,14 @@ const openai = createOpenAICompatible({
 });
 
 const handler = createMcpHandler(() => {
-  const server = new McpServer({
-    name: 'fumadocs',
-    version: '1.0.0',
-  });
+  const server = new McpServer(
+    {
+      name: 'fumadocs',
+      version: '1.0.0',
+    },
+    // the tools never change, a stream to watch them would hold a function open until it times out
+    { capabilities: { tools: { listChanged: false } } },
+  );
 
   registerSourceTools(server, source, docsLlms);
 
@@ -58,7 +62,7 @@ const handler = createMcpHandler(() => {
     },
     async ({ message }) => {
       const result = await generateText({
-        model: openai('inkeep-qa-sonnet-4'),
+        model: openai('inkeep-qa-expert'),
         tools: {
           provideLinks: {
             inputSchema: ProvideLinksToolSchema,

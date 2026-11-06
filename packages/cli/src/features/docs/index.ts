@@ -36,6 +36,8 @@ export const docs: Feature<{ i18n: boolean }> = {
   async detect(project) {
     return exists(path.join(project.cwd, project.baseDir, 'lib/source.ts'));
   },
+  supports: (project) =>
+    !project.fumapress || 'Fumapress has this as a plugin, or sets it up already.',
   async apply(ctx, options) {
     const { project } = ctx;
     const { baseDir, packageJson, config, framework } = project;

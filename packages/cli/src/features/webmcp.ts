@@ -2,6 +2,7 @@ import path from 'node:path';
 import type { Feature } from '@/features';
 import type { Framework } from '@/project';
 import { addImport, appendJsxChildren, findJsxElement } from '@/codemod';
+import { docs } from './docs';
 import { llms } from './llms';
 import { findSource, requiresMarkdown } from './utils';
 
@@ -124,7 +125,7 @@ export const webmcp: Feature = {
   title: 'WebMCP',
   description:
     'expose tools to AI agents in the browser (experimental): search, read and open docs pages',
-  requires: [llms],
+  requires: [docs, llms],
   supports: requiresMarkdown,
   async apply(ctx) {
     const { cwd, baseDir, i18n, framework } = ctx.project;

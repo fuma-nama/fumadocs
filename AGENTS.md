@@ -93,6 +93,7 @@ Fumadocs runs on Next.js and Waku (RSC), React Router and TanStack Start (with a
 
 - Modules imported by the content island (the MDX components module and what it imports) must not import anything that imports the source: it puts every page in a cycle with the source and Astro's build slows superlinearly.
 - MDX components hydrate by name from the collection's `components` module, and their props must be serializable.
+- The `components` of `<Content />` render like in Astro MDX: Astro renders them into slots of the island, without hydrating. We build on Astro's behaviour, not an RSC emulation.
 - Page Markdown lives at `<page>.md`.
 - Search composes a per-provider hook from `fumadocs-core/search/client` (`useStaticSearch`, `useFetchSearch`, ...) with the dialog parts of `fumadocs-ui/components/dialog/search`. Never pass `SearchClient`s or route through `experimental_useSearch` when a provider hook exists.
 - Check changes across setups: i18n with `hideLocale`, `base`/`trailingSlash`/`build.format`, static versus an adapter.

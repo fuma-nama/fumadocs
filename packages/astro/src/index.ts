@@ -35,7 +35,7 @@ export interface CollectionOptions extends Pick<
   | 'rehypeKatexOptions'
 > {
   /**
-   * Module whose default export is the MDX components, like `./src/components/mdx.tsx`. The content renders as a React island with them.
+   * Module whose default export is the MDX components, like `./src/components/mdx.tsx`. The content renders as a React island with them. The `components` of `<Content />` render like in Astro MDX, without hydrating.
    *
    * When unset, it renders as Astro MDX, pass components to `<Content />` instead.
    */

@@ -202,3 +202,12 @@ export const source = loader({ baseUrl: '/docs', source: toFumadocsSource([], []
   expect(await read(app, 'src/pages/api/mcp.ts')).toContain('export const prerender = false;');
   expect(await read(app, 'src/pages/export/epub.ts')).toContain('export const prerender = false;');
 });
+
+test('detects Fumapress sites, and only UI is for them', async () => {
+  const site = await project({ 'press.config.tsx': '', 'package.json': '{}' });
+  expect(site).toMatchObject({ framework: 'waku', fumapress: true });
+  await expect(run(ai, {}, site)).rejects.toThrow('Fumapress');
+
+  const astro = await project({ 'press.config.tsx': '', 'astro.config.mjs': '' });
+  expect(astro).toMatchObject({ framework: 'astro', fumapress: true });
+});

@@ -93,7 +93,7 @@ function ThumbTrack({ items }: { items: Primitive.TOCItemType[] }) {
           if (item._step === undefined) continue;
           const position = positions.get(item.url);
           const g = steps[step++];
-          if (position)
+          if (position && g)
             g.setAttribute(
               'transform',
               `translate(${position.x}, ${(position.top + position.bottom) / 2})`,
@@ -165,8 +165,8 @@ export function TOCItem({
     const isLast = index === items.length - 1;
 
     const l1 = getLineOffset(item.depth);
-    const l0 = isFirst ? l1 : getLineOffset(items[index - 1].depth);
-    const l2 = isLast ? l1 : getLineOffset(items[index + 1].depth);
+    const l0 = getLineOffset(items[index - 1]?.depth ?? item.depth);
+    const l2 = getLineOffset(items[index + 1]?.depth ?? item.depth);
 
     return {
       isFirst,

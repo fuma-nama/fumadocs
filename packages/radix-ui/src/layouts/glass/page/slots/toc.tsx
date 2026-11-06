@@ -11,6 +11,7 @@ import {
   useState,
   type ComponentProps,
   type ReactNode,
+  type CSSProperties,
 } from 'react';
 import { TOCScrollArea, useTOCItems } from '@/components/toc';
 import { TOCItem } from 'fumadocs-core/toc';
@@ -185,9 +186,11 @@ function TOCPanel({ className, style, ...props }: ComponentProps<'div'>) {
                 ? 'w-(--width) h-px'
                 : 'transition-[width,height] duration-300 xl:[@media(hover:none)]:w-(--width) xl:[@media(hover:none)]:h-px',
             )}
-            style={{
-              '--width': `calc(pow(${item.depth}, 1.5) * var(--spacing))`,
-            }}
+            style={
+              {
+                '--width': `calc(pow(${item.depth}, 1.5) * var(--spacing))`,
+              } as CSSProperties
+            }
           />
           <span
             className={cn(

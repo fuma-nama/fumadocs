@@ -5,7 +5,7 @@ import picocolors from 'picocolors';
 import type { RegistryConnector } from 'fuma-cli/registry/connector';
 import { createOrLoadConfig } from '@/config';
 import { loadProject } from '@/project';
-import { type AnyFeature, type FeatureIO, runFeature } from '@/features';
+import { type AnyFeature, assertSupported, type FeatureIO, runFeature } from '@/features';
 import { features } from '@/features/all';
 
 interface CommandOptions extends Record<string, string | boolean | undefined> {
@@ -65,6 +65,7 @@ async function run(feature: AnyFeature, options: CommandOptions, connector: Regi
   const config = await createOrLoadConfig(options.config);
   const project = await loadProject(config);
   log.info(`${project.framework}${project.static ? ' (static)' : ''}, ${project.packageManager}`);
+  assertSupported(feature, project);
 
   const values: Record<string, unknown> = {};
   for (const [key, option] of Object.entries(feature.options ?? {})) {

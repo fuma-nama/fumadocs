@@ -26,13 +26,18 @@ function renderBlocks(blocks: PortableTextBlock[] | undefined, renderNode: NodeR
   );
 }
 
+/** the UI packages forward their primitive's props: Base UI reads `multiple`, Radix UI reads `type` */
+function accordionsProps(type: 'single' | 'multiple' = 'single') {
+  return { type, multiple: type === 'multiple' };
+}
+
 export const accordionComponents: {
   accordion: PortableTextTypeComponent<AccordionValue>;
   accordions: PortableTextTypeComponent<AccordionsValue>;
 } = {
   accordion({ value, renderNode }) {
     return (
-      <Accordions>
+      <Accordions {...accordionsProps()}>
         <Accordion
           title={value.title && renderBlocks(value.title, renderNode)}
           id={value.id}
@@ -45,7 +50,7 @@ export const accordionComponents: {
   },
   accordions({ value, renderNode }) {
     return (
-      <Accordions multiple={value.type === 'multiple'}>
+      <Accordions {...accordionsProps(value.type)}>
         {value.items?.map((item) => (
           <Accordion
             key={item._key}

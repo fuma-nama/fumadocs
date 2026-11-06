@@ -3,7 +3,7 @@ import { isCancel } from '@/utils/prompt';
 import picocolors from 'picocolors';
 import { UIRegistries } from '@/commands/shared';
 import { RegistryConnector } from 'fuma-cli/registry/connector';
-import { LoadedConfig } from '@/config';
+import { isFumapress, LoadedConfig } from '@/config';
 import { FumadocsComponentInstaller } from '@/registry/installer';
 
 interface AddOption {
@@ -21,6 +21,7 @@ export async function add(input: string[], connector: RegistryConnector, config:
   let targets: Target[];
   const installer = new FumadocsComponentInstaller(connector, config);
   const subRegistry = UIRegistries[config.uiLibrary];
+  const fumapress = await isFumapress();
 
   if (input.length === 0) {
     const spin = spinner();
@@ -42,7 +43,7 @@ export async function add(input: string[], connector: RegistryConnector, config:
     }
 
     const groups = await Promise.all([
-      scan(undefined, 'common'),
+      fumapress ? [] : scan(undefined, 'common'),
       scan('sanity', 'sanity'),
       scan('openapi', 'openapi'),
       scan('api-docs', 'api-docs'),
@@ -64,7 +65,12 @@ export async function add(input: string[], connector: RegistryConnector, config:
   } else {
     const root = new Set<string>();
     for (const item of (await installer.fetchManifest()).components) root.add(item.name);
-    targets = input.map((name) => (root.has(name) ? { name } : { subRegistry, name }));
+    targets = input.map((name) => {
+      if (!root.has(name)) return { subRegistry, name };
+      if (fumapress)
+        throw new Error(`"${name}" isn't UI, Fumapress has it as a plugin or can't use it.`);
+      return { name };
+    });
   }
 
   for (const target of targets) {

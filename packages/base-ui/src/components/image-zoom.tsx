@@ -136,7 +136,7 @@ export function Lightbox({ children }: { children: ReactNode }) {
 
         transition(getImage(element), () => {
           flushSync(() => setSlides(list));
-          const slide = scrollerRef.current!.children[index];
+          const slide = scrollerRef.current!.children[index]!;
           slide.scrollIntoView({ block: 'nearest', inline: 'start', behavior: 'instant' });
           return slide.querySelector('img')!;
         });
@@ -148,9 +148,9 @@ export function Lightbox({ children }: { children: ReactNode }) {
     const scroller = scrollerRef.current;
     if (!scroller || !slides) return;
     const index = getIndex(scroller);
-    const { element } = slides[index];
+    const { element } = slides[index]!;
 
-    transition(scroller.children[index].querySelector('img')!, () => {
+    transition(scroller.children[index]!.querySelector('img')!, () => {
       flushSync(() => setSlides(null));
       element.focus({ preventScroll: true });
       const image = getImage(element);

@@ -1,3 +1,17 @@
+## @fumadocs/base-ui@16.18.1
+
+### `components` of `<Content />` on Astro
+
+- The `components` of `<Content />` render like in Astro MDX, `.astro` components included, so `createRelativeLink()` resolves relative links.
+
+### Installed components
+
+- Installed components type-check on projects without Takumi or Vite types.
+
+### Installed components
+
+- Installed components build and type-check on projects with `verbatimModuleSyntax` or `noUncheckedIndexedAccess`.
+
 ## @fumadocs/base-ui@16.18.0
 
 ### Hidden GitHub navigation icon

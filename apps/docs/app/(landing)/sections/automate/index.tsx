@@ -22,11 +22,14 @@ import {
   PAGE,
   RELEASES,
   SOURCE,
+  TYPE_NAME,
+  TYPE_TABLES,
 } from './data';
 import { type Made, Stage } from './stage';
 
+// TypeScript can't run in a function: a re-render reads the tables from `scripts/pre-build.ts`
 const generator = createGenerator({
-  cache: createFileSystemGeneratorCache('.next/cache/fumadocs-typescript'),
+  cache: createFileSystemGeneratorCache(TYPE_TABLES),
 });
 
 /** code in one of our windows, which frames it: no frame of its own */
@@ -67,7 +70,7 @@ function bound(text: string): string {
 
 /** the page's Markdown for agents, its props as a list read from the type, a deprecated one marked */
 async function markdown(source: string): Promise<ReactNode> {
-  const [docs] = await generator.generateTypeTable({ type: source, name: 'ButtonProps' });
+  const [docs] = await generator.generateTypeTable({ type: source, name: TYPE_NAME });
   const lines: ReactNode[] = [];
   for (const entry of docs.entries) {
     const tag = entry.tags.find((item) => item.name === 'deprecated');
@@ -166,7 +169,7 @@ async function table(source: string): Promise<ReactNode> {
     generator,
     highlighter: apiHighlighter,
     type: source,
-    name: 'ButtonProps',
+    name: TYPE_NAME,
     className: 'my-0 rounded-none border-0',
   });
   return <>{await Promise.all(tables)}</>;

@@ -279,11 +279,7 @@ function withBasePath(href: string) {
   // ignore external
   if (href.match(/^\w+:/) || href.startsWith('//')) return href;
 
-  const basePath =
-    // @ts-expect-error -- vite env
-    typeof import.meta.env !== 'undefined' && typeof import.meta.env.BASE_URL === 'string'
-      ? // @ts-expect-error -- vite env
-        import.meta.env.BASE_URL.replace(/\/$/, '')
-      : '';
-  return basePath + href;
+  // only typed on Vite, destructuring would make Vite inline the whole env object
+  const base = (import.meta as { env?: { BASE_URL?: string } }).env?.BASE_URL ?? '';
+  return base.replace(/\/$/, '') + href;
 }

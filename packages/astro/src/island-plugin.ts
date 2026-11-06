@@ -41,34 +41,46 @@ export function islandPlugin(module: string, runtime: string): HastPluginDefinit
 
       ctx.appendChild(root, {
         type: 'mdxJsxFlowElement',
-        name: islandName,
+        name: '_ContentIsland',
         attributes: [
-          { type: 'mdxJsxAttribute', name: 'client:load', value: null },
+          // Astro passes its children as they are
+          { type: 'mdxJsxAttribute', name: 'server:root', value: null },
           {
             type: 'mdxJsxAttribute',
             name: 'tree',
-            value: {
-              type: 'mdxJsxAttributeValueExpression',
-              value: `_serializeIsland([${tree}])`,
-            },
+            value: { type: 'mdxJsxAttributeValueExpression', value: `[${tree}]` },
           },
           {
             type: 'mdxJsxAttribute',
-            name: 'props',
-            // like MDX, `wrapper` receives the props of content
-            value: {
-              type: 'mdxJsxAttributeValueExpression',
-              value: '(({ components: _, children: __, ...rest }) => rest)(props)',
-            },
+            name: 'components',
+            value: { type: 'mdxJsxAttributeValueExpression', value: 'props.components' },
           },
         ],
-        children: slots,
+        children: [
+          {
+            type: 'mdxJsxFlowElement',
+            name: islandName,
+            attributes: [
+              { type: 'mdxJsxAttribute', name: 'client:load', value: null },
+              {
+                type: 'mdxJsxAttribute',
+                name: 'props',
+                // like MDX, `wrapper` receives the props of content
+                value: {
+                  type: 'mdxJsxAttributeValueExpression',
+                  value: '(({ components: _, children: __, ...rest }) => rest)(props)',
+                },
+              },
+            ],
+            children: slots,
+          },
+        ],
       });
       for (const node of body) ctx.removeNode(node);
       ctx.prependChild(root, {
         type: 'mdxjsEsm',
         value: `import { FumadocsIsland as ${islandName} } from ${JSON.stringify(module)};
-import { serializeIsland as _serializeIsland, Slot as _Slot } from ${JSON.stringify(runtime)};`,
+import { ContentIsland as _ContentIsland, Slot as _Slot } from ${JSON.stringify(runtime)};`,
       });
     },
   };
