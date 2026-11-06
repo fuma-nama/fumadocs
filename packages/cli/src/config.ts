@@ -12,10 +12,17 @@ function isSupportedFramework(v: string): v is Framework {
   return frameworks.includes(v as Framework);
 }
 
-/** `fuma-cli` doesn't detect Astro */
+/** a site of Fumapress: it sets up docs and their features with plugins, only the UI of Fumadocs is for it */
+export async function isFumapress(cwd = process.cwd()): Promise<boolean> {
+  const files = await fs.readdir(cwd).catch(() => []);
+  return files.some((file) => file.startsWith('press.config.'));
+}
+
+/** `fuma-cli` doesn't detect Astro, or Waku brought by Fumapress */
 async function detect(cwd: string): Promise<Framework> {
   const files = await fs.readdir(cwd).catch(() => []);
   if (files.some((file) => file.startsWith('astro.config.'))) return 'astro';
+  if (await isFumapress(cwd)) return 'waku';
   const framework = await detectFramework(cwd);
   return isSupportedFramework(framework) ? framework : 'next';
 }

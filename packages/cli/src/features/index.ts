@@ -78,19 +78,29 @@ export interface RunOptions {
   versions?: Record<string, string>;
 }
 
+/** throws when the feature or what it requires is unavailable on the project */
+export function assertSupported(
+  feature: Pick<AnyFeature, 'id' | 'requires' | 'supports'>,
+  project: Project,
+) {
+  for (const item of [...(feature.requires ?? []), feature]) {
+    const supported = item.supports?.(project) ?? true;
+    if (supported !== true) throw new Error(`"${feature.id}" is unavailable: ${supported}`);
+  }
+}
+
 export async function runFeature<O extends object>(
   feature: Omit<Feature<O>, 'options'>,
   options: O,
   { project, connector, io, versions }: RunOptions,
 ): Promise<{ notes: string[] }> {
+  assertSupported(feature, project);
   for (const dep of feature.requires ?? []) {
     if (dep.detect && !(await dep.detect(project)))
       throw new Error(
         `"${feature.id}" requires "${dep.id}", run \`fumadocs feature ${dep.id}\` first.`,
       );
   }
-  const supported = feature.supports?.(project) ?? true;
-  if (supported !== true) throw new Error(`"${feature.id}" is unavailable: ${supported}`);
 
   const { cwd } = project;
   const deps: Record<string, string | null> = {};

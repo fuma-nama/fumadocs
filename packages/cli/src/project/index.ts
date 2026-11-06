@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { detectFramework, detectPackageManager } from 'fuma-cli/detect';
-import type { LoadedConfig } from '@/config';
+import { isFumapress, type LoadedConfig } from '@/config';
 import { exists } from '@/utils/fs';
 
 export type PackageManager = NonNullable<Awaited<ReturnType<typeof detectPackageManager>>>['name'];
@@ -85,6 +85,8 @@ export interface Project {
   info: FrameworkInfo;
   /** prerendered to static HTML, no server at runtime */
   static: boolean;
+  /** `press.config` exists */
+  fumapress: boolean;
   /** `lib/i18n.ts` exists */
   i18n: I18nInfo | null;
   source: SourceInfo;
@@ -145,6 +147,7 @@ export async function loadProject(
     framework,
     info,
     static: isStatic,
+    fumapress: await isFumapress(cwd),
     i18n:
       i18nConfig === null
         ? null

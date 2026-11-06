@@ -3,6 +3,7 @@ import type { Feature } from '@/features';
 import type { Framework } from '@/project';
 import { type FormattedRoute, formatRoute, routeModule } from '@/project/route';
 import { addReactRouterPrerenderArray } from '@/codemod';
+import { docs } from './docs';
 import { llms } from './llms';
 import { registerReactRouterRoutes, requiresMarkdown, type SourceRef, sourceRef } from './utils';
 
@@ -41,7 +42,7 @@ export const mcp: Feature = {
   id: 'mcp',
   title: 'MCP Server',
   description: 'a MCP server for AI agents to search and read your docs, at /api/mcp',
-  requires: [llms],
+  requires: [docs, llms],
   supports: (project) =>
     project.static ? 'MCP requires a server at runtime' : requiresMarkdown(project),
   async apply(ctx) {
