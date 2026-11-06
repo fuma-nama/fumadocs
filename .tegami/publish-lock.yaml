@@ -1,73 +1,32 @@
 core:changelogs:
-  - content: "---\npackages:\n  \"@fumadocs/ai-chat\":\n    type: patch\n---\n\n### Accessible Ask AI button\n\n- The Ask AI button announces whether the chat is open.\n"
-    filename: 2026-11-04-ai-chat-trigger-a11y.md
+  - content: "---\npackages:\n  \"@fumadocs/astro\":\n    type: patch\n  fumadocs-ui:\n    type: patch\n  \"@fumadocs/base-ui\":\n    type: patch\n---\n\n### `components` of `<Content />` on Astro\n\n- The `components` of `<Content />` render like in Astro MDX, `.astro` components included, so `createRelativeLink()` resolves relative links.\n"
+    filename: 2026-11-05-astro-relative-links.md
     v: 0.0.0
-  - content: "---\npackages:\n  \"@fumadocs/astro\":\n    type: minor\n---\n\n### Moved the managed setup to `@fumapress/astro`\n\n- Refactored: `@fumadocs/astro` is the integration for your own routes again.\n- `src/fumadocs.config.ts`, `@fumadocs/astro/config`, `@fumadocs/astro/plugins/*`, `HomeLayout.astro` and `ReactContent.astro` moved to `@fumapress/astro`.\n- Removed the `layout` and `page` options, use `ui.renderPage` of `@fumapress/astro`.\n- See `@fumapress/astro` for the plugins of the managed setup.\n- Added the `lastModified` collection option: `page.data.lastModified` is the date of the page's last commit.\n- `toFumadocsSource()` accepts `baseDir` as its third argument.\n"
-    filename: 2026-11-03-astro-own-routes.md
+  - content: "---\npackages:\n  fumadocs-ui:\n    type: patch\n  \"@fumadocs/base-ui\":\n    type: patch\n---\n\n### Installed components\n\n- Installed components type-check on projects without Takumi or Vite types.\n"
+    filename: 2026-11-05-ui-vendored-types.md
     v: 0.0.0
-  - content: "---\npackages:\n  fumadocs-core:\n    type: minor\n  fumadocs-openapi:\n    type: minor\n  \"@fumadocs/asyncapi\":\n    type: minor\n  \"@fumadocs/graphql\":\n    type: minor\n  \"@fumadocs/notion\":\n    type: minor\n  fumadocs-obsidian:\n    type: minor\n  \"@fumadocs/sanity\":\n    type: minor\n---\n\n### Framework plugins\n\n- Added `fumadocs-core/framework/plugin`: the plugin API for integrations to add routes and page content to frameworks.\n- Integrations export their plugin as the default export of `/press`: `openapiPlugin()`, `asyncapiPlugin()`, `graphqlPlugin()`, `notionPlugin()`, `obsidianPlugin()` and `sanityPlugin()`.\n- The pages of `staticSource()` and `dynamicSource()` of OpenAPI, AsyncAPI and GraphQL have `full: true` in their page data, like generated files.\n"
-    filename: 2026-11-03-framework-plugin.md
+  - content: "---\npackages:\n  fumadocs-ui:\n    type: patch\n  \"@fumadocs/base-ui\":\n    type: patch\n---\n\n### Installed components\n\n- Installed components build and type-check on projects with `verbatimModuleSyntax` or `noUncheckedIndexedAccess`.\n"
+    filename: 2026-11-06-vendored-ui-types.md
     v: 0.0.0
-  - content: "---\npackages:\n  fumadocs-openapi:\n    type: minor\n  \"@fumadocs/asyncapi\":\n    type: minor\n  \"@fumadocs/graphql\":\n    type: minor\n---\n\n### Deprecated standalone loader plugins\n\n- Deprecated `openapiPlugin()`, `asyncapiPlugin()` and `graphqlPlugin()` of `/server`: use `loaderPlugin()` of `createOpenAPI()`, `createAsyncAPI()` and `createGraphQL()` instead.\n"
-    filename: 2026-11-04-standalone-loader-plugins-deprecated.md
+  - content: "---\npackages:\n  \"@fumadocs/cli\":\n    type: patch\n---\n\n### Fumapress sites\n\n- The CLI recognizes Fumapress sites by `press.config`. `add` and `customize` install UI as usual, and what Fumapress provides by plugins is refused.\n- `fumadocs feature` says why a feature is unavailable on your project before asking you to set up what it requires.\n"
+    filename: 2026-11-06-cli-feature-reason.md
     v: 0.0.0
-  - content: "---\npackages:\n  fumadocs-ui:\n    type: patch\n  \"@fumadocs/base-ui\":\n    type: patch\n---\n\n### Hidden GitHub navigation icon\n\n- Hide the decorative GitHub navigation icon from assistive technology to avoid an unnamed SVG image in the accessibility tree. The link retains its GitHub label.\n"
-    filename: 2026-10-18-github-icon-accessibility.md
-    v: 0.0.0
-  - content: "---\npackages:\n  fumadocs-core:\n    type: patch\n  fumadocs-ui:\n    type: patch\n  \"@fumadocs/base-ui\":\n    type: patch\n  \"@fumadocs/language\":\n    type: patch\n---\n\n### Accessibility fixes\n\n- Docs layouts render a visually hidden \"Skip to Content\" link as the first focusable element.\n- Escape closes the mobile sidebar drawer, and focus returns to the trigger when the drawer closes.\n- The heading \"Copy Anchor Link\" button is visible on keyboard focus.\n- A `Tab` `id` only links to the tab by URL hash, panels keep the ids that tab triggers point `aria-controls` at.\n- Multi-word tab labels produce ids without spaces.\n- TOC `single` mode highlights the clicked item and no longer skips headings while scrolling.\n- `DocsPage` `editOnGithub` defaults `sha` to `main` as documented.\n"
-    filename: 2026-11-03-accessibility-fixes.md
-    v: 0.0.0
-  - content: "---\npackages:\n  fumadocs-ui:\n    type: patch\n  \"@fumadocs/base-ui\":\n    type: patch\n---\n\n### Language switcher closes on selection\n\n- The language switcher closes after choosing a language.\n"
-    filename: 2026-11-04-language-select-close.md
-    v: 0.0.0
-  - content: "---\npackages:\n  \"@fumadocs/cli\":\n    type: minor\n  create-fumadocs-app:\n    type: patch\n---\n\n### Astro with your own routes\n\n- Refactored: set up Astro with your own routes, layout and provider again, the managed setup moved to `@fumapress/astro`.\n- On Astro, `og`, `llms`, `search`, `feedback` and `customise` write to your routes and components instead of `src/fumadocs.config.ts`.\n- On Astro, `llms` serves the Markdown of pages at `<page>.md`, `/docs/index.md` for the root page.\n- On Astro, routes that need a server (`mcp`, `epub`, server search) render on request with `output: 'static'` too.\n- On Astro, generated and template routes build pages whose file names need URI encoding, like spaces.\n- Removed the managed setup helpers: `ensureAstroOption` of `@fumadocs/cli/codemod`, `requiresManaged`, `requiresManagedMarkdown`, `addAstroPlugin`, `astroModule`, `astroModuleFile` and `addDocsLlms` of the features.\n"
-    filename: 2026-11-03-cli-astro-own-routes.md
-    v: 0.0.0
-  - content: "---\npackages:\n  \"@fumadocs/cli\":\n    type: patch\n---\n\n### Base UI installs\n\n- Installed components import Base UI as `fumadocs-ui`, without adding a second `@fumadocs/base-ui` dependency.\n"
-    filename: 2026-11-05-cli-base-ui-package.md
-    v: 0.0.0
-  - content: "---\npackages:\n  fumadocs-core:\n    type: patch\n---\n\n### Typed loaders fit `LoaderOutput`\n\n- A loader typed by its content source and the translations of some languages are assignable to `LoaderOutput` and `TranslationsAPI`.\n"
-    filename: 2026-11-02-typed-loader-assignable.md
-    v: 0.0.0
-  - content: "---\npackages:\n  fumadocs-core:\n    type: patch\n---\n\n### Smaller static Flexsearch index\n\n- The exported Flexsearch index is about 80% smaller, search results are unchanged.\n"
-    filename: 2026-11-04-flexsearch-static-size.md
-    v: 0.0.0
-  - content: "---\npackages:\n  fumadocs-core:\n    type: patch\n---\n\n### `renderUrl` option of `llms()`\n\n- `llms()` accepts `renderUrl` to change the links of pages.\n"
-    filename: 2026-11-04-llms-render-url.md
-    v: 0.0.0
-  - content: "---\npackages:\n  fumadocs-mdx:\n    type: patch\n---\n\n### Aliases in macro collections on Vite\n\n- Collections of `fumadocs-mdx/macro` resolve the Vite aliases of your app, like `resolve.tsconfigPaths`.\n"
-    filename: 2026-11-02-macro-vite-aliases.md
-    v: 0.0.0
-  - content: "---\npackages:\n  fumadocs-mdx:\n    type: minor\n---\n\n### Framework plugin\n\n- Added `mdxPlugin()` as the default export of `fumadocs-mdx/press`: it renders the pages of Fumadocs MDX collections in frameworks running `fumadocs-core/framework/plugin`, with your MDX `components` and relative links resolved.\n"
-    filename: 2026-11-04-mdx-plugin.md
-    v: 0.0.0
-  - content: "---\npackages:\n  fumadocs-mdx:\n    type: patch\n---\n\n### Faster Vite RSC builds\n\n- Vite builds with React Server Components compile MDX files faster.\n"
-    filename: 2026-11-04-mdx-rsc-scan.md
-    v: 0.0.0
-  - content: "---\npackages:\n  \"@fumadocs/notion\":\n    type: minor\n---\n\n### Deprecated `@fumadocs/notion/client`\n\n- Deprecated `@fumadocs/notion/client`: `NotionRenderer` hydrates its components through `'use client'`, they need no registration.\n"
-    filename: 2026-11-03-notion-client-deprecated.md
-    v: 0.0.0
-  - content: "---\npackages:\n  fumadocs-preview:\n    type: patch\n---\n\n### Fix blank pages\n\n- Fix pages failing to render with `Missing Router`.\n"
-    filename: 2026-11-03-preview-dedupe-waku.md
+  - content: "---\npackages:\n  fumadocs-core:\n    type: patch\n---\n\n### Fix same-page anchors on React Router\n\n- Same-page anchors like TOC items and heading links now create history entries with their own key, so `<ScrollRestoration />` no longer overrides their scroll and restores the right position on back and forward.\n"
+    filename: 2026-11-06-react-router-hash-links.md
     v: 0.0.0
 core:packages:
+  - id: npm:@fumadocs/ai-chat
+    updated: false
   - changelogIds:
-      - 2026-11-04-ai-chat-trigger-a11y.md
-    id: npm:@fumadocs/ai-chat
-    updated: true
-  - changelogIds:
-      - 2026-11-03-astro-own-routes.md
+      - 2026-11-05-astro-relative-links.md
     id: npm:@fumadocs/astro
     updated: true
+  - id: npm:@fumadocs/asyncapi
+    updated: false
   - changelogIds:
-      - 2026-11-03-framework-plugin.md
-      - 2026-11-04-standalone-loader-plugins-deprecated.md
-    id: npm:@fumadocs/asyncapi
-    updated: true
-  - changelogIds:
-      - 2026-10-18-github-icon-accessibility.md
-      - 2026-11-03-accessibility-fixes.md
-      - 2026-11-04-language-select-close.md
+      - 2026-11-05-astro-relative-links.md
+      - 2026-11-05-ui-vendored-types.md
+      - 2026-11-06-vendored-ui-types.md
     id: npm:@fumadocs/base-ui
     updated: true
   - id: npm:@fumadocs/basehub
@@ -75,25 +34,18 @@ core:packages:
   - id: npm:@fumadocs/changelog
     updated: false
   - changelogIds:
-      - 2026-11-03-cli-astro-own-routes.md
-      - 2026-11-05-cli-base-ui-package.md
+      - 2026-11-06-cli-feature-reason.md
     id: npm:@fumadocs/cli
     updated: true
   - id: npm:@fumadocs/content
     updated: false
   - id: npm:@fumadocs/content-collections
     updated: false
-  - changelogIds:
-      - 2026-11-02-typed-loader-assignable.md
-      - 2026-11-03-accessibility-fixes.md
-      - 2026-11-03-framework-plugin.md
-      - 2026-11-04-flexsearch-static-size.md
-      - 2026-11-04-llms-render-url.md
-    id: npm:fumadocs-core
+  - id: npm:create-fumadocs-app
     updated: true
   - changelogIds:
-      - 2026-11-03-cli-astro-own-routes.md
-    id: npm:create-fumadocs-app
+      - 2026-11-06-react-router-hash-links.md
+    id: npm:fumadocs-core
     updated: true
   - id: npm:create-fumadocs-versions
     updated: true
@@ -101,65 +53,44 @@ core:packages:
     updated: false
   - id: npm:fumadocs-epub
     updated: false
-  - changelogIds:
-      - 2026-11-03-framework-plugin.md
-      - 2026-11-04-standalone-loader-plugins-deprecated.md
-    id: npm:@fumadocs/graphql
-    updated: true
+  - id: npm:@fumadocs/graphql
+    updated: false
   - id: npm:@fumari/image-size
     updated: false
   - id: npm:@fumadocs/json-schema
     updated: false
-  - changelogIds:
-      - 2026-11-03-accessibility-fixes.md
-    id: npm:@fumadocs/language
-    updated: true
+  - id: npm:@fumadocs/language
+    updated: false
   - id: npm:@fumadocs/local-content
     updated: false
   - id: npm:@fumadocs/local-html
     updated: false
-  - changelogIds:
-      - 2026-11-02-macro-vite-aliases.md
-      - 2026-11-04-mdx-plugin.md
-      - 2026-11-04-mdx-rsc-scan.md
-    id: npm:fumadocs-mdx
-    updated: true
   - id: npm:@fumadocs/local-md
+    updated: false
+  - id: npm:fumadocs-mdx
     updated: false
   - id: npm:@fumadocs/mdx-remote
     updated: false
-  - changelogIds:
-      - 2026-11-03-framework-plugin.md
-      - 2026-11-03-notion-client-deprecated.md
-    id: npm:@fumadocs/notion
-    updated: true
-  - changelogIds:
-      - 2026-11-03-framework-plugin.md
-    id: npm:fumadocs-obsidian
-    updated: true
-  - changelogIds:
-      - 2026-11-03-framework-plugin.md
-      - 2026-11-04-standalone-loader-plugins-deprecated.md
-    id: npm:fumadocs-openapi
-    updated: true
+  - id: npm:@fumadocs/notion
+    updated: false
+  - id: npm:fumadocs-openapi
+    updated: false
+  - id: npm:fumadocs-obsidian
+    updated: false
   - id: npm:@fumadocs/openapi-standalone
     updated: false
-  - changelogIds:
-      - 2026-11-03-preview-dedupe-waku.md
-    id: npm:fumadocs-preview
-    updated: true
+  - id: npm:fumadocs-preview
+    updated: false
   - id: npm:fumadocs-python
     updated: false
   - changelogIds:
-      - 2026-10-18-github-icon-accessibility.md
-      - 2026-11-03-accessibility-fixes.md
-      - 2026-11-04-language-select-close.md
+      - 2026-11-05-astro-relative-links.md
+      - 2026-11-05-ui-vendored-types.md
+      - 2026-11-06-vendored-ui-types.md
     id: npm:fumadocs-ui
     updated: true
-  - changelogIds:
-      - 2026-11-03-framework-plugin.md
-    id: npm:@fumadocs/sanity
-    updated: true
+  - id: npm:@fumadocs/sanity
+    updated: false
   - id: npm:@fumadocs/satteri
     updated: false
   - id: npm:@fumadocs/shadcn
@@ -188,8 +119,8 @@ npm:packages:
   - id: npm:@fumadocs/cli
   - id: npm:@fumadocs/content
   - id: npm:@fumadocs/content-collections
-  - id: npm:fumadocs-core
   - id: npm:create-fumadocs-app
+  - id: npm:fumadocs-core
   - id: npm:create-fumadocs-versions
   - id: npm:fumadocs-docgen
   - id: npm:fumadocs-epub
@@ -199,12 +130,12 @@ npm:packages:
   - id: npm:@fumadocs/language
   - id: npm:@fumadocs/local-content
   - id: npm:@fumadocs/local-html
-  - id: npm:fumadocs-mdx
   - id: npm:@fumadocs/local-md
+  - id: npm:fumadocs-mdx
   - id: npm:@fumadocs/mdx-remote
   - id: npm:@fumadocs/notion
-  - id: npm:fumadocs-obsidian
   - id: npm:fumadocs-openapi
+  - id: npm:fumadocs-obsidian
   - id: npm:@fumadocs/openapi-standalone
   - id: npm:fumadocs-preview
   - id: npm:fumadocs-python
@@ -219,12 +150,12 @@ npm:packages:
   - id: npm:fumadocs-twoslash
   - id: npm:fumadocs-typescript
   - id: npm:@fumadocs/vite
-  - id: npm:docs
   - id: npm:example-astro
   - id: npm:example-astro-i18n
   - id: npm:example-astro-min
-  - id: npm:example-base-ui
+  - id: npm:docs
   - id: npm:example-asyncapi
+  - id: npm:example-base-ui
   - id: npm:example-content-collections
   - id: npm:example-graphql
   - id: npm:example-i18n
@@ -238,13 +169,13 @@ npm:packages:
   - id: npm:example-obsidian
   - id: npm:example-openapi
   - id: npm:example-python
-  - id: npm:example-react-router
   - id: npm:example-react-router-i18n
+  - id: npm:example-react-router
   - id: npm:example-react-router-min
   - id: npm:example-react-router-rsc
   - id: npm:example-react-router-spa
-  - id: npm:example-tanstack-start
   - id: npm:example-tanstack-start-i18n
+  - id: npm:example-tanstack-start
   - id: npm:example-tanstack-start-local-md
   - id: npm:example-tanstack-start-min
   - id: npm:example-tanstack-start-openapi
