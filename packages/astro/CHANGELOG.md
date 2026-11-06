@@ -1,3 +1,9 @@
+## @fumadocs/astro@0.2.1
+
+### `components` of `<Content />` on Astro
+
+- The `components` of `<Content />` render like in Astro MDX, `.astro` components included, so `createRelativeLink()` resolves relative links.
+
 ## @fumadocs/astro@0.2.0
 
 ### Moved the managed setup to `@fumapress/astro`
