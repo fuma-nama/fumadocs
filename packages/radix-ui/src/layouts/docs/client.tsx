@@ -23,7 +23,7 @@ import {
   type BaseSlots,
   type BaseSlotsProps,
 } from '../shared';
-import { AIChatPanel, SkipToContent } from '../shared/client';
+import { AIChatPanel, AIChatTrigger, SkipToContent } from '../shared/client';
 import { TreeContextProvider, useTabsGroups } from '@/contexts/tree';
 import { Header } from './slots/header';
 import { Container } from './slots/container';
@@ -143,6 +143,7 @@ export function LayoutBody(
                 {aiChat.panel}
               </AIChatPanel>
             )}
+            {aiChat?.trigger && <AIChatTrigger {...aiChat} />}
           </slots.container>
         </slots.sidebar.provider>
       </LayoutContext>

@@ -5,7 +5,14 @@ import { useI18n } from '@/contexts/i18n';
 import { cn } from '@/utils/cn';
 import { useTranslations } from '@fuma-translate/react';
 import { type FC, type ComponentProps, type ReactNode, useState } from 'react';
-import { isLinkItemActive, type BaseLayoutProps, type LinkItemType } from '.';
+import { MessageCircleIcon } from 'lucide-react';
+import { buttonVariants } from '@/components/ui/button';
+import {
+  isLinkItemActive,
+  type AIChatOptions,
+  type BaseLayoutProps,
+  type LinkItemType,
+} from '.';
 import {
   type LanguageSelectProps,
   type LanguageSelectTextProps,
@@ -65,6 +72,28 @@ export function AIChatPanel({
       {/* fixed width while resizing */}
       <div className="flex flex-col size-full xl:w-(--fd-ai-chat-width)">{mounted && children}</div>
     </aside>
+  );
+}
+
+/** a floating button toggling the chat, for layouts without one of their own */
+export function AIChatTrigger({ open, onOpenChange }: AIChatOptions) {
+  const t = useTranslations({ note: 'AI chat button' });
+
+  return (
+    <button
+      type="button"
+      aria-expanded={open}
+      className={cn(
+        buttonVariants({ variant: 'secondary' }),
+        'fixed inset-e-[calc(--spacing(4)+var(--removed-body-scroll-bar-size,0px))] bottom-4 z-20 gap-2 rounded-2xl text-fd-muted-foreground shadow-lg transition-[translate,opacity] motion-reduce:transition-none',
+        open && 'translate-y-10 opacity-0',
+      )}
+      inert={open}
+      onClick={() => onOpenChange(!open)}
+    >
+      <MessageCircleIcon aria-hidden className="size-4.5" />
+      {t('Ask AI')}
+    </button>
   );
 }
 
