@@ -17,10 +17,10 @@ async function createSite(dir = fixturesDir) {
   }).dynamicSource();
   const plugin = obsidianPlugin({
     vault: obsidian({ dir }),
-    components: {
+    components: () => ({
       Card: ({ href, children }) => <a href={href}>{children}</a>,
       a: (props) => <a data-link {...props} />,
-    },
+    }),
   });
   const loader = dynamicLoader(content, { baseUrl: '/' }).get();
   const ctx: PluginContext = {

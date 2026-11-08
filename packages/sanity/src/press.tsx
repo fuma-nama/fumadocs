@@ -5,11 +5,13 @@ import {
   type PortableTextProps,
 } from '@portabletext/react';
 import type { Plugin } from 'fumadocs-core/framework/plugin';
-import type { PageData } from 'fumadocs-core/source';
+import type { LoaderConfig, Page, PageData } from 'fumadocs-core/source';
 import type { BaseDoc, DocToPage, DocToPageLoaded } from './index';
 
-/** the components of Portable Text, for your block types */
-export type SanityPluginOptions = Pick<PortableTextProps, 'components'>;
+export interface SanityPluginOptions<P extends Page = Page> {
+  /** the components of Portable Text for your block types, or a function returning those of a page */
+  components?: PortableTextProps['components'] | ((page: P) => PortableTextProps['components']);
+}
 
 type SanityDoc = BaseDoc & { _createdAt?: string; body?: PortableTextBlock[] };
 
@@ -27,7 +29,9 @@ function isSanityPageData(data: PageData): data is SanityPageData {
 /**
  * Render the Portable Text `body` of documents from `createSanitySource()`, with their dates.
  */
-export default function sanityPlugin({ components }: SanityPluginOptions = {}): Plugin {
+export default function sanityPlugin<Config extends LoaderConfig = LoaderConfig>({
+  components,
+}: SanityPluginOptions<Config['page']> = {}): Plugin<Config> {
   // the source creates new page data when the `_updatedAt` of a document changes, so a document loaded per page data stays fresh
   const loaded = new WeakMap<SanityPageData, Promise<DocToPageLoaded<SanityDoc>>>();
   function load(data: SanityPageData) {
@@ -41,10 +45,18 @@ export default function sanityPlugin({ components }: SanityPluginOptions = {}): 
 
   return {
     name: 'sanity',
-    async getPageBody({ data }) {
+    async getPageBody(page) {
+      const { data } = page;
       if (!isSanityPageData(data)) return;
       const { body = [] } = await load(data);
-      return { node: <PortableText value={body} components={components} /> };
+      return {
+        node: (
+          <PortableText
+            value={body}
+            components={typeof components === 'function' ? components(page) : components}
+          />
+        ),
+      };
     },
     async getPageText({ data }) {
       if (isSanityPageData(data)) return toPlainText((await load(data)).body ?? []);

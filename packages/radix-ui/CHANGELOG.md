@@ -1,3 +1,9 @@
+## fumadocs-ui@16.18.2
+
+### Floating Ask AI button in docs layouts
+
+- `aiChat.trigger` renders a floating Ask AI button in the Docs and Notebook layouts. Glass and Spacious keep their own button.
+
 ## fumadocs-ui@16.18.1
 
 ### `components` of `<Content />` on Astro

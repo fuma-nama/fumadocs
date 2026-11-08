@@ -10,7 +10,7 @@ import {
   type LayoutTab,
   useLinkItems,
 } from '../shared';
-import { AIChatPanel, SkipToContent } from '../shared/client';
+import { AIChatPanel, AIChatTrigger, SkipToContent } from '../shared/client';
 import { TreeContextProvider } from '@/contexts/tree';
 import { Container } from './slots/container';
 import {
@@ -133,6 +133,7 @@ export function LayoutBody(
                 {aiChat.panel}
               </AIChatPanel>
             )}
+            {aiChat?.trigger && <AIChatTrigger {...aiChat} />}
           </slots.container>
         </slots.sidebar.provider>
       </LayoutContext>

@@ -75,6 +75,12 @@ export interface AIChatOptions {
    * The chat panel, placed beside the page on wide viewports, and floating over it on smaller ones.
    */
   panel?: ReactNode;
+  /**
+   * Render a floating Ask AI button, for layouts without one of their own (Docs and Notebook)
+   *
+   * @defaultValue false
+   */
+  trigger?: boolean;
 }
 
 export interface LayoutTab {

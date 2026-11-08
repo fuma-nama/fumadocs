@@ -59,13 +59,17 @@ describe('mdxPlugin()', () => {
     expect(await plugin.getPageLastModified!.call(ctx, page)).toBe(lastModified);
   });
 
-  test('resolves relative links with the components', async () => {
+  test('resolves relative links with the components of a page', async () => {
     const a = (props: ComponentProps<'a'>) => createElement('a', props);
-    const { ctx, plugin, page } = await createSite(false, { components: { a } });
+    const pages: unknown[] = [];
+    const { ctx, plugin, page } = await createSite(false, {
+      components: (page) => (pages.push(page), { a }),
+    });
     const body = (await plugin.getPageBody!.call(ctx, page))!.node as ReactElement<MDXProps>;
     const Link = body.props.components!.a as FC<ComponentProps<'a'>>;
     const link = Link({ href: './index.mdx#intro' }) as ReactElement<ComponentProps<'a'>>;
 
+    expect(pages).toEqual([page]);
     expect(link.type).toBe(a);
     expect(link.props.href).toBe('/#intro');
     expect(

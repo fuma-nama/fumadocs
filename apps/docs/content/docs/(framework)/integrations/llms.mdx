@@ -422,42 +422,13 @@ INKEEP_API_KEY="..."
 
 Docs layouts render the chat from their `aiChat` option, as it takes client state, create a client component for your layout, and use it in place of the original one:
 
-```tsx tab="Docs & Notebook" title="components/ai/layout.tsx"
+```tsx tab="components/ai/layout.tsx"
 'use client';
-// or `fumadocs-ui/layouts/notebook`
+// or the Notebook, Glass and Spacious layouts
 import { DocsLayout as Layout, type DocsLayoutProps } from 'fumadocs-ui/layouts/docs';
-// the installed components
-import { AIChat, AIChatPanel, AIChatTrigger, useAIChat } from './search';
-
-export function DocsLayout(props: DocsLayoutProps) {
-  return (
-    <AIChat>
-      <ChatLayout {...props} />
-      <AIChatTrigger />
-    </AIChat>
-  );
-}
-
-function ChatLayout(props: DocsLayoutProps) {
-  const { open, setOpen } = useAIChat();
-
-  return <Layout {...props} aiChat={{ open, onOpenChange: setOpen, panel: <AIChatPanel /> }} />;
-}
-```
-
-```tsx tab="Docs & Notebook" title="layout.tsx"
-import { DocsLayout } from 'fumadocs-ui/layouts/docs'; // [!code --]
-import { DocsLayout } from '@/components/ai/layout'; // [!code ++]
-```
-
-```tsx tab="Glass & Spacious" title="components/ai/layout.tsx"
-'use client';
-// or `fumadocs-ui/layouts/spacious`
-import { DocsLayout as Layout, type DocsLayoutProps } from 'fumadocs-ui/layouts/glass';
 // the installed components
 import { AIChat, AIChatPanel, useAIChat } from './search';
 
-// the layout has its own Ask AI button
 export function DocsLayout(props: DocsLayoutProps) {
   return (
     <AIChat>
@@ -469,12 +440,17 @@ export function DocsLayout(props: DocsLayoutProps) {
 function ChatLayout(props: DocsLayoutProps) {
   const { open, setOpen } = useAIChat();
 
-  return <Layout {...props} aiChat={{ open, onOpenChange: setOpen, panel: <AIChatPanel /> }} />;
+  return (
+    <Layout
+      {...props}
+      aiChat={{ open, onOpenChange: setOpen, panel: <AIChatPanel />, trigger: true }}
+    />
+  );
 }
 ```
 
-```tsx tab="Glass & Spacious" title="layout.tsx"
-import { DocsLayout } from 'fumadocs-ui/layouts/glass'; // [!code --]
+```tsx tab="layout.tsx"
+import { DocsLayout } from 'fumadocs-ui/layouts/docs'; // [!code --]
 import { DocsLayout } from '@/components/ai/layout'; // [!code ++]
 ```
 

@@ -1,5 +1,5 @@
 import type { Plugin } from 'fumadocs-core/framework/plugin';
-import type { PageData } from 'fumadocs-core/source';
+import type { LoaderConfig, Page, PageData } from 'fumadocs-core/source';
 import {
   blocksToPlainText,
   blocksToStructuredData,
@@ -19,10 +19,13 @@ import {
   type NotionPageLoaded,
 } from './source';
 
-export interface NotionPluginOptions extends Pick<
+export interface NotionPluginOptions<P extends Page = Page> extends Pick<
   NotionRendererProps,
-  'components' | 'highlightCode'
+  'highlightCode'
 > {
+  /** components to render blocks with, or a function returning those of a page */
+  components?: NotionRendererProps['components'] | ((page: P) => NotionRendererProps['components']);
+
   /** the Notion data source from `createNotion()`, the one your content source reads */
   notion: NotionIntegration;
 
@@ -37,11 +40,12 @@ export interface NotionPluginOptions extends Pick<
 /**
  * Render the pages of a Notion data source from `createNotion()`, with their table of contents, search index and dates.
  */
-export default function notionPlugin({
+export default function notionPlugin<Config extends LoaderConfig = LoaderConfig>({
   notion,
   fileProxy = true,
+  components,
   ...options
-}: NotionPluginOptions): Plugin {
+}: NotionPluginOptions<Config['page']>): Plugin<Config> {
   const filePath = (typeof fileProxy === 'object' && fileProxy.path) || '/api/notion/file';
   const handler = fileProxy && createNotionFileHandler(notion);
   const dataSourceId = toNotionId(notion.dataSourceId);
@@ -82,13 +86,15 @@ export default function notionPlugin({
         },
       });
     },
-    async getPageBody({ data }) {
+    async getPageBody(page) {
+      const { data } = page;
       if (!isNotionPage(data)) return;
       const { blocks } = await load(data);
       return {
         node: (
           <NotionRenderer
             {...options}
+            components={typeof components === 'function' ? components(page) : components}
             blocks={blocks}
             getFileUrl={
               handler

@@ -78,9 +78,11 @@ async function createSite(options?: SanityPluginOptions) {
 }
 
 describe('sanityPlugin', () => {
-  it('renders the Portable Text body with custom components', async () => {
-    const components: SanityPluginOptions['components'] = { types: { callout: () => null } };
-    const { plugin, ctx, page } = await createSite({ components });
+  it('renders the Portable Text body with the components of a page', async () => {
+    const components = { types: { callout: () => null } };
+    const { plugin, ctx, page } = await createSite({
+      components: (target) => (target.url === page.url ? components : {}),
+    });
 
     expect((await plugin.getPageBody!.call(ctx, page))?.node).toMatchObject({
       type: PortableText,

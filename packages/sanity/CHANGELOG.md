@@ -1,3 +1,9 @@
+## @fumadocs/sanity@0.3.1
+
+### Components per page in press plugins
+
+- The press plugins of Fumadocs MDX, Obsidian, Notion and Sanity accept `components` as a function of the page, typed by the pages of the site.
+
 ## @fumadocs/sanity@0.3.0
 
 ### Framework plugins

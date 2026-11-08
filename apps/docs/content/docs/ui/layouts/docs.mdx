@@ -276,8 +276,10 @@ export function SidebarSeparator({ className, style, children, ...props }: Compo
 Pass your chat panel to `aiChat` with its open state, the layout places it beside the page on wide screens, and floats it over the page on smaller ones.
 
 ```tsx
-<DocsLayout aiChat={{ open, onOpenChange: setOpen, panel: <MyChat /> }} />
+<DocsLayout aiChat={{ open, onOpenChange: setOpen, panel: <MyChat />, trigger: true }} />
 ```
+
+The layout has no Ask AI button of its own: `trigger` adds a floating one.
 
 See [Ask AI](/docs/integrations/llms#ask-ai) for a pre-built chat.
 

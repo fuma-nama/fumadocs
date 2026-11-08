@@ -1,5 +1,5 @@
 import type { Plugin, PluginContext } from 'fumadocs-core/framework/plugin';
-import type { Page } from 'fumadocs-core/source';
+import type { LoaderConfig, Page } from 'fumadocs-core/source';
 import type { MDXComponents } from 'mdx/types';
 import { createElement, type ComponentProps } from 'react';
 import type { AsyncDocCollectionEntry } from '@/runtime/server';
@@ -7,9 +7,12 @@ import type { DocData, DocMethods } from '@/runtime/types';
 
 type Awaitable<T> = T | Promise<T>;
 
-export interface MdxPluginOptions {
-  /** MDX components of the page body and its processed Markdown, relative links in `a` resolve to the URLs of their pages */
-  components?: MDXComponents;
+export interface MdxPluginOptions<P extends Page = Page> {
+  /**
+   * MDX components of the page body and its processed Markdown, or a function returning those of a page; relative links in
+   * `a` resolve to the URLs of their pages
+   */
+  components?: MDXComponents | ((page: P) => MDXComponents);
 }
 
 /** a page of a Fumadocs MDX collection, loaded eagerly or with `async: true` */
@@ -18,11 +21,14 @@ type Entry = DocMethods & (DocData | Pick<AsyncDocCollectionEntry, 'load'>);
 /**
  * Render the pages of Fumadocs MDX collections: their body, Markdown, table of contents, structured data and dates.
  */
-export default function mdxPlugin({ components }: MdxPluginOptions = {}): Plugin {
-  const Link = components?.a ?? 'a';
-
-  async function getComponents(ctx: PluginContext, page: Page) {
+export default function mdxPlugin<Config extends LoaderConfig = LoaderConfig>({
+  components: componentsOption,
+}: MdxPluginOptions<Config['page']> = {}): Plugin<Config> {
+  async function getComponents(ctx: PluginContext<Config>, page: Config['page']) {
     const loader = await ctx.getLoader();
+    const components =
+      typeof componentsOption === 'function' ? componentsOption(page) : componentsOption;
+    const Link = components?.a ?? 'a';
     return {
       ...components,
       a: (props: ComponentProps<'a'>) =>

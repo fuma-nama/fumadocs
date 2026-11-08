@@ -1,27 +1,32 @@
 import path from 'node:path';
 import type { Plugin, PluginContext } from 'fumadocs-core/framework/plugin';
-import type { Page } from 'fumadocs-core/source';
+import type { LoaderConfig, Page } from 'fumadocs-core/source';
 import type { MDXComponents } from 'mdx/types';
 import { createElement, type ComponentProps } from 'react';
 import type { ObsidianRendererResult } from './renderer';
 import type { ObsidianPage, ObsidianSource } from './source';
 import * as ObsidianComponents from './ui';
 
-export interface ObsidianPluginOptions {
+export interface ObsidianPluginOptions<P extends Page = Page> {
   /** the vault from `obsidian()`, the one your content source reads */
   vault: ObsidianSource;
 
-  /** components to render pages with, like the MDX components of Fumadocs UI, with the Obsidian components by default */
-  components?: MDXComponents;
+  /**
+   * components to render pages with, like the MDX components of Fumadocs UI, or a function returning those of a page; with
+   * the Obsidian components by default
+   */
+  components?: MDXComponents | ((page: P) => MDXComponents);
 }
 
 /**
  * Render the pages of an Obsidian vault from `obsidian()`, with relative links resolved to the URLs of their pages.
  */
-export default function obsidianPlugin({ vault, components }: ObsidianPluginOptions): Plugin {
+export default function obsidianPlugin<Config extends LoaderConfig = LoaderConfig>({
+  vault,
+  components: componentsOption,
+}: ObsidianPluginOptions<Config['page']>): Plugin<Config> {
   // a vault change creates new pages, so their results stay valid
   const rendered = new WeakMap<ObsidianPage, Promise<ObsidianRendererResult>>();
-  const Link = components?.a ?? 'a';
 
   /** pages of this vault, other local sources have the same page data */
   function isVaultPage(page: Page): page is Page & { data: ObsidianPage } {
@@ -31,11 +36,14 @@ export default function obsidianPlugin({ vault, components }: ObsidianPluginOpti
   }
 
   function render(
-    ctx: PluginContext,
-    page: Page & { data: ObsidianPage },
+    ctx: PluginContext<Config>,
+    page: Config['page'] & { data: ObsidianPage },
   ): Promise<ObsidianRendererResult> {
     let result = rendered.get(page.data);
     if (!result) {
+      const components =
+        typeof componentsOption === 'function' ? componentsOption(page) : componentsOption;
+      const Link = components?.a ?? 'a';
       result = Promise.all([page.data.load(), ctx.getLoader()]).then(([renderer, loader]) =>
         renderer.render({
           ...ObsidianComponents,
