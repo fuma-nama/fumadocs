@@ -82,7 +82,7 @@ export function Sidebar({ className, ...props }: SidebarProps) {
           </Base.SidebarCollapseTrigger>
         </div>
         <div className="flex flex-col gap-2 px-3 empty:hidden">
-          <TabsMenu />
+          <TabsMenus />
           {slots.searchTrigger && (
             <slots.searchTrigger.full
               hideIfDisabled
@@ -143,7 +143,7 @@ export function SidebarDrawer() {
           </Base.SidebarTrigger>
         </div>
         <div className="flex flex-col gap-2 px-3 empty:hidden">
-          <TabsMenu />
+          <TabsMenus />
           {aiChat && (
             <button
               type="button"
@@ -164,21 +164,34 @@ export function SidebarDrawer() {
   );
 }
 
-function TabsMenu() {
+/** the sections, then the root folders of a type within them (`root: 'version'`), as one control */
+function TabsMenus() {
   const {
     props: { tabs },
   } = useSpaciousLayout();
+  const groups = useTabsGroups(tabs);
+  const start = Math.max(
+    0,
+    groups.findLastIndex((group) => typeof group.active?.root !== 'string'),
+  );
+  if (start >= groups.length) return;
+
+  return (
+    <div className="flex flex-col rounded-xl border bg-fd-secondary/50 divide-y overflow-clip">
+      {groups.map((group, i) => i >= start && <TabsMenu key={i} options={group.options} />)}
+    </div>
+  );
+}
+
+function TabsMenu({ options }: { options: LayoutTab[] }) {
   const t = useTranslations();
   const pathname = usePathname();
   const path = useTreePath();
-  const options =
-    useTabsGroups(tabs).findLast((group) => typeof group.active?.root !== 'string')?.options ?? [];
   const selected = options.findLast((tab) => isLayoutTabActive(tab, path, pathname));
-  if (options.length === 0) return;
 
   return (
     <Menu.Root>
-      <Menu.Trigger className="flex w-full h-10 items-center gap-3 rounded-xl border bg-fd-secondary/50 ps-[calc(--spacing(2.5)-1px)] pe-2.5 text-start font-medium outline-none transition-colors hover:bg-fd-accent focus-visible:ring-2 focus-visible:ring-fd-ring data-popup-open:bg-fd-accent [&_svg]:size-4 [&_svg]:shrink-0">
+      <Menu.Trigger className="flex w-full h-10 items-center gap-3 ps-[calc(--spacing(2.5)-1px)] pe-2.5 text-start font-medium outline-none transition-colors hover:bg-fd-accent focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-fd-ring data-popup-open:bg-fd-accent [&_svg]:size-4 [&_svg]:shrink-0">
         {selected && <TabIcon tab={selected} />}
         <span className={cn('flex-1 truncate', !selected && 'text-fd-muted-foreground')}>
           {selected ? selected.title : t('Layout Tab', { note: 'layout tab trigger' })}
