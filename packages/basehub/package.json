@@ -30,7 +30,7 @@
     "types:check": "tsc --noEmit"
   },
   "devDependencies": {
-    "@types/node": "26.6.5",
+    "@types/node": "26.6.6",
     "@types/react": "^19.3.0",
     "basehub": "9.6.0",
     "fuma-cli": "^0.3.1",
@@ -38,7 +38,7 @@
     "fumadocs-ui": "workspace:@fumadocs/base-ui@*",
     "react": "^19.3.1",
     "tsconfig": "workspace:*",
-    "tsdown": "0.23.1",
+    "tsdown": "0.23.7",
     "typescript": "^7.0.2"
   },
   "peerDependencies": {

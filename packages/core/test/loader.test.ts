@@ -821,6 +821,7 @@ test('Loader: a page for each params of a dynamic file', () => {
             root: true,
             staticParams: [{ framework: 'waku' }, { framework: 'astro' }],
           },
+          dataAt: (params) => ({ title: `Framework ${params.framework}`, root: true }),
         },
         { type: 'meta', path: '[framework]/meta.cn.json', data: { title: 'Framework CN' } },
         {
@@ -864,7 +865,7 @@ test('Loader: a page for each params of a dynamic file', () => {
   // the meta files of a dynamic folder go to each folder that pages fill
   const roots = (locale: string) =>
     result.getPageTree(locale).children.map((node) => node.type === 'folder' && node.name);
-  expect(roots('en')).toEqual(['[literal]', 'Framework', 'Framework']);
+  expect(roots('en')).toEqual(['[literal]', 'Framework astro', 'Framework waku']);
   expect(roots('cn')).toContain('Framework CN');
 });
 

@@ -1,15 +1,11 @@
 import path from 'node:path';
 import MagicString from 'magic-string';
 import type { Binding as YukuBinding, Module as YukuModule } from 'yuku-analyzer';
-import { createCodegen, slash } from '@/utils/codegen';
+import { createCodegen, metaLang, slash } from '@/utils/codegen';
 import { MacroModuleId } from './options';
+import { SupportedPatterns } from '@/config/build';
 
 type YukuNode = Parameters<YukuModule['parentOf']>[0];
-
-const SupportedPatterns = {
-  doc: '**/*.{mdx,md}',
-  meta: '**/*.{json,yaml}',
-};
 
 type MacroFn = 'defineDocs' | 'defineCollections';
 
@@ -509,7 +505,7 @@ export async function transformMacroModule({
         base,
         eager: true,
         import: 'default',
-        query,
+        query: { ...query, ...metaLang },
       })}`;
     }
 

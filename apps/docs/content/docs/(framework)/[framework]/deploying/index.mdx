@@ -1,0 +1,124 @@
+---
+title: Deploying
+description: Deploy your Fumadocs app
+---
+
+## Overview
+
+Your Fumadocs app deploys like any other {frameworkName} app.
+
+<show when={props.framework === 'next'}>
+
+See the [Next.js deployment guide](https://nextjs.org/docs/app/getting-started/deploying).
+
+</show>
+
+<show when={props.framework === 'react-router'}>
+
+See the [React Router deployment guide](https://reactrouter.com/start/framework/deploying).
+
+</show>
+
+<show when={props.framework === 'tanstack-start'}>
+
+See the [TanStack Start hosting guide](https://tanstack.com/start/latest/docs/framework/react/guide/hosting).
+
+</show>
+
+<show when={props.framework === 'waku'}>
+
+See the [Waku deployment guide](https://waku.gg/#deployment).
+
+</show>
+
+<show when={props.framework === 'astro'}>
+
+See the [Astro deployment guide](https://docs.astro.build/en/guides/deploy/).
+
+</show>
+
+To output a static site that a CDN can host, see [Static Build](/docs/deploying/static).
+
+<show when={props.framework === 'next'}>
+
+## Cloudflare
+
+Fumadocs doesn't work on the Edge runtime. Deploy with [OpenNext](https://opennext.js.org/cloudflare) instead.
+
+## Docker
+
+With Fumadocs MDX, the build reads `source.config.ts`. Add it and your `next.config.js` file to the `WORKDIR` in the Dockerfile.
+The following snippet is taken from the official [Next.js Dockerfile Example](https://github.com/vercel/next.js/blob/canary/examples/with-docker/Dockerfile):
+
+```zsh title="Dockerfile"
+# syntax=docker.io/docker/dockerfile:1
+
+FROM node:18-alpine AS base
+
+# Install dependencies only when needed
+FROM base AS deps
+# Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
+RUN apk add --no-cache libc6-compat
+WORKDIR /app
+
+# Install dependencies based on the preferred package manager [!code highlight:2]
+COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* .npmrc* source.config.ts next.config.* ./
+RUN \
+  if [ -f yarn.lock ]; then yarn --frozen-lockfile; \
+  elif [ -f package-lock.json ]; then npm ci; \
+  elif [ -f pnpm-lock.yaml ]; then corepack enable pnpm && pnpm i --frozen-lockfile; \
+  else echo "Lockfile not found." && exit 1; \
+  fi
+
+
+# Rebuild the source code only when needed
+FROM base AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+
+# Next.js collects completely anonymous telemetry data about general usage.
+# Learn more here: https://nextjs.org/telemetry
+# Uncomment the following line in case you want to disable telemetry during the build.
+# ENV NEXT_TELEMETRY_DISABLED=1
+
+RUN \
+  if [ -f yarn.lock ]; then yarn run build; \
+  elif [ -f package-lock.json ]; then npm run build; \
+  elif [ -f pnpm-lock.yaml ]; then corepack enable pnpm && pnpm run build; \
+  else echo "Lockfile not found." && exit 1; \
+  fi
+
+# Production image, copy all the files and run next
+FROM base AS runner
+WORKDIR /app
+
+ENV NODE_ENV=production
+# Uncomment the following line in case you want to disable telemetry during runtime.
+# ENV NEXT_TELEMETRY_DISABLED=1
+
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
+
+COPY --from=builder /app/public ./public
+
+# Automatically leverage output traces to reduce image size
+# https://nextjs.org/docs/advanced-features/output-file-tracing
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+
+USER nextjs
+
+EXPOSE 3000
+
+ENV PORT=3000
+
+# server.js is created by next build from the standalone output
+# https://nextjs.org/docs/pages/api-reference/config/next-config-js/output
+ENV HOSTNAME="0.0.0.0"
+CMD ["node", "server.js"]
+```
+
+This ensures Fumadocs MDX can access your configuration file during builds.
+
+</show>

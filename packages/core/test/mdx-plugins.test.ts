@@ -818,6 +818,8 @@ A {props.framework === "next" && "x"} B {true}
   expect(waku.markdown).toContain('# Deploy on waku');
   expect(waku.markdown).toContain('<span data-framework={props.framework} />');
   expect(waku.markdown).not.toContain('Pro');
+  // a removed branch leaves no blank lines
+  expect(waku.markdown).not.toMatch(/\n{3,}/);
 
   // they read the params as props when rendering
   const html = waku.html({ framework: 'waku' });
@@ -835,4 +837,20 @@ A {props.framework === "next" && "x"} B {true}
   }));
   expect(pro.markdown).toContain('# Deploy on astro');
   expect(pro.markdown).toContain('## Pro');
+});
+
+test('Remark Show: the content of a branch joins the content around it', async () => {
+  const { compile } = await import('@mdx-js/mdx');
+  const { remarkShow } = await import('@/mdx-plugins/remark-show');
+  const { remarkCodeTab } = await import('@/mdx-plugins/remark-code-tab');
+  const file = await compile(
+    {
+      value:
+        '```ts tab="Shared"\na\n```\n\n<show when={props.framework === "astro"}>\n```ts tab="Astro"\nb\n```\n</show>\n',
+      data: { params: { framework: 'astro' } },
+    },
+    { remarkPlugins: [remarkShow, remarkCodeTab] },
+  );
+  // one tab group, across the branch
+  expect(String(file).match(/defaultValue:/g)).toHaveLength(1);
 });

@@ -38,19 +38,19 @@
     "chokidar": "^6.0.0",
     "picomatch": "^4.0.7",
     "tinyglobby": "^0.2.17",
-    "ws": "^8.22.0"
+    "ws": "^8.22.1"
   },
   "devDependencies": {
-    "@types/node": "26.6.5",
+    "@types/node": "26.6.6",
     "@types/picomatch": "^4.0.3",
     "@types/react": "^19.3.0",
     "@types/ws": "^8.18.2",
     "fumadocs-core": "workspace:*",
     "react": "^19.3.1",
     "tsconfig": "workspace:*",
-    "tsdown": "0.23.1",
-    "vite": "^8.3.5",
-    "vitest": "^5.0.5"
+    "tsdown": "0.23.7",
+    "vite": "^8.3.6",
+    "vitest": "^5.1.0"
   },
   "peerDependencies": {
     "@types/react": "*",

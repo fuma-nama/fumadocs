@@ -1,0 +1,413 @@
+---
+title: Manual Installation
+icon: Wrench
+---
+
+import { frameworks } from '@/lib/framework';
+
+export const frontmatter = {
+  description: `Add Fumadocs to an existing ${frameworks.find((item) => item.value === props.framework)?.name} project.`,
+};
+
+You can also let [Fumadocs CLI](/docs/cli#init) set it up for you:
+
+```npm
+npx @fumadocs/cli init
+```
+
+## Prerequisites
+
+Before continuing, make sure you have configured:
+
+<show when={props.framework === 'next'}>
+
+- Next.js 16.
+- Tailwind CSS 4.
+
+This guide uses [Fumadocs MDX](/docs/mdx) as the content source. Configure it first:
+
+<include cwd>content/docs/mdx/(integrations)/next.mdx#setup-section</include>
+
+</show>
+
+<show when={props.framework === 'react-router' || props.framework === 'tanstack-start' || props.framework === 'waku'}>
+
+- Tailwind CSS 4.
+- Fumadocs MDX: follow the [Vite setup guide](/docs/mdx/vite) and create essential files like `lib/source.ts`.
+
+</show>
+
+<show when={props.framework !== 'astro'}>
+
+<Callout title='Good to Know'>
+
+Fumadocs also supports other content sources, including [Content Collections](/docs/headless/content-collections) and headless CMS.
+
+</Callout>
+
+</show>
+
+<show when={props.framework === 'astro'}>
+
+- Node.js 22.23.4 or later (required by Astro).
+- Tailwind CSS 4.
+
+This guide uses Astro content collections as the content source. `@fumadocs/astro` compiles them with Fumadocs and renders their MDX as React islands.
+
+</show>
+
+## Getting Started
+
+Install the packages:
+
+<show when={props.framework !== 'astro'}>
+
+```npm
+npm i fumadocs-core fumadocs-ui
+```
+
+</show>
+
+<show when={props.framework === 'astro'}>
+
+```npm
+npm i fumadocs-core fumadocs-ui @fumadocs/astro @astrojs/react react react-dom @types/mdx
+```
+
+</show>
+
+### Styles
+
+Add the following to your Tailwind CSS file:
+
+```css
+@import 'tailwindcss';
+/* [!code ++:2] */
+@import 'fumadocs-ui/css/neutral.css';
+@import 'fumadocs-ui/css/preset.css';
+```
+
+<show when={props.framework === 'next'}>
+
+> Fumadocs UI has no default font. Pick one from `next/font`.
+
+</show>
+
+<show when={props.framework !== 'astro'}>
+
+### Root Provider
+
+</show>
+
+<show when={props.framework === 'next' || props.framework === 'react-router' || props.framework === 'tanstack-start'}>
+
+Wrap your entire app inside [Root Provider](/docs/ui/layouts/root-provider), and add the required styles to `body`.
+
+</show>
+
+<show when={props.framework === 'next'}>
+
+```tsx title="app/layout.tsx"
+import { RootProvider } from 'fumadocs-ui/provider/next';
+import type { ReactNode } from 'react';
+
+export default function Layout({ children }: { children: ReactNode }) {
+  return (
+    <html lang="en" suppressHydrationWarning>
+      <body
+        // required styles [!code ++:2]
+        className="flex flex-col min-h-screen"
+      >
+        <RootProvider>{children}</RootProvider>
+      </body>
+    </html>
+  );
+}
+```
+
+</show>
+
+<show when={props.framework === 'react-router'}>
+
+```tsx title="app/root.tsx"
+import { Links, Meta, Scripts, ScrollRestoration } from 'react-router';
+import { RootProvider } from 'fumadocs-ui/provider/react-router';
+import './app.css';
+
+export function Layout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <meta charSet="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <Meta />
+        <Links />
+      </head>
+      <body className="flex flex-col min-h-screen">
+        {/* [!code ++] */}
+        <RootProvider>{children}</RootProvider>
+        <ScrollRestoration />
+        <Scripts />
+      </body>
+    </html>
+  );
+}
+```
+
+</show>
+
+<show when={props.framework === 'tanstack-start'}>
+
+```tsx title="src/routes/__root.tsx"
+import { createRootRoute, HeadContent, Outlet, Scripts } from '@tanstack/react-router';
+import * as React from 'react';
+import { RootProvider } from 'fumadocs-ui/provider/tanstack';
+
+export const Route = createRootRoute({
+  component: RootComponent,
+});
+
+function RootComponent() {
+  return (
+    <RootDocument>
+      <Outlet />
+    </RootDocument>
+  );
+}
+
+function RootDocument({ children }: { children: React.ReactNode }) {
+  return (
+    <html suppressHydrationWarning>
+      <head>
+        <HeadContent />
+      </head>
+      <body className="flex flex-col min-h-screen">
+        {/* [!code ++] */}
+        <RootProvider>{children}</RootProvider>
+        <Scripts />
+      </body>
+    </html>
+  );
+}
+```
+
+</show>
+
+<show when={props.framework === 'waku'}>
+
+Wrap your entire app inside [Root Provider](/docs/ui/layouts/root-provider) from a client component:
+
+<include cwd meta='tab="src/components/provider.tsx"'>
+  ../../examples/waku/src/components/provider.tsx
+</include>
+
+```tsx tab="src/pages/_layout.tsx"
+import '@/styles/globals.css';
+import type { ReactNode } from 'react';
+import { Provider } from '@/components/provider';
+
+// [!code ++:3]
+export default function RootLayout({ children }: { children: ReactNode }) {
+  return <Provider>{children}</Provider>;
+}
+
+export const getConfig = async () => {
+  return {
+    render: 'static',
+  };
+};
+```
+
+</show>
+
+<show when={props.framework === 'astro'}>
+
+### Integration
+
+Add the Fumadocs integration to your Astro config:
+
+```js title="astro.config.mjs"
+import { defineConfig } from 'astro/config';
+import tailwindcss from '@tailwindcss/vite';
+import fumadocs from '@fumadocs/astro';
+
+export default defineConfig({
+  integrations: [fumadocs({ components: './src/components/mdx.tsx' })],
+  vite: {
+    plugins: [tailwindcss()],
+  },
+});
+```
+
+### Content Collections
+
+Define your content collections:
+
+<include cwd meta='title="src/content.config.ts"'>
+  ../../examples/astro-min/src/content.config.ts
+</include>
+
+Create the Fumadocs source from your collections:
+
+<include cwd meta='title="src/lib/source.ts"'>
+  ../../examples/astro-min/src/lib/source.ts
+</include>
+
+To combine it with other sources in one `loader()`, pass `{ baseDir }` as the third argument of `toFumadocsSource()` to place its files under a directory.
+
+</show>
+
+### Routes
+
+<show when={props.framework === 'next' || props.framework === 'waku'}>
+
+Put the shared options of your layouts in one file:
+
+</show>
+
+<show when={props.framework === 'next'}>
+
+<include cwd meta='title="lib/layout.shared.tsx"'>
+  ../../examples/next-min/lib/layout.shared.tsx
+</include>
+
+Create the following files:
+
+<include cwd meta='tab="components/mdx.tsx"'>
+  ../../examples/next-min/components/mdx.tsx
+</include>
+
+<include cwd meta='tab="app/docs/layout.tsx"'>
+  ../../examples/next-min/app/docs/layout.tsx
+</include>
+
+<include cwd meta='tab="app/docs/[[...slug]]/page.tsx"'>
+  ../../examples/next-min/app/docs/[[...slug]]/page.tsx
+</include>
+
+<include cwd meta='tab="app/api/search/route.ts"'>
+  ../../examples/next-min/app/api/search/route.ts
+</include>
+
+</show>
+
+<show when={props.framework === 'react-router'}>
+
+Update your routes:
+
+```ts title="app/routes.ts"
+import { type RouteConfig, index, route } from '@react-router/dev/routes';
+
+export default [
+  index('routes/home.tsx'),
+  // [!code ++:2]
+  route('docs/*', 'routes/docs.tsx'),
+  route('api/search', 'routes/search.ts'),
+] satisfies RouteConfig;
+```
+
+Create the following files:
+
+<include cwd meta='tab="app/components/mdx.tsx"'>
+  ../../examples/react-router-min/app/components/mdx.tsx
+</include>
+<include cwd meta='tab="app/lib/layout.shared.tsx"'>
+  ../../examples/react-router-min/app/lib/layout.shared.tsx
+</include>
+<include cwd meta='tab="app/routes/docs.tsx"'>
+  ../../examples/react-router-min/app/routes/docs.tsx
+</include>
+<include cwd meta='tab="app/routes/search.ts"'>
+  ../../examples/react-router-min/app/routes/search.ts
+</include>
+
+</show>
+
+<show when={props.framework === 'tanstack-start'}>
+
+Create the following files:
+
+<include cwd meta='tab="src/components/mdx.tsx"'>
+  ../../examples/tanstack-start-min/src/components/mdx.tsx
+</include>
+<include cwd meta='tab="src/lib/layout.shared.tsx"'>
+  ../../examples/tanstack-start-min/src/lib/layout.shared.tsx
+</include>
+<include cwd meta='tab="src/routes/docs/$.tsx"'>
+  ../../examples/tanstack-start-min/src/routes/docs/$.tsx
+</include>
+<include cwd meta='tab="src/routes/api/search.ts"'>
+  ../../examples/tanstack-start-min/src/routes/api/search.ts
+</include>
+
+</show>
+
+<show when={props.framework === 'waku'}>
+
+<include cwd meta='title="src/lib/layout.shared.tsx"'>
+  ../../examples/waku/src/lib/layout.shared.tsx
+</include>
+
+Create the following files:
+
+<include cwd meta='tab="src/components/mdx.tsx"'>
+  ../../examples/waku/src/components/mdx.tsx
+</include>
+<include cwd meta='tab="src/pages/docs/_layout.tsx"'>
+  ../../examples/waku/src/pages/docs/_layout.tsx
+</include>
+<include cwd meta='tab="src/pages/docs/[...slugs].tsx"'>
+  ../../examples/waku/src/pages/docs/[...slugs].tsx
+</include>
+<include cwd meta='tab="src/pages/_api/api/search.ts"'>
+  ../../examples/waku/src/pages/_api/api/search.ts
+</include>
+
+</show>
+
+<show when={props.framework === 'astro'}>
+
+Create the following files:
+
+<include cwd meta='tab="src/components/mdx.tsx"'>
+  ../../examples/astro-min/src/components/mdx.tsx
+</include>
+<include cwd meta='tab="src/components/provider.tsx"'>
+  ../../examples/astro-min/src/components/provider.tsx
+</include>
+<include cwd meta='tab="src/components/search.tsx"'>
+  ../../examples/astro-min/src/components/search.tsx
+</include>
+<include cwd meta='tab="src/components/docs.tsx"'>
+  ../../examples/astro-min/src/components/docs.tsx
+</include>
+<include cwd meta='tab="src/lib/layout.shared.tsx"'>
+  ../../examples/astro-min/src/lib/layout.shared.tsx
+</include>
+<include cwd meta='tab="src/layouts/Layout.astro"'>
+  ../../examples/astro-min/src/layouts/Layout.astro
+</include>
+<include cwd meta='tab="src/pages/docs/[...slug].astro"'>
+  ../../examples/astro-min/src/pages/docs/[...slug].astro
+</include>
+<include cwd meta='tab="src/pages/api/search.ts"'>
+  ../../examples/astro-min/src/pages/api/search.ts
+</include>
+
+</show>
+
+The search route uses ZBSearch. See [Document Search](/docs/headless/search) to configure it.
+
+### Finish
+
+Start the dev server and write your docs in `content/docs`:
+
+```mdx title="content/docs/index.mdx"
+---
+title: Hello World
+---
+
+## Introduction
+
+I love Fumadocs.
+```

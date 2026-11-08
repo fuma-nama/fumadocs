@@ -137,6 +137,8 @@ export function fromJS<M>(options: MarkdownRendererJSOptions): MarkdownRenderer<
         ...JsxRuntime,
         baseUrl,
       },
+      // the code of the module reads the params of a page as `props`, like its content
+      props: options.props ?? {},
       ...rest,
     };
   }

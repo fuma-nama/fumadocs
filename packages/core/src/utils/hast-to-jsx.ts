@@ -85,8 +85,8 @@ const chars = Uint8Array.from({ length: 128 }, (_, code) => {
     (/[-#/*\\\w]/.test(char) ? PROPERTY : 0) |
     (/[-\w]/.test(char) ? CUSTOM : 0) |
     (/[0-9a-z_-]/.test(char) ? BRACKET : 0) |
-    // where a value ends, or a string or parentheses start
-    (/[;}"'(]/.test(char) ? VALUE : 0)
+    // where a value ends, or a string or `url()` starts
+    (/[;}"'u]/.test(char) ? VALUE : 0)
   );
 });
 
@@ -408,7 +408,7 @@ function parseStyle(input: string): Record<string, string> {
     const valueStart = skipSpace(input, i + 1);
     i = valueEnd(input, valueStart);
     const value = removeComments(input.slice(valueStart, i)).trim();
-    if (value) style[plain && name.startsWith('--') ? name : camelCase(name)] = value;
+    if (value) style[styleName(name)] = value;
 
     while (input.charCodeAt(i) === 59 || isSpace(input.charCodeAt(i))) i++;
     i = comments(input, i);
@@ -417,7 +417,7 @@ function parseStyle(input: string): Record<string, string> {
   return style;
 }
 
-/** where a value ends: at `;` or `}` outside of strings and parentheses */
+/** where a value ends: at `;` or `}` outside of strings and `url()` */
 function valueEnd(input: string, i: number): number {
   while (i < input.length) {
     const code = input.charCodeAt(i);
@@ -425,26 +425,33 @@ function valueEnd(input: string, i: number): number {
       i++;
     } else if (code === 59 || code === 125) {
       break;
-    } else if (code === 40) {
-      const end = input.indexOf(')', i + 1);
-      i = end === -1 ? i + 1 : end + 1;
+    } else if (code === 117) {
+      i = (input.startsWith('url(', i) && urlEnd(input, i + 4)) || i + 1;
     } else {
-      i = quoteEnd(input, i, code);
+      i = quoteEnd(input, i, code) ?? i + 1;
     }
   }
   return i;
 }
 
-/** a string ends at its closing quote on the same line, or else after its last escaped quote */
-function quoteEnd(input: string, start: number, quote: number): number {
-  let end = start + 1;
+/** the end of a closed string, its escapes can be any character */
+function quoteEnd(input: string, start: number, quote: number): number | undefined {
   for (let i = start + 1; i < input.length; i++) {
     const code = input.charCodeAt(i);
-    if (code === quote) return i + 1;
-    if (code === 92 && input.charCodeAt(i + 1) === quote) end = ++i + 1;
-    else if (code === 10 || code === 13 || code === 0x2028 || code === 0x2029) break;
+    if (code === 92) i++;
+    else if (code === quote) return i + 1;
   }
-  return end;
+}
+
+/** the end of `url()` from `start` after `url(`, its argument is a string or else any text without `)` */
+function urlEnd(input: string, start: number): number | undefined {
+  const code = input.charCodeAt(start);
+  if (code === 34 || code === 39) {
+    const end = quoteEnd(input, start, code);
+    if (end !== undefined && input.charCodeAt(end) === 41) return end + 1;
+  }
+  const end = input.indexOf(')', start);
+  if (end !== -1) return end + 1;
 }
 
 function comments(input: string, i: number): number {
@@ -472,31 +479,15 @@ function removeComments(value: string): string {
   return last === 0 ? value : out + value.slice(last);
 }
 
-function camelCase(name: string): string {
-  if (!name.includes('-') || isCustomProperty(name)) return name;
-
+/** like `hast-util-to-jsx-runtime`: custom properties are case-sensitive, the others are camel cased for React */
+function styleName(name: string): string {
+  if (name.startsWith('--')) return name;
   let lower = name.toLowerCase();
   // `-ms-` stays lowercase for React
   if (lower.startsWith('-ms-')) lower = lower.slice(1);
-  let out = '';
-  let last = 0;
-  for (let i = lower.indexOf('-'); i !== -1; i = lower.indexOf('-', i + 1)) {
-    const code = lower.charCodeAt(i + 1);
-    if (code >= 97 && code <= 122) {
-      out += lower.slice(last, i) + String.fromCharCode(code - 32);
-      last = i + 2;
-      i++;
-    }
-  }
-  return out + lower.slice(last);
-}
-
-function isCustomProperty(name: string): boolean {
-  if (name.length < 3 || !name.startsWith('--')) return false;
-  for (let i = 2; i < name.length; i++) {
-    if (!is(name.charCodeAt(i), CUSTOM)) return false;
-  }
-  return true;
+  return lower.includes('-')
+    ? lower.replace(/-([a-z])/g, (_, char: string) => char.toUpperCase())
+    : lower;
 }
 
 function skipSpace(input: string, i: number): number {

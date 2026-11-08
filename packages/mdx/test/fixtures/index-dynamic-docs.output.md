@@ -11,7 +11,7 @@ const create = server<typeof Config, import("fumadocs-mdx/runtime/types").Intern
 
 ```ts title="dynamic.ts"
 // @ts-nocheck
-import { default as __fd_glob_0 } from "./generate-index-docs/meta.json?collection=docs"
+import { default as __fd_glob_0 } from "./generate-index-docs/meta.json?collection=docs&lang.js"
 import { dynamic } from 'fumadocs-mdx/runtime/dynamic';
 import path from 'node:path';
 import * as Config from './config';

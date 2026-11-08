@@ -34,14 +34,14 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
-    "hono": "^4.13.13"
+    "hono": "^4.13.17"
   },
   "devDependencies": {
     "@fumadocs/tailwind": "workspace:*",
-    "@hono/node-server": "^2.1.5",
-    "@pierre/highlights": "^0.2.0",
-    "@tailwindcss/vite": "^4.3.3",
-    "@types/node": "26.6.5",
+    "@hono/node-server": "^2.1.6",
+    "@pierre/highlights": "^0.4.0",
+    "@tailwindcss/vite": "^4.3.5",
+    "@types/node": "26.6.6",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "fumadocs-core": "workspace:*",
@@ -51,10 +51,10 @@
     "react-dom": "^19.3.1",
     "remark": "^15.0.1",
     "remark-rehype": "^11.1.2",
-    "tailwindcss": "^4.3.3",
+    "tailwindcss": "^4.3.5",
     "tsconfig": "workspace:*",
-    "tsdown": "0.23.1",
-    "vite": "^8.3.5"
+    "tsdown": "0.23.7",
+    "vite": "^8.3.6"
   },
   "engines": {
     "node": ">=22.18.0"

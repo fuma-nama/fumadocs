@@ -47,22 +47,22 @@
   "dependencies": {
     "@base-ui/react": "^1.9.0",
     "class-variance-authority": "^0.7.1",
-    "cn": "^0.5.0",
-    "lucide-react": "^1.61.0",
+    "cn": "^0.5.2",
+    "lucide-react": "^1.70.0",
     "mdast-util-mdx": "^3.0.0",
     "remark": "^15.0.1",
     "remark-mdx": "^3.1.1",
     "remark-rehype": "^11.1.2",
-    "shiki": "^4.5.0",
+    "shiki": "^4.6.0",
     "unified": "^11.0.5",
     "vfile": "^6.0.3"
   },
   "devDependencies": {
-    "@types/estree": "^1.0.9",
+    "@types/estree": "^1.0.10",
     "@types/hast": "^3.0.5",
     "@types/mdast": "^4.0.4",
     "@types/mdx": "^2.0.14",
-    "@types/node": "^26.6.5",
+    "@types/node": "^26.6.6",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "fumadocs-core": "workspace:*",
@@ -70,8 +70,8 @@
     "react": "19.3.1",
     "react-dom": "^19.3.1",
     "tsconfig": "workspace:*",
-    "tsdown": "0.23.1",
-    "vitest": "^5.0.5"
+    "tsdown": "0.23.7",
+    "vitest": "^5.1.0"
   },
   "peerDependencies": {
     "@types/hast": "*",

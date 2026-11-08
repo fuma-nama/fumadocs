@@ -130,7 +130,12 @@ export function getLayoutTabs(
 
   function next(node: PageTree.Root | PageTree.Folder, unlisted?: boolean) {
     if ('root' in node && node.root) {
-      const url = node.index?.url ?? node.children.find((node) => node.type === 'page')?.url;
+      const page =
+        node.index ??
+        node.children.find((node) => node.type === 'page') ??
+        // a folder of folders, like `(framework)/[framework]`
+        PageTree.findPath(node.children, (node) => node.type === 'page')?.at(-1);
+      const url = page?.type === 'page' ? page.url : undefined;
 
       if (url) {
         const option: LayoutTab = {

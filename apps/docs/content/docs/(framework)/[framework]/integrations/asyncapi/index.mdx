@@ -1,0 +1,557 @@
+---
+title: AsyncAPI
+description: Generating docs for AsyncAPI schema.
+---
+
+## Setup
+
+Install the required packages.
+
+```npm
+npm i @fumadocs/asyncapi shiki
+```
+
+### Generate Styles
+
+Add the following line:
+
+```css title="Tailwind CSS"
+@import 'tailwindcss';
+@import 'fumadocs-ui/css/neutral.css';
+@import 'fumadocs-ui/css/preset.css';
+/* [!code ++] */
+@import '@fumadocs/asyncapi/css/preset.css';
+```
+
+### Configure Plugin
+
+Create the AsyncAPI server instance and the `<AsyncAPIPage />` component.
+
+```ts tab="lib/asyncapi.ts"
+import { createAsyncAPI } from '@fumadocs/asyncapi/server';
+
+// note: this is a server-side API
+export const asyncapi = createAsyncAPI({
+  // the AsyncAPI schema, you can also give it an external URL.
+  input: ['./asyncapi.yaml'],
+});
+```
+
+```tsx tab="components/api-page.tsx"
+'use client';
+import { createAsyncAPIPage } from '@fumadocs/asyncapi/ui';
+
+export const AsyncAPIPage = createAsyncAPIPage();
+```
+
+See [`createAsyncAPI()`](/docs/integrations/asyncapi/server) and [`createAsyncAPIPage()`](/docs/integrations/asyncapi/api-page) for their options.
+
+### Generate Pages
+
+Pass `staticSource()` to your [`loader()`](/docs/headless/source-api/source). It generates pages without writing files.
+
+<show when={props.framework === 'react-router' || props.framework === 'tanstack-start'}>
+
+`staticSource()` reads files, so `source.ts` becomes server-only. Move `docs` into `collections.ts` for client code to import.
+
+</show>
+
+<show when={props.framework === 'next'}>
+
+```ts title="lib/source.ts"
+import { loader } from 'fumadocs-core/source';
+import { defineDocs } from 'fumadocs-mdx/macro';
+import { asyncapi } from '@/lib/asyncapi'; // [!code ++]
+
+const docs = defineDocs({
+  dir: 'content/docs',
+});
+
+export const source = loader(
+  // [!code ++:6]
+  {
+    docs: docs.toFumadocsSource(),
+    asyncapi: await asyncapi.staticSource({
+      baseDir: 'asyncapi',
+    }),
+  },
+  {
+    baseUrl: '/docs',
+    // [!code ++:2] optional: adds the direction of messages to each page item in page tree
+    plugins: [asyncapi.loaderPlugin()],
+  },
+);
+```
+
+</show>
+
+<show when={props.framework === 'react-router'}>
+
+```ts tab="app/lib/source.ts"
+import { loader } from 'fumadocs-core/source';
+import { defineDocs } from 'fumadocs-mdx/macro'; // [!code --]
+// [!code ++:2]
+import { docs } from '@/lib/collections';
+import { asyncapi } from '@/lib/asyncapi';
+
+// [!code --:6]
+export const docs = defineDocs({
+  dir: 'content/docs',
+  docs: {
+    async: true,
+  },
+});
+
+// server-only now, as `staticSource()` reads files [!code ++]
+export const source = loader(
+  // [!code ++:6]
+  {
+    docs: docs.toFumadocsSource(),
+    asyncapi: await asyncapi.staticSource({
+      baseDir: 'asyncapi',
+    }),
+  },
+  {
+    baseUrl: '/docs',
+    // [!code ++:2] optional: adds the direction of messages to each page item in page tree
+    plugins: [asyncapi.loaderPlugin()],
+  },
+);
+```
+
+```ts tab="app/lib/collections.ts"
+import { defineDocs } from 'fumadocs-mdx/macro';
+
+export const docs = defineDocs({
+  dir: 'content/docs',
+  docs: {
+    async: true,
+  },
+});
+```
+
+</show>
+
+<show when={props.framework === 'tanstack-start'}>
+
+```ts tab="src/lib/source.ts"
+import { loader } from 'fumadocs-core/source';
+import { defineDocs } from 'fumadocs-mdx/macro'; // [!code --]
+// [!code ++:2]
+import { docs } from '@/lib/collections';
+import { asyncapi } from '@/lib/asyncapi';
+
+// [!code --:6]
+export const docs = defineDocs({
+  dir: 'content/docs',
+  docs: {
+    async: true,
+  },
+});
+
+// server-only now, as `staticSource()` reads files [!code ++]
+export const source = loader(
+  // [!code ++:6]
+  {
+    docs: docs.toFumadocsSource(),
+    asyncapi: await asyncapi.staticSource({
+      baseDir: 'asyncapi',
+    }),
+  },
+  {
+    baseUrl: '/docs',
+    // [!code ++:2] optional: adds the direction of messages to each page item in page tree
+    plugins: [asyncapi.loaderPlugin()],
+  },
+);
+```
+
+```ts tab="src/lib/collections.ts"
+import { defineDocs } from 'fumadocs-mdx/macro';
+
+export const docs = defineDocs({
+  dir: 'content/docs',
+  docs: {
+    async: true,
+  },
+});
+```
+
+</show>
+
+<show when={props.framework === 'waku'}>
+
+```ts title="src/lib/source.ts"
+import { loader } from 'fumadocs-core/source';
+import { defineDocs } from 'fumadocs-mdx/macro';
+import { asyncapi } from '@/lib/asyncapi'; // [!code ++]
+
+const docs = defineDocs({
+  dir: 'content/docs',
+});
+
+export const source = loader(
+  // [!code ++:6]
+  {
+    docs: docs.toFumadocsSource(),
+    asyncapi: await asyncapi.staticSource({
+      baseDir: 'asyncapi',
+    }),
+  },
+  {
+    baseUrl: '/docs',
+    // [!code ++:2] optional: adds the direction of messages to each page item in page tree
+    plugins: [asyncapi.loaderPlugin()],
+  },
+);
+```
+
+</show>
+
+<show when={props.framework === 'astro'}>
+
+```ts title="src/lib/source.ts"
+import { getCollection } from 'astro:content';
+import { loader } from 'fumadocs-core/source';
+import { toFumadocsSource } from '@fumadocs/astro/source';
+import { asyncapi } from '@/lib/asyncapi'; // [!code ++]
+
+export const source = loader(
+  // [!code ++:6]
+  {
+    docs: toFumadocsSource(await getCollection('docs'), await getCollection('meta')),
+    asyncapi: await asyncapi.staticSource({
+      baseDir: 'asyncapi',
+    }),
+  },
+  {
+    baseUrl: '/docs',
+    // [!code ++:2] optional: adds the direction of messages to each page item in page tree
+    plugins: [asyncapi.loaderPlugin()],
+  },
+);
+```
+
+</show>
+
+`staticSource()` generates a page per operation by default. See [Generating Pages](/docs/integrations/asyncapi/generate-files) to customize them.
+
+**Pages of `source` now have two types, `docs` and `asyncapi`.** Update every place that uses `source`, like where you return text for LLMs:
+
+```ts
+import { llms } from 'fumadocs-core/source';
+import { source } from '@/lib/source';
+
+export const docsLlms = llms(source, {
+  renderPage: async (page) => {
+    // [!code ++:3]
+    if (page.type === 'asyncapi') {
+      return `# ${page.data.title}\n\n${await page.data.getText('processed')}`;
+    }
+
+    // your original flow below...
+  },
+});
+```
+
+<show when={props.framework !== 'astro'}>
+
+Render AsyncAPI pages with `<AsyncAPIPage />` in your docs page:
+
+</show>
+
+<show when={props.framework === 'astro'}>
+
+Render AsyncAPI pages in an island of their own, which wraps `<AsyncAPIPage />` with the docs layout:
+
+</show>
+
+<show when={props.framework === 'next'}>
+
+```tsx title="app/docs/[[...slug]]/page.tsx"
+import { AsyncAPIPage } from '@/components/api-page'; // [!code ++]
+
+export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
+  const params = await props.params;
+  const page = source.getPage(params.slug);
+  if (!page) notFound();
+
+  // [!code ++:10]
+  if (page.type === 'asyncapi') {
+    return (
+      <DocsPage full>
+        <DocsTitle>{page.data.title}</DocsTitle>
+        <DocsBody>
+          <AsyncAPIPage {...page.data.getAsyncAPIPageProps()} />
+        </DocsBody>
+      </DocsPage>
+    );
+  }
+
+  // ...
+}
+```
+
+</show>
+
+<show when={props.framework === 'react-router'}>
+
+```tsx title="app/routes/docs.tsx"
+import { docs, source } from '@/lib/source'; // [!code --]
+// [!code ++:3]
+import { docs } from '@/lib/collections';
+import { source } from '@/lib/source';
+import { AsyncAPIPage } from '@/components/api-page';
+
+export async function loader({ params }: Route.LoaderArgs) {
+  const slugs = params['*'].split('/').filter((v) => v.length > 0);
+  const page = source.getPage(slugs);
+  if (!page) throw new Response('Not found', { status: 404 });
+
+  // [!code ++:9]
+  const pageTree = await source.serializePageTree(source.getPageTree());
+  if (page.type === 'asyncapi') {
+    return {
+      type: 'asyncapi' as const,
+      title: page.data.title,
+      props: page.data.getAsyncAPIPageProps(),
+      pageTree,
+    };
+  }
+
+  return { type: 'docs' as const, path: page.path, pageTree }; // [!code highlight]
+}
+
+export default function Page({ loaderData }: Route.ComponentProps) {
+  const data = useFumadocsLoader(loaderData);
+
+  return (
+    <DocsLayout {...baseOptions()} tree={data.pageTree}>
+      {/* [!code ++:8] */}
+      {data.type === 'asyncapi' && (
+        <DocsPage full>
+          <DocsTitle>{data.title}</DocsTitle>
+          <DocsBody>
+            <AsyncAPIPage {...data.props} />
+          </DocsBody>
+        </DocsPage>
+      )}
+      {/* [!code highlight] */}
+      {data.type === 'docs' && <Content path={data.path} />}
+    </DocsLayout>
+  );
+}
+```
+
+</show>
+
+<show when={props.framework === 'tanstack-start'}>
+
+```tsx title="src/routes/docs/$.tsx"
+import { docs, source } from '@/lib/source'; // [!code --]
+// [!code ++:4]
+import { docs } from '@/lib/collections';
+import { source } from '@/lib/source';
+import { AsyncAPIPage } from '@/components/api-page';
+import type { AsyncAPI } from '@fumadocs/asyncapi';
+
+// [!code ++:7]
+// the type-level check of server function results can't verify AsyncAPI documents,
+// register them as serializable (install `@tanstack/router-core` if it isn't resolvable)
+declare module '@tanstack/router-core' {
+  interface SerializableExtensions {
+    asyncapiDocument: AsyncAPI.AsyncAPIObject;
+  }
+}
+
+export const Route = createFileRoute('/docs/$')({
+  component: Page,
+  loader: async ({ params }) => {
+    const slugs = params._splat?.split('/') ?? [];
+    const data = await serverLoader({ data: slugs });
+    if (data.type === 'docs') await docs.getPage(data.path)?.preload(); // [!code highlight]
+    return data;
+  },
+});
+
+const serverLoader = createServerFn({
+  method: 'GET',
+})
+  .validator((slugs: string[]) => slugs)
+  .handler(async ({ data: slugs }) => {
+    const page = source.getPage(slugs);
+    if (!page) throw notFound();
+
+    // [!code ++:9]
+    const pageTree = await source.serializePageTree(source.getPageTree());
+    if (page.type === 'asyncapi') {
+      return {
+        type: 'asyncapi',
+        title: page.data.title,
+        props: page.data.getAsyncAPIPageProps(),
+        pageTree,
+      };
+    }
+
+    return { type: 'docs', path: page.path, pageTree }; // [!code highlight]
+  });
+
+function Page() {
+  const data = useFumadocsLoader(Route.useLoaderData());
+
+  return (
+    <DocsLayout {...baseOptions()} tree={data.pageTree}>
+      {/* [!code ++:8] */}
+      {data.type === 'asyncapi' && (
+        <DocsPage full>
+          <DocsTitle>{data.title}</DocsTitle>
+          <DocsBody>
+            <AsyncAPIPage {...data.props} />
+          </DocsBody>
+        </DocsPage>
+      )}
+      <Suspense>
+        {/* [!code highlight] */}
+        {data.type === 'docs' && <Content path={data.path} />}
+      </Suspense>
+    </DocsLayout>
+  );
+}
+```
+
+</show>
+
+<show when={props.framework === 'waku'}>
+
+```tsx title="src/pages/docs/[...slugs].tsx"
+import { AsyncAPIPage } from '@/components/api-page'; // [!code ++]
+
+export default function Page({ slugs }: PageProps<'/docs/[...slugs]'>) {
+  const page = source.getPage(slugs);
+  if (!page) unstable_notFound();
+
+  // [!code ++:10]
+  if (page.type === 'asyncapi') {
+    return (
+      <DocsPage full>
+        <DocsTitle>{page.data.title}</DocsTitle>
+        <DocsBody>
+          <AsyncAPIPage {...page.data.getAsyncAPIPageProps()} />
+        </DocsBody>
+      </DocsPage>
+    );
+  }
+
+  // ...
+}
+```
+
+</show>
+
+<show when={props.framework === 'astro'}>
+
+```astro tab="src/pages/docs/[...slug].astro"
+---
+import type { GetStaticPaths, InferGetStaticPropsType } from 'astro';
+import Layout from '@/layouts/Layout.astro';
+import { Docs } from '@/components/docs';
+import { AsyncAPIDocs } from '@/components/asyncapi-docs'; // [!code ++]
+import { source } from '@/lib/source';
+
+export const prerender = true;
+
+export const getStaticPaths = (() => {
+  return source.getPages().map((page) => ({
+    params: { slug: decodeURI(page.slugs.join('/')) || undefined },
+    props: { page },
+  }));
+}) satisfies GetStaticPaths;
+
+type Props = InferGetStaticPropsType<typeof getStaticPaths>;
+
+const { page } = Astro.props;
+const pageTree = await source.serializePageTree(source.getPageTree());
+---
+
+{/* [!code ++:13] */}
+{page.type === 'asyncapi' && (
+  <Layout title={page.data.title ?? 'My App'}>
+    <AsyncAPIDocs
+      client:load
+      pathname={Astro.url.pathname}
+      params={Astro.params}
+      tree={pageTree}
+      title={page.data.title}
+      props={page.data.getAsyncAPIPageProps()}
+    />
+  </Layout>
+)}
+```
+
+```tsx tab="src/components/asyncapi-docs.tsx"
+import { type SerializedPageTree, useFumadocsLoader } from 'fumadocs-core/source/client';
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+import { DocsBody, DocsPage, DocsTitle } from 'fumadocs-ui/layouts/docs/page';
+import { AsyncAPIPage } from '@/components/api-page';
+import { Provider, type ProviderProps } from '@/components/provider';
+import { baseOptions } from '@/lib/layout.shared';
+import type { AsyncAPIPageProps } from '@fumadocs/asyncapi/ui';
+
+export function AsyncAPIDocs({
+  tree,
+  title,
+  props,
+  ...rest
+}: ProviderProps & { tree: SerializedPageTree; title?: string; props: AsyncAPIPageProps }) {
+  const data = useFumadocsLoader({ tree });
+
+  return (
+    <Provider {...rest}>
+      <DocsLayout {...baseOptions()} tree={data.tree}>
+        <DocsPage full>
+          <DocsTitle>{title}</DocsTitle>
+          <DocsBody>
+            <AsyncAPIPage {...props} />
+          </DocsBody>
+        </DocsPage>
+      </DocsLayout>
+    </Provider>
+  );
+}
+```
+
+</show>
+
+<Callout type='warn' title="Ensure the migration is complete!">
+
+Run a type check before continuing:
+
+```npm
+npm run types:check
+```
+
+</Callout>
+
+To write MDX files into your content directory instead, see [MDX Files](/docs/integrations/asyncapi/generate-files#mdx-files).
+
+## Features
+
+The official AsyncAPI integration supports AsyncAPI 3:
+
+- The direction of messages for readers, the server and channel address of operations
+- Messages with their payload and header schemas, including Avro, Protobuf and RAML schemas
+- Message examples, from the document or generated from schemas
+- Request and reply, correlation IDs
+- Security schemes, including OAuth 2.0 flows and SASL mechanisms
+- Protocol details from bindings, for the selected server
+- A playground for WebSocket, Server-Sent Events and custom transports, with text and binary messages
+- Code samples in JavaScript and Python, for WebSocket, MQTT, Kafka, AMQP and NATS
+- TypeScript definitions of payloads and headers
+- Markdown of pages for LLMs
+- Traits
+
+AsyncAPI 2 documents can be converted with `npx @asyncapi/cli convert`.
+
+### Demo
+
+See the [AsyncAPI example](/docs/asyncapi).

@@ -1,0 +1,77 @@
+---
+title: FlexSearch
+description: A fast & minimal search engine.
+---
+
+## Overview
+
+For the setup guide, see [Integrate FlexSearch](/docs/headless/search/flexsearch).
+
+It searches through an API endpoint running on the server, or through a statically cached JSON file for static sites.
+
+## Setup
+
+Create a search dialog.
+
+<Tabs items={['fetch (default)', 'static']}>
+
+    <Tab>
+
+<include meta='title="components/search.tsx"'>fetch.tsx</include>
+
+    </Tab>
+
+    <Tab id='static'>
+
+For static sites, configure [static mode](/docs/headless/search/flexsearch#static-export) on the search server, and change the search client:
+
+<include meta='title="components/search.tsx"'>flexsearch.tsx</include>
+
+    </Tab>
+
+</Tabs>
+
+<include>.shared.mdx</include>
+
+### Tag Filter
+
+Optionally, you can add UI for filtering results by tags. Configure [Tag Filter](/docs/headless/search/flexsearch#tag-filter) on search server and add the following:
+
+```tsx
+'use client';
+
+import {
+  SearchDialog,
+  SearchDialogContent,
+  SearchDialogFooter,
+  SearchDialogOverlay,
+  type SharedProps,
+  TagsList,
+  TagsListItem,
+} from 'fumadocs-ui/components/dialog/search';
+import { useState } from 'react';
+import { useFlexsearchStatic } from 'fumadocs-core/search/client/flexsearch-static';
+
+export default function CustomSearchDialog(props: SharedProps) {
+  // [!code ++]
+  const [tag, setTag] = useState<string | undefined>();
+  const search = useFlexsearchStatic({
+    tag, // [!code ++]
+  });
+
+  return (
+    <SearchDialog {...search} {...props}>
+      <SearchDialogOverlay />
+      <SearchDialogContent>
+        ...
+        <SearchDialogFooter className="flex flex-row">
+          {/* [!code ++:3] */}
+          <TagsList tag={tag} onTagChange={setTag}>
+            <TagsListItem value="my-value">My Value</TagsListItem>
+          </TagsList>
+        </SearchDialogFooter>
+      </SearchDialogContent>
+    </SearchDialog>
+  );
+}
+```

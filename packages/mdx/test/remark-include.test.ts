@@ -73,7 +73,7 @@ test('buildMDX with importsOnly keeps the imports of includes and plugins', asyn
     export let structuredData = {
       "contents": [{
         "heading": "title",
-        "content": "> import { Included } from './included';\\n>\\n>\\n>\\n> Included content."
+        "content": "> import { Included } from './included';\\n>\\n> Included content."
       }],
       "headings": [{
         "id": "title",

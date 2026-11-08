@@ -47,7 +47,7 @@
   "dependencies": {
     "@fumadocs/local-content": "workspace:*",
     "@standard-schema/spec": "^1.1.0",
-    "cn": "^0.5.0",
+    "cn": "^0.5.2",
     "github-slugger": "^2.0.0",
     "remark-parse": "^11.0.0",
     "remark-rehype": "^11.1.2",
@@ -57,11 +57,11 @@
     "zod": "^4.6.7"
   },
   "devDependencies": {
-    "@tailwindcss/oxide": "^4.3.3",
+    "@tailwindcss/oxide": "^4.3.5",
     "@types/hast": "^3.0.5",
     "@types/mdast": "^4.0.4",
     "@types/mdx": "^2.0.14",
-    "@types/node": "26.6.5",
+    "@types/node": "26.6.6",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "fumadocs-core": "workspace:*",
@@ -69,9 +69,9 @@
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "tsconfig": "workspace:*",
-    "tsdown": "0.23.1",
+    "tsdown": "0.23.7",
     "typescript": "^7.0.2",
-    "vitest": "^5.0.5"
+    "vitest": "^5.1.0"
   },
   "peerDependencies": {
     "@types/hast": "*",

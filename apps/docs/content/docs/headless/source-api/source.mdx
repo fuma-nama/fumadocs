@@ -80,7 +80,7 @@ With [i18n](/docs/headless/internationalization/config), the language of a file 
 
 #### Path Params
 
-A file of a dynamic path, like `[framework]/deploy.mdx`, is one virtual page. The loader lists its [path params](/docs/headless/page-conventions#path-params) and makes a page for each, with the data from `dataAt()`, or `data` without it:
+A file of a dynamic path, like `[framework]/deploy.mdx`, is one virtual page. The loader generates a page for each [path param](/docs/headless/page-conventions#path-params) value, using `dataAt()` when provided or `data` otherwise. The meta file of a dynamic folder works the same way:
 
 ```ts twoslash
 import type { StaticSource } from 'fumadocs-core/source';
@@ -91,6 +91,12 @@ const files: StaticSource['files'] = [
     path: '[framework]/deploy.mdx',
     data: { title: 'Deploy' },
     dataAt: (params) => ({ title: `Deploy on ${params.framework}` }),
+  },
+  {
+    type: 'meta',
+    path: '[framework]/meta.json',
+    data: { staticParams: [{ framework: 'waku' }, { framework: 'astro' }] },
+    dataAt: (params) => ({ title: params.framework }),
   },
 ];
 ```

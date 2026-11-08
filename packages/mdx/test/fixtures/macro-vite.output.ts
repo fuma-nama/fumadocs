@@ -6,9 +6,9 @@ export const docs = await __fdm.docs({ base: "test/fixtures/generate-index-docs"
   "base": "./../generate-index-docs",
   "query": "?macro_id=test%2Ffixtures%2Fmacro%2Fsource.ts%23docs",
   "eager": true
-}), meta: import.meta.glob(["./**/*.{json,yaml}"], {
+}), meta: import.meta.glob(["./**/{*.{json,yaml},meta{,.*}.{js,ts}}"], {
   "base": "./../generate-index-docs",
-  "query": "?macro_id=test%2Ffixtures%2Fmacro%2Fsource.ts%23docs",
+  "query": "?macro_id=test%2Ffixtures%2Fmacro%2Fsource.ts%23docs&lang.js",
   "eager": true,
   "import": "default"
 }) });
@@ -23,9 +23,9 @@ export const blog = await __fdm.docAsync({ base: "test/fixtures/generate-index",
   "query": "?macro_id=test%2Ffixtures%2Fmacro%2Fsource.ts%23blog"
 }) });
 
-export const metaOnly = await __fdm.meta({ base: "test/fixtures/generate-index", meta: import.meta.glob(["./**/*.{json,yaml}"], {
+export const metaOnly = await __fdm.meta({ base: "test/fixtures/generate-index", meta: import.meta.glob(["./**/{*.{json,yaml},meta{,.*}.{js,ts}}"], {
   "base": "./../generate-index",
-  "query": "?macro_id=test%2Ffixtures%2Fmacro%2Fsource.ts%23metaOnly",
+  "query": "?macro_id=test%2Ffixtures%2Fmacro%2Fsource.ts%23metaOnly&lang.js",
   "eager": true,
   "import": "default"
 }) });

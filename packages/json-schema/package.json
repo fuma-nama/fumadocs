@@ -35,16 +35,16 @@
   },
   "dependencies": {
     "@fuma-translate/react": "^1.0.2",
-    "@scalar/json-magic": "^0.16.1"
+    "@scalar/json-magic": "^0.18.0"
   },
   "devDependencies": {
-    "@types/node": "26.6.5",
+    "@types/node": "26.6.6",
     "@types/react": "^19.3.0",
     "json-schema-typed": "^9.0.0",
     "react": "^19.3.1",
     "tsconfig": "workspace:*",
-    "tsdown": "0.23.1",
-    "vitest": "^5.0.5"
+    "tsdown": "0.23.7",
+    "vitest": "^5.1.0"
   },
   "peerDependencies": {
     "json-schema-typed": "*",

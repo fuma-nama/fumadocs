@@ -1,0 +1,454 @@
+---
+title: Story
+description: Display components with controls.
+---
+
+import { story } from './client.story';
+
+<story.WithControl />
+
+## Introduction
+
+Fumadocs Story displays and documents components.
+It is a simple, docs-focused alternative to [Storybook](https://storybook.js.org), mainly designed for component libraries.
+
+If you are new to the concept of Story, this is a short explanation from **Storybook** docs:
+
+<blockquote>
+  A story captures the rendered state of a UI component. It's an object with annotations that
+  describe the component's behavior and appearance given a set of arguments.
+</blockquote>
+
+<Callout title="When to use it over Storybook?">
+
+Fumadocs Story is not a replacement for Storybook. We still recommend Storybook for proper UI testing.
+
+</Callout>
+
+## Installation
+
+```npm
+npm i @fumadocs/story
+```
+
+Add the Tailwind CSS preset:
+
+```css title="Tailwind CSS"
+/* [!code ++] */
+@import '@fumadocs/story/css/preset.css';
+```
+
+<show when={props.framework === 'next'}>
+
+Add the Turbopack and Webpack plugin:
+
+```ts title="next.config.mts"
+import type { NextConfig } from 'next';
+// [!code ++]
+import { createNextStory } from '@fumadocs/story/next';
+
+const config: NextConfig = {
+  // ...
+};
+
+// [!code ++]
+const withStory = createNextStory();
+
+// wrap the config with `withStory()`
+// if you have other plugins like `withMDX()`, keep it like `withStory(withMDX(config))` [!code highlight:2]
+export default withStory(config);
+```
+
+</show>
+
+<show when={props.framework === 'react-router' || props.framework === 'tanstack-start'}>
+
+Add the Vite plugin:
+
+```ts title="vite.config.ts"
+import { defineConfig } from 'vite';
+import story from '@fumadocs/story/vite';
+
+export default defineConfig({
+  plugins: [story()],
+});
+```
+
+</show>
+
+<show when={props.framework === 'waku'}>
+
+Add the Vite plugin:
+
+```ts title="waku.config.ts"
+import { defineConfig } from 'waku/config';
+import story from '@fumadocs/story/vite';
+
+export default defineConfig({
+  vite: {
+    plugins: [story()],
+  },
+});
+```
+
+</show>
+
+<show when={props.framework === 'astro'}>
+
+Add the Vite plugin:
+
+```js title="astro.config.mjs"
+import { defineConfig } from 'astro/config';
+import story from '@fumadocs/story/vite';
+
+export default defineConfig({
+  vite: {
+    plugins: [story()],
+  },
+});
+```
+
+</show>
+
+### Create a Story
+
+Create a story factory to store your global settings:
+
+<show when={props.framework === 'next'}>
+
+```ts title="lib/story.ts"
+import { defineStoryFactory } from '@fumadocs/story/next/client';
+
+export const { defineStory } = defineStoryFactory();
+```
+
+</show>
+
+<show when={props.framework !== 'next'}>
+
+```ts title="lib/story.ts"
+import { defineStoryFactory } from '@fumadocs/story/vite/client';
+
+export const { defineStory } = defineStoryFactory();
+```
+
+</show>
+
+Now create your first story:
+
+<show when={props.framework === 'next' || props.framework === 'waku'}>
+
+```tsx tab="my-component.story.tsx"
+import { defineStory } from '@/lib/story';
+import { MyComponent } from './my-component';
+
+export const story = defineStory({
+  // the passed component must be a client component
+  Component: MyComponent,
+  args: {
+    // default props (recommended)
+    initial: {},
+  },
+});
+```
+
+```tsx tab="my-component.tsx"
+'use client';
+
+export interface MyComponentProps {
+  title?: string;
+}
+
+export function MyComponent({ title }: MyComponentProps) {
+  return <p>{title}</p>;
+}
+```
+
+</show>
+
+<show when={props.framework !== 'next' && props.framework !== 'waku'}>
+
+```tsx tab="my-component.story.tsx"
+import { defineStory } from '@/lib/story';
+import { MyComponent } from './my-component';
+
+export const story = defineStory({
+  Component: MyComponent,
+  args: {
+    // default props (recommended)
+    initial: {},
+  },
+});
+```
+
+```tsx tab="my-component.tsx"
+export interface MyComponentProps {
+  title?: string;
+}
+
+export function MyComponent({ title }: MyComponentProps) {
+  return <p>{title}</p>;
+}
+```
+
+</show>
+
+<Callout type='warn' title={<>The <code>.story</code> suffix is required</>}>
+  The plugin only transforms files matching `*.story.{js,jsx,ts,tsx}`. Change it with the `filter` option of <show when={props.framework === 'next'}>`createNextStory()`</show><show when={props.framework !== 'next'}>the Vite plugin</show>.
+</Callout>
+
+### Render a Story
+
+Render the story in your MDX files:
+
+```mdx title="index.mdx"
+import { story } from '@/components/my-component.story';
+
+<story.WithControl />
+```
+
+## Configurations
+
+### Variants
+
+You can provide multiple variants of the component with `args`:
+
+```ts
+import { defineStory } from '@/lib/story';
+import { Callout } from '@/components/callout';
+
+export const story = defineStory({
+  Component: Callout,
+  args: [
+    {
+      variant: 'Default',
+      initial: {
+        title: 'This is a Callout',
+      },
+    },
+    {
+      variant: 'Warning',
+      initial: {
+        title: 'This is a Callout',
+      },
+      // fixed values for props
+      fixed: {
+        type: 'warning',
+      },
+    },
+  ],
+});
+```
+
+### `controls`
+
+Controls are generated from the component props. Specify the control nodes to replace them:
+
+```tsx
+import { defineStory } from '@/lib/story';
+import { GraphView } from '@/components/graph-view';
+
+export const story = defineStory({
+  Component: GraphView,
+  args: {
+    controls: {
+      node: {
+        type: 'object',
+        properties: [],
+      },
+    },
+  },
+});
+```
+
+### `frame`
+
+Components filling the viewport, like layouts, can be rendered in an iframe.
+The story panel scales the frame down to fit, with a button to open it in fullscreen.
+
+```tsx title="components/my-layout.story.tsx"
+import { defineStory } from '@/lib/story';
+import { MyLayout } from './my-layout.lazy';
+import { Window } from './window';
+
+export const story = defineStory({
+  Component: MyLayout,
+  frame: {
+    src: '/story/my-layout',
+    // viewport size, optional
+    width: 1280,
+    height: 800,
+    // wraps the frame, e.g. in a window, optional
+    Container: Window,
+  },
+});
+```
+
+Create a page at `src` to render the component. It receives the arguments from the story panel:
+
+<show when={props.framework === 'next'}>
+
+```tsx title="app/story/my-layout/page.tsx"
+import { story } from '@/components/my-layout.story';
+
+export default function Page() {
+  return <story.Frame />;
+}
+```
+
+</show>
+
+<show when={props.framework === 'react-router'}>
+
+```tsx tab="app/routes/story.my-layout.tsx"
+import { story } from '@/components/my-layout.story';
+
+export default function Page() {
+  return <story.Frame />;
+}
+```
+
+```ts tab="app/routes.ts"
+import { route, type RouteConfig } from '@react-router/dev/routes';
+
+export default [
+  // [!code ++]
+  route('story/my-layout', 'routes/story.my-layout.tsx'),
+  // ...
+] satisfies RouteConfig;
+```
+
+</show>
+
+<show when={props.framework === 'tanstack-start'}>
+
+```tsx title="src/routes/story/my-layout.tsx"
+import { createFileRoute } from '@tanstack/react-router';
+import { story } from '@/components/my-layout.story';
+
+export const Route = createFileRoute('/story/my-layout')({
+  component: () => <story.Frame />,
+});
+```
+
+</show>
+
+<show when={props.framework === 'waku'}>
+
+```tsx title="src/pages/story/my-layout.tsx"
+import { story } from '@/components/my-layout.story';
+
+export default function Page() {
+  return <story.Frame />;
+}
+
+export const getConfig = async () => ({ render: 'static' }) as const;
+```
+
+</show>
+
+<show when={props.framework === 'astro'}>
+
+```astro tab="src/pages/story/my-layout.astro"
+---
+import Layout from '@/layouts/Layout.astro';
+import { StoryFrame } from '@/components/story-frame';
+
+export const prerender = true;
+---
+
+<Layout title="Story">
+  <StoryFrame client:load />
+</Layout>
+```
+
+```tsx tab="src/components/story-frame.tsx"
+import { story } from '@/components/my-layout.story';
+
+export function StoryFrame() {
+  return <story.Frame />;
+}
+```
+
+</show>
+
+The story loads its component on every page that renders it. Pass a lazy component instead, so only the frame loads it:
+
+<show when={props.framework === 'next'}>
+
+```tsx title="components/my-layout.lazy.tsx"
+'use client';
+import dynamic from 'next/dynamic';
+
+export const MyLayout = dynamic(() => import('./my-layout').then((mod) => mod.MyLayout));
+```
+
+</show>
+
+<show when={props.framework === 'waku'}>
+
+```tsx title="components/my-layout.lazy.tsx"
+'use client';
+import { lazy } from 'react';
+
+export const MyLayout = lazy(() =>
+  import('./my-layout').then((mod) => ({ default: mod.MyLayout })),
+);
+```
+
+</show>
+
+<show when={props.framework !== 'next' && props.framework !== 'waku'}>
+
+```tsx title="components/my-layout.lazy.tsx"
+import { lazy } from 'react';
+
+export const MyLayout = lazy(() =>
+  import('./my-layout').then((mod) => ({ default: mod.MyLayout })),
+);
+```
+
+</show>
+
+<Callout title="Good to know">
+
+- The page must be on the same origin as your docs.
+- Arguments are sent with `postMessage()`, so they must be serializable (no functions or JSX).
+
+<show when={props.framework === 'next' || props.framework === 'waku'}>
+
+- `Container` must be a client component.
+
+</show>
+
+</Callout>
+
+### Internationalization
+
+Assuming you have configured [Internationalization](/docs/internationalization) at UI level:
+
+```tsx title="layout.shared.tsx"
+import { defineI18n } from 'fumadocs-core/i18n';
+import { uiTranslations } from 'fumadocs-ui/i18n';
+import { storyTranslations } from '@fumadocs/story/i18n';
+
+const i18n = defineI18n({
+  languages: ['en', 'cn'],
+  defaultLanguage: 'en',
+});
+
+export const translations = i18n
+  .translations()
+  .extend(uiTranslations())
+  // [!code ++]
+  .extend(storyTranslations())
+  .add({
+    cn: {
+      displayName: 'Chinese',
+      // [!code ++]
+      'Add Item(story arguments form)': '新增項目',
+    },
+  });
+```
+
+See [Translations](/docs/ui/translations) for more details.

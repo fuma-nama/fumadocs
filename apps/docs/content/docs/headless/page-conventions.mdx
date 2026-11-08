@@ -153,7 +153,7 @@ Fumadocs UI renders a [dropdown](/docs/ui/layouts/docs#tabs-groups) for each roo
 
 ## Path Params
 
-A folder or file named `[name]` is a dynamic segment, like a dynamic route in Next.js. The `staticParams` of its meta file list the values, and each page inside gets a URL for every value.
+A folder or file named `[name]` is a dynamic segment. The meta file of a dynamic folder lists the values in `staticParams`, and Fumadocs generates a page for every value:
 
 ```json title="[framework]/meta.json"
 {
@@ -167,13 +167,13 @@ A folder or file named `[name]` is a dynamic segment, like a dynamic route in Ne
 | --------------------------------- | ------------------------------------------- |
 | `./[framework]/deploy.mdx`        | `['waku', 'deploy']`, `['astro', 'deploy']` |
 
-Each page is compiled for its params. The content reads them as props, like `props.framework`, and can branch on them with [`<show>`](/docs/markdown#show). In code, they are in `page.params`.
+Each page is compiled once per param value. The content reads the params as `props.framework` and can branch on them with [`<show>`](/docs/markdown#show). In loader code, the params are in `page.params`.
 
-The meta file of `[framework]` applies to the `waku` and `astro` folders. A `[name]` segment without values stays a literal folder name.
+The meta file of `[framework]` applies to every generated folder (`waku`, `astro`). A `[name]` segment whose meta file has no `staticParams` stays a literal folder name.
 
 ### Page Params
 
-A page can list `staticParams` in its frontmatter too. For a name that its folders also list, the page only keeps the values both lists have.
+A page can also list `staticParams` in its frontmatter. When a page and its folder both list the same param name, the page is generated only for values that appear in both lists.
 
 ```mdx title="[framework]/fumadocs-mdx.mdx"
 ---
@@ -185,13 +185,44 @@ staticParams:
 
 The page only exists for `waku`, at `/docs/waku/fumadocs-mdx`.
 
+### Data in Code
+
+Frontmatter and meta files written in YAML or JSON are the same for every param value. To set a different title or description for each value, like a title that names the framework, write them in code. Fumadocs MDX and [local Markdown](/docs/integrations/content/local-md) sources support it.
+
+A meta file can be a module (`meta.ts` or `meta.js`). In a dynamic folder, the default export is a function that receives the params, and `staticParams` is a named export:
+
+```ts title="[framework]/meta.ts"
+const names = { waku: 'Waku', astro: 'Astro' };
+
+export const staticParams = [{ framework: 'waku' }, { framework: 'astro' }];
+
+export default ({ framework }: { framework: keyof typeof names }) => ({
+  title: names[framework],
+  root: true,
+});
+```
+
+An MDX page can export `frontmatter` in code. The export is merged over the YAML frontmatter, and the page reads its params as `props`:
+
+```mdx title="[framework]/deploy.mdx"
+---
+title: Deploy
+---
+
+export const frontmatter = {
+  description: props.framework === 'astro' ? 'Deploy with an adapter.' : 'Deploy your docs.',
+};
+```
+
+`staticParams` stays in YAML frontmatter, because the loader reads it before the export runs.
+
 ### Static Paths
 
-A file at a static path replaces the page of its value. `astro/deploy.mdx` replaces the `astro` page of `[framework]/deploy.mdx`, and `astro/meta.json` replaces the meta file of the `astro` folder.
+A file at a literal path overrides the generated page for that value. `astro/deploy.mdx` overrides the `astro` page of `[framework]/deploy.mdx`, and `astro/meta.json` overrides the meta file of the `astro` folder.
 
-With [i18n](#i18n-routing), the files of a language come before those of its fallback language: `astro/deploy.cn.mdx`, then `[framework]/deploy.cn.mdx`, then `astro/deploy.mdx`.
+With [i18n](#i18n-routing), files of a locale take priority over those of its fallback locale: `astro/deploy.cn.mdx`, then `[framework]/deploy.cn.mdx`, then `astro/deploy.mdx`.
 
-A page of another language, like `deploy.cn.mdx`, reads `staticParams` from `meta.cn.json` before `meta.json`. With the `dir` parser, each language folder lists its own `staticParams`.
+A localized page, like `deploy.cn.mdx`, reads `staticParams` from `meta.cn.json` before `meta.json`. With the `dir` parser, each language folder lists its own `staticParams`.
 
 ## Meta
 

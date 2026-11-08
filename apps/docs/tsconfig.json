@@ -19,7 +19,6 @@
     "node_modules",
     "public/registry",
     "eslint.config.mjs",
-    "components/registry/build-graph.ts",
-    "content/docs/(framework)/integrations/webmcp.tsx"
+    "components/registry/build-graph.ts"
   ]
 }

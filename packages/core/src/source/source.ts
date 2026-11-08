@@ -133,6 +133,8 @@ interface VirtualPage<Data extends PageData> extends BaseVirtualFile {
 interface VirtualMeta<Data extends MetaData> extends BaseVirtualFile {
   type: 'meta';
   data: Data;
+  /** for a meta file of a dynamic folder, like `[framework]/meta.ts`, its data in the folder filled with some params */
+  dataAt?: (params: Params) => Data;
 }
 
 /**
