@@ -60,13 +60,13 @@
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",
-    "cn": "^0.5.0",
-    "lucide-react": "^1.61.0"
+    "cn": "^0.5.2",
+    "lucide-react": "^1.70.0"
   },
   "devDependencies": {
-    "@notionhq/client": "^5.27.1",
-    "@tailwindcss/oxide": "^4.3.3",
-    "@types/node": "26.6.5",
+    "@notionhq/client": "^5.31.1",
+    "@tailwindcss/oxide": "^4.3.5",
+    "@types/node": "26.6.6",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "fumadocs-core": "workspace:*",
@@ -74,9 +74,9 @@
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "tsconfig": "workspace:*",
-    "tsdown": "0.23.1",
+    "tsdown": "0.23.7",
     "typescript": "^7.0.2",
-    "vitest": "^5.0.5"
+    "vitest": "^5.1.0"
   },
   "peerDependencies": {
     "@notionhq/client": "^5.23.0",

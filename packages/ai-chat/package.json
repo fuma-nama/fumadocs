@@ -38,26 +38,26 @@
   "dependencies": {
     "@base-ui/react": "^1.9.0",
     "@fuma-translate/react": "^1.0.2",
-    "cn": "^0.5.0",
-    "lucide-react": "^1.61.0",
+    "cn": "^0.5.2",
+    "lucide-react": "^1.70.0",
     "remark": "^15.0.1",
     "remark-gfm": "^4.0.1",
     "remark-rehype": "^11.1.2",
     "remend": "^1.4.0"
   },
   "devDependencies": {
-    "@ai-sdk/react": "^4.0.152",
+    "@ai-sdk/react": "^4.0.168",
     "@types/hast": "^3.0.5",
-    "@types/node": "26.6.5",
+    "@types/node": "26.6.6",
     "@types/react": "^19.3.0",
-    "ai": "^7.0.148",
+    "ai": "^7.0.164",
     "fuma-cli": "^0.3.1",
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:@fumadocs/base-ui@*",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "tsconfig": "workspace:*",
-    "tsdown": "0.23.1"
+    "tsdown": "0.23.7"
   },
   "peerDependencies": {
     "@ai-sdk/react": "^4.0.0",

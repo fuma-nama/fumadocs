@@ -45,11 +45,11 @@
   },
   "devDependencies": {
     "@types/mdast": "^4.0.4",
-    "@types/node": "26.6.5",
+    "@types/node": "26.6.6",
     "fumadocs-core": "workspace:*",
-    "rimraf": "^6.0.0",
+    "rimraf": "^6.1.4",
     "tsconfig": "workspace:*",
-    "tsdown": "0.23.1",
+    "tsdown": "0.23.7",
     "typescript": "^7.0.2",
     "vfile": "^6.0.3"
   },

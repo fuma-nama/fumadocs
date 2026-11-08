@@ -217,8 +217,8 @@ describe('styles', () => {
     'co/**/lor: red',
     'color: red !important',
     'background: url("a;b"); content: \'a;b\'',
+    'background: url(a;b); color: red',
     'content: "a\\"b;c"; quotes: \'a\\\'',
-    'a: (b;c) d; e: (f',
     ';color: red',
     'color:; font-size: 1px',
     'color: red} font-size: 1px',
@@ -234,7 +234,14 @@ describe('styles', () => {
   });
 
   test('invalid', () => {
-    for (const style of ['color', 'color: red; /* a', 'color /* a */ /* b */: red', 'a: b; c']) {
+    for (const style of [
+      'color',
+      'color: red; /* a',
+      'color /* a */ /* b */: red',
+      'a: b; c',
+      // only `url()` keeps a `;` in parentheses
+      'a: (b;c) d; e: (f',
+    ]) {
       expect(() => toJsxRuntime(h('div', { style }), JsxRuntime)).toThrow(
         'Cannot parse `style` attribute',
       );

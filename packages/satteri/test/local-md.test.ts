@@ -185,7 +185,7 @@ describe('localMd source', () => {
         mdastPlugins: [
           () => {
             compiles++;
-            return { name: 'count-compiles' };
+            return { name: 'count-compiles', before() {} };
           },
         ],
       },

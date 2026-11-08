@@ -1,4 +1,4 @@
-import { defineHastPlugin, type HastPluginInput, type HastVisitorContext } from 'satteri';
+import type { HastPluginInput, HastVisitorContext } from 'satteri';
 import type { Element, ElementContent } from 'hast';
 import { handleTag, jsxToSource } from '@/utils';
 import type { ExtraPluginHooks } from './compile';
@@ -41,7 +41,7 @@ declare module 'satteri' {
 export function rehypeToc({ exportToc = true }: RehypeTocOptions = {}): HastPluginInput &
   ExtraPluginHooks {
   if (exportToc === false) {
-    return defineHastPlugin({ name: 'rehype-toc' });
+    return () => undefined;
   }
 
   const resolved = exportToc === true ? { as: 'esm' as const, name: 'toc' } : exportToc;

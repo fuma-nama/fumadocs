@@ -109,9 +109,9 @@ async function updateImage(
           value: { type: 'mdxJsxAttributeValueExpression', value: variableName },
         },
       ],
-      // Sätteri drops the position of inserted nodes, stringifiers read the image's from here
+      // the position in the output, an included image has it in `data`, see `embedSource()`
       data: {
-        position: node.position ?? (node.data as PositionedNode | undefined)?.position,
+        position: (node.data as PositionedNode | undefined)?.position ?? node.position,
       } as MdxJsxFlowElement['data'],
     };
 

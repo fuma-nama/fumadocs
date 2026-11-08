@@ -73,3 +73,7 @@ allowBuilds:
   protobufjs: false
   sharp: false
   vue-demi: false
+
+# the same Rolldown as Vite, the docs lint passes the Rolldown plugin of fumadocs-mdx to unrun
+overrides:
+  unrun>rolldown: ~1.2.16
