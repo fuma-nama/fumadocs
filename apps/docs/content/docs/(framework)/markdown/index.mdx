@@ -417,6 +417,30 @@ Specify the target file path in `<include>` tag (relative to the MDX file itself
 
 See [other usages of include](/docs/mdx/include).
 
+### Show
+
+Show content on a condition. Fumadocs MDX and `@fumadocs/astro` always enable it with [Remark Show](/docs/headless/mdx/remark-show).
+`when` takes a JS expression:
+
+```mdx title="[framework]/deploy.mdx"
+Deploy your {props.framework} site.
+
+<show when={props.framework === 'astro'}>
+## Adapters
+
+Add an adapter to your Astro config.
+
+</show>
+```
+
+A condition is decided at build time when it only reads:
+
+- the [path params](/docs/headless/page-conventions#path-params) of the page, as `props`.
+- the env vars that bundlers inline: `NEXT_PUBLIC_*`, `VITE_*` and `PUBLIC_*`.
+- the `define` option of Remark Show.
+
+Statically generated properties, like the table of contents and search index, only include the branches that show. Other conditions are checked when rendering.
+
 ### NPM Commands
 
 Useful for generating commands for installing packages with different package managers.

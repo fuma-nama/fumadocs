@@ -78,6 +78,39 @@ export function createMySource(): StaticSource<{
 
 With [i18n](/docs/headless/internationalization/config), the language of a file is parsed from its path, unless the file specifies a `locale`.
 
+#### Path Params
+
+A file of a dynamic path, like `[framework]/deploy.mdx`, is one virtual page. The loader lists its [path params](/docs/headless/page-conventions#path-params) and makes a page for each, with the data from `dataAt()`, or `data` without it:
+
+```ts twoslash
+import type { StaticSource } from 'fumadocs-core/source';
+
+const files: StaticSource['files'] = [
+  {
+    type: 'page',
+    path: '[framework]/deploy.mdx',
+    data: { title: 'Deploy' },
+    dataAt: (params) => ({ title: `Deploy on ${params.framework}` }),
+  },
+];
+```
+
+To compile the pages ahead of the loader, `getStaticParams()` lists the params with the same rules. It reads the `staticParams` of meta files from your storage, by their paths without extension:
+
+```ts twoslash
+import { getStaticParams, type Params } from 'fumadocs-core/source';
+
+declare const frontmatter: { staticParams?: Params[] };
+declare const metaFiles: Map<string, { staticParams?: Params[] }>;
+// ---cut---
+const params = getStaticParams('[framework]/deploy.mdx', {
+  staticParams: frontmatter.staticParams,
+  readStaticParams: (path) => metaFiles.get(path)?.staticParams,
+});
+```
+
+It returns `undefined` when nothing lists the values. The file is then one page at its literal path.
+
 ### Dynamic Source
 
 For content sources with revalidation, return a `DynamicSource` instead:
