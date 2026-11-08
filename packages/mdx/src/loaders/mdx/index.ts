@@ -7,15 +7,9 @@ import path from 'node:path';
 import { createHash } from 'node:crypto';
 import type { ConfigLoader } from '@/loaders/config';
 import { slash } from '@/utils/codegen';
-import {
-  getStaticParams,
-  isDynamicPath,
-  type MetaData,
-  type PageData,
-  type Params,
-} from 'fumadocs-core/source';
-import { readFileSync } from 'node:fs';
-import { parse } from 'yaml';
+import { getStaticParams, isDynamicPath, type PageData, type Params } from 'fumadocs-core/source';
+import { frontmatterCode } from '@/loaders/mdx/code';
+import { readStaticParams } from '@/loaders/meta';
 
 const querySchema = z.looseObject({
   only: z.literal(['frontmatter', 'all']).default('all'),
@@ -54,6 +48,8 @@ export function createMdxLoader({ getCore }: ConfigLoader): Loader {
       }
 
       let after: (() => Promise<void>) | undefined;
+      const code = frontmatterCode(filePath, matter.content);
+      if (code) matter.content = code.content;
 
       const { experimentalBuildCache = false } = core.getConfig().global;
       if (
@@ -61,6 +57,8 @@ export function createMdxLoader({ getCore }: ConfigLoader): Loader {
         !importsOnly &&
         experimentalBuildCache &&
         only === 'all' &&
+        // the frontmatter in code depends on the files it imports, the modules of each params don't run it
+        !(code && params === undefined) &&
         // the module of a dynamic file depends on meta files
         (params !== undefined || !isDynamicPath(slash(filePath)))
       ) {
@@ -108,39 +106,48 @@ export function createMdxLoader({ getCore }: ConfigLoader): Loader {
         }
       }
 
-      if (docCollection) {
-        matter.data = await core.transformFrontmatter(
-          { collection: docCollection, filePath, source: value },
-          matter.data as Record<string, unknown>,
-        );
-      }
+      const pageParams = params === undefined ? undefined : (JSON.parse(params) as Params);
+      const yaml = matter.data as Record<string, unknown>;
+      const validate = (data: Record<string, unknown>) =>
+        docCollection
+          ? core.transformFrontmatter({ collection: docCollection, filePath, source: value }, data)
+          : data;
 
       let staticParams: Params[] | undefined;
       if (docCollection && params === undefined) {
         const { dir } = docCollection;
         staticParams = getStaticParams(slash(path.relative(dir, filePath)), {
           staticParams: (matter.data as PageData).staticParams,
-          readStaticParams(file) {
-            for (const ext of ['.json', '.yaml']) {
-              const metaFile = path.join(dir, file + ext);
-              compiler.addDependency(metaFile);
-              let content: string;
-              try {
-                content = readFileSync(metaFile, 'utf-8');
-              } catch (error) {
-                if ((error as NodeJS.ErrnoException).code === 'ENOENT') continue;
-                throw error;
-              }
-              return (parse(content) as MetaData | null)?.staticParams;
-            }
-          },
+          readStaticParams: (file) => readStaticParams(dir, file, compiler.addDependency),
         });
       }
 
+      if (staticParams) {
+        // with frontmatter in code, the pages have the validated frontmatter
+        const data = code ? { ...yaml } : await validate(yaml);
+        // the frontmatter in code of each params, the modules of its pages don't run it, lazy collections read the head
+        if (code && (only === 'frontmatter' || !docCollection!.async)) {
+          const frontmatter = code.compile(compiler.addDependency);
+          const frontmatterAt: Record<string, unknown> = {};
+          for (const item of staticParams)
+            frontmatterAt[JSON.stringify(item)] = await validate({ ...yaml, ...frontmatter(item) });
+          data._frontmatterAt = frontmatterAt;
+        }
+        return {
+          code:
+            only === 'frontmatter'
+              ? `export const frontmatter = ${JSON.stringify(data)}`
+              : dynamicModule(filePath, query, data, staticParams),
+        };
+      }
+
+      // the module of a dynamic file validates the frontmatter in code of its pages
+      if (!code) matter.data = await validate(yaml);
+      else if (pageParams === undefined)
+        matter.data = await validate({ ...yaml, ...code.compile(compiler.addDependency)() });
       if (only === 'frontmatter') {
         return { code: `export const frontmatter = ${JSON.stringify(matter.data)}` };
       }
-      if (staticParams) return { code: dynamicModule(filePath, query, matter.data, staticParams) };
 
       const { buildMDX } = await import('@/loaders/mdx/build');
       const compiled = await buildMDX(core, docCollection, {
@@ -149,7 +156,7 @@ export function createMdxLoader({ getCore }: ConfigLoader): Loader {
         source: '\n'.repeat(countLines(matter.matter)) + matter.content,
         filePath,
         frontmatter: matter.data as Record<string, unknown>,
-        params: params === undefined ? undefined : (JSON.parse(params) as Params),
+        params: pageParams,
         importsOnly,
         _compiler: compiler,
         environment: 'bundler',

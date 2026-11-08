@@ -7,6 +7,7 @@ import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import type { TOCItemType } from 'fumadocs-core/toc';
 import { createMarkdownCompiler, localMd } from '@/local-md';
+import { loader } from 'fumadocs-core/source';
 import { fromJS, fromSerialized } from '@/local-md/renderer';
 
 const cwd = path.dirname(fileURLToPath(import.meta.url));
@@ -264,4 +265,34 @@ describe('localMd source', () => {
       await fs.rm(root, { recursive: true, force: true });
     }
   });
+});
+
+test('the frontmatter and meta files in code', async () => {
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'satteri-local-md-code-'));
+
+  try {
+    await fs.mkdir(path.join(dir, '[framework]'));
+    await fs.writeFile(
+      path.join(dir, '[framework]/meta.ts'),
+      `export const staticParams = [{ framework: 'next' }, { framework: 'waku' }];
+export default ({ framework }: { framework: string }) => ({ title: \`Framework \${framework}\` });`,
+    );
+    await fs.writeFile(
+      path.join(dir, '[framework]/deploy.mdx'),
+      '---\ntitle: Deploy\n---\n\nexport const frontmatter = { description: `Deploy on ${props.framework}` };\n',
+    );
+    await fs.writeFile(
+      path.join(dir, '[framework]/waku.mdx'),
+      // only runs for the params of the page, its title is only in code
+      '---\nstaticParams:\n  - framework: waku\n---\n\nexport const frontmatter = { title: { waku: "Waku" }[props.framework].toUpperCase() };\n',
+    );
+
+    const source = loader({ baseUrl: '/', source: await localMd({ dir }).staticSource() });
+    expect(source.getPage(['waku', 'deploy'])?.data.description).toBe('Deploy on waku');
+    expect(source.getPageTree().children.map((node) => node.name)).toContain('Framework waku');
+    expect(source.getPage(['waku', 'waku'])?.data.title).toBe('WAKU');
+    expect(source.getPage(['next', 'waku'])).toBeUndefined();
+  } finally {
+    await fs.rm(dir, { recursive: true, force: true });
+  }
 });

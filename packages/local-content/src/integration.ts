@@ -15,9 +15,14 @@ export type ParsedFile<Page, Meta> =
       type: 'page';
       data: Page;
       /** for a file of a dynamic path, like `[framework]/deploy.mdx`, the data of its page at some params */
-      dataAt?: (params: Params) => Page;
+      dataAt?: (params: Params) => Page | Promise<Page>;
     }
-  | { type: 'meta'; data: Meta };
+  | {
+      type: 'meta';
+      data: Meta;
+      /** for a meta file of a dynamic folder, its data in the folder filled with some params */
+      dataAt?: (params: Params) => Meta | Promise<Meta>;
+    };
 
 /**
  * Turns files into the pages and meta entries a source exposes.

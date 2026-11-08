@@ -9,6 +9,8 @@ import { CompileResult, createMarkdownCompiler } from '@/md/compiler';
 import { fromAst, fromJS } from '@/md/renderer';
 import { localMd } from '@/index';
 import type { TOCItemType } from 'fumadocs-core/toc';
+import { loader } from 'fumadocs-core/source';
+import type { StandardSchemaV1 } from '@standard-schema/spec';
 
 const cwd = path.dirname(fileURLToPath(import.meta.url));
 const fixturesDir = path.join(cwd, 'fixtures');
@@ -204,5 +206,67 @@ test('includes files and recompiles a page when they change', async () => {
     expect(await render()).toContain('version two');
   } finally {
     await fs.rm(root, { recursive: true, force: true });
+  }
+});
+
+test('the frontmatter and meta files in code', async () => {
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'local-md-code-'));
+
+  try {
+    await fs.mkdir(path.join(dir, '[framework]'));
+    await fs.writeFile(
+      path.join(dir, '[framework]/meta.ts'),
+      `export const staticParams = [{ framework: 'next' }, { framework: 'waku' }];
+export default ({ framework }: { framework: string }) => ({ title: \`Framework \${framework}\` });`,
+    );
+    await fs.writeFile(
+      path.join(dir, '[framework]/deploy.mdx'),
+      '---\ntitle: Deploy\n---\n\nexport const frontmatter = { description: `Deploy on ${props.framework}` };\n',
+    );
+    await fs.writeFile(
+      path.join(dir, 'index.mdx'),
+      // fields of the schema can be in code only
+      'export const frontmatter = { title: "Welcome" };\n',
+    );
+
+    await fs.writeFile(
+      path.join(dir, '[framework]/waku.mdx'),
+      // only runs for the params of the page, its title is only in code
+      '---\nstaticParams:\n  - framework: waku\n---\n\nexport const frontmatter = { title: { waku: "Waku" }[props.framework].toUpperCase() };\n',
+    );
+
+    const source = loader({ baseUrl: '/', source: await localMd({ dir }).staticSource() });
+    expect(source.getPage([])?.data.title).toBe('Welcome');
+    expect(source.getPage(['waku', 'deploy'])?.data.description).toBe('Deploy on waku');
+    expect(source.getPageTree().children.map((node) => node.name)).toContain('Framework waku');
+    expect(source.getPage(['waku', 'waku'])?.data.title).toBe('WAKU');
+    expect(source.getPage(['next', 'waku'])).toBeUndefined();
+
+    // the schema validates the YAML of each params once
+    const exclaim: StandardSchemaV1<unknown, Record<string, unknown>> = {
+      '~standard': {
+        version: 1,
+        vendor: 'test',
+        validate: (value) => {
+          const data = value as Record<string, unknown>;
+          return { value: { ...data, title: `${data.title}!` } };
+        },
+      },
+    };
+    const transformed = loader({
+      baseUrl: '/',
+      source: await localMd({
+        dir,
+        frontmatterSchema: exclaim,
+        metaSchema: exclaim,
+      }).staticSource(),
+    });
+    expect(transformed.getPage(['waku', 'deploy'])?.data.title).toBe('Deploy!');
+    // the meta schema validates the data of a meta file in code at each params
+    expect(transformed.getPageTree().children.map((node) => node.name)).toContain(
+      'Framework waku!',
+    );
+  } finally {
+    await fs.rm(dir, { recursive: true, force: true });
   }
 });

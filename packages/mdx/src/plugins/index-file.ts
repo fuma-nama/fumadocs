@@ -1,11 +1,12 @@
 import type { Core, CoreOptions, Plugin, PluginContext } from '@/core';
 import type { CollectionItem, DocCollectionItem, MetaCollectionItem } from '@/config/build';
 import path from 'node:path';
-import { type CodeGen, createCodegen, ident, slash } from '@/utils/codegen';
+import { type CodeGen, createCodegen, ident, metaLang, slash } from '@/utils/codegen';
 import { glob } from 'tinyglobby';
 import { createFSCache } from '@/utils/fs-cache';
 import { createHash } from 'node:crypto';
 import type { LazyEntry } from '@/runtime/dynamic';
+import { frontmatterCode } from '@/loaders/mdx/code';
 import type { EmitEntry } from '@/core';
 import { frontmatter } from 'fumadocs-core/content/md/frontmatter';
 
@@ -257,7 +258,10 @@ async function generateDynamicIndexFile(ctx: FileGenContext) {
         filePath: absolutePath,
         source: content,
       },
-      parsed.data as Record<string, unknown>,
+      {
+        ...(parsed.data as Record<string, unknown>),
+        ...frontmatterCode(absolutePath, parsed.content)?.compile(() => undefined)(),
+      },
     );
 
     const hash = createHash('md5').update(content).digest('hex');
@@ -408,6 +412,7 @@ function generateMetaCollectionGlob(
     query: {
       collection: collection.name,
       workspace,
+      ...metaLang,
     },
     import: 'default',
     base: collection.dir,

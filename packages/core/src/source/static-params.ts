@@ -2,7 +2,8 @@ import type { Params } from './source';
 
 const segmentRegex = /^\[([^\]/]+)\]/;
 
-function segmentNames(path: string): string[] {
+/** the names of the params in a path, like `framework` in `[framework]/docs` */
+export function segmentNames(path: string): string[] {
   const names: string[] = [];
   for (const seg of path.split('/')) {
     const match = segmentRegex.exec(seg);

@@ -1,6 +1,6 @@
 ```ts title="server.ts"
 // @ts-nocheck
-import { default as __fd_glob_0 } from "./generate-index/meta.json?collection=docs"
+import { default as __fd_glob_0 } from "./generate-index/meta.json?collection=docs&lang.js"
 import { server } from 'fumadocs-mdx/runtime/server';
 import type * as Config from './config';
 

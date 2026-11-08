@@ -3365,6 +3365,12 @@ importers:
       '@standard-schema/spec':
         specifier: ^1.1.0
         version: 1.1.0
+      acorn:
+        specifier: ^8.19.0
+        version: 8.19.0
+      acorn-jsx:
+        specifier: ^5.3.2
+        version: 5.3.2(acorn@8.19.0)
       chokidar:
         specifier: ^6.0.0
         version: 6.0.0
@@ -3380,9 +3386,15 @@ importers:
       magic-string:
         specifier: ^1.4.5
         version: 1.4.5
+      mdast-util-from-markdown:
+        specifier: ^2.1.0
+        version: 2.1.0(supports-color@8.1.1)
       mdast-util-mdx:
         specifier: ^3.0.0
         version: 3.0.0(supports-color@8.1.1)
+      micromark-extension-mdxjs-esm:
+        specifier: ^3.0.0
+        version: 3.0.0
       picocolors:
         specifier: ^1.1.1
         version: 1.1.1

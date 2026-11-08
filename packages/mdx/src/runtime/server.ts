@@ -274,6 +274,7 @@ export function toFumadocsSource<
       path: baseDir ? PathUtils.joinPath(baseDir, entry.info.path) : entry.info.path,
       absolutePath: entry.info.fullPath,
       data: entry,
+      dataAt: dataAt(entry),
     });
   }
 
@@ -294,6 +295,12 @@ export function docAt<Doc extends DocMethods>(doc: Doc, params: Params): Doc {
   return page;
 }
 
+/** the data of a meta module in each folder of its params, see the meta loader */
+function dataAt<Meta>(entry: Meta): ((params: Params) => Meta) | undefined {
+  const map = (entry as { _dataAt?: Record<string, Partial<Meta>> })._dataAt;
+  if (map) return (params) => ({ ...entry, ...map[JSON.stringify(params)] });
+}
+
 function createDocAt<Doc extends DocMethods>(doc: Doc, params: Params, key: string): Doc {
   // the content reads the params as props when rendering
   const bind = (Component: FC<MDXProps>) => (props: MDXProps) =>
@@ -310,11 +317,18 @@ function createDocAt<Doc extends DocMethods>(doc: Doc, params: Params, key: stri
     };
   }
 
+  // the frontmatter in code of each params
+  const frontmatter = (doc as { _frontmatterAt?: Record<string, object> })._frontmatterAt?.[key];
   // eager entries have the exports, lazy entries load them, the macro has both
   const { load } = doc as { load?: () => Promise<DocData> };
   if (!load) {
     const page = pick(doc as { _exports?: Record<string, unknown> });
-    return { ...doc, ...mapDocData(page), ...createDocMethods(doc.info, () => page) };
+    return {
+      ...doc,
+      ...mapDocData(page),
+      ...frontmatter,
+      ...createDocMethods(doc.info, () => page),
+    };
   }
 
   let loaded: CompiledMDXProperties | undefined;
@@ -323,6 +337,7 @@ function createDocAt<Doc extends DocMethods>(doc: Doc, params: Params, key: stri
   const loadPage = () => (loading ??= load().then((data) => (loaded = pick(data))));
   return {
     ...doc,
+    ...frontmatter,
     ...createDocMethods(doc.info, loadPage),
     // memoized like `load()`, it can be called in render
     load: () => (data ??= loadPage().then(mapDocData)),

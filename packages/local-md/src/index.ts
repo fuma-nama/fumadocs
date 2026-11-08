@@ -9,7 +9,14 @@ import {
 } from '@fumadocs/local-content';
 import { frontmatter as parseFrontmatter } from 'fumadocs-core/content/md/frontmatter';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins';
-import type { DynamicSource, MetaData, PageData, Params, StaticSource } from 'fumadocs-core/source';
+import {
+  isDynamicPath,
+  type DynamicSource,
+  type MetaData,
+  type PageData,
+  type Params,
+  type StaticSource,
+} from 'fumadocs-core/source';
 import * as defaultSchemas from 'fumadocs-core/source/schema';
 import { createMarkdownCompiler, type MarkdownCompilerOptions } from './md/compiler';
 import {
@@ -19,7 +26,7 @@ import {
   type MarkdownRendererASTOptions,
 } from './md/renderer';
 
-export const defaultInclude = ['**/*.{md,mdx,json}'];
+export const defaultInclude = ['**/*.{md,mdx,json}', '**/meta{,.*}.{js,ts}'];
 
 export interface LocalMarkdownConfig<
   FrontmatterSchema extends StandardSchemaV1,
@@ -118,30 +125,44 @@ export function localMd<
         });
   }
 
-  async function page(file: SourceFile): Promise<LocalMarkdownPage<$Frontmatter>> {
-    const parsed = parseFrontmatter(await file.read());
-    const result = await frontmatterSchema['~standard'].validate(parsed.data);
-    if (result.issues) {
-      throw new Error(
-        `invalid frontmatter in "${file.absolutePath}": ${formatIssues(result.issues)}`,
-      );
-    }
-
-    const frontmatter = result.value as $Frontmatter;
-    const pageData = frontmatter as PageData & { _openapi?: unknown };
+  /** with frontmatter in code, a dynamic file has its frontmatter at each params */
+  async function page(
+    file: SourceFile,
+    { data, content }: ReturnType<typeof parseFrontmatter>,
+    code: boolean,
+    params?: Params,
+  ): Promise<LocalMarkdownPage<$Frontmatter>> {
+    let frontmatter: unknown = data;
     // the parsed file is cached until invalidated, so this compiles once
     let loaded: Promise<MarkdownRenderer> | undefined;
-    const load = () => (loaded ??= compile(file, parsed.content, frontmatter));
+    const load = () => (loaded ??= compile(file, content, frontmatter as $Frontmatter, params));
+
+    if (!code || params || !isDynamicPath(file.path)) {
+      if (code)
+        frontmatter = {
+          ...(data as object),
+          ...((await (await load()).render()).exports.frontmatter as object),
+        };
+      const result = await frontmatterSchema['~standard'].validate(frontmatter);
+      if (result.issues) {
+        throw new Error(
+          `invalid frontmatter in "${file.absolutePath}": ${formatIssues(result.issues)}`,
+        );
+      }
+      frontmatter = result.value;
+    }
+    const pageData = frontmatter as PageData & { _openapi?: unknown };
 
     return {
       title: pageData.title ?? path.basename(file.path, path.extname(file.path)),
       description: pageData.description,
       icon: pageData.icon,
+      staticParams: pageData.staticParams,
       // for Fumadocs OpenAPI
       ['_openapi' as never]: pageData._openapi,
 
-      content: parsed.content,
-      frontmatter,
+      content,
+      frontmatter: frontmatter as $Frontmatter,
       load,
       structuredData: async () => (await load()).structuredData,
     };
@@ -157,8 +178,8 @@ export function localMd<
     return { ...data, load, structuredData: async () => (await load()).structuredData };
   }
 
-  async function meta(file: SourceFile): Promise<$Meta> {
-    const result = await metaSchema['~standard'].validate(JSON.parse(await file.read()));
+  async function meta(file: SourceFile, value: unknown): Promise<$Meta> {
+    const result = await metaSchema['~standard'].validate(value);
     if (result.issues) {
       throw new Error(`invalid data in "${file.absolutePath}": ${formatIssues(result.issues)}`);
     }
@@ -173,11 +194,35 @@ export function localMd<
       async parse(file) {
         switch (path.extname(file.path)) {
           case '.json':
-            return { type: 'meta', data: await meta(file) };
+            return { type: 'meta', data: await meta(file, JSON.parse(await file.read())) };
+          case '.js':
+          case '.ts': {
+            // a new module after the file changes
+            const url = pathToFileURL(file.absolutePath);
+            url.searchParams.set('t', String(Date.now()));
+            const { default: data, staticParams } = (await import(
+              /* webpackIgnore: true */ /* @vite-ignore */ url.href
+            )) as { default: $Meta | ((params: Params) => $Meta); staticParams?: Params[] };
+            if (typeof data !== 'function')
+              return { type: 'meta', data: await meta(file, { staticParams, ...data }) };
+            return {
+              type: 'meta',
+              data: { staticParams } as $Meta,
+              dataAt: (params) => meta(file, { staticParams, ...data(params) }),
+            };
+          }
           case '.md':
           case '.mdx': {
-            const data = await page(file);
-            return { type: 'page', data, dataAt: (params) => pageAt(file, data, params) };
+            const parsed = parseFrontmatter(await file.read());
+            const code =
+              file.path.endsWith('.mdx') && /^export const frontmatter\b/m.test(parsed.content);
+            const data = await page(file, parsed, code);
+            return {
+              type: 'page',
+              data,
+              dataAt: (params) =>
+                code ? page(file, parsed, code, params) : pageAt(file, data, params),
+            };
           }
         }
       },
