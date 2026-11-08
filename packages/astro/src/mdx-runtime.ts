@@ -99,8 +99,14 @@ interface AstroNode {
 /** MDX files compile to the JSX runtime of Astro */
 type Output = ReactNode | AstroNode | Output[];
 
+/** the props of the content, with its components */
+interface MarkdownProps {
+  components?: MDXComponents;
+  [key: string]: unknown;
+}
+
 /** the function output of `remarkLlms()` */
-type Render = (props: { components?: MDXComponents }) => Output;
+type Render = (props: MarkdownProps) => Output;
 
 /** documents with the function output, by the `markdownId` from the compiler */
 const documents = new Map<string, { render: Render; components?: MDXComponents }>();
@@ -113,18 +119,21 @@ export function registerMarkdown(id: string, render: Render, components?: MDXCom
 /**
  * Render the function output of a document into Markdown, its components can define their Markdown form with `asMarkdown()`.
  */
-export async function renderMarkdown(id: string, components?: MDXComponents): Promise<string> {
+export async function renderMarkdown(id: string, props: MarkdownProps): Promise<string> {
   const document = documents.get(id);
   if (!document) throw new Error(`The function output of "${id}" is not registered.`);
 
   const { renderToMarkdown } = await import('fumadocs-core/server');
   return renderToMarkdown(
-    jsx(Markdown, { render: document.render, components: components ?? document.components }),
+    jsx(Markdown, {
+      render: document.render,
+      props: { ...props, components: props.components ?? document.components },
+    }),
   );
 }
 
-function Markdown({ render, components }: { render: Render; components?: MDXComponents }) {
-  return toReact(render({ components }));
+function Markdown({ render, props }: { render: Render; props: MarkdownProps }) {
+  return toReact(render(props));
 }
 
 function isAstroNode(node: Output): node is AstroNode {

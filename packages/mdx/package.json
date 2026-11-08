@@ -108,7 +108,7 @@
     "@types/mdx": "*",
     "@types/react": "*",
     "@vitejs/plugin-rsc": "^0.5.34",
-    "fumadocs-core": "^16.17.11",
+    "fumadocs-core": "^16.18.3",
     "mdast-util-directive": "*",
     "next": "^15.3.0 || ^16.0.0",
     "react": "^19.2.0",

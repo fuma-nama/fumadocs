@@ -17,7 +17,7 @@ import { applySatteriPreset, type DefaultSatteriOptions } from '@fumadocs/satter
 import { remarkInclude } from '@fumadocs/satteri/remark-include';
 import { remarkLlms, type LLMsOptions } from '@fumadocs/satteri/remark-llms';
 import { islandPlugin } from './island-plugin';
-import { dataKey, type FumadocsData } from './shared';
+import { dataKey, parseDynamicPageFile, type FumadocsData } from './shared';
 import { output } from './sitemap';
 import type * as RuntimeConfig from 'virtual:fumadocs/config';
 
@@ -31,6 +31,7 @@ export interface CollectionOptions extends Pick<
   | 'remarkCodeTabOptions'
   | 'remarkNpmOptions'
   | 'remarkStructureOptions'
+  | 'remarkShowOptions'
   | 'rehypeCodeOptions'
   | 'rehypeKatexOptions'
 > {
@@ -207,7 +208,7 @@ document.addEventListener('astro:before-swap', onBeforeSwap);`,
         updateConfig({
           integrations: missingIntegrations(config.integrations),
           vite: {
-            plugins: [virtualPlugin(modules), includes.plugin()],
+            plugins: [virtualPlugin(modules), includes.plugin(), dynamicPagesPlugin()],
             optimizeDeps: { exclude: ['@fumadocs/astro'] },
             ssr: { noExternal: ['@fumadocs/astro'] },
           },
@@ -299,18 +300,40 @@ function addCollectionPlugins(
 ) {
   function collectionOf({ fileURL, sourceFormat }: PluginFactoryContext) {
     if (!fileURL || sourceFormat !== 'mdx') return;
-    const file = fileURLToPath(fileURL);
+    let file = fileURLToPath(fileURL);
+    const page = parseDynamicPageFile(file);
+    if (page) file = page.file;
     const collection = collections.find(({ dir }) => isInside(dir, file));
-    return collection && { file, collection };
+    return collection && { file, collection, params: page?.params };
   }
 
   satteri.mdastPlugins.push((ctx) => {
     const match = collectionOf(ctx);
     if (!match) return;
     ctx.data._compiler = { addDependency: (dependency) => includes.add(dependency, match.file) };
+    ctx.data.params = match.params;
     return match.collection.mdastPlugins;
   });
   satteri.hastPlugins.push((ctx) => collectionOf(ctx)?.collection.hastPlugins);
+}
+
+function dynamicPagesPlugin(): Plugin {
+  return {
+    name: '@fumadocs/astro:dynamic-pages',
+    enforce: 'pre',
+    resolveId(source, importer) {
+      if (!parseDynamicPageFile(source.split('?', 1)[0])) return;
+      return importer && source.startsWith('.')
+        ? path.resolve(path.dirname(importer), source)
+        : source;
+    },
+    async load(id) {
+      const page = parseDynamicPageFile(id.split('?', 1)[0]);
+      if (!page) return;
+      this.addWatchFile(page.file);
+      return fs.promises.readFile(page.file, 'utf-8');
+    },
+  };
 }
 
 /** `virtual:fumadocs/config` */

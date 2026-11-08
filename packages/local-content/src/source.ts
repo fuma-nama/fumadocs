@@ -64,11 +64,21 @@ export function createLocalSource<Page extends PageData, Meta extends MetaData>(
       let v = fileCache.get(parsed);
       if (!v) {
         v = {
-          type: parsed.type,
+          ...parsed,
           path: baseDir ? path.join(baseDir, file) : file,
           absolutePath: path.resolve(config.dir, file),
-          data: parsed.data,
-        } as LocalVirtualFile;
+        };
+        // the pages at each params are cached with the parsed file, like its data
+        if (v.type === 'page' && v.dataAt) {
+          const dataAt = v.dataAt;
+          const pages = new Map<string, Page>();
+          v.dataAt = (params) => {
+            const key = JSON.stringify(params);
+            let page = pages.get(key);
+            if (!page) pages.set(key, (page = dataAt(params)));
+            return page;
+          };
+        }
         fileCache.set(parsed, v);
       }
       return v;

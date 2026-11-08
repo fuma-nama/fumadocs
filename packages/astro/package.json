@@ -40,6 +40,7 @@
     "@fumadocs/satteri": "workspace:^",
     "devalue": "^6.0.2",
     "satteri": "^0.10.5",
+    "yaml": "^2.9.1",
     "yuku-parser": "^0.19.0"
   },
   "devDependencies": {
@@ -66,7 +67,7 @@
     "@astrojs/react": "^7.0.0",
     "@types/mdx": "*",
     "astro": "^7.4.0",
-    "fumadocs-core": "^16.17.8",
+    "fumadocs-core": "^16.18.3",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
   },

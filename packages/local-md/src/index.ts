@@ -9,7 +9,7 @@ import {
 } from '@fumadocs/local-content';
 import { frontmatter as parseFrontmatter } from 'fumadocs-core/content/md/frontmatter';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins';
-import type { DynamicSource, MetaData, PageData, StaticSource } from 'fumadocs-core/source';
+import type { DynamicSource, MetaData, PageData, Params, StaticSource } from 'fumadocs-core/source';
 import * as defaultSchemas from 'fumadocs-core/source/schema';
 import { createMarkdownCompiler, type MarkdownCompilerOptions } from './md/compiler';
 import {
@@ -93,11 +93,12 @@ export function localMd<
     file: SourceFile,
     content: string,
     frontmatter: $Frontmatter,
+    params?: Params,
   ): Promise<MarkdownRenderer> {
     const res = await compiler.compile({
       path: file.absolutePath,
       value: content,
-      data: { frontmatter, _compiler: file },
+      data: { frontmatter, _compiler: file, params },
     });
 
     return res.type === 'ast'
@@ -113,6 +114,7 @@ export function localMd<
           filePath: res.file.path,
           baseUrl: pathToFileURL(res.file.path).href,
           structuredData: res.file.data.structuredData,
+          props: params,
         });
   }
 
@@ -145,6 +147,16 @@ export function localMd<
     };
   }
 
+  function pageAt(
+    file: SourceFile,
+    data: LocalMarkdownPage<$Frontmatter>,
+    params: Params,
+  ): LocalMarkdownPage<$Frontmatter> {
+    let loaded: Promise<MarkdownRenderer> | undefined;
+    const load = () => (loaded ??= compile(file, data.content, data.frontmatter, params));
+    return { ...data, load, structuredData: async () => (await load()).structuredData };
+  }
+
   async function meta(file: SourceFile): Promise<$Meta> {
     const result = await metaSchema['~standard'].validate(JSON.parse(await file.read()));
     if (result.issues) {
@@ -163,8 +175,10 @@ export function localMd<
           case '.json':
             return { type: 'meta', data: await meta(file) };
           case '.md':
-          case '.mdx':
-            return { type: 'page', data: await page(file) };
+          case '.mdx': {
+            const data = await page(file);
+            return { type: 'page', data, dataAt: (params) => pageAt(file, data, params) };
+          }
         }
       },
     },

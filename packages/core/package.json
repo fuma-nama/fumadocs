@@ -63,6 +63,7 @@
     "./mdx-plugins/remark-mdx-files": "./dist/mdx-plugins/remark-mdx-files.js",
     "./mdx-plugins/remark-mdx-mermaid": "./dist/mdx-plugins/remark-mdx-mermaid.js",
     "./mdx-plugins/remark-npm": "./dist/mdx-plugins/remark-npm.js",
+    "./mdx-plugins/remark-show": "./dist/mdx-plugins/remark-show.js",
     "./mdx-plugins/remark-steps": "./dist/mdx-plugins/remark-steps.js",
     "./mdx-plugins/remark-structure": "./dist/mdx-plugins/remark-structure.js",
     "./mdx-plugins/stringifier": "./dist/mdx-plugins/stringifier.js",

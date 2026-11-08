@@ -1,9 +1,12 @@
 import { z } from 'zod';
 
+const staticParams = z.array(z.record(z.string(), z.string())).optional();
+
 /**
  * Zod 4 schema
  */
 export const metaSchema = z.object({
+  staticParams,
   title: z.string().optional(),
   pages: z.array(z.string()).optional(),
   /** specify a index page for folder */
@@ -28,6 +31,7 @@ export type _JSONType =
  * Zod 4 schema
  */
 export const pageSchema = z.object({
+  staticParams,
   title: z.string(),
   description: z.string().optional(),
   icon: z.string().optional(),

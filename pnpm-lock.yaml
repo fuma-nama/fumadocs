@@ -2285,6 +2285,9 @@ importers:
       satteri:
         specifier: ^0.10.5
         version: 0.10.5
+      yaml:
+        specifier: ^2.9.1
+        version: 2.9.1
       yuku-parser:
         specifier: ^0.19.0
         version: 0.19.0
