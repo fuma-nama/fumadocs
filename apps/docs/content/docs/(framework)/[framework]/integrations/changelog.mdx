@@ -1,0 +1,352 @@
+---
+title: Changelog
+description: Show the releases of your project.
+---
+
+## Installation
+
+Install the timeline component. It adds `@fumadocs/changelog` to your dependencies:
+
+```npm
+npx @fumadocs/cli@latest add changelog
+```
+
+## Usage
+
+Create a page under your [Home Layout](/docs/ui/layouts/home-layout). Fetch a page of entries, render them with `ChangelogTimeline`, and link to the other pages with `ChangelogPagination`:
+
+<show when={props.framework === 'next'}>
+
+```tsx title="app/(home)/changelog/[[...page]]/page.tsx"
+import { notFound } from 'next/navigation';
+import { githubReleases } from '@fumadocs/changelog/github';
+import { ChangelogPagination, ChangelogTimeline } from '@/components/changelog';
+
+export const revalidate = 3600;
+
+export default async function Page(props: PageProps<'/changelog/[[...page]]'>) {
+  const { page: segments = [] } = await props.params;
+  const page = Number(segments[0] ?? 1);
+  const { entries, nextPage } = await githubReleases({
+    owner: 'fuma-nama',
+    repo: 'fumadocs',
+    token: process.env.GITHUB_TOKEN,
+    page,
+  });
+  if (entries.length === 0) notFound();
+
+  return (
+    <div className="mx-auto flex w-full max-w-[900px] flex-col gap-10 px-4 py-12">
+      <ChangelogTimeline entries={entries} />
+      <ChangelogPagination
+        newer={page > 1 ? `/changelog/${page - 1}` : undefined}
+        older={nextPage ? `/changelog/${nextPage}` : undefined}
+      />
+    </div>
+  );
+}
+```
+
+</show>
+
+<show when={props.framework === 'react-router'}>
+
+```tsx tab="app/routes/changelog.tsx"
+import type { Route } from './+types/changelog';
+import { HomeLayout } from 'fumadocs-ui/layouts/home';
+import { githubReleases } from '@fumadocs/changelog/github';
+import { baseOptions } from '@/lib/layout.shared';
+import { ChangelogPagination, ChangelogTimeline } from '@/components/changelog';
+
+export async function loader({ params }: Route.LoaderArgs) {
+  const page = Number(params.page ?? 1);
+  const releases = await githubReleases({
+    owner: 'fuma-nama',
+    repo: 'fumadocs',
+    token: process.env.GITHUB_TOKEN,
+    page,
+  });
+  if (releases.entries.length === 0) throw new Response('Not Found', { status: 404 });
+
+  return { page, ...releases };
+}
+
+export default function Page({ loaderData }: Route.ComponentProps) {
+  const { page, entries, nextPage } = loaderData;
+
+  return (
+    <HomeLayout {...baseOptions()}>
+      <div className="mx-auto flex w-full max-w-[900px] flex-col gap-10 px-4 py-12">
+        <ChangelogTimeline entries={entries} />
+        <ChangelogPagination
+          newer={page > 1 ? `/changelog/${page - 1}` : undefined}
+          older={nextPage ? `/changelog/${nextPage}` : undefined}
+        />
+      </div>
+    </HomeLayout>
+  );
+}
+```
+
+```ts tab="app/routes.ts"
+import { route, type RouteConfig } from '@react-router/dev/routes';
+
+export default [
+  // [!code ++]
+  route('changelog/:page?', 'routes/changelog.tsx'),
+] satisfies RouteConfig;
+```
+
+</show>
+
+<show when={props.framework === 'tanstack-start'}>
+
+```tsx title="src/routes/changelog.{-$page}.tsx"
+import { createFileRoute, notFound } from '@tanstack/react-router';
+import { createServerFn } from '@tanstack/react-start';
+import { HomeLayout } from 'fumadocs-ui/layouts/home';
+import { githubReleases } from '@fumadocs/changelog/github';
+import { baseOptions } from '@/lib/layout.shared';
+import { ChangelogPagination, ChangelogTimeline } from '@/components/changelog';
+
+const getReleases = createServerFn({ method: 'GET' })
+  .validator((page: number) => page)
+  .handler(async ({ data: page }) => {
+    const releases = await githubReleases({
+      owner: 'fuma-nama',
+      repo: 'fumadocs',
+      token: process.env.GITHUB_TOKEN,
+      page,
+    });
+    if (releases.entries.length === 0) throw notFound();
+
+    return releases;
+  });
+
+export const Route = createFileRoute('/changelog/{-$page}')({
+  loader: async ({ params }) => {
+    const page = Number(params.page ?? 1);
+    return { page, ...(await getReleases({ data: page })) };
+  },
+  component: Page,
+});
+
+function Page() {
+  const { page, entries, nextPage } = Route.useLoaderData();
+
+  return (
+    <HomeLayout {...baseOptions()}>
+      <div className="mx-auto flex w-full max-w-[900px] flex-col gap-10 px-4 py-12">
+        <ChangelogTimeline entries={entries} />
+        <ChangelogPagination
+          newer={page > 1 ? `/changelog/${page - 1}` : undefined}
+          older={nextPage ? `/changelog/${nextPage}` : undefined}
+        />
+      </div>
+    </HomeLayout>
+  );
+}
+```
+
+</show>
+
+<show when={props.framework === 'waku'}>
+
+```tsx tab="src/pages/(home)/changelog/[page].tsx"
+import { unstable_notFound } from 'waku/router/server';
+import { githubReleases } from '@fumadocs/changelog/github';
+import { ChangelogPagination, ChangelogTimeline } from '@/components/changelog';
+
+export default async function Page({ page: param = '1' }: { page?: string }) {
+  const page = Number(param);
+  const { entries, nextPage } = await githubReleases({
+    owner: 'fuma-nama',
+    repo: 'fumadocs',
+    token: process.env.GITHUB_TOKEN,
+    page,
+  });
+  if (entries.length === 0) unstable_notFound();
+
+  return (
+    <div className="mx-auto flex w-full max-w-[900px] flex-col gap-10 px-4 py-12">
+      <ChangelogTimeline entries={entries} />
+      <ChangelogPagination
+        newer={page > 1 ? `/changelog/${page - 1}` : undefined}
+        older={nextPage ? `/changelog/${nextPage}` : undefined}
+      />
+    </div>
+  );
+}
+
+export const getConfig = async () => ({ render: 'dynamic' }) as const;
+```
+
+```tsx tab="src/pages/(home)/changelog/index.tsx"
+// the first page
+export { default, getConfig } from './[page]';
+```
+
+</show>
+
+<show when={props.framework === 'astro'}>
+
+```astro tab="src/pages/changelog/[...page].astro"
+---
+import { getSecret } from 'astro:env/server';
+import { githubReleases } from '@fumadocs/changelog/github';
+import Layout from '@/layouts/Layout.astro';
+import { Changelog } from '@/components/changelog-page';
+
+// render per request, needs an adapter
+export const prerender = false;
+
+const page = Number(Astro.params.page ?? 1);
+const { entries, nextPage } = await githubReleases({
+  owner: 'fuma-nama',
+  repo: 'fumadocs',
+  token: getSecret('GITHUB_TOKEN'),
+  page,
+});
+if (entries.length === 0) return Astro.rewrite('/404');
+---
+
+<Layout title="Changelog">
+  <Changelog
+    client:load
+    pathname={Astro.url.pathname}
+    params={Astro.params}
+    entries={entries}
+    newer={page > 1 ? `/changelog/${page - 1}` : undefined}
+    older={nextPage ? `/changelog/${nextPage}` : undefined}
+  />
+</Layout>
+```
+
+```tsx tab="src/components/changelog-page.tsx"
+import { HomeLayout } from 'fumadocs-ui/layouts/home';
+import { baseOptions } from '@/lib/layout.shared';
+import { Provider, type ProviderProps } from '@/components/provider';
+import {
+  ChangelogPagination,
+  ChangelogTimeline,
+  type ChangelogTimelineEntry,
+} from '@/components/changelog';
+
+export interface ChangelogProps extends ProviderProps {
+  entries: ChangelogTimelineEntry[];
+  newer?: string;
+  older?: string;
+}
+
+export function Changelog({ entries, newer, older, ...props }: ChangelogProps) {
+  return (
+    <Provider {...props}>
+      <HomeLayout {...baseOptions()}>
+        <div className="mx-auto flex w-full max-w-[900px] flex-col gap-10 px-4 py-12">
+          <ChangelogTimeline entries={entries} />
+          <ChangelogPagination newer={newer} older={older} />
+        </div>
+      </HomeLayout>
+    </Provider>
+  );
+}
+```
+
+</show>
+
+## Sources
+
+### GitHub Releases
+
+`githubReleases()` returns a page of the published releases of a repository, with `nextPage` when there are older releases.
+
+- Versions are read from the release names like `fumadocs-ui@16.17.0`, or their tags.
+- Entries have a `prerelease` property for pre-releases.
+- GitHub limits unauthenticated requests to 60 per hour. Pass a `token` and cache the page<show when={props.framework === 'next'}>, like `export const revalidate = 3600`</show>.
+- GitHub lists the first 1000 releases, or 10000 with a token. Later pages have no entries.
+
+<auto-type-table type="import('@fumadocs/changelog/github').GitHubReleasesOptions" />
+
+### Custom Entries
+
+Entries are plain objects. Create them from any source:
+
+<auto-type-table type="import('@fumadocs/changelog').ChangelogEntry" />
+
+<show when={props.framework === 'next' || props.framework === 'waku'}>
+
+For example, a collection of MDX files. Pass `body` to render the content yourself:
+
+</show>
+
+<show when={props.framework === 'next'}>
+
+```tsx title="app/(home)/changelog/page.tsx"
+import { changelogSource } from '@/lib/source';
+import { getMDXComponents } from '@/components/mdx';
+import { ChangelogTimeline, type ChangelogTimelineEntry } from '@/components/changelog';
+
+export default function Page() {
+  const entries: ChangelogTimelineEntry[] = changelogSource.getPages().map((page) => {
+    const MDX = page.data.body;
+
+    return {
+      id: page.url,
+      title: page.data.title,
+      date: new Date(page.data.date),
+      body: <MDX components={getMDXComponents()} />,
+    };
+  });
+
+  return (
+    <div className="mx-auto w-full max-w-[900px] px-4 py-12">
+      <ChangelogTimeline entries={entries} />
+    </div>
+  );
+}
+```
+
+</show>
+
+<show when={props.framework === 'waku'}>
+
+```tsx title="src/pages/(home)/changelog/index.tsx"
+import { changelogSource } from '@/lib/source';
+import { getMDXComponents } from '@/components/mdx';
+import { ChangelogTimeline, type ChangelogTimelineEntry } from '@/components/changelog';
+
+export default function Page() {
+  const entries: ChangelogTimelineEntry[] = changelogSource.getPages().map((page) => {
+    const MDX = page.data.body;
+
+    return {
+      id: page.url,
+      title: page.data.title,
+      date: new Date(page.data.date),
+      body: <MDX components={getMDXComponents()} />,
+    };
+  });
+
+  return (
+    <div className="mx-auto w-full max-w-[900px] px-4 py-12">
+      <ChangelogTimeline entries={entries} />
+    </div>
+  );
+}
+
+export const getConfig = async () => ({ render: 'static' }) as const;
+```
+
+</show>
+
+<show when={props.framework === 'react-router' || props.framework === 'tanstack-start'}>
+
+Entries go from the loader to the page as data, so write their content as Markdown in `content`, rather than as React nodes in `body`.
+
+</show>
+
+<show when={props.framework === 'astro'}>
+
+Entries go from the page to the React island as props, so write their content as Markdown in `content`, rather than as React nodes in `body`.
+
+</show>

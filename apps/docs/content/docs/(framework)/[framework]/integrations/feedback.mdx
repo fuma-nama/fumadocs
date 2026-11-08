@@ -1,0 +1,354 @@
+---
+title: Feedback
+description: Receive feedback from your users
+---
+
+## Overview
+
+Feedback tells you what readers think of your docs and which pages need improvement.
+Fumadocs provides components to collect feedback on pages and on blocks of content.
+
+## Installation
+
+Install it with **Fumadocs CLI**. It also adds the component to your docs page when it finds one:
+
+```npm
+npx @fumadocs/cli feature feedback
+```
+
+Or install the component only:
+
+```npm
+npx @fumadocs/cli@latest add feedback
+```
+
+### Page Feedback
+
+Add `<Feedback />` to the bottom of your docs page. The `onSendAction` callback runs when a reader submits feedback.
+
+<show when={props.framework === 'next' || props.framework === 'waku'}>
+
+Handle the feedback in a server action. For example, report it as an `on_rate_docs` event to PostHog:
+
+```tsx
+import { DocsPage } from 'fumadocs-ui/layouts/docs/page';
+import { Feedback } from '@/components/feedback/client';
+
+export default async function Page() {
+  return (
+    <DocsPage>
+      {/* at the bottom of page */}
+      <Feedback
+        onSendAction={async (feedback) => {
+          'use server';
+
+          console.log(feedback);
+          return {};
+        }}
+      />
+    </DocsPage>
+  );
+}
+```
+
+</show>
+
+<show when={props.framework === 'tanstack-start'}>
+
+Handle the feedback in a server function. For example, report it as an `on_rate_docs` event to PostHog:
+
+```tsx
+import { createServerFn } from '@tanstack/react-start';
+import { DocsPage } from 'fumadocs-ui/layouts/docs/page';
+import { Feedback } from '@/components/feedback/client';
+import { type PageFeedback, pageFeedback } from '@/components/feedback/schema';
+
+const sendFeedback = createServerFn({ method: 'POST' })
+  .validator((feedback: PageFeedback) => pageFeedback.parse(feedback))
+  .handler(async ({ data: feedback }) => {
+    console.log(feedback);
+    return {};
+  });
+
+function Content() {
+  return (
+    <DocsPage>
+      {/* at the bottom of page */}
+      <Feedback onSendAction={(feedback) => sendFeedback({ data: feedback })} />
+    </DocsPage>
+  );
+}
+```
+
+</show>
+
+<show when={props.framework === 'react-router' || props.framework === 'astro'}>
+
+Send the feedback to an endpoint in your app:
+
+```tsx
+import { DocsPage } from 'fumadocs-ui/layouts/docs/page';
+import { Feedback } from '@/components/feedback/client';
+
+function Content() {
+  return (
+    <DocsPage>
+      {/* at the bottom of page */}
+      <Feedback
+        onSendAction={async (feedback) => {
+          const res = await fetch('/api/feedback', {
+            method: 'POST',
+            body: JSON.stringify(feedback),
+          });
+
+          return res.json();
+        }}
+      />
+    </DocsPage>
+  );
+}
+```
+
+</show>
+
+<show when={props.framework === 'react-router'}>
+
+Handle the feedback in a [resource route](https://reactrouter.com/how-to/resource-routes). For example, report it as an `on_rate_docs` event to PostHog:
+
+```ts tab="app/routes/api.feedback.ts"
+import type { Route } from './+types/api.feedback';
+import { pageFeedback } from '@/components/feedback/schema';
+
+export async function action({ request }: Route.ActionArgs) {
+  const feedback = pageFeedback.parse(await request.json());
+
+  console.log(feedback);
+  return Response.json({});
+}
+```
+
+```ts tab="app/routes.ts"
+import { route, type RouteConfig } from '@react-router/dev/routes';
+
+export default [
+  // [!code ++]
+  route('api/feedback', 'routes/api.feedback.ts'),
+] satisfies RouteConfig;
+```
+
+</show>
+
+<show when={props.framework === 'astro'}>
+
+Handle the feedback in an endpoint. For example, report it as an `on_rate_docs` event to PostHog. The endpoint renders on request, so your project needs an [adapter](https://docs.astro.build/en/guides/on-demand-rendering/).
+
+```ts title="src/pages/api/feedback.ts"
+import type { APIRoute } from 'astro';
+import { pageFeedback } from '@/components/feedback/schema';
+
+export const prerender = false;
+
+export const POST: APIRoute = async ({ request }) => {
+  const feedback = pageFeedback.parse(await request.json());
+
+  console.log(feedback);
+  return Response.json({});
+};
+```
+
+</show>
+
+<show when={props.framework === 'next' || props.framework === 'waku'}>
+
+<Callout type="warn">
+
+Validate the feedback before storing or sending it, since anyone can call a server action with any input.
+
+</Callout>
+
+</show>
+
+### Feedback Block
+
+Block feedback lets readers comment on a specific block of content through a popover that opens when they select text.
+
+Add `remarkBlockId`, a remark plugin that gives each block an ID:
+
+<show when={props.framework !== 'astro'}>
+
+```ts tab="unified" title="source.config.ts"
+import {
+  remarkBlockId,
+  type RemarkBlockIdOptions,
+} from 'fumadocs-core/mdx-plugins/remark-block-id';
+import { defineConfig } from 'fumadocs-mdx/config';
+
+const blockIdOptions: RemarkBlockIdOptions = {
+  addDataAttribute: 'feedback',
+};
+
+export default defineConfig({
+  mdxOptions: {
+    remarkPlugins: [
+      // [!code ++]
+      [remarkBlockId, blockIdOptions],
+    ],
+  },
+});
+```
+
+```ts tab="Sätteri" title="source.config.ts"
+import { remarkBlockId } from '@fumadocs/satteri/remark-block-id';
+import { defineConfig, defineDocs } from 'fumadocs-mdx/config';
+
+export const docs = defineDocs({
+  docs: {
+    compiler: 'satteri',
+  },
+});
+
+export default defineConfig({
+  satteriOptions: {
+    mdastPlugins: [
+      // [!code ++]
+      remarkBlockId({ addDataAttribute: 'feedback' }),
+    ],
+  },
+});
+```
+
+</show>
+
+<show when={props.framework === 'astro'}>
+
+```js title="astro.config.mjs"
+import { defineConfig } from 'astro/config';
+import fumadocs from '@fumadocs/astro';
+import { remarkBlockId } from '@fumadocs/satteri/remark-block-id';
+
+export default defineConfig({
+  integrations: [
+    fumadocs({
+      // [!code ++]
+      mdastPlugins: [remarkBlockId({ addDataAttribute: 'feedback' })],
+    }),
+  ],
+});
+```
+
+</show>
+
+Then wrap your page content in `<FeedbackText />`. The `onSendAction` callback runs when a reader submits feedback on a block.
+
+<show when={props.framework === 'next' || props.framework === 'waku'}>
+
+```tsx
+import { DocsPage } from 'fumadocs-ui/layouts/docs/page';
+import { FeedbackText } from '@/components/feedback/client';
+
+export default async function Page() {
+  return (
+    <DocsPage>
+      <FeedbackText
+        onSendAction={async (feedback) => {
+          'use server';
+
+          console.log(feedback);
+          return {};
+        }}
+      >
+        {/* the content of page */}
+      </FeedbackText>
+    </DocsPage>
+  );
+}
+```
+
+</show>
+
+<show when={props.framework === 'tanstack-start'}>
+
+```tsx
+import { createServerFn } from '@tanstack/react-start';
+import { DocsPage } from 'fumadocs-ui/layouts/docs/page';
+import { FeedbackText } from '@/components/feedback/client';
+import { type BlockFeedback, blockFeedback } from '@/components/feedback/schema';
+
+const sendBlockFeedback = createServerFn({ method: 'POST' })
+  .validator((feedback: BlockFeedback) => blockFeedback.parse(feedback))
+  .handler(async ({ data: feedback }) => {
+    console.log(feedback);
+    return {};
+  });
+
+function Content() {
+  return (
+    <DocsPage>
+      <FeedbackText onSendAction={(feedback) => sendBlockFeedback({ data: feedback })}>
+        {/* the content of page */}
+      </FeedbackText>
+    </DocsPage>
+  );
+}
+```
+
+</show>
+
+<show when={props.framework === 'react-router' || props.framework === 'astro'}>
+
+```tsx
+import { DocsPage } from 'fumadocs-ui/layouts/docs/page';
+import { FeedbackText } from '@/components/feedback/client';
+
+function Content() {
+  return (
+    <DocsPage>
+      <FeedbackText
+        onSendAction={async (feedback) => {
+          const res = await fetch('/api/feedback/block', {
+            method: 'POST',
+            body: JSON.stringify(feedback),
+          });
+
+          return res.json();
+        }}
+      >
+        {/* the content of page */}
+      </FeedbackText>
+    </DocsPage>
+  );
+}
+```
+
+Handle it in another endpoint like the one of page feedback, and parse the request body with `blockFeedback` instead.
+
+</show>
+
+<Callout type='info' title='Good to know'>
+
+`remark-block-id` generates a block ID from its content and order in the page, so 3rd party services can track the blocks too.
+
+</Callout>
+
+### Integrating with GitHub Discussion
+
+To report your feedback to GitHub Discussion, you can copy this file as a starting point:
+
+<include cwd meta="title='lib/github.ts'">
+  ./lib/github.ts
+</include>
+
+1. Create your own GitHub App and obtain its app ID and private key.
+2. Fill required environment variables.
+3. Replace constants like `owner`, `repo`, and `DocsCategory`.
+4. <show when={props.framework === 'next' || props.framework === 'waku'}>
+     Use `onPageFeedbackAction` and `onBlockFeedbackAction` in your feedback components.
+   </show>
+   <show when={props.framework === 'tanstack-start'}>
+     Remove the `'use server'` directives, and call `onPageFeedbackAction` and
+     `onBlockFeedbackAction` from your server functions.
+   </show>
+   <show when={props.framework === 'react-router' || props.framework === 'astro'}>
+     Remove the `'use server'` directives, and call `onPageFeedbackAction` and
+     `onBlockFeedbackAction` from your endpoints.
+   </show>

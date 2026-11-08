@@ -1,0 +1,400 @@
+---
+title: Takumi
+description: Integrate Takumi for framework agnostic and fast metadata image generation.
+---
+
+## Installation
+
+```npm
+npm install takumi-js
+```
+
+<show when={props.framework === 'next'}>
+
+`takumi-js` loads a native binding (`@takumi-rs/core`) on Node.js. Mark it as external to keep it out of the server bundle:
+
+```ts title="next.config.ts"
+import type { NextConfig } from 'next';
+
+const config: NextConfig = {
+  // [!code ++]
+  serverExternalPackages: ['@takumi-rs/core'],
+};
+```
+
+</show>
+
+## Metadata Image
+
+Add a function that returns the image URL of a page, and reference the image in the metadata of docs pages:
+
+<show when={props.framework === 'next'}>
+
+```ts tab="lib/source.ts"
+// [!code ++:8]
+export function getPageImageUrl(page: (typeof source)['$inferPage']) {
+  const segments = [...page.slugs, 'image.webp'];
+
+  return {
+    segments,
+    url: '/' + [page.locale, 'og', 'docs', ...segments].filter(Boolean).join('/'),
+  };
+}
+```
+
+```tsx tab="app/docs/[[...slug]]/page.tsx"
+import { notFound } from 'next/navigation';
+import { source, getPageImageUrl } from '@/lib/source';
+import type { Metadata } from 'next';
+
+export async function generateMetadata(props: PageProps<'/docs/[[...slug]]'>): Promise<Metadata> {
+  const params = await props.params;
+  const page = source.getPage(params.slug);
+  if (!page) notFound();
+
+  return {
+    title: page.data.title,
+    description: page.data.description,
+    openGraph: {
+      // [!code ++]
+      images: getPageImageUrl(page).url,
+    },
+  };
+}
+```
+
+</show>
+
+<show when={props.framework === 'react-router'}>
+
+```tsx tab="app/lib/shared.ts"
+export const docsImageRoute = '/og/docs';
+
+// [!code ++:5]
+export function getPageImagePath(slugs: string[], locale?: string) {
+  return (
+    '/' + [locale, ...docsImageRoute.split('/'), ...slugs, 'image.webp'].filter(Boolean).join('/')
+  );
+}
+```
+
+```tsx tab="app/routes/docs.tsx"
+// [!code ++]
+import { getPageImagePath } from '@/lib/shared';
+
+// Somewhere in your loader
+return {
+  // [!code ++]
+  imagePath: getPageImagePath(page.slugs, page.locale),
+};
+
+// Somewhere in your component or client loader
+return (
+  <>
+    {/* [!code ++] */}
+    <meta property="og:image" content={imagePath} />
+  </>
+);
+```
+
+</show>
+
+<show when={props.framework === 'tanstack-start' || props.framework === 'waku' || props.framework === 'astro'}>
+
+```ts tab="src/lib/shared.ts"
+import { createGetUrl } from 'fumadocs-core/source';
+
+// [!code ++:7]
+const getImageUrl = createGetUrl('/og/docs');
+
+export function getPageImageUrl(page: { slugs: string[]; locale?: string }) {
+  const segments = [...page.slugs, 'image.webp'];
+
+  return { segments, url: getImageUrl(segments, page.locale) };
+}
+```
+
+</show>
+
+<show when={props.framework === 'tanstack-start'}>
+
+```tsx tab="src/routes/docs/$.tsx"
+// [!code ++]
+import { getPageImageUrl } from '@/lib/shared';
+
+export const Route = createFileRoute('/docs/$')({
+  // [!code ++:3]
+  head: ({ loaderData }) => ({
+    meta: loaderData ? [{ property: 'og:image', content: loaderData.imageUrl }] : [],
+  }),
+});
+
+// Somewhere in your server function
+return {
+  // [!code ++]
+  imageUrl: getPageImageUrl(page).url,
+};
+```
+
+</show>
+
+<show when={props.framework === 'waku'}>
+
+```tsx tab="src/pages/docs/[...slugs].tsx"
+// [!code ++]
+import { getPageImageUrl } from '@/lib/shared';
+
+// Somewhere in your page component
+return (
+  <DocsPage toc={page.data.toc}>
+    {/* [!code ++] */}
+    <meta property="og:image" content={getPageImageUrl(page).url} />
+    {/* ... */}
+  </DocsPage>
+);
+```
+
+</show>
+
+<show when={props.framework === 'astro'}>
+
+```astro tab="src/pages/docs/[...slug].astro"
+---
+import Layout from '@/layouts/Layout.astro';
+// [!code ++]
+import { getPageImageUrl } from '@/lib/shared';
+---
+
+<Layout
+  title={page.data.title}
+  description={page.data.description}
+  image={getPageImageUrl(page).url}
+>
+  {/* ... */}
+</Layout>
+```
+
+```astro tab="src/layouts/Layout.astro"
+---
+interface Props {
+  title: string;
+  description?: string;
+  image?: string;
+}
+
+const { title, description, image } = Astro.props;
+---
+
+<html lang="en">
+  <head>
+    {/* [!code ++] */}
+    {image && <meta property="og:image" content={image} />}
+  </head>
+  <body><slot /></body>
+</html>
+```
+
+</show>
+
+> The image of `/docs/my-page` is at `/og/docs/my-page/image.webp`, since WebP images are smaller than PNG ones. To generate PNG, use `image.png` and `format: 'png'` instead.
+
+Then create a route to generate the images:
+
+<show when={props.framework === 'next'}>
+
+```tsx title="app/og/docs/[...slug]/route.tsx"
+import { getPageImageUrl, source } from '@/lib/source';
+import { notFound } from 'next/navigation';
+import { generateOGImage } from 'fumadocs-ui/og/takumi';
+
+export const revalidate = false;
+
+export async function GET(_req: Request, { params }: RouteContext<'/og/docs/[...slug]'>) {
+  const { slug } = await params;
+  const page = source.getPage(slug.slice(0, -1));
+  if (!page) notFound();
+
+  return generateOGImage({
+    title: page.data.title,
+    description: page.data.description,
+    site: 'My App',
+    format: 'webp',
+  });
+}
+
+export function generateStaticParams() {
+  return source.getPages().map((page) => ({
+    lang: page.locale,
+    slug: getPageImageUrl(page).segments,
+  }));
+}
+```
+
+</show>
+
+<show when={props.framework === 'react-router'}>
+
+```tsx tab="app/routes/docs.og.tsx"
+import { source } from '@/lib/source';
+import { generateOGImage } from 'fumadocs-ui/og/takumi';
+import type { Route } from './+types/docs.og';
+
+export function loader({ params }: Route.LoaderArgs) {
+  const slugs = params['*']
+    .split('/')
+    .filter((v) => v.length > 0)
+    .slice(0, -1);
+  const page = source.getPage(slugs);
+
+  if (!page) throw new Response(undefined, { status: 404 });
+
+  return generateOGImage({
+    title: page.data.title,
+    description: page.data.description,
+    site: 'My App',
+    format: 'webp',
+  });
+}
+```
+
+```ts tab="app/routes.ts"
+import { type RouteConfig, route } from '@react-router/dev/routes';
+
+export default [
+  // [!code ++]
+  route('/og/docs/*', 'routes/docs.og.tsx'),
+] satisfies RouteConfig;
+```
+
+```ts tab="react-router.config.ts"
+import type { Config } from '@react-router/dev/config';
+import { glob } from 'node:fs/promises';
+import { createGetUrl, getSlugs } from 'fumadocs-core/source';
+import { getPageImagePath } from './app/lib/shared';
+
+const getUrl = createGetUrl('/docs');
+
+export default {
+  ssr: true,
+  // [!code ++:12]
+  async prerender({ getStaticPaths }) {
+    const paths = [...getStaticPaths()];
+
+    for await (const entry of glob('**/*.mdx', { cwd: 'content/docs' })) {
+      const slugs = getSlugs(entry);
+
+      paths.push(getUrl(slugs));
+      paths.push(getPageImagePath(slugs));
+    }
+
+    return paths;
+  },
+} satisfies Config;
+```
+
+</show>
+
+<show when={props.framework === 'tanstack-start'}>
+
+```ts tab="src/routes/og/docs/$.ts"
+import { createFileRoute } from '@tanstack/react-router';
+import { generateOGImage } from 'fumadocs-ui/og/takumi';
+import { source } from '@/lib/source';
+
+export const Route = createFileRoute('/og/docs/$')({
+  server: {
+    handlers: {
+      GET: ({ params }) => {
+        const slugs = (params._splat?.split('/') ?? []).filter((v) => v.length > 0).slice(0, -1);
+        const page = source.getPage(slugs);
+        if (!page) return new Response(undefined, { status: 404 });
+
+        return generateOGImage({
+          title: page.data.title,
+          description: page.data.description,
+          site: 'My App',
+          format: 'webp',
+        });
+      },
+    },
+  },
+});
+```
+
+```ts tab="vite.config.ts"
+// SPA mode only: TanStack Start pre-renders responses as text, which breaks images
+import { defineConfig } from 'vite';
+import { nitro } from 'nitro/vite';
+// [!code ++:3]
+import { glob } from 'node:fs/promises';
+import { getSlugs } from 'fumadocs-core/source';
+import { getPageImageUrl } from './src/lib/shared';
+
+// [!code ++:4]
+const imageRoutes: string[] = [];
+for await (const entry of glob('**/*.mdx', { cwd: 'content/docs' })) {
+  imageRoutes.push(getPageImageUrl({ slugs: getSlugs(entry) }).url);
+}
+
+export default defineConfig({
+  plugins: [
+    // other plugins...
+    nitro({
+      // [!code ++]
+      prerender: { routes: imageRoutes },
+    }),
+  ],
+});
+```
+
+</show>
+
+<show when={props.framework === 'waku'}>
+
+```tsx title="src/pages/_api/og/docs/[...slugs]/image.webp.tsx"
+import { source } from '@/lib/source';
+import { generateOGImage } from 'fumadocs-ui/og/takumi';
+import { ApiContext } from 'waku/router';
+
+export async function GET(_: Request, { params }: ApiContext<'/og/docs/[...slugs]/image.webp'>) {
+  const page = source.getPage(params.slugs);
+
+  if (!page) return new Response(undefined, { status: 404 });
+
+  return generateOGImage({
+    title: page.data.title,
+    description: page.data.description,
+    site: 'My App',
+    format: 'webp',
+  });
+}
+
+export async function getConfig() {
+  const pages = source
+    .generateParams()
+    .map((item) => (item.lang ? [item.lang, ...item.slug] : item.slug));
+
+  return {
+    render: 'static' as const,
+    staticPaths: pages,
+  } as const;
+}
+```
+
+</show>
+
+<show when={props.framework === 'astro'}>
+
+<include cwd meta='title="src/pages/og/docs/[...slug]/image.webp.ts"'>
+  ../../examples/astro/src/pages/og/docs/[...slug]/image.webp.ts
+</include>
+
+</show>
+
+> Takumi bundles the full-axis (100-900) [`Geist`](https://vercel.com/font) and `Geist Mono` fonts, so no font setup is needed.
+
+See [Takumi's Documentation](https://takumi.kane.tw/docs) for advanced usage.
+
+### Other Templates
+
+See [Takumi Templates](https://takumi.kane.tw/docs/templates) for the available templates.

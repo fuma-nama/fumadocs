@@ -1,0 +1,28 @@
+---
+title: Custom Search
+description: For other search solutions.
+---
+
+## Overview
+
+You can integrate any search engine with Fumadocs.
+
+### Search Indexes
+
+<show when={props.framework !== 'astro'}>
+
+Fumadocs MDX exposes the search indexes of your pages at runtime.
+
+</show>
+
+<show when={props.framework === 'astro'}>
+
+`@fumadocs/astro` exposes the search indexes of your pages at runtime.
+
+</show>
+
+To export them statically, add a pre-rendered `static.json` route, and process its records with a script after each build:
+
+<feature>search/custom</feature>
+
+The `structured` field holds the headings and paragraphs of each page. Use it to generate accurate search indexes.

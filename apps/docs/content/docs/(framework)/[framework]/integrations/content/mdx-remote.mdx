@@ -1,0 +1,304 @@
+---
+title: MDX Remote
+description: Compiled Markdown/MDX content on demand.
+---
+
+## Introduction
+
+Fumadocs offers the **MDX Remote** package, a helper to integrate Markdown/MDX content sources with Fumadocs.
+Think of it as `next-mdx-remote` with built-in plugins for Fumadocs.
+
+<Callout type="warn">
+
+Do not pass untrusted MDX to the compiler, it runs as JavaScript in your app. Compile untrusted content as Markdown instead, it can't run JavaScript or raw HTML:
+
+```ts
+import { createCompiler } from '@fumadocs/mdx-remote';
+
+const compiler = createCompiler({
+  format: 'md',
+  // skip reading files and fetching URLs for image sizes
+  remarkImageOptions: false,
+});
+```
+
+</Callout>
+
+## Setup
+
+```package-install
+@fumadocs/mdx-remote
+```
+
+Its main feature is the MDX compiler, which compiles MDX content to JSX nodes.
+It doesn't use a bundler, so there are some limitations:
+
+- Images have to be optimized at runtime.
+- No imports and exports in MDX files.
+
+### Usage
+
+Create a compiler:
+
+```ts title="lib/compiler.ts"
+import { createCompiler } from '@fumadocs/mdx-remote';
+
+export const compiler = createCompiler({
+  // options
+});
+```
+
+Compile the content of your pages, `@/lib/source` stands for your content source.
+
+<show when={props.framework === 'next' || props.framework === 'waku'}>
+
+`compile()` returns the compiled content as a React component. Render it in your page:
+
+</show>
+
+<show when={props.framework === 'react-router' || props.framework === 'tanstack-start'}>
+
+`compileFile()` compiles it to JavaScript in the loader, and `executeMdxSync()` runs it on the client:
+
+</show>
+
+<show when={props.framework === 'astro'}>
+
+`compileFile()` compiles it to JavaScript in the page, and `executeMdxSync()` runs it in a React island:
+
+</show>
+
+<show when={props.framework === 'next'}>
+
+```tsx title="app/docs/[[...slug]]/page.tsx"
+import { DocsBody, DocsPage } from 'fumadocs-ui/layouts/docs/page';
+import { compiler } from '@/lib/compiler';
+import { getPage } from '@/lib/source';
+import { getMDXComponents } from '@/components/mdx';
+
+export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
+  const { slug } = await props.params;
+  const page = getPage(slug);
+  const { body: MdxContent, toc } = await compiler.compile({
+    source: page.content,
+  });
+
+  return (
+    <DocsPage toc={toc}>
+      <DocsBody>
+        <MdxContent components={getMDXComponents()} />
+      </DocsBody>
+    </DocsPage>
+  );
+}
+```
+
+</show>
+
+<show when={props.framework === 'react-router'}>
+
+```tsx title="app/routes/docs.tsx"
+import type { Route } from './+types/docs';
+import { useMemo } from 'react';
+import { executeMdxSync } from '@fumadocs/mdx-remote/client';
+import { useFumadocsLoader } from 'fumadocs-core/source/client';
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+import { DocsBody, DocsPage } from 'fumadocs-ui/layouts/docs/page';
+import { compiler } from '@/lib/compiler';
+import { getPage, source } from '@/lib/source';
+import { getMDXComponents } from '@/components/mdx';
+
+export async function loader({ params }: Route.LoaderArgs) {
+  const page = getPage(params['*'].split('/').filter((v) => v.length > 0));
+
+  return {
+    // compile to JavaScript, it runs on the client
+    compiled: String(await compiler.compileFile(page.content)),
+    pageTree: await source.serializePageTree(source.getPageTree()),
+  };
+}
+
+export default function Page({ loaderData }: Route.ComponentProps) {
+  const { compiled, pageTree } = useFumadocsLoader(loaderData);
+  const { default: MdxContent, toc } = useMemo(() => executeMdxSync(compiled), [compiled]);
+
+  return (
+    <DocsLayout tree={pageTree}>
+      <DocsPage toc={toc}>
+        <DocsBody>
+          <MdxContent components={getMDXComponents()} />
+        </DocsBody>
+      </DocsPage>
+    </DocsLayout>
+  );
+}
+```
+
+</show>
+
+<show when={props.framework === 'tanstack-start'}>
+
+```tsx title="src/routes/docs/$.tsx"
+import { createFileRoute } from '@tanstack/react-router';
+import { createServerFn } from '@tanstack/react-start';
+import { useMemo } from 'react';
+import { executeMdxSync } from '@fumadocs/mdx-remote/client';
+import { useFumadocsLoader } from 'fumadocs-core/source/client';
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+import { DocsBody, DocsPage } from 'fumadocs-ui/layouts/docs/page';
+import { compiler } from '@/lib/compiler';
+import { getPage, source } from '@/lib/source';
+import { getMDXComponents } from '@/components/mdx';
+
+export const Route = createFileRoute('/docs/$')({
+  component: Page,
+  loader: ({ params }) => serverLoader({ data: params._splat?.split('/') ?? [] }),
+});
+
+const serverLoader = createServerFn({
+  method: 'GET',
+})
+  .validator((slugs: string[]) => slugs)
+  .handler(async ({ data: slugs }) => {
+    const page = getPage(slugs);
+
+    return {
+      // compile to JavaScript, it runs on the client
+      compiled: String(await compiler.compileFile(page.content)),
+      pageTree: await source.serializePageTree(source.getPageTree()),
+    };
+  });
+
+function Page() {
+  const { compiled, pageTree } = useFumadocsLoader(Route.useLoaderData());
+  const { default: MdxContent, toc } = useMemo(() => executeMdxSync(compiled), [compiled]);
+
+  return (
+    <DocsLayout tree={pageTree}>
+      <DocsPage toc={toc}>
+        <DocsBody>
+          <MdxContent components={getMDXComponents()} />
+        </DocsBody>
+      </DocsPage>
+    </DocsLayout>
+  );
+}
+```
+
+</show>
+
+<show when={props.framework === 'waku'}>
+
+```tsx title="src/pages/docs/[...slugs].tsx"
+import type { PageProps } from 'waku/router';
+import { DocsBody, DocsPage } from 'fumadocs-ui/layouts/docs/page';
+import { compiler } from '@/lib/compiler';
+import { getPage } from '@/lib/source';
+import { getMDXComponents } from '@/components/mdx';
+
+export default async function Page({ slugs }: PageProps<'/docs/[...slugs]'>) {
+  const page = getPage(slugs);
+  const { body: MdxContent, toc } = await compiler.compile({
+    source: page.content,
+  });
+
+  return (
+    <DocsPage toc={toc}>
+      <DocsBody>
+        <MdxContent components={getMDXComponents()} />
+      </DocsBody>
+    </DocsPage>
+  );
+}
+
+export async function getConfig() {
+  return {
+    render: 'static',
+    // the slugs of all pages
+    staticPaths: [[], ['getting-started']],
+  } as const;
+}
+```
+
+</show>
+
+<show when={props.framework === 'astro'}>
+
+```astro tab="src/pages/docs/[...slug].astro"
+---
+import type { GetStaticPaths, InferGetStaticPropsType } from 'astro';
+import Layout from '@/layouts/Layout.astro';
+import { Docs } from '@/components/docs';
+import { compiler } from '@/lib/compiler';
+import { getPage, source } from '@/lib/source';
+
+export const prerender = true;
+
+export const getStaticPaths = (() => {
+  return source.getPages().map((page) => ({
+    params: { slug: decodeURI(page.slugs.join('/')) || undefined },
+    props: { page },
+  }));
+}) satisfies GetStaticPaths;
+
+type Props = InferGetStaticPropsType<typeof getStaticPaths>;
+
+const { page } = Astro.props;
+const pageTree = await source.serializePageTree(source.getPageTree());
+// compile to JavaScript, it runs in the island
+const compiled = String(await compiler.compileFile(getPage(page.slugs).content));
+---
+
+<Layout title={page.data.title}>
+  <Docs
+    client:load
+    pathname={Astro.url.pathname}
+    params={Astro.params}
+    tree={pageTree}
+    compiled={compiled}
+  />
+</Layout>
+```
+
+```tsx tab="src/components/docs.tsx"
+import { useMemo } from 'react';
+import { executeMdxSync } from '@fumadocs/mdx-remote/client';
+import { type SerializedPageTree, useFumadocsLoader } from 'fumadocs-core/source/client';
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+import { DocsBody, DocsPage } from 'fumadocs-ui/layouts/docs/page';
+import { Provider, type ProviderProps } from '@/components/provider';
+import { getMDXComponents } from '@/components/mdx';
+
+export interface DocsProps extends ProviderProps {
+  tree: SerializedPageTree;
+  compiled: string;
+}
+
+export function Docs({ tree, compiled, ...props }: DocsProps) {
+  const data = useFumadocsLoader({ tree });
+  const { default: MdxContent, toc } = useMemo(() => executeMdxSync(compiled), [compiled]);
+
+  return (
+    <Provider {...props}>
+      <DocsLayout tree={data.tree}>
+        <DocsPage toc={toc}>
+          <DocsBody>
+            <MdxContent components={getMDXComponents()} />
+          </DocsBody>
+        </DocsPage>
+      </DocsLayout>
+    </Provider>
+  );
+}
+```
+
+</show>
+
+> The `frontmatter` property returned by `compile()` is not validated. Validate it with a library like `zod`.
+
+### Images
+
+On serverless platforms like Vercel, the original `public` folder (including static assets like images) will be removed after production build.
+The MDX compiler might no longer be able to access local images in `public`.
+
+When referencing images, make sure to use a URL.

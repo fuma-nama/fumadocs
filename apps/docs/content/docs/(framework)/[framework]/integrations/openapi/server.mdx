@@ -1,0 +1,481 @@
+---
+title: createOpenAPI()
+description: The OpenAPI server instance.
+---
+
+## OpenAPI Server
+
+The main config for Fumadocs OpenAPI.
+
+> It should not be referenced in browser environments.
+
+### `input`
+
+The OpenAPI schemas to read from.
+
+- File Paths
+- External URLs
+- Functions (see below)
+
+Only schemas listed here can be loaded, other IDs passed to `getSchema()` or preloaded by pages throw an error.
+
+<Callout type="warn">
+
+Do not pass untrusted schemas to `input`, their `$ref`s can read local files and fetch URLs, private hosts included.
+
+</Callout>
+
+```ts tab="Basic"
+import { createOpenAPI } from 'fumadocs-openapi/server';
+
+export const openapi = createOpenAPI({
+  input: ['./unkey.json'],
+});
+```
+
+```ts tab="Functions"
+import { createOpenAPI } from 'fumadocs-openapi/server';
+
+export const openapi = createOpenAPI({
+  input: {
+    // [id]: downloaded OpenAPI Schema
+    my_schema: async () => {
+      const res = await fetch('https://registry.scalar.com/@scalar/apis/galaxy/latest?format=json');
+      return res.json();
+    },
+  },
+});
+```
+
+## Loading Documents Once
+
+Pages receive the whole document in their props, so every page load, navigation and prefetch sends it again. For large documents, leave it out:
+
+```ts title="lib/openapi.ts"
+import { createOpenAPI } from 'fumadocs-openapi/server';
+
+export const openapi = createOpenAPI({
+  // IDs end up in URLs, keep them URL-safe
+  input: { museum: './museum.yaml' },
+  includeDocument: false, // [!code ++]
+});
+```
+
+<show when={props.framework !== 'tanstack-start'}>
+
+Pass `loadDocument` to load each document once per browser session. It also runs during server rendering:
+
+</show>
+
+<show when={props.framework === 'next'}>
+
+```tsx title="components/api-page.tsx"
+'use client';
+import { preload } from 'react-dom';
+import { createOpenAPIPage } from 'fumadocs-openapi/ui';
+
+export const OpenAPIPage = createOpenAPIPage({
+  async loadDocument(id) {
+    if (typeof window === 'undefined') {
+      // the browser starts downloading it with the page
+      preload(`/api/openapi/${id}`, { as: 'fetch', crossOrigin: 'anonymous' });
+      const { openapi } = await import('@/lib/openapi');
+      return (await openapi.getSchema(id)).bundled;
+    }
+    return (await fetch(`/api/openapi/${id}`)).json();
+  },
+});
+```
+
+</show>
+
+<show when={props.framework === 'react-router' || props.framework === 'waku' || props.framework === 'astro'}>
+
+```tsx title="components/api-page.tsx"
+'use client';
+import { preload } from 'react-dom';
+import { createOpenAPIPage } from 'fumadocs-openapi/ui';
+
+export const OpenAPIPage = createOpenAPIPage({
+  async loadDocument(id) {
+    if (import.meta.env.SSR) {
+      // the browser starts downloading it with the page
+      preload(`/api/openapi/${id}`, { as: 'fetch', crossOrigin: 'anonymous' });
+      const { openapi } = await import('@/lib/openapi');
+      return (await openapi.getSchema(id)).bundled;
+    }
+    return (await fetch(`/api/openapi/${id}`)).json();
+  },
+});
+```
+
+</show>
+
+<show when={props.framework !== 'tanstack-start'}>
+
+Serve the documents to the browser from a route:
+
+</show>
+
+<show when={props.framework === 'next'}>
+
+```ts title="app/api/openapi/[id]/route.ts"
+import { openapi } from '@/lib/openapi';
+
+export async function GET(_req: Request, { params }: RouteContext<'/api/openapi/[id]'>) {
+  return Response.json((await openapi.getSchema((await params).id)).bundled);
+}
+
+// for static exports
+export async function generateStaticParams() {
+  return Object.keys(await openapi.getSchemas()).map((id) => ({ id }));
+}
+```
+
+</show>
+
+<show when={props.framework === 'react-router'}>
+
+```ts tab="app/routes/openapi.ts"
+import type { Route } from './+types/openapi';
+import { openapi } from '@/lib/openapi';
+
+export async function loader({ params }: Route.LoaderArgs) {
+  return Response.json((await openapi.getSchema(params.id)).bundled);
+}
+```
+
+```ts tab="app/routes.ts"
+import { route, type RouteConfig } from '@react-router/dev/routes';
+
+export default [
+  // [!code ++]
+  route('api/openapi/:id', 'routes/openapi.ts'),
+  // ...
+] satisfies RouteConfig;
+```
+
+</show>
+
+<show when={props.framework === 'waku'}>
+
+```ts title="src/pages/_api/api/openapi/[id].ts"
+import type { ApiContext } from 'waku/router';
+import { openapi } from '@/lib/openapi';
+
+export async function GET(_: Request, { params }: ApiContext<'/api/openapi/[id]'>) {
+  return Response.json((await openapi.getSchema(params.id)).bundled);
+}
+```
+
+</show>
+
+<show when={props.framework === 'astro'}>
+
+```ts title="src/pages/api/openapi/[id].ts"
+import type { APIRoute, GetStaticPaths } from 'astro';
+import { openapi } from '@/lib/openapi';
+
+export const prerender = true;
+
+export const getStaticPaths = (async () => {
+  return Object.keys(await openapi.getSchemas()).map((id) => ({ params: { id } }));
+}) satisfies GetStaticPaths;
+
+export const GET: APIRoute = async ({ params }) => {
+  return Response.json((await openapi.getSchema(params.id!)).bundled);
+};
+```
+
+</show>
+
+<show when={props.framework === 'tanstack-start'}>
+
+TanStack Start route loaders run on both the server and the browser, so your docs route can load the document without `loadDocument`. Call a server function only when the browser doesn't have the document yet:
+
+```tsx title="src/routes/docs/$.tsx"
+import { createServerFn } from '@tanstack/react-start';
+import type { Document } from 'fumadocs-openapi';
+import { openapi } from '@/lib/openapi';
+
+// documents the browser has loaded
+const documents = new Map<string, Document>();
+
+const getDocument = createServerFn({ method: 'GET' })
+  .validator((id: string) => id)
+  .handler(async ({ data: id }) => (await openapi.getSchema(id)).bundled);
+
+export const Route = createFileRoute('/docs/$')({
+  component: Page,
+  loader: async ({ params }) => {
+    const data = await serverLoader({ data: params._splat?.split('/') ?? [] });
+    if (data.type === 'openapi') {
+      const { document: id, payload } = data.props;
+      payload.bundled = documents.get(id) ?? (await getDocument({ data: id }));
+    }
+    return data;
+  },
+});
+
+function Page() {
+  const page = useFumadocsLoader(Route.useLoaderData());
+  // the document of the first page too
+  if (page.type === 'openapi' && typeof window !== 'undefined')
+    documents.set(page.props.document, page.props.payload.bundled!);
+  // ...
+}
+```
+
+</show>
+
+<show when={props.framework !== 'tanstack-start'}>
+
+- `loadDocument` works with generated MDX files too.
+- For the [UI installed by Fumadocs CLI](/docs/integrations/openapi/api-page#full-ui), pass `loadDocument` to `createOpenAPIRenderer()`.
+- Browsers keep each document until a reload. With `disableCache`, leave `includeDocument` on.
+
+</show>
+
+<show when={props.framework === 'tanstack-start'}>
+
+- With generated MDX files, put documents in `preloaded.docs` instead.
+- Browsers keep each document until a reload. With `disableCache`, leave `includeDocument` on.
+
+</show>
+
+## Creating Proxy
+
+A proxy server sends HTTP requests without the CORS restrictions of browsers. The API playground uses it for:
+
+- Requests to API endpoints that don't allow your origin with CORS.
+- OAuth requests of confidential clients (with a client secret) and device flows.
+
+<Callout type="warn">
+
+The proxy is public without authentication. It forwards the headers and body of requests, including `Authorization`. Restrict it with [`allowedOrigins`](#allowed-origins) and `filterRequest`.
+
+</Callout>
+
+### Setup
+
+Create a route handler for the proxy:
+
+<show when={props.framework === 'next'}>
+
+```ts title="app/api/proxy/route.ts"
+import { openapi } from '@/lib/openapi';
+
+export const { GET, HEAD, PUT, POST, PATCH, DELETE } = openapi.createProxy();
+```
+
+</show>
+
+<show when={props.framework === 'react-router'}>
+
+```ts tab="app/routes/proxy.ts"
+import type { Route } from './+types/proxy';
+import { openapi } from '@/lib/openapi';
+
+const proxy = openapi.createProxy();
+
+export const loader = ({ request }: Route.LoaderArgs) => proxy.handle(request);
+export const action = ({ request }: Route.ActionArgs) => proxy.handle(request);
+```
+
+```ts tab="app/routes.ts"
+import { route, type RouteConfig } from '@react-router/dev/routes';
+
+export default [
+  // [!code ++]
+  route('api/proxy', 'routes/proxy.ts'),
+  // ...
+] satisfies RouteConfig;
+```
+
+</show>
+
+<show when={props.framework === 'tanstack-start'}>
+
+```ts title="src/routes/api/proxy.ts"
+import { openapi } from '@/lib/openapi';
+import { createFileRoute } from '@tanstack/react-router';
+
+const proxy = openapi.createProxy();
+
+export const Route = createFileRoute('/api/proxy')({
+  server: {
+    handlers: {
+      // Handles all methods by default, or specify individual methods (GET, POST, etc.)
+      ANY: async ({ request }) => {
+        return proxy.handle(request);
+      },
+    },
+  },
+});
+```
+
+</show>
+
+<show when={props.framework === 'waku'}>
+
+```ts title="src/pages/_api/api/proxy.ts"
+import { openapi } from '@/lib/openapi';
+
+export const { GET, HEAD, PUT, POST, PATCH, DELETE } = openapi.createProxy();
+```
+
+</show>
+
+<show when={props.framework === 'astro'}>
+
+```ts title="src/pages/api/proxy.ts"
+import type { APIRoute } from 'astro';
+import { openapi } from '@/lib/openapi';
+
+export const prerender = false;
+
+const proxy = openapi.createProxy();
+
+// handles all methods
+export const ALL: APIRoute = ({ request }) => proxy.handle(request);
+```
+
+The route runs on demand, so your project needs an [adapter](https://docs.astro.build/en/guides/on-demand-rendering/).
+
+</show>
+
+Then set its URL in `createOpenAPI()`:
+
+```ts title="lib/openapi.ts"
+import { createOpenAPI } from 'fumadocs-openapi/server';
+
+export const openapi = createOpenAPI({
+  proxyUrl: '/api/proxy', // [!code ++]
+});
+```
+
+### Allowed Origins
+
+By default, the proxy accepts any public origin, refuses hosts on private networks (e.g. `localhost`), and doesn't forward your site's cookies.
+List the origins in your proxy route to restrict it, or to proxy private APIs:
+
+```ts
+openapi.createProxy({
+  // strings or regular expressions
+  allowedOrigins: ['https://api.example.com', 'http://localhost:8080'],
+});
+```
+
+Redirects are checked by the same rules.
+
+<Callout type="warn">
+  Refusing private networks requires Node.js or Deno. On other runtimes, like Bun, specify
+  `allowedOrigins`.
+</Callout>
+
+Use `filterRequest` to refuse requests, for example to only allow reads:
+
+```ts
+openapi.createProxy({
+  // proxied requests that return false are refused
+  filterRequest: (request) => request.method === 'GET',
+});
+```
+
+## OAuth Redirect
+
+OAuth providers only accept registered redirect URIs, but the API playground redirects to the current page by default.
+Create a route handler as the redirect URI of every page. It sends users back to the page that started the flow.
+
+<show when={props.framework === 'next'}>
+
+```ts title="app/api/oauth/route.ts"
+import { openapi } from '@/lib/openapi';
+
+export const GET = openapi.createOAuthHandler();
+```
+
+</show>
+
+<show when={props.framework === 'react-router'}>
+
+```ts tab="app/routes/oauth.ts"
+import type { Route } from './+types/oauth';
+import { openapi } from '@/lib/openapi';
+
+const handler = openapi.createOAuthHandler();
+
+export const loader = ({ request }: Route.LoaderArgs) => handler(request);
+```
+
+```ts tab="app/routes.ts"
+import { route, type RouteConfig } from '@react-router/dev/routes';
+
+export default [
+  // [!code ++]
+  route('api/oauth', 'routes/oauth.ts'),
+  // ...
+] satisfies RouteConfig;
+```
+
+</show>
+
+<show when={props.framework === 'tanstack-start'}>
+
+```ts title="src/routes/api/oauth.ts"
+import { openapi } from '@/lib/openapi';
+import { createFileRoute } from '@tanstack/react-router';
+
+const handler = openapi.createOAuthHandler();
+
+export const Route = createFileRoute('/api/oauth')({
+  server: {
+    handlers: {
+      GET: async ({ request }) => handler(request),
+    },
+  },
+});
+```
+
+</show>
+
+<show when={props.framework === 'waku'}>
+
+```ts title="src/pages/_api/api/oauth.ts"
+import { openapi } from '@/lib/openapi';
+
+export const GET = openapi.createOAuthHandler();
+```
+
+</show>
+
+<show when={props.framework === 'astro'}>
+
+```ts title="src/pages/api/oauth.ts"
+import type { APIRoute } from 'astro';
+import { openapi } from '@/lib/openapi';
+
+export const prerender = false;
+
+const handler = openapi.createOAuthHandler();
+
+export const GET: APIRoute = ({ request }) => handler(request);
+```
+
+The route runs on demand, so your project needs an [adapter](https://docs.astro.build/en/guides/on-demand-rendering/).
+
+</show>
+
+Pass its URL to `createOpenAPIPage()`, and register the full URL (e.g. `https://docs.example.com/api/oauth`) on your OAuth provider:
+
+```tsx title="components/api-page.tsx"
+export const OpenAPIPage = createOpenAPIPage({
+  oauthRedirectUrl: '/api/oauth', // [!code ++]
+});
+```
+
+<Callout title="Content Security Policy">
+
+The handler sends users back with a script served from its own route. If a Content Security Policy covers the route, it must allow `'self'` scripts. Policies with `'strict-dynamic'` ignore `'self'`, leave the route out of them instead.
+
+</Callout>

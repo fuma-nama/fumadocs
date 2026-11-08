@@ -1,8 +1,8 @@
 import { readFile } from 'node:fs/promises';
 import { ServerCodeBlock } from '@/components/server-codeblock';
-import { story } from '@/content/docs/(framework)/integrations/story/client.story';
+import { story } from '@/content/docs/(framework)/[framework]/integrations/story/client.story';
 
-const DIR = 'content/docs/(framework)/integrations/story';
+const DIR = 'content/docs/(framework)/[framework]/integrations/story';
 
 /**
  * The Callout story of the docs with its controls, and how its page renders it; the file that

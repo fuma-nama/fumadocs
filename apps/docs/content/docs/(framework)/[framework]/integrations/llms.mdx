@@ -1,0 +1,652 @@
+---
+title: AI & LLMs
+description: Integrate AI functionality to Fumadocs.
+---
+
+## Docs for LLM
+
+Serve your docs as Markdown for LLMs and AI agents:
+
+```package-install
+npx @fumadocs/cli feature llms
+```
+
+It enables processed Markdown on your docs collection, adds `docsLlms` to `lib/source.ts`, and creates the routes below. The generated files are listed here if you prefer a manual setup.
+
+### `docsLlms`
+
+`llms()` renders your docs for LLMs. `renderPage` turns one page into Markdown, from the processed document rather than the raw file content:
+
+<feature title="lib/source.ts">llms/docs-llms.ts</feature>
+
+| Method         | Output                                         |
+| -------------- | ---------------------------------------------- |
+| `index(lang?)` | the `llms.txt` index, built from the page tree |
+| `page(page)`   | one page, rendered with `renderPage`           |
+| `full(lang?)`  | every page rendered with `renderPage`, joined  |
+
+<Callout title="renderPage is required">
+  `page()` and `full()` are only available when you pass `renderPage`, since Fumadocs cannot know
+  how your content source exposes its Markdown.
+</Callout>
+
+`renderPage` reads the processed Markdown of pages, so enable `includeProcessedMarkdown`:
+
+<show when={props.framework !== 'astro'}>
+
+<feature title="source.config.ts">llms/source.config.ts</feature>
+
+</show>
+
+<show when={props.framework === 'astro'}>
+
+```js title="astro.config.mjs"
+import { defineConfig } from 'astro/config';
+import fumadocs from '@fumadocs/astro';
+
+export default defineConfig({
+  integrations: [
+    fumadocs({
+      includeProcessedMarkdown: { output: 'function' }, // [!code ++]
+    }),
+  ],
+});
+```
+
+</show>
+
+MDX components appear as JSX syntax by default. Render them into meaningful Markdown with the [`output` option](/docs/headless/mdx/remark-llms#output).
+
+Runtime content sources like [`@fumadocs/local-md`](/docs/integrations/content/local-md) resolve on demand. Pass their `getSource` and the CLI generates the same routes:
+
+```ts
+export const docsLlms = llms(getSource, {
+  renderPage: (page) => `# ${page.data.title} (${page.url})
+
+${page.data.content}`,
+});
+```
+
+With `getSource`, `index()` and `indexNode()` return a promise instead of a string.
+
+### `llms.txt`
+
+An index of all pages, generated from the page tree.
+
+<show when={props.framework === 'next'}>
+
+<feature title="app/llms.txt/route.ts">llms/next/app/llms.txt/route.ts</feature>
+
+</show>
+
+<show when={props.framework === 'react-router'}>
+
+<feature tab="app/routes/llms.txt.ts">llms/react-router/routes/llms.txt.ts</feature>
+
+<feature tab="app/routes.ts">llms/react-router/routes.ts</feature>
+
+</show>
+
+<show when={props.framework === 'tanstack-start'}>
+
+<feature title="src/routes/llms[.]txt.ts">llms/tanstack-start/routes/llms[.]txt.ts</feature>
+
+</show>
+
+<show when={props.framework === 'waku'}>
+
+<feature title="src/pages/_api/llms.txt.ts">llms/waku/pages/_api/llms.txt.ts</feature>
+
+</show>
+
+<show when={props.framework === 'astro'}>
+
+<feature title="src/pages/llms.txt.ts">llms/astro/pages/llms.txt.ts</feature>
+
+</show>
+
+### `llms-full.txt`
+
+The content of all pages in a single file.
+
+<show when={props.framework === 'next'}>
+
+<feature title="app/llms-full.txt/route.ts">llms/next/app/llms-full.txt/route.ts</feature>
+
+</show>
+
+<show when={props.framework === 'react-router'}>
+
+<feature title="app/routes/llms-full.txt.ts">llms/react-router/routes/llms-full.txt.ts</feature>
+
+</show>
+
+<show when={props.framework === 'tanstack-start'}>
+
+<feature title="src/routes/llms-full[.]txt.ts">
+  llms/tanstack-start/routes/llms-full[.]txt.ts
+</feature>
+
+</show>
+
+<show when={props.framework === 'waku'}>
+
+<feature title="src/pages/_api/llms-full.txt.ts">llms/waku/pages/_api/llms-full.txt.ts</feature>
+
+</show>
+
+<show when={props.framework === 'astro'}>
+
+<feature title="src/pages/llms-full.txt.ts">llms/astro/pages/llms-full.txt.ts</feature>
+
+</show>
+
+### `*.md` [#md-extension]
+
+The Markdown of a single page, for AI agents.
+
+<show when={props.framework === 'next'}>
+
+<feature tab="lib/shared.ts">llms/next/lib/shared.ts</feature>
+
+<feature tab="app/llms.mdx/docs/[[...slug]]/route.ts">
+  llms/next/app/llms.mdx/docs/[[...slug]]/route.ts
+</feature>
+
+<feature tab="next.config.ts">llms/next/next.config.ts</feature>
+
+</show>
+
+<show when={props.framework === 'react-router'}>
+
+<feature tab="app/lib/shared.ts">llms/react-router/lib/shared.ts</feature>
+
+<feature tab="app/routes/llms.mdx.docs.ts">llms/react-router/routes/llms.mdx.docs.ts</feature>
+
+```ts tab="app/root.tsx"
+import { rewritePath } from 'fumadocs-core/negotiation';
+import type { Route } from './+types/root';
+
+// serve `/docs/page.md` [!code ++:14]
+const { rewrite: rewriteLLM } = rewritePath(
+  '/docs{/*path}.md',
+  '/llms.mdx/docs{/*path}/content.md',
+);
+const serverMiddleware: Route.MiddlewareFunction = async ({ request }, next) => {
+  const url = new URL(request.url);
+  const path = rewriteLLM(url.pathname);
+  if (path) return Response.redirect(new URL(path, url));
+
+  return next();
+};
+
+export const middleware = [serverMiddleware];
+```
+
+</show>
+
+<show when={props.framework === 'tanstack-start'}>
+
+<feature tab="src/lib/shared.ts">llms/tanstack-start/lib/shared.ts</feature>
+
+<feature tab="src/routes/docs/\{$\}[.]md.ts">llms/tanstack-start/routes/docs/\{$\}[.]md.ts</feature>
+
+</show>
+
+<show when={props.framework === 'waku'}>
+
+<feature tab="src/lib/shared.ts">llms/waku/lib/shared.ts</feature>
+
+<feature tab="src/pages/_api/llms.mdx/docs/[...slug]/content.md.ts">
+  llms/waku/pages/_api/llms.mdx/docs/[...slug]/content.md.ts
+</feature>
+
+</show>
+
+<show when={props.framework === 'astro'}>
+
+<feature tab="src/lib/shared.ts">llms/astro/lib/shared.ts</feature>
+
+<feature tab="src/pages/docs/[...slug].md.ts">llms/astro/pages/docs/[...slug].md.ts</feature>
+
+</show>
+
+#### `Accept`
+
+<show when={props.framework !== 'astro'}>
+
+AI agents can ask for Markdown with the `Accept` header. Serve the Markdown of a page when the request prefers it:
+
+</show>
+
+<show when={props.framework === 'next'}>
+
+```ts title="proxy.ts"
+import { NextRequest, NextResponse } from 'next/server';
+import { isMarkdownPreferred, rewritePath } from 'fumadocs-core/negotiation';
+
+const { rewrite: rewriteLLM } = rewritePath('/docs{/*path}', '/llms.mdx/docs{/*path}/content.md');
+
+export default function proxy(request: NextRequest) {
+  if (isMarkdownPreferred(request)) {
+    const result = rewriteLLM(request.nextUrl.pathname);
+
+    if (result) {
+      return NextResponse.rewrite(new URL(result, request.nextUrl), {
+        headers: { Vary: 'Accept' }, // [!code highlight]
+      });
+    }
+  }
+
+  return NextResponse.next();
+}
+```
+
+</show>
+
+<show when={props.framework === 'react-router'}>
+
+```ts title="app/root.tsx"
+import { isMarkdownPreferred, rewritePath } from 'fumadocs-core/negotiation';
+import type { Route } from './+types/root';
+
+const { rewrite: rewriteLLM } = rewritePath('/docs{/*path}', '/llms.mdx/docs{/*path}/content.md');
+const serverMiddleware: Route.MiddlewareFunction = async ({ request }, next) => {
+  const url = new URL(request.url);
+  const path = isMarkdownPreferred(request) && rewriteLLM(url.pathname);
+
+  // the headers of `Response.redirect()` are immutable, build the response directly
+  if (path)
+    return new Response(null, {
+      status: 302,
+      headers: { Location: new URL(path, url).toString(), Vary: 'Accept' }, // [!code highlight]
+    });
+
+  return next();
+};
+
+export const middleware = [serverMiddleware];
+```
+
+</show>
+
+<show when={props.framework === 'tanstack-start'}>
+
+```ts title="src/start.ts"
+import { createMiddleware, createStart } from '@tanstack/react-start';
+import { redirect } from '@tanstack/react-router';
+import { isMarkdownPreferred } from 'fumadocs-core/negotiation';
+import { getPageMarkdownUrl } from '@/lib/shared';
+
+const llmMiddleware = createMiddleware().server(({ next, request }) => {
+  const url = new URL(request.url);
+
+  if (
+    (url.pathname === '/docs' || url.pathname.startsWith('/docs/')) &&
+    !url.pathname.endsWith('.md') &&
+    isMarkdownPreferred(request)
+  ) {
+    const slugs = url.pathname
+      .slice('/docs'.length)
+      .split('/')
+      .filter((v) => v.length > 0);
+    url.pathname = getPageMarkdownUrl({ slugs }).url;
+
+    throw redirect({ href: url.href, headers: { Vary: 'Accept' } }); // [!code highlight]
+  }
+
+  return next();
+});
+
+export const startInstance = createStart(() => ({
+  requestMiddleware: [llmMiddleware],
+}));
+```
+
+</show>
+
+<show when={props.framework === 'waku'}>
+
+Redirect those requests from a [Hono middleware](https://hono.dev/docs/guides/middleware) in `src/middleware`:
+
+```ts title="src/middleware/llms.ts"
+import type { MiddlewareHandler } from 'hono';
+import { isMarkdownPreferred, rewritePath } from 'fumadocs-core/negotiation';
+
+const { rewrite: rewriteLLM } = rewritePath('/docs{/*path}', '/llms.mdx/docs{/*path}/content.md');
+
+export default function llmsMiddleware(): MiddlewareHandler {
+  return async (c, next) => {
+    const path = isMarkdownPreferred(c.req.raw) && rewriteLLM(c.req.path);
+
+    if (path) {
+      c.header('Vary', 'Accept'); // [!code highlight]
+      return c.redirect(path);
+    }
+
+    await next();
+  };
+}
+```
+
+</show>
+
+<show when={props.framework !== 'astro'}>
+
+The same URL now has two representations, so the response needs `Vary: Accept` to prevent cache collisions.
+
+</show>
+
+<show when={props.framework === 'next'}>
+
+<Callout>
+  Next.js discards `Vary` on App Router page responses, so the HTML responses of docs pages can't
+  carry the header. Set it at your CDN if a shared cache serves your docs.
+</Callout>
+
+</show>
+
+<show when={props.framework === 'astro'}>
+
+Docs pages can't serve Markdown based on the `Accept` header. Astro middleware only runs for pages rendered on request, while docs pages are prerendered.
+
+</show>
+
+### Page Actions
+
+Page actions let readers copy the Markdown of a page, or open the page in AI apps. They require the [`*.md`](#md-extension) route.
+
+![AI Page Actions](/docs/ai-page-actions.png)
+
+<show when={props.framework === 'next' || props.framework === 'waku'}>
+
+Render them in your docs page:
+
+```tsx
+import { MarkdownCopyButton, ViewOptionsPopover } from 'fumadocs-ui/layouts/docs/page';
+import { getPageMarkdownUrl } from '@/lib/shared';
+
+const markdownUrl = getPageMarkdownUrl(page).url;
+
+<div className="flex flex-row gap-2 items-center border-b pt-2 pb-6">
+  <MarkdownCopyButton markdownUrl={markdownUrl} />
+  <ViewOptionsPopover
+    markdownUrl={markdownUrl}
+    githubUrl={`https://github.com/${owner}/${repo}/blob/main/content/docs/${page.path}`}
+  />
+</div>;
+```
+
+</show>
+
+<show when={props.framework === 'react-router' || props.framework === 'tanstack-start'}>
+
+Return the Markdown URL from the loader of your docs page, and render them in the page:
+
+```tsx
+import { MarkdownCopyButton, ViewOptionsPopover } from 'fumadocs-ui/layouts/docs/page';
+import { getPageMarkdownUrl } from '@/lib/shared';
+
+// in your loader
+return {
+  path: page.path,
+  markdownUrl: getPageMarkdownUrl(page).url,
+};
+
+// in your page
+<div className="flex flex-row gap-2 items-center border-b pt-2 pb-6">
+  <MarkdownCopyButton markdownUrl={markdownUrl} />
+  <ViewOptionsPopover
+    markdownUrl={markdownUrl}
+    githubUrl={`https://github.com/${owner}/${repo}/blob/main/content/docs/${path}`}
+  />
+</div>;
+```
+
+</show>
+
+<show when={props.framework === 'astro'}>
+
+Pass the Markdown URL from your docs page to its React island, and render them in the island:
+
+```astro tab="src/pages/docs/[...slug].astro"
+---
+import { getPageMarkdownUrl } from '@/lib/shared';
+---
+
+<Docs
+  client:load
+  markdownUrl={getPageMarkdownUrl(page).url}
+  githubUrl={`https://github.com/${owner}/${repo}/blob/main/content/docs/${page.path}`}
+>
+  <Content />
+</Docs>
+```
+
+```tsx tab="src/components/docs.tsx"
+import { MarkdownCopyButton, ViewOptionsPopover } from 'fumadocs-ui/layouts/docs/page';
+
+<div className="flex flex-row gap-2 items-center border-b pt-2 pb-6">
+  <MarkdownCopyButton markdownUrl={markdownUrl} />
+  <ViewOptionsPopover markdownUrl={markdownUrl} githubUrl={githubUrl} />
+</div>;
+```
+
+</show>
+
+## MCP Server
+
+Expose your docs to AI agents through a [MCP](https://modelcontextprotocol.io) server, with tools to list, search and read pages.
+
+```package-install
+npx @fumadocs/cli feature mcp
+```
+
+It creates a `/api/mcp` route with the streamable HTTP transport, on top of the [LLM routes](#docs-for-llm) above.
+
+The tools come from [`fumadocs-core/mcp`](/docs/headless/utils/mcp).
+
+<show when={props.framework === 'next'}>
+
+<feature title="app/api/mcp/route.ts">mcp/next/app/api/mcp/route.ts</feature>
+
+</show>
+
+<show when={props.framework === 'react-router'}>
+
+<feature title="app/routes/api.mcp.ts">mcp/react-router/routes/api.mcp.ts</feature>
+
+</show>
+
+<show when={props.framework === 'tanstack-start'}>
+
+<feature title="src/routes/api/mcp.ts">mcp/tanstack-start/routes/api/mcp.ts</feature>
+
+</show>
+
+<show when={props.framework === 'waku'}>
+
+<feature title="src/pages/_api/api/mcp.ts">mcp/waku/pages/_api/api/mcp.ts</feature>
+
+</show>
+
+<show when={props.framework === 'astro'}>
+
+<feature title="src/pages/api/mcp.ts">mcp/astro/pages/api/mcp.ts</feature>
+
+The route renders on request, so your project needs an [adapter](https://docs.astro.build/en/guides/on-demand-rendering/).
+
+</show>
+
+Connect an agent to it with:
+
+```json
+{
+  "mcpServers": {
+    "docs": { "url": "https://your-site.com/api/mcp" }
+  }
+}
+```
+
+## WebMCP
+
+<Callout type="warn" title="Experimental">
+  [WebMCP](https://webmachinelearning.github.io/webmcp/) is an early web standard, available in
+  Chrome 149+ behind the `#enable-webmcp-testing` flag and an origin trial. The API may still
+  change.
+</Callout>
+
+Where the MCP server above serves agents connecting to your site, WebMCP exposes tools to the AI agent
+of the browser, on the page the reader is viewing.
+
+```package-install
+npx @fumadocs/cli feature webmcp
+```
+
+It creates a `WebMCP` component on top of the [LLM routes](#docs-for-llm). Render it inside `<RootProvider />`.
+
+- `search_docs` queries the search API route. You can replace `fetchClient` with [other clients](/docs/search).
+- `read_page` fetches the Markdown of a page, from <show when={props.framework === 'tanstack-start' || props.framework === 'astro'}>`/docs/page.md`</show><show when={props.framework !== 'tanstack-start' && props.framework !== 'astro'}>`/llms.mdx/docs/page/content.md`</show>.
+
+## Ask AI
+
+![AI Search](/docs/ai-search.png)
+
+You can install the AI chat dialog using Fumadocs CLI.
+
+<Tabs items={['AI SDK', 'LLMGateway', 'Inkeep AI']}>
+<Tab>
+
+```npm
+npx @fumadocs/cli add ai/openrouter
+```
+
+It's automatically configured for [OpenRouter](https://openrouter.ai) using Vercel AI SDK, with a `/search` tool for AI.
+
+You can use other models by updating the `/api/chat` route.
+
+> Fumadocs doesn't provide the AI model, it's up to you.
+>
+> Your AI model can use the `llms-full.txt` file generated above, or more diversified sources of information when combined with 3rd party solutions.
+
+</Tab>
+<Tab>
+
+```npm
+npx @fumadocs/cli add ai/llmgateway
+```
+
+It's automatically configured for [LLMGateway](https://llmgateway.io) using Vercel AI SDK, with a `/search` tool for AI.
+
+LLMGateway is an open-source API gateway that proxies requests to 300+ language models, so the same route handler can switch between providers by changing the model ID.
+
+Add your LLMGateway API key to environment variables:
+
+```dotenv
+LLM_GATEWAY_API_KEY="..."
+```
+
+By default the route uses `anthropic/claude-3.5-sonnet`. To switch to any other model supported by LLMGateway, set the `LLM_GATEWAY_MODEL` environment variable. No code change is required:
+
+```dotenv
+# any model id from https://llmgateway.io/models
+LLM_GATEWAY_MODEL="openai/gpt-4o"
+```
+
+</Tab>
+<Tab>
+
+```npm
+npx @fumadocs/cli add ai/inkeep
+```
+
+It's automatically configured for [Inkeep AI](https://inkeep.com) using Vercel AI SDK.
+
+Add your Inkeep API key to environment variables:
+
+```dotenv
+INKEEP_API_KEY="..."
+```
+
+</Tab>
+</Tabs>
+
+Docs layouts render the chat from their `aiChat` option. The option takes client state, so create a client component for your layout and use it in place of the original layout:
+
+```tsx tab="components/ai/layout.tsx"
+'use client';
+// or the Notebook, Glass and Spacious layouts
+import { DocsLayout as Layout, type DocsLayoutProps } from 'fumadocs-ui/layouts/docs';
+// the installed components
+import { AIChat, AIChatPanel, useAIChat } from './search';
+
+export function DocsLayout(props: DocsLayoutProps) {
+  return (
+    <AIChat>
+      <ChatLayout {...props} />
+    </AIChat>
+  );
+}
+
+function ChatLayout(props: DocsLayoutProps) {
+  const { open, setOpen } = useAIChat();
+
+  return (
+    <Layout
+      {...props}
+      aiChat={{ open, onOpenChange: setOpen, panel: <AIChatPanel />, trigger: true }}
+    />
+  );
+}
+```
+
+<show when={props.framework === 'next'}>
+
+```tsx tab="app/docs/layout.tsx"
+import { DocsLayout } from 'fumadocs-ui/layouts/docs'; // [!code --]
+import { DocsLayout } from '@/components/ai/layout'; // [!code ++]
+```
+
+</show>
+
+<show when={props.framework === 'react-router'}>
+
+```tsx tab="app/routes/docs.tsx"
+import { DocsLayout } from 'fumadocs-ui/layouts/docs'; // [!code --]
+import { DocsLayout } from '@/components/ai/layout'; // [!code ++]
+```
+
+</show>
+
+<show when={props.framework === 'tanstack-start'}>
+
+```tsx tab="src/routes/docs/$.tsx"
+import { DocsLayout } from 'fumadocs-ui/layouts/docs'; // [!code --]
+import { DocsLayout } from '@/components/ai/layout'; // [!code ++]
+```
+
+</show>
+
+<show when={props.framework === 'waku'}>
+
+```tsx tab="src/pages/docs/_layout.tsx"
+import { DocsLayout } from 'fumadocs-ui/layouts/docs'; // [!code --]
+import { DocsLayout } from '@/components/ai/layout'; // [!code ++]
+```
+
+</show>
+
+<show when={props.framework === 'astro'}>
+
+```tsx tab="src/components/docs.tsx"
+import { DocsLayout } from 'fumadocs-ui/layouts/docs'; // [!code --]
+import { DocsLayout } from '@/components/ai/layout'; // [!code ++]
+```
+
+</show>
+
+<show when={props.framework === 'next' || props.framework === 'waku'}>
+
+The layout options are passed to a client component, so they have to be serializable.
+
+</show>

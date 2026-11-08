@@ -125,11 +125,11 @@ export const copy = {
 export const command = 'pnpm create fumadocs-app';
 
 export const frameworks = [
-  { name: 'Next.js', href: '/docs/manual-installation/next' },
-  { name: 'React Router', href: '/docs/manual-installation/react-router' },
-  { name: 'TanStack Start', href: '/docs/manual-installation/tanstack-start' },
-  { name: 'Waku', href: '/docs/manual-installation/waku' },
-  { name: 'Astro', href: '/docs/manual-installation/astro' },
+  { name: 'Next.js', href: '/docs/next/manual-installation' },
+  { name: 'React Router', href: '/docs/react-router/manual-installation' },
+  { name: 'TanStack Start', href: '/docs/tanstack-start/manual-installation' },
+  { name: 'Waku', href: '/docs/waku/manual-installation' },
+  { name: 'Astro', href: '/docs/astro/manual-installation' },
 ];
 
 export interface Quote {
