@@ -1,3 +1,9 @@
+## @fumadocs/cli@1.8.2
+
+### Keep MCP routes from holding serverless functions open
+
+- The generated MCP route no longer lets clients open a stream that lasts until the function times out.
+
 ## @fumadocs/cli@1.8.1
 
 ### Fumapress sites
