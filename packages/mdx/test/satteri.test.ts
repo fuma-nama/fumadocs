@@ -60,6 +60,15 @@ export const x = 1
   expect(compiled.code).toContain('export const toc');
   expect(compiled.code).toContain('shiki');
   expect(compiled.code).toContain('Hello Satteri');
+
+  // a page without frontmatter takes the title of its h1
+  const untitled = await buildMDX(core, collection, {
+    filePath: path.join(baseDir, 'satteri-untitled.mdx'),
+    source: '# Untitled Heading\n',
+    environment: 'bundler',
+    isDevelopment: false,
+  });
+  expect(untitled.code).toMatch(/export const frontmatter = \{ "title": "Untitled Heading" \}/);
 });
 
 test('buildMDX with default mdx compiler', async () => {

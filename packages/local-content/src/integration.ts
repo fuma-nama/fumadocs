@@ -1,3 +1,5 @@
+import type { Params } from 'fumadocs-core/source';
+
 export interface SourceFile {
   /** path relative to the content directory */
   path: string;
@@ -8,7 +10,19 @@ export interface SourceFile {
   addDependency: (file: string) => void;
 }
 
-export type ParsedFile<Page, Meta> = { type: 'page'; data: Page } | { type: 'meta'; data: Meta };
+export type ParsedFile<Page, Meta> =
+  | {
+      type: 'page';
+      data: Page;
+      /** for a file of a dynamic path, like `[framework]/deploy.mdx`, the data of its page at some params */
+      dataAt?: (params: Params) => Page | Promise<Page>;
+    }
+  | {
+      type: 'meta';
+      data: Meta;
+      /** for a meta file of a dynamic folder, its data in the folder filled with some params */
+      dataAt?: (params: Params) => Meta | Promise<Meta>;
+    };
 
 /**
  * Turns files into the pages and meta entries a source exposes.

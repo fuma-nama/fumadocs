@@ -58,7 +58,7 @@ export function DocsPage({ lastUpdate, editOnGithub, children, ...props }: DocsP
       <div className="flex flex-row flex-wrap items-center justify-between gap-4 empty:hidden">
         {editOnGithub && (
           <EditOnGitHub
-            href={`https://github.com/${editOnGithub.owner}/${editOnGithub.repo}/blob/${editOnGithub.sha ?? 'main'}/${editOnGithub.path.startsWith('/') ? editOnGithub.path.slice(1) : editOnGithub.path}`}
+            href={`https://github.com/${editOnGithub.owner}/${editOnGithub.repo}/blob/${editOnGithub.sha ?? 'main'}/${encodeURI(editOnGithub.path.startsWith('/') ? editOnGithub.path.slice(1) : editOnGithub.path)}`}
           />
         )}
         {lastUpdate && <PageLastUpdate date={new Date(lastUpdate)} />}

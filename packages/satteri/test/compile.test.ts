@@ -89,6 +89,7 @@ describe('output-format aware exports', () => {
   test('collectExports hooks contribute, a later export of the same name wins', async () => {
     const declare = (name: string, value: string): MdastPluginInput & ExtraPluginHooks => ({
       name,
+      before() {},
       collectExports: ({ addExport }) => addExport('dup', value),
     });
 

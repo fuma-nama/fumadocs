@@ -18,6 +18,7 @@ export default defineConfig({
     'src/local-md/dev/react-client.ts',
     'src/remark-heading.ts',
     'src/remark-structure.ts',
+    'src/remark-show.ts',
     'src/remark-image.ts',
     'src/remark-include.ts',
     'src/rehype-katex.ts',

@@ -40,6 +40,8 @@ export interface MarkdownRendererJSOptions {
   filePath: string;
   baseUrl?: string;
   structuredData?: StructuredData;
+  /** the props of the content, like the params of a page of a dynamic file */
+  props?: Record<string, unknown>;
 }
 
 export interface MarkdownRendererASTOptions {
@@ -135,6 +137,8 @@ export function fromJS<M>(options: MarkdownRendererJSOptions): MarkdownRenderer<
         ...JsxRuntime,
         baseUrl,
       },
+      // the code of the module reads the params of a page as `props`, like its content
+      props: options.props ?? {},
       ...rest,
     };
   }
@@ -152,7 +156,7 @@ export function fromJS<M>(options: MarkdownRendererJSOptions): MarkdownRenderer<
 
       return {
         toc: out.toc ?? [],
-        body: JsxRuntime.jsx(out.default, { components }),
+        body: JsxRuntime.jsx(out.default, { ...options.props, components }),
         exports: out,
       };
     },
@@ -167,7 +171,7 @@ export function fromJS<M>(options: MarkdownRendererJSOptions): MarkdownRenderer<
 
       return {
         toc: out.toc ?? [],
-        body: JsxRuntime.jsx(out.default, { components }),
+        body: JsxRuntime.jsx(out.default, { ...options.props, components }),
         exports: out,
       };
     },

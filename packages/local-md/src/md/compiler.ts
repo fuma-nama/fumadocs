@@ -10,6 +10,7 @@ import { rehypeCode, type RehypeCodeOptions } from 'fumadocs-core/mdx-plugins/re
 import { rehypeToc, type RehypeTocOptions } from 'fumadocs-core/mdx-plugins/rehype-toc';
 import { remarkStructure, type StructureOptions } from 'fumadocs-core/mdx-plugins/remark-structure';
 import { remarkInclude, type RemarkIncludeOptions } from 'fumadocs-core/mdx-plugins/remark-include';
+import { remarkShow, type RemarkShowOptions } from 'fumadocs-core/mdx-plugins/remark-show';
 import { Compatible, VFile } from 'vfile';
 import type { Root } from 'hast';
 import * as Mdx from '@mdx-js/mdx';
@@ -36,6 +37,7 @@ export interface MarkdownProcessorOptions {
 }
 
 export interface MDXProcessorOptions extends Mdx.ProcessorOptions {
+  remarkShowOptions?: RemarkShowOptions;
   remarkStructureOptions?: StructureOptions | false;
   remarkHeadingOptions?: RemarkHeadingOptions | false;
   remarkCodeTabOptions?: RemarkCodeTabOptions | false;
@@ -109,6 +111,7 @@ export function createMarkdownCompiler(options?: MarkdownCompilerOptions): Markd
 
   function createMdxCompiler() {
     const {
+      remarkShowOptions,
       remarkCodeTabOptions,
       remarkHeadingOptions,
       remarkNpmOptions,
@@ -125,6 +128,7 @@ export function createMarkdownCompiler(options?: MarkdownCompilerOptions): Markd
       outputFormat: 'function-body',
       development: false,
       remarkPlugins: plugins(
+        plugin(remarkShow, remarkShowOptions),
         plugin(remarkInclude, { getProcessor }),
         remarkGfm,
         remarkHeadingOptions !== false &&

@@ -32,6 +32,8 @@ import { getSuggestions } from './suggestions';
 import { PathUtils } from 'fumadocs-core/source';
 import { AsyncAPIPageLazy, GraphQLPageLazy, OpenAPIPageLazy } from './lazy';
 import { SponsorsMarquee } from '@fumari/sponsors';
+import { defaultFramework, frameworks, isFramework, withFramework } from '@/lib/framework';
+import { redirect } from 'next/navigation';
 
 function PreviewRenderer({ preview }: { preview: string }): ReactNode {
   if (preview && preview in Preview) {
@@ -48,12 +50,22 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
   const params = await props.params;
   const page = source.getPage(params.slug);
 
-  if (!page)
+  if (!page) {
+    // a page of `[framework]` that only some frameworks have, like `/docs/astro/integrations/og/next`
+    const [first, ...rest] = params.slug ?? [];
+    if (isFramework(first)) {
+      for (const { value } of frameworks) {
+        const other = source.getPage([value, ...rest]);
+        if (other) redirect(other.url);
+      }
+    }
+
     return (
       <NotFound
         getSuggestions={async () => (params.slug ? getSuggestions(params.slug.join(' ')) : [])}
       />
     );
+  }
 
   const pageProps = {
     tableOfContent: {
@@ -98,6 +110,20 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
   }
 
   const { body: Mdx, toc, lastModified } = await page.data.load();
+  const framework = isFramework(page.params?.framework) ? page.params.framework : undefined;
+
+  /** links to pages of `[framework]` omit the framework segment, they open the framework of the current page */
+  function resolveLink(href: string) {
+    const found =
+      source.getPageByHref(href, { dir: PathUtils.dirname(page!.path) }) ??
+      source.getPageByHref(withFramework(href, framework ?? defaultFramework) ?? href);
+    if (!found) return;
+
+    return {
+      page: found.page,
+      href: found.hash ? `${found.page.url}#${found.hash}` : found.page.url,
+    };
+  }
 
   return (
     <DocsPage toc={toc} {...pageProps}>
@@ -107,7 +133,7 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
         <MarkdownCopyButton markdownUrl={`${page.url}.mdx`} />
         <ViewOptionsPopover
           markdownUrl={`${page.url}.mdx`}
-          githubUrl={`https://github.com/${owner}/${repo}/blob/dev/apps/docs/content/docs/${page.path}`}
+          githubUrl={`https://github.com/${owner}/${repo}/blob/dev/apps/docs/content/docs/${encodeURI(page.path)}`}
         />
       </div>
       <div className="prose flex-1 text-fd-foreground/90">
@@ -117,18 +143,12 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
             components={getMDXComponents({
               ...Twoslash,
               a({ href, ...props }) {
-                const found = source.getPageByHref(href ?? '', {
-                  dir: PathUtils.dirname(page.path),
-                });
-
+                const found = href ? resolveLink(href) : undefined;
                 if (!found) return <Link href={href} {...props} />;
 
                 return (
                   <HoverCard>
-                    <HoverCardTrigger
-                      href={found.hash ? `${found.page.url}#${found.hash}` : found.page.url}
-                      {...props}
-                    >
+                    <HoverCardTrigger href={found.href} {...props}>
                       {props.children}
                     </HoverCardTrigger>
                     <HoverCardContent className="text-sm">
@@ -138,6 +158,9 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
                   </HoverCard>
                 );
               },
+              Card: ({ href, ...props }) => (
+                <Card href={href && (resolveLink(href)?.href ?? href)} {...props} />
+              ),
               Banner,
               Mermaid,
               TypeTable,

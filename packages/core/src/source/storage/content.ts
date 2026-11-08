@@ -1,7 +1,8 @@
 import { FileSystem } from '@/source/storage/file-system';
-import { normalize } from '@/source/path';
+import { basename, dirname, extname, normalize } from '@/source/path';
 import type { ResolvedLoaderConfig } from '../loader';
-import { isStaticSource, MetaData, PageData, type StaticSource } from '../source';
+import { isStaticSource, MetaData, PageData, type Params, type StaticSource } from '../source';
+import { fillParams, getStaticParams, isDynamicPath, segmentNames } from '../static-params';
 
 export type ContentStorage<
   P extends ContentStoragePageFile = ContentStoragePageFile,
@@ -38,7 +39,11 @@ export interface ContentStoragePageFile<
   format: 'page';
   slugs: string[];
   data: Data;
+  /** for a page of a dynamic file, its params */
+  params?: Params;
 }
+
+type ContentStorageFile = ContentStorageMetaFile | ContentStoragePageFile;
 
 const EmptyLang = Symbol();
 
@@ -79,15 +84,41 @@ export function createContentStorageBuilder(loaderConfig: ResolvedLoaderConfig) 
 
   const fileMap = new Map<
     string | typeof EmptyLang,
-    [storageKey: string, file: ContentStorageMetaFile | ContentStoragePageFile][]
+    [storageKey: string, file: ContentStorageFile][]
   >();
 
+  function add(storageKey: string, locale: string | typeof EmptyLang, file: ContentStorageFile) {
+    const entry = [storageKey, file] as const;
+    if (i18n && locale === '$') {
+      for (const item of i18n.languages) pushMapList(fileMap, item, entry);
+    } else {
+      pushMapList(fileMap, locale, entry);
+    }
+  }
+
+  /** the meta files of dynamic folders that give their data at the params of each folder */
+  const metaDataAt = new Map<ContentStorageMetaFile, (params: Params) => MetaData>();
+
   function scan(type: string | undefined, source: StaticSource) {
+    const staticParams = new Map<string, Params[] | undefined>();
+    const readStaticParams = (path: string) => staticParams.get(path);
+    for (const inputFile of source.files) {
+      if (inputFile.type !== 'meta') continue;
+      const path = normalize(
+        source.baseDir ? `${source.baseDir}/${inputFile.path}` : inputFile.path,
+      );
+      staticParams.set(
+        path.slice(0, path.length - extname(path).length),
+        inputFile.data.staticParams,
+      );
+    }
+
     for (const inputFile of source.files) {
       let file: ContentStorageMetaFile | ContentStoragePageFile;
       const path = normalize(
         source.baseDir ? `${source.baseDir}/${inputFile.path}` : inputFile.path,
       );
+      let files: ContentStorageFile[] | undefined;
 
       if (inputFile.type === 'page') {
         file = {
@@ -99,6 +130,11 @@ export function createContentStorageBuilder(loaderConfig: ResolvedLoaderConfig) 
           data: inputFile.data,
           absolutePath: inputFile.absolutePath,
         };
+        const page = file;
+        files = getStaticParams(path, {
+          staticParams: inputFile.data.staticParams,
+          readStaticParams,
+        })?.map((params) => ({ ...page, params, data: inputFile.dataAt?.(params) ?? page.data }));
       } else {
         file = {
           format: 'meta',
@@ -107,16 +143,13 @@ export function createContentStorageBuilder(loaderConfig: ResolvedLoaderConfig) 
           absolutePath: inputFile.absolutePath,
           data: inputFile.data,
         };
+        if (inputFile.dataAt) metaDataAt.set(file, inputFile.dataAt);
       }
 
       const [storageKey, locale = i18n ? i18n.defaultLanguage : EmptyLang] =
         i18n && inputFile.locale ? [path, inputFile.locale] : parser(path);
-      const entry = [storageKey, file] as const;
-      if (i18n && locale === '$') {
-        for (const item of i18n.languages) pushMapList(fileMap, item, entry);
-      } else {
-        pushMapList(fileMap, locale, entry);
-      }
+      if (files) for (const item of files) add(storageKey, locale, item);
+      else add(storageKey, locale, file);
     }
   }
 
@@ -124,6 +157,26 @@ export function createContentStorageBuilder(loaderConfig: ResolvedLoaderConfig) 
     scan(undefined, input);
   } else {
     for (const k in input) scan(k, input[k]);
+  }
+
+  // dynamic folder -> the folders that pages of every language fill with their params, the meta files of each language go there
+  const folders = new Map<string, Map<string, Params>>();
+  for (const list of fileMap.values())
+    for (const [path, file] of list) {
+      if (file.format !== 'page' || !file.params) continue;
+      for (let folder = dirname(path); isDynamicPath(folder); folder = dirname(folder)) {
+        let filled = folders.get(folder);
+        if (!filled) folders.set(folder, (filled = new Map()));
+        const target = fillParams(folder, file.params);
+        if (filled.has(target)) continue;
+        const params: Params = {};
+        for (const name of segmentNames(folder)) params[name] = file.params[name];
+        filled.set(target, params);
+      }
+    }
+  for (const [locale, list] of fileMap) {
+    if (folders.size === 0 && !list.some(([path]) => isDynamicPath(path))) continue;
+    fileMap.set(locale, route(list, folders, metaDataAt));
   }
 
   function makeStorage(locale: string | typeof EmptyLang, inherit?: ContentStorage) {
@@ -173,4 +226,43 @@ function pushMapList<K, V>(map: Map<K, V[]>, k: K, v: V) {
     map.set(k, list);
   }
   list.push(v);
+}
+
+/**
+ * Route the files of dynamic paths: a page goes to the path its `params` fill, the meta file of a dynamic folder to
+ * each folder that pages fill. Files at a static path win.
+ */
+function route(
+  list: [string, ContentStorageFile][],
+  folders: Map<string, Map<string, Params>>,
+  metaDataAt: Map<ContentStorageMetaFile, (params: Params) => MetaData>,
+): [string, ContentStorageFile][] {
+  const out = new Map<string, ContentStorageFile>();
+  for (const [path, file] of list) if (!isDynamicPath(path)) out.set(path, file);
+  /** the path of a page or meta file -> its dynamic file */
+  const made = new Map<string, string>();
+  for (const [path, file] of list) {
+    if (!isDynamicPath(path)) continue;
+    const targets: [string, ContentStorageFile][] = [];
+    if (file.format === 'page' && file.params) targets.push([fillParams(path, file.params), file]);
+    if (file.format === 'meta') {
+      const dataAt = metaDataAt.get(file);
+      for (const [folder, params] of folders.get(dirname(path)) ?? [])
+        targets.push([
+          `${folder}/${basename(path)}`,
+          dataAt ? { ...file, data: dataAt(params) } : file,
+        ]);
+    }
+    if (targets.length === 0) out.set(path, file);
+
+    for (const [target, item] of targets) {
+      const other = made.get(target);
+      if (other) throw new Error(`"${other}" and "${path}" both go to "${target}"`);
+      if (out.has(target)) continue;
+      made.set(target, path);
+      out.set(target, item);
+    }
+  }
+
+  return [...out];
 }

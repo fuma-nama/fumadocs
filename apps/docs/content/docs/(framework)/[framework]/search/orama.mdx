@@ -1,0 +1,62 @@
+---
+title: ZBSearch (default)
+description: The default search engine powered by ZBSearch.
+---
+
+## Overview
+
+Fumadocs configures the [ZBSearch search engine](/docs/headless/search/orama) out of the box.
+
+It searches through an API endpoint running on the server, or through a statically cached JSON file for static sites.
+
+## Setup
+
+Create a search dialog.
+
+<Tabs items={['fetch (default)', 'static']}>
+
+    <Tab>
+
+<show when={props.framework !== 'astro'}>
+
+The default search dialog uses this client. Re-create it to customize the dialog:
+
+</show>
+
+<show when={props.framework === 'astro'}>
+
+Use it when your search route renders per request, which needs an adapter:
+
+</show>
+
+<include meta='title="components/search.tsx"'>fetch.tsx</include>
+
+    </Tab>
+
+    <Tab id='static'>
+
+<show when={props.framework !== 'astro'}>
+
+For static sites, configure [static mode](/docs/headless/search/orama#static-export) on the search server, and use the `static` client:
+
+</show>
+
+<show when={props.framework === 'astro'}>
+
+The Astro setup uses the `static` client by default, with [static mode](/docs/headless/search/orama#static-export) on the search server:
+
+</show>
+
+<include meta='title="components/search.tsx"'>./static.tsx</include>
+
+    </Tab>
+
+</Tabs>
+
+<include>.shared.mdx</include>
+
+### Tag Filter
+
+Optionally, you can add UI for filtering results by tags. Configure [Tag Filter](/docs/headless/search/orama#tag-filter) on search server and add the following:
+
+<include>.tag-filter.mdx</include>

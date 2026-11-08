@@ -1,0 +1,200 @@
+---
+title: RSS Feed
+description: Generate a RSS feed for your docs/blog.
+---
+
+## Setup
+
+You can create the feed object:
+
+```ts title="lib/rss.ts"
+import { Feed } from 'feed';
+import { source } from '@/lib/source';
+
+const baseUrl = 'https://fumadocs.dev';
+
+export function getRSS() {
+  const feed = new Feed({
+    title: 'Fumadocs Blog',
+    id: `${baseUrl}/blog`,
+    link: `${baseUrl}/blog`,
+    language: 'en',
+
+    image: `${baseUrl}/banner.png`,
+    favicon: `${baseUrl}/icon.png`,
+    copyright: 'All rights reserved 2025, Fuma Nama',
+  });
+
+  for (const page of source.getPages()) {
+    feed.addItem({
+      id: page.url,
+      title: page.data.title,
+      description: page.data.description,
+      link: `${baseUrl}${page.url}`,
+      date: page.data.lastModified ?? new Date(),
+
+      author: [
+        {
+          name: 'Fuma',
+        },
+      ],
+    });
+  }
+
+  return feed.rss2();
+}
+```
+
+Then serve it from a route:
+
+<show when={props.framework === 'next'}>
+
+```ts title="app/rss.xml/route.ts"
+import { getRSS } from '@/lib/rss';
+
+export const revalidate = false;
+
+export function GET() {
+  return new Response(getRSS());
+}
+```
+
+</show>
+
+<show when={props.framework === 'react-router'}>
+
+```ts tab="app/routes/rss.ts"
+import { getRSS } from '@/lib/rss';
+
+export async function loader() {
+  return new Response(getRSS());
+}
+```
+
+```ts tab="app/routes.ts"
+import { route, type RouteConfig } from '@react-router/dev/routes';
+
+export default [
+  // [!code ++]
+  route('rss.xml', 'routes/rss.ts'),
+] satisfies RouteConfig;
+```
+
+</show>
+
+<show when={props.framework === 'tanstack-start'}>
+
+```ts title="src/routes/rss[.]xml.ts"
+import { createFileRoute } from '@tanstack/react-router';
+import { getRSS } from '@/lib/rss';
+
+export const Route = createFileRoute('/rss.xml')({
+  server: {
+    handlers: {
+      GET: async () => new Response(getRSS()),
+    },
+  },
+});
+```
+
+</show>
+
+<show when={props.framework === 'waku'}>
+
+```ts title="src/pages/_api/rss.xml.ts"
+import { getRSS } from '@/lib/rss';
+
+export function GET() {
+  return new Response(getRSS());
+}
+
+export async function getConfig() {
+  return {
+    render: 'static' as const,
+  } as const;
+}
+```
+
+</show>
+
+<show when={props.framework === 'astro'}>
+
+```ts title="src/pages/rss.xml.ts"
+import type { APIRoute } from 'astro';
+import { getRSS } from '@/lib/rss';
+
+export const GET: APIRoute = () => new Response(getRSS());
+```
+
+</show>
+
+### Link the Feed
+
+Link it from your pages, so feed readers can discover it:
+
+<show when={props.framework === 'next'}>
+
+```ts title="app/layout.tsx"
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  alternates: {
+    types: {
+      'application/rss+xml': [
+        {
+          title: 'Fumadocs Blog',
+          url: 'https://fumadocs.dev/rss.xml',
+        },
+      ],
+    },
+  },
+};
+```
+
+</show>
+
+<show when={props.framework === 'react-router'}>
+
+```ts title="app/root.tsx"
+import type { Route } from './+types/root';
+
+export const links: Route.LinksFunction = () => [
+  { rel: 'alternate', type: 'application/rss+xml', title: 'Fumadocs Blog', href: '/rss.xml' },
+];
+```
+
+</show>
+
+<show when={props.framework === 'tanstack-start'}>
+
+```tsx title="src/routes/__root.tsx"
+export const Route = createRootRoute({
+  head: () => ({
+    links: [
+      { rel: 'alternate', type: 'application/rss+xml', title: 'Fumadocs Blog', href: '/rss.xml' },
+    ],
+  }),
+  // ...
+});
+```
+
+</show>
+
+<show when={props.framework === 'waku'}>
+
+```tsx title="src/pages/_layout.tsx"
+// React hoists it into `<head>`
+<link rel="alternate" type="application/rss+xml" title="Fumadocs Blog" href="/rss.xml" />
+```
+
+</show>
+
+<show when={props.framework === 'astro'}>
+
+```astro title="src/layouts/Layout.astro"
+<head>
+  <link rel="alternate" type="application/rss+xml" title="Fumadocs Blog" href="/rss.xml" />
+</head>
+```
+
+</show>

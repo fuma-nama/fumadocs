@@ -112,6 +112,16 @@ export function createMDX(options: CreateMDXOptions = {}) {
           ],
           as: '*.js',
         },
+        '*.{js,ts}': {
+          condition: { all: [{ query: metaLoaderQueryGlob }, { path: metaLoaderFileGlob }] },
+          loaders: [
+            {
+              loader: 'fumadocs-mdx/webpack/meta',
+              options: turbopackLoaderOptions as unknown as TurbopackLoaderOptions,
+            },
+          ],
+          as: '*.js',
+        },
       },
     };
 

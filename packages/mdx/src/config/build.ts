@@ -47,7 +47,13 @@ export interface DocsCollectionItem
 
 const SupportedFormats = {
   doc: ['mdx', 'md'],
-  meta: ['json', 'yaml'],
+  meta: ['json', 'yaml', 'js', 'ts'],
+};
+
+/** the default `files` of collections, meta files in code are named like `meta.ts` */
+export const SupportedPatterns = {
+  doc: '**/*.{mdx,md}',
+  meta: '**/{*.{json,yaml},meta{,.*}.{js,ts}}',
 };
 
 export function buildCollection(
@@ -87,7 +93,7 @@ function buildPrimitiveCollection(
   cwd: string,
 ): PrimitiveCollectionItem {
   const supportedFormats = SupportedFormats[config.type];
-  const patterns = config.files ?? [`**/*.{${supportedFormats.join(',')}}`];
+  const patterns = config.files ?? [SupportedPatterns[config.type]];
   let matcher: picomatch.Matcher;
 
   return {

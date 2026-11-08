@@ -1,9 +1,13 @@
+import fs from 'node:fs';
 import path from 'node:path';
+import { parse } from 'yaml';
 import { glob, type Loader, type LoaderContext } from 'astro/loaders';
 import { mdxToMdast, type MdastNode } from 'satteri';
 import { metaSchema, pageSchema } from 'fumadocs-core/source/schema';
 import { loaders, root } from 'virtual:fumadocs/config';
+import { getStaticParams, isDynamicPath, type MetaData, type PageData } from 'fumadocs-core/source';
 import type { ExtractedReference } from './source';
+import { dynamicPageFile, dynamicPageKey } from './shared';
 
 function getOptions(collection: string) {
   const options = loaders[collection];
@@ -43,7 +47,90 @@ export function pageLoader(collection = 'docs'): Loader & { schema: typeof pageS
       });
     };
   }
+  const load = loader.load;
+  loader.load = async (context) => {
+    const pages = createDynamicPages(context.store, path.resolve(root, dir));
+    await load({ ...context, store: withSet(context.store, pages.set, pages.delete) });
+    pages.sync();
+    context.watcher?.on('all', (_event, file) => pages.onChange(file));
+  };
   return Object.assign(loader, { schema: pageSchema });
+}
+
+type Entry = Parameters<Store['set']>[0];
+
+/**
+ * The entries of the pages of dynamic files, one for each of their params, compiled from a virtual file. They are
+ * written after the glob loader syncs, which deletes the entries that aren't its files.
+ */
+function createDynamicPages(store: Store, dir: string) {
+  const metaFiles = new Set<string>();
+  /** entry ID of a dynamic file -> the entry IDs of its pages */
+  const pages = new Map<string, string[]>();
+  let synced = false;
+
+  function write(entry: Entry) {
+    if (!synced || !entry.filePath || !isDynamicPath(entry.id) || dynamicPageKey in entry.data)
+      return;
+    remove(entry.id);
+    const staticParams = getStaticParams(entry.id, {
+      staticParams: (entry.data as PageData).staticParams,
+      readStaticParams(file) {
+        for (const ext of ['.json', '.yaml']) {
+          const metaFile = path.join(dir, file + ext);
+          metaFiles.add(metaFile);
+          let content: string;
+          try {
+            content = fs.readFileSync(metaFile, 'utf-8');
+          } catch (error) {
+            if ((error as NodeJS.ErrnoException).code === 'ENOENT') continue;
+            throw error;
+          }
+          return (parse(content) as MetaData | null)?.staticParams;
+        }
+      },
+    });
+
+    const ids: string[] = [];
+    pages.set(entry.id, ids);
+    for (const params of staticParams ?? []) {
+      const id = `${entry.id}#${JSON.stringify(params)}`;
+      ids.push(id);
+      store.set({
+        ...entry,
+        id,
+        filePath: dynamicPageFile(entry.filePath, params),
+        data: { ...entry.data, [dynamicPageKey]: { id: entry.id, params } },
+        deferredRender: true,
+      });
+    }
+  }
+
+  function remove(id: string) {
+    for (const page of pages.get(id) ?? []) store.delete(page);
+    pages.delete(id);
+  }
+
+  function sync() {
+    synced = true;
+    for (const entry of store.values()) write(entry as Entry);
+  }
+
+  return {
+    set(entry: Entry) {
+      const out = store.set(entry);
+      write(entry);
+      return out;
+    },
+    delete(id: string) {
+      remove(id);
+      store.delete(id);
+    },
+    sync,
+    onChange(file: string) {
+      if (synced && metaFiles.has(file)) sync();
+    },
+  };
 }
 
 /**
@@ -65,10 +152,11 @@ export function metaLoader(collection = 'docs'): Loader & { schema: typeof metaS
 type Store = LoaderContext['store'];
 
 /** entries get the data of the collection options, like Fumadocs MDX */
-function withSet(store: Store, set: Store['set']): Store {
+function withSet(store: Store, set: Store['set'], remove?: Store['delete']): Store {
   return new Proxy(store, {
     get(target, key) {
       if (key === 'set') return set;
+      if (key === 'delete' && remove) return remove;
       const value: unknown = Reflect.get(target, key, target);
       return typeof value === 'function' ? value.bind(target) : value;
     },

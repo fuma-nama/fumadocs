@@ -90,15 +90,24 @@ export const lint: Feature<{ linter: 'eslint' | 'biome' | 'oxlint' }> = {
     const json = (content: object) => `${JSON.stringify(content, null, 2)}\n`;
 
     switch (linter) {
-      case 'eslint':
+      case 'eslint': {
         if (!next) throw new Error('ESLint is only supported on Next.js');
+        const typescript = packageJson.devDependencies?.typescript;
         ctx.addDependencies(
           { eslint: '^9.39.4', 'eslint-config-next': packageJson.dependencies?.next ?? null },
           true,
         );
         await ctx.write('eslint.config.mjs', eslintConfig);
-        await ctx.packageJson((data) => scripts(data, { lint: 'eslint' }));
+        await ctx.packageJson((data) => {
+          scripts(data, { lint: 'eslint' });
+          // typescript-eslint needs the TypeScript 6 API, TS 7 runs side by side as recommended by TypeScript
+          if (data.devDependencies && typescript && /^\D*7\./.test(typescript)) {
+            data.devDependencies.typescript = 'npm:@typescript/typescript6@^6.0.2';
+            data.devDependencies['@typescript/native'] = `npm:typescript@${typescript}`;
+          }
+        });
         break;
+      }
       case 'biome':
         ctx.addDependencies({ '@biomejs/biome': null }, true);
         await ctx.write('biome.json', json(biomeConfig(next)));

@@ -22,6 +22,8 @@ import { cn } from '@/lib/cn';
 import { useTreeContext } from 'fumadocs-ui/contexts/tree';
 import type { Item, Node } from 'fumadocs-core/page-tree';
 import { useRouter } from 'next/navigation';
+import { defaultFramework, isFramework } from '@/lib/framework';
+import { usePathname } from 'fumadocs-core/framework';
 
 const items = [
   {
@@ -58,7 +60,11 @@ const items = [
 export default function CustomSearchDialog(props: SharedProps) {
   const [open, setOpen] = useState(false);
   const [tag, setTag] = useState<string | undefined>();
-  const search = useFetchSearch({ tag });
+  // the framework of the page, like `next` of `/docs/next/search`
+  const segment = usePathname().split('/', 3)[2];
+  const framework = isFramework(segment) ? segment : defaultFramework;
+  // see the tags of `app/api/search/route.ts`
+  const search = useFetchSearch({ tag: tag ? `${tag}/${framework}` : framework });
   const { full } = useTreeContext();
   const router = useRouter();
   const searchMap = useMemo(() => {
@@ -68,6 +74,8 @@ export default function CustomSearchDialog(props: SharedProps) {
       if (node.type === 'page' && typeof node.name === 'string') {
         map.set(node.name.toLowerCase(), node);
       } else if (node.type === 'folder') {
+        // the folders of other frameworks
+        if (node.root === 'framework' && node.$id !== `(framework)/${framework}`) return;
         if (node.index) onNode(node.index);
         for (const item of node.children) onNode(item);
       }
@@ -75,7 +83,7 @@ export default function CustomSearchDialog(props: SharedProps) {
 
     for (const item of full.children) onNode(item);
     return map;
-  }, [full]);
+  }, [full, framework]);
   const pageTreeAction = useMemo<SearchItemType | undefined>(() => {
     if (search.search.length === 0) return;
 

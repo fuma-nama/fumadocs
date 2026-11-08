@@ -1,0 +1,469 @@
+---
+title: createGraphQL()
+description: The GraphQL server instance.
+---
+
+## GraphQL Server
+
+The main config for Fumadocs GraphQL.
+
+> It should not be referenced in browser environments.
+
+### `input`
+
+The GraphQL schemas to read from, either:
+
+- an array of file paths/URLs to SDL files.
+- a record of schema id -> input.
+
+Record inputs accept SDL file paths/URLs, SDL text, introspection results, `GraphQLSchema` instances, and functions returning them.
+
+Only schemas listed here can be loaded, other IDs passed to `getSchema()` throw an error.
+
+```ts tab="Basic"
+import { createGraphQL } from '@fumadocs/graphql/server';
+
+export const graphql = createGraphQL({
+  input: ['./schema.graphql'],
+});
+```
+
+```ts tab="Record"
+import { createGraphQL } from '@fumadocs/graphql/server';
+
+export const graphql = createGraphQL({
+  input: {
+    // [id]: schema input
+    store: './store.graphql',
+    remote: 'https://example.com/schema.graphql',
+    // functions, e.g. downloading an introspection result
+    galaxy: async () => {
+      const res = await fetch('https://example.com/introspection.json');
+      return res.json();
+    },
+  },
+});
+```
+
+You can pass an array of SDL files to merge them into a single schema, type extensions (e.g. `extend type Query`) are supported.
+
+```ts
+import { createGraphQL } from '@fumadocs/graphql/server';
+
+export const graphql = createGraphQL({
+  input: {
+    api: ['./base.graphql', './orders.graphql'],
+  },
+});
+```
+
+### `examples`
+
+Example operations from GraphQL documents: file paths, URLs or GraphQL text.
+
+```ts tab="Basic"
+import { createGraphQL } from '@fumadocs/graphql/server';
+
+export const graphql = createGraphQL({
+  input: ['./schema.graphql'],
+  examples: ['./examples.graphql'],
+});
+```
+
+```ts tab="Record"
+import { createGraphQL } from '@fumadocs/graphql/server';
+
+export const graphql = createGraphQL({
+  input: {
+    store: './store.graphql',
+    admin: './admin.graphql',
+  },
+  examples: {
+    // [id]: documents of the schema
+    store: ['./examples/store.graphql'],
+  },
+});
+```
+
+An array applies to every schema. Each named operation becomes an example on the pages of root fields it selects, replacing the generated one:
+
+```graphql title="examples.graphql"
+# The public profile of a customer.
+query CustomerProfile($id: ID! = "cus_42") {
+  customer(id: $id) {
+    id
+    name
+  }
+}
+```
+
+| Example     | From                                                                                |
+| ----------- | ----------------------------------------------------------------------------------- |
+| title       | the operation name, like **Customer Profile** for `CustomerProfile`                 |
+| description | the `"""` description of operation, or the `#` comments right above it, in Markdown |
+| variables   | default values of variables (left out of the query), or generated for required ones |
+| response    | generated from the selection                                                        |
+
+Operations must have unique names and be valid against the schema, otherwise the build fails.
+
+Arguments of root fields must be variables of the same names, like `customer(id: $id)`, so the playground can edit them.
+
+### `disableCache`
+
+Disable caching of loaded schemas and examples. Useful during development when they change frequently.
+
+```ts
+import { createGraphQL } from '@fumadocs/graphql/server';
+
+export const graphql = createGraphQL({
+  input: ['./schema.graphql'],
+  disableCache: true,
+});
+```
+
+## Loading Schemas Once
+
+Pages receive the whole schema in their props, so every page load, navigation and prefetch sends it again. For large schemas, leave it out:
+
+```ts title="lib/graphql.ts"
+import { createGraphQL } from '@fumadocs/graphql/server';
+
+export const graphql = createGraphQL({
+  // IDs end up in URLs, keep them URL-safe
+  input: { store: './store.graphql' },
+  includeSchema: false, // [!code ++]
+});
+```
+
+<show when={props.framework !== 'tanstack-start'}>
+
+Pass `loadSchema` to load the SDL of each schema once per browser session. It also runs during server rendering:
+
+</show>
+
+<show when={props.framework === 'next'}>
+
+```tsx title="components/api-page.tsx"
+'use client';
+import { preload } from 'react-dom';
+import { createGraphQLPage } from '@fumadocs/graphql/ui';
+
+export const GraphQLPage = createGraphQLPage({
+  async loadSchema(id) {
+    if (typeof window === 'undefined') {
+      // the browser starts downloading it with the page
+      preload(`/api/graphql-schema/${id}`, { as: 'fetch', crossOrigin: 'anonymous' });
+      const { graphql } = await import('@/lib/graphql');
+      return (await graphql.getSchema(id)).sdl;
+    }
+    return (await fetch(`/api/graphql-schema/${id}`)).text();
+  },
+});
+```
+
+</show>
+
+<show when={props.framework === 'react-router' || props.framework === 'waku' || props.framework === 'astro'}>
+
+```tsx title="components/api-page.tsx"
+'use client';
+import { preload } from 'react-dom';
+import { createGraphQLPage } from '@fumadocs/graphql/ui';
+
+export const GraphQLPage = createGraphQLPage({
+  async loadSchema(id) {
+    if (import.meta.env.SSR) {
+      // the browser starts downloading it with the page
+      preload(`/api/graphql-schema/${id}`, { as: 'fetch', crossOrigin: 'anonymous' });
+      const { graphql } = await import('@/lib/graphql');
+      return (await graphql.getSchema(id)).sdl;
+    }
+    return (await fetch(`/api/graphql-schema/${id}`)).text();
+  },
+});
+```
+
+</show>
+
+<show when={props.framework !== 'tanstack-start'}>
+
+Serve the schemas to the browser from a route:
+
+</show>
+
+<show when={props.framework === 'next'}>
+
+```ts title="app/api/graphql-schema/[id]/route.ts"
+import { graphql } from '@/lib/graphql';
+
+export async function GET(_req: Request, { params }: RouteContext<'/api/graphql-schema/[id]'>) {
+  return new Response((await graphql.getSchema((await params).id)).sdl);
+}
+
+// for static exports
+export async function generateStaticParams() {
+  return Object.keys(await graphql.getSchemas()).map((id) => ({ id }));
+}
+```
+
+</show>
+
+<show when={props.framework === 'react-router'}>
+
+```ts tab="app/routes/graphql-schema.ts"
+import type { Route } from './+types/graphql-schema';
+import { graphql } from '@/lib/graphql';
+
+export async function loader({ params }: Route.LoaderArgs) {
+  return new Response((await graphql.getSchema(params.id)).sdl);
+}
+```
+
+```ts tab="app/routes.ts"
+import { route, type RouteConfig } from '@react-router/dev/routes';
+
+export default [
+  // [!code ++]
+  route('api/graphql-schema/:id', 'routes/graphql-schema.ts'),
+  // ...
+] satisfies RouteConfig;
+```
+
+</show>
+
+<show when={props.framework === 'waku'}>
+
+```ts title="src/pages/_api/api/graphql-schema/[id].ts"
+import type { ApiContext } from 'waku/router';
+import { graphql } from '@/lib/graphql';
+
+export async function GET(_: Request, { params }: ApiContext<'/api/graphql-schema/[id]'>) {
+  return new Response((await graphql.getSchema(params.id)).sdl);
+}
+```
+
+</show>
+
+<show when={props.framework === 'astro'}>
+
+```ts title="src/pages/api/graphql-schema/[id].ts"
+import type { APIRoute, GetStaticPaths } from 'astro';
+import { graphql } from '@/lib/graphql';
+
+export const prerender = true;
+
+export const getStaticPaths = (async () => {
+  return Object.keys(await graphql.getSchemas()).map((id) => ({ params: { id } }));
+}) satisfies GetStaticPaths;
+
+export const GET: APIRoute = async ({ params }) => {
+  return new Response((await graphql.getSchema(params.id!)).sdl);
+};
+```
+
+</show>
+
+<show when={props.framework === 'tanstack-start'}>
+
+TanStack Start route loaders run on both the server and the browser, so your docs route can load the schema without `loadSchema`. Call a server function only when the browser doesn't have the schema yet:
+
+```tsx title="src/routes/docs/$.tsx"
+import { createServerFn } from '@tanstack/react-start';
+import { graphql } from '@/lib/graphql';
+
+// schemas the browser has loaded
+const schemas = new Map<string, string>();
+
+const getSchema = createServerFn({ method: 'GET' })
+  .validator((id: string) => id)
+  .handler(async ({ data: id }) => (await graphql.getSchema(id)).sdl);
+
+export const Route = createFileRoute('/docs/$')({
+  component: Page,
+  loader: async ({ params }) => {
+    const data = await serverLoader({ data: params._splat?.split('/') ?? [] });
+    if (data.type === 'graphql') {
+      const { schema: id, payload } = data.props;
+      payload.sdl = schemas.get(id) ?? (await getSchema({ data: id }));
+    }
+    return data;
+  },
+});
+
+function Page() {
+  const page = useFumadocsLoader(Route.useLoaderData());
+  // the schema of the first page too
+  if (page.type === 'graphql' && typeof window !== 'undefined')
+    schemas.set(page.props.schema, page.props.payload.sdl!);
+  // ...
+}
+```
+
+</show>
+
+<show when={props.framework !== 'tanstack-start'}>
+
+- For the [UI installed by Fumadocs CLI](/docs/integrations/graphql/api-page#full-ui), pass `loadSchema` to `createGraphQLRenderer()`.
+- Browsers keep each schema until a reload. With [`disableCache`](#disablecache), leave `includeSchema` on.
+
+</show>
+
+<show when={props.framework === 'tanstack-start'}>
+
+- Browsers keep each schema until a reload. With [`disableCache`](#disablecache), leave `includeSchema` on.
+
+</show>
+
+## Generating Pages
+
+`staticSource()` and `dynamicSource()` generate pages for your `loader()`, they share the same options.
+
+```ts title="lib/source.ts"
+export const source = loader(
+  {
+    docs: docs.toFumadocsSource(),
+    graphql: await graphql.staticSource({
+      baseDir: 'graphql',
+    }),
+  },
+  // ...
+);
+```
+
+### `per`
+
+Customize the content of pages, default to `item`.
+
+| mode   | content                                                             | file path         |
+| ------ | ------------------------------------------------------------------- | ----------------- |
+| item   | each operation, and each named type with `includeTypes`             | `{name}.mdx`      |
+| file   | the operations of a schema, and its named types with `includeTypes` | `{file_name}.mdx` |
+| custom | see below                                                           | N/A               |
+
+When set to `custom`, you can pass a function to fully customize the generation process:
+
+```ts
+import { graphql } from '@/lib/graphql';
+
+await graphql.staticSource({
+  per: 'custom',
+  toPages(builder) {
+    builder.create({
+      type: 'operation',
+      path: 'my-orders.mdx',
+      info: { title: 'My Orders' },
+      item: { kind: 'query', name: 'orders' },
+    });
+  },
+});
+```
+
+### `groupBy`
+
+For `per: 'item'`, customize how generated pages are grouped into folders, default to `kind`.
+
+| mode | folders                                      |
+| ---- | -------------------------------------------- |
+| kind | by their kind, e.g. `queries/`, `mutations/` |
+| none | no folders                                   |
+
+You can also pass a function that returns the group name of an entry:
+
+```ts
+import { graphql } from '@/lib/graphql';
+
+await graphql.staticSource({
+  groupBy: (entry) => (entry.type === 'operation' ? 'operations' : 'types'),
+});
+```
+
+### `includeOperations` & `includeTypes`
+
+Filter the operations (query/mutation/subscription fields) and named types to document.
+
+- `includeOperations`: a page per operation for `per: 'item'`, default to `true`.
+- `includeTypes`: named types, their own pages for `per: 'item'` or in the page for `per: 'file'`, default to `false`. Operation pages show the types they use either way.
+
+Type pages show where the type is used, and link to each other and to operations.
+
+```ts
+import { graphql } from '@/lib/graphql';
+
+await graphql.staticSource({
+  // skip subscriptions
+  includeOperations: (kind, field) => kind !== 'subscription',
+  // document types, except internal ones
+  includeTypes: (type) => !type.name.startsWith('Internal'),
+});
+```
+
+### `name` & `slugify`
+
+Customize the file name of generated pages.
+
+GraphQL names are already URL-safe, hence the original name (including its case) is kept by default.
+
+```ts
+import { graphql } from '@/lib/graphql';
+
+await graphql.staticSource({
+  per: 'item',
+  name: (entry) => entry.item.name.toLowerCase(),
+});
+```
+
+`slugify` converts group names (and item names by default) into URL-friendly segments.
+
+### `meta`
+
+Generate `meta.json` files to customize the page tree, disabled by default.
+
+| `folderStyle` | page tree                                  |
+| ------------- | ------------------------------------------ |
+| folder        | a folder per group (default)               |
+| separator     | a separator per group, with pages under it |
+
+```ts
+import { graphql } from '@/lib/graphql';
+
+await graphql.staticSource({
+  meta: { folderStyle: 'separator' },
+});
+```
+
+## Markdown for LLMs
+
+`page.data.getText()` returns the items of a page in Markdown: operations with their signature, arguments, examples and the SDL of types they use, named types with their SDL and usages. For example, in [`docsLlms`](/docs/integrations/llms#docsllms):
+
+```ts
+import { llms } from 'fumadocs-core/source';
+import { source } from '@/lib/source';
+
+export const docsLlms = llms(source, {
+  renderPage: async (page) => {
+    // [!code ++:3]
+    if (page.type === 'graphql') {
+      return `# ${page.data.title}\n\n${await page.data.getText('processed')}`;
+    }
+
+    // your original flow below...
+  },
+});
+```
+
+## Loader Plugin
+
+`loaderPlugin()` decorates GraphQL pages in your page tree:
+
+- a `query`/`mutation`/`subscription` badge per operation page.
+- a strikethrough on deprecated operations.
+
+```ts title="lib/source.ts"
+export const source = loader(
+  // ...
+  {
+    baseUrl: '/docs',
+    plugins: [graphql.loaderPlugin()],
+  },
+);
+```

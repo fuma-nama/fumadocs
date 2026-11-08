@@ -1,5 +1,12 @@
 import { expect, test } from 'vitest';
-import { createGetUrl, getSlugs, loader, LoaderOptions, StaticSource } from '@/source';
+import {
+  createGetUrl,
+  getSlugs,
+  getStaticParams,
+  loader,
+  LoaderOptions,
+  StaticSource,
+} from '@/source';
 import type { ReactElement } from 'react';
 import { removeUndefined } from '@/utils/remove-undefined';
 import { lucideIconsPlugin } from '@/source/plugins/lucide-icons';
@@ -798,4 +805,98 @@ test('Loader: configureStatic receives the source name for named sources', () =>
   expect(received).toEqual(['docs:docs', 'blog:blog']);
   expect(result.getPage(['guide'])?.type).toBe('docs');
   expect(result.getPage(['hello'])?.type).toBe('blog');
+});
+
+test('Loader: a page for each params of a dynamic file', () => {
+  const result = loader({
+    baseUrl: '/docs',
+    i18n: { languages: ['en', 'cn'], defaultLanguage: 'en' },
+    source: {
+      files: [
+        {
+          type: 'meta',
+          path: '[framework]/meta.json',
+          data: {
+            title: 'Framework',
+            root: true,
+            staticParams: [{ framework: 'waku' }, { framework: 'astro' }],
+          },
+          dataAt: (params) => ({ title: `Framework ${params.framework}`, root: true }),
+        },
+        { type: 'meta', path: '[framework]/meta.cn.json', data: { title: 'Framework CN' } },
+        {
+          type: 'page',
+          path: '[framework]/deploy.mdx',
+          data: { title: 'Deploy' },
+          dataAt: (params) => ({ title: `Deploy on ${params.framework}` }),
+        },
+        {
+          type: 'page',
+          path: '[framework]/deploy.cn.mdx',
+          data: { title: 'Deploy CN', staticParams: [{ framework: 'waku' }] },
+        },
+        // a file at a static path wins
+        { type: 'page', path: 'astro/index.mdx', data: { title: 'Astro' } },
+        { type: 'page', path: '[framework]/index.mdx', data: { title: 'Home' } },
+        // nothing lists its values
+        { type: 'page', path: '[literal]/page.mdx', data: { title: 'Literal' } },
+      ],
+    },
+  });
+
+  expect(result.getPages('en').map((page) => page.url)).toEqual([
+    '/en/docs/astro',
+    '/en/docs/waku/deploy',
+    '/en/docs/astro/deploy',
+    '/en/docs/waku',
+    '/en/docs/%5Bliteral%5D/page',
+  ]);
+  const deploy = result.getPage(['astro', 'deploy'], 'en')!;
+  expect(deploy.params).toEqual({ framework: 'astro' });
+  expect(deploy.data.title).toBe('Deploy on astro');
+  expect(result.getPage(['astro'], 'en')?.data.title).toBe('Astro');
+  expect(result.getPage(['waku', 'deploy'], 'cn')?.data.title).toBe('Deploy CN');
+  // the pages of the fallback language
+  expect(result.getPage(['astro', 'deploy'], 'cn')?.data.title).toBe('Deploy on astro');
+  expect(result.resolveHref('./deploy.mdx', result.getPage(['waku'], 'en')!)).toBe(
+    '/en/docs/waku/deploy',
+  );
+
+  // the meta files of a dynamic folder go to each folder that pages fill
+  const roots = (locale: string) =>
+    result.getPageTree(locale).children.map((node) => node.type === 'folder' && node.name);
+  expect(roots('en')).toEqual(['[literal]', 'Framework astro', 'Framework waku']);
+  expect(roots('cn')).toContain('Framework CN');
+});
+
+test('Static params of a dynamic file', () => {
+  const metas: Record<string, Record<string, string>[]> = {
+    '[framework]/meta': [{ framework: 'waku' }, { framework: 'astro' }],
+    '[framework]/meta.cn': [{ framework: 'waku' }],
+  };
+  const readStaticParams = (path: string) => metas[path];
+
+  // the meta files of its language come first
+  expect(getStaticParams('[framework]/deploy.cn.mdx', { readStaticParams })).toEqual([
+    { framework: 'waku' },
+  ]);
+  // lists are joined by the names they share
+  expect(
+    getStaticParams('[framework]/[pm].mdx', {
+      readStaticParams,
+      staticParams: [
+        { framework: 'astro', pm: 'npm' },
+        { framework: 'next', pm: 'npm' },
+        { pm: 'pnpm' },
+      ],
+    }),
+  ).toEqual([
+    { framework: 'waku', pm: 'pnpm' },
+    { framework: 'astro', pm: 'npm' },
+    { framework: 'astro', pm: 'pnpm' },
+  ]);
+  expect(getStaticParams('[a]/page.mdx', { readStaticParams })).toBeUndefined();
+  expect(() =>
+    getStaticParams('[a]/[b].mdx', { readStaticParams, staticParams: [{ a: 'x' }] }),
+  ).toThrowError('No value of "[b]" is listed for "[a]/[b].mdx"');
 });

@@ -3,12 +3,66 @@ import type { ConfigLoader } from '@/loaders/config';
 import { parse as parseYaml } from 'yaml';
 import { z } from 'zod';
 import type { MetaCollectionItem } from '@/config/build';
+import { runModule } from '@/loaders/mdx/code';
+import { slash } from '@/utils/codegen';
+import { getStaticParams, type MetaData, type Params } from 'fumadocs-core/source';
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
 
 const querySchema = z.looseObject({
   collection: z.string().optional(),
   workspace: z.string().optional(),
   macro_id: z.string().optional(),
 });
+
+/**
+ * The data of a meta file. A module, like `meta.ts`, has a default export, which can be a function of the params of
+ * its folder, and the `staticParams` as a named export or in its data.
+ */
+function parse(
+  filePath: string,
+  source: string,
+  addDependency: (file: string) => void,
+): { data: MetaData; dataAt?: (params: Params) => MetaData } {
+  if (/\.[jt]s$/.test(filePath)) {
+    const { default: data, staticParams = (data as MetaData | undefined)?.staticParams } =
+      runModule(filePath, source, addDependency) as {
+        default?: MetaData | ((params: Params) => MetaData);
+        staticParams?: Params[];
+      };
+    if (typeof data === 'function') return { data: { staticParams }, dataAt: data };
+    return { data: { ...data, staticParams } };
+  }
+
+  try {
+    if (filePath.endsWith('.json')) return { data: JSON.parse(source) };
+    if (filePath.endsWith('.yaml')) return { data: parseYaml(source) };
+  } catch (e) {
+    throw new Error(`invalid data in ${filePath}`, { cause: e });
+  }
+
+  throw new Error('Unknown file type ' + filePath);
+}
+
+/** read the `staticParams` of a meta file in `dir`, by its path without the extension, like `[framework]/meta` */
+export function readStaticParams(
+  dir: string,
+  file: string,
+  addDependency: (file: string) => void,
+): Params[] | undefined {
+  for (const ext of ['.json', '.yaml', '.ts', '.js']) {
+    const metaFile = path.join(dir, file + ext);
+    addDependency(metaFile);
+    let content: string;
+    try {
+      content = readFileSync(metaFile, 'utf-8');
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code === 'ENOENT') continue;
+      throw error;
+    }
+    return parse(metaFile, content, addDependency).data?.staticParams;
+  }
+}
 
 /**
  * load meta files, fallback to bundler's built-in plugins when ?collection is unspecified.
@@ -21,17 +75,6 @@ export function createMetaLoader(
   } = {},
 ): Loader {
   const { json: resolveJson = 'js' } = resolve;
-
-  function parse(filePath: string, source: string) {
-    try {
-      if (filePath.endsWith('.json')) return JSON.parse(source);
-      if (filePath.endsWith('.yaml')) return parseYaml(source);
-    } catch (e) {
-      throw new Error(`invalid data in ${filePath}`, { cause: e });
-    }
-
-    throw new Error('Unknown file type ' + filePath);
-  }
 
   function onMeta(source: string, { filePath, query, compiler }: LoaderInput) {
     const parsed = querySchema.safeParse(query);
@@ -69,17 +112,23 @@ export function createMetaLoader(
         }
       }
 
-      const data = parse(filePath, source);
-
+      const { data, dataAt } = parse(filePath, source, compiler.addDependency);
       if (!metaCollection) return data;
-      return core.transformMeta(
-        {
-          collection: metaCollection,
-          filePath,
-          source,
-        },
-        data,
-      );
+      const options = { collection: metaCollection, filePath, source };
+      if (!dataAt) return core.transformMeta(options, data);
+
+      // the data in each folder of its params, the module doesn't run at runtime
+      const { dir } = metaCollection;
+      const out = { ...data, _dataAt: {} as Record<string, unknown> };
+      const list = getStaticParams(slash(path.relative(dir, filePath)), {
+        readStaticParams: (file) => readStaticParams(dir, file, compiler.addDependency),
+      });
+      for (const params of list ?? [])
+        out._dataAt[JSON.stringify(params)] = await core.transformMeta(options, {
+          staticParams: data.staticParams,
+          ...dataAt(params),
+        });
+      return out;
     };
   }
 
@@ -110,7 +159,7 @@ export function createMetaLoader(
         if (result === null)
           return {
             loader: 'object',
-            exports: parse(input.filePath, source),
+            exports: parse(input.filePath, source, () => undefined).data as Record<string, unknown>,
           };
 
         return result().then((data) => ({

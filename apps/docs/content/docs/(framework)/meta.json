@@ -3,24 +3,5 @@
   "description": "The docs framework",
   "icon": "Building",
   "root": true,
-  "pages": [
-    "---Introduction---",
-    "index",
-    "what-is-fumadocs",
-    "comparisons",
-    "manual-installation",
-    "guides",
-    "---Writing---",
-    "page-conventions",
-    "markdown",
-    "---Configurations---",
-    "navigation",
-    "deploying",
-    "internationalization",
-    "search",
-    "---Integrations---",
-    "editor",
-    "...integrations",
-    "community"
-  ]
+  "pages": ["next", "react-router", "tanstack-start", "waku", "astro"]
 }

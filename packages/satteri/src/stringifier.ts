@@ -40,7 +40,7 @@ declare module 'satteri' {
 export interface PositionedNode {
   type?: string;
   position?: { start: { offset?: number }; end: { offset?: number } };
-  /** Sätteri drops the position of inserted nodes, they can carry one in `data` */
+  /** embedded nodes carry their position in the output in `data`, see {@link embedSource} */
   data?: unknown;
 }
 
@@ -49,7 +49,8 @@ interface ParentNode extends PositionedNode {
 }
 
 export function offsets(node: PositionedNode): Range | undefined {
-  const position = node.position ?? (node.data as PositionedNode | undefined)?.position;
+  // embedded nodes keep the position in their own source, `data` has the one in the output
+  const position = (node.data as PositionedNode | undefined)?.position ?? node.position;
   const start = position?.start.offset;
   const end = position?.end.offset;
   if (start !== undefined && end !== undefined) return { start, end };
@@ -103,6 +104,7 @@ export function embedSource(
       if (range) {
         range.start += base;
         range.end += base;
+        // Sätteri copies a node of another tree with its own position
         child.data = {
           ...(child.data as object),
           position: { start: { offset: range.start }, end: { offset: range.end } },
@@ -227,6 +229,15 @@ export function createStringifier(
         appliedEnd = edit.end;
       }
       cursor = edit.end;
+      // a removed block leaves no blank lines, at the end of the range the ones before it go too
+      if (
+        text === '' &&
+        /^[ \t]*$/.test(source.slice(source.lastIndexOf('\n', edit.start - 1) + 1, edit.start))
+      ) {
+        blankLines.lastIndex = cursor;
+        if (blankLines.test(source)) cursor = Math.min(blankLines.lastIndex, end);
+        if (cursor === end) out = out.trimEnd();
+      }
     }
 
     return out + source.slice(cursor, end);
@@ -300,6 +311,8 @@ function edge(nodes: readonly ParentNode[] = [], last: boolean): Range | undefin
     if (range) return range;
   }
 }
+
+const blankLines = /(?:[ \t\r]*\n)+/y;
 
 const containerPrefixRegex = /^(?:[ \t]*(?:>|[-*+](?=[ \t])|\d{1,9}[.)](?=[ \t])))*[ \t]*/;
 

@@ -5,7 +5,7 @@ export default defineConfig({
   format: 'esm',
   entry: ['src/config/index.ts', 'src/cli/index.ts'],
   outDir: 'dist/lib',
-  dts: true,
+  dts: { emitJs: false },
   sourcemap: false,
   deps: {
     onlyBundle: ['clsx', 'class-variance-authority'],

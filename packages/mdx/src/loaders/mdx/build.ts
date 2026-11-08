@@ -4,6 +4,7 @@ import type { FC } from 'react';
 import type { MDXProps } from 'mdx/types';
 import type { Core } from '@/core';
 import type { DocCollectionItem } from '@/config/build';
+import type { Params } from 'fumadocs-core/source';
 
 export interface BuildMDXOptions {
   /**
@@ -12,6 +13,8 @@ export interface BuildMDXOptions {
   filePath: string;
   source: string;
   frontmatter?: Record<string, unknown>;
+  /** for a page of a dynamic file, its params */
+  params?: Params;
 
   environment: 'bundler' | 'runtime';
   isDevelopment: boolean;
@@ -43,6 +46,8 @@ export interface CompiledMDXProperties<Frontmatter = Record<string, unknown>> {
    * Enable from `postprocess` option.
    */
   _mdast?: string;
+  /** for a dynamic file, the module compiled for each of its params, by the params as JSON */
+  _pages?: Record<string, CompiledMDXProperties<Frontmatter>>;
 }
 
 export async function buildMDX(

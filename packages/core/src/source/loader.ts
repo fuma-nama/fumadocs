@@ -1,12 +1,19 @@
 import type * as PageTree from '@/page-tree/definitions';
 import type { I18nConfig } from '@/i18n';
 import { createContentStorageBuilder, type ContentStorage } from './storage/content';
+import { fillParams } from './static-params';
 import { createPageTreeBuilder, type PageTreeOptions } from '@/source/page-tree/builder';
 import { dirname, joinPath } from './path';
 import { normalizeUrl } from '@/utils/url';
 import { slugsPlugin, SlugsPluginOptions } from '@/source/plugins/slugs';
 import { iconPlugin, type IconResolver } from '@/source/plugins/icon';
-import { isStaticSource, type MetaData, type PageData, type StaticSource } from './source';
+import {
+  isStaticSource,
+  type MetaData,
+  type PageData,
+  type Params,
+  type StaticSource,
+} from './source';
 import { visit } from '@/page-tree/utils';
 import type { PageTreeTransformer } from '@/source/page-tree/builder';
 import type { SerializedPageTree } from './client';
@@ -73,6 +80,8 @@ export interface Page<
   slugs: string[];
   url: string;
   data: Data;
+  /** for a page of a dynamic file, its params */
+  params?: Params;
 
   locale?: string | undefined;
 }
@@ -234,6 +243,7 @@ function createPageIndexer({ url }: ResolvedLoaderConfig) {
           url: url(item.slugs, lang),
           slugs: item.slugs,
           data: item.data,
+          params: item.params,
           locale: lang,
         };
         index.pathToPage.set(path, page);
@@ -398,7 +408,8 @@ export function loader<I extends ResolvedInput, I18n extends I18nConfig | undefi
     resolveHref(href, parent) {
       if (href.startsWith('./') || href.startsWith('../')) {
         const target = this.getPageByHref(href, {
-          dir: dirname(parent.path),
+          // for a page of a dynamic file, relative links resolve from the folder its params fill
+          dir: dirname(parent.params ? fillParams(parent.path, parent.params) : parent.path),
           language: parent.locale,
         });
 

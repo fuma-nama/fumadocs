@@ -1,6 +1,6 @@
 {
   "name": "@fumadocs/astro",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "The Astro integration for Fumadocs",
   "keywords": [
     "Astro",
@@ -36,37 +36,38 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
-    "@astrojs/mdx": "^8.1.1",
+    "@astrojs/mdx": "^8.1.3",
     "@fumadocs/satteri": "workspace:^",
     "devalue": "^6.0.2",
-    "satteri": "^0.10.5",
+    "satteri": "^0.11.7",
+    "yaml": "^2.9.1",
     "yuku-parser": "^0.19.0"
   },
   "devDependencies": {
-    "@astrojs/markdown-satteri": "^0.4.5",
-    "@astrojs/react": "^7.1.1",
+    "@astrojs/markdown-satteri": "^0.4.7",
+    "@astrojs/react": "^7.1.4",
     "@types/estree-jsx": "^1.0.5",
     "@types/hast": "^3.0.5",
     "@types/mdx": "^2.0.14",
-    "@types/node": "26.6.5",
+    "@types/node": "26.6.6",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
-    "astro": "^7.4.2",
+    "astro": "^7.4.7",
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:@fumadocs/base-ui@*",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "tsconfig": "workspace:*",
-    "tsdown": "0.23.1",
+    "tsdown": "0.23.7",
     "typescript": "^7.0.2",
-    "vite": "^8.3.5",
-    "vitest": "^5.0.5"
+    "vite": "^8.3.6",
+    "vitest": "^5.1.0"
   },
   "peerDependencies": {
     "@astrojs/react": "^7.0.0",
     "@types/mdx": "*",
     "astro": "^7.4.0",
-    "fumadocs-core": "^16.17.8",
+    "fumadocs-core": "^16.18.3",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
   },
