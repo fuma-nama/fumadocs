@@ -1,3 +1,14 @@
+## @fumadocs/base-ui@16.18.3
+
+### GitHub links to bracketed paths
+
+- `editOnGithub` of `DocsPage` opens files under folders like `[slug]`.
+
+### Root Folders of a Type in the Spacious Sidebar
+
+- The Spacious sidebar switches between root folders of a type (`root: 'version'`) below the section switcher, in one control.
+- A root folder that only contains folders gets a tab, linking to its first page.
+
 ## @fumadocs/base-ui@16.18.2
 
 ### Floating Ask AI button in docs layouts

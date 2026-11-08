@@ -1,3 +1,9 @@
+## create-fumadocs-app@16.2.32
+
+### ESLint on TypeScript 7
+
+- The ESLint linter installs TypeScript 6 next to TypeScript 7, so `eslint` runs on TypeScript 7 projects.
+
 ## create-fumadocs-app@16.2.29
 
 ### Astro with your own routes

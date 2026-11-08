@@ -1,22 +1,40 @@
 core:changelogs:
-  - content: "---\npackages:\n  fumadocs-ui:\n    type: patch\n  \"@fumadocs/base-ui\":\n    type: patch\n---\n\n### Floating Ask AI button in docs layouts\n\n- `aiChat.trigger` renders a floating Ask AI button in the Docs and Notebook layouts. Glass and Spacious keep their own button.\n"
-    filename: 2026-11-08-ai-chat-trigger.md
+  - content: "---\npackages:\n  fumadocs-core:\n    type: patch\n  fumadocs-mdx:\n    type: patch\n  \"@fumadocs/satteri\":\n    type: patch\n  \"@fumadocs/astro\":\n    type: patch\n  \"@fumadocs/local-content\":\n    type: patch\n  \"@fumadocs/local-md\":\n    type: patch\n---\n\n### Path params and `<show>`\n\n- A folder or file named `[name]` makes a page for each value listed in `staticParams` of its meta file or frontmatter.\n- Each page is compiled for its params, read as `props`, and a file at a static path replaces the page of its value.\n- `<show when={...}>` shows content on a condition. Conditions on params and inlined env vars are decided before headings, TOC, search and Markdown.\n- The `define` option of Remark Show sets the values resolved at build time, like Vite's `define`, also per page.\n- Custom sources give a dynamic file `dataAt()`, and `getStaticParams()` lists its params from any storage.\n"
+    filename: 2026-11-08-path-params.md
     v: 0.0.0
-  - content: "---\npackages:\n  \"@fumadocs/cli\":\n    type: patch\n---\n\n### Keep MCP routes from holding serverless functions open\n\n- The generated MCP route no longer lets clients open a stream that lasts until the function times out.\n"
-    filename: 2026-11-07-mcp-no-listen-stream.md
+  - content: "---\npackages:\n  fumadocs-ui:\n    type: patch\n  \"@fumadocs/base-ui\":\n    type: patch\n---\n\n### GitHub links to bracketed paths\n\n- `editOnGithub` of `DocsPage` opens files under folders like `[slug]`.\n"
+    filename: 2026-11-09-encode-github-urls.md
     v: 0.0.0
-  - content: "---\npackages:\n  fumadocs-mdx:\n    type: patch\n  fumadocs-obsidian:\n    type: patch\n  \"@fumadocs/notion\":\n    type: patch\n  \"@fumadocs/sanity\":\n    type: patch\n---\n\n### Components per page in press plugins\n\n- The press plugins of Fumadocs MDX, Obsidian, Notion and Sanity accept `components` as a function of the page, typed by the pages of the site.\n"
-    filename: 2026-11-08-page-components.md
+  - content: "---\npackages:\n  fumadocs-ui:\n    type: patch\n  \"@fumadocs/base-ui\":\n    type: patch\n---\n\n### Root Folders of a Type in the Spacious Sidebar\n\n- The Spacious sidebar switches between root folders of a type (`root: 'version'`) below the section switcher, in one control.\n- A root folder that only contains folders gets a tab, linking to its first page.\n"
+    filename: 2026-11-09-typed-root-tabs.md
+    v: 0.0.0
+  - content: "---\npackages:\n  \"@fumadocs/cli\":\n    type: patch\n  create-fumadocs-app:\n    type: patch\n---\n\n### ESLint on TypeScript 7\n\n- The ESLint linter installs TypeScript 6 next to TypeScript 7, so `eslint` runs on TypeScript 7 projects.\n"
+    filename: 2026-11-09-eslint-typescript-7.md
+    v: 0.0.0
+  - content: "---\npackages:\n  fumadocs-core:\n    type: patch\n  fumadocs-mdx:\n    type: patch\n  \"@fumadocs/local-md\":\n    type: patch\n  \"@fumadocs/local-content\":\n    type: patch\n  \"@fumadocs/satteri\":\n    type: patch\n---\n\n### Frontmatter and Meta Files in Code\n\n- An MDX page can export `frontmatter`, merged into its frontmatter and validated by the schema. On a dynamic page, it reads the params as `props`.\n- Meta files can be modules, like `meta.ts`. The meta file of a dynamic folder can export a function of the folder's params.\n"
+    filename: 2026-11-08-code-page-data.md
+    v: 0.0.0
+  - content: "---\npackages:\n  fumadocs-core:\n    type: patch\n  \"@fumadocs/satteri\":\n    type: patch\n---\n\n### Processed Markdown\n\n- Removed content, like imports, no longer leaves blank lines.\n"
+    filename: 2026-11-08-markdown-blank-lines.md
+    v: 0.0.0
+  - content: "---\npackages:\n  fumadocs-core:\n    type: patch\n---\n\n### Rendering Inline Styles\n\n- Inline styles follow `hast-util-to-jsx-runtime` 2.3.7: property names are lowercased, custom properties keep their case, and only `url()` keeps a `;` inside parentheses.\n"
+    filename: 2026-11-08-style-casing.md
+    v: 0.0.0
+  - content: "---\npackages:\n  \"@fumadocs/satteri\":\n    type: patch\n---\n\n### Remark Show\n\n- The content of a kept `<show>` branch joins the content around it, like tab code blocks joining the tab group before the branch.\n"
+    filename: 2026-11-08-show-unwrap.md
     v: 0.0.0
 core:packages:
   - id: npm:@fumadocs/ai-chat
     updated: false
-  - id: npm:@fumadocs/astro
-    updated: false
+  - changelogIds:
+      - 2026-11-08-path-params.md
+    id: npm:@fumadocs/astro
+    updated: true
   - id: npm:@fumadocs/asyncapi
     updated: false
   - changelogIds:
-      - 2026-11-08-ai-chat-trigger.md
+      - 2026-11-09-encode-github-urls.md
+      - 2026-11-09-typed-root-tabs.md
     id: npm:@fumadocs/base-ui
     updated: true
   - id: npm:@fumadocs/basehub
@@ -24,16 +42,23 @@ core:packages:
   - id: npm:@fumadocs/changelog
     updated: false
   - changelogIds:
-      - 2026-11-07-mcp-no-listen-stream.md
+      - 2026-11-09-eslint-typescript-7.md
     id: npm:@fumadocs/cli
     updated: true
   - id: npm:@fumadocs/content
     updated: false
   - id: npm:@fumadocs/content-collections
     updated: false
-  - id: npm:fumadocs-core
+  - changelogIds:
+      - 2026-11-08-code-page-data.md
+      - 2026-11-08-markdown-blank-lines.md
+      - 2026-11-08-path-params.md
+      - 2026-11-08-style-casing.md
+    id: npm:fumadocs-core
     updated: true
-  - id: npm:create-fumadocs-app
+  - changelogIds:
+      - 2026-11-09-eslint-typescript-7.md
+    id: npm:create-fumadocs-app
     updated: true
   - id: npm:create-fumadocs-versions
     updated: true
@@ -47,27 +72,30 @@ core:packages:
     updated: false
   - id: npm:@fumadocs/json-schema
     updated: false
+  - changelogIds:
+      - 2026-11-08-code-page-data.md
+      - 2026-11-08-path-params.md
+    id: npm:@fumadocs/local-content
+    updated: true
   - id: npm:@fumadocs/language
     updated: false
-  - id: npm:@fumadocs/local-content
-    updated: false
   - id: npm:@fumadocs/local-html
-    updated: false
-  - id: npm:@fumadocs/local-md
-    updated: false
+    updated: true
   - changelogIds:
-      - 2026-11-08-page-components.md
+      - 2026-11-08-code-page-data.md
+      - 2026-11-08-path-params.md
+    id: npm:@fumadocs/local-md
+    updated: true
+  - changelogIds:
+      - 2026-11-08-code-page-data.md
+      - 2026-11-08-path-params.md
     id: npm:fumadocs-mdx
     updated: true
   - id: npm:@fumadocs/mdx-remote
     updated: false
-  - changelogIds:
-      - 2026-11-08-page-components.md
-    id: npm:@fumadocs/notion
-    updated: true
-  - changelogIds:
-      - 2026-11-08-page-components.md
-    id: npm:fumadocs-obsidian
+  - id: npm:@fumadocs/notion
+    updated: false
+  - id: npm:fumadocs-obsidian
     updated: true
   - id: npm:fumadocs-openapi
     updated: false
@@ -78,15 +106,19 @@ core:packages:
   - id: npm:fumadocs-python
     updated: false
   - changelogIds:
-      - 2026-11-08-ai-chat-trigger.md
+      - 2026-11-09-encode-github-urls.md
+      - 2026-11-09-typed-root-tabs.md
     id: npm:fumadocs-ui
     updated: true
-  - changelogIds:
-      - 2026-11-08-page-components.md
-    id: npm:@fumadocs/sanity
-    updated: true
-  - id: npm:@fumadocs/satteri
+  - id: npm:@fumadocs/sanity
     updated: false
+  - changelogIds:
+      - 2026-11-08-code-page-data.md
+      - 2026-11-08-markdown-blank-lines.md
+      - 2026-11-08-path-params.md
+      - 2026-11-08-show-unwrap.md
+    id: npm:@fumadocs/satteri
+    updated: true
   - id: npm:@fumadocs/shadcn
     updated: false
   - id: npm:shared-api
@@ -121,8 +153,8 @@ npm:packages:
   - id: npm:@fumadocs/graphql
   - id: npm:@fumari/image-size
   - id: npm:@fumadocs/json-schema
-  - id: npm:@fumadocs/language
   - id: npm:@fumadocs/local-content
+  - id: npm:@fumadocs/language
   - id: npm:@fumadocs/local-html
   - id: npm:@fumadocs/local-md
   - id: npm:fumadocs-mdx
@@ -170,8 +202,8 @@ npm:packages:
   - id: npm:example-react-router-spa
   - id: npm:example-tanstack-start
   - id: npm:example-tanstack-start-i18n
-  - id: npm:example-tanstack-start-local-md
   - id: npm:example-tanstack-start-min
+  - id: npm:example-tanstack-start-local-md
   - id: npm:example-tanstack-start-openapi
   - id: npm:example-tanstack-start-spa
   - id: npm:example-tanstack-start-story

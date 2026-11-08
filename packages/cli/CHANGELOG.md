@@ -1,3 +1,9 @@
+## @fumadocs/cli@1.8.3
+
+### ESLint on TypeScript 7
+
+- The ESLint linter installs TypeScript 6 next to TypeScript 7, so `eslint` runs on TypeScript 7 projects.
+
 ## @fumadocs/cli@1.8.2
 
 ### Keep MCP routes from holding serverless functions open
