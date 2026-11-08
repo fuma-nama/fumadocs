@@ -133,7 +133,7 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
         <MarkdownCopyButton markdownUrl={`${page.url}.mdx`} />
         <ViewOptionsPopover
           markdownUrl={`${page.url}.mdx`}
-          githubUrl={`https://github.com/${owner}/${repo}/blob/dev/apps/docs/content/docs/${page.path}`}
+          githubUrl={`https://github.com/${owner}/${repo}/blob/dev/apps/docs/content/docs/${encodeURI(page.path)}`}
         />
       </div>
       <div className="prose flex-1 text-fd-foreground/90">

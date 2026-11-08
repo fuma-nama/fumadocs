@@ -372,7 +372,7 @@ const markdownUrl = getPageMarkdownUrl(page).url;
   <MarkdownCopyButton markdownUrl={markdownUrl} />
   <ViewOptionsPopover
     markdownUrl={markdownUrl}
-    githubUrl={`https://github.com/${owner}/${repo}/blob/main/content/docs/${page.path}`}
+    githubUrl={`https://github.com/${owner}/${repo}/blob/main/content/docs/${encodeURI(page.path)}`}
   />
 </div>;
 ```
@@ -398,7 +398,7 @@ return {
   <MarkdownCopyButton markdownUrl={markdownUrl} />
   <ViewOptionsPopover
     markdownUrl={markdownUrl}
-    githubUrl={`https://github.com/${owner}/${repo}/blob/main/content/docs/${path}`}
+    githubUrl={`https://github.com/${owner}/${repo}/blob/main/content/docs/${encodeURI(path)}`}
   />
 </div>;
 ```
@@ -417,7 +417,7 @@ import { getPageMarkdownUrl } from '@/lib/shared';
 <Docs
   client:load
   markdownUrl={getPageMarkdownUrl(page).url}
-  githubUrl={`https://github.com/${owner}/${repo}/blob/main/content/docs/${page.path}`}
+  githubUrl={`https://github.com/${owner}/${repo}/blob/main/content/docs/${encodeURI(page.path)}`}
 >
   <Content />
 </Docs>

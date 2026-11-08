@@ -54,7 +54,7 @@ Show GitHub link, and shortcut links for AIs.
 ```tsx
 import { DocsPage, ViewOptionsPopover } from 'fumadocs-ui/layouts/<layout>/page';
 
-const githubUrl = `https://github.com/fuma-nama/fumadocs/blob/main/content/docs/${page.path}`
+const githubUrl = `https://github.com/fuma-nama/fumadocs/blob/main/content/docs/${encodeURI(page.path)}`
 
 <DocsPage>
   <ViewOptionsPopover githubUrl={githubUrl} />
