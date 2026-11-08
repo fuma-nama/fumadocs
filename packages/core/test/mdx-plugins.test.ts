@@ -838,3 +838,19 @@ A {props.framework === "next" && "x"} B {true}
   expect(pro.markdown).toContain('# Deploy on astro');
   expect(pro.markdown).toContain('## Pro');
 });
+
+test('Remark Show: the content of a branch joins the content around it', async () => {
+  const { compile } = await import('@mdx-js/mdx');
+  const { remarkShow } = await import('@/mdx-plugins/remark-show');
+  const { remarkCodeTab } = await import('@/mdx-plugins/remark-code-tab');
+  const file = await compile(
+    {
+      value:
+        '```ts tab="Shared"\na\n```\n\n<show when={props.framework === "astro"}>\n```ts tab="Astro"\nb\n```\n</show>\n',
+      data: { params: { framework: 'astro' } },
+    },
+    { remarkPlugins: [remarkShow, remarkCodeTab] },
+  );
+  // one tab group, across the branch
+  expect(String(file).match(/defaultValue:/g)).toHaveLength(1);
+});

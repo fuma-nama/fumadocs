@@ -1,5 +1,5 @@
 import type { Expression, MemberExpression } from 'estree-jsx';
-import type { Parent, Root } from 'mdast';
+import type { Parent, Root, RootContent } from 'mdast';
 import type { MdxJsxFlowElement, MdxJsxTextElement } from 'mdast-util-mdx';
 import type { Processor, Transformer } from 'unified';
 import type { Params } from '@/source';
@@ -79,9 +79,9 @@ export function remarkShow(this: Processor, options?: RemarkShowOptions): Transf
     const context = createContext(file.data.params);
     let used = false;
 
-    const visit = (parent: Parent) => {
-      for (let i = 0; i < parent.children.length; i++) {
-        const node = parent.children[i];
+    /** the nodes with their branches decided, in one pass so a parent with many branches stays linear */
+    const visitAll = (nodes: RootContent[], out: RootContent[]) => {
+      for (const node of nodes) {
         if (node.type === 'mdxTextExpression') {
           const statement = node.data?.estree?.body[0];
           const result =
@@ -91,40 +91,49 @@ export function remarkShow(this: Processor, options?: RemarkShowOptions): Transf
           const value = result?.value;
           if (typeof value === 'string' || typeof value === 'number') {
             replaceSource(file, node, String(value));
-            parent.children[i] = { type: 'text', value: String(value) };
+            out.push({ type: 'text', value: String(value) });
           } else if (result && (value === null || typeof value !== 'object')) {
             // booleans, `null` and `undefined` render nothing
             replaceSource(file, node, '');
-            parent.children.splice(i--, 1);
-          }
+          } else out.push(node);
           continue;
         }
 
-        if (node.type === 'mdxJsxFlowElement' || node.type === 'mdxJsxTextElement') {
-          if (node.name === 'show') {
-            const condition =
-              getCondition(node) ??
-              file.fail('`<show>` needs a `when` expression, like `when={x === "y"}`', node);
-            const result = context.evaluate(condition);
-            if (result && !result.value) {
-              replaceSource(file, node, '');
-              parent.children.splice(i--, 1);
+        if (
+          (node.type === 'mdxJsxFlowElement' || node.type === 'mdxJsxTextElement') &&
+          node.name === 'show'
+        ) {
+          const condition =
+            getCondition(node) ??
+            file.fail('`<show>` needs a `when` expression, like `when={x === "y"}`', node);
+          const result = context.evaluate(condition);
+          if (result) {
+            replaceSource(file, node, result.value ? (s) => s.inner(node) : '');
+            if (!result.value) continue;
+            // unwrapped, so later plugins see the content as siblings of the content around it,
+            // except content on the line of the tag: it is phrasing, a fragment holds it
+            if (
+              node.type === 'mdxJsxTextElement' ||
+              node.children[0]?.position?.start.line !== node.position?.start.line
+            ) {
+              visitAll(node.children, out);
               continue;
             }
-
-            if (result) {
-              // a fragment, so the content keeps its structure
-              replaceSource(file, node, (s) => s.inner(node));
-              node.name = null;
-              node.attributes = [];
-            } else {
-              used = true;
-              node.name = showElement;
-            }
+            node.name = null;
+            node.attributes = [];
+          } else {
+            used = true;
+            node.name = showElement;
           }
         }
         if ('children' in node) visit(node);
+        out.push(node);
       }
+    };
+    const visit = (parent: Parent) => {
+      const children: RootContent[] = [];
+      visitAll(parent.children, children);
+      parent.children = children;
     };
 
     visit(tree);

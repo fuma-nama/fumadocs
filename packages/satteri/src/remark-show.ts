@@ -36,49 +36,82 @@ export function remarkShow(
 
   return (document) => {
     const context = createContext(document.data.params);
-    // a page without branches or build-time values skips the plugin
-    if (!document.source.includes('<show') && !context.reads(document.source)) return;
+    // a page without branches, build-time values or included files skips the plugin
+    const { source } = document;
+    if (!source.includes('<show') && !source.includes('<include') && !context.reads(source)) return;
     let used = false;
-    // the end of the last removed branch, Sätteri still visits its content
-    let removedEnd = -1;
-    const removed = (node: Readonly<MdastNode>) => (offsets(node)?.start ?? -1) < removedEnd;
-    const remove = (node: Readonly<MdastNode>, ctx: MdastVisitorContext) => {
-      replaceSource(ctx, node, '');
-      ctx.removeNode(node);
-      removedEnd = Math.max(removedEnd, offsets(node)?.end ?? -1);
-    };
+    /** the content of decided nodes by start offset */
+    const decided = new Map<number, readonly MdastNode[]>();
+    /** the outermost decided branches with their content, replaced after the pass */
+    const branches: [Readonly<Element>, readonly MdastNode[]][] = [];
+    const contentOf = (node: Readonly<MdastNode>) =>
+      node.type === 'mdxTextExpression' || ('name' in node && node.name === 'show')
+        ? decided.get(offsets(node)!.start)
+        : undefined;
+    /** `nodes` with decided nodes swapped for their content */
+    function unwrap(nodes: readonly MdastNode[], out: MdastNode[]): MdastNode[] {
+      for (const node of nodes) {
+        const content = contentOf(node);
+        if (content) unwrap(content, out);
+        else out.push(node);
+      }
+      return out;
+    }
 
     function expression(node: Readonly<MdxTextExpression>, ctx: MdastVisitorContext) {
-      if (!context.reads(node.value) || removed(node)) return;
+      if (!context.reads(node.value)) return;
       const statement = parse(node.value).body[0];
       const result =
         statement?.type === 'ExpressionStatement'
           ? context.evaluate(statement.expression)
           : undefined;
       const value = result?.value;
-      if (typeof value === 'string' || typeof value === 'number') {
-        replaceSource(ctx, node, String(value));
-        ctx.replaceNode(node, { type: 'text', value: String(value) } as MdastNode);
-      } else if (result && (value === null || typeof value !== 'object')) {
-        // booleans, `null` and `undefined` render nothing
-        remove(node, ctx);
-      }
+      // booleans, `null` and `undefined` render nothing
+      if (!result || (typeof value === 'object' && value !== null)) return;
+      const text = typeof value === 'string' || typeof value === 'number' ? String(value) : '';
+      const content = text ? [{ type: 'text', value: text } as MdastNode] : [];
+      replaceSource(ctx, node, text);
+      ctx.replaceNode(node, content);
+      // a branch replaced after the pass reads its children before the replacement
+      decided.set(offsets(node)!.start, content);
     }
 
     function element(node: Readonly<Element>, ctx: MdastVisitorContext) {
-      if (node.name !== 'show' || removed(node)) return;
+      if (node.name !== 'show') return;
       const result = context.evaluate(getCondition(node));
-      if (result && !result.value) return remove(node, ctx);
-      if (result) {
-        // a fragment, so the content keeps its structure, its range is read while Sätteri visits it
-        const first = node.children[0] && offsets(node.children[0]);
-        const last = node.children.at(-1) && offsets(node.children.at(-1)!);
-        replaceSource(ctx, node, first && last ? (s) => s.slice(first.start, last.end) : '');
-        return ctx.setProperty<Element, 'name'>(node, 'name', null);
+      if (!result) {
+        used = true;
+        return ctx.setProperty<Element, 'name'>(node, 'name', showElement);
       }
 
-      used = true;
-      ctx.setProperty<Element, 'name'>(node, 'name', showElement);
+      if (!result.value) replaceSource(ctx, node, '');
+      else {
+        // `inner()` reads the first and last child, copied since Sätteri nodes can't be read after the pass
+        const copy = {
+          position: node.position,
+          data: node.data,
+          children: [node.children[0], node.children.at(-1)].map((child) => ({
+            position: child?.position,
+            data: child?.data,
+          })),
+        };
+        replaceSource(ctx, node, (s) => s.inner(copy));
+        // content on the line of the tag is phrasing, it stays in a fragment
+        if (
+          node.type === 'mdxJsxFlowElement' &&
+          node.children[0]?.position?.start.line === node.position?.start.line
+        )
+          return ctx.setProperty<Element, 'name'>(node, 'name', null);
+      }
+
+      // replaced after the pass: Sätteri can't remove a node handed back to `replaceNode`, like a removed branch inside it
+      const content = result.value ? node.children : [];
+      decided.set(offsets(node)!.start, content);
+      const parent = ctx.parent(node);
+      // a branch inside another decided branch moves with its content, or is removed with it
+      if (contentOf(parent)) return;
+      for (let p = ctx.parent(parent); p; p = ctx.parent(p)) if (contentOf(p)?.length === 0) return;
+      branches.push([node, content]);
     }
 
     return {
@@ -88,6 +121,7 @@ export function remarkShow(
       mdxJsxFlowElement: element,
       mdxJsxTextElement: element,
       after(root, ctx) {
+        for (const [node, content] of branches) ctx.replaceNode(node, unwrap(content, []));
         if (used)
           ctx.prependChild(root, { type: 'mdxjsEsm', value: context.declaration } as MdastNode);
       },

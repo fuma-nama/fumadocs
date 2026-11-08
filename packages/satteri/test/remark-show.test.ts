@@ -1,9 +1,13 @@
+import fs from 'node:fs/promises';
+import os from 'node:os';
+import path from 'node:path';
 import { expect, test } from 'vitest';
 import * as JsxRuntime from 'react/jsx-runtime';
 import { renderToStaticMarkup } from 'react-dom/server';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
 import { compileMdx } from '@/compile';
 import { applySatteriPreset } from '@/preset';
+import { remarkInclude } from '@/remark-include';
 import { remarkLlms } from '@/remark-llms';
 import type { RehypeTocItemType } from '@/rehype-toc';
 
@@ -69,4 +73,51 @@ test('Remark Show: branches decided at compile time, before other plugins', asyn
   expect(astro.html({ framework: 'astro' })).toContain('<aside title="astro">');
   expect(astro.html({ framework: 'astro' })).not.toContain('With pnpm');
   expect(astro.html({ framework: 'astro', pm: 'pnpm' })).toContain('With pnpm');
+});
+
+test('Remark Show: the content of a branch joins the content around it', async () => {
+  const options = await applySatteriPreset({})('runtime');
+  const { code } = await compileMdx({
+    source:
+      '```ts tab="Shared"\na\n```\n\n<show when={props.framework === "astro"}>\n```ts tab="Astro"\nb\n```\n</show>\n',
+    filePath: '/tmp/doc.mdx',
+    environment: 'runtime',
+    options: { ...options, data: { ...options.data, params: { framework: 'astro' } } },
+  });
+  // one tab group, across the branch
+  expect(code.match(/defaultValue:/g)).toHaveLength(1);
+});
+
+test('Remark Show: branches with included files', async () => {
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'remark-show-'));
+  await fs.writeFile(path.join(dir, 'shared.mdx'), '## Shared\n\nShared text.\n');
+  await fs.writeFile(
+    path.join(dir, 'branchy.mdx'),
+    '## Inner\n\n<show when={props.framework === "waku"}>\nIncluded branch.\n</show>\n',
+  );
+  const options = await applySatteriPreset({})('bundler');
+  const compile = async (framework: string) => {
+    const { data } = await compileMdx({
+      source:
+        '# Page\n\n<show when={props.framework === "waku"}>\nWaku.\n\n<include>./shared.mdx</include>\n</show>\n\n<include>./branchy.mdx</include>\n\nEnd.\n',
+      filePath: path.join(dir, 'page.mdx'),
+      environment: 'bundler',
+      options: {
+        ...options,
+        mdastPlugins: [
+          remarkInclude({ cwd: dir }),
+          ...options.mdastPlugins!,
+          remarkLlms({ as: 'markdown' }),
+        ],
+        data: { ...options.data, params: { framework } },
+      },
+    });
+    return data.markdown;
+  };
+
+  expect(await compile('waku')).toBe(
+    '# Page [#page]\n\nWaku.\n\n## Shared [#shared]\n\nShared text.\n\n## Inner [#inner]\n\nIncluded branch.\n\nEnd.\n',
+  );
+  expect(await compile('next')).toBe('# Page [#page]\n\n## Inner [#inner]\n\nEnd.\n');
+  await fs.rm(dir, { recursive: true });
 });
