@@ -229,6 +229,15 @@ export function createStringifier(
         appliedEnd = edit.end;
       }
       cursor = edit.end;
+      // a removed block leaves no blank lines, at the end of the range the ones before it go too
+      if (
+        text === '' &&
+        /^[ \t]*$/.test(source.slice(source.lastIndexOf('\n', edit.start - 1) + 1, edit.start))
+      ) {
+        blankLines.lastIndex = cursor;
+        if (blankLines.test(source)) cursor = Math.min(blankLines.lastIndex, end);
+        if (cursor === end) out = out.trimEnd();
+      }
     }
 
     return out + source.slice(cursor, end);
@@ -302,6 +311,8 @@ function edge(nodes: readonly ParentNode[] = [], last: boolean): Range | undefin
     if (range) return range;
   }
 }
+
+const blankLines = /(?:[ \t\r]*\n)+/y;
 
 const containerPrefixRegex = /^(?:[ \t]*(?:>|[-*+](?=[ \t])|\d{1,9}[.)](?=[ \t])))*[ \t]*/;
 

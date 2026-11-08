@@ -55,6 +55,8 @@ test('Remark Show: branches decided at compile time, before other plugins', asyn
   expect(urls(astro.data)).toEqual(['#deploy-on-astro', '#setup', '#with-pnpm']);
   expect((waku.data.structuredData as StructuredData).contents[0].content).toBe('Hi waku');
   expect(astro.data.markdown).toContain('## Setup [#setup]');
+  // a removed branch leaves no blank lines
+  expect(waku.data.markdown).not.toMatch(/\n{3,}/);
   // other expressions and the branches checked when rendering stay as authored
   expect(waku.data.markdown).toContain(
     '<Note title={props.framework} {...props.extra}>\nHi waku\n</Note>',

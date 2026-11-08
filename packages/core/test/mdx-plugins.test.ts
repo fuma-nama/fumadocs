@@ -818,6 +818,8 @@ A {props.framework === "next" && "x"} B {true}
   expect(waku.markdown).toContain('# Deploy on waku');
   expect(waku.markdown).toContain('<span data-framework={props.framework} />');
   expect(waku.markdown).not.toContain('Pro');
+  // a removed branch leaves no blank lines
+  expect(waku.markdown).not.toMatch(/\n{3,}/);
 
   // they read the params as props when rendering
   const html = waku.html({ framework: 'waku' });

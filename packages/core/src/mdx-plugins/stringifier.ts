@@ -215,6 +215,15 @@ export function createStringifier(
         appliedEnd = edit.end;
       }
       cursor = edit.end;
+      // a removed block leaves no blank lines, at the end of the range the ones before it go too
+      if (
+        text === '' &&
+        /^[ \t]*$/.test(source.slice(source.lastIndexOf('\n', edit.start - 1) + 1, edit.start))
+      ) {
+        blankLines.lastIndex = cursor;
+        if (blankLines.test(source)) cursor = Math.min(blankLines.lastIndex, end);
+        if (cursor === end) out = out.trimEnd();
+      }
     }
 
     return out + source.slice(cursor, end);
@@ -304,6 +313,8 @@ export function markdownTable(rows: string[][]): string {
 
   return [table[0], widths.map((w) => '-'.repeat(w)), ...table.slice(1)].map(line).join('\n');
 }
+
+const blankLines = /(?:[ \t\r]*\n)+/y;
 
 const containerPrefixRegex = /^(?:[ \t]*(?:>|[-*+](?=[ \t])|\d{1,9}[.)](?=[ \t])))*[ \t]*/;
 
