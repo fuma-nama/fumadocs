@@ -7,12 +7,7 @@ import { useTranslations } from '@fuma-translate/react';
 import { type FC, type ComponentProps, type ReactNode, useState } from 'react';
 import { MessageCircleIcon } from 'lucide-react';
 import { buttonVariants } from '@/components/ui/button';
-import {
-  isLinkItemActive,
-  type AIChatOptions,
-  type BaseLayoutProps,
-  type LinkItemType,
-} from '.';
+import { isLinkItemActive, type AIChatOptions, type BaseLayoutProps, type LinkItemType } from '.';
 import {
   type LanguageSelectProps,
   type LanguageSelectTextProps,
