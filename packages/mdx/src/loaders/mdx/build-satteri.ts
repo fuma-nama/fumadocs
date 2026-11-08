@@ -14,7 +14,7 @@ export type CompiledSatteriMDXProperties<Frontmatter = Record<string, unknown>> 
 export async function buildSatteriMDX(
   core: Core,
   collection: DocCollectionItem | undefined,
-  { filePath, frontmatter, source, _compiler, environment, isDevelopment }: BuildMDXOptions,
+  { filePath, frontmatter, source, _compiler, environment, isDevelopment, params }: BuildMDXOptions,
 ): Promise<{ code: string }> {
   const satteriOptions = await getSatteriOptions(core.getConfig(), collection, environment);
   const format = filePath.endsWith('.mdx') ? 'mdx' : 'md';
@@ -31,6 +31,7 @@ export async function buildSatteriMDX(
   const data: Data = {
     frontmatter,
     _compiler,
+    params,
     _cwd: collection?.cwd,
     _valueToExport: collection?.postprocess?.valueToExport,
   };

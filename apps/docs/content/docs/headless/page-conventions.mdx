@@ -151,6 +151,48 @@ Fumadocs UI renders a [dropdown](/docs/ui/layouts/docs#tabs-groups) for each roo
 
 </Callout>
 
+## Path Params
+
+A folder or file named `[name]` is a dynamic segment, like a dynamic route in Next.js. The `staticParams` of its meta file list the values, and each page inside gets a URL for every value.
+
+```json title="[framework]/meta.json"
+{
+  "title": "Framework",
+  "root": true,
+  "staticParams": [{ "framework": "waku" }, { "framework": "astro" }]
+}
+```
+
+| path (relative to content folder) | slugs                                       |
+| --------------------------------- | ------------------------------------------- |
+| `./[framework]/deploy.mdx`        | `['waku', 'deploy']`, `['astro', 'deploy']` |
+
+Each page is compiled for its params. The content reads them as props, like `props.framework`, and can branch on them with [`<show>`](/docs/markdown#show). In code, they are in `page.params`.
+
+The meta file of `[framework]` applies to the `waku` and `astro` folders. A `[name]` segment without values stays a literal folder name.
+
+### Page Params
+
+A page can list `staticParams` in its frontmatter too. For a name that its folders also list, the page only keeps the values both lists have.
+
+```mdx title="[framework]/fumadocs-mdx.mdx"
+---
+title: Fumadocs MDX
+staticParams:
+  - framework: waku
+---
+```
+
+The page only exists for `waku`, at `/docs/waku/fumadocs-mdx`.
+
+### Static Paths
+
+A file at a static path replaces the page of its value. `astro/deploy.mdx` replaces the `astro` page of `[framework]/deploy.mdx`, and `astro/meta.json` replaces the meta file of the `astro` folder.
+
+With [i18n](#i18n-routing), the files of a language come before those of its fallback language: `astro/deploy.cn.mdx`, then `[framework]/deploy.cn.mdx`, then `astro/deploy.mdx`.
+
+A page of another language, like `deploy.cn.mdx`, reads `staticParams` from `meta.cn.json` before `meta.json`. With the `dir` parser, each language folder lists its own `staticParams`.
+
 ## Meta
 
 Customize folders by creating a `meta.json` file in the folder.

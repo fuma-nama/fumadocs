@@ -1,6 +1,7 @@
 export {
   type MetaData,
   type PageData,
+  type Params,
   type DynamicSource,
   type SourceUnion,
   type StaticSource,
@@ -25,6 +26,7 @@ export type {
   ContentStorageMetaFile,
   ContentStoragePageFile,
 } from './storage/content';
+export { getStaticParams, isDynamicPath, type StaticParamsOptions } from './static-params';
 
 export { dynamicLoader, type DynamicLoader, type DynamicLoaderConfig } from './dynamic';
 export * from './llms';

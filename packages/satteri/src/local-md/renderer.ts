@@ -35,6 +35,8 @@ export interface MarkdownRendererJSOptions {
   filePath: string;
   baseUrl?: string;
   structuredData?: StructuredData;
+  /** the props of the content, like the params of a page of a dynamic file */
+  props?: Record<string, unknown>;
 }
 
 const AsyncFunction: new (...args: string[]) => (...args: unknown[]) => Promise<unknown> =
@@ -75,7 +77,7 @@ export function fromJS<M>(options: MarkdownRendererJSOptions): MarkdownRenderer<
   function toResult(out: CompiledExports & M, components?: MDXComponents) {
     return {
       toc: out.toc ?? [],
-      body: JsxRuntime.jsx(out.default, { components }),
+      body: JsxRuntime.jsx(out.default, { ...options.props, components }),
       exports: out,
     };
   }

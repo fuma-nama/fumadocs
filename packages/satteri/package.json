@@ -42,6 +42,7 @@
     "./remark-mdx-files": "./dist/remark-mdx-files.js",
     "./remark-mdx-mermaid": "./dist/remark-mdx-mermaid.js",
     "./remark-npm": "./dist/remark-npm.js",
+    "./remark-show": "./dist/remark-show.js",
     "./remark-steps": "./dist/remark-steps.js",
     "./remark-structure": "./dist/remark-structure.js",
     "./remark-ts2js": "./dist/remark-ts2js.js",
@@ -96,7 +97,7 @@
     "@types/mdast": "*",
     "@types/mdx": "*",
     "@types/react": "*",
-    "fumadocs-core": "^16.17.8",
+    "fumadocs-core": "^16.18.3",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
   },

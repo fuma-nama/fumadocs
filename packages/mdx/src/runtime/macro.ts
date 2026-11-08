@@ -1,8 +1,8 @@
-import type { MetaData, PageData, Source } from 'fumadocs-core/source';
+import type { MetaData, PageData, Params, Source } from 'fumadocs-core/source';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
 import type { MDXContent, MDXProps } from 'mdx/types';
 import { createElement, use } from 'react';
-import { server, toFumadocsSource } from './server';
+import { docAt, server, toFumadocsSource } from './server';
 import type { DocData, DocMethods, MetaMethods } from './types';
 
 export interface BrowserDocMethods {
@@ -90,7 +90,8 @@ export interface MacroDocsCollection<
   docs: MacroDocEntry<Frontmatter, Extra>[];
   meta: MacroMetaEntry<Meta>[];
 
-  getPage: (path: string) => MacroDocEntry<Frontmatter, Extra> | undefined;
+  /** get a page by its file path, for a file of a dynamic path, its page at `params` */
+  getPage: (path: string, params?: Params) => MacroDocEntry<Frontmatter, Extra> | undefined;
   getMeta: (path: string) => MacroMetaEntry<Meta> | undefined;
 
   toFumadocsSource: (options?: ToFumadocsSourceOptions) => Source<{
@@ -107,7 +108,8 @@ export interface MacroAsyncDocsCollection<
   docs: MacroAsyncDocEntry<Frontmatter, Extra>[];
   meta: MacroMetaEntry<Meta>[];
 
-  getPage: (path: string) => MacroAsyncDocEntry<Frontmatter, Extra> | undefined;
+  /** get a page by its file path, for a file of a dynamic path, its page at `params` */
+  getPage: (path: string, params?: Params) => MacroAsyncDocEntry<Frontmatter, Extra> | undefined;
   getMeta: (path: string) => MacroMetaEntry<Meta> | undefined;
 
   toFumadocsSource: (options?: ToFumadocsSourceOptions) => Source<{
@@ -138,6 +140,17 @@ function accessor<Entry extends { info: { path: string } }>(entries: Entry[]) {
     get(path: string): Entry | undefined {
       path = normalize(path);
       return entries.find((entry) => entry.info.path === path);
+    },
+  };
+}
+
+function docAccessor<Entry extends DocMethods>(entries: Entry[]) {
+  const { get } = accessor(entries);
+  return {
+    entries,
+    get(path: string, params?: Params): Entry | undefined {
+      const entry = get(path);
+      return entry && params ? docAt(entry, params) : entry;
     },
   };
 }
@@ -246,7 +259,7 @@ export async function docs(
     instance.meta('meta', args.base, args.meta) as Promise<MacroMetaEntry<MetaData>[]>,
   ]);
   const docEntries = withPreload(rawDocEntries) as MacroDocEntry<PageData>[];
-  const getDoc = accessor(docEntries);
+  const getDoc = docAccessor(docEntries);
   const getMeta = accessor(metaEntries);
 
   return {
@@ -269,7 +282,7 @@ export async function docsAsync(
     instance.meta('meta', args.base, args.meta) as Promise<MacroMetaEntry<MetaData>[]>,
   ]);
   const docEntries = asyncEntries(rawDocEntries) as MacroAsyncDocEntry<PageData>[];
-  const getDoc = accessor(docEntries);
+  const getDoc = docAccessor(docEntries);
   const getMeta = accessor(metaEntries);
 
   return {

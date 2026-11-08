@@ -67,7 +67,12 @@ type SourceConfig = {
   metaData: MetaData;
 };
 
+/** the values of dynamic segments, by their names */
+export type Params = Record<string, string>;
+
 export interface MetaData {
+  /** the params of the pages in this folder, like Next.js `generateStaticParams()` */
+  staticParams?: Params[] | undefined;
   icon?: string | undefined;
   title?: string | undefined;
   root?: boolean | string | undefined;
@@ -80,6 +85,8 @@ export interface MetaData {
 }
 
 export interface PageData {
+  /** the params of the pages this dynamic file makes, like Next.js `generateStaticParams()` */
+  staticParams?: Params[] | undefined;
   icon?: string | undefined;
   title?: string | undefined;
   description?: string | undefined;
@@ -119,6 +126,8 @@ interface VirtualPage<Data extends PageData> extends BaseVirtualFile {
    */
   slugs?: string[];
   data: Data;
+  /** for a file of a dynamic path, like `[framework]/deploy.mdx`, the data of its page at some params */
+  dataAt?: (params: Params) => Data;
 }
 
 interface VirtualMeta<Data extends MetaData> extends BaseVirtualFile {

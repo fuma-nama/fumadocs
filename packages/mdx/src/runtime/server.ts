@@ -1,16 +1,18 @@
 import {
   type MetaData,
   type PageData,
+  type Params,
   PathUtils,
   type Source,
   type VirtualFile,
 } from 'fumadocs-core/source';
+import type { MDXProps } from 'mdx/types';
 import type { DocCollection, DocsCollection, MetaCollection } from '@/config';
 import type { StandardSchemaV1 } from '@standard-schema/spec';
 import type { CompiledMDXProperties } from '@/loaders/mdx/build';
 import type { InternalTypeConfig, DocData, DocMethods, FileInfo, MetaMethods } from './types';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
-import { createElement } from 'react';
+import { createElement, use, type FC } from 'react';
 
 export type MetaCollectionEntry<Data> = Data & MetaMethods;
 
@@ -69,6 +71,22 @@ export type ServerCreate<Config, TC extends InternalTypeConfig = InternalTypeCon
   typeof server<Config, TC>
 >;
 
+function mapDocData(entry: CompiledMDXProperties): DocData {
+  const data: DocData = {
+    body: entry.default,
+    toc: entry.toc,
+    structuredData: entry.structuredData,
+    _exports: entry as unknown as Record<string, unknown>,
+  };
+
+  for (const key of ['lastModified', 'extractedReferences']) {
+    // @ts-expect-error -- handle passthrough properties
+    data[key] = entry[key];
+  }
+
+  return data;
+}
+
 export function server<Config, TC extends InternalTypeConfig>() {
   function fileInfo(file: string, base: string): FileInfo {
     if (file.startsWith('./')) {
@@ -80,22 +98,6 @@ export function server<Config, TC extends InternalTypeConfig>() {
       // `joinPath()` drops leading `../` and `/`, which `base` may contain
       fullPath: !base || base.endsWith('/') ? base + file : `${base}/${file}`,
     };
-  }
-
-  function mapDocData(entry: CompiledMDXProperties): DocData {
-    const data: DocData = {
-      body: entry.default,
-      toc: entry.toc,
-      structuredData: entry.structuredData,
-      _exports: entry as unknown as Record<string, unknown>,
-    };
-
-    for (const key of ['lastModified', 'extractedReferences']) {
-      // @ts-expect-error -- handle passthrough properties
-      data[key] = entry[key];
-    }
-
-    return data;
   }
 
   return {
@@ -262,6 +264,7 @@ export function toFumadocsSource<
       path: baseDir ? PathUtils.joinPath(baseDir, entry.info.path) : entry.info.path,
       absolutePath: entry.info.fullPath,
       data: entry,
+      dataAt: (params) => docAt(entry, params),
     });
   }
 
@@ -276,6 +279,59 @@ export function toFumadocsSource<
 
   return {
     files,
+  };
+}
+
+const docAtCache = new WeakMap<object, Map<string, unknown>>();
+
+/** @internal the page of a dynamic file at some params, the same object for the same params */
+export function docAt<Doc extends DocMethods>(doc: Doc, params: Params): Doc {
+  const key = JSON.stringify(params);
+  let pages = docAtCache.get(doc);
+  if (!pages) docAtCache.set(doc, (pages = new Map()));
+  let page = pages.get(key) as Doc | undefined;
+  if (!page) pages.set(key, (page = createDocAt(doc, params, key)));
+  return page;
+}
+
+function createDocAt<Doc extends DocMethods>(doc: Doc, params: Params, key: string): Doc {
+  // the content reads the params as props when rendering
+  const bind = (Component: FC<MDXProps>) => (props: MDXProps) =>
+    createElement(Component, { ...params, ...props });
+  function pick(data: { _exports?: Record<string, unknown> }): CompiledMDXProperties {
+    const pages = data._exports?._pages as Record<string, CompiledMDXProperties> | undefined;
+    const page = pages?.[key];
+    if (!page) throw new Error(`"${doc.info.path}" isn't compiled for ${key}`);
+    const { _markdown: markdown } = page;
+    return {
+      ...page,
+      default: bind(page.default),
+      _markdown: typeof markdown === 'function' ? bind(markdown) : markdown,
+    };
+  }
+
+  // eager entries have the exports, lazy entries load them, the macro has both
+  const { load } = doc as { load?: () => Promise<DocData> };
+  if (!load) {
+    const page = pick(doc as { _exports?: Record<string, unknown> });
+    return { ...doc, ...mapDocData(page), ...createDocMethods(doc.info, () => page) };
+  }
+
+  let loaded: CompiledMDXProperties | undefined;
+  let loading: Promise<CompiledMDXProperties> | undefined;
+  let data: Promise<DocData> | undefined;
+  const loadPage = () => (loading ??= load().then((data) => (loaded = pick(data))));
+  return {
+    ...doc,
+    ...createDocMethods(doc.info, loadPage),
+    // memoized like `load()`, it can be called in render
+    load: () => (data ??= loadPage().then(mapDocData)),
+    structuredData: async () => (await loadPage()).structuredData,
+    ...('body' in doc && {
+      preload: () => loadPage().then(() => undefined),
+      // like the body of the macro, it renders synchronously when loaded
+      body: (props: MDXProps) => createElement((loaded ?? use(loadPage())).default, props),
+    }),
   };
 }
 
