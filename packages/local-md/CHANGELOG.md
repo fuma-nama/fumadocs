@@ -1,3 +1,18 @@
+## @fumadocs/local-md@0.4.1
+
+### Frontmatter and Meta Files in Code
+
+- An MDX page can export `frontmatter`, merged into its frontmatter and validated by the schema. On a dynamic page, it reads the params as `props`.
+- Meta files can be modules, like `meta.ts`. The meta file of a dynamic folder can export a function of the folder's params.
+
+### Path params and `<show>`
+
+- A folder or file named `[name]` makes a page for each value listed in `staticParams` of its meta file or frontmatter.
+- Each page is compiled for its params, read as `props`, and a file at a static path replaces the page of its value.
+- `<show when={...}>` shows content on a condition. Conditions on params and inlined env vars are decided before headings, TOC, search and Markdown.
+- The `define` option of Remark Show sets the values resolved at build time, like Vite's `define`, also per page.
+- Custom sources give a dynamic file `dataAt()`, and `getStaticParams()` lists its params from any storage.
+
 ## @fumadocs/local-md@0.4.0
 
 ### `<include>` in Local Markdown
