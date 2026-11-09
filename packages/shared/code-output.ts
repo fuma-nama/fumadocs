@@ -62,11 +62,13 @@ export function createCodeOutput<N extends CodeNode, S extends CodeStringifier<N
   literal: (text: string) => string = JSON.stringify,
 ) {
   const parts: CodePart[] = [];
+  let components = false;
   /** a value */
   const mark = (part: CodePart) => `\0${parts.push(part) - 1}\0`;
   /** content, it stays in the output so edits apply to it like to other content (e.g. the prefixes of lists) */
   const wrap = (part: CodePart, content: string) => {
     const i = parts.push(part) - 1;
+    components ||= 'ref' in part && part.ref.startsWith('_c.');
     return `\0${i}\0${content}\0/${i}\0`;
   };
   const expression = (code: string, fallback: string) => mark({ code, fallback });
@@ -122,8 +124,10 @@ export function createCodeOutput<N extends CodeNode, S extends CodeStringifier<N
     },
     /** the output as one value: a string without parts, a fragment otherwise */
     toCode: (text: string) => chunksToCode(chunks(text), literal),
-    /** whether the output has elements of the MDX components `_c` */
-    usesComponents: (text: string) => usesComponents(chunks(text)),
+    /** whether an element of the MDX components `_c` was kept */
+    get usesComponents() {
+      return components;
+    },
     /**
      * The export of Markdown, a component rendered with `renderToMarkdown()` of `fumadocs-core/server`, or the string
      * of static Markdown, code of plugins is concatenated
@@ -136,12 +140,11 @@ export function createCodeOutput<N extends CodeNode, S extends CodeStringifier<N
           out += `${out ? ' + ' : ''}${typeof chunk === 'string' ? literal(chunk) : `(${(chunk as { code: string }).code})`}`;
         return `export const ${as} = ${out || '""'};`;
       }
-      const elements = usesComponents(list);
       return [
-        `import { asMarkdown as _asMarkdown${elements ? ', jsxComponents as _jsxComponents' : ''} } from "fumadocs-core/server";`,
+        `import { asMarkdown as _asMarkdown${components ? ', jsxComponents as _jsxComponents' : ''} } from "fumadocs-core/server";`,
         `export function ${as}(props) {`,
         '  if (!_asMarkdown()) return null;',
-        ...(elements ? ['  const _c = _jsxComponents(props.components);'] : []),
+        ...(components ? ['  const _c = _jsxComponents(props.components);'] : []),
         `  return ${chunksToCode(list, literal)};`,
         '}',
       ].join('\n');
@@ -326,9 +329,7 @@ export function createStructuredRecords() {
     /** the code of the runtime records, a function of the props giving the records that show, see `renderStructuredData()` */
     toCode(out: Output): string {
       const items: { code: string; when: string[] }[] = [];
-      let components = false;
       for (const record of records) {
-        components ||= out.usesComponents(record.content);
         let code = `{content: ${out.toCode(record.content)}`;
         if ('id' in record) code += `, id: ${record.code ?? JSON.stringify(record.id)}`;
         else {
@@ -339,7 +340,7 @@ export function createStructuredRecords() {
       }
       const list = guardedArray(items);
       // the MDX components are page props, like in the content
-      return components
+      return out.usesComponents
         ? `(props) => {\nconst _c = props.components;\nreturn ${list};\n}`
         : `(props) => ${list}`;
     },
@@ -387,14 +388,4 @@ function chunksToJsx(chunks: Chunk[], literal: (text: string) => string): string
     }
   }
   return out;
-}
-
-/** whether the chunks have elements of the MDX components `_c` */
-function usesComponents(chunks: Chunk[]): boolean {
-  return chunks.some(
-    (chunk) =>
-      typeof chunk !== 'string' &&
-      'children' in chunk &&
-      (('ref' in chunk && chunk.ref.startsWith('_c.')) || usesComponents(chunk.children)),
-  );
 }
