@@ -2,7 +2,8 @@ import type { MdastPluginEntry } from 'satteri';
 import { defineMdastPlugin } from 'satteri';
 import type { PositionedNode } from './stringifier';
 import { stringifyHeadingId } from './heading-id';
-import { type Chunk, chunksToCode, createCodeOutput, type JsxElementNode } from './utils';
+import { createCodeOutput, type JsxElementNode } from './utils';
+import { keptElement, markdownCode } from '../../shared/code-output';
 
 export interface LLMsOptions {
   /**
@@ -58,20 +59,10 @@ export function remarkLlms({
       if (out.markCode(node) || !jsx || !name || !componentNameRegex.test(name)) return;
 
       out.s.replace(node, (s) => {
-        let open = `<_c.${name}`;
-        for (const attr of node.attributes) {
-          if (attr.type === 'mdxJsxExpressionAttribute') open += ` {${attr.value}}`;
-          else if (attr.value == null) open += ` ${attr.name}`;
-          else if (typeof attr.value === 'string')
-            open += ` ${attr.name}={${JSON.stringify(attr.value)}}`;
-          else open += ` ${attr.name}={${attr.value.value}}`;
-        }
-
-        const inline = node.type === 'mdxJsxTextElement';
         let children = s.inner(node);
         // block content on its own lines
-        if (children && !inline) children = `\n${children}\n`;
-        return out.wrap({ open, name, inline }, children);
+        if (children && node.type === 'mdxJsxFlowElement') children = `\n${children}\n`;
+        return out.wrap(keptElement(node, name), children);
       });
     };
     const expression = (node: PositionedNode & { type: string; value: string }) => {
@@ -102,44 +93,11 @@ export function remarkLlms({
         if (!as) return;
         ctx.prependChild(root, {
           type: 'mdxjsEsm',
-          value:
-            jsx || out.dynamic
-              ? toComponentCode(as, chunksToCode(chunks), hasElement(chunks))
-              : `export const ${as} = ${toStringCode(chunks)};`,
+          value: markdownCode(as, chunks, jsx || out.dynamic),
         });
       },
     });
   };
 
   return factory;
-}
-
-function toComponentCode(as: string, body: string, hasJsx: boolean): string {
-  return [
-    `import { asMarkdown as _asMarkdown${hasJsx ? ', jsxComponents as _jsxComponents' : ''} } from "fumadocs-core/server";`,
-    `export function ${as}(props) {`,
-    '  if (!_asMarkdown()) return null;',
-    ...(hasJsx ? ['  const _c = _jsxComponents(props.components);'] : []),
-    `  return ${body};`,
-    '}',
-  ].join('\n');
-}
-
-function hasElement(chunks: Chunk[]): boolean {
-  return chunks.some(
-    (chunk) =>
-      typeof chunk !== 'string' &&
-      ('open' in chunk || ('children' in chunk && hasElement(chunk.children))),
-  );
-}
-
-/** the chunks as one string, they have no elements or branches */
-function toStringCode(chunks: Chunk[]): string {
-  let out = '';
-  for (const chunk of chunks) {
-    if (out) out += ' + ';
-    out +=
-      typeof chunk === 'string' ? JSON.stringify(chunk) : `(${(chunk as { code: string }).code})`;
-  }
-  return out || '""';
 }

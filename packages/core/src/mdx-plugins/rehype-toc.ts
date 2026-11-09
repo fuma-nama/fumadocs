@@ -1,16 +1,9 @@
 import type { Processor, Transformer } from 'unified';
 import type { Root, Element, Nodes } from 'hast';
 import { toEstree } from 'hast-util-to-estree';
-import type { Expression, ObjectExpression } from 'estree-jsx';
-import { valueToEstree } from 'estree-util-value-to-estree';
-import {
-  guardedArray,
-  handleTag,
-  property,
-  propsFunction,
-  showCondition,
-  toMdxExportRaw,
-} from './utils';
+import type { Expression } from 'estree-jsx';
+import { handleTag, toEsm } from './utils';
+import { guardedArray, showCondition } from '../../../shared/code-output';
 
 export interface RehypeTocOptions {
   /**
@@ -57,7 +50,7 @@ export interface RehypeTOCItemType {
 
 /** whether content reads render scope: authored expressions, or branches of `<show>` checked when rendering */
 function readsProps(node: Nodes): boolean {
-  if (node.type === 'mdxTextExpression' || showCondition(node as never)) return true;
+  if (node.type === 'mdxTextExpression' || showCondition(node)) return true;
   return 'children' in node && node.children.some(readsProps);
 }
 
@@ -90,15 +83,15 @@ export function rehypeToc(
   }
 
   return (tree, file) => {
-    const items: (RehypeTOCItemType & { when: Expression[] })[] = [];
+    const items: (RehypeTOCItemType & { when: string[] })[] = [];
     let dynamic = false;
 
-    const visit = (nodes: Nodes[], when: Expression[]) => {
+    const visit = (nodes: Nodes[], when: string[]) => {
       for (let i = 0; i < nodes.length; i++) {
         const node = nodes[i];
         if (!('children' in node)) continue;
         if (node.type !== 'element' || !HeadingTags.has(node.tagName) || !node.children.length) {
-          const condition = showCondition(node as never);
+          const condition = showCondition(node);
           visit(node.children, condition ? [...when, condition] : when);
           continue;
         }
@@ -131,29 +124,32 @@ export function rehypeToc(
     visit(tree.children, []);
 
     if (exportToc.as === 'esm') {
-      const list: { value: Expression; when: Expression[] }[] = [];
-      for (const { title, when, _step, ...item } of items) {
+      const titles: Expression[] = [];
+      const list: { code: string; when: string[] }[] = [];
+      for (const { title, when, url, depth, _step } of items) {
         const root = toEstree(title, {
           elementAttributeNameCase: 'react',
           stylePropertyNameCase: 'dom',
         }).body[0];
         if (root.type !== 'ExpressionStatement' || root.expression.type !== 'JSXElement') continue;
 
-        const value = valueToEstree(
-          _step === undefined ? item : { ...item, _step },
-        ) as ObjectExpression;
-        value.properties.push(
-          property('title', {
-            type: 'JSXFragment',
-            openingFragment: { type: 'JSXOpeningFragment' },
-            closingFragment: { type: 'JSXClosingFragment' },
-            children: root.expression.children,
-          }),
-        );
-        list.push({ value, when });
+        const i = titles.push({
+          type: 'JSXFragment',
+          openingFragment: { type: 'JSXOpeningFragment' },
+          closingFragment: { type: 'JSXClosingFragment' },
+          children: root.expression.children,
+        });
+        let code = `{depth: ${depth}, url: ${JSON.stringify(url)}`;
+        if (_step !== undefined) code += `, _step: ${_step}`;
+        list.push({ code: `${code}, title: _fumadocs${i - 1}}`, when });
       }
       const array = guardedArray(list);
-      tree.children.push(toMdxExportRaw(exportToc.name, dynamic ? propsFunction(array) : array));
+      tree.children.push(
+        toEsm(
+          `export const ${exportToc.name} = ${dynamic ? `(props) => ${array}` : array};`,
+          titles,
+        ),
+      );
     } else {
       file.data.rehypeToc = items.map(({ when: _, ...item }) => item);
     }

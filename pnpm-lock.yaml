@@ -2678,6 +2678,12 @@ importers:
       '@fumari/image-size':
         specifier: workspace:^
         version: link:../image-size
+      acorn:
+        specifier: ^8.19.0
+        version: 8.19.0
+      acorn-jsx:
+        specifier: ^5.3.2
+        version: 5.3.2(acorn@8.19.0)
       estree-util-value-to-estree:
         specifier: ^3.5.0
         version: 3.5.0

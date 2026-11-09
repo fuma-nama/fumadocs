@@ -8,14 +8,8 @@ import { tableRowToStructuredData } from 'fumadocs-core/search';
 import { offsets, type Stringifier } from './stringifier';
 import { headingIdRegex } from './heading-id';
 import type { ExtraPluginHooks } from './compile';
-import {
-  and,
-  chunksToCode,
-  createCodeOutput,
-  guardedArray,
-  showConditions,
-  type JsxElementNode,
-} from './utils';
+import { createCodeOutput, showConditions, type JsxElementNode } from './utils';
+import { and, chunksToCode, guardedArray } from '../../shared/code-output';
 
 declare module 'satteri' {
   interface DataMap {

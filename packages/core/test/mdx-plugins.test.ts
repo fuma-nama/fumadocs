@@ -862,7 +862,7 @@ test('Remark Show: a branch in a heading makes the TOC a function', async () => 
     '## Deploy <show when={props.framework === "next"}>on Vercel</show>\n\n<show when={props.a}>\nParagraph.\n</show>\n',
     { remarkPlugins: [remarkShow, remarkHeading], rehypePlugins: [rehypeToc] },
   );
-  expect(String(file)).toMatch(/let toc = props => \[/);
+  expect(String(file)).toMatch(/const toc = props => \[/);
 });
 
 test('Remark Show: code tabs end at a branch', async () => {

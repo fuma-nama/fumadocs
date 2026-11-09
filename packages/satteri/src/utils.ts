@@ -8,7 +8,10 @@ import type {
   rehypeCodeFromHighlighter,
   RehypeCodeFromHighlighterOptions,
 } from 'fumadocs-core/mdx-plugins/rehype-code.core';
-import { showElement } from 'fumadocs-core/mdx-plugins/remark-show';
+import {
+  createCodeOutput as createSharedCodeOutput,
+  showCondition,
+} from '../../shared/code-output';
 import { createStringifier, offsets, type PositionedNode, type Stringifier } from './stringifier';
 
 export interface JsxElementNode {
@@ -83,163 +86,19 @@ export function parse(code: string): Program {
   return parseCode(code, { lang: 'jsx', preserveParens: false }).program as Program;
 }
 
-/** a part of an output that renders from code */
-type CodePart =
-  /** a value, like an authored expression, `fallback` in outputs that can't render it */
-  | { code: string; fallback: string }
-  /** content shown when `when` holds, a branch of `<show>` checked when rendering */
-  | { when: string }
-  | KeptElement;
-
-/** a kept JSX element */
-interface KeptElement {
-  /** the opening tag without its end, with the name prefixed */
-  open: string;
-  name: string;
-  inline: boolean;
-}
-
-/** Markdown and the parts of it rendered from code, the content of branches and elements as chunks */
-export type Chunk =
-  | string
-  | Extract<CodePart, { code: string }>
-  | (Exclude<CodePart, { code: string }> & { children: Chunk[] });
-
 type CodeNode = PositionedNode & {
   type: string;
   name?: unknown;
   attributes?: unknown;
   value?: unknown;
-  children?: readonly PositionedNode[];
 };
 
-const markerRegex = /\0(\/?)(\d+)\0/g;
-
-/** the text a literal renders, booleans and `null` render nothing */
-function literalText(expression: { type: string; value?: unknown }): string | undefined {
-  if (expression.type !== 'Literal') return;
-  const { value } = expression;
-  if (typeof value === 'string' || typeof value === 'number') return String(value);
-  if (typeof value === 'boolean' || value === null) return '';
-}
-
-/**
- * A stringifier whose output can have parts rendered from code: replacements mark them, `chunks()` splits the output on
- * their markers. Authored expressions and the branches of `<show>` checked when rendering read render scope (`props`),
- * an output with them is a function of the props.
- */
+/** the shared code output, on the stringifier of Sätteri */
 export function createCodeOutput(ctx: MdastVisitorContext, namespace?: 'search') {
-  const parts: CodePart[] = [];
-  let dynamic = false;
-  /** a value */
-  const mark = (part: CodePart) => `\0${parts.push(part) - 1}\0`;
-  /** content, it stays in the output so edits apply to it like to other content (e.g. the prefixes of lists) */
-  const wrap = (part: CodePart, content: string) => {
-    const i = parts.push(part) - 1;
-    return `\0${i}\0${content}\0/${i}\0`;
-  };
-  const s: Stringifier = createStringifier(ctx, namespace, (code, fallback) =>
-    mark({ code, fallback }),
+  return createSharedCodeOutput<CodeNode, Stringifier>(
+    (expression) => createStringifier(ctx, namespace, expression),
+    { program: (node) => parse(node.value as string), range: offsets },
   );
-
-  /** the output without code: expressions as their fallbacks, branches unwrapped */
-  function toStatic(text: string): string {
-    return text.replace(markerRegex, (_, close: string, i: string) => {
-      const part = parts[Number(i)];
-      return !close && 'fallback' in part ? part.fallback : '';
-    });
-  }
-
-  function chunks(text: string): Chunk[] {
-    const root: Chunk[] = [];
-    const stack: Chunk[][] = [root];
-    /** a branch just closed, the whitespace after it goes with it */
-    let branch: Chunk[] | undefined;
-    let idx = 0;
-    const pushText = (end: number) => {
-      let value = text.slice(idx, end);
-      if (branch) {
-        const lead = /^\s*/.exec(value)![0];
-        if (lead.includes('\n')) {
-          branch.push(lead);
-          value = value.slice(lead.length);
-        }
-        branch = undefined;
-      }
-      if (value) stack.at(-1)!.push(value);
-    };
-
-    for (const match of text.matchAll(markerRegex)) {
-      pushText(match.index);
-      idx = match.index + match[0].length;
-      const part = parts[Number(match[2])];
-      if (match[1]) {
-        const children = stack.pop()!;
-        stack.at(-1)!.push({ ...part, children } as Chunk);
-        if ('when' in part) branch = children;
-      } else if ('code' in part) {
-        stack.at(-1)!.push(part);
-      } else {
-        stack.push([]);
-      }
-    }
-    pushText(text.length);
-    return root;
-  }
-
-  return {
-    s,
-    mark,
-    wrap,
-    chunks,
-    toStatic,
-    /** whether a marked part reads render scope */
-    get dynamic() {
-      return dynamic;
-    },
-    /**
-     * Mark a node rendered from code: an authored expression, or a branch of `<show>` checked when rendering.
-     *
-     * @returns whether it is one
-     */
-    markCode(node: CodeNode): boolean {
-      if (node.type === 'mdxTextExpression' || node.type === 'mdxFlowExpression') {
-        const code = node.value as string;
-        const statement = parse(code).body[0];
-        const expression =
-          statement?.type === 'ExpressionStatement' ? statement.expression : undefined;
-        // a comment renders nothing, a literal like `{' '}` is text
-        const text = expression ? literalText(expression) : '';
-        if (text !== undefined) {
-          s.replace(node, text);
-          return true;
-        }
-        dynamic = true;
-        const range = offsets(node);
-        const fallback = range ? s.source.slice(range.start, range.end) : '';
-        s.replace(node, mark({ code, fallback }));
-        return true;
-      }
-
-      const when = showCondition(node);
-      if (!when) return false;
-      dynamic = true;
-      s.replace(node, (s) => wrap({ when }, s.inner(node)));
-      return true;
-    },
-  };
-}
-
-/** the condition of a branch of `<show>` checked when rendering */
-export function showCondition(node: {
-  type: string;
-  name?: unknown;
-  attributes?: unknown;
-}): string | undefined {
-  if (node.name !== showElement) return;
-  for (const attr of node.attributes as JsxElementNode['attributes'])
-    if (attr.type === 'mdxJsxAttribute' && attr.name === 'when' && typeof attr.value === 'object')
-      return attr.value?.value;
 }
 
 /** the conditions of the branches of `<show>` around a node, outermost first */
@@ -251,49 +110,6 @@ export function showConditions(
   for (let p = ctx.parent(node as never); p; p = ctx.parent(p as never)) {
     const condition = showCondition(p as { type: string });
     if (condition) out.unshift(condition);
-  }
-  return out;
-}
-
-/** all of the conditions */
-export function and(conditions: string[]): string | undefined {
-  if (conditions.length > 0) return `(${conditions.join(') && (')})`;
-}
-
-/** an array of items, each kept only when its conditions hold */
-export function guardedArray(items: { code: string; when: string[] }[]): string {
-  let out = '[';
-  for (const { code, when } of items) {
-    const test = and(when);
-    out += test ? `...(${test} ? [${code}] : []),` : `${code},`;
-  }
-  return `${out}]`;
-}
-
-/** the chunks as one value: a string without parts, a fragment otherwise */
-export function chunksToCode(chunks: Chunk[]): string {
-  let text = '';
-  for (const chunk of chunks) {
-    if (typeof chunk !== 'string') return `<>${chunksToJsx(chunks)}</>`;
-    text += chunk;
-  }
-  return JSON.stringify(text);
-}
-
-function chunksToJsx(chunks: Chunk[]): string {
-  let out = '';
-  for (const chunk of chunks) {
-    if (typeof chunk === 'string') out += `{${JSON.stringify(chunk)}}`;
-    else if ('code' in chunk) out += `{${chunk.code}}`;
-    else if ('when' in chunk)
-      out += `{(${chunk.when}) ? <>${chunksToJsx(chunk.children)}</> : null}`;
-    else {
-      const { open, name, inline, children } = chunk;
-      const element =
-        children.length > 0 ? `${open}>${chunksToJsx(children)}</_c.${name}>` : `${open} />`;
-      // keep inline elements in inline context when rendered
-      out += inline ? `<span>${element}</span>` : element;
-    }
   }
   return out;
 }

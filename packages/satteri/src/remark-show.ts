@@ -6,7 +6,7 @@ import type {
   MdxJsxTextElement,
   PluginFactoryContext,
 } from 'satteri';
-import { showDeclaration, showElement } from 'fumadocs-core/mdx-plugins/remark-show';
+import { showDeclaration, showElement } from '../../shared/code-output';
 
 type Element = MdxJsxFlowElement | MdxJsxTextElement;
 

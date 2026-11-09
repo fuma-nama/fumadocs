@@ -1,8 +1,9 @@
 import {Fragment as _Fragment, jsx as _jsx, jsxs as _jsxs} from "react/jsx-runtime";
 import {asMarkdown as _asMarkdown, jsxComponents as _jsxComponents} from "fumadocs-core/server";
 export function _markdown(props) {
+  if (!_asMarkdown()) return null;
   const _c = _jsxComponents(props.components);
-  return _asMarkdown() ? _jsxs(_Fragment, {
+  return _jsxs(_Fragment, {
     children: ["## Hello World\n\nContent with ", _jsx("span", {
       children: _jsx(_c.Badge, {
         type: "info",
@@ -17,7 +18,7 @@ export function _markdown(props) {
         children: "\nnested\n"
       }), "\n"]
     }), "\n\nEnding paragraph.\n"]
-  }) : null;
+  });
 }
 function _createMdxContent(props) {
   const _components = {

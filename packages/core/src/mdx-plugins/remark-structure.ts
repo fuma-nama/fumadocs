@@ -3,25 +3,13 @@ import { remark } from 'remark';
 import remarkGfm from 'remark-gfm';
 import type { PluggableList, Transformer } from 'unified';
 import { VFile } from 'vfile';
-import type { Expression } from 'estree-jsx';
-import {
-  and,
-  chunksToExpression,
-  createCodeOutput,
-  guardedArray,
-  isJsxElement,
-  property,
-  propsFunction,
-  showCondition,
-  toMdxExport,
-  toMdxExportRaw,
-} from './utils';
+import { createCodeOutput, isJsxElement, toMdxExport } from './utils';
+import { and, chunksToCode, guardedArray, showCondition } from '../../../shared/code-output';
 import type { Stringifier } from './stringifier';
 import { headingIdRegex } from './heading-id';
 import type { MdxJsxFlowElement, MdxJsxTextElement } from 'mdast-util-mdx';
 import { remarkHeading } from './remark-heading';
 import { tableRowToStructuredData } from '@/search';
-import { valueToEstree } from 'estree-util-value-to-estree';
 
 interface StructuredDataHeading {
   id: string;
@@ -136,9 +124,9 @@ export function remarkStructure({
     const out = createCodeOutput(file, 'search');
     const { s } = out;
     /** headings and contents in document order, their content with the markers of code */
-    const headings: { id: string; content: string; when: Expression[] }[] = [];
-    const contents: (StructuredDataContent & { when: Expression[]; after: number })[] = [];
-    const pushContent = (item: StructuredDataContent, when: Expression[]) =>
+    const headings: { id: string; content: string; when: string[] }[] = [];
+    const contents: (StructuredDataContent & { when: string[]; after: number })[] = [];
+    const pushContent = (item: StructuredDataContent, when: string[]) =>
       contents.push({ ...item, when, after: headings.length });
 
     // Fumadocs OpenAPI Generated Structured Data
@@ -158,7 +146,7 @@ export function remarkStructure({
     let covered: { start: number; end: number } | undefined;
     let tables = 0;
 
-    const collect = (node: Nodes, when: Expression[]) => {
+    const collect = (node: Nodes, when: string[]) => {
       // links and elements become their content, unless kept as HTML tags, images are removed
       if (out.markCode(node)) {
         // rendered from code
@@ -215,10 +203,10 @@ export function remarkStructure({
         });
       }
     };
-    const visit = (node: Nodes, when: Expression[]) => {
+    const visit = (node: Nodes, when: string[]) => {
       collect(node, when);
       if (!('children' in node)) return;
-      const condition = isJsxElement(node) ? showCondition(node) : undefined;
+      const condition = showCondition(node);
       for (const child of node.children) visit(child, condition ? [...when, condition] : when);
     };
     visit(tree, []);
@@ -242,65 +230,37 @@ export function remarkStructure({
      * The heading of content: the last heading before it that shows with it, the conditions of the branches decide
      * those in other branches.
      */
-    function headingOf(when: Expression[], after: number): Expression {
-      let value: Expression = { type: 'Identifier', name: 'undefined' };
-      let i = after - 1;
-      for (; i >= 0; i--) {
-        if (!and(headings[i].when.filter((item) => !when.includes(item)))) {
-          value = { type: 'Literal', value: headings[i].id };
-          break;
-        }
+    function headingOf(when: string[], after: number): string {
+      let chain = '';
+      for (let i = after - 1; i >= 0; i--) {
+        const id = JSON.stringify(headings[i].id);
+        const test = and(headings[i].when.filter((item) => !when.includes(item)));
+        if (!test) return chain + id;
+        chain += `${test} ? ${id} : `;
       }
-      for (let j = i + 1; j < after; j++) {
-        const test = and(headings[j].when.filter((item) => !when.includes(item)))!;
-        value = {
-          type: 'ConditionalExpression',
-          test,
-          consequent: { type: 'Literal', value: headings[j].id },
-          alternate: value,
-        };
-      }
-      return value;
+      return `${chain}undefined`;
     }
 
-    const code = (content: string) => property('content', chunksToExpression(out.chunks(content)));
-    const headingList: { value: Expression; when: Expression[] }[] = [];
-    for (const { id, content, when } of headings) {
-      if (!content) continue;
-      headingList.push({
-        value: {
-          type: 'ObjectExpression',
-          properties: [property('id', { type: 'Literal', value: id }), code(content)],
-        },
-        when,
-      });
-    }
-    const contentList: { value: Expression; when: Expression[] }[] = [];
+    const headingList: { code: string; when: string[] }[] = [];
+    for (const { id, content, when } of headings)
+      if (content)
+        headingList.push({
+          code: `{id: ${JSON.stringify(id)}, content: ${chunksToCode(out.chunks(content))}}`,
+          when,
+        });
+    const contentList: { code: string; when: string[] }[] = [];
     for (const { when, after, heading, table, content } of contents) {
-      const properties = [
-        property('heading', heading === undefined ? headingOf(when, after) : toObject(heading)),
-        code(content),
-      ];
-      if (table) properties.push(property('table', { type: 'Literal', value: table }));
-      contentList.push({ value: { type: 'ObjectExpression', properties }, when });
+      let code = `{heading: ${heading === undefined ? headingOf(when, after) : JSON.stringify(heading)}`;
+      code += `, content: ${chunksToCode(out.chunks(content))}`;
+      if (table) code += `, table: ${JSON.stringify(table)}`;
+      contentList.push({ code: `${code}}`, when });
     }
     tree.children.unshift(
-      toMdxExportRaw(
-        name,
-        propsFunction({
-          type: 'ObjectExpression',
-          properties: [
-            property('headings', guardedArray(headingList)),
-            property('contents', guardedArray(contentList)),
-          ],
-        }),
+      out.esm(
+        `export const ${name} = (props) => ({headings: ${guardedArray(headingList)}, contents: ${guardedArray(contentList)}});`,
       ),
     );
   };
-}
-
-function toObject(value: unknown): Expression {
-  return valueToEstree(value) as Expression;
 }
 
 /** an element on one line has inline content, recorded like a paragraph */

@@ -1,17 +1,10 @@
 import type { Transformer } from 'unified';
-import {
-  type Chunk,
-  chunksToExpression,
-  createCodeOutput,
-  isJsxElement,
-  toMdxExportRaw,
-  toMdxImport,
-} from './utils';
+import { createCodeOutput, isJsxElement, toMdxExport } from './utils';
+import { keptElement, markdownCode } from '../../../shared/code-output';
 import type { Nodes, Root } from 'mdast';
-import type { MdxJsxFlowElement, MdxJsxTextElement, MdxjsEsm } from 'mdast-util-mdx';
+import type { MdxJsxFlowElement, MdxJsxTextElement } from 'mdast-util-mdx';
 import type { PlaceholderData } from './remark-llms.runtime';
 import { stringifyHeadingId } from './heading-id';
-import type { Expression, Statement } from 'estree-jsx';
 
 export interface LLMsOptions {
   /**
@@ -113,7 +106,7 @@ export function remarkLLMs({
               let children = s.inner(node);
               // block content on its own lines
               if (children && node.type === 'mdxJsxFlowElement') children = `\n${children}\n`;
-              return out.wrap({ element: node }, children);
+              return out.wrap(keptElement(node, node.name!), children);
             });
         }
       }
@@ -124,11 +117,12 @@ export function remarkLLMs({
     const value = text ? `${text}\n` : '';
     const chunks = out.chunks(value);
 
-    if (jsx || out.dynamic) {
-      tree.children.unshift(...componentToEsm(as, chunks));
-    } else {
-      tree.children.unshift(toMdxExportRaw(as, concat(chunks)));
-    }
+    const component = jsx || out.dynamic;
+    tree.children.unshift(
+      component || chunks.some((chunk) => typeof chunk !== 'string')
+        ? out.esm(markdownCode(as, chunks, component))
+        : toMdxExport(as, value),
+    );
     if (_data) file.data.markdown = out.toStatic(value);
   };
 }
@@ -145,100 +139,4 @@ function toPlaceholder(node: JsxElement, children: string): string {
     children,
     attributes,
   } satisfies PlaceholderData)}\0`;
-}
-
-/** the chunks as one string, they have no elements or branches */
-function concat(chunks: Chunk[]): Expression {
-  let out: Expression | undefined;
-  for (const chunk of chunks) {
-    const value: Expression =
-      typeof chunk === 'string'
-        ? { type: 'Literal', value: chunk }
-        : (chunk as { expression: Expression }).expression;
-    out = out ? { type: 'BinaryExpression', operator: '+', left: out, right: value } : value;
-  }
-
-  return out ?? { type: 'Literal', value: '' };
-}
-
-function hasElement(chunks: Chunk[]): boolean {
-  return chunks.some(
-    (chunk) =>
-      typeof chunk !== 'string' &&
-      ('element' in chunk || ('children' in chunk && hasElement(chunk.children))),
-  );
-}
-
-/**
- * The component export of Markdown rendered from code, rendered with `renderToMarkdown()` of `fumadocs-core/server`.
- */
-function componentToEsm(as: string, chunks: Chunk[]): MdxjsEsm[] {
-  const elements = hasElement(chunks);
-  const call = (name: string, args: Expression[] = []): Expression => ({
-    type: 'CallExpression',
-    callee: { type: 'Identifier', name },
-    arguments: args,
-    optional: false,
-  });
-  const body: Statement[] = [
-    {
-      type: 'ReturnStatement',
-      argument: {
-        type: 'ConditionalExpression',
-        test: call('_asMarkdown'),
-        consequent: chunksToExpression(chunks),
-        alternate: { type: 'Literal', value: null },
-      },
-    },
-  ];
-  // the components of kept elements, from `props.components`
-  if (elements)
-    body.unshift({
-      type: 'VariableDeclaration',
-      kind: 'const',
-      declarations: [
-        {
-          type: 'VariableDeclarator',
-          id: { type: 'Identifier', name: '_c' },
-          init: call('_jsxComponents', [
-            {
-              type: 'MemberExpression',
-              object: { type: 'Identifier', name: 'props' },
-              property: { type: 'Identifier', name: 'components' },
-              computed: false,
-              optional: false,
-            },
-          ]),
-        },
-      ],
-    });
-
-  const names: [string, string][] = [['asMarkdown', '_asMarkdown']];
-  if (elements) names.push(['jsxComponents', '_jsxComponents']);
-  return [
-    toMdxImport('fumadocs-core/server', names),
-    {
-      type: 'mdxjsEsm',
-      value: '',
-      data: {
-        estree: {
-          type: 'Program',
-          sourceType: 'module',
-          body: [
-            {
-              type: 'ExportNamedDeclaration',
-              attributes: [],
-              specifiers: [],
-              declaration: {
-                type: 'FunctionDeclaration',
-                id: { type: 'Identifier', name: as },
-                params: [{ type: 'Identifier', name: 'props' }],
-                body: { type: 'BlockStatement', body },
-              },
-            },
-          ],
-        },
-      },
-    },
-  ];
 }

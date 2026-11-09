@@ -1,13 +1,7 @@
 import type { HastPluginInput, HastVisitorContext, MdxTextExpression } from 'satteri';
 import type { Element, ElementContent } from 'hast';
-import {
-  guardedArray,
-  handleTag,
-  jsxToSource,
-  parse,
-  showCondition,
-  showConditions,
-} from '@/utils';
+import { handleTag, jsxToSource, parse, showConditions } from '@/utils';
+import { guardedArray, showCondition } from '../../shared/code-output';
 import type { ExtraPluginHooks } from './compile';
 
 export interface RehypeTocOptions {
