@@ -15,8 +15,8 @@ export async function buildGraph(): Promise<Graph> {
         description: page.data.description,
       });
 
-      const { extractedReferences = [] } = await page.data.load();
-      for (const ref of extractedReferences) {
+      const { extractedReferences } = await page.data.load();
+      for (const ref of extractedReferences?.() ?? []) {
         const refPage = source.getPageByHref(ref.href);
         if (!refPage) continue;
 

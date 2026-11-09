@@ -66,6 +66,7 @@ function remarkElementIds(): MdastPluginDefinition {
 const docs = defineDocs({
   docs: {
     compiler: 'satteri',
+    analysis: 'runtime',
     schema: pageSchema.extend({
       preview: z.string().optional(),
       index: z.boolean().default(false),
@@ -164,6 +165,7 @@ const docs = defineDocs({
 const blog = defineCollections({
   type: 'doc',
   compiler: 'satteri',
+  analysis: 'runtime',
   dir: 'content/blog',
   schema: blogPageSchema.extend({
     date: z.iso.date().or(z.date()),

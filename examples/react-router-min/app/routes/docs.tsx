@@ -28,7 +28,7 @@ function Content({ path }: { path: string }) {
   const Mdx = page.body;
 
   return (
-    <DocsPage toc={toc}>
+    <DocsPage toc={toc()}>
       <title>{page.title}</title>
       <meta name="description" content={page.description} />
       <DocsTitle>{page.title}</DocsTitle>

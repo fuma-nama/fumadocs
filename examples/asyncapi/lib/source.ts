@@ -4,6 +4,9 @@ import { defineDocs } from 'fumadocs-mdx/macro';
 
 const docs = defineDocs({
   dir: 'content/docs',
+  docs: {
+    analysis: 'runtime',
+  },
 });
 
 export const asyncapi = createAsyncAPI({

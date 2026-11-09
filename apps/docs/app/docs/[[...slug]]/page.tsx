@@ -126,7 +126,7 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
   }
 
   return (
-    <DocsPage toc={toc} {...pageProps}>
+    <DocsPage toc={toc()} {...pageProps}>
       <h1 className="text-[1.75em] font-semibold">{page.data.title}</h1>
       <p className="text-lg text-fd-muted-foreground mb-2">{page.data.description}</p>
       <div className="flex flex-row flex-wrap gap-2 items-center border-b pb-6 mb-4">

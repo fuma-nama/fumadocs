@@ -6,6 +6,7 @@ import { metaSchema, pageSchema } from 'fumadocs-core/source/schema';
 const docs = defineDocs({
   dir: 'content/docs',
   docs: {
+    analysis: 'runtime',
     schema: pageSchema,
     postprocess: {
       includeProcessedMarkdown: true,

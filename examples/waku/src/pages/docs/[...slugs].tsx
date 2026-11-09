@@ -20,7 +20,7 @@ export default function Page({ slugs }: PageProps<'/docs/[...slugs]'>) {
   const MDX = page.data.body;
   const markdownUrl = getPageMarkdownUrl(page).url;
   return (
-    <DocsPage toc={page.data.toc}>
+    <DocsPage toc={page.data.toc()}>
       <meta property="og:image" content={getPageImageUrl(page).url} />
       <DocsTitle>{page.data.title}</DocsTitle>
       <DocsDescription className="mb-0">{page.data.description}</DocsDescription>

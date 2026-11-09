@@ -4,6 +4,9 @@ import { graphql } from './graphql';
 
 const docs = defineDocs({
   dir: 'content/docs',
+  docs: {
+    analysis: 'runtime',
+  },
 });
 
 export const source = loader(

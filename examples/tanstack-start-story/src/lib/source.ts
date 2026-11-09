@@ -5,6 +5,7 @@ import { lucideIconsPlugin } from 'fumadocs-core/source/lucide-icons';
 export const docs = defineDocs({
   dir: 'content/docs',
   docs: {
+    analysis: 'runtime',
     async: true,
   },
 });
