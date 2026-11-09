@@ -29,7 +29,8 @@ export interface LLMsOptions {
    *   Render it with `renderToMarkdown` from `fumadocs-core/server`, where a component
    *   can call `asMarkdown()` to define its own Markdown form.
    *
-   * @default string
+   * By default, a string, or a component when the Markdown reads the props of the page (like a `<show>` branch).
+   * `string` throws on such a page.
    */
   output?: 'function' | 'string';
 }
@@ -41,12 +42,12 @@ const componentNameRegex = /^[A-Z][\w$]*$/;
  * frontmatter & ESM nodes are dropped, and includes are replaced with their content.
  *
  * Authored expressions and the branches of `<show>` checked when rendering are rendered from code, the export is then
- * a component of the props in both forms.
+ * a component of the props.
  */
 export function remarkLlms({
   as = '_markdown',
   headingIds = true,
-  output = 'string',
+  output,
 }: LLMsOptions = {}): MdastPluginEntry {
   const jsx = output === 'function';
   const factory = () => {
@@ -91,6 +92,10 @@ export function remarkLlms({
         // `data.markdown` uses the fallbacks of expressions, with every branch
         if (!jsx) ctx.data.markdown ??= out.toStatic(value);
         if (!as) return;
+        if (output === 'string' && out.dynamic)
+          throw new Error(
+            `[remark-llms] the Markdown of ${ctx.fileURL ?? 'a page'} reads the props of the page, it can't be output as a string.`,
+          );
         ctx.prependChild(root, {
           type: 'mdxjsEsm',
           value: markdownCode(as, chunks, jsx || out.dynamic),

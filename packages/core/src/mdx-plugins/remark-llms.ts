@@ -48,7 +48,8 @@ export interface LLMsOptions {
    *   Render it with `renderToMarkdown` from `fumadocs-core/server`, where a component
    *   can call `asMarkdown()` to define its own Markdown form.
    *
-   * @default string
+   * By default, a string, or a component when the Markdown reads the props of the page (like a `<show>` branch).
+   * `string` throws on such a page.
    */
   output?: 'function' | 'string';
 
@@ -67,14 +68,14 @@ const componentNameRegex = /^[A-Z][\w$]*$/;
  * `replaceSource()` from `fumadocs-core/mdx-plugins/stringifier`.
  *
  * Authored expressions and the branches of `<show>` checked when rendering are rendered from code, the export is then a
- * component of the props in both forms.
+ * component of the props.
  */
 export function remarkLLMs({
   as = '_markdown',
   headingIds = true,
   _data = false,
   mdxAsPlaceholder,
-  output = 'string',
+  output,
   filterElement,
 }: LLMsOptions = {}): Transformer<Root, Root> {
   const jsx = output === 'function';
@@ -117,6 +118,10 @@ export function remarkLLMs({
     const value = text ? `${text}\n` : '';
     const chunks = out.chunks(value);
 
+    if (output === 'string' && out.dynamic)
+      throw new Error(
+        `[remark-llms] the Markdown of ${file.path} reads the props of the page, it can't be output as a string.`,
+      );
     const component = jsx || out.dynamic;
     tree.children.unshift(
       component || chunks.some((chunk) => typeof chunk !== 'string')

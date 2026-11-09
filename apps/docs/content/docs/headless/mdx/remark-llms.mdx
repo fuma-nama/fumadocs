@@ -97,6 +97,8 @@ const markdown = await renderPlaceholder(await page.data.getText('processed'), {
 
 With `output: 'function'`, `_markdown` is a component: Markdown stays as you wrote it and JSX elements are rendered by your components.
 
+Without `output`, a page whose Markdown reads `props`, like a [`<show>`](/docs/markdown#show) branch, also gets a component. `output: 'string'` throws on such a page.
+
 ```ts
 import type { LLMsOptions } from 'fumadocs-core/mdx-plugins/remark-llms';
 

@@ -344,3 +344,19 @@ test('included images use the URLs of their imports', async () => {
     { heading: undefined, content: 'With .' },
   ]);
 });
+
+test('remark-llms with Markdown that reads props', async () => {
+  const compile = async (output?: 'string') =>
+    compileMdx({
+      source: 'Deploy on {props.framework}.\n',
+      filePath: '/page.mdx',
+      options: await applySatteriPreset({
+        rehypeCodeOptions: false,
+        mdastPlugins: [remarkLlms({ output })],
+      })('bundler'),
+    });
+
+  await expect(compile('string')).rejects.toThrow("can't be output as a string");
+  // without an explicit output, a component
+  expect((await compile()).code).toContain('export function _markdown(props)');
+});

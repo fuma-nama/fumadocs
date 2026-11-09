@@ -91,3 +91,14 @@ test('Remark LLMs: URLs of imported images', async () => {
   const Md = (await load('function')) as FC;
   await expect(renderToMarkdown(<Md />)).resolves.toBe(expected);
 });
+
+test('Remark LLMs: Markdown that reads props', async () => {
+  const value = 'Deploy on {props.framework}.\n';
+  await expect(
+    compile(value, { remarkPlugins: [[remarkLLMs, { output: 'string' }]] }),
+  ).rejects.toThrow("can't be output as a string");
+  // without an explicit output, a component
+  expect(String(await compile(value, { remarkPlugins: [remarkLLMs] }))).toContain(
+    'export function _markdown(props)',
+  );
+});
