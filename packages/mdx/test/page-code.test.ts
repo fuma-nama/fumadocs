@@ -205,4 +205,21 @@ test('runtime outputs bind the params of a page and take custom props', async ()
     throw new Error('expected runtime outputs');
   expect(page.toc({ name: 'Fuma' })[0].title).toBe('next Fuma');
   expect((await page.structuredData({ name: 'Fuma' })).headings[0].content).toBe('next Fuma');
+
+  // processed Markdown takes them too
+  const { server, docAt } = await import('@/runtime/server');
+  const { asMarkdown } = await import('fumadocs-core/server');
+  const [entry] = await server().doc('docs', '', {
+    'index.mdx': {
+      frontmatter: {},
+      default: () => null,
+      toc: [],
+      structuredData: { headings: [], contents: [] },
+      // like the compiled component of `remarkLLMs`
+      _markdown: (props: Record<string, string>) =>
+        asMarkdown() ? `${props.framework} ${props.name}` : null,
+    },
+  } as never);
+  const at = docAt(entry as never, { framework: 'next' }) as typeof entry;
+  await expect(at.getText('processed', { props: { name: 'Fuma' } })).resolves.toBe('next Fuma');
 });

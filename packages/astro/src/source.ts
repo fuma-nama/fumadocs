@@ -61,6 +61,8 @@ export interface GetTextOptions {
    * @defaultValue the MDX components of the collection
    */
   components?: MDXComponents;
+  /** the props you pass to the content of the page, with the runtime analysis of `includeProcessedMarkdown` */
+  props?: Record<string, unknown>;
 }
 
 /** the config of the source from `toFumadocsSource()` */
@@ -143,7 +145,11 @@ function pageData<Entry extends PageEntry>(entry: Entry, params?: Params): Astro
       const { markdown, components } = (await compile()).outputs;
       if (markdown === undefined) throw new NoProcessedMarkdownError();
       if (typeof markdown === 'string') return markdown;
-      return renderMarkdown(markdown, { ...props, components: options?.components ?? components });
+      return renderMarkdown(markdown, {
+        ...props,
+        ...options?.props,
+        components: options?.components ?? components,
+      });
     },
   };
 }

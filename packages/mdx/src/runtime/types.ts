@@ -42,6 +42,8 @@ export interface GetTextOptions {
    * MDX components for JSX elements in the output, with the runtime analysis of `includeProcessedMarkdown`.
    */
   components?: MDXComponents;
+  /** the props you pass to the content of the page, with the runtime analysis of `includeProcessedMarkdown` */
+  props?: Record<string, unknown>;
 }
 
 export interface DocMethods {

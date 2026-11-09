@@ -175,6 +175,8 @@ const toc = page.data.toc();
 // when you pass custom props to the content, pass them here too
 const tocWithProps = page.data.toc({ version: 'v2' });
 const structuredData = await page.data.structuredData();
+// processed Markdown, with `includeProcessedMarkdown`
+const markdown = await page.data.getText('processed', { props: { version: 'v2' } });
 ```
 
 On [async](/docs/mdx/async) collections, `toc` comes from `await page.data.load()`, and you call it the same way.

@@ -372,7 +372,9 @@ function createDocMethods(
       if (typeof markdown === 'string') return markdown;
       if (markdown) {
         const { renderToMarkdown } = await import('fumadocs-core/server');
-        return renderToMarkdown(createElement(markdown, { components: options?.components }));
+        return renderToMarkdown(
+          createElement(markdown, { ...options?.props, components: options?.components }),
+        );
       }
 
       throw new Error(
