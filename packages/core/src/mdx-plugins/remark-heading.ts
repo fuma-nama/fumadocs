@@ -27,7 +27,7 @@ export interface RemarkHeadingOptions {
   /**
    * With `static`, IDs are always slugged from the source.
    *
-   * @defaultValue the analysis of the content source, or `runtime`
+   * @defaultValue the analysis of the content source, or `static`
    */
   analysis?: Analysis;
 }
@@ -62,7 +62,7 @@ export function remarkHeading({
   return (root, file) => {
     const toc: TOCItemType[] = [];
     const ids = headingIdCode();
-    const fromCode = defaultSlug && (analysis ?? file.data._analysis) !== 'static';
+    const fromCode = defaultSlug && (analysis ?? file.data._analysis) === 'runtime';
     slugger?.reset();
 
     const visit = (heading: RootContent, when: string[]) => {

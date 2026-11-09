@@ -388,11 +388,14 @@ function docCollectionOf(collection: CollectionItem): DocCollectionItem | undefi
 }
 
 function postprocessPlugin(): Plugin {
-  const LinkReferenceTypes = `{
+  /** outputs of runtime analysis are functions of the props of a page */
+  const output = (type: string, runtime: boolean, async = false) =>
+    runtime ? `(props?: Record<string, unknown>) => ${async ? `Promise<${type}>` : type}` : type;
+  const LinkReferenceTypes = (runtime: boolean) => `{
   /**
    * extracted references (e.g. hrefs, paths), useful for analyzing relationships between pages.
    */
-  extractedReferences: import("fumadocs-mdx").ExtractedReference[];
+  extractedReferences: ${output('import("fumadocs-mdx").ExtractedReference[]', runtime)};
 }`;
 
   const LastModifiedTypes = `{
@@ -412,12 +415,11 @@ function postprocessPlugin(): Plugin {
           const docs = docCollectionOf(collection);
           if (!docs) continue;
 
-          const structuredData =
-            'import("fumadocs-core/mdx-plugins/remark-structure").StructuredData';
+          const runtime = docs.analysis === 'runtime';
           const extras = [
-            `{ structuredData: ${docs.analysis === 'static' ? structuredData : `() => Promise<${structuredData}>`} }`,
+            `{ toc: ${output('import("fumadocs-core/toc").TOCItemType[]', runtime)}, structuredData: ${output('import("fumadocs-core/mdx-plugins/remark-structure").StructuredData', runtime, true)} }`,
           ];
-          if (docs.postprocess?.extractLinkReferences) extras.push(LinkReferenceTypes);
+          if (docs.postprocess?.extractLinkReferences) extras.push(LinkReferenceTypes(runtime));
           if (docs.lastModified) extras.push(LastModifiedTypes);
 
           lines.push(ident(`${collection.name}: ${extras.join(' & ')},`, 2));

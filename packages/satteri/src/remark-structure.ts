@@ -39,7 +39,7 @@ export interface StructureOptions {
    */
   exportAs?: string | boolean;
 
-  /** @defaultValue 'runtime' */
+  /** @defaultValue the analysis of the content source, or `static` */
   analysis?: Analysis;
 }
 
@@ -185,7 +185,7 @@ export function remarkStructure({
       // positions tell authored nodes from generated ones
       options: { position: true },
       before(_root: unknown, ctx: MdastVisitorContext) {
-        isStatic = (analysis ?? ctx.data._analysis) === 'static';
+        isStatic = (analysis ?? ctx.data._analysis) !== 'runtime';
         out = createCodeOutput(ctx, 'search', isStatic);
         s = out.s;
 

@@ -7,14 +7,16 @@ import type { CompiledMDXProperties } from '@/loaders/mdx/build';
 import type { ExtractedReference } from '@/loaders/mdx/remark-postprocess';
 import { renderStructuredData } from '../../../shared/structured-data';
 
-/** the exports of a compiled page at params, its outputs are resolved */
+type Props = Record<string, unknown>;
+
+/** the exports of a compiled page at params, outputs of runtime analysis are bound to them */
 export type PageAt<Page extends CompiledMDXProperties<unknown>> = Omit<
   Page,
   'toc' | 'structuredData' | 'extractedReferences'
 > & {
-  toc: TOCItemType[];
-  structuredData: StructuredData | (() => Promise<StructuredData>);
-  extractedReferences?: ExtractedReference[];
+  toc: TOCItemType[] | ((props?: Props) => TOCItemType[]);
+  structuredData: StructuredData | ((props?: Props) => Promise<StructuredData>);
+  extractedReferences?: ExtractedReference[] | ((props?: Props) => ExtractedReference[]);
 };
 
 /** the exports of a compiled page at params, the content and its outputs read them as props */
@@ -30,12 +32,13 @@ export function pageAt<Page extends CompiledMDXProperties<unknown>>(
     default: bound
       ? (props: MDXProps) => createElement(page.default, { ...params, ...props })
       : page.default,
-    toc: typeof toc === 'function' ? toc(params) : toc,
+    toc: typeof toc === 'function' ? (props) => toc({ ...params, ...props }) : toc,
     structuredData:
       typeof structuredData === 'function'
-        ? () => renderStructuredData(structuredData(params))
+        ? (props) => renderStructuredData(structuredData({ ...params, ...props }))
         : structuredData,
-    extractedReferences: typeof refs === 'function' ? refs(params) : refs,
+    extractedReferences:
+      typeof refs === 'function' ? (props) => refs({ ...params, ...props }) : refs,
     // called in place, so `asMarkdown()` of the component opts in when rendering into Markdown
     _markdown:
       typeof markdown === 'function' && bound

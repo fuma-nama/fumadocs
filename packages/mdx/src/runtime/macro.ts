@@ -29,7 +29,7 @@ export type MacroAsyncDocEntry<Frontmatter = unknown, Extra = unknown> = {
    * The promise is memoized, it's safe to call in render (e.g. `use(entry.load())`).
    */
   load: () => Promise<DocData & Extra>;
-  structuredData: () => Promise<StructuredData>;
+  structuredData: (props?: Record<string, unknown>) => Promise<StructuredData>;
   /**
    * Component rendering the compiled content.
    *

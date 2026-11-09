@@ -32,7 +32,7 @@ export function remarkHeading({
       name: 'remark-heading',
       before(_root, ctx) {
         if (generateToc) ctx.data.toc ??= [];
-        fromCode = !slug && (analysis ?? ctx.data._analysis) !== 'static';
+        fromCode = !slug && (analysis ?? ctx.data._analysis) === 'runtime';
       },
       heading(node, ctx: MdastVisitorContext) {
         // visited nodes are frozen, so mutate copies

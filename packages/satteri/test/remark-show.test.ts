@@ -61,7 +61,10 @@ After the branch.
 </show>`;
 
 test('Remark Show: branches and expressions render from code in every output', async () => {
-  const options = await applySatteriPreset({ mdastPlugins: [remarkLlms()] })('runtime');
+  const options = await applySatteriPreset({
+    data: { _analysis: 'runtime' },
+    mdastPlugins: [remarkLlms()],
+  })('runtime');
   const { code, data } = await compileMdx({
     source,
     filePath: '/tmp/doc.mdx',
@@ -155,7 +158,7 @@ test('Remark Show: static outputs analyse the source', async () => {
 });
 
 test('Remark Show: code tabs end at a branch', async () => {
-  const options = await applySatteriPreset({})('runtime');
+  const options = await applySatteriPreset({ data: { _analysis: 'runtime' } })('runtime');
   const { code } = await compileMdx({
     source:
       '```ts tab="Shared"\na\n```\n\n<show when={props.framework === "astro"}>\n```ts tab="Astro"\nb\n```\n</show>\n',
@@ -173,7 +176,7 @@ test('Remark Show: branches with included files', async () => {
     path.join(dir, 'branchy.mdx'),
     '## Inner\n\n<show when={props.edition === "pro"}>\nIncluded branch.\n</show>\n',
   );
-  const options = await applySatteriPreset({})('runtime');
+  const options = await applySatteriPreset({ data: { _analysis: 'runtime' } })('runtime');
   const { code } = await compileMdx({
     source:
       '# Page\n\n<show when={props.edition === "pro"}>\nWaku.\n\n<include>./shared.mdx</include>\n</show>\n\n<include>./branchy.mdx</include>\n\nEnd.\n',
@@ -202,7 +205,7 @@ test('Remark Show: branches of an included file, the page itself has none', asyn
     path.join(dir, 'branchy.mdx'),
     '<show when={props.edition === "pro"}>\nIncluded branch.\n</show>\n',
   );
-  const options = await applySatteriPreset({})('runtime');
+  const options = await applySatteriPreset({ data: { _analysis: 'runtime' } })('runtime');
   const { code } = await compileMdx({
     source: '# Page\n\n<include>./branchy.mdx</include>\n',
     filePath: path.join(dir, 'page.mdx'),

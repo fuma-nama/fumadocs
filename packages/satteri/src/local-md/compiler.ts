@@ -49,7 +49,8 @@ export function createMarkdownCompiler(config: MarkdownCompilerOptions = {}): Ma
         source: input.value,
         filePath: input.path,
         environment: 'runtime',
-        options: { ...options, data: { ...options.data, ...input.data } },
+        // the outputs are rendered for the props of a page
+        options: { ...options, data: { _analysis: 'runtime', ...options.data, ...input.data } },
       });
 
       return {

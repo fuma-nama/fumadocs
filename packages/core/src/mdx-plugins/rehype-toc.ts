@@ -30,7 +30,7 @@ export interface RehypeTocOptions {
         name: string;
       };
 
-  /** @defaultValue the analysis of the content source, or `runtime` */
+  /** @defaultValue the analysis of the content source, or `static` */
   analysis?: Analysis;
 }
 
@@ -78,7 +78,7 @@ export function rehypeToc(
   }
 
   return (tree, file) => {
-    const isStatic = (analysis ?? file.data._analysis) === 'static';
+    const isStatic = (analysis ?? file.data._analysis) !== 'runtime';
     const items: (RehypeTOCItemType & { when: string[]; code?: string })[] = [];
 
     const visit = (nodes: Nodes[], when: string[]) => {

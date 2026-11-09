@@ -45,7 +45,7 @@ export interface LLMsOptions {
    * kept as JSX, receiving their original props and resolving from `props.components`, a component can call
    * `asMarkdown()` to define its own Markdown form. A static export is a string.
    *
-   * @defaultValue the analysis of the content source, or `runtime`
+   * @defaultValue the analysis of the content source, or `static`
    */
   analysis?: Analysis;
 
@@ -76,7 +76,7 @@ export function remarkLLMs({
   filterElement,
 }: LLMsOptions = {}): Transformer<Root, Root> {
   return (tree, file) => {
-    const isStatic = (analysis ?? file.data._analysis) === 'static';
+    const isStatic = (analysis ?? file.data._analysis) !== 'runtime';
     const out = createCodeOutput(file, undefined, isStatic);
     const { s } = out;
 

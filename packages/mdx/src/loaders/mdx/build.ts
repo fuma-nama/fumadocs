@@ -6,7 +6,6 @@ import type { FC } from 'react';
 import type { MDXProps } from 'mdx/types';
 import type { Core } from '@/core';
 import type { DocCollectionItem } from '@/config/build';
-import type { Params } from 'fumadocs-core/source';
 
 export interface BuildMDXOptions {
   /**
@@ -32,10 +31,12 @@ export interface CompilerOptions {
 /** the exports of a compiled page, its content and runtime outputs read the params of a page as props */
 export interface CompiledMDXProperties<Frontmatter = Record<string, unknown>> {
   frontmatter: Frontmatter;
-  structuredData: StructuredData | ((props: Params) => StructuredDataNodes);
-  toc: TOCItemType[] | ((props: Params) => TOCItemType[]);
+  structuredData: StructuredData | ((props: Record<string, unknown>) => StructuredDataNodes);
+  toc: TOCItemType[] | ((props: Record<string, unknown>) => TOCItemType[]);
   default: FC<MDXProps>;
-  extractedReferences?: ExtractedReference[] | ((props: Params) => ExtractedReference[]);
+  extractedReferences?:
+    | ExtractedReference[]
+    | ((props: Record<string, unknown>) => ExtractedReference[]);
 
   /**
    * Enable from `postprocess` option.

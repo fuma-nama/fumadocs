@@ -85,8 +85,6 @@ export function createCompiler(mdxOptions?: CompilerOptions) {
     const { frontmatter, content } = parseFrontmatter(String(file));
     file.value = content;
     file.data.frontmatter ??= frontmatter;
-    // outputs are values, set `analysis: 'runtime'` in the options of plugins to opt in
-    file.data._analysis ??= 'static';
 
     return getProcessor().process(file);
   }

@@ -34,7 +34,7 @@ export type AsyncDocCollectionEntry<
   TC extends InternalTypeConfig = InternalTypeConfig,
 > = {
   load: () => Promise<DocData & TC['DocData'][Name]>;
-  structuredData: () => Promise<StructuredData>;
+  structuredData: (props?: Record<string, unknown>) => Promise<StructuredData>;
 } & DocMethods &
   Frontmatter;
 
@@ -88,8 +88,11 @@ function toDocData(page: PageAt<CompiledMDXProperties>, exports: CompiledMDXProp
   return data;
 }
 
-async function resolveStructuredData(data: DocData['structuredData']) {
-  return typeof data === 'function' ? data() : data;
+async function resolveStructuredData(
+  data: DocData['structuredData'],
+  props?: Record<string, unknown>,
+) {
+  return typeof data === 'function' ? data(props) : data;
 }
 
 /** the page of compiled exports at params, with its doc data */
@@ -157,8 +160,8 @@ export function server<Config, TC extends InternalTypeConfig>() {
             async load() {
               return bind(await content(), {}).data;
             },
-            async structuredData() {
-              return resolveStructuredData(bind(await content(), {}).page.structuredData);
+            async structuredData(props) {
+              return resolveStructuredData(bind(await content(), {}).page.structuredData, props);
             },
           } satisfies AsyncDocCollectionEntry;
         }),
@@ -338,7 +341,8 @@ function createDocAt<Doc extends DocMethods>(doc: Doc, params: Params, key: stri
     ...createDocMethods(doc.info, async () => (await loadPage()).page),
     // memoized, it can be called in render
     load: () => (data ??= loadPage().then((item) => item.data)),
-    structuredData: async () => resolveStructuredData((await loadPage()).page.structuredData),
+    structuredData: async (props?: Record<string, unknown>) =>
+      resolveStructuredData((await loadPage()).page.structuredData, props),
     ...('body' in doc && {
       preload: () => loadPage().then(() => undefined),
       // like the body of the macro, it renders synchronously when loaded

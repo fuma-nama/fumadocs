@@ -16,7 +16,7 @@ async function compile(source: string) {
 // The toc is emitted as an `mdxjsEsm` node prepended to the document root, so
 // the export appears near the top of the module and is pretty-printed across
 // multiple lines by the MDX compiler.
-const TocExportRegex = /export const toc = \(props\) => (\[[^]*?\]);/;
+const TocExportRegex = /export const toc = (\[[^]*?\]);/;
 
 function tocExport(code: string) {
   const match = TocExportRegex.exec(code);

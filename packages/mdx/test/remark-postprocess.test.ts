@@ -101,7 +101,8 @@ test('includeProcessedMarkdown keeps the authored source', async () => {
     isDevelopment: false,
   });
 
-  expect(JSON.parse(/^ {2}return (".+");$/m.exec(code)![1])).toMatchInlineSnapshot(`
+  expect(JSON.parse(/^export (?:const|let) _markdown = (".+");$/m.exec(code)![1]))
+    .toMatchInlineSnapshot(`
     "# Title [#title]
 
     ![Diagram](/images/diagram.png)

@@ -69,7 +69,7 @@ export function remarkPostprocess({
     });
 
     if (extractLinkReferences) {
-      const isStatic = file.data._analysis === 'static';
+      const isStatic = file.data._analysis !== 'runtime';
       const items: { code: string; when: string[] }[] = [];
       const visit = (node: Nodes, when: string[]) => {
         if (node.type === 'link')

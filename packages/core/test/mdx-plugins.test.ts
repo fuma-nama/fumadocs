@@ -797,12 +797,16 @@ After the branch.
 ## Setup
 </show>`;
 
-  const code = await compile(source, {
-    outputFormat: 'function-body',
-    baseUrl: import.meta.url,
-    remarkPlugins: [remarkShow, remarkHeading, [remarkStructure, { exportAs: true }], remarkLLMs],
-    rehypePlugins: [rehypeToc],
-  });
+  // set by the content source, like the collection of Fumadocs MDX
+  const code = await compile(
+    { value: source, data: { _analysis: 'runtime' } },
+    {
+      outputFormat: 'function-body',
+      baseUrl: import.meta.url,
+      remarkPlugins: [remarkShow, remarkHeading, [remarkStructure, { exportAs: true }], remarkLLMs],
+      rehypePlugins: [rehypeToc],
+    },
+  );
   // the generated imports of `fumadocs-core/server`, from the source
   const body = String(code).replace(
     /await import\([^)]*"fumadocs-core\/server"\)\)?/g,

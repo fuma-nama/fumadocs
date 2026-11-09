@@ -94,14 +94,14 @@ function postprocessPlugin(
     },
     link(node, ctx) {
       if (!extractLinkReferences) return;
-      const when = ctx.data._analysis === 'static' ? [] : showConditions(node, ctx);
+      const when = ctx.data._analysis !== 'runtime' ? [] : showConditions(node, ctx);
       ctx.data.extractedReferences!.push({ code: JSON.stringify({ href: node.url }), when });
     },
     collectExports({ data, addExport }) {
       if (extractLinkReferences) {
         addExport(
           'extractedReferences',
-          listCode(data.extractedReferences!, data._analysis === 'static'),
+          listCode(data.extractedReferences!, data._analysis !== 'runtime'),
         );
       }
 

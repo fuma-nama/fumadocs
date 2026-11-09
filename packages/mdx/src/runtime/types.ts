@@ -10,14 +10,14 @@ export interface DocData {
   body: MDXContent;
 
   /**
-   * table of contents generated from content.
+   * table of contents generated from content, a function of the props with `analysis: 'runtime'`.
    */
-  toc: TOCItemType[];
+  toc: TOCItemType[] | ((props?: Record<string, unknown>) => TOCItemType[]);
 
   /**
-   * structured data for document search indexing, a value with `analysis: 'static'` on the collection.
+   * structured data for document search indexing, a function of the props with `analysis: 'runtime'`.
    */
-  structuredData: StructuredData | (() => Promise<StructuredData>);
+  structuredData: StructuredData | ((props?: Record<string, unknown>) => Promise<StructuredData>);
 
   /**
    * Raw exports from the compiled MDX file.

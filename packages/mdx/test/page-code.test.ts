@@ -186,3 +186,23 @@ test('static analysis of a collection with its own options', async () => {
     expect(code).not.toContain('_headingIds');
   }
 });
+
+test('runtime outputs bind the params of a page and take custom props', async () => {
+  const { pageAt } = await import('@/utils/page');
+  const page = pageAt(
+    {
+      frontmatter: {},
+      default: () => null,
+      toc: (props) => [{ title: `${props.framework} ${props.name}`, url: '#a', depth: 2 }],
+      structuredData: (props) => ({
+        headings: [{ id: 'a', content: `${props.framework} ${props.name}` }],
+        contents: [],
+      }),
+    },
+    { framework: 'next' },
+  );
+  if (typeof page.toc !== 'function' || typeof page.structuredData !== 'function')
+    throw new Error('expected runtime outputs');
+  expect(page.toc({ name: 'Fuma' })[0].title).toBe('next Fuma');
+  expect((await page.structuredData({ name: 'Fuma' })).headings[0].content).toBe('next Fuma');
+});

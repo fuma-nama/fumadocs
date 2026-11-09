@@ -20,7 +20,7 @@ export interface RehypeTocOptions {
         as: 'esm';
         name: string;
       };
-  /** @defaultValue the analysis of the content source, or `runtime` */
+  /** @defaultValue the analysis of the content source, or `static` */
   analysis?: Analysis;
 }
 
@@ -59,7 +59,7 @@ export function rehypeToc({ exportToc = true, analysis }: RehypeTocOptions = {})
     return {
       name: 'rehype-toc',
       before(_root: unknown, ctx: HastVisitorContext) {
-        isStatic = (analysis ?? ctx.data._analysis) === 'static';
+        isStatic = (analysis ?? ctx.data._analysis) !== 'runtime';
         if (resolved && resolved.as === 'data') ctx.data.rehypeToc ??= [];
       },
       after(_root: unknown, ctx: HastVisitorContext) {
@@ -128,7 +128,7 @@ export function rehypeToc({ exportToc = true, analysis }: RehypeTocOptions = {})
   };
   plugin.collectExports = ({ data, addExport }) => {
     if (resolved && resolved.as === 'esm') {
-      const isStatic = (analysis ?? data._analysis) === 'static';
+      const isStatic = (analysis ?? data._analysis) !== 'runtime';
       addExport(resolved.name, listCode(data._rehypeTocItems ?? [], isStatic));
     }
   };

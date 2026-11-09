@@ -63,7 +63,7 @@ export function remarkLlms({
       name: 'remark-llms',
       options: { position: true },
       before(_root, ctx) {
-        isStatic = (analysis ?? ctx.data._analysis) === 'static';
+        isStatic = (analysis ?? ctx.data._analysis) !== 'runtime';
         out = createCodeOutput(ctx, undefined, isStatic);
       },
       mdxjsEsm: drop,

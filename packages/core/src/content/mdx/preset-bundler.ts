@@ -38,7 +38,7 @@ export async function mdxPreset(options: MDXBundlerPresetOptions = {}): Promise<
     remarkStructureOptions,
     remarkCodeTabOptions,
     remarkNpmOptions,
-    analysis = 'static',
+    analysis,
     _include,
     ...mdxOptions
   } = options;
