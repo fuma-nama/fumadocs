@@ -433,10 +433,12 @@ Add an adapter to your Astro config.
 </show>
 ```
 
-The table of contents, the search index and the Markdown of a page only include the branches that show for its props. Expressions like `{props.framework}` render into them as values. Because the file compiles once:
+The table of contents, search index and Markdown of a page only include the branches that show for its props, and expressions like `{props.framework}` render into them as values.
 
-- heading IDs are unique across the file, so the same heading in two branches gets a `-1` suffix on the second one. Use a [custom anchor](#custom-anchor) to choose the ID.
-- a [tab group](#tab-groups) belongs to one branch: code blocks on both sides of a `<show>` tag form separate groups.
+All branches compile together in one file, so:
+
+- Heading IDs are unique across the file. The same heading in two branches gets a `-1` suffix on the second one, unless it has a [custom anchor](#custom-anchor).
+- A [tab group](#tab-groups) ends at a `<show>` tag.
 
 ### NPM Commands
 
