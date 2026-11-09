@@ -109,10 +109,12 @@ export function parseExpression(code: string): Expression {
 }
 
 function fill(node: object, expressions: Expression[]) {
-  for (const [key, value] of Object.entries(node)) {
+  const record = node as Record<string, { type?: string; name?: string } | null>;
+  for (const key in record) {
+    const value = record[key];
     if (typeof value !== 'object' || value === null) continue;
-    const match = value.type === 'Identifier' && placeholderRegex.exec(value.name);
-    if (match) (node as Record<string, unknown>)[key] = expressions[Number(match[1])];
+    const match = value.type === 'Identifier' && placeholderRegex.exec(value.name!);
+    if (match) record[key] = expressions[Number(match[1])];
     else fill(value, expressions);
   }
 }
@@ -128,6 +130,8 @@ export function createCodeOutput(file: VFile, namespace?: string, isStatic?: boo
       )),
     (node) => stringifier.range(node),
     isStatic,
+    // strings skip the parser
+    (value) => `_fumadocs${expressions.push({ type: 'Literal', value }) - 1}`,
   );
   return Object.assign(out, { esm: (code: string) => toEsm(code, expressions) });
 }

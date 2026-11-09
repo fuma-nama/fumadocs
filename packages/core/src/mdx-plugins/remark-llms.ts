@@ -1,6 +1,6 @@
 import type { Transformer } from 'unified';
-import { createCodeOutput, isJsxElement, parseExpression } from './utils';
-import { keptElement, markdownCode } from '../../../shared/code-output';
+import { createCodeOutput, isJsxElement } from './utils';
+import { keptElement } from '../../../shared/code-output';
 import type { Nodes, Root } from 'mdast';
 import type { MdxJsxFlowElement, MdxJsxTextElement } from 'mdast-util-mdx';
 import type { Analysis } from './stringifier';
@@ -101,7 +101,7 @@ export function remarkLLMs({
             node,
             headingIds,
             (node: Nodes) => s.range(node),
-            isStatic ? undefined : (code, id) => s.expression(parseExpression(code), id),
+            isStatic ? undefined : out.expression,
           );
         } else if (isJsxElement(node) && node.name) {
           if (isStatic && mdxAsPlaceholder?.includes(node.name))
@@ -120,9 +120,8 @@ export function remarkLLMs({
     visit(tree.children);
     const text = s.stringify(tree).trim();
     const value = text ? `${text}\n` : '';
-    const chunks = out.chunks(value);
 
-    tree.children.unshift(out.esm(markdownCode(as, chunks, isStatic)));
+    tree.children.unshift(out.esm(out.markdownCode(as, value)));
     if (_data) file.data.markdown = out.toStatic(value);
   };
 }

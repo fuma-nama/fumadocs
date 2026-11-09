@@ -4,7 +4,7 @@ import { offsets, type PositionedNode } from './stringifier';
 import type { Analysis } from 'fumadocs-core/mdx-plugins/stringifier';
 import { stringifyHeadingId } from '../../shared/heading-id';
 import { createCodeOutput, type JsxElementNode } from './utils';
-import { keptElement, markdownCode } from '../../shared/code-output';
+import { keptElement } from '../../shared/code-output';
 
 export interface LLMsOptions {
   /**
@@ -71,13 +71,7 @@ export function remarkLlms({
       yaml: drop,
       toml: drop,
       heading: (node) =>
-        stringifyHeadingId(
-          out.s,
-          node,
-          headingIds,
-          offsets,
-          isStatic ? undefined : out.s.expression,
-        ),
+        stringifyHeadingId(out.s, node, headingIds, offsets, isStatic ? undefined : out.expression),
       mdxTextExpression: expression,
       mdxFlowExpression: expression,
       mdxJsxFlowElement: element,
@@ -85,11 +79,9 @@ export function remarkLlms({
       after(root, ctx) {
         const text = out.s.stringify(root).trim();
         const value = text ? `${text}\n` : '';
-        const chunks = out.chunks(value);
 
         if (isStatic) ctx.data.markdown ??= out.toStatic(value);
-        if (as)
-          ctx.prependChild(root, { type: 'mdxjsEsm', value: markdownCode(as, chunks, isStatic) });
+        if (as) ctx.prependChild(root, { type: 'mdxjsEsm', value: out.markdownCode(as, value) });
       },
     });
   };

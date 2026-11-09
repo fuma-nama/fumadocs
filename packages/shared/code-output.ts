@@ -48,15 +48,17 @@ interface CodeStringifier<N> {
 const markerRegex = /\0(\/?)(\d+)\0/g;
 
 /**
- * A stringifier whose output can have parts rendered from code: replacements mark them, `chunks()` splits the output on
+ * A stringifier whose output can have parts rendered from code: replacements mark them, `toCode()` splits the output on
  * their markers. Runtime outputs are functions of the props of the page, code reads them in render scope.
  *
  * @param isStatic - for static outputs: authored expressions keep their source, the content of every branch shows
+ * @param literal - the code of a string
  */
 export function createCodeOutput<N extends CodeNode, S extends CodeStringifier<N>>(
   createStringifier: (expression: (code: string, fallback: string) => string) => S,
   range: (node: N) => { start: number; end: number } | undefined,
   isStatic = false,
+  literal: (text: string) => string = JSON.stringify,
 ) {
   const parts: CodePart[] = [];
   /** a value */
@@ -66,11 +68,50 @@ export function createCodeOutput<N extends CodeNode, S extends CodeStringifier<N
     const i = parts.push(part) - 1;
     return `\0${i}\0${content}\0/${i}\0`;
   };
-  const s = createStringifier((code, fallback) => mark({ code, fallback }));
+  const expression = (code: string, fallback: string) => mark({ code, fallback });
+  const s = createStringifier(expression);
+  const chunks = (text: string): Chunk[] => {
+    const root: Chunk[] = [];
+    const stack: Chunk[][] = [root];
+    /** a branch just closed, the whitespace after it goes with it */
+    let branch: Chunk[] | undefined;
+    let idx = 0;
+    const pushText = (end: number) => {
+      let value = text.slice(idx, end);
+      if (branch) {
+        const lead = /^\s*/.exec(value)![0];
+        if (lead.includes('\n')) {
+          branch.push(lead);
+          value = value.slice(lead.length);
+        }
+        branch = undefined;
+      }
+      if (value) stack.at(-1)!.push(value);
+    };
+
+    for (const match of text.matchAll(markerRegex)) {
+      pushText(match.index);
+      idx = match.index + match[0].length;
+      const part = parts[Number(match[2])];
+      if (match[1]) {
+        const children = stack.pop()!;
+        stack.at(-1)!.push({ ...part, children } as Chunk);
+        if ('when' in part) branch = children;
+      } else if ('code' in part) {
+        stack.at(-1)!.push(part);
+      } else {
+        stack.push([]);
+      }
+    }
+    pushText(text.length);
+    return root;
+  };
 
   return {
     s,
     wrap,
+    /** mark the code of a value, `fallback` in static outputs */
+    expression,
     /** the output without code: expressions as their fallbacks, branches unwrapped */
     toStatic(text: string): string {
       return text.replace(markerRegex, (_, close: string, i: string) => {
@@ -78,41 +119,29 @@ export function createCodeOutput<N extends CodeNode, S extends CodeStringifier<N
         return !close && 'fallback' in part ? part.fallback : '';
       });
     },
-    chunks(text: string): Chunk[] {
-      const root: Chunk[] = [];
-      const stack: Chunk[][] = [root];
-      /** a branch just closed, the whitespace after it goes with it */
-      let branch: Chunk[] | undefined;
-      let idx = 0;
-      const pushText = (end: number) => {
-        let value = text.slice(idx, end);
-        if (branch) {
-          const lead = /^\s*/.exec(value)![0];
-          if (lead.includes('\n')) {
-            branch.push(lead);
-            value = value.slice(lead.length);
-          }
-          branch = undefined;
-        }
-        if (value) stack.at(-1)!.push(value);
-      };
-
-      for (const match of text.matchAll(markerRegex)) {
-        pushText(match.index);
-        idx = match.index + match[0].length;
-        const part = parts[Number(match[2])];
-        if (match[1]) {
-          const children = stack.pop()!;
-          stack.at(-1)!.push({ ...part, children } as Chunk);
-          if ('when' in part) branch = children;
-        } else if ('code' in part) {
-          stack.at(-1)!.push(part);
-        } else {
-          stack.push([]);
-        }
+    /** the output as one value: a string without parts, a fragment otherwise */
+    toCode: (text: string) => chunksToCode(chunks(text), literal),
+    /**
+     * The export of Markdown, a component rendered with `renderToMarkdown()` of `fumadocs-core/server`, or the string
+     * of static Markdown, code of plugins is concatenated
+     */
+    markdownCode(as: string, text: string): string {
+      const list = chunks(text);
+      if (isStatic) {
+        let out = '';
+        for (const chunk of list)
+          out += `${out ? ' + ' : ''}${typeof chunk === 'string' ? literal(chunk) : `(${(chunk as { code: string }).code})`}`;
+        return `export const ${as} = ${out || '""'};`;
       }
-      pushText(text.length);
-      return root;
+      const elements = hasElement(list);
+      return [
+        `import { asMarkdown as _asMarkdown${elements ? ', jsxComponents as _jsxComponents' : ''} } from "fumadocs-core/server";`,
+        `export function ${as}(props) {`,
+        '  if (!_asMarkdown()) return null;',
+        ...(elements ? ['  const _c = _jsxComponents(props.components);'] : []),
+        `  return ${chunksToCode(list, literal)};`,
+        '}',
+      ].join('\n');
     },
     /**
      * Mark a node rendered from code: an authored expression, or a branch of `<show>` checked when rendering.
@@ -200,7 +229,7 @@ export function createStructuredRecords() {
   /** `code` is the ID as code */
   const headings: { id: string; code?: string; content: string; when: string[] }[] = [];
   const contents: (StructuredContent & { when: string[]; after: number })[] = [];
-  type Output = Pick<ReturnType<typeof createCodeOutput>, 'toStatic' | 'chunks'>;
+  type Output = Pick<ReturnType<typeof createCodeOutput>, 'toStatic' | 'toCode'>;
   const idOf = (i: number) => headings[i].code ?? JSON.stringify(headings[i].id);
 
   /**
@@ -239,14 +268,14 @@ export function createStructuredRecords() {
         const { content, when } = headings[i];
         if (content)
           headingList.push({
-            code: `{id: ${idOf(i)}, content: ${chunksToCode(out.chunks(content))}}`,
+            code: `{id: ${idOf(i)}, content: ${out.toCode(content)}}`,
             when,
           });
       }
       const contentList: { code: string; when: string[] }[] = [];
       for (const { when, after, heading, table, content } of contents) {
         let code = `{heading: ${heading === undefined ? headingOf(when, after) : JSON.stringify(heading)}`;
-        code += `, content: ${chunksToCode(out.chunks(content))}`;
+        code += `, content: ${out.toCode(content)}`;
         if (table) code += `, table: ${JSON.stringify(table)}`;
         contentList.push({ code: `${code}}`, when });
       }
@@ -271,54 +300,33 @@ export function guardedArray(items: { code: string; when: string[] }[]): string 
   return `${out}]`;
 }
 
-/** the chunks as one value: a string without parts, a fragment otherwise */
-export function chunksToCode(chunks: Chunk[]): string {
+function chunksToCode(chunks: Chunk[], literal: (text: string) => string): string {
   let text = '';
   for (const chunk of chunks) {
-    if (typeof chunk !== 'string') return `<>${chunksToJsx(chunks)}</>`;
+    if (typeof chunk !== 'string') return `<>${chunksToJsx(chunks, literal)}</>`;
     text += chunk;
   }
-  return JSON.stringify(text);
+  return literal(text);
 }
 
-function chunksToJsx(chunks: Chunk[]): string {
+function chunksToJsx(chunks: Chunk[], literal: (text: string) => string): string {
   let out = '';
   for (const chunk of chunks) {
-    if (typeof chunk === 'string') out += `{${JSON.stringify(chunk)}}`;
+    if (typeof chunk === 'string') out += `{${literal(chunk)}}`;
     else if ('code' in chunk) out += `{${chunk.code}}`;
     else if ('when' in chunk)
-      out += `{(${chunk.when}) ? <>${chunksToJsx(chunk.children)}</> : null}`;
+      out += `{(${chunk.when}) ? <>${chunksToJsx(chunk.children, literal)}</> : null}`;
     else {
       const { open, name, inline, children } = chunk;
       const element =
-        children.length > 0 ? `${open}>${chunksToJsx(children)}</_c.${name}>` : `${open} />`;
+        children.length > 0
+          ? `${open}>${chunksToJsx(children, literal)}</_c.${name}>`
+          : `${open} />`;
       // keep inline elements in inline context when rendered
       out += inline ? `<span>${element}</span>` : element;
     }
   }
   return out;
-}
-
-/**
- * The export of Markdown, a component rendered with `renderToMarkdown()` of `fumadocs-core/server`, or the string of
- * static Markdown, code of plugins is concatenated
- */
-export function markdownCode(as: string, chunks: Chunk[], isStatic = false): string {
-  if (isStatic) {
-    let out = '';
-    for (const chunk of chunks)
-      out += `${out ? ' + ' : ''}${typeof chunk === 'string' ? JSON.stringify(chunk) : `(${(chunk as { code: string }).code})`}`;
-    return `export const ${as} = ${out || '""'};`;
-  }
-  const elements = hasElement(chunks);
-  return [
-    `import { asMarkdown as _asMarkdown${elements ? ', jsxComponents as _jsxComponents' : ''} } from "fumadocs-core/server";`,
-    `export function ${as}(props) {`,
-    '  if (!_asMarkdown()) return null;',
-    ...(elements ? ['  const _c = _jsxComponents(props.components);'] : []),
-    `  return ${chunksToCode(chunks)};`,
-    '}',
-  ].join('\n');
 }
 
 function hasElement(chunks: Chunk[]): boolean {
