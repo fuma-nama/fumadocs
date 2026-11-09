@@ -128,6 +128,13 @@ interface VirtualPage<Data extends PageData> extends BaseVirtualFile {
   data: Data;
   /** for a file of a dynamic path, like `[framework]/deploy.mdx`, the data of its page at some params */
   dataAt?: (params: Params) => Data;
+  /**
+   * The data of the page with props passed to its content, for `getPage(slugs, { props })`. Like the content, its
+   * outputs render for the props, with the path params of the page.
+   *
+   * @param data - the data of the page, after the plugins of the loader
+   */
+  withProps?(data: Data, props: Record<string, unknown>, params: Params): Data;
 }
 
 interface VirtualMeta<Data extends MetaData> extends BaseVirtualFile {

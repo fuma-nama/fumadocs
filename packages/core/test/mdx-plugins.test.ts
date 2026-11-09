@@ -37,7 +37,7 @@ import {
   replaceSource,
 } from '@/mdx-plugins/stringifier';
 import { walk } from '@/mdx-plugins/utils';
-import { renderStructuredData, type StructuredDataNodes } from '../../shared/structured-data';
+import { trimStructuredData } from '../../shared/structured-data';
 
 const cwd = path.dirname(fileURLToPath(import.meta.url));
 
@@ -748,6 +748,34 @@ test('Remark LLMs: placeholder', async () => {
   ).toMatchFileSnapshot(path.resolve(cwd, './fixtures/remark-llms.output.md'));
 });
 
+test('Remark LLMs: placeholders with runtime analysis', async () => {
+  const { compile, run } = await import('@mdx-js/mdx');
+  const runtime = await import('react/jsx-runtime');
+  const server = await import('@/server');
+  const code = await compile(
+    {
+      value: 'For {props.name}.\n\n<MyPage title="Hi">Body</MyPage>\n',
+      data: { _analysis: 'runtime' },
+    },
+    {
+      outputFormat: 'function-body',
+      baseUrl: import.meta.url,
+      remarkPlugins: [[remarkLLMs, { mdxAsPlaceholder: ['MyPage'] }]],
+    },
+  );
+  const body = String(code).replace(
+    /await import\([^)]*"fumadocs-core\/server"\)\)?/g,
+    'arguments[0]._server',
+  );
+  const { _markdown } = await run(body, { ...runtime, _server: server } as never);
+  const markdown = await server.renderToMarkdown(runtime.jsx(_markdown as never, { name: 'Fuma' }));
+  await expect(
+    renderPlaceholder(markdown, {
+      MyPage: ({ attributes, children }) => `${attributes.title}: ${children}`,
+    }),
+  ).resolves.toBe('For Fuma.\n\nHi: Body');
+});
+
 test('Remark Show: branches and expressions render from code in every output', async () => {
   const { compile, run } = await import('@mdx-js/mdx');
   const runtime = await import('react/jsx-runtime');
@@ -815,13 +843,13 @@ After the branch.
   const mod = await run(body, { ...runtime, _server: server } as never);
   type Page = {
     toc: (props: object) => { url: string }[];
-    structuredData: (props: object) => StructuredDataNodes;
+    structuredData: (props: object) => StructuredData;
     _markdown: (props: object) => unknown;
   };
   const page = mod as unknown as Page;
   const outputs = async (props: object) => ({
     toc: page.toc(props).map((item) => item.url),
-    structured: await renderStructuredData(page.structuredData(props)),
+    structured: trimStructuredData(page.structuredData(props)),
     markdown: await renderToMarkdown(runtime.jsx(page._markdown as never, props)),
     html: renderToStaticMarkup(runtime.jsx(mod.default, props)),
   });

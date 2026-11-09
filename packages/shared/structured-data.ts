@@ -1,34 +1,15 @@
-import type { ReactNode } from 'react';
-import type {
-  StructuredData,
-  StructuredDataContent,
-} from 'fumadocs-core/mdx-plugins/remark-structure';
+import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
 
-/** structured data whose content renders from code, from `remarkStructure` for pages that read their props */
-export interface StructuredDataNodes {
-  headings: { id: string; content: ReactNode }[];
-  contents: (Omit<StructuredDataContent, 'content'> & { content: ReactNode })[];
-}
-
-/** content rendered from code becomes Markdown, empty records are left out */
-export async function renderStructuredData({
-  headings,
-  contents,
-}: StructuredDataNodes): Promise<StructuredData> {
-  const { renderToMarkdown } = await import('fumadocs-core/server');
-  async function render<T extends { content: ReactNode }>(list: T[]) {
-    const out: (T & { content: string })[] = [];
-    const rendered = await Promise.all(
-      list.map((item) =>
-        typeof item.content === 'string' ? item.content : renderToMarkdown(item.content),
-      ),
-    );
-    for (let i = 0; i < list.length; i++) {
-      const content = rendered[i].trim();
-      if (content) out.push({ ...list[i], content });
+/** structured data rendered for the props of a page: content is trimmed, empty records are left out */
+export function trimStructuredData({ headings, contents }: StructuredData): StructuredData {
+  function trim<T extends { content: string }>(list: T[]): T[] {
+    const out: T[] = [];
+    for (const item of list) {
+      const content = item.content.trim();
+      if (content) out.push({ ...item, content });
     }
     return out;
   }
 
-  return { headings: await render(headings), contents: await render(contents) };
+  return { headings: trim(headings), contents: trim(contents) };
 }

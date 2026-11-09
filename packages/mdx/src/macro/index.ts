@@ -10,8 +10,6 @@ import type { ExtractedReference, PostprocessOptions } from '@/loaders/mdx/remar
 export type { ExtractedReference } from '@/loaders/mdx/remark-postprocess';
 import type { SatteriOptionsInput } from '@/loaders/mdx/build-satteri';
 import type { Analysis } from 'fumadocs-core/mdx-plugins/stringifier';
-import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
-import type { TOCItemType } from 'fumadocs-core/toc';
 import type {
   MacroAsyncDocCollection,
   MacroAsyncDocsCollection,
@@ -29,25 +27,13 @@ type DocMacroFlags = {
   schema: StandardSchemaV1;
   async: boolean;
   lastModified: boolean;
-  analysis: Analysis;
 };
-
-type Props = Record<string, unknown>;
 
 type GetExtras<T extends DocMacroFlags> = (T['lastModified'] extends true
   ? { lastModified?: Date | undefined }
-  : unknown) &
-  (T['analysis'] extends 'runtime'
-    ? {
-        toc: (props?: Props) => TOCItemType[];
-        structuredData: (props?: Props) => Promise<StructuredData>;
-        extractedReferences?: (props?: Props) => ExtractedReference[];
-      }
-    : {
-        toc: TOCItemType[];
-        structuredData: StructuredData;
-        extractedReferences?: ExtractedReference[];
-      });
+  : unknown) & {
+  extractedReferences?: ExtractedReference[];
+};
 
 export interface DocMacroOptions<T extends DocMacroFlags = DocMacroFlags> {
   /**
@@ -82,14 +68,12 @@ export interface DocMacroOptions<T extends DocMacroFlags = DocMacroFlags> {
   postprocess?: Partial<PostprocessOptions>;
 
   /**
-   * The analysis of the TOC, structured data, processed Markdown and extracted references: `runtime` makes them
-   * functions of the props of a page.
+   * The analysis of the outputs of a page: its table of contents, structured data, processed Markdown and extracted
+   * references. `runtime` renders them for the props of the page, `static` analyses them from the source.
    *
-   * Must be statically analyzable (string literal).
-   *
-   * @defaultValue 'static'
+   * @defaultValue 'runtime'
    */
-  analysis?: T['analysis'];
+  analysis?: Analysis;
 
   schema?: CollectionSchema<T['schema'], MacroSchemaContext>;
 
@@ -165,7 +149,6 @@ export function defineDocs<
   MetaSchema extends StandardSchemaV1 = typeof metaSchema,
   const Async extends boolean = false,
   const LastModified extends boolean = false,
-  const A extends Analysis = 'static',
 >(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars -- compiled away by the bundler plugin
   options?: DefineDocsOptions<
@@ -173,7 +156,6 @@ export function defineDocs<
       schema: DocSchema;
       async: Async;
       lastModified: LastModified;
-      analysis: A;
     },
     MetaSchema
   >,
@@ -187,7 +169,6 @@ export function defineDocs<
             schema: DocSchema;
             async: Async;
             lastModified: LastModified;
-            analysis: A;
           }>
         >
       : MacroDocsCollection<
@@ -197,7 +178,6 @@ export function defineDocs<
             schema: DocSchema;
             async: Async;
             lastModified: LastModified;
-            analysis: A;
           }>
         >
     : never
@@ -213,13 +193,11 @@ export function defineCollections<
   DocSchema extends StandardSchemaV1 = StandardSchemaV1,
   const Async extends boolean = false,
   const LastModified extends boolean = false,
-  const A extends Analysis = 'static',
 >(
   options: DefineDocCollectionsOptions<{
     schema: DocSchema;
     async: Async;
     lastModified: LastModified;
-    analysis: A;
   }>,
 ): Async extends true
   ? MacroAsyncDocCollection<
@@ -228,7 +206,6 @@ export function defineCollections<
         schema: DocSchema;
         async: Async;
         lastModified: LastModified;
-        analysis: A;
       }>
     >
   : MacroDocCollection<
@@ -237,7 +214,6 @@ export function defineCollections<
         schema: DocSchema;
         async: Async;
         lastModified: LastModified;
-        analysis: A;
       }>
     >;
 

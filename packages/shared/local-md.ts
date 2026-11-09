@@ -3,7 +3,7 @@ import { pathToFileURL } from 'node:url';
 import type { StandardSchemaV1 } from '@standard-schema/spec';
 import { frontmatter as parseFrontmatter } from 'fumadocs-core/content/md/frontmatter';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
-import { renderStructuredData, type StructuredDataNodes } from './structured-data';
+import { trimStructuredData } from './structured-data';
 import { isDynamicPath, type MetaData, type PageData, type Params } from 'fumadocs-core/source';
 import * as defaultSchemas from 'fumadocs-core/source/schema';
 import { createLocalSource, type SourceFile } from '@fumadocs/local-content';
@@ -118,10 +118,10 @@ export function createMarkdownSource<
         // Markdown has no code, and rendering it renders the body
         if (!file.path.endsWith('.mdx')) return renderer.structuredData;
         const { structuredData } = (await renderer.render()).exports as {
-          structuredData?: (props: Params) => StructuredDataNodes;
+          structuredData?: (props: Params) => StructuredData;
         };
         return structuredData
-          ? renderStructuredData(structuredData(params ?? {}))
+          ? trimStructuredData(structuredData(params ?? {}))
           : renderer.structuredData;
       },
     };

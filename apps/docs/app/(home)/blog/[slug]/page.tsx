@@ -27,7 +27,7 @@ export default async function Page(props: PageProps<'/blog/[slug]'>) {
   const { body: Mdx, toc } = await page.data.load();
 
   return (
-    <BlogPage toc={toc()}>
+    <BlogPage toc={toc}>
       <BlogHeader>
         <BlogBackLink href="/blog" />
         <BlogTitle>{post.title}</BlogTitle>

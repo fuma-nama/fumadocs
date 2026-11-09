@@ -48,7 +48,7 @@ interface CodeStringifier<N> {
 const markerRegex = /\0(\/?)(\d+)\0/g;
 
 /**
- * A stringifier whose output can have parts rendered from code: replacements mark them, `toCode()` splits the output on
+ * A stringifier whose output can have parts rendered from code: replacements mark them, `toText()` splits the output on
  * their markers. Runtime outputs are functions of the props of the page, code reads them in render scope.
  *
  * @param isStatic - for static outputs: authored expressions keep their source, the content of every branch shows
@@ -120,7 +120,8 @@ export function createCodeOutput<N extends CodeNode, S extends CodeStringifier<N
       });
     },
     /** the output as one value: a string without parts, a fragment otherwise */
-    toCode: (text: string) => chunksToCode(chunks(text), literal),
+    /** the output as the code of a string, for text like search records */
+    toText: (text: string) => chunksToText(chunks(text), literal),
     /**
      * The export of Markdown, a component rendered with `renderToMarkdown()` of `fumadocs-core/server`, or the string
      * of static Markdown, code of plugins is concatenated
@@ -266,7 +267,7 @@ export function createStructuredRecords() {
   /** `code` is the ID as code */
   const headings: { id: string; code?: string; content: string; when: string[] }[] = [];
   const contents: (StructuredContent & { when: string[]; after: number })[] = [];
-  type Output = Pick<ReturnType<typeof createCodeOutput>, 'toStatic' | 'toCode'>;
+  type Output = Pick<ReturnType<typeof createCodeOutput>, 'toStatic' | 'toText'>;
   const idOf = (i: number) => headings[i].code ?? JSON.stringify(headings[i].id);
 
   /**
@@ -305,14 +306,14 @@ export function createStructuredRecords() {
         const { content, when } = headings[i];
         if (content)
           headingList.push({
-            code: `{id: ${idOf(i)}, content: ${out.toCode(content)}}`,
+            code: `{id: ${idOf(i)}, content: ${out.toText(content)}}`,
             when,
           });
       }
       const contentList: { code: string; when: string[] }[] = [];
       for (const { when, after, heading, table, content } of contents) {
         let code = `{heading: ${heading === undefined ? headingOf(when, after) : JSON.stringify(heading)}`;
-        code += `, content: ${out.toCode(content)}`;
+        code += `, content: ${out.toText(content)}`;
         if (table) code += `, table: ${JSON.stringify(table)}`;
         contentList.push({ code: `${code}}`, when });
       }
@@ -335,6 +336,21 @@ export function guardedArray(items: { code: string; when: string[] }[]): string 
     out += test ? `...(${test} ? [${code}] : []),` : `${code},`;
   }
   return `${out}]`;
+}
+
+/** the chunks as the code of a string, like React, values other than strings and numbers render nothing */
+function chunksToText(chunks: Chunk[], literal: (text: string) => string): string {
+  if (chunks.every((chunk) => typeof chunk === 'string')) return literal(chunks.join(''));
+  const parts: string[] = [];
+  for (const chunk of chunks) {
+    if (typeof chunk === 'string') parts.push(literal(chunk));
+    else if ('code' in chunk)
+      parts.push(`((v) => typeof v === "string" || typeof v === "number" ? v : "")(${chunk.code})`);
+    else if ('when' in chunk)
+      parts.push(`((${chunk.when}) ? ${chunksToText(chunk.children, literal)} : "")`);
+    else parts.push(chunksToText(chunk.children, literal));
+  }
+  return `[${parts.join(', ')}].join("")`;
 }
 
 function chunksToCode(chunks: Chunk[], literal: (text: string) => string): string {

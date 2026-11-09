@@ -14,7 +14,7 @@ export function ServerComponent({ params }: Route.ComponentProps) {
 
   return (
     <DocsLayout {...baseOptions()} tree={source.getPageTree()}>
-      <DocsPage toc={page.data.toc()}>
+      <DocsPage toc={page.data.toc}>
         <title>{page.data.title}</title>
         <meta name="description" content={page.data.description} />
         <DocsTitle>{page.data.title}</DocsTitle>

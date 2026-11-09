@@ -187,40 +187,35 @@ test('static analysis of a collection with its own options', async () => {
   }
 });
 
-test('runtime outputs bind the params of a page and take custom props', async () => {
-  const { pageAt } = await import('@/utils/page');
-  const page = pageAt(
-    {
-      frontmatter: {},
-      default: () => null,
-      toc: (props) => [{ title: `${props.framework} ${props.name}`, url: '#a', depth: 2 }],
-      structuredData: (props) => ({
-        headings: [{ id: 'a', content: `${props.framework} ${props.name}` }],
-        contents: [],
-      }),
-    },
-    { framework: 'next' },
-  );
-  if (typeof page.toc !== 'function' || typeof page.structuredData !== 'function')
-    throw new Error('expected runtime outputs');
-  expect(page.toc({ name: 'Fuma' })[0].title).toBe('next Fuma');
-  expect((await page.structuredData({ name: 'Fuma' })).headings[0].content).toBe('next Fuma');
-
-  // processed Markdown takes them too
-  const { server, docAt } = await import('@/runtime/server');
+test('custom props of getPage render the content and outputs of a page', async () => {
+  const { server, toFumadocsSource: toSource } = await import('@/runtime/server');
   const { asMarkdown } = await import('fumadocs-core/server');
+  type Props = Record<string, string>;
   const create = server<{ docs: DocCollection }, { DocData: { docs: object } }>();
-  const [entry] = await create.doc('docs', '', {
-    'index.mdx': {
-      frontmatter: {},
+  const docs = await create.doc('docs', '', {
+    '[framework]/index.mdx': {
+      frontmatter: { title: 'Home', staticParams: [{ framework: 'next' }] },
       default: () => null,
-      toc: [],
-      structuredData: { headings: [], contents: [] },
-      // like the compiled component of `remarkLLMs`
-      _markdown: (props: Record<string, string>) =>
-        asMarkdown() ? `${props.framework} ${props.name}` : null,
+      // like the outputs of runtime analysis
+      toc: (props: Props) => [{ title: `${props.framework} ${props.name}`, url: '#a', depth: 2 }],
+      structuredData: (props: Props) => ({
+        headings: [{ id: 'a', content: ` ${props.framework} ${props.name} ` }],
+        contents: [{ heading: 'a', content: ' ' }],
+      }),
+      _markdown: (props: Props) => (asMarkdown() ? `${props.framework} ${props.name}` : null),
     },
   });
-  const at = docAt(entry, { framework: 'next' });
-  await expect(at.getText('processed', { props: { name: 'Fuma' } })).resolves.toBe('next Fuma');
+  const source = loader({ baseUrl: '/', source: toSource(docs, []) });
+
+  // the outputs are values for the path params
+  expect(source.getPage(['next'])?.data.toc[0].title).toBe('next undefined');
+  const page = source.getPage(['next'], { props: { name: 'Fuma' } })!;
+  expect(page.url).toBe('/next');
+  expect(page.data.toc[0].title).toBe('next Fuma');
+  // records are trimmed, empty ones are left out
+  expect(page.data.structuredData).toEqual({
+    headings: [{ id: 'a', content: 'next Fuma' }],
+    contents: [],
+  });
+  await expect(page.data.getText('processed')).resolves.toBe('next Fuma');
 });

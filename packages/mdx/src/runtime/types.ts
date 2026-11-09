@@ -10,14 +10,14 @@ export interface DocData {
   body: MDXContent;
 
   /**
-   * table of contents generated from content, a function of the props with `analysis: 'runtime'`.
+   * table of contents generated from content.
    */
-  toc: TOCItemType[] | ((props?: Record<string, unknown>) => TOCItemType[]);
+  toc: TOCItemType[];
 
   /**
-   * structured data for document search indexing, a function of the props with `analysis: 'runtime'`.
+   * structured data for document search indexing.
    */
-  structuredData: StructuredData | ((props?: Record<string, unknown>) => Promise<StructuredData>);
+  structuredData: StructuredData;
 
   /**
    * Raw exports from the compiled MDX file.
@@ -42,8 +42,6 @@ export interface GetTextOptions {
    * MDX components for JSX elements in the output, with the runtime analysis of `includeProcessedMarkdown`.
    */
   components?: MDXComponents;
-  /** the props you pass to the content of the page, with the runtime analysis of `includeProcessedMarkdown` */
-  props?: Record<string, unknown>;
 }
 
 export interface DocMethods {

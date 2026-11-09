@@ -1,5 +1,4 @@
 import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
-import type { StructuredDataNodes } from '../../../../shared/structured-data';
 import type { ExtractedReference } from './remark-postprocess';
 import type { TOCItemType } from 'fumadocs-core/toc';
 import type { FC } from 'react';
@@ -31,7 +30,7 @@ export interface CompilerOptions {
 /** the exports of a compiled page, its content and runtime outputs read the params of a page as props */
 export interface CompiledMDXProperties<Frontmatter = Record<string, unknown>> {
   frontmatter: Frontmatter;
-  structuredData: StructuredData | ((props: Record<string, unknown>) => StructuredDataNodes);
+  structuredData: StructuredData | ((props: Record<string, unknown>) => StructuredData);
   toc: TOCItemType[] | ((props: Record<string, unknown>) => TOCItemType[]);
   default: FC<MDXProps>;
   extractedReferences?:

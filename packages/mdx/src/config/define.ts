@@ -33,10 +33,10 @@ export interface DocCollectionBase<
 > extends BaseCollection {
   postprocess?: Partial<PostprocessOptions>;
   /**
-   * The analysis of the TOC, structured data, processed Markdown and extracted references: `runtime` makes them
-   * functions of the props of a page, rendered for its path params and the props you pass.
+   * The analysis of the outputs of a page: its table of contents, structured data, processed Markdown and extracted
+   * references. `runtime` renders them for the props of the page, `static` analyses them from the source.
    *
-   * @defaultValue 'static'
+   * @defaultValue 'runtime'
    */
   analysis?: Analysis;
   async?: boolean;

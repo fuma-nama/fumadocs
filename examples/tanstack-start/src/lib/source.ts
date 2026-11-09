@@ -6,7 +6,6 @@ import { docsRoute } from './shared';
 export const docs = defineDocs({
   dir: 'content/docs',
   docs: {
-    analysis: 'runtime',
     async: true,
     postprocess: {
       includeProcessedMarkdown: true,

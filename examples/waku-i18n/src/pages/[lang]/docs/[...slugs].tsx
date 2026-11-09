@@ -22,7 +22,7 @@ export default function DocPage({ slugs, lang }: PageProps<'/[lang]/docs/[...slu
   const MDX = page.data.body;
   return (
     <DocsLayout {...baseOptions(lang)} tree={source.getPageTree(lang)}>
-      <DocsPage toc={page.data.toc()}>
+      <DocsPage toc={page.data.toc}>
         <DocsTitle>{page.data.title}</DocsTitle>
         <DocsDescription>{page.data.description}</DocsDescription>
         <DocsBody>

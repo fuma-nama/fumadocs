@@ -52,14 +52,10 @@ export default function mdxPlugin<Config extends LoaderConfig = LoaderConfig>({
       });
     },
     async getPageToc(page) {
-      if (!isEntry(page.data)) return;
-      const { toc } = await load(page.data);
-      return typeof toc === 'function' ? toc() : toc;
+      if (isEntry(page.data)) return (await load(page.data)).toc;
     },
     async getPageStructuredData(page) {
-      if (!isEntry(page.data)) return;
-      const { structuredData } = await load(page.data);
-      return typeof structuredData === 'function' ? structuredData() : structuredData;
+      if (isEntry(page.data)) return (await load(page.data)).structuredData;
     },
     getPageCreatedAt({ data }) {
       if (!isEntry(data) || !('date' in data)) return;

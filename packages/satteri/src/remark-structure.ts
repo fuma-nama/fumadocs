@@ -85,14 +85,12 @@ interface TableRecord {
   rows: TableRow[];
 }
 
-/** an item of a list in code, kept when its conditions hold */
 /**
  * Extract content into structured data, as Markdown sliced from the authored source. Links and JSX elements are
  * replaced by their content, images are removed.
  *
- * Authored expressions and the branches of `<show>` checked when rendering are rendered from code: the export is then
- * a function of the props that gives `StructuredDataNodes`. `ctx.data.structuredData` has the authored source of
- * expressions and every branch.
+ * With runtime analysis, the export is a function of the props, rendering authored expressions and the branches of
+ * `<show>` that show. `ctx.data.structuredData` has the authored source of expressions and every branch.
  */
 export function remarkStructure({
   types = ['heading', 'paragraph', 'blockquote', 'table', 'mdxJsxFlowElement', 'mdxFlowExpression'],

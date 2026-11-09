@@ -35,8 +35,6 @@ export interface LLMsOptions {
 
   /**
    * Tag names of MDX components to be output as placeholders, render them with `renderPlaceholder()`.
-   *
-   * For static output only.
    */
   mdxAsPlaceholder?: string[];
 
@@ -103,7 +101,7 @@ export function remarkLLMs({
           );
         } else if (isJsxElement(node) && node.name) {
           const element = !isStatic && keptElement(node);
-          if (isStatic && mdxAsPlaceholder?.includes(node.name))
+          if (mdxAsPlaceholder?.includes(node.name))
             s.replace(node, (s) => toPlaceholder(node, out.toStatic(s.inner(node))));
           else if (element)
             s.replace(node, (s) => {

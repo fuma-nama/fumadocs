@@ -58,7 +58,7 @@ async function checkLinks() {
 async function getHeadings(page: AnySource['$inferPage']): Promise<string[]> {
   if (page.type !== 'docs') return [];
   const { _exports, toc } = await page.data.load();
-  const headings = toc().map((item) => item.url.slice(1));
+  const headings = toc.map((item) => item.url.slice(1));
   const elementIds = _exports?.elementIds;
   if (Array.isArray(elementIds)) {
     headings.push(...elementIds);

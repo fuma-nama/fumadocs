@@ -4,10 +4,6 @@ import type { MDXComponents } from 'mdx/types';
 import type { ElementType, ReactNode } from 'react';
 import { Fragment, jsx, jsxs } from 'react/jsx-runtime';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
-import {
-  renderStructuredData as renderNodes,
-  type StructuredDataNodes,
-} from '../../shared/structured-data';
 import type { TOCItemType } from 'fumadocs-core/toc';
 import type { IslandNode } from './island';
 
@@ -117,7 +113,7 @@ type Render = (props: MarkdownProps) => Output;
 /** the outputs of a compiled page, functions of the params of a page */
 export interface PageOutputs {
   toc: (props: Record<string, unknown>) => TOCItemType[];
-  structuredData: (props: Record<string, unknown>) => StructuredDataNodes;
+  structuredData: (props: Record<string, unknown>) => StructuredData;
   /** with `includeProcessedMarkdown`, a string for static output */
   markdown?: string | Render;
   /** the MDX components of the content island */
@@ -133,13 +129,6 @@ export const pageOutputs = new Map<string, PageOutputs>();
 export async function renderMarkdown(render: Render, props: MarkdownProps): Promise<string> {
   const { renderToMarkdown } = await import('fumadocs-core/server');
   return renderToMarkdown(jsx(Markdown, { render, props }));
-}
-
-/** structured data with content rendered from code, as text */
-export async function renderStructuredData(data: StructuredDataNodes): Promise<StructuredData> {
-  const nodes = <T extends { content: ReactNode }>(items: T[]) =>
-    items.map((item) => ({ ...item, content: toReact(item.content as Output) }));
-  return renderNodes({ headings: nodes(data.headings), contents: nodes(data.contents) });
 }
 
 function Markdown({ render, props }: { render: Render; props: MarkdownProps }) {

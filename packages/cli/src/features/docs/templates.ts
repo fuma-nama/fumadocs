@@ -33,10 +33,7 @@ import { defineDocs } from 'fumadocs-mdx/macro';
 import { docsRoute } from './shared';
 ${i18n ? "import { i18n } from '@/lib/i18n';\n" : ''}
 export const docs = defineDocs({
-  dir: 'content/docs',
-  docs: {
-    analysis: 'runtime',${async ? '\n    async: true,' : ''}
-  },
+  dir: 'content/docs',${async ? '\n  docs: {\n    async: true,\n  },' : ''}
 });
 
 export const source = loader({
@@ -164,7 +161,7 @@ const clientContent = `function Content({ path }: { path: string }) {
   const MDX = page.body;
 
   return (
-    <DocsPage toc={toc()}>
+    <DocsPage toc={toc}>
       <DocsTitle>{page.title}</DocsTitle>
       <DocsDescription>{page.description}</DocsDescription>
       <DocsBody>
@@ -244,7 +241,7 @@ export default async function Page(props: PageProps<'${route}/docs/[[...slug]]'>
   const MDX = page.data.body;
 
   return (
-    <DocsPage toc={page.data.toc()} full={page.data.full}>
+    <DocsPage toc={page.data.toc} full={page.data.full}>
       <DocsTitle>{page.data.title}</DocsTitle>
       <DocsDescription>{page.data.description}</DocsDescription>
       <DocsBody>
@@ -313,7 +310,7 @@ export async function loader({ params }: Route.LoaderArgs) {
   };
 }
 
-${clientContent.replace('<DocsPage toc={toc()}>', '<DocsPage toc={toc()}>\n      <title>{page.title}</title>\n      <meta name="description" content={page.description} />')}
+${clientContent.replace('<DocsPage toc={toc}>', '<DocsPage toc={toc}>\n      <title>{page.title}</title>\n      <meta name="description" content={page.description} />')}
 
 export default function Page({ loaderData${i18n ? ', params' : ''} }: Route.ComponentProps) {
   const { path, pageTree } = useFumadocsLoader(loaderData);
@@ -440,7 +437,7 @@ export default function Page({ slug${i18n ? ', lang' : ''} }: PageProps<'${i18n 
 
   const MDX = page.data.body;
   const content = (
-    <DocsPage toc={page.data.toc()}>
+    <DocsPage toc={page.data.toc}>
       <DocsTitle>{page.data.title}</DocsTitle>
       <DocsDescription>{page.data.description}</DocsDescription>
       <DocsBody>

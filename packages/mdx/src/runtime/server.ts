@@ -34,7 +34,7 @@ export type AsyncDocCollectionEntry<
   TC extends InternalTypeConfig = InternalTypeConfig,
 > = {
   load: () => Promise<DocData & TC['DocData'][Name]>;
-  structuredData: (props?: Record<string, unknown>) => Promise<StructuredData>;
+  structuredData: () => Promise<StructuredData>;
 } & DocMethods &
   Frontmatter;
 
@@ -88,16 +88,9 @@ function toDocData(page: PageAt<CompiledMDXProperties>, exports: CompiledMDXProp
   return data;
 }
 
-async function resolveStructuredData(
-  data: DocData['structuredData'],
-  props?: Record<string, unknown>,
-) {
-  return typeof data === 'function' ? data(props) : data;
-}
-
-/** the page of compiled exports at params, with its doc data */
-function bind(exports: CompiledMDXProperties, params: Params) {
-  const page = pageAt(exports, params);
+/** the page of compiled exports for its props, with its doc data */
+function bind(exports: CompiledMDXProperties, props: Record<string, unknown>) {
+  const page = pageAt(exports, props);
   return { page, data: toDocData(page, exports) };
 }
 
@@ -160,8 +153,8 @@ export function server<Config, TC extends InternalTypeConfig>() {
             async load() {
               return bind(await content(), {}).data;
             },
-            async structuredData(props) {
-              return resolveStructuredData(bind(await content(), {}).page.structuredData, props);
+            async structuredData() {
+              return bind(await content(), {}).page.structuredData;
             },
           } satisfies AsyncDocCollectionEntry;
         }),
@@ -280,6 +273,7 @@ export function toFumadocsSource<
       absolutePath: entry.info.fullPath,
       data: entry,
       dataAt: (params) => docAt(entry, params),
+      withProps: (data, props, params) => createDocAt(entry, { ...params, ...props }, data),
     });
   }
 
@@ -306,7 +300,11 @@ export function docAt<Doc extends DocMethods>(doc: Doc, params: Params): Doc {
   let pages = docAtCache.get(doc);
   if (!pages) docAtCache.set(doc, (pages = new Map()));
   let page = pages.get(key) as Doc | undefined;
-  if (!page) pages.set(key, (page = createDocAt(doc, params, key)));
+  if (!page) {
+    // the frontmatter in code of each params
+    const frontmatter = (doc as { _frontmatterAt?: Record<string, object> })._frontmatterAt?.[key];
+    pages.set(key, (page = createDocAt(doc, params, { ...doc, ...frontmatter })));
+  }
   return page;
 }
 
@@ -319,16 +317,23 @@ function dataAt<Meta>(entry: Meta): ((params: Params) => Meta) | undefined {
   if (map) return (params) => ({ ...entry, ...(map[JSON.stringify(params)] ?? data?.(params)) });
 }
 
-function createDocAt<Doc extends DocMethods>(doc: Doc, params: Params, key: string): Doc {
-  // the frontmatter in code of each params
-  const frontmatter = (doc as { _frontmatterAt?: Record<string, object> })._frontmatterAt?.[key];
+/**
+ * The page of an entry for its props, the path params and custom props: its content and outputs render for them.
+ *
+ * @param base - the data of the page that the content and outputs replace
+ */
+function createDocAt<Doc extends DocMethods>(
+  doc: Doc,
+  props: Record<string, unknown>,
+  base: Doc,
+): Doc {
   const at = (data: { _exports?: Record<string, unknown> }) =>
-    bind(data._exports as unknown as CompiledMDXProperties, params);
+    bind(data._exports as unknown as CompiledMDXProperties, props);
   // eager entries have the exports, lazy entries load them, the macro has both
   const { load } = doc as { load?: () => Promise<DocData> };
   if (!load) {
     const { page, data } = at(doc as { _exports?: Record<string, unknown> });
-    return { ...doc, ...data, ...frontmatter, ...createDocMethods(doc.info, () => page) };
+    return { ...base, ...data, ...createDocMethods(doc.info, () => page) };
   }
 
   let loaded: ReturnType<typeof at> | undefined;
@@ -336,13 +341,11 @@ function createDocAt<Doc extends DocMethods>(doc: Doc, params: Params, key: stri
   let data: Promise<DocData> | undefined;
   const loadPage = () => (loading ??= load().then((data) => (loaded = at(data))));
   return {
-    ...doc,
-    ...frontmatter,
+    ...base,
     ...createDocMethods(doc.info, async () => (await loadPage()).page),
     // memoized, it can be called in render
     load: () => (data ??= loadPage().then((item) => item.data)),
-    structuredData: async (props?: Record<string, unknown>) =>
-      resolveStructuredData((await loadPage()).page.structuredData, props),
+    structuredData: async () => (await loadPage()).page.structuredData,
     ...('body' in doc && {
       preload: () => loadPage().then(() => undefined),
       // like the body of the macro, it renders synchronously when loaded
@@ -372,9 +375,7 @@ function createDocMethods(
       if (typeof markdown === 'string') return markdown;
       if (markdown) {
         const { renderToMarkdown } = await import('fumadocs-core/server');
-        return renderToMarkdown(
-          createElement(markdown, { ...options?.props, components: options?.components }),
-        );
+        return renderToMarkdown(createElement(markdown, { components: options?.components }));
       }
 
       throw new Error(

@@ -61,6 +61,7 @@ export const source = loader({ baseUrl: '/', source: docs.toFumadocsSource() });
     loader: true,
     dynamic: false,
     collections: 'lib/source.ts',
+    async: true,
     baseUrl: '/',
     dir: 'docs',
   });
@@ -77,6 +78,7 @@ export const source = loader({ baseUrl: docsRoute, source: docs.toFumadocsSource
   });
   expect(baseDir).toBe('src');
   expect(source.collections).toBe('source.config.ts');
+  expect(source.async).toBe(false);
   expect(source.baseUrl).toBe('/guide');
 });
 
@@ -102,6 +104,7 @@ export const source = loader({
     loader: true,
     dynamic: false,
     collections: 'astro.config.mjs',
+    async: true,
     baseUrl: '/guide',
     dir: 'content/guide',
   });

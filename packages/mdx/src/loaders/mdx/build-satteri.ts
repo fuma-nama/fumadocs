@@ -34,7 +34,8 @@ export async function buildSatteriMDX(
     _compiler,
     _cwd: collection?.cwd,
     _valueToExport: collection?.postprocess?.valueToExport,
-    _analysis: collection?.analysis,
+    // collections render their outputs for the props of a page by default
+    _analysis: collection && (collection.analysis ?? 'runtime'),
   };
 
   const mdastPlugins: MdastPluginInput[] = [remarkInclude({ cwd: collection?.cwd })];

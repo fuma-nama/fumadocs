@@ -78,7 +78,8 @@ export async function buildJSMDX(
     value: source,
     path: filePath,
     cwd: collection?.cwd,
-    data: { frontmatter, _compiler, _analysis: collection?.analysis },
+    // collections render their outputs for the props of a page by default
+    data: { frontmatter, _compiler, _analysis: collection && (collection.analysis ?? 'runtime') },
   });
 
   if (collection) {

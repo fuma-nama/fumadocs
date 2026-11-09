@@ -7,7 +7,8 @@ import { root } from 'virtual:fumadocs/config';
 import type { MetaData, PageData, Params, StaticSource, VirtualFile } from 'fumadocs-core/source';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
 import type { TOCItemType } from 'fumadocs-core/toc';
-import { pageOutputs, renderMarkdown, renderStructuredData, type PageOutputs } from './mdx-runtime';
+import { pageOutputs, renderMarkdown, type PageOutputs } from './mdx-runtime';
+import { trimStructuredData } from '../../shared/structured-data';
 import { dataKey } from './shared';
 
 /** an entry of Astro content collections */
@@ -39,13 +40,9 @@ export interface DocData {
 }
 
 export type AstroPageData<Entry extends PageEntry = PageEntry> = Entry['data'] & {
-  /**
-   * the content, rendered with `render()` of `astro:content`, and its outputs
-   *
-   * @param props - the props you pass to the content, the outputs render for them with the path params
-   */
-  load: (props?: Record<string, unknown>) => Promise<DocData>;
-  structuredData: (props?: Record<string, unknown>) => Promise<StructuredData>;
+  /** the content, rendered with `render()` of `astro:content` */
+  load: () => Promise<DocData>;
+  structuredData: () => Promise<StructuredData>;
   /**
    * Get the content of page:
    * - `raw`: the source file, without frontmatter.
@@ -65,8 +62,6 @@ export interface GetTextOptions {
    * @defaultValue the MDX components of the collection
    */
   components?: MDXComponents;
-  /** the props you pass to the content of the page, with the runtime analysis of `includeProcessedMarkdown` */
-  props?: Record<string, unknown>;
 }
 
 /** the config of the source from `toFumadocsSource()` */
@@ -101,14 +96,26 @@ export function toFumadocsSource<Page extends PageEntry, Meta extends MetaEntry>
       absolutePath: entry.filePath && path.resolve(root, entry.filePath),
       data: pageData(entry),
       dataAt: (params) => pageData(entry, params),
+      withProps(data, props, params) {
+        const { load, structuredData, getText } = pageData(entry, params, props);
+        return { ...data, load, structuredData, getText };
+      },
     });
   for (const entry of meta) files.push({ type: 'meta', path: entry.id, data: entry.data });
   return { files, baseDir: options?.baseDir };
 }
 
-/** @param params - for a page of a dynamic file, the params that its content and outputs read as props */
-function pageData<Entry extends PageEntry>(entry: Entry, params?: Params): AstroPageData<Entry> {
-  const props = params ?? {};
+/**
+ * @param params - for a page of a dynamic file, the params that its content and outputs read as props
+ * @param custom - the custom props passed to the content, the outputs render for them too
+ */
+function pageData<Entry extends PageEntry>(
+  entry: Entry,
+  params?: Params,
+  custom?: Record<string, unknown>,
+): AstroPageData<Entry> {
+  const props = { ...params, ...custom };
+  const bound = Object.keys(props).length > 0;
   async function compile(): Promise<{ Content: AstroComponentFactory; outputs: PageOutputs }> {
     // `render()` is typed by `astro sync` of projects, it imports the module that registers the outputs
     const { Content, remarkPluginFrontmatter } = await render(entry);
@@ -119,41 +126,34 @@ function pageData<Entry extends PageEntry>(entry: Entry, params?: Params): Astro
       );
     return { Content, outputs };
   }
-  const structuredData = (outputs: PageOutputs, own?: Record<string, unknown>) =>
-    renderStructuredData(outputs.structuredData({ ...props, ...own }));
 
   return {
     ...entry.data,
     // the frontmatter in code of each params
     ...(params && entry.data._frontmatterAt?.[JSON.stringify(params)]),
-    async load(own?: Record<string, unknown>) {
+    async load() {
       const { Content, outputs } = await compile();
-      const { toc } = outputs;
       return {
-        body: params
+        body: bound
           ? Object.assign(
               (...[result, own, slots]: Parameters<AstroComponentFactory>) =>
-                Content(result, { ...params, ...own }, slots),
+                Content(result, { ...props, ...own }, slots),
               Content,
             )
           : Content,
-        toc: toc({ ...props, ...own }),
-        structuredData: await structuredData(outputs, own),
+        toc: outputs.toc(props),
+        structuredData: trimStructuredData(outputs.structuredData(props)),
       };
     },
-    async structuredData(own?: Record<string, unknown>) {
-      return structuredData((await compile()).outputs, own);
+    async structuredData() {
+      return trimStructuredData((await compile()).outputs.structuredData(props));
     },
     async getText(type, options) {
       if (type === 'raw') return entry.body ?? '';
       const { markdown, components } = (await compile()).outputs;
       if (markdown === undefined) throw new NoProcessedMarkdownError();
       if (typeof markdown === 'string') return markdown;
-      return renderMarkdown(markdown, {
-        ...props,
-        ...options?.props,
-        components: options?.components ?? components,
-      });
+      return renderMarkdown(markdown, { ...props, components: options?.components ?? components });
     },
   };
 }
