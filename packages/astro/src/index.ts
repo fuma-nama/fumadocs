@@ -86,26 +86,26 @@ export interface FumadocsOptions extends CollectionOptions {
   collections?: Record<string, CollectionConfig>;
 }
 
-/** code blocks are renamed in mdast, so the syntax highlighter of Astro skips them */
-const hiddenPre = 'fumadocs-pre';
+/** the `<code>` of code blocks is renamed in mdast, so the syntax highlighter of Astro skips them */
+const hiddenCode = 'fumadocs-code';
 
 const hideCode: MdastPluginDefinition = {
   name: 'fumadocs-astro-hide-code',
   code(node, ctx) {
     // `hName` of mdast-util-to-hast, not in the types of Sätteri
     const data = node.data as { hName?: string } | undefined;
-    if (!data?.hName) ctx.setProperty(node, 'data', { ...data, hName: hiddenPre });
+    if (!data?.hName) ctx.setProperty(node, 'data', { ...data, hName: hiddenCode });
   },
 };
 
 const restoreCode: HastPluginDefinition = {
   name: 'fumadocs-astro-restore-code',
   element: {
-    filter: [hiddenPre],
+    filter: [hiddenCode],
     visit(node, ctx) {
       ctx.replaceNode(node, {
         type: 'element',
-        tagName: 'pre',
+        tagName: 'code',
         properties: node.properties,
         children: node.children,
       });
