@@ -147,7 +147,12 @@ Unlike `mdxOptions`, the collection-level `satteriOptions` keeps the default pre
 
 ### `analysis`
 
-By default, structured data, the table of contents, processed Markdown and extracted references are rendered for the props of each page, like `<show>` branches. Use `static` for values analysed from the source instead: expressions keep their source and every branch shows.
+> This API is only available on `doc` type.
+
+How Fumadocs MDX generates the table of contents, structured data, processed Markdown and extracted references of a page:
+
+- `runtime` (default): rendered for the props of the page, so they only include the `<show>` branches that show, and expressions render as values. `page.data.structuredData` is an async function.
+- `static`: analysed from the source, so they include every branch, and expressions keep their source. `page.data.structuredData` is an object, unless the collection is [async](/docs/mdx/async).
 
 ```ts title="source.config.ts"
 import { defineDocs } from 'fumadocs-mdx/config';
@@ -158,8 +163,6 @@ export const docs = defineDocs({
   },
 });
 ```
-
-`page.data.structuredData` is then an object, rather than an async function.
 
 ### `postprocess`
 

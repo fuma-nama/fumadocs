@@ -6,15 +6,21 @@ packages:
   '@fumadocs/local-md': minor
   '@fumadocs/astro': minor
   '@fumadocs/cli': patch
+  '@fumadocs/mdx-remote': patch
+  'create-fumadocs-app': patch
 ---
 
 ### Path params at runtime
 
-- Refactored path params: a file of a dynamic path compiles once, its content reads the params as `props` when rendering.
-- `<show>` branches are checked when rendering. The TOC, search data and processed Markdown of a page only contain the branches that show for its props.
-- Authored expressions render into the TOC, search data, processed Markdown and heading IDs, duplicate IDs count only the headings that show.
-- Refactored outputs: `analysis: 'runtime'` (default) makes `toc`, `structuredData` and `extractedReferences` functions of the props and processed Markdown a component, `analysis: 'static'` keeps values analysed from source. In Fumadocs MDX, set it on a collection: `page.data.structuredData` is an async function by default, the search templates of the CLI await it.
-- Deprecated `output` of `remarkLLMs`, use `analysis`: `string` is `static`, `function` is `runtime`.
-- The frontmatter in code of Fumadocs MDX reads the imports after it, and keeps the other declarators of its statement.
-- Refactored `remarkShow`: removed the `define` option and the `showElement` export, conditions are always checked when rendering.
+- Refactored path params: each file of a dynamic path compiles once, and its content reads the params as `props` when rendering.
+- Refactored `remarkShow`: conditions are checked when rendering, and the `define` option and `showElement` export are removed.
+- The table of contents, structured data and processed Markdown of a page only include the `<show>` branches that show for its props, and render its expressions as values.
+- Headings with expressions get their IDs from the rendered text, and duplicate IDs only count the headings that show.
+- Added the `analysis` option to Fumadocs MDX collections, `remarkHeading`, `remarkStructure`, `rehypeToc` and `remarkLLMs`: `runtime` (default) renders their outputs for the props of a page, `static` analyses them from the source.
+- Refactored the outputs of MDX files: `toc`, `structuredData` and `extractedReferences` are functions of the props, and `_markdown` is a component, unless `analysis` is `static`.
+- Refactored `page.data.structuredData` of Fumadocs MDX into an async function. Set `analysis: 'static'` on the collection to keep an object.
+- `@fumadocs/mdx-remote` and the MDX presets of `fumadocs-core/content` keep static outputs, unless `analysis: 'runtime'` is set on the presets or their plugins.
+- Deprecated the `output` option of `remarkLLMs`, use `analysis`: `string` is `static`, `function` is `runtime`.
+- The search templates of the CLI await `page.data.structuredData()`.
+- The frontmatter in code of Fumadocs MDX can use imports declared after it, and keeps the other variables declared in its statement.
 - `@fumadocs/astro` supports frontmatter in code.

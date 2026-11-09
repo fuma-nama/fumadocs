@@ -3,7 +3,7 @@ title: Built-in Search
 description: Built-in document search of Fumadocs
 ---
 
-Fumadocs supports document search with [ZBSearch](https://www.zbsearch.dev), It is the default but also the recommended option since it can be self-hosted and totally free.
+Fumadocs supports document search with [ZBSearch](https://www.zbsearch.dev). It is the default and recommended option, since it can be self-hosted for free.
 
 ## Setup
 
@@ -44,9 +44,9 @@ export const GET: APIRoute = ({ request }) => server.GET(request);
 
 ### From Search Indexes
 
-Create the server from search indexes, each index needs a `structuredData` field.
+Create the server from search indexes. Each index needs the `structuredData` of its page, from your content source or the [Remark Structure](/docs/headless/mdx/structure) plugin.
 
-Usually, it is provided by your content source (e.g. Fumadocs MDX). You can also extract it from Markdown/MDX document using the [Remark Structure](/docs/headless/mdx/structure) plugin.
+With Fumadocs MDX, call `page.data.structuredData()` to get it, unless the collection uses [`analysis: 'static'`](/docs/mdx/collections#analysis).
 
 ```ts tab="Next.js" title="app/api/search/route.ts"
 import { source } from '@/lib/source';
@@ -140,7 +140,6 @@ import { createSearchAPI } from 'fumadocs-core/search/server';
 import { source } from '@/lib/source';
 
 const server = createSearchAPI('advanced', {
-  // `structuredData` is loaded on demand
   indexes: () =>
     Promise.all(
       source.getPages().map(async (page) => ({

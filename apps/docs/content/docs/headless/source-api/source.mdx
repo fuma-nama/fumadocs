@@ -101,7 +101,7 @@ const files: StaticSource['files'] = [
 ];
 ```
 
-To compile the pages ahead of the loader, `getStaticParams()` lists the params with the same rules. It reads the `staticParams` of meta files from your storage, by their paths without extension:
+To resolve the data of each param value ahead of the loader, like the frontmatter in code, `getStaticParams()` lists the params with the same rules. It reads the `staticParams` of meta files from your storage, by their paths without extension:
 
 ```ts twoslash
 import { getStaticParams, type Params } from 'fumadocs-core/source';
@@ -117,7 +117,29 @@ const params = getStaticParams('[framework]/deploy.mdx', {
 
 It returns `undefined` when nothing lists the values. The file is then one page at its literal path.
 
-When your source compiles MDX, compile each file once and pass the params of a page as props when rendering. See [Remark Show](/docs/headless/mdx/remark-show#custom-sources) for the exports that read them.
+When your source compiles MDX, compile each file once and pass the params of a page as props when rendering. The `toc` export of Rehype TOC and the `structuredData` export of Remark Structure are functions of the same props:
+
+```tsx twoslash
+import type { ReactNode } from 'react';
+import type { MDXContent } from 'mdx/types';
+import type { Params } from 'fumadocs-core/source';
+import type { TOCItemType } from 'fumadocs-core/toc';
+
+declare const params: Params;
+declare const compiled: {
+  default: MDXContent;
+  toc: (props: Params) => TOCItemType[];
+  structuredData: (props: Params) => { contents: { heading?: string; content: ReactNode }[] };
+};
+// ---cut---
+const { default: Content, toc, structuredData } = compiled;
+
+const body = <Content {...params} />;
+const items = toc(params);
+const records = structuredData(params);
+```
+
+A record that renders an expression has React nodes as its content. Turn them into text with [`renderToMarkdown()`](/docs/headless/utils/markdown).
 
 ### Dynamic Source
 

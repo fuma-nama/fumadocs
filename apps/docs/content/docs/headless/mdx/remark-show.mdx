@@ -7,20 +7,6 @@ description: Show content on a condition.
 
 Remark Show is a remark plugin. Fumadocs MDX and `@fumadocs/astro` enable it by default on both unified and Sätteri. See [Show](/docs/markdown#show) for the syntax.
 
-It turns `<show>` into a component that renders its content when `when` holds. The condition is checked when rendering, so it can read the props of a page, like its path params. The table of contents, structured data and Markdown of a page only include the branches that show for its props.
+It compiles `<show>` into a component that renders its content when `when` holds. The condition is checked when rendering, so it can read the props of a page, like its [path params](/docs/headless/page-conventions#path-params).
 
-### Custom Sources
-
-A [custom source](/docs/headless/source-api/source#path-params) that compiles MDX passes the params of a page as props when rendering. The `toc` and `structuredData` exports are functions of them too:
-
-```ts twoslash
-import type { Params } from 'fumadocs-core/source';
-import type { TOCItemType } from 'fumadocs-core/toc';
-
-declare const params: Params;
-declare const compiled: { toc: (props: Params) => TOCItemType[] };
-// ---cut---
-const toc = compiled.toc(params);
-```
-
-Structured data records can then contain React nodes. Render them into text with `renderToMarkdown()` from `fumadocs-core/server`.
+The table of contents, structured data and Markdown of a page only include the branches that show for its props, unless the collection uses [`analysis: 'static'`](/docs/mdx/collections#analysis). To render these outputs from a custom source, see [Path Params](/docs/headless/source-api/source#path-params).

@@ -7,6 +7,8 @@ description: Process headings from your document
 
 A remark plugin that applies ids to headings. Fumadocs MDX enables it by default. Pass options with `remarkHeadingOptions`.
 
+Headings with expressions, like `## Deploy on {props.framework}`, and headings inside `<show>` get their ids when rendering, from their rendered text. Duplicate ids only count the headings that show.
+
 ### Custom Ids [#custom-heading-id]
 
 You can customize the heading id with `[#slug]`.
@@ -54,7 +56,7 @@ Fumadocs MDX turns it off with `generateToc: false` and exports the table of con
 
 ## Rehype TOC
 
-A rehype plugin that exports the table of contents (an array of `TOCItemType`). Unlike Remark Heading, it keeps JSX nodes in heading titles.
+A rehype plugin that exports the table of contents. Unlike Remark Heading, it keeps JSX nodes in heading titles.
 
 Fumadocs MDX enables it by default. On Sätteri, pass options with `rehypeTocOptions`.
 
@@ -66,10 +68,10 @@ For a Markdown document:
 ## Hello `code`
 ```
 
-An export will be created:
+It exports a function of the page's props, which returns an array of `TOCItemType`:
 
 ```jsx
-export const toc = [
+export const toc = (props) => [
   {
     title: (
       <>
@@ -81,3 +83,5 @@ export const toc = [
   },
 ];
 ```
+
+The array only includes the headings in `<show>` branches that show. Fumadocs MDX calls it with the params of each page, so `page.data.toc` is the array. With [`analysis: 'static'`](/docs/mdx/collections#analysis), the export is the array itself, with every heading.

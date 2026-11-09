@@ -74,9 +74,9 @@ export const GET: APIRoute = ({ request }) => server.GET(request);
 
 ### From Search Indexes
 
-Create the server from search indexes, each index needs a `structuredData` field.
+Create the server from search indexes. Each index needs the `structuredData` of its page, from your content source or the [Remark Structure](/docs/headless/mdx/structure) plugin.
 
-Usually, it is provided by your content source (e.g. Fumadocs MDX). You can also extract it from Markdown/MDX document using the [Remark Structure](/docs/headless/mdx/structure) plugin.
+With Fumadocs MDX, call `page.data.structuredData()` to get it, unless the collection uses [`analysis: 'static'`](/docs/mdx/collections#analysis).
 
 Serve it from your search route in place of `flexsearchFromSource()`:
 

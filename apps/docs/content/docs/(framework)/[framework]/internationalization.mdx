@@ -2,10 +2,10 @@
 title: Internationalization
 ---
 
-import { frameworkName, frameworks } from '@/lib/framework';
+import { frameworkName } from '@/lib/framework';
 
 export const frontmatter = {
-  description: `Support multiple languages in your ${frameworks.find((item) => item.value === props.framework)?.name} docs.`,
+  description: `Support multiple languages in your ${frameworkName(props.framework)} docs.`,
 };
 
 <Callout title="Fumadocs CLI">

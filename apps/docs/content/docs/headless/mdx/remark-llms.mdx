@@ -3,7 +3,7 @@ title: Remark LLMs
 description: Export the Markdown of your documents for LLMs.
 ---
 
-The `remarkLLMs` plugin exports the Markdown of a document as `_markdown`, a component of the page's props, for LLMs. It keeps the Markdown you wrote. See [Stringification](/docs/headless/mdx/stringification) for how it's generated.
+The `remarkLLMs` plugin exports the Markdown of a document as `_markdown`, for LLMs. It keeps the Markdown you wrote, and renders the expressions and `<show>` branches of a page for its props. See [Stringification](/docs/headless/mdx/stringification) for how it's generated.
 
 ```mdx tab="Input"
 import { Callout } from 'fumadocs-ui/components/callout';
@@ -60,23 +60,29 @@ Images in the public directory keep their address. Vite inlines images smaller t
 
 ## JSX Elements
 
-JSX elements are rendered by their components, into Markdown. With `analysis: 'static'`, `_markdown` is a string and they are kept as you wrote them. To change them:
+`_markdown` is a component, rendered into Markdown with [`renderToMarkdown()`](/docs/headless/utils/markdown). Pass your MDX components to render JSX elements with them:
 
-| Option             | Elements                                                    |
-| ------------------ | ----------------------------------------------------------- |
-| `filterElement`    | Removed, or replaced by their children                      |
-| `mdxAsPlaceholder` | Turned into placeholders, rendered at runtime (static only) |
+```tsx
+import { getMDXComponents } from '@/components/mdx';
 
-On Sätteri, `filterElement` and `mdxAsPlaceholder` are unavailable.
+const markdown = await page.data.getText('processed', {
+  components: getMDXComponents(),
+});
+```
 
-### Placeholders
+Components define their Markdown form with [`asMarkdown()`](/docs/headless/utils/markdown#asmarkdown), others are kept as JSX. To remove elements, or replace them with their children, use `filterElement` (unavailable on Sätteri).
 
-List the components to output as placeholders:
+## Static Analysis
+
+With `analysis: 'static'`, `_markdown` is a string: expressions keep their source, every `<show>` branch is included, and JSX elements are kept as you wrote them. In Fumadocs MDX, set it on the [collection](/docs/mdx/collections#analysis).
+
+To render JSX elements later, list them as placeholders:
 
 ```ts
 import type { LLMsOptions } from 'fumadocs-core/mdx-plugins/remark-llms';
 
 const llmsOptions: LLMsOptions = {
+  analysis: 'static',
   mdxAsPlaceholder: ['Callout'],
 };
 ```
@@ -92,19 +98,7 @@ const markdown = await renderPlaceholder(await page.data.getText('processed'), {
 });
 ```
 
-### Components [#components]
-
-Render `_markdown` with your components:
-
-```tsx
-import { getMDXComponents } from '@/components/mdx';
-
-const markdown = await page.data.getText('processed', {
-  components: getMDXComponents(),
-});
-```
-
-Components define their Markdown form with `asMarkdown()`. Others are kept as JSX. See [Markdown Rendering](/docs/headless/utils/markdown).
+On Sätteri, `mdxAsPlaceholder` is unavailable.
 
 ## Options
 
