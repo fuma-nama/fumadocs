@@ -16,6 +16,8 @@ import { remarkLlms } from '@/remark-llms';
 
 const AsyncFunction: new (...args: string[]) => (...args: unknown[]) => Promise<unknown> =
   Object.getPrototypeOf(async function () {}).constructor;
+// the generated imports of Fumadocs read from the scope
+const scope = { ...JsxRuntime, ...server, createHeadingIds };
 
 const source = `# Deploy on {props.framework}
 
@@ -66,12 +68,7 @@ test('Remark Show: branches and expressions render from code in every output', a
     environment: 'runtime',
     options,
   });
-  // the generated imports of Fumadocs read from the scope
-  const page = (await new AsyncFunction('opts', code)({
-    ...JsxRuntime,
-    ...server,
-    createHeadingIds,
-  })) as {
+  const page = (await new AsyncFunction('opts', code)(scope)) as {
     default: FC<object>;
     toc: (props: object) => { url: string }[];
     structuredData: (props: object) => StructuredDataNodes;
@@ -144,11 +141,7 @@ test('Remark Show: static outputs analyse the source', async () => {
     environment: 'runtime',
     options,
   });
-  const page = (await new AsyncFunction('opts', code)({
-    ...JsxRuntime,
-    ...server,
-    createHeadingIds,
-  })) as {
+  const page = (await new AsyncFunction('opts', code)(scope)) as {
     toc: { url: string }[];
     structuredData: StructuredData;
     _markdown: string;
@@ -188,11 +181,7 @@ test('Remark Show: branches with included files', async () => {
       mdastPlugins: [remarkInclude({ cwd: dir }), ...options.mdastPlugins!, remarkLlms()],
     },
   });
-  const page = (await new AsyncFunction('opts', code)({
-    ...JsxRuntime,
-    ...server,
-    createHeadingIds,
-  })) as {
+  const page = (await new AsyncFunction('opts', code)(scope)) as {
     _markdown: FC<object>;
   };
   const markdown = (props: object) => server.renderToMarkdown(createElement(page._markdown, props));
@@ -220,11 +209,7 @@ test('Remark Show: branches of an included file, the page itself has none', asyn
       mdastPlugins: [remarkInclude({ cwd: dir }), ...options.mdastPlugins!, remarkLlms()],
     },
   });
-  const page = (await new AsyncFunction('opts', code)({
-    ...JsxRuntime,
-    ...server,
-    createHeadingIds,
-  })) as {
+  const page = (await new AsyncFunction('opts', code)(scope)) as {
     _markdown: FC<object>;
   };
   const markdown = (props: object) => server.renderToMarkdown(createElement(page._markdown, props));

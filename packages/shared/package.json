@@ -13,7 +13,6 @@
     "@types/react": "^19.3.0",
     "fuma-translate": "^1.0.2",
     "fumadocs-core": "workspace:*",
-    "github-slugger": "^2.0.0",
     "tsconfig": "workspace:*",
     "tsdown": "0.23.7",
     "typescript": "^7.0.2"

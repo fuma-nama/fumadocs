@@ -79,38 +79,23 @@ export function rehypeToc({ exportToc = true, output }: RehypeTocOptions = {}): 
           if (typeof id !== 'string') return;
           const code = typeof idCode === 'string' ? idCode : undefined;
 
-          let isTocOnly = false;
           let title = ctx.textContent(element);
-          let titleChildren: ElementContent[] = element.children;
-          const last = element.children[element.children.length - 1];
-          if (last?.type === 'text') {
-            const noToc = handleTag(last.value, NoTocTag);
-            if (noToc !== false) {
-              if (code)
-                ctx.replaceNode(
-                  element,
-                  withIdCode(
-                    element,
-                    [...element.children.slice(0, -1), { ...last, value: noToc }],
-                    code,
-                  ),
-                );
-              else ctx.setProperty(last, 'value', noToc);
-              return;
-            }
-
-            const tocOnly = handleTag(last.value, TocOnlyTag);
-            if (tocOnly !== false) {
-              isTocOnly = true;
-              title = title.slice(0, title.length - last.value.length) + tocOnly;
-              // the element is removed below, so strip the tag in a copy for
-              // `jsxToSource()` — visited nodes are frozen anyway
-              titleChildren = [...element.children.slice(0, -1), { ...last, value: tocOnly }];
-            }
+          let children: ElementContent[] = element.children;
+          const last = children[children.length - 1];
+          const text = last?.type === 'text' ? last : undefined;
+          const noToc = text && handleTag(text.value, NoTocTag);
+          const tocOnly = noToc === false && handleTag(text!.value, TocOnlyTag);
+          const stripped = typeof noToc === 'string' ? noToc : tocOnly;
+          if (text && typeof stripped === 'string') {
+            title = title.slice(0, title.length - text.value.length) + stripped;
+            // visited nodes are frozen, the tag is stripped in a copy
+            children = [...children.slice(0, -1), { ...text, value: stripped }];
           }
 
-          if (isTocOnly) ctx.removeNode(element);
-          else if (code) ctx.replaceNode(element, withIdCode(element, titleChildren, code));
+          if (typeof tocOnly === 'string') ctx.removeNode(element);
+          else if (code) ctx.replaceNode(element, withIdCode(element, children, code));
+          else if (text && typeof noToc === 'string') ctx.setProperty(text, 'value', noToc);
+          if (typeof noToc === 'string') return;
           if (!resolved) return;
 
           const step =
@@ -124,9 +109,9 @@ export function rehypeToc({ exportToc = true, output }: RehypeTocOptions = {}): 
             resolved.as === 'esm'
               ? jsxToSource({
                   type: 'root',
-                  children: isStatic ? staticContent(titleChildren) : titleChildren,
+                  children: isStatic ? staticContent(children) : children,
                 })
-              : textCode(titleChildren)
+              : textCode(children)
           },`;
           obj += `url: ${code && !isStatic ? `"#" + ${code}` : JSON.stringify(`#${id}`)},`;
           obj += `depth: ${JSON.stringify(Number(element.tagName[1]))},`;
@@ -182,27 +167,17 @@ function textCode(nodes: readonly ElementContent[]): string {
 }
 
 /** the heading with its ID rendered from code, Sätteri maps JSX of Markdown elements to MDX components */
-function withIdCode(
-  element: Element,
-  children: ElementContent[],
-  code: string,
-): MdxJsxFlowElementHast {
+function withIdCode(element: Element, children: ElementContent[], code: string) {
   const attributes: MdxJsxAttributeNode[] = [];
   for (const [name, value] of Object.entries(element.properties)) {
-    if (name === idCodeProperty || value == null || value === false) continue;
+    if (name === idCodeProperty || value == null) continue;
+    // space-separated, like `className`
+    const expression =
+      name === 'id' ? code : JSON.stringify(Array.isArray(value) ? value.join(' ') : value);
     attributes.push({
       type: 'mdxJsxAttribute',
       name,
-      value:
-        name === 'id'
-          ? { type: 'mdxJsxAttributeValueExpression', value: code }
-          : value === true
-            ? null
-            : {
-                type: 'mdxJsxAttributeValueExpression',
-                // space-separated, like `className`
-                value: JSON.stringify(Array.isArray(value) ? value.join(' ') : value),
-              },
+      value: { type: 'mdxJsxAttributeValueExpression', value: expression },
     });
   }
   return {

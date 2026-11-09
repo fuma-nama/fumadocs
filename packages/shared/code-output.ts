@@ -153,7 +153,8 @@ export function showConditions(
 export function staticContent<N extends CodeNode & { children?: N[] }>(nodes: N[]): N[] {
   const out: N[] = [];
   for (const node of nodes) {
-    if (node.type === 'mdxTextExpression') out.push({ type: 'text', value: `{${node.value}}` } as N);
+    if (node.type === 'mdxTextExpression')
+      out.push({ type: 'text', value: `{${node.value}}` } as N);
     else if (showCondition(node)) out.push(...staticContent(node.children!));
     else if (node.children) out.push({ ...node, children: staticContent(node.children) });
     else out.push(node);
@@ -185,6 +186,73 @@ export function keptElement(node: CodeNode, name: string): KeptElement {
 /** all of the conditions */
 export function and(conditions: string[]): string | undefined {
   if (conditions.length > 0) return `(${conditions.join(') && (')})`;
+}
+
+/** a content of structured data, see `fumadocs-core/mdx-plugins/remark-structure` */
+interface StructuredContent {
+  heading: string | undefined;
+  content: string;
+  table?: string;
+}
+
+/** the records of structured data in document order, their content with the markers of code */
+export function createStructuredRecords() {
+  /** `code` is the ID as code */
+  const headings: { id: string; code?: string; content: string; when: string[] }[] = [];
+  const contents: (StructuredContent & { when: string[]; after: number })[] = [];
+  type Output = Pick<ReturnType<typeof createCodeOutput>, 'toStatic' | 'chunks'>;
+  const idOf = (i: number) => headings[i].code ?? JSON.stringify(headings[i].id);
+
+  /**
+   * The heading of content: the last heading before it that shows with it, the conditions of the branches decide
+   * those in other branches.
+   */
+  function headingOf(when: string[], after: number): string {
+    let chain = '';
+    for (let i = after - 1; i >= 0; i--) {
+      const test = and(headings[i].when.filter((item) => !when.includes(item)));
+      if (!test) return `${chain}(${idOf(i)})`;
+      chain += `${test} ? (${idOf(i)}) : `;
+    }
+    return `${chain}undefined`;
+  }
+
+  return {
+    headings,
+    pushContent: (item: StructuredContent, when: string[]) =>
+      contents.push({ ...item, when, after: headings.length }),
+    toStatic(out: Output) {
+      const data = {
+        contents: [] as StructuredContent[],
+        headings: [] as { id: string; content: string }[],
+      };
+      for (const { id, content } of headings)
+        if (content) data.headings.push({ id, content: out.toStatic(content) });
+      for (const { when: _, after, heading = headings[after - 1]?.id, ...item } of contents)
+        data.contents.push({ heading, ...item, content: out.toStatic(item.content) });
+      return data;
+    },
+    /** the code of the runtime structured data, a function of the props */
+    toCode(out: Output): string {
+      const headingList: { code: string; when: string[] }[] = [];
+      for (let i = 0; i < headings.length; i++) {
+        const { content, when } = headings[i];
+        if (content)
+          headingList.push({
+            code: `{id: ${idOf(i)}, content: ${chunksToCode(out.chunks(content))}}`,
+            when,
+          });
+      }
+      const contentList: { code: string; when: string[] }[] = [];
+      for (const { when, after, heading, table, content } of contents) {
+        let code = `{heading: ${heading === undefined ? headingOf(when, after) : JSON.stringify(heading)}`;
+        code += `, content: ${chunksToCode(out.chunks(content))}`;
+        if (table) code += `, table: ${JSON.stringify(table)}`;
+        contentList.push({ code: `${code}}`, when });
+      }
+      return `(props) => ({headings: ${guardedArray(headingList)}, contents: ${guardedArray(contentList)}})`;
+    },
+  };
 }
 
 /** an array of items, each kept only when its conditions hold */

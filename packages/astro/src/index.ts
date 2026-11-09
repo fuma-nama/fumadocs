@@ -17,6 +17,7 @@ import {
   type PluginFactoryContext,
 } from 'satteri';
 import { parse, type ImportDeclaration, type Node } from 'yuku-parser';
+import { frontmatterModule } from '../../shared/frontmatter-code';
 import { applySatteriPreset, type DefaultSatteriOptions } from '@fumadocs/satteri/preset';
 import { remarkInclude } from '@fumadocs/satteri/remark-include';
 import { remarkLlms, type LLMsOptions } from '@fumadocs/satteri/remark-llms';
@@ -114,10 +115,9 @@ const restoreCode: HastPluginDefinition = {
 
 /**
  * The frontmatter in the code of a page, `export const frontmatter = {...}`, leaves the content, which has the
- * frontmatter export of Astro. Like Fumadocs MDX, it is a function of the params of a page as `props`, with the imports
- * it reads and the exports before it in its ESM block.
+ * frontmatter export of Astro. Like Fumadocs MDX, it is a function of the params of a page as `props`.
  *
- * @param onModule - receives the module of the function, `_frontmatter(props = {})`
+ * @param onModule - receives the module of the function
  */
 function frontmatterCode(onModule?: (module: string) => void): MdastPluginInput {
   return ({ source }) => {
@@ -130,49 +130,22 @@ function frontmatterCode(onModule?: (module: string) => void): MdastPluginInput 
       mdxjsEsm(node, ctx) {
         if (done) return;
         const { value } = node;
-        let body = '';
-        const declarations: Node[] = [];
         const statements = parse(value, { lang: 'tsx' }).program.body;
-        // imports are hoisted, the frontmatter can read those after it
         for (const statement of statements)
           if (statement.type === 'ImportDeclaration')
             imports.push([statement, value.slice(statement.start, statement.end)]);
-        for (const statement of statements) {
-          if (statement.type !== 'ExportNamedDeclaration' || !statement.declaration) continue;
-          const { declaration } = statement;
-          body += `${value.slice(declaration.start, declaration.end)}\n`;
-          declarations.push(declaration);
-          if (declaration.type !== 'VariableDeclaration') continue;
-          // first, as `hasFrontmatterCode()` detects it
-          const [first, second] = declaration.declarations;
-          if (first.id.type !== 'Identifier' || first.id.name !== 'frontmatter') continue;
-
-          const names = new Set<string>();
-          collectNames(declarations, names);
-          let code = '';
-          for (const [item, text] of imports)
-            if (item.specifiers.some((specifier) => names.has(specifier.local.name)))
-              code += `${text}\n`;
-          onModule?.(
-            `${code}export function _frontmatter(props = {}) {\n${body}return frontmatter;\n}`,
-          );
-          // the other declarators of the statement stay in the content
-          const [start, end] = second
-            ? [first.start, second.start]
-            : [statement.start, statement.end];
-          ctx.setField(node, 'value', value.slice(0, start) + value.slice(end));
-          done = true;
-          return;
-        }
+        const frontmatter = frontmatterModule(value, statements, imports, (node: Node) => [
+          node.start,
+          node.end,
+        ]);
+        if (!frontmatter) return;
+        onModule?.(frontmatter.module);
+        const [start, end] = frontmatter.remove;
+        ctx.setField(node, 'value', value.slice(0, start) + value.slice(end));
+        done = true;
       },
     };
   };
-}
-
-function collectNames(node: unknown, out: Set<string>) {
-  if (typeof node !== 'object' || node === null) return;
-  if ('type' in node && node.type === 'Identifier' && 'name' in node) out.add(node.name as string);
-  for (const value of Object.values(node)) collectNames(value, out);
 }
 
 /**
@@ -382,14 +355,14 @@ function runtimeConfigModule(runtime: typeof RuntimeConfig): string {
   return code;
 }
 
-/** the frontmatter in code of an MDX file as a module, `_frontmatter` is `undefined` without it */
+/** the frontmatter in code of an MDX file as a module, `frontmatter` is `undefined` without it */
 function frontmatterPlugin(): Plugin {
   return {
     name: '@fumadocs/astro:frontmatter',
     load: {
       filter: { id: new RegExp(`${frontmatterQuery.replace(/[?.]/g, '\\$&')}$`) },
       async handler(id) {
-        let module = 'export const _frontmatter = undefined;';
+        let module = 'export const frontmatter = undefined;';
         mdxToMdast(await fs.promises.readFile(id.slice(0, -frontmatterQuery.length), 'utf8'), {
           features: { frontmatter: true },
           position: false,

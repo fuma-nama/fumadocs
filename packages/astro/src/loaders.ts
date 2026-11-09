@@ -67,11 +67,11 @@ async function parsePage<Data extends Record<string, unknown>>(
 ): Promise<Data> {
   const { filePath, data } = props;
   // through Vite, which loads the frontmatter in code as a module
-  const { _frontmatter: run } =
+  const { frontmatter: run } =
     filePath && hasFrontmatterCode(await fs.readFile(filePath, 'utf8'))
       ? ((await import(
           /* @vite-ignore */ `${filePath.replaceAll(path.sep, '/')}${frontmatterQuery}`
-        )) as { _frontmatter?: (params?: Params) => Record<string, unknown> })
+        )) as { frontmatter?: (params?: Params) => Record<string, unknown> })
       : {};
   if (!run) return context.parseData(props);
   const file = path.relative(base, filePath!).replaceAll(path.sep, '/');

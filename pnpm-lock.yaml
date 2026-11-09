@@ -4386,9 +4386,6 @@ importers:
       fumadocs-core:
         specifier: workspace:*
         version: link:../core
-      github-slugger:
-        specifier: ^2.0.0
-        version: 2.0.0
       tsconfig:
         specifier: workspace:*
         version: link:../tsconfig

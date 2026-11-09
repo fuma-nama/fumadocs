@@ -3,9 +3,8 @@ import type { Heading, Root, RootContent } from 'mdast';
 import type { Transformer } from 'unified';
 import type { TOCItemType } from '@/toc';
 import { flattenNode, toEsm } from '@/mdx-plugins/utils';
-import { headingIdRegex } from '@/mdx-plugins/heading-id';
 import { showCondition } from '../../../shared/code-output';
-import { headingIdCode, idCodeProperty } from '../../../shared/heading-id';
+import { headingIdCode, headingIdRegex, idCodeProperty } from '../../../shared/heading-id';
 
 export interface RemarkHeadingOptions {
   slug?: (root: Root, heading: Heading, text: string) => string;

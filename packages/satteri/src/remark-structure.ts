@@ -1,17 +1,13 @@
 import type { MdastPluginDefinition, MdastVisitorContext } from 'satteri';
 import type { Nodes, TableRow } from 'mdast';
-import type {
-  StructuredData,
-  StructuredDataContent,
-} from 'fumadocs-core/mdx-plugins/remark-structure';
+import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
 import type { OutputMode } from 'fumadocs-core/mdx-plugins/stringifier';
 import { tableRowToStructuredData } from 'fumadocs-core/search';
 import { offsets, type Stringifier } from './stringifier';
-import { headingIdRegex } from './heading-id';
-import { idCodeProperty } from '../../shared/heading-id';
+import { headingIdRegex, idCodeProperty } from '../../shared/heading-id';
 import type { ExtraPluginHooks } from './compile';
 import { createCodeOutput, type JsxElementNode } from './utils';
-import { and, chunksToCode, guardedArray, showConditions } from '../../shared/code-output';
+import { createStructuredRecords, showConditions } from '../../shared/code-output';
 
 declare module 'satteri' {
   interface DataMap {
@@ -85,11 +81,6 @@ interface TableRecord {
 }
 
 /** an item of a list in code, kept when its conditions hold */
-interface CodeItem {
-  code: string;
-  when: string[];
-}
-
 /**
  * Extract content into structured data, as Markdown sliced from the authored source. Links and JSX elements are
  * replaced by their content, images are removed.
@@ -120,35 +111,16 @@ export function remarkStructure({
   const visitors = [...(typeof types === 'function' ? RECORD_VISITORS : types), ...EDIT_VISITORS];
 
   const plugin: ExtraPluginHooks & { (): MdastPluginDefinition } = () => {
-    const data: StructuredData = { contents: [], headings: [] };
     const records: (ContentRecord | TableRecord)[] = [];
     let covered: { start: number; end: number } | undefined;
     let tables = 0;
     let out: ReturnType<typeof createCodeOutput>;
     let s: Stringifier;
-    /** headings and contents in document order, their content with the markers of code, `code` is the ID as code */
-    const headings: { id: string; code: string; content: string; when: string[] }[] = [];
-    const contents: (StructuredDataContent & { when: string[]; after: number })[] = [];
-    const pushContent = (item: StructuredDataContent, when: string[]) =>
-      contents.push({ ...item, when, after: headings.length });
+    const structured = createStructuredRecords();
+    const { headings, pushContent } = structured;
 
     function stringifyCells(row: TableRow): string[] {
       return row.children.map((cell) => s.inner(cell).trim());
-    }
-
-    /**
-     * The heading of content: the last heading before it that shows with it, the conditions of the branches decide
-     * those in other branches.
-     */
-    function headingOf(when: string[], after: number): string {
-      let chain = '';
-      for (let i = after - 1; i >= 0; i--) {
-        const id = `(${headings[i].code})`;
-        const test = and(headings[i].when.filter((item) => !when.includes(item)));
-        if (!test) return chain + id;
-        chain += `${test} ? ${id} : `;
-      }
-      return `${chain}undefined`;
     }
 
     function visit(node: Nodes, ctx: MdastVisitorContext) {
@@ -191,7 +163,7 @@ export function remarkStructure({
             node,
             when,
             id,
-            code: typeof code === 'string' ? code : JSON.stringify(id),
+            code: typeof code === 'string' ? code : undefined,
           });
         return;
       }
@@ -204,15 +176,13 @@ export function remarkStructure({
       // positions tell authored nodes from generated ones
       options: { position: true },
       before(_root: unknown, ctx: MdastVisitorContext) {
-        ctx.data.structuredData ??= data;
         out = createCodeOutput(ctx, 'search', output === 'static');
         s = out.s;
 
         // Fumadocs OpenAPI Generated Structured Data
         const openapi = (ctx.data.frontmatter as { _openapi?: { structuredData?: StructuredData } })
           ?._openapi?.structuredData;
-        for (const item of openapi?.headings ?? [])
-          headings.push({ ...item, code: JSON.stringify(item.id), when: [] });
+        for (const item of openapi?.headings ?? []) headings.push({ ...item, when: [] });
         for (const item of openapi?.contents ?? []) pushContent(item, []);
       },
       after(_root, ctx) {
@@ -229,34 +199,15 @@ export function remarkStructure({
             pushContent({ heading, content, table }, when);
           } else if (record.id) {
             const content = s.inner(record.node).replace(headingIdRegex, '').trim();
-            headings.push({ id: record.id, code: record.code!, content, when: record.when });
+            headings.push({ id: record.id, code: record.code, content, when: record.when });
           } else {
             const content = s.stringify(record.node).trim();
             if (content.length > 0) pushContent({ heading: undefined, content }, record.when);
           }
         }
 
-        for (const { id, content } of headings)
-          if (content) data.headings.push({ id, content: out.toStatic(content) });
-        for (const { when: _, after, heading = headings[after - 1]?.id, ...item } of contents)
-          data.contents.push({ heading, ...item, content: out.toStatic(item.content) });
-        if (!exportAs || output === 'static') return;
-
-        const headingList: CodeItem[] = [];
-        for (const { code, content, when } of headings)
-          if (content)
-            headingList.push({
-              code: `{id: ${code}, content: ${chunksToCode(out.chunks(content))}}`,
-              when,
-            });
-        const contentList: CodeItem[] = [];
-        for (const { when, after, heading, table, content } of contents) {
-          let obj = `{heading: ${heading === undefined ? headingOf(when, after) : JSON.stringify(heading)}`;
-          obj += `, content: ${chunksToCode(out.chunks(content))}`;
-          if (table) obj += `, table: ${JSON.stringify(table)}`;
-          contentList.push({ code: `${obj}}`, when });
-        }
-        ctx.data._structuredDataCode = `(props) => ({headings: ${guardedArray(headingList)}, contents: ${guardedArray(contentList)}})`;
+        ctx.data.structuredData ??= structured.toStatic(out);
+        if (exportAs && output !== 'static') ctx.data._structuredDataCode = structured.toCode(out);
       },
       ...Object.fromEntries(visitors.map((key) => [key, visit])),
     };

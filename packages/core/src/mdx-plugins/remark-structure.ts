@@ -4,10 +4,9 @@ import remarkGfm from 'remark-gfm';
 import type { PluggableList, Transformer } from 'unified';
 import { VFile } from 'vfile';
 import { createCodeOutput, isJsxElement, toMdxExport } from './utils';
-import { and, chunksToCode, guardedArray, showCondition } from '../../../shared/code-output';
+import { createStructuredRecords, showCondition } from '../../../shared/code-output';
 import type { OutputMode, Stringifier } from './stringifier';
-import { headingIdRegex } from './heading-id';
-import { idCodeProperty } from '../../../shared/heading-id';
+import { headingIdRegex, idCodeProperty } from '../../../shared/heading-id';
 import type { MdxJsxFlowElement, MdxJsxTextElement } from 'mdast-util-mdx';
 import { remarkHeading } from './remark-heading';
 import { tableRowToStructuredData } from '@/search';
@@ -127,17 +126,13 @@ export function remarkStructure({
   return (tree, file) => {
     const out = createCodeOutput(file, 'search', output === 'static');
     const { s } = out;
-    /** headings and contents in document order, their content with the markers of code, `code` is the ID as code */
-    const headings: { id: string; code: string; content: string; when: string[] }[] = [];
-    const contents: (StructuredDataContent & { when: string[]; after: number })[] = [];
-    const pushContent = (item: StructuredDataContent, when: string[]) =>
-      contents.push({ ...item, when, after: headings.length });
+    const structured = createStructuredRecords();
+    const { headings, pushContent } = structured;
 
     // Fumadocs OpenAPI Generated Structured Data
     const openapi = (file.data.frontmatter as { _openapi?: { structuredData?: StructuredData } })
       ?._openapi?.structuredData;
-    for (const item of openapi?.headings ?? [])
-      headings.push({ ...item, code: JSON.stringify(item.id), when: [] });
+    for (const item of openapi?.headings ?? []) headings.push({ ...item, when: [] });
     for (const item of openapi?.contents ?? []) pushContent(item, []);
 
     const toCells = (row: TableRow) => {
@@ -200,12 +195,7 @@ export function remarkStructure({
         const code = node.data?.hProperties?.[idCodeProperty];
         records.push(() => {
           const content = s.inner(node).replace(headingIdRegex, '').trim();
-          headings.push({
-            id,
-            code: typeof code === 'string' ? code : JSON.stringify(id),
-            content,
-            when,
-          });
+          headings.push({ id, code: typeof code === 'string' ? code : undefined, content, when });
         });
       } else {
         records.push(() => {
@@ -223,50 +213,15 @@ export function remarkStructure({
     visit(tree, []);
     for (const record of records) record();
 
-    const data: StructuredData = { contents: [], headings: [] };
-    for (const { id, content } of headings)
-      if (content) data.headings.push({ id, content: out.toStatic(content) });
-    for (const { when: _, after, heading = headings[after - 1]?.id, ...item } of contents)
-      data.contents.push({ heading, ...item, content: out.toStatic(item.content) });
+    const data: StructuredData = structured.toStatic(out);
     file.data.structuredData = data;
 
     if (!exportAs) return;
     const name = typeof exportAs === 'string' ? exportAs : 'structuredData';
-    if (output === 'static') return void tree.children.unshift(toMdxExport(name, data));
-
-    /**
-     * The heading of content: the last heading before it that shows with it, the conditions of the branches decide
-     * those in other branches.
-     */
-    function headingOf(when: string[], after: number): string {
-      let chain = '';
-      for (let i = after - 1; i >= 0; i--) {
-        const id = `(${headings[i].code})`;
-        const test = and(headings[i].when.filter((item) => !when.includes(item)));
-        if (!test) return chain + id;
-        chain += `${test} ? ${id} : `;
-      }
-      return `${chain}undefined`;
-    }
-
-    const headingList: { code: string; when: string[] }[] = [];
-    for (const { code, content, when } of headings)
-      if (content)
-        headingList.push({
-          code: `{id: ${code}, content: ${chunksToCode(out.chunks(content))}}`,
-          when,
-        });
-    const contentList: { code: string; when: string[] }[] = [];
-    for (const { when, after, heading, table, content } of contents) {
-      let code = `{heading: ${heading === undefined ? headingOf(when, after) : JSON.stringify(heading)}`;
-      code += `, content: ${chunksToCode(out.chunks(content))}`;
-      if (table) code += `, table: ${JSON.stringify(table)}`;
-      contentList.push({ code: `${code}}`, when });
-    }
     tree.children.unshift(
-      out.esm(
-        `export const ${name} = (props) => ({headings: ${guardedArray(headingList)}, contents: ${guardedArray(contentList)}});`,
-      ),
+      output === 'static'
+        ? toMdxExport(name, data)
+        : out.esm(`export const ${name} = ${structured.toCode(out)};`),
     );
   };
 }

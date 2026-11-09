@@ -17,7 +17,6 @@ import * as Mdx from '@mdx-js/mdx';
 import { remark } from 'remark';
 import type { PluggableList } from 'unified';
 import remarkRehype, { type Options as RemarkRehypeOptions } from 'remark-rehype';
-import type { AssignmentProperty, ImportSpecifier } from 'estree';
 import { headingRuntime } from '../../../shared/heading-id';
 
 export interface MarkdownCompilerOptions {
@@ -144,7 +143,6 @@ export function createMarkdownCompiler(options?: MarkdownCompilerOptions): Markd
         ...(rehypePlugins ?? []),
         rehypeTocOptions !== false &&
           plugin(rehypeToc, { exportToc: { as: 'esm', name: 'toc' }, ...rehypeTocOptions }),
-        rehypeRuntime,
       ),
     });
   }
@@ -158,7 +156,12 @@ export function createMarkdownCompiler(options?: MarkdownCompilerOptions): Markd
         return {
           type: 'js',
           file,
-          code: String(out.value),
+          // like the JSX runtime, the runtime of generated code reads from `arguments[0]`, a dynamic import can't run
+          // synchronously or in browsers
+          code: String(out.value).replace(
+            `await import(_resolveDynamicMdxSpecifier(${JSON.stringify(headingRuntime)}))`,
+            'arguments[0]',
+          ),
         };
       }
 
@@ -170,48 +173,5 @@ export function createMarkdownCompiler(options?: MarkdownCompilerOptions): Markd
         file,
       };
     },
-  };
-}
-
-/**
- * Like the JSX runtime, the body reads the runtime of generated code from `arguments[0]`: imports of function bodies
- * are dynamic, which synchronous rendering and browsers can't run.
- */
-function rehypeRuntime() {
-  return (tree: Root) => {
-    for (const node of tree.children) {
-      const body = node.type === 'mdxjsEsm' ? node.data?.estree?.body : undefined;
-      const statement = body?.[0];
-      if (statement?.type !== 'ImportDeclaration' || statement.source.value !== headingRuntime)
-        continue;
-      const properties: AssignmentProperty[] = [];
-      for (const { imported, local } of statement.specifiers as ImportSpecifier[])
-        properties.push({
-          type: 'Property',
-          kind: 'init',
-          key: imported,
-          value: local,
-          method: false,
-          shorthand: false,
-          computed: false,
-        });
-      body![0] = {
-        type: 'VariableDeclaration',
-        kind: 'const',
-        declarations: [
-          {
-            type: 'VariableDeclarator',
-            id: { type: 'ObjectPattern', properties },
-            init: {
-              type: 'MemberExpression',
-              object: { type: 'Identifier', name: 'arguments' },
-              property: { type: 'Literal', value: 0 },
-              computed: true,
-              optional: false,
-            },
-          },
-        ],
-      };
-    }
   };
 }

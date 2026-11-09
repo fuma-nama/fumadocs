@@ -166,6 +166,7 @@ test('fromJS: IDs of headings read the props, without imports', async () => {
   const renderer = fromJS({
     code: compiled.code,
     filePath: '/page.mdx',
+    baseUrl: 'file:///page.mdx',
     props: { framework: 'Next.js' },
   });
   const { body, toc } = renderer.renderSync();

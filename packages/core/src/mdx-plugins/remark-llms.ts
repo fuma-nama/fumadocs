@@ -1,11 +1,11 @@
 import type { Transformer } from 'unified';
-import { createCodeOutput, isJsxElement } from './utils';
+import { createCodeOutput, isJsxElement, parseExpression } from './utils';
 import { keptElement, markdownCode } from '../../../shared/code-output';
 import type { Nodes, Root } from 'mdast';
 import type { MdxJsxFlowElement, MdxJsxTextElement } from 'mdast-util-mdx';
 import type { OutputMode } from './stringifier';
 import type { PlaceholderData } from './remark-llms.runtime';
-import { stringifyHeadingId } from './heading-id';
+import { stringifyHeadingId } from '../../../shared/heading-id';
 
 export interface LLMsOptions {
   /**
@@ -95,7 +95,13 @@ export function remarkLLMs({
         } else if (out.markCode(node)) {
           // rendered from code
         } else if (node.type === 'heading') {
-          stringifyHeadingId(s, node, headingIds, isStatic);
+          stringifyHeadingId(
+            s,
+            node,
+            headingIds,
+            (node: Nodes) => s.range(node),
+            isStatic ? undefined : (code, id) => s.expression(parseExpression(code), id),
+          );
         } else if (isJsxElement(node) && node.name) {
           if (isStatic && mdxAsPlaceholder?.includes(node.name))
             s.replace(node, (s) => toPlaceholder(node, out.toStatic(s.inner(node))));

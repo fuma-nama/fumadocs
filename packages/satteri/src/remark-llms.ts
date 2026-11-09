@@ -1,8 +1,8 @@
 import type { MdastPluginEntry } from 'satteri';
 import { defineMdastPlugin } from 'satteri';
-import type { PositionedNode } from './stringifier';
+import { offsets, type PositionedNode } from './stringifier';
 import type { OutputMode } from 'fumadocs-core/mdx-plugins/stringifier';
-import { stringifyHeadingId } from './heading-id';
+import { stringifyHeadingId } from '../../shared/heading-id';
 import { createCodeOutput, type JsxElementNode } from './utils';
 import { keptElement, markdownCode } from '../../shared/code-output';
 
@@ -66,7 +66,14 @@ export function remarkLlms({
       mdxjsEsm: drop,
       yaml: drop,
       toml: drop,
-      heading: (node) => stringifyHeadingId(out.s, node, headingIds, isStatic),
+      heading: (node) =>
+        stringifyHeadingId(
+          out.s,
+          node,
+          headingIds,
+          offsets,
+          isStatic ? undefined : out.s.expression,
+        ),
       mdxTextExpression: expression,
       mdxFlowExpression: expression,
       mdxJsxFlowElement: element,

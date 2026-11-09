@@ -56,10 +56,10 @@ export const frontmatter = {
     files.math,
     'export function Note() { return <b>note</b>; }\nexport const frontmatter = { title: props.title ?? "Math" };\n\n$x_{\\alpha}$\n',
   );
-  // the required title of a dynamic page only in code
+  // the required title of a dynamic page only in code, an import after it, another declarator stays
   await fs.writeFile(
     files.named,
-    `import { names } from '../names';\n\nexport const frontmatter = { title: names[props.framework] };\n`,
+    `export const frontmatter = { title: names[props.framework] }, label = 'x';\nimport { names } from '../names';\n\n{label}\n`,
   );
 
   const core = createCore({
