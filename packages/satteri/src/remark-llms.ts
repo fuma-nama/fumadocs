@@ -37,11 +37,11 @@ export function remarkLlms({
   as = '_markdown',
   headingIds = true,
   output,
-  analysis = output === 'string' ? 'static' : 'runtime',
+  analysis = output && (output === 'string' ? 'static' : 'runtime'),
 }: LLMsOptions = {}): MdastPluginEntry {
-  const isStatic = analysis === 'static';
   const factory = () => {
     let out: ReturnType<typeof createCodeOutput>;
+    let isStatic = false;
 
     const drop = (node: PositionedNode) => out.s.replace(node, '');
     const element = (node: JsxElementNode & { type: string; children: PositionedNode[] }) => {
@@ -64,6 +64,7 @@ export function remarkLlms({
       name: 'remark-llms',
       options: { position: true },
       before(_root, ctx) {
+        isStatic = (analysis ?? ctx.data._analysis) === 'static';
         out = createCodeOutput(ctx, undefined, isStatic);
       },
       mdxjsEsm: drop,

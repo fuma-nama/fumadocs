@@ -16,6 +16,13 @@ export type Replacement = string | ((s: Stringifier) => string);
  */
 export type Analysis = 'static' | 'runtime';
 
+declare module 'vfile' {
+  interface DataMap {
+    /** @internal the analysis of the content source, for plugins without the option */
+    _analysis?: Analysis;
+  }
+}
+
 interface Range {
   start: number;
   end: number;

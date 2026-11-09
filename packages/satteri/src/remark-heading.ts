@@ -3,21 +3,26 @@ import { defineMdastPlugin, type MdastVisitorContext } from 'satteri';
 import type { Heading } from 'mdast';
 import { headingIdCode, headingIdRegex, idCodeProperty } from '../../shared/heading-id';
 import { showConditions } from '../../shared/code-output';
+import type { Analysis } from 'fumadocs-core/mdx-plugins/stringifier';
 
 export interface RemarkHeadingOptions {
   slug?: (heading: Heading, text: string) => string;
   customId?: boolean;
   generateToc?: boolean;
+  /** see `analysis` of `remarkHeading()` from `fumadocs-core/mdx-plugins/remark-heading` */
+  analysis?: Analysis;
 }
 
 export function remarkHeading({
   slug,
   customId = true,
   generateToc = true,
+  analysis,
 }: RemarkHeadingOptions = {}) {
   return () => {
     let resolveSlug = slug;
     const ids = headingIdCode();
+    let fromCode = false;
     if (!resolveSlug) {
       const slugger = new Slugger();
       resolveSlug = (_, v) => slugger.slug(v);
@@ -27,6 +32,7 @@ export function remarkHeading({
       name: 'remark-heading',
       before(_root, ctx) {
         if (generateToc) ctx.data.toc ??= [];
+        fromCode = !slug && (analysis ?? ctx.data._analysis) !== 'static';
       },
       heading(node, ctx: MdastVisitorContext) {
         // visited nodes are frozen, so mutate copies
@@ -50,7 +56,7 @@ export function remarkHeading({
 
         if (!hProperties.id) {
           hProperties.id = resolveSlug(node, title);
-          const code = !slug && ids.next(node.children, showConditions(node, ctx));
+          const code = fromCode && ids.next(node.children, showConditions(node, ctx));
           if (code) hProperties[idCodeProperty] = code;
         }
 

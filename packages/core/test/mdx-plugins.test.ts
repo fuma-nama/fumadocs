@@ -869,23 +869,34 @@ After the branch.
 test('Remark Show: static outputs analyse the source', async () => {
   const { compile } = await import('@mdx-js/mdx');
   const { remarkShow } = await import('@/mdx-plugins/remark-show');
-  const analysis = 'static';
   const file = String(
-    await compile('## Deploy on {props.framework}\n\n<show when={props.a}>\nAstro.\n</show>\n', {
-      remarkPlugins: [
-        remarkShow,
-        remarkHeading,
-        [remarkStructure, { exportAs: true, analysis }],
-        [remarkLLMs, { analysis }],
-      ],
-      rehypePlugins: [[rehypeToc, { analysis }]],
-    }),
+    await compile(
+      {
+        value: '## Deploy on {props.framework}\n\n<show when={props.a}>\nAstro.\n</show>\n',
+        // set by the content source, like the collection of Fumadocs MDX
+        data: { _analysis: 'static' },
+      },
+      {
+        remarkPlugins: [
+          remarkShow,
+          remarkHeading,
+          [remarkStructure, { exportAs: true }],
+          remarkLLMs,
+        ],
+        rehypePlugins: [rehypeToc],
+      },
+    ),
   );
   expect(file).toContain(
-    'export const _markdown = "## Deploy on {props.framework} [#deploy-on-]\\n\\nAstro.\\n";',
+    'export const _markdown = "## Deploy on {props.framework} [#deploy-on-propsframework]\\n\\nAstro.\\n";',
   );
   expect(file).toContain('"content": "Deploy on {props.framework}"');
-  expect(file).toMatch(/export const toc = \[\{\n\s+depth: 2,\n\s+url: "#deploy-on-"/);
+  expect(file).toMatch(
+    /export const toc = \[\{\n\s+depth: 2,\n\s+url: "#deploy-on-propsframework"/,
+  );
+  // IDs are slugged from the source, like the TOC
+  expect(file).toContain('id: "deploy-on-propsframework"');
+  expect(file).not.toContain('_headingIds');
 });
 
 test('Remark Show: code tabs end at a branch', async () => {

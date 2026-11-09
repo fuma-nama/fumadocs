@@ -1,3 +1,4 @@
+import type { Analysis } from 'fumadocs-core/mdx-plugins/stringifier';
 import type { MdastVisitorContext } from 'satteri';
 
 /**
@@ -34,6 +35,8 @@ declare module 'satteri' {
     /** sources embedded after the document's, e.g. included files */
     _embeddedSource?: string;
     _embeds?: Embed[];
+    /** @internal the analysis of the content source, for plugins without the option */
+    _analysis?: Analysis;
   }
 }
 

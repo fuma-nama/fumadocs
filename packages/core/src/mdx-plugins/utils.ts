@@ -32,10 +32,8 @@ export function walk<N extends { type: string; children?: N[] }>(
     walk(node.children[i], visitor, i, node as { children: N[] });
 }
 
-/** the text of a node, authored expressions are code and render from it */
 export function flattenNode(node: RootContent): string {
   if ('children' in node) return node.children.map(flattenNode).join('');
-  if (node.type === 'mdxTextExpression' || node.type === 'mdxFlowExpression') return '';
 
   if ('value' in node && typeof node.value === 'string') return node.value;
 

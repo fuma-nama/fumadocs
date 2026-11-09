@@ -4,10 +4,9 @@ import { valueToEstree } from 'estree-util-value-to-estree';
 import { removePosition } from 'unist-util-remove-position';
 import { flattenNode, walk } from './mdast-utils';
 import type { LLMsOptions } from 'fumadocs-core/mdx-plugins';
-import type { Analysis } from 'fumadocs-core/mdx-plugins/stringifier';
 import { Parser } from 'acorn';
 import type { MdxjsEsm } from 'mdast-util-mdx';
-import { guardedArray, showCondition } from '../../../../shared/code-output';
+import { listCode, showCondition } from '../../../../shared/code-output';
 import { remarkLLMs } from 'fumadocs-core/mdx-plugins/remark-llms';
 
 export interface ExtractedReference {
@@ -16,7 +15,6 @@ export interface ExtractedReference {
 
 export interface PostprocessOptions {
   _format: 'md' | 'mdx';
-  _analysis?: Analysis;
 
   /**
    * Properties to export from `vfile.data`
@@ -52,7 +50,6 @@ export function remarkPostprocess({
   includeMDAST = false,
   extractLinkReferences = false,
   valueToExport = [],
-  _analysis,
 }: PostprocessOptions): Transformer<Root, Root> {
   return (tree, file) => {
     const frontmatter = (file.data.frontmatter ??= {});
@@ -72,7 +69,7 @@ export function remarkPostprocess({
     });
 
     if (extractLinkReferences) {
-      const isStatic = _analysis === 'static';
+      const isStatic = file.data._analysis === 'static';
       const items: { code: string; when: string[] }[] = [];
       const visit = (node: Nodes, when: string[]) => {
         if (node.type === 'link')
@@ -82,24 +79,22 @@ export function remarkPostprocess({
         for (const child of node.children) visit(child, condition ? [...when, condition] : when);
       };
       visit(tree, []);
-      const list = guardedArray(items);
       tree.children.unshift({
         type: 'mdxjsEsm',
         value: '',
         data: {
-          estree: Parser.parse(
-            `export const extractedReferences = ${isStatic ? list : `(props) => ${list}`};`,
-            { ecmaVersion: 'latest', sourceType: 'module' },
-          ) as unknown as NonNullable<MdxjsEsm['data']>['estree'],
+          estree: Parser.parse(`export const extractedReferences = ${listCode(items, isStatic)};`, {
+            ecmaVersion: 'latest',
+            sourceType: 'module',
+          }) as unknown as NonNullable<MdxjsEsm['data']>['estree'],
         },
       });
     }
 
     if (includeProcessedMarkdown) {
-      const llms = remarkLLMs({
-        analysis: _analysis,
-        ...(typeof includeProcessedMarkdown === 'object' && includeProcessedMarkdown),
-      });
+      const llms = remarkLLMs(
+        typeof includeProcessedMarkdown === 'object' ? includeProcessedMarkdown : undefined,
+      );
       llms(tree, file, () => undefined);
     }
 

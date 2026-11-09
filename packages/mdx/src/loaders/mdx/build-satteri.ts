@@ -6,8 +6,7 @@ import type { PostprocessOptions } from '@/loaders/mdx/remark-postprocess';
 import { resolveLastModified } from '@/loaders/mdx/last-modified';
 import type { MdxCompileOptions, Data, MdastPluginInput, MdastPluginDefinition } from 'satteri';
 import type { SatteriPresetOptions } from '@fumadocs/satteri/preset';
-import type { Analysis } from 'fumadocs-core/mdx-plugins/stringifier';
-import { guardedArray, showConditions } from '../../../../shared/code-output';
+import { listCode, showConditions } from '../../../../shared/code-output';
 import type { ExtraPluginHooks } from '@fumadocs/satteri/compile';
 
 export type CompiledSatteriMDXProperties<Frontmatter = Record<string, unknown>> =
@@ -22,7 +21,6 @@ export async function buildSatteriMDX(
   const format = filePath.endsWith('.mdx') ? 'mdx' : 'md';
   const postprocess: PostprocessOptions = {
     _format: format,
-    _analysis: collection?.analysis,
     ...collection?.postprocess,
   };
   const [{ compileMdx }, { remarkLlms }, { remarkInclude }] = await Promise.all([
@@ -36,17 +34,18 @@ export async function buildSatteriMDX(
     _compiler,
     _cwd: collection?.cwd,
     _valueToExport: collection?.postprocess?.valueToExport,
+    _analysis: collection?.analysis,
   };
 
   const mdastPlugins: MdastPluginInput[] = [remarkInclude({ cwd: collection?.cwd })];
   if (satteriOptions.mdastPlugins) mdastPlugins.push(...satteriOptions.mdastPlugins);
   if (postprocess.includeProcessedMarkdown) {
     mdastPlugins.push(
-      remarkLlms({
-        analysis: postprocess._analysis,
-        ...(typeof postprocess.includeProcessedMarkdown === 'object' &&
-          postprocess.includeProcessedMarkdown),
-      }),
+      remarkLlms(
+        typeof postprocess.includeProcessedMarkdown === 'object'
+          ? postprocess.includeProcessedMarkdown
+          : undefined,
+      ),
     );
   }
   mdastPlugins.push(
@@ -79,7 +78,7 @@ declare module 'satteri' {
 }
 
 function postprocessPlugin(
-  { extractLinkReferences = false, _analysis }: PostprocessOptions,
+  { extractLinkReferences = false }: PostprocessOptions,
   lastModified: Date | undefined,
 ): MdastPluginDefinition & ExtraPluginHooks {
   return {
@@ -95,13 +94,15 @@ function postprocessPlugin(
     },
     link(node, ctx) {
       if (!extractLinkReferences) return;
-      const when = _analysis === 'static' ? [] : showConditions(node, ctx);
+      const when = ctx.data._analysis === 'static' ? [] : showConditions(node, ctx);
       ctx.data.extractedReferences!.push({ code: JSON.stringify({ href: node.url }), when });
     },
     collectExports({ data, addExport }) {
       if (extractLinkReferences) {
-        const list = guardedArray(data.extractedReferences!);
-        addExport('extractedReferences', _analysis === 'static' ? list : `(props) => ${list}`);
+        addExport(
+          'extractedReferences',
+          listCode(data.extractedReferences!, data._analysis === 'static'),
+        );
       }
 
       if (lastModified) {
@@ -124,15 +125,12 @@ export type SatteriOptionsInput =
 async function resolvePresetOptions(
   input: SatteriOptionsInput,
   environment: BuildEnvironment,
-  analysis?: Analysis,
 ): Promise<MdxCompileOptions> {
   const options = typeof input === 'function' ? await input(environment) : input;
   const { applySatteriPreset } = await import(
     /* turbopackOptional: true */ '@fumadocs/satteri/preset'
   );
-  return applySatteriPreset(options?.preset === 'minimal' ? options : { analysis, ...options })(
-    environment,
-  );
+  return applySatteriPreset(options)(environment);
 }
 
 function getSatteriOptions(
@@ -156,7 +154,6 @@ function getSatteriOptions(
     result = resolvePresetOptions(
       collection.satteriOptions ?? config.global.satteriOptions,
       environment,
-      collection.analysis,
     );
   } else if (collection) {
     throw new Error(

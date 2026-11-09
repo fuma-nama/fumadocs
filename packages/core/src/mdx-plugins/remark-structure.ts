@@ -62,7 +62,7 @@ export interface StructureOptions {
    */
   exportAs?: string | boolean;
 
-  /** @defaultValue 'runtime' */
+  /** @defaultValue the analysis of the content source, or `runtime` */
   analysis?: Analysis;
 }
 
@@ -124,7 +124,8 @@ export function remarkStructure({
   const isType = Array.isArray(types) ? (node: Nodes) => types.includes(node.type) : types;
 
   return (tree, file) => {
-    const out = createCodeOutput(file, 'search', analysis === 'static');
+    const isStatic = (analysis ?? file.data._analysis) === 'static';
+    const out = createCodeOutput(file, 'search', isStatic);
     const { s } = out;
     const structured = createStructuredRecords();
     const { headings, pushContent } = structured;
@@ -219,7 +220,7 @@ export function remarkStructure({
     if (!exportAs) return;
     const name = typeof exportAs === 'string' ? exportAs : 'structuredData';
     tree.children.unshift(
-      analysis === 'static'
+      isStatic
         ? toMdxExport(name, data)
         : out.esm(`export const ${name} = ${structured.toCode(out)};`),
     );

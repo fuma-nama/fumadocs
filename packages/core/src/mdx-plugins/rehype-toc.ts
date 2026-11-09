@@ -3,7 +3,7 @@ import type { Root, Element, ElementContent, Nodes } from 'hast';
 import { toEstree } from 'hast-util-to-estree';
 import type { Expression, JSXElement } from 'estree-jsx';
 import { handleTag, parseExpression, toEsm } from './utils';
-import { guardedArray, showCondition, staticContent } from '../../../shared/code-output';
+import { listCode, showCondition, staticContent } from '../../../shared/code-output';
 import type { Analysis } from './stringifier';
 import { idCodeProperty } from '../../../shared/heading-id';
 
@@ -30,7 +30,7 @@ export interface RehypeTocOptions {
         name: string;
       };
 
-  /** @defaultValue 'runtime' */
+  /** @defaultValue the analysis of the content source, or `runtime` */
   analysis?: Analysis;
 }
 
@@ -78,6 +78,7 @@ export function rehypeToc(
   }
 
   return (tree, file) => {
+    const isStatic = (analysis ?? file.data._analysis) === 'static';
     const items: (RehypeTOCItemType & { when: string[]; code?: string })[] = [];
 
     const visit = (nodes: Nodes[], when: string[]) => {
@@ -92,8 +93,8 @@ export function rehypeToc(
 
         const { id, [idCodeProperty]: idCode } = node.properties;
         if (typeof id !== 'string') continue;
-        const code = typeof idCode === 'string' ? idCode : undefined;
-        if (code) delete node.properties[idCodeProperty];
+        if (idCode !== undefined) delete node.properties[idCodeProperty];
+        const code = !isStatic && typeof idCode === 'string' ? idCode : undefined;
         const last = node.children[node.children.length - 1];
         const text = last.type === 'text' ? last : undefined;
         const noToc = text && handleTag(text.value, NoTocTag);
@@ -126,7 +127,6 @@ export function rehypeToc(
     if (exportToc.as === 'esm') {
       const titles: Expression[] = [];
       const list: { code: string; when: string[] }[] = [];
-      const isStatic = analysis === 'static';
       for (const { title, when, url, depth, _step, code: id } of items) {
         const i = titles.push({
           type: 'JSXFragment',
@@ -139,12 +139,8 @@ export function rehypeToc(
         if (_step !== undefined) code += `, _step: ${_step}`;
         list.push({ code: `${code}, title: _fumadocs${i - 1}}`, when: isStatic ? [] : when });
       }
-      const array = guardedArray(list);
       tree.children.push(
-        toEsm(
-          `export const ${exportToc.name} = ${isStatic ? array : `(props) => ${array}`};`,
-          titles,
-        ),
+        toEsm(`export const ${exportToc.name} = ${listCode(list, isStatic)};`, titles),
       );
     } else {
       file.data.rehypeToc = items.map(({ when: _, code: __, ...item }) => item);

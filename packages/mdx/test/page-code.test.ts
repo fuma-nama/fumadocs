@@ -3,7 +3,7 @@ import * as os from 'node:os';
 import * as path from 'node:path';
 import { expect, test } from 'vitest';
 import { loader } from 'fumadocs-core/source';
-import { defineDocs } from '@/config';
+import { applyMdxPreset, defineDocs } from '@/config';
 import { buildConfig } from '@/config/build';
 import { createCore } from '@/core';
 import { createMdxLoader } from '@/loaders/mdx';
@@ -155,4 +155,34 @@ export const frontmatter = {
   });
 
   await fs.rm(dir, { recursive: true });
+});
+
+test('static analysis of a collection with its own options', async () => {
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'page-code-'));
+  const file = path.join(dir, 'index.mdx');
+  await fs.writeFile(file, '---\ntitle: Home\n---\n\n## Hello {props.name}\n\n[Link](/a)\n');
+  const docs = (compiler?: 'satteri') =>
+    defineDocs({
+      dir,
+      docs: {
+        analysis: 'static',
+        postprocess: { extractLinkReferences: true, includeProcessedMarkdown: true },
+        ...(compiler ? { compiler } : { mdxOptions: applyMdxPreset() }),
+      },
+    });
+
+  for (const compiler of [undefined, 'satteri'] as const) {
+    const core = createCore({ environment: 'vite', outDir: dir });
+    await core.init({ config: buildConfig({ docs: docs(compiler) }, dir) });
+    const { code } = (await createMdxLoader({ getCore: async () => core }).load({
+      filePath: file,
+      query: { collection: 'docs' },
+      getSource: () => fs.readFile(file, 'utf-8'),
+      development: false,
+      compiler: { addDependency() {} },
+    }))!;
+    for (const name of ['toc', 'structuredData', 'extractedReferences', '_markdown'])
+      expect(code).not.toMatch(new RegExp(`(const|let) ${name} = \\(?props\\)? =>`));
+    expect(code).not.toContain('_headingIds');
+  }
 });

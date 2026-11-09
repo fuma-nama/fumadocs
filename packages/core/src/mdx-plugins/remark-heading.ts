@@ -3,6 +3,7 @@ import type { Heading, Root, RootContent } from 'mdast';
 import type { Transformer } from 'unified';
 import type { TOCItemType } from '@/toc';
 import { flattenNode, toEsm } from '@/mdx-plugins/utils';
+import type { Analysis } from '@/mdx-plugins/stringifier';
 import { showCondition } from '../../../shared/code-output';
 import { headingIdCode, headingIdRegex, idCodeProperty } from '../../../shared/heading-id';
 
@@ -22,6 +23,13 @@ export interface RemarkHeadingOptions {
    * @defaultValue true
    */
   generateToc?: boolean;
+
+  /**
+   * With `static`, IDs are always slugged from the source.
+   *
+   * @defaultValue the analysis of the content source, or `runtime`
+   */
+  analysis?: Analysis;
 }
 
 declare module 'vfile' {
@@ -34,13 +42,14 @@ declare module 'vfile' {
 }
 
 /**
- * Add heading ids and extract TOC. With the default slugs, IDs of headings with authored expressions or in branches of
- * `<show>` render from code.
+ * Add heading ids and extract TOC. With the default slugs and runtime analysis, IDs of headings with authored
+ * expressions or in branches of `<show>` render from code.
  */
 export function remarkHeading({
   slug,
   customId = true,
   generateToc = true,
+  analysis,
 }: RemarkHeadingOptions = {}): Transformer<Root, Root> {
   let slugger: Slugger | undefined;
   const defaultSlug = !slug;
@@ -53,6 +62,7 @@ export function remarkHeading({
   return (root, file) => {
     const toc: TOCItemType[] = [];
     const ids = headingIdCode();
+    const fromCode = defaultSlug && (analysis ?? file.data._analysis) !== 'static';
     slugger?.reset();
 
     const visit = (heading: RootContent, when: string[]) => {
@@ -82,7 +92,7 @@ export function remarkHeading({
         flattened ??= flattenNode(heading);
 
         props.id = slug(root, heading, flattened);
-        const code = defaultSlug && ids.next(heading.children, when);
+        const code = fromCode && ids.next(heading.children, when);
         if (code) props[idCodeProperty] = code;
       }
 

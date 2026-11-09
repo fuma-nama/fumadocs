@@ -131,10 +131,11 @@ test('Remark Show: branches and expressions render from code in every output', a
 });
 
 test('Remark Show: static outputs analyse the source', async () => {
-  const analysis = 'static';
-  const options = await applySatteriPreset({ analysis, mdastPlugins: [remarkLlms({ analysis })] })(
-    'runtime',
-  );
+  // set by the content source, like the collection of Fumadocs MDX
+  const options = await applySatteriPreset({
+    data: { _analysis: 'static' },
+    mdastPlugins: [remarkLlms()],
+  })('runtime');
   const { code } = await compileMdx({
     source: '## Deploy on {props.framework}\n\n<show when={props.a}>\nAstro.\n</show>\n',
     filePath: '/tmp/doc.mdx',
@@ -146,6 +147,8 @@ test('Remark Show: static outputs analyse the source', async () => {
     structuredData: StructuredData;
     _markdown: string;
   };
+  // IDs are slugged from the source, like the TOC
+  expect(code).not.toContain('_headingIds');
   expect(page.toc.map((item) => item.url)).toEqual(['#deploy-on-']);
   expect(page.structuredData.headings[0].content).toBe('Deploy on {props.framework}');
   expect(page._markdown).toBe('## Deploy on {props.framework} [#deploy-on-]\n\nAstro.\n');

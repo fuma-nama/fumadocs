@@ -1,5 +1,6 @@
 import type { ProcessorOptions } from '@mdx-js/mdx';
 import type * as Plugins from '@/mdx-plugins';
+import type { Analysis } from '@/mdx-plugins/stringifier';
 import { resolvePlugins, type ResolvePlugins } from '@/content/mdx/util';
 import type { Pluggable } from 'unified';
 
@@ -18,6 +19,12 @@ export type MDXBundlerPresetOptions = Omit<
   remarkCodeTabOptions?: Plugins.RemarkCodeTabOptions | false;
   remarkNpmOptions?: Plugins.RemarkNpmOptions | false;
   rehypeCodeOptions?: Plugins.RehypeCodeOptions | false;
+  /**
+   * The analysis of the TOC, structured data and heading IDs, `runtime` makes the outputs functions of the props.
+   *
+   * @defaultValue 'static'
+   */
+  analysis?: Analysis;
 };
 
 /**
@@ -31,6 +38,7 @@ export async function mdxPreset(options: MDXBundlerPresetOptions = {}): Promise<
     remarkStructureOptions,
     remarkCodeTabOptions,
     remarkNpmOptions,
+    analysis = 'static',
     _include,
     ...mdxOptions
   } = options;
@@ -43,6 +51,7 @@ export async function mdxPreset(options: MDXBundlerPresetOptions = {}): Promise<
           mod.remarkHeading,
           {
             generateToc: false,
+            analysis,
             ...remarkHeadingOptions,
           },
         ]),
@@ -68,6 +77,7 @@ export async function mdxPreset(options: MDXBundlerPresetOptions = {}): Promise<
           mod.remarkStructure,
           {
             exportAs: 'structuredData',
+            analysis,
             ...remarkStructureOptions,
           } satisfies Plugins.StructureOptions,
         ]),
@@ -80,7 +90,7 @@ export async function mdxPreset(options: MDXBundlerPresetOptions = {}): Promise<
       rehypeCodeOptions !== false &&
         import('@/mdx-plugins/rehype-code').then((mod) => [mod.rehypeCode, rehypeCodeOptions]),
       ...v,
-      import('@/mdx-plugins/rehype-toc').then((mod) => mod.rehypeToc),
+      import('@/mdx-plugins/rehype-toc').then((mod) => [mod.rehypeToc, { analysis }]),
     ],
     mdxOptions.rehypePlugins,
   );

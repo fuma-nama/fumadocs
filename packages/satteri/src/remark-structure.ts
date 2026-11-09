@@ -116,6 +116,7 @@ export function remarkStructure({
     let tables = 0;
     let out: ReturnType<typeof createCodeOutput>;
     let s: Stringifier;
+    let isStatic = false;
     const structured = createStructuredRecords();
     const { headings, pushContent } = structured;
 
@@ -176,7 +177,8 @@ export function remarkStructure({
       // positions tell authored nodes from generated ones
       options: { position: true },
       before(_root: unknown, ctx: MdastVisitorContext) {
-        out = createCodeOutput(ctx, 'search', analysis === 'static');
+        isStatic = (analysis ?? ctx.data._analysis) === 'static';
+        out = createCodeOutput(ctx, 'search', isStatic);
         s = out.s;
 
         // Fumadocs OpenAPI Generated Structured Data
@@ -207,8 +209,7 @@ export function remarkStructure({
         }
 
         ctx.data.structuredData ??= structured.toStatic(out);
-        if (exportAs && analysis !== 'static')
-          ctx.data._structuredDataCode = structured.toCode(out);
+        if (exportAs && !isStatic) ctx.data._structuredDataCode = structured.toCode(out);
       },
       ...Object.fromEntries(visitors.map((key) => [key, visit])),
     };

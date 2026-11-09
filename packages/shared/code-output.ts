@@ -255,6 +255,12 @@ export function createStructuredRecords() {
   };
 }
 
+/** the code of an output list: a function of the props in runtime analysis */
+export function listCode(items: { code: string; when: string[] }[], isStatic: boolean): string {
+  const list = guardedArray(items);
+  return isStatic ? list : `(props) => ${list}`;
+}
+
 /** an array of items, each kept only when its conditions hold */
 export function guardedArray(items: { code: string; when: string[] }[]): string {
   let out = '[';

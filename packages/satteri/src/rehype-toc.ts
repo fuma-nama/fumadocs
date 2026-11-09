@@ -7,12 +7,7 @@ import type {
 } from 'satteri';
 import type { Element, ElementContent } from 'hast';
 import { handleTag, jsxToSource, parse } from '@/utils';
-import {
-  guardedArray,
-  showCondition,
-  showConditions,
-  staticContent,
-} from '../../shared/code-output';
+import { listCode, showCondition, showConditions, staticContent } from '../../shared/code-output';
 import { idCodeProperty } from '../../shared/heading-id';
 import type { ExtraPluginHooks } from './compile';
 import type { Analysis } from 'fumadocs-core/mdx-plugins/stringifier';
@@ -25,7 +20,7 @@ export interface RehypeTocOptions {
         as: 'esm';
         name: string;
       };
-  /** @defaultValue 'runtime' */
+  /** @defaultValue the analysis of the content source, or `runtime` */
   analysis?: Analysis;
 }
 
@@ -60,14 +55,16 @@ export function rehypeToc({ exportToc = true, analysis }: RehypeTocOptions = {})
   ExtraPluginHooks {
   const resolved = exportToc === true ? { as: 'esm' as const, name: 'toc' } : exportToc;
   const plugin: HastPluginInput & ExtraPluginHooks = () => {
+    let isStatic = false;
     return {
       name: 'rehype-toc',
       before(_root: unknown, ctx: HastVisitorContext) {
+        isStatic = (analysis ?? ctx.data._analysis) === 'static';
         if (resolved && resolved.as === 'data') ctx.data.rehypeToc ??= [];
       },
       after(_root: unknown, ctx: HastVisitorContext) {
         if (resolved && resolved.as === 'data')
-          ctx.data._rehypeTocCode = `(props) => ${guardedArray(ctx.data._rehypeTocItems ?? [])}`;
+          ctx.data._rehypeTocCode = listCode(ctx.data._rehypeTocItems ?? [], false);
       },
       element: {
         filter: HeadingTags,
@@ -77,7 +74,7 @@ export function rehypeToc({ exportToc = true, analysis }: RehypeTocOptions = {})
 
           const { id, [idCodeProperty]: idCode } = element.properties;
           if (typeof id !== 'string') return;
-          const code = typeof idCode === 'string' ? idCode : undefined;
+          const code = !isStatic && typeof idCode === 'string' ? idCode : undefined;
 
           let title = ctx.textContent(element);
           let children: ElementContent[] = element.children;
@@ -102,7 +99,6 @@ export function rehypeToc({ exportToc = true, analysis }: RehypeTocOptions = {})
             typeof element.properties['data-fd-step'] === 'number'
               ? element.properties['data-fd-step']
               : undefined;
-          const isStatic = analysis === 'static';
           const when = isStatic ? [] : showConditions(element, ctx);
           let obj = '{';
           obj += `title: ${
@@ -132,8 +128,8 @@ export function rehypeToc({ exportToc = true, analysis }: RehypeTocOptions = {})
   };
   plugin.collectExports = ({ data, addExport }) => {
     if (resolved && resolved.as === 'esm') {
-      const list = guardedArray(data._rehypeTocItems ?? []);
-      addExport(resolved.name, analysis === 'static' ? list : `(props) => ${list}`);
+      const isStatic = (analysis ?? data._analysis) === 'static';
+      addExport(resolved.name, listCode(data._rehypeTocItems ?? [], isStatic));
     }
   };
   return plugin;
