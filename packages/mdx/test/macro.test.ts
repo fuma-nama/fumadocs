@@ -558,7 +558,7 @@ describe('runtime', () => {
         './index.mdx': {
           default: () => null,
           toc: () => [],
-          structuredData: () => ({ headings: [], contents: [] }),
+          structuredData: () => [],
           frontmatter: { title: 'Hello' },
         },
       },
@@ -584,7 +584,7 @@ describe('runtime', () => {
     const compiled = {
       default: () => null,
       toc: () => [],
-      structuredData: () => ({ headings: [], contents: [] }),
+      structuredData: () => [],
       frontmatter: { title: 'Hello' },
     };
 

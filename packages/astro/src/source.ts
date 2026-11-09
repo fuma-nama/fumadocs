@@ -8,7 +8,7 @@ import type { MetaData, PageData, Params, StaticSource, VirtualFile } from 'fuma
 import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
 import type { TOCItemType } from 'fumadocs-core/toc';
 import { pageOutputs, renderMarkdown, type PageOutputs } from './mdx-runtime';
-import { trimStructuredData } from '../../shared/structured-data';
+import { toStructuredData } from '../../shared/structured-data';
 import { dataKey } from './shared';
 
 /** an entry of Astro content collections */
@@ -142,11 +142,11 @@ function pageData<Entry extends PageEntry>(
             )
           : Content,
         toc: outputs.toc(props),
-        structuredData: trimStructuredData(outputs.structuredData(props)),
+        structuredData: toStructuredData(outputs.structuredData(props)),
       };
     },
     async structuredData() {
-      return trimStructuredData((await compile()).outputs.structuredData(props));
+      return toStructuredData((await compile()).outputs.structuredData(props));
     },
     async getText(type, options) {
       if (type === 'raw') return entry.body ?? '';

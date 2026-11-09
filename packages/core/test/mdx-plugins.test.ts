@@ -37,7 +37,7 @@ import {
   replaceSource,
 } from '@/mdx-plugins/stringifier';
 import { walk } from '@/mdx-plugins/utils';
-import { trimStructuredData } from '../../shared/structured-data';
+import { toStructuredData, type StructuredRecord } from '../../shared/structured-data';
 
 const cwd = path.dirname(fileURLToPath(import.meta.url));
 
@@ -760,7 +760,8 @@ test('Remark Structure: values of expressions with runtime analysis', async () =
   );
   const { structuredData } = await run(String(code), runtime as never);
   // elements give the text of their children, like when they render
-  expect((structuredData as (props: object) => StructuredData)({ n: 2 }).contents).toEqual([
+  const records = (structuredData as (props: object) => StructuredRecord[])({ n: 2 });
+  expect(toStructuredData(records).contents).toEqual([
     { heading: undefined, content: 'Version Beta 2 of 2.' },
   ]);
 });
@@ -860,13 +861,13 @@ After the branch.
   const mod = await run(body, { ...runtime, _server: server } as never);
   type Page = {
     toc: (props: object) => { url: string }[];
-    structuredData: (props: object) => StructuredData;
+    structuredData: (props: object) => StructuredRecord[];
     _markdown: (props: object) => unknown;
   };
   const page = mod as unknown as Page;
   const outputs = async (props: object) => ({
     toc: page.toc(props).map((item) => item.url),
-    structured: trimStructuredData(page.structuredData(props)),
+    structured: toStructuredData(page.structuredData(props)),
     markdown: await renderToMarkdown(runtime.jsx(page._markdown as never, props)),
     html: renderToStaticMarkup(runtime.jsx(mod.default, props)),
   });

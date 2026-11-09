@@ -13,7 +13,7 @@ const structuredData = { headings: [], contents: [{ heading: undefined, content:
 const compiled = {
   default: (props: MDXProps) => createElement('p', props),
   toc: () => toc,
-  structuredData: () => structuredData,
+  structuredData: () => [{ content: 'Hello' }],
   frontmatter: { title: 'Hello', date: '2026-11-04' },
   lastModified,
   _markdown({ components }: MDXProps) {

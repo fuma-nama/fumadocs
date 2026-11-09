@@ -4,7 +4,7 @@ import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure'
 import type { TOCItemType } from 'fumadocs-core/toc';
 import type { CompiledMDXProperties } from '@/loaders/mdx/build';
 import type { ExtractedReference } from '@/loaders/mdx/remark-postprocess';
-import { trimStructuredData } from '../../../shared/structured-data';
+import { toStructuredData } from '../../../shared/structured-data';
 
 /** the exports of a compiled page for its props, outputs of runtime analysis are rendered for them */
 export type PageAt<Page extends CompiledMDXProperties<unknown>> = Omit<
@@ -32,7 +32,7 @@ export function pageAt<Page extends CompiledMDXProperties<unknown>>(
     toc: typeof toc === 'function' ? toc(props) : toc,
     structuredData:
       typeof structuredData === 'function'
-        ? trimStructuredData(structuredData(props))
+        ? toStructuredData(structuredData(props))
         : structuredData,
     extractedReferences: typeof refs === 'function' ? refs(props) : refs,
     // called in place, so `asMarkdown()` of the component opts in when rendering into Markdown

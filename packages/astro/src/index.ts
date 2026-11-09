@@ -164,7 +164,7 @@ function outputsPlugin(root: string, markdown: boolean, island?: string): HastPl
         const { data } = ctx;
         const outputs = [
           `toc: ${data._rehypeTocCode ?? '() => []'}`,
-          `structuredData: ${data._structuredDataCode ?? '() => ({ headings: [], contents: [] })'}`,
+          `structuredData: ${data._structuredDataCode ?? '() => []'}`,
         ];
         if (markdown) outputs.push('markdown: _markdown');
         if (island) outputs.push('components: _components');

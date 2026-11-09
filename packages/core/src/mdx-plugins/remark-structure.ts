@@ -114,8 +114,8 @@ export const remarkStructureDefaultOptions = {
  * Extract content into structured data, as Markdown sliced from the authored source. Links and JSX elements are
  * replaced by their content, images are removed.
  *
- * With runtime analysis, the export is a function of the props, expressions render strings and numbers into the
- * content. `vfile.data.structuredData` is static.
+ * With runtime analysis, the export is a function of the props giving the records that show, expressions render
+ * strings and numbers into their content. `vfile.data.structuredData` is static.
  *
  * By default, the output is stored into VFile (`vfile.data.structuredData`), you can specify `exportAs` to export it.
  */
@@ -133,13 +133,13 @@ export function remarkStructure({
     const out = createCodeOutput(file, 'search', isStatic);
     const { s } = out;
     const structured = createStructuredRecords();
-    const { headings, pushContent } = structured;
+    const { push } = structured;
 
     // Fumadocs OpenAPI Generated Structured Data
     const openapi = (file.data.frontmatter as { _openapi?: { structuredData?: StructuredData } })
       ?._openapi?.structuredData;
-    for (const item of openapi?.headings ?? []) headings.push({ ...item, when: [] });
-    for (const item of openapi?.contents ?? []) pushContent(item, []);
+    for (const item of openapi?.headings ?? []) push(item);
+    for (const item of openapi?.contents ?? []) push(item);
 
     const toCells = (row: TableRow) => {
       const cells: string[] = [];
@@ -168,7 +168,7 @@ export function remarkStructure({
       if (node.data?.structuredData) {
         const items = node.data.structuredData.contents;
         records.push(() => {
-          for (const item of items) pushContent(item, when);
+          for (const item of items) push(item, when);
         });
         covered = s.range(node) ?? covered;
         return;
@@ -187,7 +187,7 @@ export function remarkStructure({
           const [head, ...rows] = node.children;
           const header = toCells(head);
           for (const row of rows)
-            pushContent(
+            push(
               tableRowToStructuredData({ table, heading: undefined, row: toCells(row), header }),
               when,
             );
@@ -204,12 +204,12 @@ export function remarkStructure({
         const code = node.data?.hProperties?.[idCodeProperty];
         records.push(() => {
           const content = s.inner(node).replace(headingIdRegex, '').trim();
-          headings.push({ id, code: typeof code === 'string' ? code : undefined, content, when });
+          push({ id, code: typeof code === 'string' ? code : undefined, content }, when);
         });
       } else {
         records.push(() => {
           const content = s.stringify(node).trim();
-          if (content.length > 0) pushContent({ heading: undefined, content }, when);
+          if (content.length > 0) push({ heading: undefined, content }, when);
         });
       }
     };

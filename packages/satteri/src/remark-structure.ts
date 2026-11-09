@@ -121,7 +121,7 @@ export function remarkStructure({
     let s: Stringifier;
     let isStatic = false;
     const structured = createStructuredRecords();
-    const { headings, pushContent } = structured;
+    const { push } = structured;
 
     function stringifyCells(row: TableRow): string[] {
       return row.children.map((cell) => s.inner(cell).trim());
@@ -190,27 +190,27 @@ export function remarkStructure({
         // Fumadocs OpenAPI Generated Structured Data
         const openapi = (ctx.data.frontmatter as { _openapi?: { structuredData?: StructuredData } })
           ?._openapi?.structuredData;
-        for (const item of openapi?.headings ?? []) headings.push({ ...item, when: [] });
-        for (const item of openapi?.contents ?? []) pushContent(item, []);
+        for (const item of openapi?.headings ?? []) push(item);
+        for (const item of openapi?.contents ?? []) push(item);
       },
       after(_root, ctx) {
         for (const record of records) {
           if ('rows' in record) {
             const header = stringifyCells(record.head);
             for (const row of record.rows)
-              pushContent(
+              push(
                 tableRowToStructuredData({ table: record.table, row: stringifyCells(row), header }),
                 record.when,
               );
           } else if (record.content !== undefined) {
             const { heading, content, table, when } = record;
-            pushContent({ heading, content, table }, when);
+            push({ heading, content, table }, when);
           } else if (record.id) {
             const content = s.inner(record.node).replace(headingIdRegex, '').trim();
-            headings.push({ id: record.id, code: record.code, content, when: record.when });
+            push({ id: record.id, code: record.code, content }, record.when);
           } else {
             const content = s.stringify(record.node).trim();
-            if (content.length > 0) pushContent({ heading: undefined, content }, record.when);
+            if (content.length > 0) push({ heading: undefined, content }, record.when);
           }
         }
 

@@ -209,7 +209,7 @@ test('keep collection dir outside the project in file paths', async () => {
   const entry = {
     default: () => null,
     toc: () => [],
-    structuredData: () => ({ headings: [], contents: [] }),
+    structuredData: () => [],
   };
   const docs = await create.doc('docs', '../content/docs', { './a.mdx': entry, 'b/c.mdx': entry });
   const absolute = await create.doc('docs', '/content/docs', { './a.mdx': entry });

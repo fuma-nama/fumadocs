@@ -198,10 +198,10 @@ test('custom props of getPage render the content and outputs of a page', async (
       default: () => null,
       // like the outputs of runtime analysis
       toc: (props: Props) => [{ title: `${props.framework} ${props.name}`, url: '#a', depth: 2 }],
-      structuredData: (props: Props) => ({
-        headings: [{ id: 'a', content: ` ${props.framework} ${props.name} ` }],
-        contents: [{ heading: 'a', content: ' ' }],
-      }),
+      structuredData: (props: Props) => [
+        { id: 'a', content: ` ${props.framework} ${props.name} ` },
+        { content: ' ' },
+      ],
       _markdown: (props: Props) => (asMarkdown() ? `${props.framework} ${props.name}` : null),
     },
   });

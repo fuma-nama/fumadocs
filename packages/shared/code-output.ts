@@ -262,67 +262,59 @@ interface StructuredContent {
   table?: string;
 }
 
+/** a heading of structured data, `code` is its ID as code */
+interface StructuredHeading {
+  id: string;
+  code?: string;
+  content: string;
+}
+
 /** the records of structured data in document order, their content with the markers of code */
 export function createStructuredRecords() {
-  /** `code` is the ID as code */
-  const headings: { id: string; code?: string; content: string; when: string[] }[] = [];
-  const contents: (StructuredContent & { when: string[]; after: number })[] = [];
+  const records: ((StructuredHeading | StructuredContent) & { when: string[] })[] = [];
   type Output = Pick<ReturnType<typeof createCodeOutput>, 'toStatic' | 'toText'>;
-  const idOf = (i: number) => headings[i].code ?? JSON.stringify(headings[i].id);
-
-  /**
-   * The heading of content: the last heading before it that shows with it, the conditions of the branches decide
-   * those in other branches.
-   */
-  function headingOf(when: string[], after: number): string {
-    let chain = '';
-    for (let i = after - 1; i >= 0; i--) {
-      const test = and(headings[i].when.filter((item) => !when.includes(item)));
-      if (!test) return `${chain}(${idOf(i)})`;
-      chain += `${test} ? (${idOf(i)}) : `;
-    }
-    return `${chain}undefined`;
-  }
 
   return {
-    headings,
-    pushContent: (item: StructuredContent, when: string[]) =>
-      contents.push({ ...item, when, after: headings.length }),
+    /** `when`: the conditions of the branches of `<show>` around it */
+    push: (item: StructuredHeading | StructuredContent, when: string[] = []) =>
+      records.push({ ...item, when }),
     toStatic(out: Output) {
       const data = {
         contents: [] as StructuredContent[],
         headings: [] as { id: string; content: string }[],
       };
-      for (const { id, content } of headings)
-        if (content) data.headings.push({ id, content: out.toStatic(content) });
-      for (const { when: _, after, heading = headings[after - 1]?.id, ...item } of contents)
-        data.contents.push({ heading, ...item, content: out.toStatic(item.content) });
+      let heading: string | undefined;
+      for (const record of records) {
+        const content = out.toStatic(record.content);
+        if ('id' in record) {
+          heading = record.id;
+          if (content) data.headings.push({ id: record.id, content });
+          continue;
+        }
+        const item: StructuredContent = { heading: record.heading ?? heading, content };
+        if (record.table) item.table = record.table;
+        data.contents.push(item);
+      }
       return data;
     },
-    /** the code of the runtime structured data, a function of the props */
+    /** the code of the runtime records, a function of the props giving the records that show, see `toStructuredData()` */
     toCode(out: Output): string {
-      const headingList: { code: string; when: string[] }[] = [];
-      for (let i = 0; i < headings.length; i++) {
-        const { content, when } = headings[i];
-        if (content)
-          headingList.push({
-            code: `{id: ${idOf(i)}, content: ${out.toText(content)}}`,
-            when,
-          });
+      const items: { code: string; when: string[] }[] = [];
+      for (const record of records) {
+        let code = `{content: ${out.toText(record.content)}`;
+        if ('id' in record) code += `, id: ${record.code ?? JSON.stringify(record.id)}`;
+        else {
+          if (record.heading !== undefined) code += `, heading: ${JSON.stringify(record.heading)}`;
+          if (record.table) code += `, table: ${JSON.stringify(record.table)}`;
+        }
+        items.push({ code: `${code}}`, when: record.when });
       }
-      const contentList: { code: string; when: string[] }[] = [];
-      for (const { when, after, heading, table, content } of contents) {
-        let code = `{heading: ${heading === undefined ? headingOf(when, after) : JSON.stringify(heading)}`;
-        code += `, content: ${out.toText(content)}`;
-        if (table) code += `, table: ${JSON.stringify(table)}`;
-        contentList.push({ code: `${code}}`, when });
-      }
-      const data = `{headings: ${guardedArray(headingList)}, contents: ${guardedArray(contentList)}}`;
-      if (!data.includes(`${textFunction}(`)) return `(props) => (${data})`;
+      const list = guardedArray(items);
+      if (!list.includes(`${textFunction}(`)) return `(props) => ${list}`;
       // the text of values, elements by their children like when they render
       return `(props) => {
 const ${textFunction} = (v) => typeof v === "string" || typeof v === "number" ? String(v) : Array.isArray(v) ? v.map(${textFunction}).join("") : v !== null && typeof v === "object" && "props" in v ? ${textFunction}(v.props.children) : "";
-return ${data};
+return ${list};
 }`;
     },
   };

@@ -3,9 +3,9 @@ import { DevalueError, stringify } from 'devalue';
 import type { MDXComponents } from 'mdx/types';
 import type { ElementType, ReactNode } from 'react';
 import { Fragment, jsx, jsxs } from 'react/jsx-runtime';
-import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
 import type { TOCItemType } from 'fumadocs-core/toc';
 import type { IslandNode } from './island';
+import type { StructuredRecord } from '../../shared/structured-data';
 
 /*
  * The runtime of compiled MDX files. It never imports the source of pages: MDX modules importing it
@@ -113,7 +113,7 @@ type Render = (props: MarkdownProps) => Output;
 /** the outputs of a compiled page, functions of the params of a page */
 export interface PageOutputs {
   toc: (props: Record<string, unknown>) => TOCItemType[];
-  structuredData: (props: Record<string, unknown>) => StructuredData;
+  structuredData: (props: Record<string, unknown>) => StructuredRecord[];
   /** with `includeProcessedMarkdown`, a string for static output */
   markdown?: string | Render;
   /** the MDX components of the content island */
