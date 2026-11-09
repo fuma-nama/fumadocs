@@ -9,7 +9,14 @@ import {
   type ReactElement,
   type ReactNode,
 } from 'react';
-import { asMarkdown, jsxComponents, md, renderRoute, renderToMarkdown } from '@/server';
+import {
+  asMarkdown,
+  jsxComponents,
+  md,
+  renderRoute,
+  renderToMarkdown,
+  renderToMarkdownSync,
+} from '@/server';
 
 /** mimics Vite RSC: a callable proxy that throws when called on the server */
 function clientReference(id: string) {
@@ -290,6 +297,43 @@ block
     expect(await md`${[1, ' and ', Promise.resolve('two')]}, ${<strong>x</strong>}`).toBe(
       '1 and two, **x**',
     );
+  });
+});
+
+describe('synchronous rendering', () => {
+  function Version({ name }: { name: string }) {
+    if (asMarkdown()) return <code>{name}@1.0.0</code>;
+    return <span>{name}</span>;
+  }
+
+  async function Latest() {
+    asMarkdown();
+    return 'latest';
+  }
+
+  function Note({ children }: { children?: ReactNode }) {
+    if (asMarkdown()) return md`> ${children}`;
+    return <div>{children}</div>;
+  }
+
+  it('renders components like renderToMarkdown()', async () => {
+    const tree = (
+      <p>
+        Use <Version name="fumadocs" /> with <b>care</b>.
+      </p>
+    );
+    expect(renderToMarkdownSync(tree)).toBe(await renderToMarkdown(tree));
+    expect(renderToMarkdownSync(tree)).toBe('Use `fumadocs@1.0.0` with **care**.');
+  });
+
+  it('keeps what renders asynchronously as JSX syntax', () => {
+    expect(
+      renderToMarkdownSync(
+        <p>
+          <Latest /> <Note>text</Note>
+        </p>,
+      ),
+    ).toBe('<Latest /> <Note>text</Note>');
   });
 });
 
