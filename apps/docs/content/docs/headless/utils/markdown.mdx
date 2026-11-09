@@ -61,20 +61,6 @@ Two variants return the content as a block:
 - `md.linePrefix(prefix)`: prefix every line, e.g. `'> '` for quote blocks.
 - `md.indent(size)`: indent every line.
 
-## `renderToMarkdownSync`
-
-`renderToMarkdownSync()` renders without waiting, for code that can't be async. Components that render asynchronously, like async server components and Markdown forms made with `md`, stay as JSX syntax. [Remark Structure](/docs/headless/mdx/structure#components) uses it for runtime records.
-
-```tsx
-import { renderToMarkdownSync } from 'fumadocs-core/server';
-
-const text = renderToMarkdownSync(
-  <div>
-    <h2>Hello World</h2>
-  </div>,
-);
-```
-
 ## `renderRoute`
 
 Render a page element into Markdown, or `undefined` when its component doesn't call `asMarkdown()`.

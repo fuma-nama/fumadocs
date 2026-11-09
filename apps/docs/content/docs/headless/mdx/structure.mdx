@@ -83,11 +83,11 @@ The `analysis` option sets whether the records render for the props of the conte
 - `runtime`: `structuredData` is a function of the props. Its records only include the [`<show>`](/docs/markdown#show) branches that show, expressions render as their values, and JSX elements render with their [components](#components).
 - `static` (default): `structuredData` is the records of the source. They include every branch, and expressions keep their source text.
 
-Fumadocs MDX passes the [`analysis`](/docs/mdx/collections#analysis) of the collection, `runtime` by default, and renders the records for the props of each page.
+Fumadocs MDX passes the [`analysis`](/docs/mdx/collections#analysis) of the collection. With runtime analysis, it renders the records for the props of each page, and `page.data.structuredData` is `() => Promise<StructuredData>`.
 
 ### Components
 
-With runtime analysis, records render JSX elements like [processed Markdown](/docs/headless/mdx/remark-llms#jsx-elements): a name that the file imports or declares is that variable, and other names come from the MDX components in the [page props](/docs/headless/source-api#custom-props). A component puts its text in search by defining its Markdown form with [`asMarkdown()`](/docs/headless/utils/markdown#asmarkdown):
+With runtime analysis, records render JSX elements like [processed Markdown](/docs/headless/mdx/remark-llms#jsx-elements): a name that the file imports or declares is that variable, and other names come from the MDX components in the [page props](/docs/headless/source-api#custom-props). Search reads pages without page props, so a component that search should render is imported or declared in the file. It puts its text in search by defining its Markdown form with [`asMarkdown()`](/docs/headless/utils/markdown#asmarkdown):
 
 ```tsx
 import { asMarkdown } from 'fumadocs-core/server';
@@ -98,7 +98,7 @@ export function ProductName() {
 }
 ```
 
-A component without a Markdown form stays as JSX syntax, and so does an MDX component that the page props don't have. Records render synchronously, so components that render asynchronously, like async server components and Markdown forms made with `md`, stay as JSX syntax too.
+A component without a Markdown form stays as JSX syntax, and so does an MDX component that the page props don't have.
 
 ## Plugins
 

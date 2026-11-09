@@ -151,20 +151,22 @@ Unlike `mdxOptions`, the collection-level `satteriOptions` keeps the default pre
 
 Set how Fumadocs MDX generates the outputs of a page: its table of contents, structured data, processed Markdown and extracted references.
 
-- `runtime` (default): the outputs render for the props of the content, like the [path params](/docs/headless/page-conventions#path-params) of the page. They only include the [`<show>`](/docs/markdown#show) branches that show, expressions render as their values, and heading IDs are slugged from the rendered text.
+- `runtime`: the outputs render for the props of the content, like the [path params](/docs/headless/page-conventions#path-params) of the page. They only include the [`<show>`](/docs/markdown#show) branches that show, expressions render as their values, and heading IDs are slugged from the rendered text. Structured data renders like processed Markdown, so it's `() => Promise<StructuredData>`.
 - `static`: the outputs are analysed from the source. They include every `<show>` branch, expressions keep their source text, and heading IDs are slugged from the source.
+
+Collections with `async` or `dynamic` use runtime analysis by default, the others use static analysis so that their structured data stays an object. Set it to `runtime` for pages with `<show>` or expressions:
 
 ```ts title="source.config.ts"
 import { defineDocs } from 'fumadocs-mdx/config';
 
 export const docs = defineDocs({
   docs: {
-    analysis: 'static',
+    analysis: 'runtime',
   },
 });
 ```
 
-With runtime analysis, the outputs also render for the [page props](/docs/headless/source-api#custom-props) that you pass to `loader()` or `getPage()`.
+With runtime analysis, the outputs also render for the [custom props](/docs/headless/source-api#custom-props) that you pass to `getPage()`.
 
 ### `postprocess`
 
