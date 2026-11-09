@@ -3,7 +3,7 @@ import { pathToFileURL } from 'node:url';
 import type { StandardSchemaV1 } from '@standard-schema/spec';
 import { frontmatter as parseFrontmatter } from 'fumadocs-core/content/md/frontmatter';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
-import { toStructuredData, type StructuredRecords } from './structured-data';
+import { renderStructuredData, type StructuredRecords } from './structured-data';
 import { isDynamicPath, type MetaData, type PageData, type Params } from 'fumadocs-core/source';
 import * as defaultSchemas from 'fumadocs-core/source/schema';
 import { createLocalSource, type SourceFile } from '@fumadocs/local-content';
@@ -121,7 +121,7 @@ export function createMarkdownSource<
           structuredData?: StructuredRecords;
         };
         return structuredData
-          ? toStructuredData(structuredData, params ?? {})
+          ? renderStructuredData(structuredData, params ?? {})
           : renderer.structuredData;
       },
     };

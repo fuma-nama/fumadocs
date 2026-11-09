@@ -37,7 +37,7 @@ import {
   replaceSource,
 } from '@/mdx-plugins/stringifier';
 import { walk } from '@/mdx-plugins/utils';
-import { toStructuredData, type StructuredRecords } from '../../shared/structured-data';
+import { renderStructuredData, type StructuredRecords } from '../../shared/structured-data';
 
 const cwd = path.dirname(fileURLToPath(import.meta.url));
 
@@ -760,9 +760,9 @@ test('Remark Structure: values of expressions with runtime analysis', async () =
   );
   const { structuredData } = await run(String(code), runtime as never);
   // values render into Markdown
-  expect(toStructuredData(structuredData as StructuredRecords, { n: 2 }).contents).toEqual([
-    { heading: undefined, content: 'Version **Beta 2** of 2.' },
-  ]);
+  expect(
+    (await renderStructuredData(structuredData as StructuredRecords, { n: 2 })).contents,
+  ).toEqual([{ heading: undefined, content: 'Version **Beta 2** of 2.' }]);
 });
 
 test('Remark Structure: components render with runtime analysis', async () => {
@@ -777,7 +777,14 @@ test('Remark Structure: components render with runtime analysis', async () => {
   return 'Fumadocs';
 }
 
+export function Bold({ children }) {
+  if (_server.asMarkdown()) return _server.md\`**\${children}**\`;
+  return <b>{children}</b>;
+}
+
 Declared: <Local />, from MDX components: <ProductName />, as a value: {<Local />}.
+
+Made with md: <Bold>text</Bold>.
 `,
       data: { _analysis: 'runtime' },
     },
@@ -794,12 +801,15 @@ Declared: <Local />, from MDX components: <ProductName />, as a value: {<Local /
   }
 
   // MDX components are page props, the missing ones are kept as JSX syntax
-  expect(toStructuredData(records, {}).contents[0].content).toBe(
+  expect((await renderStructuredData(records, {})).contents[0].content).toBe(
     'Declared: Fumadocs, from MDX components: <ProductName />, as a value: Fumadocs.',
   );
-  expect(toStructuredData(records, { components: { ProductName } }).contents[0].content).toBe(
+  const data = await renderStructuredData(records, { components: { ProductName } });
+  expect(data.contents.map((item) => item.content)).toEqual([
     'Declared: Fumadocs, from MDX components: Fumadocs UI, as a value: Fumadocs.',
-  );
+    // Markdown forms render like in processed Markdown
+    'Made with md: **text**.',
+  ]);
 });
 
 test('Remark LLMs: elements resolve like in MDX with runtime analysis', async () => {
@@ -937,7 +947,7 @@ After the branch.
   const page = mod as unknown as Page;
   const outputs = async (props: Record<string, unknown>) => ({
     toc: page.toc(props).map((item) => item.url),
-    structured: toStructuredData(page.structuredData, props),
+    structured: await renderStructuredData(page.structuredData, props),
     markdown: await renderToMarkdown(runtime.jsx(page._markdown as never, props)),
     html: renderToStaticMarkup(runtime.jsx(mod.default, props)),
   });

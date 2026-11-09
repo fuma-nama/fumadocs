@@ -323,7 +323,7 @@ export function createStructuredRecords() {
       }
       return data;
     },
-    /** the code of the runtime records, a function of the props giving the records that show, see `toStructuredData()` */
+    /** the code of the runtime records, a function of the props giving the records that show, see `renderStructuredData()` */
     toCode(out: Output): string {
       const items: { code: string; when: string[] }[] = [];
       let components = false;

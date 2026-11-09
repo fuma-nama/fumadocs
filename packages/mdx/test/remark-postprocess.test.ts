@@ -72,6 +72,7 @@ test('includeProcessedMarkdown keeps the authored source', async () => {
       docs: defineCollections({
         type: 'doc',
         dir,
+        analysis: 'runtime',
         postprocess: { includeProcessedMarkdown: true },
       }),
       default: { mdxOptions: { rehypeCodeOptions: false, remarkPlugins: [remarkDirective] } },

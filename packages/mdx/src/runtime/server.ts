@@ -10,7 +10,7 @@ import type { MDXProps } from 'mdx/types';
 import type { DocCollection, DocsCollection, MetaCollection } from '@/config';
 import type { StandardSchemaV1 } from '@standard-schema/spec';
 import type { CompiledMDXProperties } from '@/loaders/mdx/build';
-import { pageAt, type PageAt } from '@/utils/page';
+import { loadStructuredData, pageAt, type PageAt } from '@/utils/page';
 import type { InternalTypeConfig, DocData, DocMethods, FileInfo, MetaMethods } from './types';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
 import { createElement, use } from 'react';
@@ -21,7 +21,15 @@ export type DocCollectionEntry<
   Name extends string = string,
   Frontmatter = unknown,
   TC extends InternalTypeConfig = InternalTypeConfig,
-> = DocData & DocMethods & Frontmatter & TC['DocData'][Name];
+> = Omit<DocData, 'structuredData'> & {
+  structuredData: TC['DocData'][Name] extends {
+    structuredData: infer T extends PageData['structuredData'];
+  }
+    ? T
+    : StructuredData;
+} & DocMethods &
+  Frontmatter &
+  TC['DocData'][Name];
 
 interface ToFumadocsSourceOptions {
   /** base directory for virtual file paths */
@@ -76,7 +84,8 @@ function toDocData(page: PageAt<CompiledMDXProperties>, exports: CompiledMDXProp
   const data: DocData = {
     body: page.default,
     toc: page.toc,
-    structuredData: page.structuredData,
+    // a function with runtime analysis, the type config of the collection gives its type
+    structuredData: page.structuredData as StructuredData,
     _exports: exports as unknown as Record<string, unknown>,
   };
 
@@ -92,6 +101,11 @@ function toDocData(page: PageAt<CompiledMDXProperties>, exports: CompiledMDXProp
 function bind(exports: CompiledMDXProperties, props: Record<string, unknown>) {
   const page = pageAt(exports, props);
   return { page, data: toDocData(page, exports) };
+}
+
+/** the doc data of a loaded page, its structured data is rendered like the rest of it */
+async function loadDocData({ page, data }: ReturnType<typeof bind>): Promise<DocData> {
+  return { ...data, structuredData: await loadStructuredData(page.structuredData) };
 }
 
 export function server<Config, TC extends InternalTypeConfig>() {
@@ -151,10 +165,10 @@ export function server<Config, TC extends InternalTypeConfig>() {
             ...data,
             ...createDocMethods(fileInfo(k, base), async () => bind(await content(), {}).page),
             async load() {
-              return bind(await content(), {}).data;
+              return loadDocData(bind(await content(), {}));
             },
             async structuredData() {
-              return bind(await content(), {}).page.structuredData;
+              return loadStructuredData(bind(await content(), {}).page.structuredData);
             },
           } satisfies AsyncDocCollectionEntry;
         }),
@@ -212,7 +226,7 @@ export function server<Config, TC extends InternalTypeConfig>() {
         toFumadocsSource(options) {
           return toFumadocsSource(this.docs, this.meta, options);
         },
-      } satisfies DocsCollectionEntry;
+      } satisfies DocsCollectionEntry<Name, PageData, MetaData, TC>;
 
       return entry as never;
     },
@@ -346,8 +360,8 @@ function createDocAt<Doc extends DocMethods>(
     ...base,
     ...createDocMethods(doc.info, async () => (await loadPage()).page),
     // memoized, it can be called in render
-    load: () => (data ??= loadPage().then((item) => item.data)),
-    structuredData: async () => (await loadPage()).page.structuredData,
+    load: () => (data ??= loadPage().then(loadDocData)),
+    structuredData: async () => loadStructuredData((await loadPage()).page.structuredData),
     ...('body' in doc && {
       preload: () => loadPage().then(() => undefined),
       // like the body of the macro, it renders synchronously when loaded

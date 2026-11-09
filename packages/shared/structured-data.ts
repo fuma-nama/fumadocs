@@ -1,5 +1,4 @@
 import { createElement, type ElementType, type ReactNode } from 'react';
-import { jsxComponents, renderToMarkdownSync } from 'fumadocs-core/server';
 import type {
   StructuredData,
   StructuredDataContent,
@@ -15,27 +14,32 @@ export interface StructuredRecord extends Partial<Omit<StructuredDataContent, 'c
 export type StructuredRecords = (props: Record<string, unknown>) => StructuredRecord[];
 
 /**
- * The structured data of a page for its props: records render into Markdown with the MDX components of the props,
- * content goes under the last heading before it, records are trimmed and empty ones are left out.
+ * Render the structured data of a page for its props, like its processed Markdown: content goes under the last heading
+ * before it, records are trimmed and empty ones are left out.
  */
-export function toStructuredData(
+export async function renderStructuredData(
   records: StructuredRecords,
   props: Record<string, unknown>,
-): StructuredData {
+): Promise<StructuredData> {
+  const { jsxComponents, renderToMarkdown } = await import('fumadocs-core/server');
   const list = records({
     ...props,
     // missing components are kept as JSX syntax
     components: jsxComponents(props.components as Record<string, ElementType> | undefined),
   });
-  const data: StructuredData = { headings: [], contents: [] };
-  let heading: string | undefined;
-  for (const record of list) {
-    const content = (
+  const rendered = await Promise.all(
+    list.map((record) =>
       typeof record.content === 'string'
         ? record.content
         : // inline content, so elements stay on one line like search dialogs show them
-          renderToMarkdownSync(createElement('span', null, record.content))
-    ).trim();
+          renderToMarkdown(createElement('span', null, record.content)),
+    ),
+  );
+  const data: StructuredData = { headings: [], contents: [] };
+  let heading: string | undefined;
+  for (let i = 0; i < list.length; i++) {
+    const record = list[i];
+    const content = rendered[i].trim();
     if (record.id !== undefined) {
       heading = record.id;
       if (content) data.headings.push({ id: record.id, content });

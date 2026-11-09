@@ -395,6 +395,13 @@ function postprocessPlugin(): Plugin {
   extractedReferences: import("fumadocs-mdx").ExtractedReference[];
 }`;
 
+  const RuntimeStructuredDataTypes = `{
+  /**
+   * structured data for document search indexing, rendered for the props of the page.
+   */
+  structuredData: () => Promise<import("fumadocs-core/mdx-plugins/remark-structure").StructuredData>;
+}`;
+
   const LastModifiedTypes = `{
   /**
    * Last modified date of document file, obtained from version control.
@@ -415,6 +422,9 @@ function postprocessPlugin(): Plugin {
           const extras: string[] = [];
           if (docs.postprocess?.extractLinkReferences) extras.push(LinkReferenceTypes);
           if (docs.lastModified) extras.push(LastModifiedTypes);
+          // async entries load it rendered
+          if (docs.analysis === 'runtime' && !docs.async && !docs.dynamic)
+            extras.push(RuntimeStructuredDataTypes);
           if (extras.length === 0) continue;
 
           lines.push(ident(`${collection.name}: ${extras.join(' & ')},`, 2));

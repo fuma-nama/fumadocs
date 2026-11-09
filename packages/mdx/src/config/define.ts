@@ -36,7 +36,9 @@ export interface DocCollectionBase<
    * The analysis of the outputs of a page: its table of contents, structured data, processed Markdown and extracted
    * references. `runtime` renders them for the props of the page, `static` analyses them from the source.
    *
-   * @defaultValue 'runtime'
+   * With `runtime`, the structured data of pages is `() => Promise<StructuredData>`.
+   *
+   * @defaultValue `runtime` for `async` and `dynamic` collections, `static` otherwise
    */
   analysis?: Analysis;
   async?: boolean;

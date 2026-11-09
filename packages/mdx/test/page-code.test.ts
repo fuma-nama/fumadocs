@@ -4,6 +4,7 @@ import * as path from 'node:path';
 import { expect, test } from 'vitest';
 import { createElement, type FC } from 'react';
 import { loader } from 'fumadocs-core/source';
+import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
 import { applyMdxPreset, defineDocs, type DocCollection } from '@/config';
 import { buildConfig } from '@/config/build';
 import { createCore } from '@/core';
@@ -192,7 +193,11 @@ test('page props render the content and outputs of a page', async () => {
   const { server, toFumadocsSource: toSource } = await import('@/runtime/server');
   const { asMarkdown, jsxComponents } = await import('fumadocs-core/server');
   type Props = { framework: string; name?: string; components?: Record<string, FC> };
-  const create = server<{ docs: DocCollection }, { DocData: { docs: object } }>();
+  // the type config of a collection with runtime analysis
+  const create = server<
+    { docs: DocCollection },
+    { DocData: { docs: { structuredData: () => Promise<StructuredData> } } }
+  >();
   const docs = await create.doc('docs', '', {
     '[framework]/index.mdx': {
       frontmatter: { title: 'Home', staticParams: [{ framework: 'next' }] },
@@ -217,17 +222,17 @@ test('page props render the content and outputs of a page', async () => {
     asMarkdown();
     return 'Fumadocs';
   }
-  const source = loader({ baseUrl: '/', source: toSource(docs, []), props: { name: 'Fuma' } });
+  const source = loader({ baseUrl: '/', source: toSource(docs, []) });
 
-  // the props of the loader, with the path params
-  expect(source.getPage(['next'])?.data.toc[0].title).toBe('next Fuma');
-  // MDX components are page props, the missing ones are kept as JSX syntax
-  expect(source.getPage(['next'])?.data.structuredData.contents[0].content).toBe('<ProductName />');
-  const page = source.getPage(['next'], { props: { components: { ProductName } } })!;
+  // the outputs are values for the path params, the missing MDX components are kept as JSX syntax
+  const next = source.getPage(['next'])!;
+  expect(next.data.toc[0].title).toBe('next undefined');
+  expect((await next.data.structuredData()).contents[0].content).toBe('<ProductName />');
+  const page = source.getPage(['next'], { props: { name: 'Fuma', components: { ProductName } } })!;
   expect(page.url).toBe('/next');
   expect(page.data.toc[0].title).toBe('next Fuma');
   // records are trimmed, empty ones are left out
-  expect(page.data.structuredData).toEqual({
+  await expect(page.data.structuredData()).resolves.toEqual({
     headings: [{ id: 'a', content: 'next Fuma' }],
     contents: [{ heading: 'a', content: 'Fumadocs' }],
   });

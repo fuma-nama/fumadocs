@@ -7,7 +7,7 @@ import { root } from 'virtual:fumadocs/config';
 import type { MetaData, PageData, Params, StaticSource, VirtualFile } from 'fumadocs-core/source';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
 import type { TOCItemType } from 'fumadocs-core/toc';
-import { pageOutputs, renderMarkdown, renderStructuredData, type PageOutputs } from './mdx-runtime';
+import { pageOutputs, renderMarkdown, structuredDataOf, type PageOutputs } from './mdx-runtime';
 import { dataKey } from './shared';
 
 /** an entry of Astro content collections */
@@ -58,7 +58,7 @@ export interface GetTextOptions {
   /**
    * MDX components for JSX elements in the output, with the runtime analysis of `includeProcessedMarkdown`.
    *
-   * @deprecated pass them as page props, with the `props` option of `loader()` or `getPage()`
+   * @deprecated pass them as page props, with the `props` option of `getPage()`
    * @defaultValue the MDX components of the collection
    */
   components?: MDXComponents;
@@ -142,11 +142,11 @@ function pageData<Entry extends PageEntry>(
             )
           : Content,
         toc: outputs.toc(props),
-        structuredData: renderStructuredData(outputs, props),
+        structuredData: await structuredDataOf(outputs, props),
       };
     },
     async structuredData() {
-      return renderStructuredData((await compile()).outputs, props);
+      return structuredDataOf((await compile()).outputs, props);
     },
     async getText(type, options) {
       if (type === 'raw') return entry.body ?? '';

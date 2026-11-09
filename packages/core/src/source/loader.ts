@@ -51,18 +51,11 @@ export interface LoaderOptions<
         typedPlugin: (plugin: LoaderPlugin<S>) => LoaderPlugin;
       }) => LoaderPluginOption[]);
   icon?: IconResolver;
-
-  /**
-   * The props you pass to the content of every page, like the MDX components: its outputs (like the structured data)
-   * render for them too. The `props` of `getPage()` are added to them.
-   */
-  props?: Record<string, unknown>;
 }
 
 export interface ResolvedLoaderConfig {
   input: ResolvedInput;
   url: (slugs: string[], locale?: string) => string;
-  props?: Record<string, unknown>;
 
   plugins: LoaderPlugin[];
   pageTree?: Partial<PageTreeOptions>;
@@ -101,8 +94,8 @@ export interface GetPageOptions {
   /** if unspecified, the default language */
   language?: string;
   /**
-   * The props you pass to the content of the page, added to the `props` of the loader: its outputs (like the table of
-   * contents) render for them too. The page is not cached.
+   * The props you pass to the content of the page, its outputs (like the table of contents) render for them too. The
+   * page is not cached.
    */
   props?: Record<string, unknown>;
 }
@@ -235,7 +228,7 @@ interface LocaleIndex {
   urlToPage: Map<string, Page>;
 }
 
-function createPageIndexer({ url, props: defaults }: ResolvedLoaderConfig) {
+function createPageIndexer({ url }: ResolvedLoaderConfig) {
   /** locale (empty without i18n) -> index */
   const indexes = new Map<string, LocaleIndex>();
   const binders = new WeakMap<Page, NonNullable<ContentStoragePageFile['dataAt']>>();
@@ -267,10 +260,7 @@ function createPageIndexer({ url, props: defaults }: ResolvedLoaderConfig) {
           absolutePath: item.absolutePath,
           url: url(item.slugs, lang),
           slugs: item.slugs,
-          data:
-            item.dataAt && defaults
-              ? item.dataAt(item.params ?? {}, { props: defaults, data: item.data })
-              : item.data,
+          data: item.data,
           params: item.params,
           locale: lang,
         };
@@ -295,11 +285,7 @@ function createPageIndexer({ url, props: defaults }: ResolvedLoaderConfig) {
     /** the page with props passed to its content, not cached */
     withProps(page: Page, props: Record<string, unknown>): Page {
       const bind = binders.get(page);
-      if (!bind) return page;
-      return {
-        ...page,
-        data: bind(page.params ?? {}, { props: { ...defaults, ...props }, data: page.data }),
-      };
+      return bind ? { ...page, data: bind(page.params ?? {}, { props, data: page.data }) } : page;
     },
     /** do not filter by language if `lang` is not specified */
     getPages(lang?: string) {

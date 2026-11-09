@@ -8,7 +8,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import * as server from 'fumadocs-core/server';
 import { createHeadingIds } from 'fumadocs-core/mdx-plugins/remark-heading.runtime';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
-import { toStructuredData, type StructuredRecords } from '../../shared/structured-data';
+import { renderStructuredData, type StructuredRecords } from '../../shared/structured-data';
 import { compileMdx } from '@/compile';
 import { applySatteriPreset } from '@/preset';
 import { remarkInclude } from '@/remark-include';
@@ -79,7 +79,7 @@ test('Remark Show: branches and expressions render from code in every output', a
   };
   const outputs = async (props: Record<string, unknown>) => ({
     toc: page.toc(props).map((item) => item.url),
-    structured: toStructuredData(page.structuredData, props),
+    structured: await renderStructuredData(page.structuredData, props),
     markdown: await server.renderToMarkdown(createElement(page._markdown, props)),
     html: renderToStaticMarkup(createElement(page.default, props)),
   });

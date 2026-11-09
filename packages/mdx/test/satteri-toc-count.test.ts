@@ -103,6 +103,7 @@ test('includeProcessedMarkdown exports _markdown', async () => {
         type: 'doc',
         compiler: 'satteri',
         dir: baseDir,
+        analysis: 'runtime',
         postprocess: { includeProcessedMarkdown: true },
         satteriOptions: { rehypeCodeOptions: false },
       }),

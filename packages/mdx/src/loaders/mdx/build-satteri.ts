@@ -1,6 +1,11 @@
 import { pathToFileURL } from 'node:url';
 import type { Core } from '@/core';
-import type { BuildEnvironment, DocCollectionItem, LoadedConfig } from '@/config/build';
+import {
+  analysisOf,
+  type BuildEnvironment,
+  type DocCollectionItem,
+  type LoadedConfig,
+} from '@/config/build';
 import type { BuildMDXOptions, CompiledMDXProperties } from '@/loaders/mdx/build';
 import type { PostprocessOptions } from '@/loaders/mdx/remark-postprocess';
 import { resolveLastModified } from '@/loaders/mdx/last-modified';
@@ -34,8 +39,7 @@ export async function buildSatteriMDX(
     _compiler,
     _cwd: collection?.cwd,
     _valueToExport: collection?.postprocess?.valueToExport,
-    // collections render their outputs for the props of a page by default
-    _analysis: collection && (collection.analysis ?? 'runtime'),
+    _analysis: collection && analysisOf(collection),
   };
 
   const mdastPlugins: MdastPluginInput[] = [remarkInclude({ cwd: collection?.cwd })];

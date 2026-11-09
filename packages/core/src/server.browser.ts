@@ -18,11 +18,6 @@ export async function renderToMarkdown(): Promise<string> {
   throw new Error('`renderToMarkdown` is only available on the server.');
 }
 
-/** structured data of pages renders with it when they bind in the browser, where it isn't searched */
-export function renderToMarkdownSync(): string {
-  return '';
-}
-
 export async function renderRoute(_element: ReactElement): Promise<string | undefined> {
   throw new Error('`renderRoute` is only available on the server.');
 }

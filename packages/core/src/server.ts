@@ -29,12 +29,7 @@ interface State {
   heading: boolean;
   /** set by `ul`/`ol` for each item, consumed by `li` */
   list?: { ordered: boolean; index: number };
-  /** render synchronously: what renders asynchronously is kept as JSX syntax, see `renderToMarkdownSync()` */
-  sync?: boolean;
 }
-
-/** Markdown, or its promise when a part of the tree renders asynchronously */
-type Text = string | Promise<string>;
 
 const ROOT_STATE: State = { pre: false, inline: false, heading: false };
 
@@ -49,8 +44,6 @@ interface Frame {
 }
 
 const NOT_OPTED_IN = Symbol();
-/** the result of a component, see `optIn()` */
-type OptIn = ReactNode | typeof NOT_OPTED_IN;
 const store = new AsyncLocalStorage<Frame>({
   name: 'fumadocs:markdown',
 });
@@ -71,15 +64,6 @@ export function asMarkdown(): boolean {
  */
 export async function renderToMarkdown(node: ReactNode): Promise<string> {
   return collapse(await walk(node, ROOT_STATE)).trim();
-}
-
-/**
- * Render a React tree into a Markdown document synchronously. Components that render asynchronously, like async
- * components and Markdown forms made with `md`, are kept as JSX syntax.
- */
-export function renderToMarkdownSync(node: ReactNode): string {
-  // synchronous rendering never waits, so the walker returns a string
-  return collapse(walk(node, { ...ROOT_STATE, sync: true }) as string).trim();
 }
 
 /**
@@ -186,8 +170,8 @@ function dedent(strings: readonly string[]): string[] {
   return out.split(PLACEHOLDER);
 }
 
-function render(node: ReactNode): Text {
-  return then(walk(node, ROOT_STATE), collapse);
+async function render(node: ReactNode): Promise<string> {
+  return collapse(await walk(node, ROOT_STATE));
 }
 
 /**
@@ -208,38 +192,36 @@ function collapse(text: string): string {
  * A component that throws before opting in (e.g. it needs a context that only exists on its own route) is treated the
  * same, it has no Markdown form.
  */
-function optIn(component: Component, props: unknown): OptIn | Promise<OptIn> {
+async function optIn(
+  component: Component,
+  props: unknown,
+): Promise<ReactNode | typeof NOT_OPTED_IN> {
   const frame: Frame = { optedIn: false };
-  const settle = (result: ReactNode): OptIn => (frame.optedIn ? result : NOT_OPTED_IN);
-  const fail = (e: unknown): OptIn => {
-    if (frame.optedIn) throw e;
-    return NOT_OPTED_IN;
-  };
 
   try {
-    const result = store.run(frame, () => component(props));
-    return isThenable(result) ? Promise.resolve(result).then(settle, fail) : settle(result);
+    const result = await store.run(frame, () => component(props));
+    return frame.optedIn ? result : NOT_OPTED_IN;
   } catch (e) {
-    return fail(e);
+    if (frame.optedIn) throw e;
+    return NOT_OPTED_IN;
   }
 }
 
-function walk(node: ReactNode, state: State): Text {
+async function walk(node: ReactNode, state: State): Promise<string> {
   if (node === null || node === undefined || typeof node === 'boolean') return '';
   if (typeof node === 'string') return node;
   if (typeof node === 'number' || typeof node === 'bigint') return String(node);
-  if (isThenable(node)) {
-    return state.sync ? drop(node, '') : Promise.resolve(node).then((node) => walk(node, state));
-  }
+  if (isThenable(node)) return walk(await node, state);
   if (isValidElement(node)) return element(node.type, node.props as Props, state);
   if (typeof node === 'object' && Symbol.iterator in node) {
-    return then(all(Array.from(node, (child) => walk(child, state))), (parts) => parts.join(''));
+    const parts = await Promise.all(Array.from(node, (child) => walk(child, state)));
+    return parts.join('');
   }
 
   return '';
 }
 
-function element(type: unknown, props: Props, state: State): Text {
+async function element(type: unknown, props: Props, state: State): Promise<string> {
   if (typeof type === 'string') return host(type, props, state);
   // client references can be callable proxies (Vite RSC) that throw when called, check them first
   if (isClientReference(type)) return jsx(clientReferenceName(type.$$id), props, state);
@@ -257,13 +239,8 @@ function element(type: unknown, props: Props, state: State): Text {
     };
 
     switch (special.$$typeof) {
-      case REACT_LAZY: {
-        const resolved = resolveLazy(special);
-        if (!(resolved instanceof Promise)) return element(resolved, props, state);
-        // not loaded yet, its name is unknown
-        if (state.sync) return drop(resolved, jsx('Component', props, state));
-        return resolved.then((type) => element(type, props, state));
-      }
+      case REACT_LAZY:
+        return element(await resolveLazy(special), props, state);
       case REACT_MEMO:
         return element(special.type, props, state);
       case REACT_FORWARD_REF:
@@ -274,13 +251,10 @@ function element(type: unknown, props: Props, state: State): Text {
   return '';
 }
 
-function component(fn: Component, props: Props, state: State): Text {
-  const result = optIn(fn, props);
-  const render = (result: OptIn) =>
-    result === NOT_OPTED_IN ? jsx(componentName(fn), props, state) : walk(result, state);
-
-  if (!(result instanceof Promise)) return render(result);
-  return state.sync ? drop(result, jsx(componentName(fn), props, state)) : result.then(render);
+async function component(fn: Component, props: Props, state: State): Promise<string> {
+  const result = await optIn(fn, props);
+  if (result === NOT_OPTED_IN) return jsx(componentName(fn), props, state);
+  return walk(result, state);
 }
 
 function componentName(fn: Component): string {
@@ -288,32 +262,19 @@ function componentName(fn: Component): string {
   return typeof displayName === 'string' && displayName ? displayName : name || 'Component';
 }
 
-/** the type of a lazy component, a promise while it loads */
-function resolveLazy(type: { _payload?: unknown; _init?: (payload: unknown) => unknown }): unknown {
-  try {
-    return type._init!(type._payload);
-  } catch (e) {
-    // pending: React throws the thenable
-    if (!isThenable(e)) throw e;
-    return Promise.resolve(e).then(() => resolveLazy(type));
+async function resolveLazy(type: {
+  _payload?: unknown;
+  _init?: (payload: unknown) => unknown;
+}): Promise<unknown> {
+  for (;;) {
+    try {
+      return type._init!(type._payload);
+    } catch (e) {
+      // pending: React throws the thenable
+      if (!isThenable(e)) throw e;
+      await e;
+    }
   }
-}
-
-/** continue with a value, or with what its promise resolves to */
-function then<T>(value: T | Promise<T>, fn: (value: T) => Text): Text {
-  return value instanceof Promise ? value.then(fn) : fn(value);
-}
-
-/** the texts, or their promise when one of them is a promise */
-function all(texts: Text[]): string[] | Promise<string[]> {
-  for (const text of texts) if (text instanceof Promise) return Promise.all(texts);
-  return texts as string[];
-}
-
-/** synchronous rendering doesn't wait for a promise: `fallback` stands in for it, its rejection is ignored */
-function drop(promise: PromiseLike<unknown>, fallback: Text): Text {
-  Promise.resolve(promise).catch(() => {});
-  return fallback;
 }
 
 /**
@@ -347,7 +308,7 @@ const PRESENTATIONAL_PROPS = new Set(['children', 'className', 'style', 'tabInde
 /**
  * Serialize a component as JSX syntax, for components without a Markdown form.
  */
-function jsx(name: string, props: Props, state: State): Text {
+async function jsx(name: string, props: Props, state: State): Promise<string> {
   let open = `<${name}`;
   for (const key in props) {
     if (PRESENTATIONAL_PROPS.has(key)) continue;
@@ -355,15 +316,14 @@ function jsx(name: string, props: Props, state: State): Text {
     if (attr !== undefined) open += ` ${attr}`;
   }
 
-  return then(walk(props.children, state), (children) => {
-    if (state.inline) {
-      return children.trim().length === 0 ? `${open} />` : `${open}>${children}</${name}>`;
-    }
+  const children = await walk(props.children, state);
+  if (state.inline) {
+    return children.trim().length === 0 ? `${open} />` : `${open}>${children}</${name}>`;
+  }
 
-    const body = children.trim();
-    if (body.length === 0) return `\n${open} />\n\n`;
-    return `\n${open}>\n${body}\n</${name}>\n\n`;
-  });
+  const body = children.trim();
+  if (body.length === 0) return `\n${open} />\n\n`;
+  return `\n${open}>\n${body}\n</${name}>\n\n`;
 }
 
 function attribute(key: string, value: unknown): string | undefined {
@@ -424,7 +384,7 @@ const DROP_TAGS = new Set([
   'title',
 ]);
 
-function host(tag: string, props: Props, state: State): Text {
+async function host(tag: string, props: Props, state: State): Promise<string> {
   if (DROP_TAGS.has(tag)) return '';
 
   if (state.pre) {
@@ -432,71 +392,71 @@ function host(tag: string, props: Props, state: State): Text {
     return walk(props.children, state);
   }
 
-  const children = (override: Partial<State>, fn: (children: string) => Text) =>
-    then(walk(props.children, { ...state, ...override }), fn);
+  const children = (override: Partial<State>) => walk(props.children, { ...state, ...override });
 
   switch (tag) {
-    case 'p':
-      return children({ inline: true }, (c) => {
-        c = c.trim();
-        return state.inline ? `${c} ` : `\n${c}\n\n`;
-      });
+    case 'p': {
+      const c = (await children({ inline: true })).trim();
+      return state.inline ? `${c} ` : `\n${c}\n\n`;
+    }
     case 'h1':
     case 'h2':
     case 'h3':
     case 'h4':
     case 'h5':
-    case 'h6':
-      return children({ inline: true, heading: true }, (c) => {
-        c = c.trim().replace(/\s*\n\s*/g, ' ');
-        return `\n${'#'.repeat(Number(tag[1]))} ${c}\n\n`;
-      });
+    case 'h6': {
+      const c = (await children({ inline: true, heading: true })).trim().replace(/\s*\n\s*/g, ' ');
+      return `\n${'#'.repeat(Number(tag[1]))} ${c}\n\n`;
+    }
     case 'a': {
       const href = typeof props.href === 'string' ? props.href : undefined;
-      return children({ inline: true }, (c) => {
-        // anchor links in headings (e.g. fumadocs headings)
-        if (!href || (state.heading && href.startsWith('#'))) return c;
-        const text = c.trim();
-        return text.length === 0 ? `<${href}>` : `[${text}](${href})`;
-      });
+      const c = await children({ inline: true });
+      // anchor links in headings (e.g. fumadocs headings)
+      if (!href || (state.heading && href.startsWith('#'))) return c;
+      const text = c.trim();
+      return text.length === 0 ? `<${href}>` : `[${text}](${href})`;
     }
     case 'strong':
     case 'b':
-      return children({ inline: true }, (c) => wrap(c, '**'));
+      return wrap(await children({ inline: true }), '**');
     case 'em':
     case 'i':
-      return children({ inline: true }, (c) => wrap(c, '*'));
+      return wrap(await children({ inline: true }), '*');
     case 'del':
     case 's':
-      return children({ inline: true }, (c) => wrap(c, '~~'));
+      return wrap(await children({ inline: true }), '~~');
     case 'code':
-    case 'kbd':
-      return children({ inline: true }, (c) =>
-        // multi-line code without a `<pre>` ancestor (e.g. `pre` mapped to a client component)
-        c.includes('\n') && !state.inline ? codeFence(detectLang(props), c) : inlineCode(c),
-      );
+    case 'kbd': {
+      const c = await children({ inline: true });
+      // multi-line code without a `<pre>` ancestor (e.g. `pre` mapped to a client component)
+      if (c.includes('\n') && !state.inline) return codeFence(detectLang(props), c);
+      return inlineCode(c);
+    }
     case 'pre':
-      return children({ pre: true }, (c) => codeFence(detectLang(props), c));
+      return codeFence(detectLang(props), await children({ pre: true }));
     case 'blockquote':
-      return children({ inline: false }, (c) => `\n${prefixLines(collapse(c).trim(), '> ')}\n\n`);
+      return `\n${prefixLines(collapse(await children({ inline: false })).trim(), '> ')}\n\n`;
     case 'ul':
     case 'ol': {
       const ordered = tag === 'ol';
       let index = typeof props.start === 'number' ? props.start : 1;
-      const items = flatten(props.children).map((child) => {
-        if (!isValidElement(child)) return typeof child === 'string' ? child.trim() : '';
-        return walk(child, { ...state, inline: false, list: { ordered, index: index++ } });
-      });
 
-      return then(all(items), (items) => `\n${items.join('')}\n`);
+      const items = await Promise.all(
+        flatten(props.children).map((child) => {
+          if (!isValidElement(child)) return typeof child === 'string' ? child.trim() : '';
+          return walk(child, { ...state, inline: false, list: { ordered, index: index++ } });
+        }),
+      );
+
+      return `\n${items.join('')}\n`;
     }
     case 'li': {
       const marker = state.list?.ordered ? `${state.list.index}. ` : '- ';
-      return children({ inline: false }, (c) => {
-        // keep nested lists tight
-        const body = c.trim().replace(/\n{2,}(?=(?:[-*+] |\d+\. ))/g, '\n');
-        return `${marker}${prefixLines(body, ' '.repeat(marker.length)).slice(marker.length)}\n`;
-      });
+      // keep nested lists tight
+      const body = (await children({ inline: false }))
+        .trim()
+        .replace(/\n{2,}(?=(?:[-*+] |\d+\. ))/g, '\n');
+      return `${marker}${prefixLines(body, ' '.repeat(marker.length)).slice(marker.length)}\n`;
     }
     case 'img': {
       if (typeof props.src !== 'string') return '';
@@ -507,25 +467,23 @@ function host(tag: string, props: Props, state: State): Text {
       return '\n---\n\n';
     case 'br':
       return '\n';
-    case 'table':
-      return children({ inline: false }, (text) => {
-        const rows: string[][] = [];
-        // without the text before the first row & cell
-        for (const row of text.split(ROW).slice(1)) rows.push(row.split(CELL).slice(1));
-        return rows.length === 0 ? '' : `\n${markdownTable(rows)}\n\n`;
-      });
+    case 'table': {
+      const rows: string[][] = [];
+      // without the text before the first row & cell
+      for (const row of (await children({ inline: false })).split(ROW).slice(1))
+        rows.push(row.split(CELL).slice(1));
+      return rows.length === 0 ? '' : `\n${markdownTable(rows)}\n\n`;
+    }
     case 'tr':
-      return children({ inline: false }, (c) => `${ROW}${c}`);
+      return `${ROW}${await children({ inline: false })}`;
     case 'th':
     case 'td':
-      return children({ inline: true }, (c) => `${CELL}${c}`);
+      return `${CELL}${await children({ inline: true })}`;
   }
 
-  if (INLINE_TAGS.has(tag)) return children({ inline: true }, (c) => c);
-  return children({ inline: false }, (c) => {
-    c = c.trim();
-    return c.length === 0 ? '' : `\n${c}\n\n`;
-  });
+  if (INLINE_TAGS.has(tag)) return children({ inline: true });
+  const c = (await children({ inline: false })).trim();
+  return c.length === 0 ? '' : `\n${c}\n\n`;
 }
 
 function wrap(text: string, marker: string): string {

@@ -1,5 +1,10 @@
 import { applyMdxPreset } from '@/config/preset';
-import type { BuildEnvironment, DocCollectionItem, LoadedConfig } from '@/config/build';
+import {
+  analysisOf,
+  type BuildEnvironment,
+  type DocCollectionItem,
+  type LoadedConfig,
+} from '@/config/build';
 import type { Core } from '@/core';
 import { createProcessor, type ProcessorOptions } from '@mdx-js/mdx';
 import { remarkInclude } from 'fumadocs-core/mdx-plugins/remark-include';
@@ -78,8 +83,7 @@ export async function buildJSMDX(
     value: source,
     path: filePath,
     cwd: collection?.cwd,
-    // collections render their outputs for the props of a page by default
-    data: { frontmatter, _compiler, _analysis: collection && (collection.analysis ?? 'runtime') },
+    data: { frontmatter, _compiler, _analysis: collection && analysisOf(collection) },
   });
 
   if (collection) {

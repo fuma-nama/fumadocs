@@ -16,8 +16,14 @@ export interface BrowserDocMethods {
   preload: () => Promise<void>;
 }
 
-export type MacroDocEntry<Frontmatter = unknown, Extra = unknown> = DocData &
-  DocMethods &
+export type MacroDocEntry<Frontmatter = unknown, Extra = unknown> = Omit<
+  DocData,
+  'structuredData'
+> & {
+  structuredData: Extra extends { structuredData: infer T extends PageData['structuredData'] }
+    ? T
+    : StructuredData;
+} & DocMethods &
   BrowserDocMethods &
   Frontmatter &
   Extra;

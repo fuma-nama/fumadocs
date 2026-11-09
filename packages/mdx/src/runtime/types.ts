@@ -41,7 +41,7 @@ export interface GetTextOptions {
   /**
    * MDX components for JSX elements in the output, with the runtime analysis of `includeProcessedMarkdown`.
    *
-   * @deprecated pass them as page props, with the `props` option of `loader()` or `getPage()`
+   * @deprecated pass them as page props, with the `props` option of `getPage()`
    */
   components?: MDXComponents;
 }
