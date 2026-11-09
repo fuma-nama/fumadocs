@@ -3,8 +3,6 @@ import type { Transformer } from 'unified';
 import { showDeclaration, showElement } from '../../../shared/code-output';
 import { isJsxElement, toEsm, walk } from './utils';
 
-export { showElement };
-
 /**
  * `<show when={...}>` renders its content when the condition holds, like `props.framework === 'next'` with the params of
  * a page as props. The outputs of other plugins (TOC, structured data, Markdown) check the conditions too.

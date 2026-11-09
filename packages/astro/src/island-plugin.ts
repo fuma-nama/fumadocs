@@ -6,8 +6,8 @@ import type {
   MdxJsxTextElementHast,
 } from 'satteri';
 import type { Program } from 'estree-jsx';
-import { showElement } from 'fumadocs-core/mdx-plugins/remark-show';
 import { parse, type JSXElement, type JSXFragment, type Node } from 'yuku-parser';
+import { showElement } from '../../shared/code-output';
 
 const islandName = '_FumadocsIsland';
 
