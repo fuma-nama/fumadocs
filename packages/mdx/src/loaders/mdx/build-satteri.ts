@@ -6,7 +6,7 @@ import type { PostprocessOptions } from '@/loaders/mdx/remark-postprocess';
 import { resolveLastModified } from '@/loaders/mdx/last-modified';
 import type { MdxCompileOptions, Data, MdastPluginInput, MdastPluginDefinition } from 'satteri';
 import type { SatteriPresetOptions } from '@fumadocs/satteri/preset';
-import type { OutputMode } from 'fumadocs-core/mdx-plugins/stringifier';
+import type { Analysis } from 'fumadocs-core/mdx-plugins/stringifier';
 import { guardedArray, showConditions } from '../../../../shared/code-output';
 import type { ExtraPluginHooks } from '@fumadocs/satteri/compile';
 
@@ -22,7 +22,7 @@ export async function buildSatteriMDX(
   const format = filePath.endsWith('.mdx') ? 'mdx' : 'md';
   const postprocess: PostprocessOptions = {
     _format: format,
-    _output: collection?.output,
+    _analysis: collection?.analysis,
     ...collection?.postprocess,
   };
   const [{ compileMdx }, { remarkLlms }, { remarkInclude }] = await Promise.all([
@@ -43,7 +43,7 @@ export async function buildSatteriMDX(
   if (postprocess.includeProcessedMarkdown) {
     mdastPlugins.push(
       remarkLlms({
-        output: postprocess._output,
+        analysis: postprocess._analysis,
         ...(typeof postprocess.includeProcessedMarkdown === 'object' &&
           postprocess.includeProcessedMarkdown),
       }),
@@ -79,7 +79,7 @@ declare module 'satteri' {
 }
 
 function postprocessPlugin(
-  { extractLinkReferences = false, _output }: PostprocessOptions,
+  { extractLinkReferences = false, _analysis }: PostprocessOptions,
   lastModified: Date | undefined,
 ): MdastPluginDefinition & ExtraPluginHooks {
   return {
@@ -95,13 +95,13 @@ function postprocessPlugin(
     },
     link(node, ctx) {
       if (!extractLinkReferences) return;
-      const when = _output === 'static' ? [] : showConditions(node, ctx);
+      const when = _analysis === 'static' ? [] : showConditions(node, ctx);
       ctx.data.extractedReferences!.push({ code: JSON.stringify({ href: node.url }), when });
     },
     collectExports({ data, addExport }) {
       if (extractLinkReferences) {
         const list = guardedArray(data.extractedReferences!);
-        addExport('extractedReferences', _output === 'static' ? list : `(props) => ${list}`);
+        addExport('extractedReferences', _analysis === 'static' ? list : `(props) => ${list}`);
       }
 
       if (lastModified) {
@@ -124,13 +124,13 @@ export type SatteriOptionsInput =
 async function resolvePresetOptions(
   input: SatteriOptionsInput,
   environment: BuildEnvironment,
-  output?: OutputMode,
+  analysis?: Analysis,
 ): Promise<MdxCompileOptions> {
   const options = typeof input === 'function' ? await input(environment) : input;
   const { applySatteriPreset } = await import(
     /* turbopackOptional: true */ '@fumadocs/satteri/preset'
   );
-  return applySatteriPreset(options?.preset === 'minimal' ? options : { output, ...options })(
+  return applySatteriPreset(options?.preset === 'minimal' ? options : { analysis, ...options })(
     environment,
   );
 }
@@ -156,7 +156,7 @@ function getSatteriOptions(
     result = resolvePresetOptions(
       collection.satteriOptions ?? config.global.satteriOptions,
       environment,
-      collection.output,
+      collection.analysis,
     );
   } else if (collection) {
     throw new Error(

@@ -415,7 +415,7 @@ function postprocessPlugin(): Plugin {
           const structuredData =
             'import("fumadocs-core/mdx-plugins/remark-structure").StructuredData';
           const extras = [
-            `{ structuredData: ${docs.output === 'static' ? structuredData : `() => Promise<${structuredData}>`} }`,
+            `{ structuredData: ${docs.analysis === 'static' ? structuredData : `() => Promise<${structuredData}>`} }`,
           ];
           if (docs.postprocess?.extractLinkReferences) extras.push(LinkReferenceTypes);
           if (docs.lastModified) extras.push(LastModifiedTypes);

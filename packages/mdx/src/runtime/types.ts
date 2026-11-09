@@ -15,7 +15,7 @@ export interface DocData {
   toc: TOCItemType[];
 
   /**
-   * structured data for document search indexing, a value with `output: 'static'` on the collection.
+   * structured data for document search indexing, a value with `analysis: 'static'` on the collection.
    */
   structuredData: StructuredData | (() => Promise<StructuredData>);
 
@@ -39,7 +39,7 @@ export interface FileInfo {
 
 export interface GetTextOptions {
   /**
-   * MDX components for JSX elements in the output, only available with `output: 'function'` in `includeProcessedMarkdown`.
+   * MDX components for JSX elements in the output, with the runtime analysis of `includeProcessedMarkdown`.
    */
   components?: MDXComponents;
 }

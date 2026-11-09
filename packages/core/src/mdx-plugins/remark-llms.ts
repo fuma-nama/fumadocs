@@ -3,7 +3,7 @@ import { createCodeOutput, isJsxElement, parseExpression } from './utils';
 import { keptElement, markdownCode } from '../../../shared/code-output';
 import type { Nodes, Root } from 'mdast';
 import type { MdxJsxFlowElement, MdxJsxTextElement } from 'mdast-util-mdx';
-import type { OutputMode } from './stringifier';
+import type { Analysis } from './stringifier';
 import type { PlaceholderData } from './remark-llms.runtime';
 import { stringifyHeadingId } from '../../../shared/heading-id';
 
@@ -45,11 +45,12 @@ export interface LLMsOptions {
    * kept as JSX, receiving their original props and resolving from `props.components`, a component can call
    * `asMarkdown()` to define its own Markdown form. A static export is a string.
    *
-   * `string` and `function` are deprecated, use `static` and `runtime`.
-   *
    * @defaultValue 'runtime'
    */
-  output?: OutputMode | 'string' | 'function';
+  analysis?: Analysis;
+
+  /** @deprecated use `analysis`: `string` is `static`, `function` is `runtime` */
+  output?: 'string' | 'function';
 
   /**
    * @internal output in file data
@@ -73,9 +74,10 @@ export function remarkLLMs({
   _data = false,
   mdxAsPlaceholder,
   output,
+  analysis = output === 'string' ? 'static' : 'runtime',
   filterElement,
 }: LLMsOptions = {}): Transformer<Root, Root> {
-  const isStatic = output === 'static' || output === 'string';
+  const isStatic = analysis === 'static';
 
   return (tree, file) => {
     const out = createCodeOutput(file, undefined, isStatic);

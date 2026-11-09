@@ -77,7 +77,7 @@ export async function renderRoute(element: ReactElement): Promise<string | undef
 }
 
 /**
- * Resolve the MDX components of a generated Markdown component (`remarkLLMs` with `output: 'function'`):
+ * Resolve the MDX components of a generated Markdown component (`remarkLLMs` with the runtime analysis):
  * a missing component becomes a stub that `renderToMarkdown` serializes as JSX syntax.
  */
 export function jsxComponents(

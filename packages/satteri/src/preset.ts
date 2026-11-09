@@ -10,7 +10,7 @@ import { rehypeCode, type RehypeCodeOptions } from '@/rehype-code';
 import { rehypeToc, type RehypeTocOptions } from '@/rehype-toc';
 import { rehypeTable } from '@/rehype-table';
 import { rehypeKatex, type RehypeKatexOptions } from '@/rehype-katex';
-import type { OutputMode } from 'fumadocs-core/mdx-plugins/stringifier';
+import type { Analysis } from 'fumadocs-core/mdx-plugins/stringifier';
 import type { MdastPluginInput } from 'satteri';
 
 type ResolvePlugins<T> = readonly T[] | ((plugins: T[]) => T[]);
@@ -26,8 +26,8 @@ export type DefaultSatteriOptions = Omit<MdxCompileOptions, 'mdastPlugins' | 'ha
   remarkNpmOptions?: RemarkNpmOptions | false;
   rehypeCodeOptions?: RehypeCodeOptions | false;
   rehypeTocOptions?: RehypeTocOptions;
-  /** the output of structured data and the TOC */
-  output?: OutputMode;
+  /** the analysis of structured data and the TOC */
+  analysis?: Analysis;
   /**
    * KaTeX rendering, applied only when the `math` feature is enabled. Pass
    * options to customize it, or `false` to keep math unrendered.
@@ -86,7 +86,7 @@ export function applySatteriPreset(
       remarkNpmOptions,
       rehypeKatexOptions,
       rehypeTocOptions,
-      output,
+      analysis,
       mdastPlugins,
       hastPlugins,
       features,
@@ -112,7 +112,7 @@ export function applySatteriPreset(
         remarkStructureOptions !== false &&
           remarkStructure({
             exportAs: 'structuredData',
-            output,
+            analysis,
             ...remarkStructureOptions,
           }),
       ],
@@ -130,7 +130,7 @@ export function applySatteriPreset(
           }),
         ...plugins,
         rehypeTable(),
-        rehypeToc({ output, ...rehypeTocOptions }),
+        rehypeToc({ analysis, ...rehypeTocOptions }),
       ],
       hastPlugins,
     );

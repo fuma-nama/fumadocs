@@ -4,7 +4,7 @@ import { toEstree } from 'hast-util-to-estree';
 import type { Expression, JSXElement } from 'estree-jsx';
 import { handleTag, parseExpression, toEsm } from './utils';
 import { guardedArray, showCondition, staticContent } from '../../../shared/code-output';
-import type { OutputMode } from './stringifier';
+import type { Analysis } from './stringifier';
 import { idCodeProperty } from '../../../shared/heading-id';
 
 export interface RehypeTocOptions {
@@ -31,7 +31,7 @@ export interface RehypeTocOptions {
       };
 
   /** @defaultValue 'runtime' */
-  output?: OutputMode;
+  analysis?: Analysis;
 }
 
 declare module 'vfile' {
@@ -71,7 +71,7 @@ function getStep(properties: Element['properties']): number | undefined {
 
 export function rehypeToc(
   this: Processor,
-  { exportToc = true, output }: RehypeTocOptions = {},
+  { exportToc = true, analysis }: RehypeTocOptions = {},
 ): Transformer<Root, Root> {
   if (exportToc === true) {
     exportToc = { as: 'esm', name: 'toc' };
@@ -126,7 +126,7 @@ export function rehypeToc(
     if (exportToc.as === 'esm') {
       const titles: Expression[] = [];
       const list: { code: string; when: string[] }[] = [];
-      const isStatic = output === 'static';
+      const isStatic = analysis === 'static';
       for (const { title, when, url, depth, _step, code: id } of items) {
         const i = titles.push({
           type: 'JSXFragment',

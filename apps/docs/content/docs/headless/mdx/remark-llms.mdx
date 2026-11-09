@@ -60,7 +60,7 @@ Images in the public directory keep their address. Vite inlines images smaller t
 
 ## JSX Elements
 
-JSX elements are rendered by their components, into Markdown. With `output: 'static'`, `_markdown` is a string and they are kept as you wrote them. To change them:
+JSX elements are rendered by their components, into Markdown. With `analysis: 'static'`, `_markdown` is a string and they are kept as you wrote them. To change them:
 
 | Option             | Elements                                                    |
 | ------------------ | ----------------------------------------------------------- |
@@ -92,7 +92,7 @@ const markdown = await renderPlaceholder(await page.data.getText('processed'), {
 });
 ```
 
-### Components [#output]
+### Components [#components]
 
 Render `_markdown` with your components:
 

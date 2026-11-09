@@ -9,12 +9,12 @@ import type { VFile } from 'vfile';
 export type Replacement = string | ((s: Stringifier) => string);
 
 /**
- * The output of a plugin:
+ * How a plugin analyses the code of a page for its output:
  *
  * - `runtime`: a function of the props of a page, authored expressions and the branches of `<show>` render for them.
  * - `static`: a value analysed from source, authored expressions keep their source and every branch shows.
  */
-export type OutputMode = 'static' | 'runtime';
+export type Analysis = 'static' | 'runtime';
 
 interface Range {
   start: number;

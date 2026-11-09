@@ -63,7 +63,7 @@ test('Remark LLMs: heading IDs', async () => {
     const result = await remark()
       .use(remarkMdx)
       .use(remarkHeading)
-      .use(remarkLLMs, { _data: true, output: 'static', headingIds })
+      .use(remarkLLMs, { _data: true, analysis: 'static', headingIds })
       .process('# Title\n\n## Custom [#custom]\n');
     return result.data.markdown;
   };
@@ -93,7 +93,7 @@ test('Remark Mdx Files: auto files in Markdown output', async () => {
   const processor = remark()
     .use(remarkMdx)
     .use(remarkMdxFiles)
-    .use(remarkLLMs, { _data: true, output: 'static' });
+    .use(remarkLLMs, { _data: true, analysis: 'static' });
   await processor.run(processor.parse(file), file);
 
   expect(file.data.markdown).toBe('```\nbasic.tree.json\n```\n');
@@ -222,7 +222,7 @@ test('Remark Steps: tags in search records only', async () => {
     .use(remarkHeading)
     .use(remarkSteps)
     .use(remarkStructure)
-    .use(remarkLLMs, { _data: true, output: 'static' });
+    .use(remarkLLMs, { _data: true, analysis: 'static' });
   await processor.run(processor.parse(file), file);
 
   expect(file.data.structuredData).toEqual({
@@ -395,7 +395,7 @@ test('Remark LLMs: filterElement', async () => {
     .use(remarkMdx)
     .use(remarkLLMs, {
       _data: true,
-      output: 'static',
+      analysis: 'static',
       filterElement(node) {
         if (node.type !== 'mdxJsxFlowElement' && node.type !== 'mdxJsxTextElement') return true;
         return node.name !== 'Callout';
@@ -460,7 +460,7 @@ test('Remark LLMs: keep the authored source', async () => {
     .use(remarkNpm)
     .use(remarkLLMs, {
       _data: true,
-      output: 'static',
+      analysis: 'static',
       mdxAsPlaceholder: ['Callout'],
       filterElement: (node) =>
         node.type !== 'mdxJsxFlowElement' || node.name !== 'Unwrap' || 'children-only',
@@ -507,7 +507,7 @@ test('Remark LLMs: ignore generated nodes', async () => {
       .use(remarkMdx)
       .use(() => plugin)
       .use(remarkHeading)
-      .use(remarkLLMs, { _data: true, output: 'static' })
+      .use(remarkLLMs, { _data: true, analysis: 'static' })
       .process('# Title\n\nFirst paragraph.\n\n## Section\n\nLast paragraph.\n');
     return result.data.markdown;
   };
@@ -538,7 +538,7 @@ test('Remark LLMs: nested replacements', async () => {
       .use(remarkMdx)
       .use(() => plugin)
       .use(remarkHeading)
-      .use(remarkLLMs, { _data: true, output: 'static' })
+      .use(remarkLLMs, { _data: true, analysis: 'static' })
       .process(content);
     return result.data.markdown;
   };
@@ -625,7 +625,7 @@ test('Remark LLMs: replaced headings', async () => {
         });
       })
       .use(remarkHeading)
-      .use(remarkLLMs, { _data: true, output: 'static' })
+      .use(remarkLLMs, { _data: true, analysis: 'static' })
       .process('## Heading\n\nText.\n');
     return result.data.markdown;
   };
@@ -659,7 +659,7 @@ test('Remark LLMs: replacements of embedded content', async () => {
           replaceSource(file, node, 'Multi\n\nline');
       });
     })
-    .use(remarkLLMs, { _data: true, output: 'static' })
+    .use(remarkLLMs, { _data: true, analysis: 'static' })
     .process('Before.\n\n<Embed />\n\nAfter.\n');
 
   expect(result.data.markdown).toBe(
@@ -705,7 +705,7 @@ test('Remark LLMs: edits of plugins', async () => {
       replaceSource(file, { type: 'paragraph', children: [] }, 'broken');
     })
     .use(remarkHeading)
-    .use(remarkLLMs, { _data: true, output: 'static', mdxAsPlaceholder: ['Note'] })
+    .use(remarkLLMs, { _data: true, analysis: 'static', mdxAsPlaceholder: ['Note'] })
     .process(content);
 
   const rendered = await renderPlaceholder(result.data.markdown as string, {
@@ -734,7 +734,7 @@ test('Remark LLMs: placeholder', async () => {
   const content = await fs.readFile(file);
   const result = await remark()
     .use(remarkMdx)
-    .use(remarkLLMs, { _data: true, output: 'static', mdxAsPlaceholder: ['MyPage'] })
+    .use(remarkLLMs, { _data: true, analysis: 'static', mdxAsPlaceholder: ['MyPage'] })
     .process(content);
 
   const markdown = result.data.markdown as string;
@@ -869,16 +869,16 @@ After the branch.
 test('Remark Show: static outputs analyse the source', async () => {
   const { compile } = await import('@mdx-js/mdx');
   const { remarkShow } = await import('@/mdx-plugins/remark-show');
-  const output = 'static';
+  const analysis = 'static';
   const file = String(
     await compile('## Deploy on {props.framework}\n\n<show when={props.a}>\nAstro.\n</show>\n', {
       remarkPlugins: [
         remarkShow,
         remarkHeading,
-        [remarkStructure, { exportAs: true, output }],
-        [remarkLLMs, { output }],
+        [remarkStructure, { exportAs: true, analysis }],
+        [remarkLLMs, { analysis }],
       ],
-      rehypePlugins: [[rehypeToc, { output }]],
+      rehypePlugins: [[rehypeToc, { analysis }]],
     }),
   );
   expect(file).toContain(

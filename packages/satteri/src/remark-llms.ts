@@ -1,7 +1,7 @@
 import type { MdastPluginEntry } from 'satteri';
 import { defineMdastPlugin } from 'satteri';
 import { offsets, type PositionedNode } from './stringifier';
-import type { OutputMode } from 'fumadocs-core/mdx-plugins/stringifier';
+import type { Analysis } from 'fumadocs-core/mdx-plugins/stringifier';
 import { stringifyHeadingId } from '../../shared/heading-id';
 import { createCodeOutput, type JsxElementNode } from './utils';
 import { keptElement, markdownCode } from '../../shared/code-output';
@@ -21,8 +21,10 @@ export interface LLMsOptions {
    */
   headingIds?: boolean;
 
-  /** see `output` of `remarkLLMs()` from `fumadocs-core/mdx-plugins/remark-llms` */
-  output?: OutputMode | 'string' | 'function';
+  /** see `analysis` of `remarkLLMs()` from `fumadocs-core/mdx-plugins/remark-llms` */
+  analysis?: Analysis;
+  /** @deprecated use `analysis`: `string` is `static`, `function` is `runtime` */
+  output?: 'string' | 'function';
 }
 
 const componentNameRegex = /^[A-Z][\w$]*$/;
@@ -35,15 +37,16 @@ export function remarkLlms({
   as = '_markdown',
   headingIds = true,
   output,
+  analysis = output === 'string' ? 'static' : 'runtime',
 }: LLMsOptions = {}): MdastPluginEntry {
-  const isStatic = output === 'static' || output === 'string';
+  const isStatic = analysis === 'static';
   const factory = () => {
     let out: ReturnType<typeof createCodeOutput>;
 
     const drop = (node: PositionedNode) => out.s.replace(node, '');
     const element = (node: JsxElementNode & { type: string; children: PositionedNode[] }) => {
       const name = node.name;
-      // elements are kept in function output only
+      // elements are kept in runtime output only
       if (out.markCode(node) || isStatic || !name || !componentNameRegex.test(name)) return;
 
       out.s.replace(node, (s) => {

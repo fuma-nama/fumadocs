@@ -5,7 +5,7 @@ import type { PluggableList, Transformer } from 'unified';
 import { VFile } from 'vfile';
 import { createCodeOutput, isJsxElement, toMdxExport } from './utils';
 import { createStructuredRecords, showCondition } from '../../../shared/code-output';
-import type { OutputMode, Stringifier } from './stringifier';
+import type { Analysis, Stringifier } from './stringifier';
 import { headingIdRegex, idCodeProperty } from '../../../shared/heading-id';
 import type { MdxJsxFlowElement, MdxJsxTextElement } from 'mdast-util-mdx';
 import { remarkHeading } from './remark-heading';
@@ -63,7 +63,7 @@ export interface StructureOptions {
   exportAs?: string | boolean;
 
   /** @defaultValue 'runtime' */
-  output?: OutputMode;
+  analysis?: Analysis;
 }
 
 declare module 'mdast' {
@@ -119,12 +119,12 @@ export function remarkStructure({
   mdxTypes = remarkStructureDefaultOptions.mdxTypes,
   filterElement = remarkStructureDefaultOptions.filterElement,
   exportAs = remarkStructureDefaultOptions.exportAs,
-  output,
+  analysis,
 }: StructureOptions = {}): Transformer<Root, Root> {
   const isType = Array.isArray(types) ? (node: Nodes) => types.includes(node.type) : types;
 
   return (tree, file) => {
-    const out = createCodeOutput(file, 'search', output === 'static');
+    const out = createCodeOutput(file, 'search', analysis === 'static');
     const { s } = out;
     const structured = createStructuredRecords();
     const { headings, pushContent } = structured;
@@ -219,7 +219,7 @@ export function remarkStructure({
     if (!exportAs) return;
     const name = typeof exportAs === 'string' ? exportAs : 'structuredData';
     tree.children.unshift(
-      output === 'static'
+      analysis === 'static'
         ? toMdxExport(name, data)
         : out.esm(`export const ${name} = ${structured.toCode(out)};`),
     );

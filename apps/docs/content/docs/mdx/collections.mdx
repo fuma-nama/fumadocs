@@ -145,7 +145,7 @@ export const blog = defineCollections({
 
 Unlike `mdxOptions`, the collection-level `satteriOptions` keeps the default preset unless you pass `preset: 'minimal'`. It replaces the global `satteriOptions` instead of merging with them.
 
-### `output`
+### `analysis`
 
 By default, structured data, the table of contents, processed Markdown and extracted references are rendered for the props of each page, like `<show>` branches. Use `static` for values analysed from the source instead: expressions keep their source and every branch shows.
 
@@ -154,7 +154,7 @@ import { defineDocs } from 'fumadocs-mdx/config';
 
 export const docs = defineDocs({
   docs: {
-    output: 'static',
+    analysis: 'static',
   },
 });
 ```

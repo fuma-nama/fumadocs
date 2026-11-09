@@ -4,7 +4,7 @@ import { valueToEstree } from 'estree-util-value-to-estree';
 import { removePosition } from 'unist-util-remove-position';
 import { flattenNode, walk } from './mdast-utils';
 import type { LLMsOptions } from 'fumadocs-core/mdx-plugins';
-import type { OutputMode } from 'fumadocs-core/mdx-plugins/stringifier';
+import type { Analysis } from 'fumadocs-core/mdx-plugins/stringifier';
 import { Parser } from 'acorn';
 import type { MdxjsEsm } from 'mdast-util-mdx';
 import { guardedArray, showCondition } from '../../../../shared/code-output';
@@ -16,7 +16,7 @@ export interface ExtractedReference {
 
 export interface PostprocessOptions {
   _format: 'md' | 'mdx';
-  _output?: OutputMode;
+  _analysis?: Analysis;
 
   /**
    * Properties to export from `vfile.data`
@@ -52,7 +52,7 @@ export function remarkPostprocess({
   includeMDAST = false,
   extractLinkReferences = false,
   valueToExport = [],
-  _output,
+  _analysis,
 }: PostprocessOptions): Transformer<Root, Root> {
   return (tree, file) => {
     const frontmatter = (file.data.frontmatter ??= {});
@@ -72,7 +72,7 @@ export function remarkPostprocess({
     });
 
     if (extractLinkReferences) {
-      const isStatic = _output === 'static';
+      const isStatic = _analysis === 'static';
       const items: { code: string; when: string[] }[] = [];
       const visit = (node: Nodes, when: string[]) => {
         if (node.type === 'link')
@@ -97,7 +97,7 @@ export function remarkPostprocess({
 
     if (includeProcessedMarkdown) {
       const llms = remarkLLMs({
-        output: _output,
+        analysis: _analysis,
         ...(typeof includeProcessedMarkdown === 'object' && includeProcessedMarkdown),
       });
       llms(tree, file, () => undefined);

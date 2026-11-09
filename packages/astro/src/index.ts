@@ -49,7 +49,7 @@ export interface CollectionOptions extends Pick<
   /**
    * Enable `getText('processed')` on pages, `true` or the options of `remarkLLMs`.
    *
-   * With `output: 'function'`, JSX elements are rendered by the MDX components, which define their Markdown form with `asMarkdown()`.
+   * JSX elements are rendered by the MDX components, which define their Markdown form with `asMarkdown()`.
    *
    * @defaultValue false
    */

@@ -131,8 +131,8 @@ test('Remark Show: branches and expressions render from code in every output', a
 });
 
 test('Remark Show: static outputs analyse the source', async () => {
-  const output = 'static';
-  const options = await applySatteriPreset({ output, mdastPlugins: [remarkLlms({ output })] })(
+  const analysis = 'static';
+  const options = await applySatteriPreset({ analysis, mdastPlugins: [remarkLlms({ analysis })] })(
     'runtime',
   );
   const { code } = await compileMdx({

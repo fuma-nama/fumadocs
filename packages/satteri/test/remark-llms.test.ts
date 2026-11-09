@@ -13,7 +13,7 @@ import { defineMdastPlugin, type MdastPluginInput } from 'satteri';
 test('remark-llms handles many root blocks', async () => {
   const options = await applySatteriPreset({
     rehypeCodeOptions: false,
-    mdastPlugins: [remarkLlms({ output: 'static' })],
+    mdastPlugins: [remarkLlms({ analysis: 'static' })],
   })('bundler');
 
   const result = await compileMdx({
@@ -30,7 +30,7 @@ test('remark-llms handles many root blocks', async () => {
 test('remark-llms keeps the authored source form', async () => {
   const options = await applySatteriPreset({
     rehypeCodeOptions: false,
-    mdastPlugins: [remarkLlms({ output: 'static' })],
+    mdastPlugins: [remarkLlms({ analysis: 'static' })],
   })('bundler');
 
   const result = await compileMdx({
@@ -65,7 +65,7 @@ test('remark-llms keeps the authored source form', async () => {
 test('remark-llms splices included content', async () => {
   const options = await applySatteriPreset({
     rehypeCodeOptions: false,
-    mdastPlugins: [remarkInclude(), remarkLlms({ output: 'static' })],
+    mdastPlugins: [remarkInclude(), remarkLlms({ analysis: 'static' })],
   })('bundler');
 
   const result = await compileMdx({
@@ -87,7 +87,7 @@ test('included content goes through the plugins', async () => {
   options.mdastPlugins = [
     remarkInclude(),
     ...(options.mdastPlugins ?? []),
-    remarkLlms({ output: 'static' }),
+    remarkLlms({ analysis: 'static' }),
   ];
 
   const result = await compileMdx({
@@ -108,7 +108,7 @@ test('included content goes through the plugins', async () => {
 test('remark-llms function output keeps replaced content in elements', async () => {
   const options = await applySatteriPreset({
     rehypeCodeOptions: false,
-    mdastPlugins: [remarkInclude(), remarkLlms({ output: 'runtime' })],
+    mdastPlugins: [remarkInclude(), remarkLlms({ analysis: 'runtime' })],
   })('bundler');
 
   const result = await compileMdx({
@@ -139,7 +139,7 @@ test('remark-llms composes nested edits', async () => {
     const result = await compileMdx({
       source: '<Outer>\n  <Item />\n</Outer>\n\n<Item />\n',
       filePath: '/doc.mdx',
-      options: { mdastPlugins: [...plugins, remarkLlms({ output: 'static' })] },
+      options: { mdastPlugins: [...plugins, remarkLlms({ analysis: 'static' })] },
     });
     return result.data?.markdown;
   };
@@ -160,7 +160,7 @@ test('remark-llms composes nested edits', async () => {
 test('remark-llms keeps replacements inside their containers', async () => {
   const options = await applySatteriPreset({
     rehypeCodeOptions: false,
-    mdastPlugins: [remarkInclude(), remarkLlms({ output: 'static' })],
+    mdastPlugins: [remarkInclude(), remarkLlms({ analysis: 'static' })],
   })('bundler');
 
   const result = await compileMdx({
@@ -215,7 +215,7 @@ test('remark-llms shows generated content of replaced nodes', async () => {
         renderType: (type) => ({ type: 'text', value: type }),
         renderMarkdown: (md) => ({ type: 'text', value: md }),
       }),
-      remarkLlms({ output: 'static' }),
+      remarkLlms({ analysis: 'static' }),
     ],
   })('bundler');
 
@@ -241,7 +241,7 @@ test('remark-llms shows generated content of replaced nodes', async () => {
 test('remark-llms function output exports a component', async () => {
   const options = await applySatteriPreset({
     rehypeCodeOptions: false,
-    mdastPlugins: [remarkLlms({ output: 'runtime' })],
+    mdastPlugins: [remarkLlms({ analysis: 'runtime' })],
   })('bundler');
 
   const result = await compileMdx({
@@ -307,11 +307,11 @@ test('remark-llms function output exports a component', async () => {
 
 test('remark-llms outputs the URLs of imported images', async () => {
   const fixtures = path.resolve(import.meta.dirname, './fixtures');
-  const load = async (output?: 'runtime') => {
+  const load = async (analysis?: 'runtime') => {
     const options = await applySatteriPreset({
       rehypeCodeOptions: false,
       remarkImageOptions: { publicDir: fixtures },
-      mdastPlugins: [remarkLlms({ output })],
+      mdastPlugins: [remarkLlms({ analysis })],
     })('bundler');
     const result = await compileMdx({
       // a page-relative image, and one in the public directory
@@ -320,7 +320,7 @@ test('remark-llms outputs the URLs of imported images', async () => {
       options,
     });
 
-    const evalFile = path.join(fixtures, `remark-llms-image-${output}.out.js`);
+    const evalFile = path.join(fixtures, `remark-llms-image-${analysis}.out.js`);
     await fs.writeFile(evalFile, result.code);
     const { _markdown } = await import(evalFile);
     await fs.rm(evalFile);

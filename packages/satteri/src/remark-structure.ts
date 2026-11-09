@@ -1,7 +1,7 @@
 import type { MdastPluginDefinition, MdastVisitorContext } from 'satteri';
 import type { Nodes, TableRow } from 'mdast';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
-import type { OutputMode } from 'fumadocs-core/mdx-plugins/stringifier';
+import type { Analysis } from 'fumadocs-core/mdx-plugins/stringifier';
 import { tableRowToStructuredData } from 'fumadocs-core/search';
 import { offsets, type Stringifier } from './stringifier';
 import { headingIdRegex, idCodeProperty } from '../../shared/heading-id';
@@ -35,7 +35,7 @@ export interface StructureOptions {
   exportAs?: string | boolean;
 
   /** @defaultValue 'runtime' */
-  output?: OutputMode;
+  analysis?: Analysis;
 }
 
 /** the nodes that a function of `types` can match */
@@ -104,7 +104,7 @@ export function remarkStructure({
     }
   },
   exportAs = true,
-  output,
+  analysis,
 }: StructureOptions = {}) {
   const matchType =
     typeof types === 'function' ? types : (node: Nodes) => types.includes(node.type);
@@ -176,7 +176,7 @@ export function remarkStructure({
       // positions tell authored nodes from generated ones
       options: { position: true },
       before(_root: unknown, ctx: MdastVisitorContext) {
-        out = createCodeOutput(ctx, 'search', output === 'static');
+        out = createCodeOutput(ctx, 'search', analysis === 'static');
         s = out.s;
 
         // Fumadocs OpenAPI Generated Structured Data
@@ -207,7 +207,8 @@ export function remarkStructure({
         }
 
         ctx.data.structuredData ??= structured.toStatic(out);
-        if (exportAs && output !== 'static') ctx.data._structuredDataCode = structured.toCode(out);
+        if (exportAs && analysis !== 'static')
+          ctx.data._structuredDataCode = structured.toCode(out);
       },
       ...Object.fromEntries(visitors.map((key) => [key, visit])),
     };

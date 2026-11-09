@@ -15,7 +15,7 @@ import {
 } from '../../shared/code-output';
 import { idCodeProperty } from '../../shared/heading-id';
 import type { ExtraPluginHooks } from './compile';
-import type { OutputMode } from 'fumadocs-core/mdx-plugins/stringifier';
+import type { Analysis } from 'fumadocs-core/mdx-plugins/stringifier';
 
 export interface RehypeTocOptions {
   exportToc?:
@@ -26,7 +26,7 @@ export interface RehypeTocOptions {
         name: string;
       };
   /** @defaultValue 'runtime' */
-  output?: OutputMode;
+  analysis?: Analysis;
 }
 
 export interface RehypeTocItemType {
@@ -56,7 +56,7 @@ declare module 'satteri' {
   }
 }
 
-export function rehypeToc({ exportToc = true, output }: RehypeTocOptions = {}): HastPluginInput &
+export function rehypeToc({ exportToc = true, analysis }: RehypeTocOptions = {}): HastPluginInput &
   ExtraPluginHooks {
   const resolved = exportToc === true ? { as: 'esm' as const, name: 'toc' } : exportToc;
   const plugin: HastPluginInput & ExtraPluginHooks = () => {
@@ -102,7 +102,7 @@ export function rehypeToc({ exportToc = true, output }: RehypeTocOptions = {}): 
             typeof element.properties['data-fd-step'] === 'number'
               ? element.properties['data-fd-step']
               : undefined;
-          const isStatic = output === 'static';
+          const isStatic = analysis === 'static';
           const when = isStatic ? [] : showConditions(element, ctx);
           let obj = '{';
           obj += `title: ${
@@ -133,7 +133,7 @@ export function rehypeToc({ exportToc = true, output }: RehypeTocOptions = {}): 
   plugin.collectExports = ({ data, addExport }) => {
     if (resolved && resolved.as === 'esm') {
       const list = guardedArray(data._rehypeTocItems ?? []);
-      addExport(resolved.name, output === 'static' ? list : `(props) => ${list}`);
+      addExport(resolved.name, analysis === 'static' ? list : `(props) => ${list}`);
     }
   };
   return plugin;

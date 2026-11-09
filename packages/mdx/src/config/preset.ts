@@ -1,7 +1,7 @@
 import type { ProcessorOptions } from '@mdx-js/mdx';
 import type { Pluggable } from 'unified';
 import type * as Plugins from 'fumadocs-core/mdx-plugins';
-import type { OutputMode } from 'fumadocs-core/mdx-plugins/stringifier';
+import type { Analysis } from 'fumadocs-core/mdx-plugins/stringifier';
 import type { BuildEnvironment } from './build';
 
 type ResolvePlugins = Pluggable[] | ((v: Pluggable[]) => Pluggable[]);
@@ -24,8 +24,8 @@ export type DefaultMDXOptions = Omit<
   remarkCodeTabOptions?: Plugins.RemarkCodeTabOptions | false;
   remarkNpmOptions?: Plugins.RemarkNpmOptions | false;
   rehypeCodeOptions?: Plugins.RehypeCodeOptions | false;
-  /** the output of structured data and the TOC */
-  output?: OutputMode;
+  /** the analysis of structured data and the TOC */
+  analysis?: Analysis;
 };
 
 function pluginOption(
@@ -65,7 +65,7 @@ export function applyMdxPreset(
       remarkStructureOptions,
       remarkCodeTabOptions,
       remarkNpmOptions,
-      output,
+      analysis,
       ...mdxOptions
     } = options;
 
@@ -96,7 +96,7 @@ export function applyMdxPreset(
           plugins.remarkStructure,
           {
             exportAs: 'structuredData',
-            output,
+            analysis,
             ...remarkStructureOptions,
           } satisfies Plugins.StructureOptions,
         ],
@@ -123,7 +123,7 @@ export function applyMdxPreset(
       (v) => [
         rehypeCodeOptions !== false && [plugins.rehypeCode, rehypeCodeOptions],
         ...v,
-        [plugins.rehypeToc, { output }],
+        [plugins.rehypeToc, { analysis }],
       ],
       mdxOptions.rehypePlugins,
     );
