@@ -199,8 +199,12 @@ export function showCondition(node: CodeNode): string | undefined {
       return attr.value?.value;
 }
 
-/** a kept JSX element, its name resolves from `_c` */
-export function keptElement(node: CodeNode, name: string): KeptElement {
+const componentNameRegex = /^[A-Z][\w$]*$/;
+
+/** a kept JSX element of a component, its name resolves from `_c` */
+export function keptElement(node: CodeNode): KeptElement | undefined {
+  const name = node.name;
+  if (typeof name !== 'string' || !componentNameRegex.test(name)) return;
   let open = `<_c.${name}`;
   for (const attr of node.attributes as JsxAttributes) {
     if (attr.type === 'mdxJsxExpressionAttribute') open += ` {${attr.value}}`;
@@ -210,6 +214,39 @@ export function keptElement(node: CodeNode, name: string): KeptElement {
     else open += ` ${attr.name}={${attr.value.value}}`;
   }
   return { open, name, inline: node.type === 'mdxJsxTextElement' };
+}
+
+/** an element on one line has inline content, recorded like a paragraph */
+export function isInline(source: string, range: { start: number; end: number }): boolean {
+  const line = source.indexOf('\n', range.start);
+  return line === -1 || line >= range.end;
+}
+
+/**
+ * A JSX element as an HTML tag, so search dialogs render it as an element. Expression values become strings, values
+ * and content are kept on one line, values are truncated.
+ */
+export function toHtmlTag(node: CodeNode, inner: string): string {
+  let attrs = '';
+  for (const attr of node.attributes as JsxAttributes) {
+    if (attr.type === 'mdxJsxExpressionAttribute') continue;
+    if (attr.value == null) {
+      attrs += ` ${attr.name}`;
+      continue;
+    }
+
+    let value = (typeof attr.value === 'string' ? attr.value : attr.value.value).replace(
+      /\s+/g,
+      ' ',
+    );
+    if (value.length > 100) value = `${value.slice(0, 100)}…`;
+    attrs += ` ${attr.name}="${value.replaceAll('&', '&amp;').replaceAll('"', '&quot;')}"`;
+  }
+
+  const children = inner.replace(/\s+/g, ' ');
+  const name = node.name as string;
+  if (!children) return `<${name}${attrs} />`;
+  return `<${name}${attrs}>${children}</${name}>`;
 }
 
 /** all of the conditions */

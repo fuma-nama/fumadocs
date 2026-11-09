@@ -7,7 +7,12 @@ import { offsets, type Stringifier } from './stringifier';
 import { headingIdRegex, idCodeProperty } from '../../shared/heading-id';
 import type { ExtraPluginHooks } from './compile';
 import { createCodeOutput, type JsxElementNode } from './utils';
-import { createStructuredRecords, showConditions } from '../../shared/code-output';
+import {
+  createStructuredRecords,
+  isInline,
+  showConditions,
+  toHtmlTag,
+} from '../../shared/code-output';
 
 declare module 'satteri' {
   interface DataMap {
@@ -132,7 +137,10 @@ export function remarkStructure({
         s.replace(node, (s) => s.inner(node));
       else if (node.type === 'image' || node.type === 'imageReference') s.replace(node, '');
       else if (isJsxElement(node))
-        s.replace(node, filterElement(node) ? (s) => toHtmlTag(node, s) : (s) => s.inner(node));
+        s.replace(
+          node,
+          filterElement(node) ? (s) => toHtmlTag(node, s.inner(node)) : (s) => s.inner(node),
+        );
 
       if (node.data?.structuredData) {
         const when = showConditions(node, ctx);
@@ -228,38 +236,6 @@ export function remarkStructure({
 
 export type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
 
-/** an element on one line has inline content, recorded like a paragraph */
-function isInline(source: string, range: { start: number; end: number }): boolean {
-  const line = source.indexOf('\n', range.start);
-  return line === -1 || line >= range.end;
-}
-
 function isJsxElement(node: Nodes): node is Nodes & JsxElementNode {
   return node.type === 'mdxJsxFlowElement' || node.type === 'mdxJsxTextElement';
-}
-
-/**
- * A JSX element as an HTML tag, so search dialogs render it as an element. Expression
- * values become strings, values and content are kept on one line, values are truncated.
- */
-function toHtmlTag(node: Nodes & JsxElementNode, s: Stringifier): string {
-  let attrs = '';
-  for (const attr of node.attributes) {
-    if (attr.type === 'mdxJsxExpressionAttribute') continue;
-    if (attr.value == null) {
-      attrs += ` ${attr.name}`;
-      continue;
-    }
-
-    let value = (typeof attr.value === 'string' ? attr.value : attr.value.value).replace(
-      /\s+/g,
-      ' ',
-    );
-    if (value.length > 100) value = `${value.slice(0, 100)}…`;
-    attrs += ` ${attr.name}="${value.replaceAll('&', '&amp;').replaceAll('"', '&quot;')}"`;
-  }
-
-  const children = s.inner(node).replace(/\s+/g, ' ');
-  if (!children) return `<${node.name}${attrs} />`;
-  return `<${node.name}${attrs}>${children}</${node.name}>`;
 }

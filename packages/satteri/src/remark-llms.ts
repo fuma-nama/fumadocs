@@ -27,8 +27,6 @@ export interface LLMsOptions {
   output?: 'string' | 'function';
 }
 
-const componentNameRegex = /^[A-Z][\w$]*$/;
-
 /**
  * Export the document as Markdown, sliced from the authored source: heading IDs are added,
  * frontmatter & ESM nodes are dropped, and includes are replaced with their content.
@@ -45,15 +43,16 @@ export function remarkLlms({
 
     const drop = (node: PositionedNode) => out.s.replace(node, '');
     const element = (node: JsxElementNode & { type: string; children: PositionedNode[] }) => {
-      const name = node.name;
       // elements are kept in runtime output only
-      if (out.markCode(node) || isStatic || !name || !componentNameRegex.test(name)) return;
+      if (out.markCode(node) || isStatic) return;
+      const kept = keptElement(node);
+      if (!kept) return;
 
       out.s.replace(node, (s) => {
         let children = s.inner(node);
         // block content on its own lines
         if (children && node.type === 'mdxJsxFlowElement') children = `\n${children}\n`;
-        return out.wrap(keptElement(node, name), children);
+        return out.wrap(kept, children);
       });
     };
     const expression = (node: PositionedNode & { type: string; value: string }) => {

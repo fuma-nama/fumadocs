@@ -60,8 +60,6 @@ export interface LLMsOptions {
 
 type JsxElement = MdxJsxFlowElement | MdxJsxTextElement;
 
-const componentNameRegex = /^[A-Z][\w$]*$/;
-
 /**
  * Generate Markdown for LLMs from the authored source, other plugins can edit it with
  * `replaceSource()` from `fumadocs-core/mdx-plugins/stringifier`.
@@ -104,14 +102,15 @@ export function remarkLLMs({
             isStatic ? undefined : out.expression,
           );
         } else if (isJsxElement(node) && node.name) {
+          const element = !isStatic && keptElement(node);
           if (isStatic && mdxAsPlaceholder?.includes(node.name))
             s.replace(node, (s) => toPlaceholder(node, out.toStatic(s.inner(node))));
-          else if (!isStatic && componentNameRegex.test(node.name))
+          else if (element)
             s.replace(node, (s) => {
               let children = s.inner(node);
               // block content on its own lines
               if (children && node.type === 'mdxJsxFlowElement') children = `\n${children}\n`;
-              return out.wrap(keptElement(node, node.name!), children);
+              return out.wrap(element, children);
             });
         }
       }

@@ -4,8 +4,13 @@ import remarkGfm from 'remark-gfm';
 import type { PluggableList, Transformer } from 'unified';
 import { VFile } from 'vfile';
 import { createCodeOutput, isJsxElement, toMdxExport } from './utils';
-import { createStructuredRecords, showCondition } from '../../../shared/code-output';
-import type { Analysis, Stringifier } from './stringifier';
+import {
+  createStructuredRecords,
+  isInline,
+  showCondition,
+  toHtmlTag,
+} from '../../../shared/code-output';
+import type { Analysis } from './stringifier';
 import { headingIdRegex, idCodeProperty } from '../../../shared/heading-id';
 import type { MdxJsxFlowElement, MdxJsxTextElement } from 'mdast-util-mdx';
 import { remarkHeading } from './remark-heading';
@@ -155,7 +160,10 @@ export function remarkStructure({
         s.replace(node, (s) => s.inner(node));
       else if (node.type === 'image' || node.type === 'imageReference') s.replace(node, '');
       else if (isJsxElement(node))
-        s.replace(node, filterElement(node) ? (s) => toHtmlTag(node, s) : (s) => s.inner(node));
+        s.replace(
+          node,
+          filterElement(node) ? (s) => toHtmlTag(node, s.inner(node)) : (s) => s.inner(node),
+        );
 
       if (node.data?.structuredData) {
         const items = node.data.structuredData.contents;
@@ -225,38 +233,6 @@ export function remarkStructure({
         : out.esm(`export const ${name} = ${structured.toCode(out)};`),
     );
   };
-}
-
-/** an element on one line has inline content, recorded like a paragraph */
-function isInline(source: string, range: { start: number; end: number }): boolean {
-  const line = source.indexOf('\n', range.start);
-  return line === -1 || line >= range.end;
-}
-
-/**
- * A JSX element as an HTML tag, so search dialogs render it as an element. Expression values
- * become strings, values and content are kept on one line, values are truncated.
- */
-function toHtmlTag(node: JsxElement, s: Stringifier): string {
-  let attrs = '';
-  for (const attr of node.attributes) {
-    if (attr.type === 'mdxJsxExpressionAttribute') continue;
-    if (attr.value == null) {
-      attrs += ` ${attr.name}`;
-      continue;
-    }
-
-    let value = (typeof attr.value === 'string' ? attr.value : attr.value.value).replace(
-      /\s+/g,
-      ' ',
-    );
-    if (value.length > 100) value = `${value.slice(0, 100)}…`;
-    attrs += ` ${attr.name}="${value.replaceAll('&', '&amp;').replaceAll('"', '&quot;')}"`;
-  }
-
-  const children = s.inner(node).replace(/\s+/g, ' ');
-  if (!children) return `<${node.name}${attrs} />`;
-  return `<${node.name}${attrs}>${children}</${node.name}>`;
 }
 
 /**
