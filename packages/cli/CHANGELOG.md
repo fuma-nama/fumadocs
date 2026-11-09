@@ -1,3 +1,10 @@
+## @fumadocs/cli@1.9.0
+
+### Parse with Babel
+
+- The CLI parses code with Babel instead of Yuku, so it installs no native binding. `@fumadocs/cli` installs at 1.4 MB, and `create-fumadocs-app` at 2.3 MB.
+- Requires Node.js 22.18 or later.
+
 ## @fumadocs/cli@1.8.4
 
 ### Smaller installs
