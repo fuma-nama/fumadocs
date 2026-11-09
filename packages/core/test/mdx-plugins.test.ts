@@ -808,7 +808,7 @@ After the branch.
   const page = mod as unknown as Page;
   const outputs = async (props: object) => ({
     toc: page.toc(props).map((item) => item.url),
-    structured: await renderStructuredData(page.structuredData, props),
+    structured: await renderStructuredData(page.structuredData(props)),
     markdown: await renderToMarkdown(runtime.jsx(page._markdown as never, props)),
     html: renderToStaticMarkup(runtime.jsx(mod.default, props)),
   });
@@ -817,9 +817,9 @@ After the branch.
   const waku = await outputs({ framework: 'waku' });
   const pnpm = await outputs({ framework: 'astro', pm: 'pnpm' });
 
-  // every output keeps only the branches that show
-  expect(astro.toc).toEqual(['#deploy-on-', '#overview', '#setup']);
-  expect(waku.toc).toEqual(['#deploy-on-', '#overview']);
+  // every output keeps only the branches that show, IDs read the props
+  expect(astro.toc).toEqual(['#deploy-on-astro', '#overview', '#setup']);
+  expect(waku.toc).toEqual(['#deploy-on-waku', '#overview']);
   expect(pnpm.toc).toContain('#with-pnpm');
   expect(astro.structured.headings.map((item) => item.content)).toEqual([
     'Deploy on astro',
@@ -838,7 +838,8 @@ After the branch.
   expect(after(astro.structured)).toBe('setup');
   expect(after(waku.structured)).toBe('overview');
   // expressions are values
-  expect(waku.markdown).toContain('# Deploy on waku');
+  expect(waku.markdown).toContain('# Deploy on waku [#deploy-on-waku]');
+  expect(waku.html).toContain('<h1 id="deploy-on-waku">Deploy on waku</h1>');
   expect(waku.markdown).not.toContain('Pro');
   expect(waku.markdown).toContain('Waku detects the **platform**.');
   expect(astro.markdown).toContain('Astro only.');
@@ -853,16 +854,6 @@ After the branch.
   expect(waku.html).toContain('<p>A  B </p>');
   expect(astro.html).not.toContain('With pnpm');
   expect(pnpm.html).toContain('With pnpm');
-});
-
-test('Remark Show: a branch in a heading makes the TOC a function', async () => {
-  const { compile } = await import('@mdx-js/mdx');
-  const { remarkShow } = await import('@/mdx-plugins/remark-show');
-  const file = await compile(
-    '## Deploy <show when={props.framework === "next"}>on Vercel</show>\n\n<show when={props.a}>\nParagraph.\n</show>\n',
-    { remarkPlugins: [remarkShow, remarkHeading], rehypePlugins: [rehypeToc] },
-  );
-  expect(String(file)).toMatch(/const toc = props => \[/);
 });
 
 test('Remark Show: code tabs end at a branch', async () => {

@@ -1,16 +1,17 @@
 import type { Processor, Transformer } from 'unified';
-import type { Root, Element, Nodes } from 'hast';
+import type { Root, Element, ElementContent, Nodes } from 'hast';
 import { toEstree } from 'hast-util-to-estree';
-import type { Expression } from 'estree-jsx';
-import { handleTag, toEsm } from './utils';
+import type { Expression, JSXElement } from 'estree-jsx';
+import { handleTag, parseExpression, toEsm } from './utils';
 import { guardedArray, showCondition } from '../../../shared/code-output';
+import { idCodeProperty } from '../../../shared/heading-id';
 
 export interface RehypeTocOptions {
   /**
    * Export the generated toc.
    *
    * - `true` (default): as an ESM export named `toc`.
-   * - `false`: disable the plugin.
+   * - `false`: no TOC, IDs from code are still rendered into headings.
    */
   exportToc?:
     | boolean
@@ -48,12 +49,6 @@ export interface RehypeTOCItemType {
   _step?: number;
 }
 
-/** whether content reads render scope: authored expressions, or branches of `<show>` checked when rendering */
-function readsProps(node: Nodes): boolean {
-  if (node.type === 'mdxTextExpression' || showCondition(node)) return true;
-  return 'children' in node && node.children.some(readsProps);
-}
-
 const TocOnlyTag = '[toc]';
 const NoTocTag = '[!toc]';
 const HeadingTags = new Set(['h1', 'h2', 'h3', 'h4', 'h5', 'h6']);
@@ -78,13 +73,8 @@ export function rehypeToc(
     exportToc = { as: 'esm', name: 'toc' };
   }
 
-  if (exportToc === false) {
-    return () => undefined;
-  }
-
   return (tree, file) => {
-    const items: (RehypeTOCItemType & { when: string[] })[] = [];
-    let dynamic = false;
+    const items: (RehypeTOCItemType & { when: string[]; code?: string })[] = [];
 
     const visit = (nodes: Nodes[], when: string[]) => {
       for (let i = 0; i < nodes.length; i++) {
@@ -96,62 +86,85 @@ export function rehypeToc(
           continue;
         }
 
-        const id = node.properties.id;
+        const { id, [idCodeProperty]: idCode } = node.properties;
         if (typeof id !== 'string') continue;
+        const code = typeof idCode === 'string' ? idCode : undefined;
+        if (code) delete node.properties[idCodeProperty];
         const last = node.children[node.children.length - 1];
         const text = last.type === 'text' ? last : undefined;
         const noToc = text && handleTag(text.value, NoTocTag);
         if (typeof noToc === 'string') {
           text!.value = noToc;
+          if (code) nodes[i] = withIdCode(node, code);
           continue;
         }
         const tocOnly = text && handleTag(text.value, TocOnlyTag);
         if (typeof tocOnly === 'string') {
           text!.value = tocOnly;
           nodes.splice(i--, 1);
+        } else if (code) {
+          nodes[i] = withIdCode(node, code);
         }
 
-        dynamic ||= when.length > 0 || readsProps(node);
         items.push({
           title: node,
           depth: Number(node.tagName[1]),
           url: `#${id}`,
           _step: getStep(node.properties),
           when,
+          code,
         });
       }
     };
     visit(tree.children, []);
 
+    if (exportToc === false) return;
     if (exportToc.as === 'esm') {
       const titles: Expression[] = [];
       const list: { code: string; when: string[] }[] = [];
-      for (const { title, when, url, depth, _step } of items) {
-        const root = toEstree(title, {
-          elementAttributeNameCase: 'react',
-          stylePropertyNameCase: 'dom',
-        }).body[0];
-        if (root.type !== 'ExpressionStatement' || root.expression.type !== 'JSXElement') continue;
-
+      for (const { title, when, url, depth, _step, code: id } of items) {
         const i = titles.push({
           type: 'JSXFragment',
           openingFragment: { type: 'JSXOpeningFragment' },
           closingFragment: { type: 'JSXClosingFragment' },
-          children: root.expression.children,
+          children: toJsx(title).children,
         });
-        let code = `{depth: ${depth}, url: ${JSON.stringify(url)}`;
+        let code = `{depth: ${depth}, url: ${id ? `"#" + ${id}` : JSON.stringify(url)}`;
         if (_step !== undefined) code += `, _step: ${_step}`;
         list.push({ code: `${code}, title: _fumadocs${i - 1}}`, when });
       }
-      const array = guardedArray(list);
       tree.children.push(
-        toEsm(
-          `export const ${exportToc.name} = ${dynamic ? `(props) => ${array}` : array};`,
-          titles,
-        ),
+        toEsm(`export const ${exportToc.name} = (props) => ${guardedArray(list)};`, titles),
       );
     } else {
-      file.data.rehypeToc = items.map(({ when: _, ...item }) => item);
+      file.data.rehypeToc = items.map(({ when: _, code: __, ...item }) => item);
     }
+  };
+}
+
+function toJsx(element: Element): JSXElement {
+  const root = toEstree(element, {
+    elementAttributeNameCase: 'react',
+    stylePropertyNameCase: 'dom',
+  });
+  return (root.body[0] as { expression: JSXElement }).expression;
+}
+
+/** the heading with its ID rendered from code, its JSX maps to MDX components like Markdown */
+function withIdCode(heading: Element, code: string): ElementContent {
+  const element = toJsx(heading);
+  for (const attribute of element.openingElement.attributes)
+    if (attribute.type === 'JSXAttribute' && attribute.name.name === 'id')
+      attribute.value = { type: 'JSXExpressionContainer', expression: parseExpression(code) };
+  return {
+    type: 'mdxFlowExpression',
+    value: '',
+    data: {
+      estree: {
+        type: 'Program',
+        sourceType: 'module',
+        body: [{ type: 'ExpressionStatement', expression: element }],
+      },
+    },
   };
 }

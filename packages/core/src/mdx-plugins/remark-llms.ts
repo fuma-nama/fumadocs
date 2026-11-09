@@ -1,5 +1,5 @@
 import type { Transformer } from 'unified';
-import { createCodeOutput, isJsxElement, toMdxExport } from './utils';
+import { createCodeOutput, isJsxElement } from './utils';
 import { keptElement, markdownCode } from '../../../shared/code-output';
 import type { Nodes, Root } from 'mdast';
 import type { MdxJsxFlowElement, MdxJsxTextElement } from 'mdast-util-mdx';
@@ -40,18 +40,12 @@ export interface LLMsOptions {
   mdxAsPlaceholder?: string[];
 
   /**
-   * Form of the export:
+   * The export is a component of the props of the page, render it with `renderToMarkdown` from `fumadocs-core/server`.
    *
-   * - `string`: the output Markdown.
-   * - `function`: a component: Markdown content is kept as authored, while JSX elements are
-   *   kept as JSX, receiving their original props and resolving from `props.components`.
-   *   Render it with `renderToMarkdown` from `fumadocs-core/server`, where a component
-   *   can call `asMarkdown()` to define its own Markdown form.
-   *
-   * By default, a string, or a component when the Markdown reads the props of the page (like a `<show>` branch).
-   * `string` throws on such a page.
+   * With `function`, JSX elements are kept as JSX, receiving their original props and resolving from
+   * `props.components`. A component can call `asMarkdown()` to define its own Markdown form.
    */
-  output?: 'function' | 'string';
+  output?: 'function';
 
   /**
    * @internal output in file data, unavailable with `output: 'function'`
@@ -67,8 +61,7 @@ const componentNameRegex = /^[A-Z][\w$]*$/;
  * Generate Markdown for LLMs from the authored source, other plugins can edit it with
  * `replaceSource()` from `fumadocs-core/mdx-plugins/stringifier`.
  *
- * Authored expressions and the branches of `<show>` checked when rendering are rendered from code, the export is then a
- * component of the props.
+ * Authored expressions and the branches of `<show>` are rendered from code.
  */
 export function remarkLLMs({
   as = '_markdown',
@@ -118,16 +111,7 @@ export function remarkLLMs({
     const value = text ? `${text}\n` : '';
     const chunks = out.chunks(value);
 
-    if (output === 'string' && out.dynamic)
-      throw new Error(
-        `[remark-llms] the Markdown of ${file.path} reads the props of the page, it can't be output as a string.`,
-      );
-    const component = jsx || out.dynamic;
-    tree.children.unshift(
-      component || chunks.some((chunk) => typeof chunk !== 'string')
-        ? out.esm(markdownCode(as, chunks, component))
-        : toMdxExport(as, value),
-    );
+    tree.children.unshift(out.esm(markdownCode(as, chunks)));
     if (_data) file.data.markdown = out.toStatic(value);
   };
 }

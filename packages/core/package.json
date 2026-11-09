@@ -56,6 +56,7 @@
     "./mdx-plugins/remark-feedback-block": "./dist/mdx-plugins/remark-feedback-block.js",
     "./mdx-plugins/remark-gfm": "./dist/mdx-plugins/remark-gfm.js",
     "./mdx-plugins/remark-heading": "./dist/mdx-plugins/remark-heading.js",
+    "./mdx-plugins/remark-heading.runtime": "./dist/mdx-plugins/remark-heading.runtime.js",
     "./mdx-plugins/remark-image": "./dist/mdx-plugins/remark-image.js",
     "./mdx-plugins/remark-include": "./dist/mdx-plugins/remark-include.js",
     "./mdx-plugins/remark-llms": "./dist/mdx-plugins/remark-llms.js",

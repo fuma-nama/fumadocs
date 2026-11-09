@@ -303,7 +303,7 @@ test('remark-llms function output exports a component', async () => {
 
 test('remark-llms outputs the URLs of imported images', async () => {
   const fixtures = path.resolve(import.meta.dirname, './fixtures');
-  const load = async (output: 'function' | 'string') => {
+  const load = async (output?: 'function') => {
     const options = await applySatteriPreset({
       rehypeCodeOptions: false,
       remarkImageOptions: { publicDir: fixtures },
@@ -324,7 +324,7 @@ test('remark-llms outputs the URLs of imported images', async () => {
   };
 
   const expected = '![Image](</test/fixtures/img.png> "A \\"title\\"")\n\n![Public](/img.png)';
-  await expect(load('string')).resolves.toBe(`${expected}\n`);
+  await expect(renderToMarkdown(createElement(await load()))).resolves.toBe(expected);
   await expect(renderToMarkdown(createElement(await load('function')))).resolves.toBe(expected);
 });
 
@@ -338,25 +338,11 @@ test('included images use the URLs of their imports', async () => {
     options,
   });
 
-  expect(result.code).toContain('With ![image](<" + (__img0.src ?? __img0) + ">).');
+  expect(result.code).toContain(
+    '"Intro text.\\n\\nWith ![image](<",\n        __img0.src ?? __img0,',
+  );
   expect(result.data?.structuredData?.contents).toEqual([
     { heading: undefined, content: 'Intro text.' },
     { heading: undefined, content: 'With .' },
   ]);
-});
-
-test('remark-llms with Markdown that reads props', async () => {
-  const compile = async (output?: 'string') =>
-    compileMdx({
-      source: 'Deploy on {props.framework}.\n',
-      filePath: '/page.mdx',
-      options: await applySatteriPreset({
-        rehypeCodeOptions: false,
-        mdastPlugins: [remarkLlms({ output })],
-      })('bundler'),
-    });
-
-  await expect(compile('string')).rejects.toThrow("can't be output as a string");
-  // without an explicit output, a component
-  expect((await compile()).code).toContain('export function _markdown(props)');
 });

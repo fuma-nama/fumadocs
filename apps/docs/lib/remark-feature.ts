@@ -110,10 +110,7 @@ async function getDocuments() {
   const documents = [];
   for (const page of source.getPages()) {
     documents.push({
-      structured:
-        typeof page.data.structuredData === 'function'
-          ? await page.data.structuredData()
-          : page.data.structuredData,
+      structured: await page.data.structuredData(),
       url: page.url,
       title: page.data.title,
       description: page.data.description,

@@ -115,12 +115,12 @@ interface MarkdownProps {
 /** the function output of `remarkLlms()` */
 type Render = (props: MarkdownProps) => Output;
 
-/** the outputs of a compiled page, a function of the props reads the params of a page */
+/** the outputs of a compiled page, functions of the params of a page */
 export interface PageOutputs {
-  toc: TOCItemType[] | ((props: Params) => TOCItemType[]);
-  structuredData: StructuredData | ((props: Params) => StructuredDataNodes);
+  toc: (props: Params) => TOCItemType[];
+  structuredData: (props: Params) => StructuredDataNodes;
   /** with `includeProcessedMarkdown` */
-  markdown?: string | Render;
+  markdown?: Render;
   /** the MDX components of the content island */
   components?: MDXComponents;
 }

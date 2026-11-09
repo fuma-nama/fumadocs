@@ -3,10 +3,11 @@ import { remark } from 'remark';
 import remarkGfm from 'remark-gfm';
 import type { PluggableList, Transformer } from 'unified';
 import { VFile } from 'vfile';
-import { createCodeOutput, isJsxElement, toMdxExport } from './utils';
+import { createCodeOutput, isJsxElement } from './utils';
 import { and, chunksToCode, guardedArray, showCondition } from '../../../shared/code-output';
 import type { Stringifier } from './stringifier';
 import { headingIdRegex } from './heading-id';
+import { idCodeProperty } from '../../../shared/heading-id';
 import type { MdxJsxFlowElement, MdxJsxTextElement } from 'mdast-util-mdx';
 import { remarkHeading } from './remark-heading';
 import { tableRowToStructuredData } from '@/search';
@@ -106,9 +107,9 @@ export const remarkStructureDefaultOptions = {
  * Extract content into structured data, as Markdown sliced from the authored source. Links and JSX elements are
  * replaced by their content, images are removed.
  *
- * Authored expressions and the branches of `<show>` checked when rendering are rendered from code: the export is then
- * a function of the props, its content can be React nodes, rendered into Markdown by the source. `vfile.data.structuredData`
- * has the authored source of expressions and every branch.
+ * The export is a function of the props of the page, authored expressions and the branches of `<show>` render from
+ * code: its content can be React nodes, rendered into Markdown by the source. `vfile.data.structuredData` has the
+ * authored source of expressions and every branch.
  *
  * By default, the output is stored into VFile (`vfile.data.structuredData`), you can specify `exportAs` to export it.
  */
@@ -123,8 +124,8 @@ export function remarkStructure({
   return (tree, file) => {
     const out = createCodeOutput(file, 'search');
     const { s } = out;
-    /** headings and contents in document order, their content with the markers of code */
-    const headings: { id: string; content: string; when: string[] }[] = [];
+    /** headings and contents in document order, their content with the markers of code, `code` is the ID as code */
+    const headings: { id: string; code: string; content: string; when: string[] }[] = [];
     const contents: (StructuredDataContent & { when: string[]; after: number })[] = [];
     const pushContent = (item: StructuredDataContent, when: string[]) =>
       contents.push({ ...item, when, after: headings.length });
@@ -132,7 +133,8 @@ export function remarkStructure({
     // Fumadocs OpenAPI Generated Structured Data
     const openapi = (file.data.frontmatter as { _openapi?: { structuredData?: StructuredData } })
       ?._openapi?.structuredData;
-    for (const item of openapi?.headings ?? []) headings.push({ ...item, when: [] });
+    for (const item of openapi?.headings ?? [])
+      headings.push({ ...item, code: JSON.stringify(item.id), when: [] });
     for (const item of openapi?.contents ?? []) pushContent(item, []);
 
     const toCells = (row: TableRow) => {
@@ -192,9 +194,15 @@ export function remarkStructure({
           return;
         }
 
+        const code = node.data?.hProperties?.[idCodeProperty];
         records.push(() => {
           const content = s.inner(node).replace(headingIdRegex, '').trim();
-          headings.push({ id, content, when });
+          headings.push({
+            id,
+            code: typeof code === 'string' ? code : JSON.stringify(id),
+            content,
+            when,
+          });
         });
       } else {
         records.push(() => {
@@ -221,10 +229,6 @@ export function remarkStructure({
 
     if (!exportAs) return;
     const name = typeof exportAs === 'string' ? exportAs : 'structuredData';
-    if (!out.dynamic) {
-      tree.children.unshift(toMdxExport(name, data));
-      return;
-    }
 
     /**
      * The heading of content: the last heading before it that shows with it, the conditions of the branches decide
@@ -233,7 +237,7 @@ export function remarkStructure({
     function headingOf(when: string[], after: number): string {
       let chain = '';
       for (let i = after - 1; i >= 0; i--) {
-        const id = JSON.stringify(headings[i].id);
+        const id = `(${headings[i].code})`;
         const test = and(headings[i].when.filter((item) => !when.includes(item)));
         if (!test) return chain + id;
         chain += `${test} ? ${id} : `;
@@ -242,10 +246,10 @@ export function remarkStructure({
     }
 
     const headingList: { code: string; when: string[] }[] = [];
-    for (const { id, content, when } of headings)
+    for (const { code, content, when } of headings)
       if (content)
         headingList.push({
-          code: `{id: ${JSON.stringify(id)}, content: ${chunksToCode(out.chunks(content))}}`,
+          code: `{id: ${code}, content: ${chunksToCode(out.chunks(content))}}`,
           when,
         });
     const contentList: { code: string; when: string[] }[] = [];

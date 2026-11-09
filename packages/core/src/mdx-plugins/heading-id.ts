@@ -1,5 +1,7 @@
 import type { Heading } from 'mdast';
 import type { Stringifier } from './stringifier';
+import { parseExpression } from './utils';
+import { idCodeProperty } from '../../../shared/heading-id';
 
 /** a custom ID at the end of heading text, like `[#id]` */
 export const headingIdRegex = /\s*\[#(?<slug>[^]+?)]\s*$/;
@@ -13,7 +15,13 @@ export function stringifyHeadingId(s: Stringifier, node: Heading, enabled: boole
   if (start === undefined || end === undefined) return;
 
   const marker = headingIdRegex.exec(s.source.slice(start, end));
-  const id = node.data?.hProperties?.id;
+  const { id, [idCodeProperty]: code } = node.data?.hProperties ?? {};
   if (!enabled && marker) s.edit(start + marker.index, end, '', node);
-  else if (enabled && !marker && id) s.edit(end, end, ` [#${id}]`, node);
+  else if (enabled && !marker && id)
+    s.edit(
+      end,
+      end,
+      ` [#${typeof code === 'string' ? s.expression(parseExpression(code), String(id)) : id}]`,
+      node,
+    );
 }

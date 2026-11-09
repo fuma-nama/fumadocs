@@ -115,6 +115,7 @@ Run the installer of {props.version}.`,
     expect(toc.map((item) => item.title)).toEqual(
       version === 'v2' ? ['Install v2', 'Migrate'] : ['Install v1'],
     );
+    expect(toc[0].url).toBe(`#install-${version}`);
     expect(structuredData.contents.map((item) => item.content)).toEqual(
       version === 'v2' ? ['Only in v2.', 'Run the installer of v2.'] : ['Run the installer of v1.'],
     );

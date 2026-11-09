@@ -2,6 +2,7 @@ import type { TOCItemType } from 'fumadocs-core/toc';
 import type { RehypeTOCItemType, StructuredData } from 'fumadocs-core/mdx-plugins';
 import type { ReactNode } from 'react';
 import * as JsxRuntime from 'react/jsx-runtime';
+import { headingSlug } from 'fumadocs-core/mdx-plugins/remark-heading.runtime';
 import { type Components, type Evaluator, toJsx } from 'fumadocs-core/utils/hast-to-jsx';
 import type { Root } from 'hast';
 import type { JSExecutor, JSExecutorConfig } from '@/js/executor';
@@ -135,6 +136,7 @@ export function fromJS<M>(options: MarkdownRendererJSOptions): MarkdownRenderer<
     return {
       opts: {
         ...JsxRuntime,
+        headingSlug,
         baseUrl,
       },
       // the code of the module reads the params of a page as `props`, like its content
@@ -143,13 +145,8 @@ export function fromJS<M>(options: MarkdownRendererJSOptions): MarkdownRenderer<
     };
   }
 
-  /** the outputs of content rendered from code read the props too */
-  type Exports = {
-    toc?: TOCItemType[] | ((props: Record<string, unknown>) => TOCItemType[]);
-    default: MDXContent;
-  };
-  const tocOf = ({ toc = [] }: Exports) =>
-    typeof toc === 'function' ? toc(options.props ?? {}) : toc;
+  type Exports = { toc?: (props: Record<string, unknown>) => TOCItemType[]; default: MDXContent };
+  const tocOf = ({ toc }: Exports) => toc?.(options.props ?? {}) ?? [];
 
   return {
     structuredData,

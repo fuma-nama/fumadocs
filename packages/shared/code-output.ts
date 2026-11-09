@@ -49,19 +49,13 @@ const markerRegex = /\0(\/?)(\d+)\0/g;
 
 /**
  * A stringifier whose output can have parts rendered from code: replacements mark them, `chunks()` splits the output on
- * their markers. Authored expressions, the branches of `<show>` checked when rendering and code of plugins that reads
- * `props` read render scope, an output with them is a function of the props.
+ * their markers. Outputs are functions of the props of the page, code reads them in render scope.
  */
 export function createCodeOutput<N extends CodeNode, S extends CodeStringifier<N>>(
-  createStringifier: (expression: (code: string, fallback: string, reads: boolean) => string) => S,
-  options: {
-    /** the program of an authored expression */
-    program: (node: N) => { body: unknown[] } | null | undefined;
-    range: (node: N) => { start: number; end: number } | undefined;
-  },
+  createStringifier: (expression: (code: string, fallback: string) => string) => S,
+  range: (node: N) => { start: number; end: number } | undefined,
 ) {
   const parts: CodePart[] = [];
-  let dynamic = false;
   /** a value */
   const mark = (part: CodePart) => `\0${parts.push(part) - 1}\0`;
   /** content, it stays in the output so edits apply to it like to other content (e.g. the prefixes of lists) */
@@ -69,18 +63,11 @@ export function createCodeOutput<N extends CodeNode, S extends CodeStringifier<N
     const i = parts.push(part) - 1;
     return `\0${i}\0${content}\0/${i}\0`;
   };
-  const s = createStringifier((code, fallback, reads) => {
-    dynamic ||= reads;
-    return mark({ code, fallback });
-  });
+  const s = createStringifier((code, fallback) => mark({ code, fallback }));
 
   return {
     s,
     wrap,
-    /** whether a marked part reads render scope */
-    get dynamic() {
-      return dynamic;
-    },
     /** the output without code: expressions as their fallbacks, branches unwrapped */
     toStatic(text: string): string {
       return text.replace(markerRegex, (_, close: string, i: string) => {
@@ -131,46 +118,18 @@ export function createCodeOutput<N extends CodeNode, S extends CodeStringifier<N
      */
     markCode(node: N): boolean {
       if (node.type === 'mdxTextExpression' || node.type === 'mdxFlowExpression') {
-        const text = literalText(options.program(node));
-        if (text !== undefined) {
-          s.replace(node, text);
-          return true;
-        }
-        dynamic = true;
-        const range = options.range(node);
-        const fallback = range ? s.source.slice(range.start, range.end) : '';
+        const position = range(node);
+        const fallback = position ? s.source.slice(position.start, position.end) : '';
         s.replace(node, mark({ code: node.value as string, fallback }));
         return true;
       }
 
       const when = showCondition(node);
       if (!when) return false;
-      dynamic = true;
       s.replace(node, (s) => wrap({ when }, s.inner(node)));
       return true;
     },
   };
-}
-
-/** the text an expression renders when it is a comment or a literal, booleans and `null` render nothing */
-function literalText(program: { body: unknown[] } | null | undefined): string | undefined {
-  const statement = program?.body[0] as
-    | { type: string; expression?: { type: string; value?: unknown } }
-    | undefined;
-  if (!statement) return '';
-  if (statement.expression?.type !== 'Literal') return;
-  const { value } = statement.expression;
-  if (typeof value === 'string' || typeof value === 'number') return String(value);
-  if (typeof value === 'boolean' || value === null) return '';
-}
-
-/** whether code reads the props of the page: an estree node with a `props` identifier */
-export function readsProps(node: unknown): boolean {
-  if (typeof node !== 'object' || node === null) return false;
-  if ('type' in node && node.type === 'Identifier' && 'name' in node && node.name === 'props')
-    return true;
-  for (const value of Object.values(node)) if (readsProps(value)) return true;
-  return false;
 }
 
 /** the condition of a branch of `<show>` checked when rendering */
@@ -237,21 +196,8 @@ function chunksToJsx(chunks: Chunk[]): string {
   return out;
 }
 
-/**
- * The export of Markdown: a string without elements or branches, a component rendered with `renderToMarkdown()` of
- * `fumadocs-core/server` otherwise.
- */
-export function markdownCode(as: string, chunks: Chunk[], component: boolean): string {
-  if (!component) {
-    let out = '';
-    for (const chunk of chunks) {
-      if (out) out += ' + ';
-      out +=
-        typeof chunk === 'string' ? JSON.stringify(chunk) : `(${(chunk as { code: string }).code})`;
-    }
-    return `export const ${as} = ${out || '""'};`;
-  }
-
+/** the export of Markdown, a component rendered with `renderToMarkdown()` of `fumadocs-core/server` */
+export function markdownCode(as: string, chunks: Chunk[]): string {
   const elements = hasElement(chunks);
   return [
     `import { asMarkdown as _asMarkdown${elements ? ', jsxComponents as _jsxComponents' : ''} } from "fumadocs-core/server";`,

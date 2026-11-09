@@ -34,7 +34,7 @@ describe('output-format aware exports', () => {
 
     expect(code).toContain('export const frontmatter =');
     expect(code).toContain('export const structuredData =');
-    expect(code).toContain('export const markdown =');
+    expect(code).toContain('export function markdown(props)');
   });
 
   test('function-body output carries the same values on the returned object', async () => {
@@ -49,16 +49,16 @@ describe('output-format aware exports', () => {
       default: unknown;
       frontmatter: unknown;
       structuredData: { headings: unknown[] };
-      markdown: string;
-      toc: unknown[];
+      markdown: unknown;
+      toc: (props: object) => unknown[];
     };
     expect(out.default).toBeTypeOf('function');
 
     // `fd-exports` injects these into the tree, so the compiler returns them
     expect(out.frontmatter).toEqual({ title: 'Doc' });
     expect(out.structuredData.headings).toHaveLength(1);
-    expect(out.markdown).toContain('Heading');
-    expect(out.toc).toHaveLength(1);
+    expect(out.markdown).toBeTypeOf('function');
+    expect(out.toc({})).toHaveLength(1);
 
     // and they remain readable from `data`
     expect(data.structuredData?.headings).toHaveLength(1);
@@ -73,7 +73,7 @@ describe('output-format aware exports', () => {
       environment: 'bundler',
       options: await applySatteriPreset({})('bundler'),
     });
-    expect(program.code).toContain('export const toc = []');
+    expect(program.code).toContain('export const toc = (props) => []');
 
     const runtime = await compileMdx({
       source,
@@ -82,8 +82,8 @@ describe('output-format aware exports', () => {
       options: await applySatteriPreset({})('runtime'),
     });
     const fn = new AsyncFunction('opts', runtime.code);
-    const out = (await fn({ ...JsxRuntime })) as { toc?: unknown[] };
-    expect(out.toc).toEqual([]);
+    const out = (await fn({ ...JsxRuntime })) as { toc: (props: object) => unknown[] };
+    expect(out.toc({})).toEqual([]);
   });
 
   test('collectExports hooks contribute, a later export of the same name wins', async () => {
@@ -120,8 +120,11 @@ describe('output-format aware exports', () => {
     });
 
     const fn = new AsyncFunction('opts', code);
-    const out = (await fn({ ...JsxRuntime })) as { toc?: unknown[]; frontmatter?: unknown };
-    expect(out.toc).toEqual([]);
+    const out = (await fn({ ...JsxRuntime })) as {
+      toc: (props: object) => unknown[];
+      frontmatter?: unknown;
+    };
+    expect(out.toc({})).toEqual([]);
     expect(out.frontmatter).toEqual({ title: 'Empty' });
   });
 });

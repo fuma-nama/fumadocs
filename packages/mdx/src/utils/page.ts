@@ -12,7 +12,7 @@ export type PageAt<Page extends CompiledMDXProperties<unknown>> = Omit<
   'toc' | 'structuredData'
 > & {
   toc: TOCItemType[];
-  structuredData: StructuredData | (() => Promise<StructuredData>);
+  structuredData: () => Promise<StructuredData>;
 };
 
 /** the exports of a compiled page at params, the content and its outputs read them as props */
@@ -28,15 +28,10 @@ export function pageAt<Page extends CompiledMDXProperties<unknown>>(
     default: bound
       ? (props: MDXProps) => createElement(page.default, { ...params, ...props })
       : page.default,
-    toc: typeof toc === 'function' ? toc(params) : toc,
-    structuredData:
-      typeof structuredData === 'function'
-        ? () => renderStructuredData(structuredData, params)
-        : structuredData,
+    toc: toc(params),
+    structuredData: () => renderStructuredData(structuredData(params)),
     // called in place, so `asMarkdown()` of the component opts in when rendering into Markdown
     _markdown:
-      typeof markdown === 'function' && bound
-        ? (props: MDXProps) => markdown({ ...params, ...props })
-        : markdown,
+      markdown && bound ? (props: MDXProps) => markdown({ ...params, ...props }) : markdown,
   };
 }

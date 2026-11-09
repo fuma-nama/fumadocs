@@ -1,29 +1,29 @@
 import { Fragment as _Fragment, jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
-export const structuredData = {
-    "contents": [
+export const structuredData = (props) => ({
+    headings: [{
+        id: "hello-world",
+        content: "Hello World"
+    }],
+    contents: [
         {
-            "heading": "hello-world",
-            "content": "Content with inline **bold** element."
+            heading: "hello-world",
+            content: "Content with inline **bold** element."
         },
         {
-            "heading": "hello-world",
-            "content": "Some *content* here."
+            heading: "hello-world",
+            content: "Some *content* here."
         },
         {
-            "heading": "hello-world",
-            "content": "nested"
+            heading: "hello-world",
+            content: "nested"
         },
         {
-            "heading": "hello-world",
-            "content": "Ending paragraph."
+            heading: "hello-world",
+            content: "Ending paragraph."
         }
-    ],
-    "headings": [{
-        "id": "hello-world",
-        "content": "Hello World"
-    }]
-};
-export const toc = [{
+    ]
+});
+export const toc = (props) => [{
     title: _jsx(_Fragment, { children: "Hello World" }),
     url: "#hello-world",
     depth: 2

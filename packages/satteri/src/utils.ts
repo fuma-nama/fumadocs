@@ -10,7 +10,6 @@ import type {
 } from 'fumadocs-core/mdx-plugins/rehype-code.core';
 import {
   createCodeOutput as createSharedCodeOutput,
-  readsProps,
   showCondition,
 } from '../../shared/code-output';
 import { createStringifier, offsets, type PositionedNode, type Stringifier } from './stringifier';
@@ -97,11 +96,8 @@ type CodeNode = PositionedNode & {
 /** the shared code output, on the stringifier of Sätteri */
 export function createCodeOutput(ctx: MdastVisitorContext, namespace?: 'search') {
   return createSharedCodeOutput<CodeNode, Stringifier>(
-    (expression) =>
-      createStringifier(ctx, namespace, (code, fallback) =>
-        expression(code, fallback, readsProps(parse(code))),
-      ),
-    { program: (node) => parse(node.value as string), range: offsets },
+    (expression) => createStringifier(ctx, namespace, expression),
+    offsets,
   );
 }
 

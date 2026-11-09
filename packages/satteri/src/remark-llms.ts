@@ -21,18 +21,12 @@ export interface LLMsOptions {
   headingIds?: boolean;
 
   /**
-   * Form of the export:
+   * The export is a component of the props of the page, render it with `renderToMarkdown` from `fumadocs-core/server`.
    *
-   * - `string`: the output Markdown.
-   * - `function`: a component: Markdown content is kept as authored source, while JSX elements
-   *   stay as JSX, receiving their original props and resolving from `props.components`.
-   *   Render it with `renderToMarkdown` from `fumadocs-core/server`, where a component
-   *   can call `asMarkdown()` to define its own Markdown form.
-   *
-   * By default, a string, or a component when the Markdown reads the props of the page (like a `<show>` branch).
-   * `string` throws on such a page.
+   * With `function`, JSX elements stay as JSX, receiving their original props and resolving from
+   * `props.components`. A component can call `asMarkdown()` to define its own Markdown form.
    */
-  output?: 'function' | 'string';
+  output?: 'function';
 }
 
 const componentNameRegex = /^[A-Z][\w$]*$/;
@@ -92,14 +86,7 @@ export function remarkLlms({
         // `data.markdown` uses the fallbacks of expressions, with every branch
         if (!jsx) ctx.data.markdown ??= out.toStatic(value);
         if (!as) return;
-        if (output === 'string' && out.dynamic)
-          throw new Error(
-            `[remark-llms] the Markdown of ${ctx.fileURL ?? 'a page'} reads the props of the page, it can't be output as a string.`,
-          );
-        ctx.prependChild(root, {
-          type: 'mdxjsEsm',
-          value: markdownCode(as, chunks, jsx || out.dynamic),
-        });
+        ctx.prependChild(root, { type: 'mdxjsEsm', value: markdownCode(as, chunks) });
       },
     });
   };

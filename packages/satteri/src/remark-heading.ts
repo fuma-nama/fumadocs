@@ -2,6 +2,7 @@ import Slugger from 'github-slugger';
 import { defineMdastPlugin, type MdastVisitorContext } from 'satteri';
 import type { Heading } from 'mdast';
 import { headingIdRegex } from './heading-id';
+import { headingSlugImport, idCode, idCodeProperty } from '../../shared/heading-id';
 
 export interface RemarkHeadingOptions {
   slug?: (heading: Heading, text: string) => string;
@@ -16,6 +17,7 @@ export function remarkHeading({
 }: RemarkHeadingOptions = {}) {
   return () => {
     let resolveSlug = slug;
+    let slugs = false;
     if (!resolveSlug) {
       const slugger = new Slugger();
       resolveSlug = (_, v) => slugger.slug(v);
@@ -48,6 +50,11 @@ export function remarkHeading({
 
         if (!hProperties.id) {
           hProperties.id = resolveSlug(node, title);
+          const code = !slug && idCode(node.children);
+          if (code) {
+            hProperties[idCodeProperty] = code;
+            slugs = true;
+          }
         }
 
         ctx.setProperty(node, 'data', data);
@@ -56,6 +63,9 @@ export function remarkHeading({
           url: `#${hProperties.id}`,
           depth: node.depth,
         });
+      },
+      after(root, ctx) {
+        if (slugs) ctx.prependChild(root, { type: 'mdxjsEsm', value: headingSlugImport });
       },
     });
   };

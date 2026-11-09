@@ -3,7 +3,7 @@ title: Remark LLMs
 description: Export the Markdown of your documents for LLMs.
 ---
 
-The `remarkLLMs` plugin exports the Markdown of a document as `_markdown`, for LLMs. It keeps the Markdown you wrote. See [Stringification](/docs/headless/mdx/stringification) for how it's generated.
+The `remarkLLMs` plugin exports the Markdown of a document as `_markdown`, a component of the page's props, for LLMs. It keeps the Markdown you wrote. See [Stringification](/docs/headless/mdx/stringification) for how it's generated.
 
 ```mdx tab="Input"
 import { Callout } from 'fumadocs-ui/components/callout';
@@ -95,9 +95,7 @@ const markdown = await renderPlaceholder(await page.data.getText('processed'), {
 
 ### Function Output [#output]
 
-With `output: 'function'`, `_markdown` is a component: Markdown stays as you wrote it and JSX elements are rendered by your components.
-
-Without `output`, a page whose Markdown reads `props`, like a [`<show>`](/docs/markdown#show) branch, also gets a component. `output: 'string'` throws on such a page.
+With `output: 'function'`, Markdown stays as you wrote it and JSX elements are rendered by your components.
 
 ```ts
 import type { LLMsOptions } from 'fumadocs-core/mdx-plugins/remark-llms';

@@ -63,7 +63,7 @@ test('Remark LLMs: jsx', async () => {
 test('Remark LLMs: URLs of imported images', async () => {
   // a page-relative image, and one in the public directory
   const value = '![Test](./test.png "A \\"title\\"")\n\n![Public](/remark-image.svg)\n';
-  const load = async (output: 'function' | 'string') => {
+  const load = async (output?: 'function') => {
     const compiled = String(
       await compile(
         { value, path: path.resolve(cwd, './fixtures/page.mdx') },
@@ -87,18 +87,6 @@ test('Remark LLMs: URLs of imported images', async () => {
 
   const expected =
     '![Test](</test/fixtures/test.png> "A \\"title\\"")\n\n![Public](/remark-image.svg)';
-  await expect(load('string')).resolves.toBe(`${expected}\n`);
-  const Md = (await load('function')) as FC;
-  await expect(renderToMarkdown(<Md />)).resolves.toBe(expected);
-});
-
-test('Remark LLMs: Markdown that reads props', async () => {
-  const value = 'Deploy on {props.framework}.\n';
-  await expect(
-    compile(value, { remarkPlugins: [[remarkLLMs, { output: 'string' }]] }),
-  ).rejects.toThrow("can't be output as a string");
-  // without an explicit output, a component
-  expect(String(await compile(value, { remarkPlugins: [remarkLLMs] }))).toContain(
-    'export function _markdown(props)',
-  );
+  for (const Md of [await load(), await load('function')] as FC[])
+    await expect(renderToMarkdown(<Md />)).resolves.toBe(expected);
 });

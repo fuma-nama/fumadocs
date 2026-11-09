@@ -8,10 +8,12 @@ import mdxPlugin, { type MdxPluginOptions } from '@/press';
 import { server, toFumadocsSource } from '@/runtime/server';
 
 const lastModified = new Date('2026-11-03');
+const toc = [{ title: 'Intro', url: '#intro', depth: 2 }];
+const structuredData = { headings: [], contents: [{ heading: undefined, content: 'Hello' }] };
 const compiled = {
   default: (props: MDXProps) => createElement('p', props),
-  toc: [{ title: 'Intro', url: '#intro', depth: 2 }],
-  structuredData: { headings: [], contents: [{ heading: undefined, content: 'Hello' }] },
+  toc: () => toc,
+  structuredData: () => structuredData,
   frontmatter: { title: 'Hello', date: '2026-11-04' },
   lastModified,
   _markdown({ components }: MDXProps) {
@@ -53,8 +55,8 @@ describe('mdxPlugin()', () => {
 
     expect(body.props.components!.custom).toBe(components.custom);
     expect(await plugin.getPageText!.call(ctx, page)).toBe('custom text');
-    expect(await plugin.getPageToc!.call(ctx, page)).toBe(compiled.toc);
-    expect(await plugin.getPageStructuredData!.call(ctx, page)).toBe(compiled.structuredData);
+    expect(await plugin.getPageToc!.call(ctx, page)).toBe(toc);
+    expect(await plugin.getPageStructuredData!.call(ctx, page)).toEqual(structuredData);
     expect(await plugin.getPageCreatedAt!.call(ctx, page)).toEqual(new Date('2026-11-04'));
     expect(await plugin.getPageLastModified!.call(ctx, page)).toBe(lastModified);
   });

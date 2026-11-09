@@ -11,16 +11,16 @@ It turns `<show>` into a component that renders its content when `when` holds. T
 
 ### Custom Sources
 
-A [custom source](/docs/headless/source-api/source#path-params) that compiles MDX passes the params of a page as props when rendering. When a page reads its props, the `toc` and `structuredData` exports are functions of them. Call them with the params of the page:
+A [custom source](/docs/headless/source-api/source#path-params) that compiles MDX passes the params of a page as props when rendering. The `toc` and `structuredData` exports are functions of them too:
 
 ```ts twoslash
 import type { Params } from 'fumadocs-core/source';
 import type { TOCItemType } from 'fumadocs-core/toc';
 
 declare const params: Params;
-declare const compiled: { toc: TOCItemType[] | ((props: Params) => TOCItemType[]) };
+declare const compiled: { toc: (props: Params) => TOCItemType[] };
 // ---cut---
-const toc = typeof compiled.toc === 'function' ? compiled.toc(params) : compiled.toc;
+const toc = compiled.toc(params);
 ```
 
 Structured data records can then contain React nodes. Render them into text with `renderToMarkdown()` from `fumadocs-core/server`.

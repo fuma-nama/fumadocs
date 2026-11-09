@@ -7,10 +7,7 @@ import acornJsx from 'acorn-jsx';
 import type Hast from 'hast';
 import type { VFile } from 'vfile';
 import { createStringifier, type Stringifier } from './stringifier';
-import {
-  createCodeOutput as createSharedCodeOutput,
-  readsProps,
-} from '../../../shared/code-output';
+import { createCodeOutput as createSharedCodeOutput } from '../../../shared/code-output';
 
 export function isJsxElement(node: Nodes): node is MdxJsxFlowElement | MdxJsxTextElement {
   return node.type === 'mdxJsxFlowElement' || node.type === 'mdxJsxTextElement';
@@ -109,6 +106,10 @@ export function toEsm(code: string, expressions: Expression[] = []): MdxjsEsm {
   return { type: 'mdxjsEsm', value: '', data: { estree: program as unknown as Program } };
 }
 
+export function parseExpression(code: string): Expression {
+  return parser.parseExpressionAt(code, 0, { ecmaVersion: 'latest' }) as unknown as Expression;
+}
+
 function fill(node: object, expressions: Expression[]) {
   for (const [key, value] of Object.entries(node)) {
     if (typeof value !== 'object' || value === null) continue;
@@ -125,12 +126,9 @@ export function createCodeOutput(file: VFile, namespace?: string) {
   const out = createSharedCodeOutput<Nodes, Stringifier>(
     (expression) =>
       (stringifier = createStringifier(file, namespace, (value, fallback) =>
-        expression(`_fumadocs${expressions.push(value) - 1}`, fallback, readsProps(value)),
+        expression(`_fumadocs${expressions.push(value) - 1}`, fallback),
       )),
-    {
-      program: (node) => (node.data && 'estree' in node.data ? node.data.estree : undefined),
-      range: (node) => stringifier.range(node),
-    },
+    (node) => stringifier.range(node),
   );
   return Object.assign(out, { esm: (code: string) => toEsm(code, expressions) });
 }

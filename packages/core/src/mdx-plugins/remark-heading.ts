@@ -2,8 +2,9 @@ import Slugger from 'github-slugger';
 import type { Heading, Nodes, Root } from 'mdast';
 import type { Transformer } from 'unified';
 import type { TOCItemType } from '@/toc';
-import { flattenNode, walk } from '@/mdx-plugins/utils';
+import { flattenNode, toEsm, walk } from '@/mdx-plugins/utils';
 import { headingIdRegex } from '@/mdx-plugins/heading-id';
+import { headingSlugImport, idCode, idCodeProperty } from '../../../shared/heading-id';
 
 export interface RemarkHeadingOptions {
   slug?: (root: Root, heading: Heading, text: string) => string;
@@ -33,7 +34,7 @@ declare module 'vfile' {
 }
 
 /**
- * Add heading ids and extract TOC
+ * Add heading ids and extract TOC. With the default slugs, IDs of headings with authored expressions render from code.
  */
 export function remarkHeading({
   slug,
@@ -41,6 +42,7 @@ export function remarkHeading({
   generateToc = true,
 }: RemarkHeadingOptions = {}): Transformer<Root, Root> {
   let slugger: Slugger | undefined;
+  const defaultSlug = !slug;
 
   if (!slug) {
     slugger = new Slugger();
@@ -49,6 +51,7 @@ export function remarkHeading({
 
   return (root, file) => {
     const toc: TOCItemType[] = [];
+    let slugs = false;
     slugger?.reset();
 
     walk<Nodes>(root, (heading) => {
@@ -72,6 +75,11 @@ export function remarkHeading({
         flattened ??= flattenNode(heading);
 
         props.id = slug(root, heading, flattened);
+        const code = defaultSlug && idCode(heading.children);
+        if (code) {
+          props[idCodeProperty] = code;
+          slugs = true;
+        }
       }
 
       if (generateToc) {
@@ -85,6 +93,7 @@ export function remarkHeading({
       return 'skip';
     });
 
+    if (slugs) root.children.unshift(toEsm(headingSlugImport));
     if (generateToc) file.data.toc = toc;
   };
 }

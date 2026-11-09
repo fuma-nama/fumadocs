@@ -1,6 +1,6 @@
 import type { Nodes, Root } from 'mdast';
 import type { Transformer } from 'unified';
-import { showDeclaration, showElement } from '../../../shared/code-output';
+import { showCondition, showDeclaration, showElement } from '../../../shared/code-output';
 import { isJsxElement, toEsm, walk } from './utils';
 
 /**
@@ -8,11 +8,12 @@ import { isJsxElement, toEsm, walk } from './utils';
  * a page as props. The outputs of other plugins (TOC, structured data, Markdown) check the conditions too.
  */
 export function remarkShow(): Transformer<Root, Root> {
-  return (tree) => {
+  return (tree, file) => {
     let used = false;
     walk<Nodes>(tree, (node) => {
       if (!isJsxElement(node) || node.name !== 'show') return;
       node.name = showElement;
+      if (!showCondition(node)) file.fail('`<show>` needs a `when` expression', node);
       used = true;
     });
     if (used) tree.children.unshift(toEsm(showDeclaration));

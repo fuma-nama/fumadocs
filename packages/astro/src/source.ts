@@ -113,11 +113,8 @@ function pageData<Entry extends PageEntry>(entry: Entry, params?: Params): Astro
       );
     return { Content, outputs };
   }
-  async function structuredData({ structuredData }: PageOutputs): Promise<StructuredData> {
-    return typeof structuredData === 'function'
-      ? renderStructuredData(structuredData(props))
-      : structuredData;
-  }
+  const structuredData = (outputs: PageOutputs) =>
+    renderStructuredData(outputs.structuredData(props));
 
   return {
     ...entry.data,
@@ -134,7 +131,7 @@ function pageData<Entry extends PageEntry>(entry: Entry, params?: Params): Astro
               Content,
             )
           : Content,
-        toc: typeof toc === 'function' ? toc(props) : toc,
+        toc: toc(props),
         structuredData: await structuredData(outputs),
       };
     },
@@ -145,7 +142,6 @@ function pageData<Entry extends PageEntry>(entry: Entry, params?: Params): Astro
       if (type === 'raw') return entry.body ?? '';
       const { markdown, components } = (await compile()).outputs;
       if (markdown === undefined) throw new NoProcessedMarkdownError();
-      if (typeof markdown === 'string') return markdown;
       return renderMarkdown(markdown, { ...props, components: options?.components ?? components });
     },
   };

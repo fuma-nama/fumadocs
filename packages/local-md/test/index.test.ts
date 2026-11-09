@@ -156,6 +156,23 @@ test('fromJS: a user context does not displace the jsx runtime', async () => {
   }
 });
 
+test('fromJS: IDs of headings read the props, without imports', async () => {
+  const compiled = await createMarkdownCompiler().compile({
+    path: '/page.mdx',
+    value: '## Setup on {props.framework}',
+  });
+  if (compiled.type !== 'js') throw new Error('expected a js result');
+
+  const renderer = fromJS({
+    code: compiled.code,
+    filePath: '/page.mdx',
+    props: { framework: 'Next.js' },
+  });
+  const { body, toc } = renderer.renderSync();
+  expect(renderToStaticMarkup(body)).toBe('<h2 id="setup-on-nextjs">Setup on Next.js</h2>');
+  expect(toc.map((item) => item.url)).toEqual(['#setup-on-nextjs']);
+});
+
 test('load() compiles each page only once', async () => {
   const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'local-md-cache-'));
 

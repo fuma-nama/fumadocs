@@ -6,6 +6,7 @@ import { createElement, type FC } from 'react';
 import * as JsxRuntime from 'react/jsx-runtime';
 import { renderToStaticMarkup } from 'react-dom/server';
 import * as server from 'fumadocs-core/server';
+import { headingSlug } from 'fumadocs-core/mdx-plugins/remark-heading.runtime';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
 import { renderStructuredData, type StructuredDataNodes } from '../../shared/structured-data';
 import { compileMdx } from '@/compile';
@@ -61,8 +62,12 @@ test('Remark Show: branches and expressions render from code in every output', a
     environment: 'runtime',
     options,
   });
-  // the generated imports of `fumadocs-core/server` read from the scope
-  const page = (await new AsyncFunction('opts', code)({ ...JsxRuntime, ...server })) as {
+  // the generated imports of Fumadocs read from the scope
+  const page = (await new AsyncFunction('opts', code)({
+    ...JsxRuntime,
+    ...server,
+    headingSlug,
+  })) as {
     default: FC<object>;
     toc: (props: object) => { url: string }[];
     structuredData: (props: object) => StructuredDataNodes;
@@ -70,7 +75,7 @@ test('Remark Show: branches and expressions render from code in every output', a
   };
   const outputs = async (props: object) => ({
     toc: page.toc(props).map((item) => item.url),
-    structured: await renderStructuredData(page.structuredData, props),
+    structured: await renderStructuredData(page.structuredData(props)),
     markdown: await server.renderToMarkdown(createElement(page._markdown, props)),
     html: renderToStaticMarkup(createElement(page.default, props)),
   });
@@ -79,9 +84,9 @@ test('Remark Show: branches and expressions render from code in every output', a
   const waku = await outputs({ framework: 'waku' });
   const pnpm = await outputs({ framework: 'astro', pm: 'pnpm' });
 
-  // every output keeps only the branches that show, slugs leave out the expressions of headings
-  expect(astro.toc).toEqual(['#deploy-on-', '#overview', '#setup']);
-  expect(waku.toc).toEqual(['#deploy-on-', '#overview']);
+  // every output keeps only the branches that show, IDs read the props
+  expect(astro.toc).toEqual(['#deploy-on-astro', '#overview', '#setup']);
+  expect(waku.toc).toEqual(['#deploy-on-waku', '#overview']);
   expect(pnpm.toc).toContain('#with-pnpm');
   expect(astro.structured.headings.map((item) => item.content)).toEqual([
     'Deploy on astro',
@@ -100,7 +105,8 @@ test('Remark Show: branches and expressions render from code in every output', a
   expect(after(astro.structured)).toBe('setup');
   expect(after(waku.structured)).toBe('overview');
   // expressions are values, constants are decided
-  expect(waku.markdown).toContain('# Deploy on waku');
+  expect(waku.markdown).toContain('# Deploy on waku [#deploy-on-waku]');
+  expect(waku.html).toContain('<h1 id="deploy-on-waku">Deploy on waku</h1>');
   expect(waku.markdown).not.toContain('Pro');
   expect(waku.markdown).toContain('Waku detects the **platform**.');
   expect(astro.markdown).toContain('Astro only.');
@@ -185,8 +191,7 @@ test('Remark Show: branches of an included file, the page itself has none', asyn
   const page = (await new AsyncFunction('opts', code)({ ...JsxRuntime, ...server })) as {
     _markdown: FC<object>;
   };
-  const markdown = (props: object) =>
-    server.renderToMarkdown(createElement(page._markdown, props));
+  const markdown = (props: object) => server.renderToMarkdown(createElement(page._markdown, props));
   expect(await markdown({})).not.toContain('Included branch.');
   expect(await markdown({ edition: 'pro' })).toContain('Included branch.');
   await fs.rm(dir, { recursive: true });

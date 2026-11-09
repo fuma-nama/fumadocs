@@ -7,6 +7,7 @@ import type {
 import { tableRowToStructuredData } from 'fumadocs-core/search';
 import { offsets, type Stringifier } from './stringifier';
 import { headingIdRegex } from './heading-id';
+import { idCodeProperty } from '../../shared/heading-id';
 import type { ExtraPluginHooks } from './compile';
 import { createCodeOutput, showConditions, type JsxElementNode } from './utils';
 import { and, chunksToCode, guardedArray } from '../../shared/code-output';
@@ -63,8 +64,9 @@ interface ContentRecord {
   node: Nodes;
   /** the conditions of the branches of `<show>` around it */
   when: string[];
-  /** set for heading records */
+  /** set for heading records, `code` is the ID as code */
   id?: string;
+  code?: string;
   table?: string;
   /** set for generated records */
   content?: string;
@@ -119,8 +121,8 @@ export function remarkStructure({
     let tables = 0;
     let out: ReturnType<typeof createCodeOutput>;
     let s: Stringifier;
-    /** headings and contents in document order, their content with the markers of code */
-    const headings: { id: string; content: string; when: string[] }[] = [];
+    /** headings and contents in document order, their content with the markers of code, `code` is the ID as code */
+    const headings: { id: string; code: string; content: string; when: string[] }[] = [];
     const contents: (StructuredDataContent & { when: string[]; after: number })[] = [];
     const pushContent = (item: StructuredDataContent, when: string[]) =>
       contents.push({ ...item, when, after: headings.length });
@@ -136,7 +138,7 @@ export function remarkStructure({
     function headingOf(when: string[], after: number): string {
       let chain = '';
       for (let i = after - 1; i >= 0; i--) {
-        const id = JSON.stringify(headings[i].id);
+        const id = `(${headings[i].code})`;
         const test = and(headings[i].when.filter((item) => !when.includes(item)));
         if (!test) return chain + id;
         chain += `${test} ? ${id} : `;
@@ -177,8 +179,15 @@ export function remarkStructure({
       }
 
       if (node.type === 'heading') {
-        const id = (node.data as { hProperties?: { id?: string } } | undefined)?.hProperties?.id;
-        if (id) records.push({ node, when, id });
+        const { id, [idCodeProperty]: code } =
+          (node.data as { hProperties?: Record<string, unknown> } | undefined)?.hProperties ?? {};
+        if (typeof id === 'string' && id)
+          records.push({
+            node,
+            when,
+            id,
+            code: typeof code === 'string' ? code : JSON.stringify(id),
+          });
         return;
       }
 
@@ -197,7 +206,8 @@ export function remarkStructure({
         // Fumadocs OpenAPI Generated Structured Data
         const openapi = (ctx.data.frontmatter as { _openapi?: { structuredData?: StructuredData } })
           ?._openapi?.structuredData;
-        for (const item of openapi?.headings ?? []) headings.push({ ...item, when: [] });
+        for (const item of openapi?.headings ?? [])
+          headings.push({ ...item, code: JSON.stringify(item.id), when: [] });
         for (const item of openapi?.contents ?? []) pushContent(item, []);
       },
       after(_root, ctx) {
@@ -214,7 +224,7 @@ export function remarkStructure({
             pushContent({ heading, content, table }, when);
           } else if (record.id) {
             const content = s.inner(record.node).replace(headingIdRegex, '').trim();
-            headings.push({ id: record.id, content, when: record.when });
+            headings.push({ id: record.id, code: record.code!, content, when: record.when });
           } else {
             const content = s.stringify(record.node).trim();
             if (content.length > 0) pushContent({ heading: undefined, content }, record.when);
@@ -225,13 +235,13 @@ export function remarkStructure({
           if (content) data.headings.push({ id, content: out.toStatic(content) });
         for (const { when: _, after, heading = headings[after - 1]?.id, ...item } of contents)
           data.contents.push({ heading, ...item, content: out.toStatic(item.content) });
-        if (!exportAs || !out.dynamic) return;
+        if (!exportAs) return;
 
         const headingList: CodeItem[] = [];
-        for (const { id, content, when } of headings)
+        for (const { code, content, when } of headings)
           if (content)
             headingList.push({
-              code: `{id: ${JSON.stringify(id)}, content: ${chunksToCode(out.chunks(content))}}`,
+              code: `{id: ${code}, content: ${chunksToCode(out.chunks(content))}}`,
               when,
             });
         const contentList: CodeItem[] = [];
@@ -250,8 +260,7 @@ export function remarkStructure({
     if (exportAs) {
       addExport(
         typeof exportAs === 'string' ? exportAs : 'structuredData',
-        data._structuredDataCode ??
-          JSON.stringify(data.structuredData ?? { headings: [], contents: [] }),
+        data._structuredDataCode ?? '() => ({ headings: [], contents: [] })',
       );
     }
   };

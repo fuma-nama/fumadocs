@@ -92,10 +92,7 @@ const server = flexsearch({
         description: page.data.description,
         url: page.url,
         id: page.url,
-        structuredData:
-          typeof page.data.structuredData === 'function'
-            ? await page.data.structuredData()
-            : page.data.structuredData,
+        structuredData: await page.data.structuredData(),
       })),
     ),
 });
@@ -133,10 +130,7 @@ const server = flexsearchFromSource(source, {
       description: page.data.description,
       url: page.url,
       id: page.url,
-      structuredData:
-        typeof page.data.structuredData === 'function'
-          ? await page.data.structuredData()
-          : page.data.structuredData,
+      structuredData: await page.data.structuredData(),
       // use your desired value, like page.slugs[0] [!code ++:2]
       tag: '<value>',
     };
@@ -294,10 +288,7 @@ const server = flexsearchI18n({
       source.getPages().map(async (page) => ({
         title: page.data.title!,
         description: page.data.description,
-        structuredData:
-          typeof page.data.structuredData === 'function'
-            ? await page.data.structuredData()
-            : page.data.structuredData,
+        structuredData: await page.data.structuredData(),
         id: page.url,
         url: page.url,
         locale: page.locale!,
