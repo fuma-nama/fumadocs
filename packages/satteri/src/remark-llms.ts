@@ -1,8 +1,8 @@
 import type { MdastPluginEntry } from 'satteri';
 import { defineMdastPlugin } from 'satteri';
-import { createStringifier, type PositionedNode, type Stringifier } from './stringifier';
+import type { PositionedNode } from './stringifier';
 import { stringifyHeadingId } from './heading-id';
-import type { JsxElementNode } from './utils';
+import { type Chunk, chunksToCode, createCodeOutput, type JsxElementNode } from './utils';
 
 export interface LLMsOptions {
   /**
@@ -33,25 +33,14 @@ export interface LLMsOptions {
   output?: 'function' | 'string';
 }
 
-/** a JSX element kept in function output */
-interface KeptElement {
-  /** the opening tag without its end, with the name prefixed */
-  open: string;
-  name: string;
-  inline: boolean;
-  /** Markdown with the markers of kept elements */
-  children: string;
-}
-
-/** kept JSX elements & expressions, by their markers */
-type Kept = KeptElement | { code: string; fallback: string };
-
 const componentNameRegex = /^[A-Z][\w$]*$/;
-const markerRegex = /\0(\d+)\0/g;
 
 /**
  * Export the document as Markdown, sliced from the authored source: heading IDs are added,
  * frontmatter & ESM nodes are dropped, and includes are replaced with their content.
+ *
+ * Authored expressions and the branches of `<show>` checked when rendering are rendered from code, the export is then
+ * a component of the props in both forms.
  */
 export function remarkLlms({
   as = '_markdown',
@@ -60,15 +49,15 @@ export function remarkLlms({
 }: LLMsOptions = {}): MdastPluginEntry {
   const jsx = output === 'function';
   const factory = () => {
-    const kept: Kept[] = [];
-    let s: Stringifier;
+    let out: ReturnType<typeof createCodeOutput>;
 
-    const drop = (node: PositionedNode) => s.replace(node, '');
-    const keep = (node: JsxElementNode & { type: string; children: PositionedNode[] }) => {
+    const drop = (node: PositionedNode) => out.s.replace(node, '');
+    const element = (node: JsxElementNode & { type: string; children: PositionedNode[] }) => {
       const name = node.name;
-      if (!name || !componentNameRegex.test(name)) return;
+      // elements are kept in function output only
+      if (out.markCode(node) || !jsx || !name || !componentNameRegex.test(name)) return;
 
-      s.replace(node, (s) => {
+      out.s.replace(node, (s) => {
         let open = `<_c.${name}`;
         for (const attr of node.attributes) {
           if (attr.type === 'mdxJsxExpressionAttribute') open += ` {${attr.value}}`;
@@ -82,49 +71,41 @@ export function remarkLlms({
         let children = s.inner(node);
         // block content on its own lines
         if (children && !inline) children = `\n${children}\n`;
-        return `\0${kept.push({ open, name, inline, children }) - 1}\0`;
+        return out.wrap({ open, name, inline }, children);
       });
+    };
+    const expression = (node: PositionedNode & { type: string; value: string }) => {
+      out.markCode(node);
     };
 
     return defineMdastPlugin({
       name: 'remark-llms',
       options: { position: true },
       before(_root, ctx) {
-        s = createStringifier(
-          ctx,
-          undefined,
-          (code, fallback) => `\0${kept.push({ code, fallback }) - 1}\0`,
-        );
+        out = createCodeOutput(ctx);
       },
       mdxjsEsm: drop,
       yaml: drop,
       toml: drop,
-      heading: (node) => stringifyHeadingId(s, node, headingIds),
-      // elements are kept in function output only
-      ...(jsx && { mdxJsxFlowElement: keep, mdxJsxTextElement: keep }),
+      heading: (node) => stringifyHeadingId(out.s, node, headingIds),
+      mdxTextExpression: expression,
+      mdxFlowExpression: expression,
+      mdxJsxFlowElement: element,
+      mdxJsxTextElement: element,
       after(root, ctx) {
-        const text = s.stringify(root).trim();
+        const text = out.s.stringify(root).trim();
         const value = text ? `${text}\n` : '';
+        const chunks = out.chunks(value);
 
-        if (!jsx) {
-          // string output only keeps expressions, `data.markdown` uses their fallbacks
-          ctx.data.markdown ??= value.replace(
-            markerRegex,
-            (_, i: string) => (kept[Number(i)] as { fallback: string }).fallback,
-          );
-          if (as)
-            ctx.prependChild(root, {
-              type: 'mdxjsEsm',
-              value: `export const ${as} = ${toStringCode(value, kept)};`,
-            });
-          return;
-        }
+        // `data.markdown` uses the fallbacks of expressions, with every branch
+        if (!jsx) ctx.data.markdown ??= out.toStatic(value);
         if (!as) return;
-
-        const body = kept.length > 0 ? `<>${toCode(value, kept)}</>` : JSON.stringify(value);
         ctx.prependChild(root, {
           type: 'mdxjsEsm',
-          value: toComponentCode(as, body, kept.length > 0),
+          value:
+            jsx || out.dynamic
+              ? toComponentCode(as, chunksToCode(chunks), hasElement(chunks))
+              : `export const ${as} = ${toStringCode(chunks)};`,
         });
       },
     });
@@ -144,43 +125,21 @@ function toComponentCode(as: string, body: string, hasJsx: boolean): string {
   ].join('\n');
 }
 
-/** Markdown with the markers of expressions as one string */
-function toStringCode(text: string, kept: Kept[]): string {
-  // text & the indexes of expressions, alternating
-  const parts = text.split(markerRegex);
-  let out = JSON.stringify(parts[0]);
-  for (let i = 1; i < parts.length; i += 2)
-    out += ` + (${(kept[Number(parts[i])] as { code: string }).code}) + ${JSON.stringify(parts[i + 1])}`;
-
-  return out;
+function hasElement(chunks: Chunk[]): boolean {
+  return chunks.some(
+    (chunk) =>
+      typeof chunk !== 'string' &&
+      ('open' in chunk || ('children' in chunk && hasElement(chunk.children))),
+  );
 }
 
-/**
- * Generate the JSX for Markdown with the markers of kept elements & expressions: Markdown becomes string literals, kept
- * elements stay as JSX with `_c.`-prefixed names and their attributes.
- */
-function toCode(text: string, kept: Kept[]): string {
+/** the chunks as one string, they have no elements or branches */
+function toStringCode(chunks: Chunk[]): string {
   let out = '';
-  let idx = 0;
-  const pushText = (chunk: string) => {
-    if (chunk.trim()) out += `{${JSON.stringify(chunk)}}`;
-  };
-
-  for (const match of text.matchAll(markerRegex)) {
-    pushText(text.slice(idx, match.index));
-    idx = match.index + match[0].length;
-    const item = kept[Number(match[1])];
-    if (!('open' in item)) {
-      out += `{${item.code}}`;
-      continue;
-    }
-
-    const { open, name, inline, children } = item;
-    const element = children ? `${open}>${toCode(children, kept)}</_c.${name}>` : `${open} />`;
-    // keep inline elements in inline context when rendered
-    out += inline ? `<span>${element}</span>` : element;
+  for (const chunk of chunks) {
+    if (out) out += ' + ';
+    out +=
+      typeof chunk === 'string' ? JSON.stringify(chunk) : `(${(chunk as { code: string }).code})`;
   }
-  pushText(text.slice(idx));
-
-  return out;
+  return out || '""';
 }

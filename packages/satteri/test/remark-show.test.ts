@@ -2,90 +2,138 @@ import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { expect, test } from 'vitest';
+import { createElement, type FC } from 'react';
 import * as JsxRuntime from 'react/jsx-runtime';
 import { renderToStaticMarkup } from 'react-dom/server';
+import * as server from 'fumadocs-core/server';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
+import { renderStructuredData, type StructuredDataNodes } from '../../shared/structured-data';
 import { compileMdx } from '@/compile';
 import { applySatteriPreset } from '@/preset';
 import { remarkInclude } from '@/remark-include';
 import { remarkLlms } from '@/remark-llms';
-import type { RehypeTocItemType } from '@/rehype-toc';
 
 const AsyncFunction: new (...args: string[]) => (...args: unknown[]) => Promise<unknown> =
   Object.getPrototypeOf(async function () {}).constructor;
 
 const source = `# Deploy on {props.framework}
 
-<Note title={props.framework} {...props.extra}>
-Hi {props.framework}
-</Note>
+<span data-framework={props.framework} />
+
+A {props.framework === "next" && "x"} B {true}
+
+<show when={props.edition === "pro"}>
+## Pro
+</show>
+
+## Overview
+
+Shared.
 
 <show when={props.framework === "astro"}>
 ## Setup
+
+Astro only.
 </show>
+
+After the branch.
+
+<show when={props.framework === "waku"}>Waku detects the **platform**.</show>
 
 <show when={props.framework === "astro" && props.pm === "pnpm"}>
 ## With pnpm
 </show>
-`;
 
-async function compile(framework: string) {
-  const options = await applySatteriPreset({
-    rehypeTocOptions: { exportToc: { as: 'data' } },
-    mdastPlugins: [remarkLlms({ as: 'markdown' })],
-  })('runtime');
+1. First.
+2. <show when={props.framework === "waku"}>
+     Waku, on two
+     lines.
+   </show>
+   <show when={props.framework === "astro"}>
+     Astro.
+   </show>`;
+
+test('Remark Show: branches and expressions render from code in every output', async () => {
+  const options = await applySatteriPreset({ mdastPlugins: [remarkLlms()] })('runtime');
   const { code, data } = await compileMdx({
     source,
     filePath: '/tmp/doc.mdx',
     environment: 'runtime',
-    options: { ...options, data: { ...options.data, params: { framework } } },
+    options,
   });
-  const out = (await new AsyncFunction('opts', code)({ ...JsxRuntime })) as { default: () => null };
-  const Note = ({ title, children }: { title: string; children: unknown }) =>
-    JsxRuntime.jsx('aside', { title, children: children as never });
-  const html = (props: object) =>
-    renderToStaticMarkup(JsxRuntime.jsx(out.default, { ...props, components: { Note } }));
-  return { html, data };
-}
+  // the generated imports of `fumadocs-core/server` read from the scope
+  const page = (await new AsyncFunction('opts', code)({ ...JsxRuntime, ...server })) as {
+    default: FC<object>;
+    toc: (props: object) => { url: string }[];
+    structuredData: (props: object) => StructuredDataNodes;
+    _markdown: FC<object>;
+  };
+  const outputs = async (props: object) => ({
+    toc: page.toc(props).map((item) => item.url),
+    structured: await renderStructuredData(page.structuredData, props),
+    markdown: await server.renderToMarkdown(createElement(page._markdown, props)),
+    html: renderToStaticMarkup(createElement(page.default, props)),
+  });
 
-test('Remark Show: branches decided at compile time, before other plugins', async () => {
-  const waku = await compile('waku');
-  const astro = await compile('astro');
+  const astro = await outputs({ framework: 'astro' });
+  const waku = await outputs({ framework: 'waku' });
+  const pnpm = await outputs({ framework: 'astro', pm: 'pnpm' });
 
-  // heading IDs are assigned after the branches of other params are gone
-  const urls = (data: typeof waku.data) =>
-    (data.rehypeToc as RehypeTocItemType[]).map((item) => item.url);
-  expect(urls(waku.data)).toEqual(['#deploy-on-waku']);
-  expect(urls(astro.data)).toEqual(['#deploy-on-astro', '#setup', '#with-pnpm']);
-  expect((waku.data.structuredData as StructuredData).contents[0].content).toBe('Hi waku');
-  expect(astro.data.markdown).toContain('## Setup [#setup]');
-  // a removed branch leaves no blank lines
-  expect(waku.data.markdown).not.toMatch(/\n{3,}/);
-  // other expressions and the branches checked when rendering stay as authored
-  expect(waku.data.markdown).toContain(
-    '<Note title={props.framework} {...props.extra}>\nHi waku\n</Note>',
+  // every output keeps only the branches that show, slugs leave out the expressions of headings
+  expect(astro.toc).toEqual(['#deploy-on-', '#overview', '#setup']);
+  expect(waku.toc).toEqual(['#deploy-on-', '#overview']);
+  expect(pnpm.toc).toContain('#with-pnpm');
+  expect(astro.structured.headings.map((item) => item.content)).toEqual([
+    'Deploy on astro',
+    'Overview',
+    'Setup',
+  ]);
+  expect(waku.structured.contents.map((item) => item.content)).toContain(
+    'Waku detects the **platform**.',
   );
-  expect(astro.data.markdown).toContain(
-    '<show when={props.framework === "astro" && props.pm === "pnpm"}>',
+  expect(astro.structured.contents.map((item) => item.content)).not.toContain(
+    'Waku detects the **platform**.',
   );
+  // content after a branch belongs to the last heading that shows with it
+  const after = (data: StructuredData) =>
+    data.contents.find((item) => item.content === 'After the branch.')?.heading;
+  expect(after(astro.structured)).toBe('setup');
+  expect(after(waku.structured)).toBe('overview');
+  // expressions are values, constants are decided
+  expect(waku.markdown).toContain('# Deploy on waku');
+  expect(waku.markdown).not.toContain('Pro');
+  expect(waku.markdown).toContain('Waku detects the **platform**.');
+  expect(astro.markdown).toContain('Astro only.');
+  expect(waku.markdown).not.toContain('Astro only.');
+  expect(waku.markdown).not.toMatch(/\n{3,}/);
+  // a branch in a list item keeps its prefixes, the whitespace after a branch goes with it
+  expect(waku.markdown).toContain('2. Waku, on two\n   lines.');
+  expect(astro.markdown).toContain('2. Astro.');
 
-  // they read the params as props when rendering
-  expect(astro.html({ framework: 'astro' })).toContain('<aside title="astro">');
-  expect(astro.html({ framework: 'astro' })).not.toContain('With pnpm');
-  expect(astro.html({ framework: 'astro', pm: 'pnpm' })).toContain('With pnpm');
+  expect(waku.html).toContain('data-framework="waku"');
+  // booleans render nothing
+  expect(waku.html).toContain('<p>A  B </p>');
+  expect(astro.html).not.toContain('With pnpm');
+  expect(pnpm.html).toContain('With pnpm');
+
+  // the static views have the authored source of expressions and every branch
+  expect((data.structuredData as StructuredData).headings[0].content).toBe(
+    'Deploy on {props.framework}',
+  );
+  expect(data.markdown).toContain('# Deploy on {props.framework}');
+  expect(data.markdown).toContain('## With pnpm');
 });
 
-test('Remark Show: the content of a branch joins the content around it', async () => {
+test('Remark Show: code tabs end at a branch', async () => {
   const options = await applySatteriPreset({})('runtime');
   const { code } = await compileMdx({
     source:
       '```ts tab="Shared"\na\n```\n\n<show when={props.framework === "astro"}>\n```ts tab="Astro"\nb\n```\n</show>\n',
     filePath: '/tmp/doc.mdx',
     environment: 'runtime',
-    options: { ...options, data: { ...options.data, params: { framework: 'astro' } } },
+    options,
   });
-  // one tab group, across the branch
-  expect(code.match(/defaultValue:/g)).toHaveLength(1);
+  expect(code.match(/defaultValue:/g)).toHaveLength(2);
 });
 
 test('Remark Show: branches with included files', async () => {
@@ -93,31 +141,53 @@ test('Remark Show: branches with included files', async () => {
   await fs.writeFile(path.join(dir, 'shared.mdx'), '## Shared\n\nShared text.\n');
   await fs.writeFile(
     path.join(dir, 'branchy.mdx'),
-    '## Inner\n\n<show when={props.framework === "waku"}>\nIncluded branch.\n</show>\n',
+    '## Inner\n\n<show when={props.edition === "pro"}>\nIncluded branch.\n</show>\n',
   );
-  const options = await applySatteriPreset({})('bundler');
-  const compile = async (framework: string) => {
-    const { data } = await compileMdx({
-      source:
-        '# Page\n\n<show when={props.framework === "waku"}>\nWaku.\n\n<include>./shared.mdx</include>\n</show>\n\n<include>./branchy.mdx</include>\n\nEnd.\n',
-      filePath: path.join(dir, 'page.mdx'),
-      environment: 'bundler',
-      options: {
-        ...options,
-        mdastPlugins: [
-          remarkInclude({ cwd: dir }),
-          ...options.mdastPlugins!,
-          remarkLlms({ as: 'markdown' }),
-        ],
-        data: { ...options.data, params: { framework } },
-      },
-    });
-    return data.markdown;
+  const options = await applySatteriPreset({})('runtime');
+  const { code } = await compileMdx({
+    source:
+      '# Page\n\n<show when={props.edition === "pro"}>\nWaku.\n\n<include>./shared.mdx</include>\n</show>\n\n<include>./branchy.mdx</include>\n\nEnd.\n',
+    filePath: path.join(dir, 'page.mdx'),
+    environment: 'runtime',
+    options: {
+      ...options,
+      mdastPlugins: [remarkInclude({ cwd: dir }), ...options.mdastPlugins!, remarkLlms()],
+    },
+  });
+  const page = (await new AsyncFunction('opts', code)({ ...JsxRuntime, ...server })) as {
+    _markdown: FC<object>;
   };
+  const markdown = (props: object) => server.renderToMarkdown(createElement(page._markdown, props));
 
-  expect(await compile('waku')).toBe(
-    '# Page [#page]\n\nWaku.\n\n## Shared [#shared]\n\nShared text.\n\n## Inner [#inner]\n\nIncluded branch.\n\nEnd.\n',
+  expect(await markdown({ edition: 'pro' })).toBe(
+    '# Page [#page]\n\nWaku.\n\n## Shared [#shared]\n\nShared text.\n\n## Inner [#inner]\n\nIncluded branch.\n\nEnd.',
   );
-  expect(await compile('next')).toBe('# Page [#page]\n\n## Inner [#inner]\n\nEnd.\n');
+  expect(await markdown({})).toBe('# Page [#page]\n\n## Inner [#inner]\n\nEnd.');
+  await fs.rm(dir, { recursive: true });
+});
+
+test('Remark Show: branches of an included file, the page itself has none', async () => {
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'remark-show-'));
+  await fs.writeFile(
+    path.join(dir, 'branchy.mdx'),
+    '<show when={props.edition === "pro"}>\nIncluded branch.\n</show>\n',
+  );
+  const options = await applySatteriPreset({})('runtime');
+  const { code } = await compileMdx({
+    source: '# Page\n\n<include>./branchy.mdx</include>\n',
+    filePath: path.join(dir, 'page.mdx'),
+    environment: 'runtime',
+    options: {
+      ...options,
+      mdastPlugins: [remarkInclude({ cwd: dir }), ...options.mdastPlugins!, remarkLlms()],
+    },
+  });
+  const page = (await new AsyncFunction('opts', code)({ ...JsxRuntime, ...server })) as {
+    _markdown: FC<object>;
+  };
+  const markdown = (props: object) =>
+    server.renderToMarkdown(createElement(page._markdown, props));
+  expect(await markdown({})).not.toContain('Included branch.');
+  expect(await markdown({ edition: 'pro' })).toContain('Included branch.');
   await fs.rm(dir, { recursive: true });
 });
