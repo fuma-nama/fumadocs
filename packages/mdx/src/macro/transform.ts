@@ -1,7 +1,7 @@
 import path from 'node:path';
 import MagicString from 'magic-string';
 import type { Binding as YukuBinding, Module as YukuModule } from 'yuku-analyzer';
-import { createCodegen, metaLang, slash } from '@/utils/codegen';
+import { createCodegen, slash } from '@/utils/codegen';
 import { MacroModuleId } from './options';
 import { SupportedPatterns } from '@/config/build';
 
@@ -169,14 +169,6 @@ function propertyKey(property: Node): string | undefined {
   const key = property.key as Node;
   if (key.type === 'Identifier') return key.name as string;
   if (key.type === 'Literal' && typeof key.value === 'string') return key.value;
-}
-
-function getProperty(object: Node | undefined, name: string): Node | undefined {
-  if (!object || object.type !== 'ObjectExpression') return;
-
-  for (const property of object.properties as Node[]) {
-    if (propertyKey(property) === name) return property.value as Node;
-  }
 }
 
 function requireStatic<T>(
@@ -407,6 +399,24 @@ export async function transformMacroModule({
   if (!parsed || parsed.calls.length === 0) return null;
 
   const ctx = { file, code };
+  function getProperty(object: Node | undefined, name: string): Node | undefined {
+    if (!object || object.type !== 'ObjectExpression') return;
+    const properties = object.properties as Node[];
+
+    for (let i = properties.length - 1; i >= 0; i--) {
+      const property = properties[i];
+      if (property.type === 'SpreadElement') {
+        throw new MacroTransformError(
+          file,
+          code,
+          property.start,
+          `the options of a macro cannot be spread, since its \`${name}\` option affects how content files are bundled.`,
+        );
+      }
+      if (propertyKey(property) === name) return property.value as Node;
+    }
+  }
+
   const cfg = slash(path.relative(root, file));
   const moduleDir = path.dirname(file);
   const codegen = createCodegen({
@@ -505,7 +515,7 @@ export async function transformMacroModule({
         base,
         eager: true,
         import: 'default',
-        query: { ...query, ...metaLang },
+        query,
       })}`;
     }
 
