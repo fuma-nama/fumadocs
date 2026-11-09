@@ -10,7 +10,8 @@ import { createMdxLoader } from '@/loaders/mdx';
 import { createMetaLoader } from '@/loaders/meta';
 import { toFumadocsSource } from '@/runtime/server';
 
-test('the frontmatter and meta files in code', async () => {
+// a lazy collection reads the head, or the module when the macro can't tell it's lazy
+test.each([false, true])('the frontmatter and meta files in code, async: %s', async (async) => {
   const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'page-code-'));
   await fs.mkdir(path.join(dir, '[framework]'));
   await fs.writeFile(
@@ -67,7 +68,7 @@ export const frontmatter = {
     configPath: path.join(dir, 'source.config.ts'),
     outDir: dir,
   });
-  await core.init({ config: buildConfig({ docs: defineDocs({ dir }) }, dir) });
+  await core.init({ config: buildConfig({ docs: defineDocs({ dir, docs: { async } }) }, dir) });
   const mdx = createMdxLoader({ getCore: async () => core });
   const dependencies: string[] = [];
   const load = async (filePath: string, query: Record<string, string>) =>

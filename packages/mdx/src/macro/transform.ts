@@ -1,7 +1,7 @@
 import path from 'node:path';
 import MagicString from 'magic-string';
 import type { Binding as YukuBinding, Module as YukuModule } from 'yuku-analyzer';
-import { createCodegen, metaLang, slash } from '@/utils/codegen';
+import { createCodegen, slash } from '@/utils/codegen';
 import { MacroModuleId } from './options';
 import { SupportedPatterns } from '@/config/build';
 
@@ -505,7 +505,7 @@ export async function transformMacroModule({
         base,
         eager: true,
         import: 'default',
-        query: { ...query, ...metaLang },
+        query,
       })}`;
     }
 

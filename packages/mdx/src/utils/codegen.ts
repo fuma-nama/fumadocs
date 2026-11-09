@@ -149,12 +149,6 @@ export function createCodegen({
 /**
  * Serialize a query object into a `?`-prefixed, percent-encoded string.
  */
-/**
- * The meta loader outputs JavaScript, for meta files in code too. Vite's `lang.*` flag tells it the language of a module
- * with a query, the language of `meta.ts?macro_id=app%2Fsource.ts%23docs` isn't detected otherwise.
- */
-export const metaLang = { 'lang.js': '' };
-
 function stringifyQuery(query: GlobImportOptions['query'] = {}): string {
   const searchParams = new URLSearchParams();
 
@@ -162,8 +156,9 @@ function stringifyQuery(query: GlobImportOptions['query'] = {}): string {
     if (v !== undefined) searchParams.set(k, v);
   }
 
-  // flags like `lang.js` have no value
-  return searchParams.size > 0 ? `?${searchParams.toString().replaceAll(/=(?=&|$)/g, '')}` : '';
+  // Rolldown's Vite transform reads the extension of an id before its query, like `ts%23docs` of
+  // `meta.ts?macro_id=source.ts%23docs`, so dots in values are encoded too
+  return searchParams.size > 0 ? `?${searchParams.toString().replaceAll('.', '%2E')}` : '';
 }
 
 /**

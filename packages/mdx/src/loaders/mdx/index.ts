@@ -125,8 +125,8 @@ export function createMdxLoader({ getCore }: ConfigLoader): Loader {
       if (staticParams) {
         // with frontmatter in code, the pages have the validated frontmatter
         const data = code ? { ...yaml } : await validate(yaml);
-        // the frontmatter in code of each params, the modules of its pages don't run it, lazy collections read the head
-        if (code && (only === 'frontmatter' || !docCollection!.async)) {
+        // the frontmatter in code of each params, the modules of its pages don't run it
+        if (code) {
           const frontmatter = code.compile(compiler.addDependency);
           const frontmatterAt: Record<string, unknown> = {};
           for (const item of staticParams)
