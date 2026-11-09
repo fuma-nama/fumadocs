@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { cancel, group, intro, log, outro, select, type Option } from '@clack/prompts';
-import picocolors from 'picocolors';
+import { styleText } from 'node:util';
 import { parseSourceFile } from '@/codemod';
 import { frameworks } from '@/project';
 import type { Target } from '@/commands/add';
@@ -25,7 +25,7 @@ interface SlotPrintInfo {
 }
 
 export async function customise(config: LoadedConfig, connector: RegistryConnector) {
-  intro(picocolors.bgBlack(picocolors.whiteBright('Customize Fumadocs UI')));
+  intro(styleText(['bgBlack', 'whiteBright'], 'Customize Fumadocs UI'));
 
   const installer = new FumadocsComponentInstaller(connector, config);
   const subRegistry = UIRegistries[config.uiLibrary];
@@ -195,7 +195,7 @@ export async function customise(config: LoadedConfig, connector: RegistryConnect
 
   await targetInfo.print?.();
 
-  outro(picocolors.bold('Have fun!'));
+  outro(styleText('bold', 'Have fun!'));
 }
 
 /** point the imports of route files at the installed layouts, Astro routes import them through React components */
@@ -225,23 +225,23 @@ export async function rewriteLayoutImports(config: LoadedConfig, map: Map<string
 }
 
 async function printLayout(config: LoadedConfig, ...maps: [from: string, to: string][]) {
-  intro(picocolors.bold('What is Next?'));
+  intro(styleText('bold', 'What is Next?'));
   const updated = await rewriteLayoutImports(config, new Map(maps));
 
   log.info(
     [
       'You can check the installed layouts in `layouts` folder.',
-      picocolors.dim('---'),
+      styleText('dim', '---'),
       updated.length > 0
         ? `Updated the imports of ${updated.join(', ')}.`
         : 'Open the files using the layouts, replace the imports of components:',
-      ...maps.map(([from, to]) => picocolors.greenBright(`"${from}" -> "${to}"`)),
+      ...maps.map(([from, to]) => styleText('greenBright', `"${from}" -> "${to}"`)),
     ].join('\n'),
   );
 }
 
 function printSlot({ at, layoutId, name, isPage, uiLibrary }: SlotPrintInfo) {
-  intro(picocolors.bold('What is Next?'));
+  intro(styleText('bold', 'What is Next?'));
 
   log.info(`You can check the installed layout slot in "${at}".`);
 
@@ -251,7 +251,7 @@ function printSlot({ at, layoutId, name, isPage, uiLibrary }: SlotPrintInfo) {
   const [imports, value] = slot;
   // every layout names its components `DocsLayout` and `DocsPage`
   const component = isPage ? 'DocsPage' : 'DocsLayout';
-  log.info(`${picocolors.bold(`At your <${component} /> component, update your "slots" prop:`)}
+  log.info(`${styleText('bold', `At your <${component} /> component, update your "slots" prop:`)}
 
 import { ${imports} } from '${at}';
 

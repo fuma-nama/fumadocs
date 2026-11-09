@@ -2591,15 +2591,6 @@ importers:
       cac:
         specifier: ^7.1.0
         version: 7.1.0
-      magic-string:
-        specifier: ^1.4.5
-        version: 1.4.5
-      package-manager-detector:
-        specifier: ^1.8.0
-        version: 1.9.0
-      picocolors:
-        specifier: ^1.1.1
-        version: 1.1.1
       tinyexec:
         specifier: ^1.3.1
         version: 1.3.1
@@ -2610,15 +2601,18 @@ importers:
       '@babel/types':
         specifier: ^8.1.0
         version: 8.1.0
-      '@fuma-cli/interactive':
-        specifier: ^0.1.5
-        version: 0.1.5
       '@types/node':
         specifier: 26.6.6
         version: 26.6.6
       fuma-cli:
         specifier: ^0.3.4
         version: 0.3.4
+      magic-string:
+        specifier: ^1.4.5
+        version: 1.4.5
+      package-manager-detector:
+        specifier: ^1.8.0
+        version: 1.9.0
       tsconfig:
         specifier: workspace:*
         version: link:../tsconfig
@@ -2850,9 +2844,6 @@ importers:
       cac:
         specifier: ^7.1.0
         version: 7.1.0
-      picocolors:
-        specifier: ^1.1.1
-        version: 1.1.1
       tinyexec:
         specifier: ^1.3.1
         version: 1.3.1
@@ -6354,9 +6345,6 @@ packages:
 
   '@formatjs/intl-localematcher@0.10.1':
     resolution: {integrity: sha512-gBqglQK9rXuHsLmM8wzTMBy4Xo4d0jamirIVKuEL8F1rwbskWdpMA1kZarSkny+uvr5q/K6GSzE0Rcq1wZLl3g==}
-
-  '@fuma-cli/interactive@0.1.5':
-    resolution: {integrity: sha512-BHh0+w+eZhMzYA7zhAPqLjzBfbdYWHuNK5Vfx7KtlTRD9J6oDTavlnW7CIQo5yrp4q58Laih0V8VQFQGyOB87Q==}
 
   '@fuma-translate/binding-darwin-arm64@1.0.2':
     resolution: {integrity: sha512-SDM90GlvwwFmsj+dVjkTxJVyV3oFucv+Fow4V6lcjqxAeTYNMr3ICWA3nXzfBsMlr2398BH/W0W894SoE7TM6Q==}
@@ -17835,12 +17823,6 @@ snapshots:
   '@formatjs/intl-localematcher@0.10.1':
     dependencies:
       '@formatjs/fast-memoize': 3.1.7
-
-  '@fuma-cli/interactive@0.1.5':
-    dependencies:
-      '@clack/prompts': 1.8.1
-      fuma-cli: 0.3.4
-      picocolors: 1.1.1
 
   '@fuma-translate/binding-darwin-arm64@1.0.2':
     optional: true

@@ -1,13 +1,34 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { InteractiveInstaller } from '@fuma-cli/interactive';
-import { reuseUI, type InstallerPlugin, type IOInterface } from 'fuma-cli/registry/installer';
+import { styleText } from 'node:util';
+import {
+  autocompleteMultiselect,
+  box,
+  confirm,
+  log,
+  outro,
+  spinner,
+  type Option,
+  type SpinnerResult,
+} from '@clack/prompts';
+import { detectPackageManager } from 'fuma-cli/detect';
+import {
+  ComponentInstaller,
+  reuseUI,
+  type InstallerPlugin,
+  type InstallTarget,
+  type IOInterface,
+} from 'fuma-cli/registry/installer';
 import type { RegistryConnector } from 'fuma-cli/registry/connector';
 import { UIRegistries } from '@/commands/shared';
 import type { LoadedConfig } from '@/config';
 import { formatRoute } from '@/project/route';
+import { isCancel } from '@/utils/prompt';
 
-export class FumadocsComponentInstaller extends InteractiveInstaller {
+export class FumadocsComponentInstaller extends ComponentInstaller {
+  /** the component being installed by `installInteractive()` */
+  private interactive: { name: string; spin: SpinnerResult } | null = null;
+
   constructor(
     connector: RegistryConnector,
     config: LoadedConfig,
@@ -15,10 +36,31 @@ export class FumadocsComponentInstaller extends InteractiveInstaller {
     io?: Partial<IOInterface>,
   ) {
     const { aliases } = config;
+    const toRelative = (file: string) => path.relative(cwd ?? process.cwd(), file);
 
     super(connector, {
       cwd,
-      io,
+      io: {
+        confirmFileOverride: async (file) => {
+          if (!this.interactive) return true;
+          const { name, spin } = this.interactive;
+          spin.clear();
+          const value = await confirm({
+            message: `Do you want to override ${toRelative(file.output)}?`,
+            initialValue: false,
+          });
+          if (isCancel(value)) {
+            outro('Installation terminated');
+            process.exit(0);
+          }
+          spin.start(styleText(['bold', 'cyanBright'], `Installing ${name}`));
+          return value;
+        },
+        onFileWritten: (file) => {
+          this.interactive?.spin.message(toRelative(file.output));
+        },
+        ...io,
+      },
       framework: config.framework === 'astro' ? 'none' : config.framework,
       outDir: {
         base: config.baseDir,
@@ -37,6 +79,78 @@ export class FumadocsComponentInstaller extends InteractiveInstaller {
         ...(config.framework === 'astro' ? [astroEndpoints()] : []),
       ],
     });
+  }
+
+  /** select components of the root registry and `subRegistries` to install */
+  async add(config: { subRegistries?: string[] } = {}) {
+    const { subRegistries = [] } = config;
+    const spin = spinner();
+    spin.start('fetching registry');
+
+    const scan = async (registry?: string) => {
+      const options: Option<InstallTarget>[] = [];
+      for (const item of (await this.fetchManifest(registry)).components) {
+        if (item.unlisted) continue;
+        options.push({
+          label: item.title ?? item.name,
+          value: { name: item.name, registry },
+          hint: item.description,
+        });
+      }
+      return options;
+    };
+
+    const options = (await Promise.all([scan(), ...subRegistries.map(scan)])).flat();
+    spin.stop(styleText(['bold', 'greenBright'], 'registry fetched'));
+    const value = await autocompleteMultiselect({
+      message: 'Select components to install',
+      options,
+    });
+    if (isCancel(value)) {
+      outro('Ended');
+      return;
+    }
+
+    for (const target of value) await this.installInteractive(target.name, target.registry);
+    outro(styleText(['bold', 'greenBright'], 'Successful'));
+  }
+
+  /** install with a spinner, and prompt for overrides and new dependencies */
+  async installInteractive(name: string, registry?: string): Promise<void> {
+    if (this.interactive) throw new Error(`cannot install while installing another component`);
+
+    const spin = spinner();
+    spin.start(styleText(['bold', 'cyanBright'], `Installing ${name}`));
+
+    try {
+      this.interactive = { name, spin };
+      const deps = await (await this.install(name, registry)).deps();
+      spin.stop(styleText(['bold', 'greenBright'], `${name} installed`));
+      if (!deps.hasRequired()) return;
+
+      log.message();
+      box([...deps.dependencies, ...deps.devDependencies].join('\n'), 'New Dependencies');
+      const pm = (await detectPackageManager())?.name ?? 'npm';
+      const value = await confirm({ message: `Do you want to install with ${pm}?` });
+      if (isCancel(value)) {
+        outro('Installation terminated');
+        process.exit(0);
+      }
+
+      if (value) {
+        const spin = spinner({ errorMessage: 'Failed to install dependencies' });
+        spin.start('Installing dependencies');
+        await deps.installRequired(pm);
+        spin.stop('Dependencies installed');
+      } else {
+        await deps.writeRequired();
+      }
+    } catch (e) {
+      spin.error(e instanceof Error ? e.message : String(e));
+      process.exit(-1);
+    } finally {
+      this.interactive = null;
+    }
   }
 }
 

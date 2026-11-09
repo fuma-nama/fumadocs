@@ -1,6 +1,6 @@
 import { autocompleteMultiselect, outro, spinner } from '@clack/prompts';
 import { isCancel } from '@/utils/prompt';
-import picocolors from 'picocolors';
+import { styleText } from 'node:util';
 import { UIRegistries } from '@/commands/shared';
 import { RegistryConnector } from 'fuma-cli/registry/connector';
 import { isFumapress, LoadedConfig } from '@/config';
@@ -34,7 +34,7 @@ export async function add(input: string[], connector: RegistryConnector, config:
       for (const item of manifest.components) {
         if (item.unlisted) continue;
         options.push({
-          label: `${prefix ? `${picocolors.bold(prefix)} - ` : ''}${item.title ?? item.name}`,
+          label: `${prefix ? `${styleText('bold', prefix)} - ` : ''}${item.title ?? item.name}`,
           value: { name: item.name, subRegistry },
           hint: item.description,
         });
@@ -50,7 +50,7 @@ export async function add(input: string[], connector: RegistryConnector, config:
       scan(subRegistry, 'ui'),
     ]);
 
-    spin.stop(picocolors.bold(picocolors.greenBright('registry fetched')));
+    spin.stop(styleText(['bold', 'greenBright'], 'registry fetched'));
     const value = await autocompleteMultiselect({
       message: 'Select components to install',
       options: groups.flat().sort((a, b) => a.label.localeCompare(b.label)),
@@ -77,5 +77,5 @@ export async function add(input: string[], connector: RegistryConnector, config:
     await installer.installInteractive(target.name, target.subRegistry);
   }
 
-  outro(picocolors.bold(picocolors.greenBright('Successful')));
+  outro(styleText(['bold', 'greenBright'], 'Successful'));
 }

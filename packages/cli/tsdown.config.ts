@@ -14,7 +14,14 @@ export default defineConfig({
   target: 'node22',
   copy: 'schema.json',
   deps: {
-    onlyBundle: ['fuma-cli', '@fuma-cli/interactive', '@babel/parser', '@babel/types'],
+    onlyBundle: [
+      'fuma-cli',
+      '@babel/parser',
+      '@babel/types',
+      'magic-string',
+      '@jridgewell/sourcemap-codec',
+      'package-manager-detector',
+    ],
   },
   exports: {
     enabled: true,
