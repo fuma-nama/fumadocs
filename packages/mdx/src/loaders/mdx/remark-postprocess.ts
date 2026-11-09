@@ -75,7 +75,7 @@ export function remarkPostprocess({
         if (node.type === 'link')
           return void items.push({ code: JSON.stringify({ href: node.url }), when });
         if (!('children' in node)) return;
-        const condition = !isStatic && showCondition(node);
+        const condition = showCondition(node, isStatic);
         for (const child of node.children) visit(child, condition ? [...when, condition] : when);
       };
       visit(tree, []);

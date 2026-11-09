@@ -12,7 +12,8 @@ export type Replacement = string | ((s: Stringifier) => string);
  * How a plugin analyses the code of a page for its output:
  *
  * - `runtime`: a function of the props of a page, authored expressions and the branches of `<show>` render for them.
- * - `static`: a value analysed from source, authored expressions keep their source and every branch shows.
+ * - `static`: a value analysed from source, authored expressions keep their source. It can't tell which branches of
+ *   `<show>` show, so a page with them fails to compile.
  */
 export type Analysis = 'static' | 'runtime';
 

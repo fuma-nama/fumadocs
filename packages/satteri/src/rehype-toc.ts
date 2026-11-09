@@ -99,7 +99,7 @@ export function rehypeToc({ exportToc = true, analysis }: RehypeTocOptions = {})
             typeof element.properties['data-fd-step'] === 'number'
               ? element.properties['data-fd-step']
               : undefined;
-          const when = isStatic ? [] : showConditions(element, ctx);
+          const when = showConditions(element, ctx, isStatic);
           let obj = '{';
           obj += `title: ${
             resolved.as === 'esm'
@@ -109,7 +109,7 @@ export function rehypeToc({ exportToc = true, analysis }: RehypeTocOptions = {})
                 })
               : textCode(children)
           },`;
-          obj += `url: ${code && !isStatic ? `"#" + ${code}` : JSON.stringify(`#${id}`)},`;
+          obj += `url: ${code ? `"#" + ${code}` : JSON.stringify(`#${id}`)},`;
           obj += `depth: ${JSON.stringify(Number(element.tagName[1]))},`;
           if (step !== undefined) obj += `_step: ${JSON.stringify(step)},`;
           obj += '}';

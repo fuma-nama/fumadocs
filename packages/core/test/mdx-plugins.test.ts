@@ -1,4 +1,5 @@
 import { expect, test } from 'vitest';
+import type { PluggableList } from 'unified';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { remark } from 'remark';
@@ -1007,23 +1008,20 @@ After the branch.
 test('Remark Show: static outputs analyse the source', async () => {
   const { compile } = await import('@mdx-js/mdx');
   const { remarkShow } = await import('@/mdx-plugins/remark-show');
-  const file = String(
-    await compile(
+  const compileStatic = (value: string, remarkPlugins: PluggableList = []) =>
+    compile(
+      // set by the content source, like the collection of Fumadocs MDX
+      { value, data: { _analysis: 'static' } },
       {
-        value: '## Deploy on {props.framework}\n\n<show when={props.a}>\nAstro.\n</show>\n',
-        // set by the content source, like the collection of Fumadocs MDX
-        data: { _analysis: 'static' },
-      },
-      {
-        remarkPlugins: [
-          remarkShow,
-          remarkHeading,
-          [remarkStructure, { exportAs: true }],
-          remarkLLMs,
-        ],
+        remarkPlugins: [remarkShow, remarkHeading, ...remarkPlugins],
         rehypePlugins: [rehypeToc],
       },
-    ),
+    );
+  const file = String(
+    await compileStatic('## Deploy on {props.framework}\n\nAstro.\n', [
+      [remarkStructure, { exportAs: true }],
+      remarkLLMs,
+    ]),
   );
   expect(file).toContain(
     'export const _markdown = "## Deploy on {props.framework} [#deploy-on-propsframework]\\n\\nAstro.\\n";',
@@ -1035,6 +1033,16 @@ test('Remark Show: static outputs analyse the source', async () => {
   // IDs are slugged from the source, like the TOC
   expect(file).toContain('id: "deploy-on-propsframework"');
   expect(file).not.toContain('_headingIds');
+
+  // static outputs can't tell which branches show, each of them says so
+  const branch = '<show when={props.a}>\n## Astro\n\n[Astro](/astro).\n</show>\n';
+  for (const plugins of [[], [[remarkStructure, { exportAs: true }]], [remarkLLMs]])
+    await expect(compileStatic(branch, plugins as PluggableList)).rejects.toThrow(
+      '`<show>` needs runtime analysis',
+    );
+  await expect(compileStatic('## On <show when={props.a}>Astro</show>\n')).rejects.toThrow(
+    '`<show>` needs runtime analysis',
+  );
 });
 
 test('Remark Show: code tabs end at a branch', async () => {

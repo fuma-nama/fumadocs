@@ -99,7 +99,7 @@ function postprocessPlugin(
     },
     link(node, ctx) {
       if (!extractLinkReferences) return;
-      const when = ctx.data._analysis !== 'runtime' ? [] : showConditions(node, ctx);
+      const when = showConditions(node, ctx, ctx.data._analysis !== 'runtime');
       ctx.data.extractedReferences!.push({ code: JSON.stringify({ href: node.url }), when });
     },
     collectExports({ data, addExport }) {

@@ -149,12 +149,9 @@ test('Remark Show: static outputs analyse the source', async () => {
     data: { _analysis: 'static' },
     mdastPlugins: [remarkLlms()],
   })('runtime');
-  const { code } = await compileMdx({
-    source: '## Deploy on {props.framework}\n\n<show when={props.a}>\nAstro.\n</show>\n',
-    filePath: '/tmp/doc.mdx',
-    environment: 'runtime',
-    options,
-  });
+  const compile = (source: string) =>
+    compileMdx({ source, filePath: '/tmp/doc.mdx', environment: 'runtime', options });
+  const { code } = await compile('## Deploy on {props.framework}\n\nAstro.\n');
   const page = (await new AsyncFunction('opts', code)(scope)) as {
     toc: { url: string }[];
     structuredData: StructuredData;
@@ -165,6 +162,13 @@ test('Remark Show: static outputs analyse the source', async () => {
   expect(page.toc.map((item) => item.url)).toEqual(['#deploy-on-']);
   expect(page.structuredData.headings[0].content).toBe('Deploy on {props.framework}');
   expect(page._markdown).toBe('## Deploy on {props.framework} [#deploy-on-]\n\nAstro.\n');
+
+  // static outputs can't tell which branches show
+  for (const source of [
+    '<show when={props.a}>\n## Astro\n</show>\n',
+    '## On <show when={props.a}>Astro</show>\n',
+  ])
+    await expect(compile(source)).rejects.toThrow('`<show>` needs runtime analysis');
 });
 
 test('Remark Show: code tabs end at a branch', async () => {

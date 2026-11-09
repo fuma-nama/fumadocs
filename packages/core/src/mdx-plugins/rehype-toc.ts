@@ -86,7 +86,7 @@ export function rehypeToc(
         const node = nodes[i];
         if (!('children' in node)) continue;
         if (node.type !== 'element' || !HeadingTags.has(node.tagName) || !node.children.length) {
-          const condition = showCondition(node);
+          const condition = showCondition(node, isStatic);
           visit(node.children, condition ? [...when, condition] : when);
           continue;
         }
@@ -135,9 +135,9 @@ export function rehypeToc(
           children: toJsx(isStatic ? { ...title, children: staticContent(title.children) } : title)
             .children,
         });
-        let code = `{depth: ${depth}, url: ${id && !isStatic ? `"#" + ${id}` : JSON.stringify(url)}`;
+        let code = `{depth: ${depth}, url: ${id ? `"#" + ${id}` : JSON.stringify(url)}`;
         if (_step !== undefined) code += `, _step: ${_step}`;
-        list.push({ code: `${code}, title: _fumadocs${i - 1}}`, when: isStatic ? [] : when });
+        list.push({ code: `${code}, title: _fumadocs${i - 1}}`, when });
       }
       tree.children.push(
         toEsm(`export const ${exportToc.name} = ${listCode(list, isStatic)};`, titles),
