@@ -1,48 +1,25 @@
 core:changelogs:
-  - content: "---\npackages:\n  fumadocs-core:\n    type: patch\n  fumadocs-mdx:\n    type: patch\n  \"@fumadocs/satteri\":\n    type: patch\n  \"@fumadocs/astro\":\n    type: patch\n  \"@fumadocs/local-content\":\n    type: patch\n  \"@fumadocs/local-md\":\n    type: patch\n---\n\n### Path params and `<show>`\n\n- A folder or file named `[name]` makes a page for each value listed in `staticParams` of its meta file or frontmatter.\n- Each page is compiled for its params, read as `props`, and a file at a static path replaces the page of its value.\n- `<show when={...}>` shows content on a condition. Conditions on params and inlined env vars are decided before headings, TOC, search and Markdown.\n- The `define` option of Remark Show sets the values resolved at build time, like Vite's `define`, also per page.\n- Custom sources give a dynamic file `dataAt()`, and `getStaticParams()` lists its params from any storage.\n"
-    filename: 2026-11-08-path-params.md
+  - content: "---\npackages:\n  \"@fumadocs/cli\":\n    type: patch\n  create-fumadocs-app:\n    type: patch\n---\n\n### Smaller installs\n\n- Reduced the install size of `@fumadocs/cli` from 17 MB to 2.2 MB, and of `create-fumadocs-app` from 18 MB to 3.2 MB.\n"
+    filename: 2026-11-09-cli-install-size.md
     v: 0.0.0
-  - content: "---\npackages:\n  fumadocs-ui:\n    type: patch\n  \"@fumadocs/base-ui\":\n    type: patch\n---\n\n### GitHub links to bracketed paths\n\n- `editOnGithub` of `DocsPage` opens files under folders like `[slug]`.\n"
-    filename: 2026-11-09-encode-github-urls.md
-    v: 0.0.0
-  - content: "---\npackages:\n  fumadocs-ui:\n    type: patch\n  \"@fumadocs/base-ui\":\n    type: patch\n---\n\n### Root Folders of a Type in the Spacious Sidebar\n\n- The Spacious sidebar switches between root folders of a type (`root: 'version'`) below the section switcher, in one control.\n- A root folder that only contains folders gets a tab, linking to its first page.\n"
-    filename: 2026-11-09-typed-root-tabs.md
-    v: 0.0.0
-  - content: "---\npackages:\n  \"@fumadocs/cli\":\n    type: patch\n  create-fumadocs-app:\n    type: patch\n---\n\n### ESLint on TypeScript 7\n\n- The ESLint linter installs TypeScript 6 next to TypeScript 7, so `eslint` runs on TypeScript 7 projects.\n"
-    filename: 2026-11-09-eslint-typescript-7.md
-    v: 0.0.0
-  - content: "---\npackages:\n  fumadocs-core:\n    type: patch\n  fumadocs-mdx:\n    type: patch\n  \"@fumadocs/local-md\":\n    type: patch\n  \"@fumadocs/local-content\":\n    type: patch\n  \"@fumadocs/satteri\":\n    type: patch\n---\n\n### Frontmatter and Meta Files in Code\n\n- An MDX page can export `frontmatter`, merged into its frontmatter and validated by the schema. On a dynamic page, it reads the params as `props`.\n- Meta files can be modules, like `meta.ts`. The meta file of a dynamic folder can export a function of the folder's params.\n"
-    filename: 2026-11-08-code-page-data.md
-    v: 0.0.0
-  - content: "---\npackages:\n  fumadocs-core:\n    type: patch\n  \"@fumadocs/satteri\":\n    type: patch\n---\n\n### Processed Markdown\n\n- Removed content, like imports, no longer leaves blank lines.\n"
-    filename: 2026-11-08-markdown-blank-lines.md
-    v: 0.0.0
-  - content: "---\npackages:\n  fumadocs-core:\n    type: patch\n---\n\n### Rendering Inline Styles\n\n- Inline styles follow `hast-util-to-jsx-runtime` 2.3.7: property names are lowercased, custom properties keep their case, and only `url()` keeps a `;` inside parentheses.\n"
-    filename: 2026-11-08-style-casing.md
-    v: 0.0.0
-  - content: "---\npackages:\n  \"@fumadocs/satteri\":\n    type: patch\n---\n\n### Remark Show\n\n- The content of a kept `<show>` branch joins the content around it, like tab code blocks joining the tab group before the branch.\n"
-    filename: 2026-11-08-show-unwrap.md
+  - content: "---\npackages:\n  fumadocs-mdx:\n    type: patch\n---\n\n### Meta Files with the Macro on Vite\n\n- Vite builds with the React plugin load JSON meta files of macro collections again.\n- The macro reports options set through a spread, instead of ignoring them.\n"
+    filename: 2026-11-09-vite-meta-query.md
     v: 0.0.0
 core:packages:
   - id: npm:@fumadocs/ai-chat
     updated: false
-  - changelogIds:
-      - 2026-11-08-path-params.md
-    id: npm:@fumadocs/astro
-    updated: true
+  - id: npm:@fumadocs/astro
+    updated: false
   - id: npm:@fumadocs/asyncapi
     updated: false
-  - changelogIds:
-      - 2026-11-09-encode-github-urls.md
-      - 2026-11-09-typed-root-tabs.md
-    id: npm:@fumadocs/base-ui
-    updated: true
+  - id: npm:@fumadocs/base-ui
+    updated: false
   - id: npm:@fumadocs/basehub
     updated: false
   - id: npm:@fumadocs/changelog
     updated: false
   - changelogIds:
-      - 2026-11-09-eslint-typescript-7.md
+      - 2026-11-09-cli-install-size.md
     id: npm:@fumadocs/cli
     updated: true
   - id: npm:@fumadocs/content
@@ -50,19 +27,14 @@ core:packages:
   - id: npm:@fumadocs/content-collections
     updated: false
   - changelogIds:
-      - 2026-11-08-code-page-data.md
-      - 2026-11-08-markdown-blank-lines.md
-      - 2026-11-08-path-params.md
-      - 2026-11-08-style-casing.md
-    id: npm:fumadocs-core
-    updated: true
-  - changelogIds:
-      - 2026-11-09-eslint-typescript-7.md
+      - 2026-11-09-cli-install-size.md
     id: npm:create-fumadocs-app
     updated: true
+  - id: npm:fumadocs-docgen
+    updated: false
   - id: npm:create-fumadocs-versions
     updated: true
-  - id: npm:fumadocs-docgen
+  - id: npm:fumadocs-core
     updated: false
   - id: npm:fumadocs-epub
     updated: false
@@ -72,23 +44,16 @@ core:packages:
     updated: false
   - id: npm:@fumadocs/json-schema
     updated: false
-  - changelogIds:
-      - 2026-11-08-code-page-data.md
-      - 2026-11-08-path-params.md
-    id: npm:@fumadocs/local-content
-    updated: true
   - id: npm:@fumadocs/language
     updated: false
+  - id: npm:@fumadocs/local-content
+    updated: false
   - id: npm:@fumadocs/local-html
-    updated: true
+    updated: false
+  - id: npm:@fumadocs/local-md
+    updated: false
   - changelogIds:
-      - 2026-11-08-code-page-data.md
-      - 2026-11-08-path-params.md
-    id: npm:@fumadocs/local-md
-    updated: true
-  - changelogIds:
-      - 2026-11-08-code-page-data.md
-      - 2026-11-08-path-params.md
+      - 2026-11-09-vite-meta-query.md
     id: npm:fumadocs-mdx
     updated: true
   - id: npm:@fumadocs/mdx-remote
@@ -96,7 +61,7 @@ core:packages:
   - id: npm:@fumadocs/notion
     updated: false
   - id: npm:fumadocs-obsidian
-    updated: true
+    updated: false
   - id: npm:fumadocs-openapi
     updated: false
   - id: npm:@fumadocs/openapi-standalone
@@ -105,20 +70,12 @@ core:packages:
     updated: false
   - id: npm:fumadocs-python
     updated: false
-  - changelogIds:
-      - 2026-11-09-encode-github-urls.md
-      - 2026-11-09-typed-root-tabs.md
-    id: npm:fumadocs-ui
-    updated: true
+  - id: npm:fumadocs-ui
+    updated: false
   - id: npm:@fumadocs/sanity
     updated: false
-  - changelogIds:
-      - 2026-11-08-code-page-data.md
-      - 2026-11-08-markdown-blank-lines.md
-      - 2026-11-08-path-params.md
-      - 2026-11-08-show-unwrap.md
-    id: npm:@fumadocs/satteri
-    updated: true
+  - id: npm:@fumadocs/satteri
+    updated: false
   - id: npm:@fumadocs/shadcn
     updated: false
   - id: npm:shared-api
@@ -145,16 +102,16 @@ npm:packages:
   - id: npm:@fumadocs/cli
   - id: npm:@fumadocs/content
   - id: npm:@fumadocs/content-collections
-  - id: npm:fumadocs-core
   - id: npm:create-fumadocs-app
-  - id: npm:create-fumadocs-versions
   - id: npm:fumadocs-docgen
+  - id: npm:create-fumadocs-versions
+  - id: npm:fumadocs-core
   - id: npm:fumadocs-epub
   - id: npm:@fumadocs/graphql
   - id: npm:@fumari/image-size
   - id: npm:@fumadocs/json-schema
-  - id: npm:@fumadocs/local-content
   - id: npm:@fumadocs/language
+  - id: npm:@fumadocs/local-content
   - id: npm:@fumadocs/local-html
   - id: npm:@fumadocs/local-md
   - id: npm:fumadocs-mdx
@@ -177,24 +134,15 @@ npm:packages:
   - id: npm:fumadocs-typescript
   - id: npm:@fumadocs/vite
   - id: npm:docs
-  - id: npm:example-astro
-  - id: npm:example-astro-i18n
-  - id: npm:example-astro-min
   - id: npm:example-asyncapi
   - id: npm:example-base-ui
-  - id: npm:example-content-collections
   - id: npm:example-graphql
   - id: npm:example-i18n
-  - id: npm:example-marble-cms
   - id: npm:example-next
-  - id: npm:example-next-local-html
-  - id: npm:example-next-local-md
   - id: npm:example-next-min
   - id: npm:example-next-shadcn
   - id: npm:example-next-static
-  - id: npm:example-obsidian
   - id: npm:example-openapi
-  - id: npm:example-python
   - id: npm:example-react-router
   - id: npm:example-react-router-i18n
   - id: npm:example-react-router-min
@@ -203,9 +151,8 @@ npm:packages:
   - id: npm:example-tanstack-start
   - id: npm:example-tanstack-start-i18n
   - id: npm:example-tanstack-start-min
-  - id: npm:example-tanstack-start-local-md
-  - id: npm:example-tanstack-start-openapi
   - id: npm:example-tanstack-start-spa
+  - id: npm:example-tanstack-start-openapi
   - id: npm:example-tanstack-start-story
   - id: npm:example-waku
   - id: npm:example-waku-i18n

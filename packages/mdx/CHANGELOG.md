@@ -1,3 +1,10 @@
+## fumadocs-mdx@15.5.3
+
+### Meta Files with the Macro on Vite
+
+- Vite builds with the React plugin load JSON meta files of macro collections again.
+- The macro reports options set through a spread, instead of ignoring them.
+
 ## fumadocs-mdx@15.5.2
 
 ### Frontmatter and Meta Files in Code
