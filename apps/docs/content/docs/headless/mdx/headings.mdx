@@ -7,7 +7,7 @@ description: Process headings from your document
 
 A remark plugin that applies ids to headings. Fumadocs MDX enables it by default. Pass options with `remarkHeadingOptions`.
 
-Headings with expressions, like `## Deploy on {props.framework}`, and headings inside `<show>` get their ids when rendering, from their rendered text. Duplicate ids only count the headings that show.
+By default, ids are slugged from the source. With the `analysis: 'runtime'` option, headings with expressions, like `## Deploy on {props.framework}`, and headings inside `<show>` get their ids when rendering, from their rendered text. Duplicate ids then only count the headings that show. Fumadocs MDX passes the [`analysis`](/docs/mdx/collections#analysis) of the collection.
 
 ### Custom Ids [#custom-heading-id]
 
@@ -68,9 +68,23 @@ For a Markdown document:
 ## Hello `code`
 ```
 
-It exports a function of the page's props, which returns an array of `TOCItemType`:
+It exports an array of `TOCItemType`. With the `analysis: 'runtime'` option, it exports a function of the page's props, returning only the headings in `<show>` branches that show:
 
-```jsx
+```jsx tab="static"
+export const toc = [
+  {
+    title: (
+      <>
+        Hello <code>code</code>
+      </>
+    ),
+    depth: 2,
+    url: '#hello-code',
+  },
+];
+```
+
+```jsx tab="runtime"
 export const toc = (props) => [
   {
     title: (
@@ -84,4 +98,4 @@ export const toc = (props) => [
 ];
 ```
 
-The array only includes the headings in `<show>` branches that show. Fumadocs MDX calls it with the params of each page, so `page.data.toc` is the array. With [`analysis: 'static'`](/docs/mdx/collections#analysis), the export is the array itself, with every heading.
+Fumadocs MDX passes the [`analysis`](/docs/mdx/collections#analysis) of the collection. With `runtime`, `page.data.toc()` calls the export with the path params of the page.

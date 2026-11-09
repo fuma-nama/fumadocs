@@ -9,4 +9,9 @@ Remark Show is a remark plugin. Fumadocs MDX and `@fumadocs/astro` enable it by 
 
 It compiles `<show>` into a component that renders its content when `when` holds. The condition is checked when rendering, so it can read the props of a page, like its [path params](/docs/headless/page-conventions#path-params).
 
-The table of contents, structured data and Markdown of a page only include the branches that show for its props, unless the collection uses [`analysis: 'static'`](/docs/mdx/collections#analysis). To render these outputs from a custom source, see [Path Params](/docs/headless/source-api/source#path-params).
+The table of contents, structured data and Markdown of a page include:
+
+- With runtime analysis, only the branches that show for its props. Fumadocs MDX uses it with [`analysis: 'runtime'`](/docs/mdx/collections#analysis) on the collection, and `@fumadocs/astro` always does.
+- With static analysis, the default of Fumadocs MDX, every branch.
+
+To render these outputs from a custom source, see [Path Params](/docs/headless/source-api/source#path-params).

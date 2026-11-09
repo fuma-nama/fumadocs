@@ -117,7 +117,7 @@ const params = getStaticParams('[framework]/deploy.mdx', {
 
 It returns `undefined` when nothing lists the values. The file is then one page at its literal path.
 
-When your source compiles MDX, compile each file once and pass the params of a page as props when rendering. The `toc` export of Rehype TOC and the `structuredData` export of Remark Structure are functions of the same props:
+When your source compiles MDX, compile each file once with the `analysis: 'runtime'` option of the Fumadocs plugins, and pass the params of a page as props when rendering. The `toc` export of Rehype TOC and the `structuredData` export of Remark Structure are then functions of the same props:
 
 ```tsx twoslash
 import type { ReactNode } from 'react';

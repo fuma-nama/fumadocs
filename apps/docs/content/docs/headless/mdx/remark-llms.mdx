@@ -3,7 +3,7 @@ title: Remark LLMs
 description: Export the Markdown of your documents for LLMs.
 ---
 
-The `remarkLLMs` plugin exports the Markdown of a document as `_markdown`, for LLMs. It keeps the Markdown you wrote, and renders the expressions and `<show>` branches of a page for its props. See [Stringification](/docs/headless/mdx/stringification) for how it's generated.
+The `remarkLLMs` plugin exports the Markdown of a document as `_markdown`, for LLMs. It keeps the Markdown you wrote. See [Stringification](/docs/headless/mdx/stringification) for how it's generated.
 
 ```mdx tab="Input"
 import { Callout } from 'fumadocs-ui/components/callout';
@@ -30,6 +30,7 @@ import { defineDocs } from 'fumadocs-mdx/config';
 
 export const docs = defineDocs({
   docs: {
+    analysis: 'runtime',
     postprocess: {
       // `true`, or the options of `remarkLLMs`
       includeProcessedMarkdown: true,
@@ -58,9 +59,13 @@ Images beside your pages, imported by [Remark Image](/docs/headless/mdx/remark-i
 
 Images in the public directory keep their address. Vite inlines images smaller than [`build.assetsInlineLimit`](https://vite.dev/config/build-options#build-assetsinlinelimit) as `data:` URLs.
 
-## JSX Elements
+## Runtime Analysis
 
-`_markdown` is a component, rendered into Markdown with [`renderToMarkdown()`](/docs/headless/utils/markdown). Pass your MDX components to render JSX elements with them:
+With the `analysis: 'runtime'` option, `_markdown` is a component that renders the Markdown of a page for its props: expressions render as values, and only the `<show>` branches that show are included. Fumadocs MDX passes the [`analysis`](/docs/mdx/collections#analysis) of the collection, and `getText('processed')` renders the component with the path params of the page.
+
+### JSX Elements
+
+The component is rendered into Markdown with [`renderToMarkdown()`](/docs/headless/utils/markdown). Pass your MDX components to render JSX elements with them:
 
 ```tsx
 import { getMDXComponents } from '@/components/mdx';
@@ -74,7 +79,7 @@ Components define their Markdown form with [`asMarkdown()`](/docs/headless/utils
 
 ## Static Analysis
 
-With `analysis: 'static'`, `_markdown` is a string: expressions keep their source, every `<show>` branch is included, and JSX elements are kept as you wrote them. In Fumadocs MDX, set it on the [collection](/docs/mdx/collections#analysis).
+By default, `_markdown` is a string: expressions keep their source, every `<show>` branch is included, and JSX elements are kept as you wrote them.
 
 To render JSX elements later, list them as placeholders:
 
@@ -82,7 +87,6 @@ To render JSX elements later, list them as placeholders:
 import type { LLMsOptions } from 'fumadocs-core/mdx-plugins/remark-llms';
 
 const llmsOptions: LLMsOptions = {
-  analysis: 'static',
   mdxAsPlaceholder: ['Callout'],
 };
 ```

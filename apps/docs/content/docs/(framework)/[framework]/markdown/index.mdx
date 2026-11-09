@@ -435,6 +435,12 @@ Add an adapter to your Astro config.
 
 The table of contents, search index and Markdown of a page only include the branches that show for its props. Expressions like `{props.framework}` render as values in them, and in heading IDs.
 
+<show when={props.framework !== 'astro'}>
+
+Fumadocs MDX renders them this way with [`analysis: 'runtime'`](/docs/mdx/collections#analysis) on the collection.
+
+</show>
+
 A [tab group](#tab-groups) can't span a `<show>` tag, so keep its code blocks in the same branch.
 
 ### NPM Commands

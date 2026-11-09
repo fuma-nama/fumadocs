@@ -46,7 +46,7 @@ export const GET: APIRoute = ({ request }) => server.GET(request);
 
 Create the server from search indexes. Each index needs the `structuredData` of its page, from your content source or the [Remark Structure](/docs/headless/mdx/structure) plugin.
 
-With Fumadocs MDX, call `page.data.structuredData()` to get it, unless the collection uses [`analysis: 'static'`](/docs/mdx/collections#analysis).
+With Fumadocs MDX and `@fumadocs/astro`, get it with `await page.data.structuredData()`. On Fumadocs MDX collections with [static analysis](/docs/mdx/collections#analysis), it's an object unless the collection is async.
 
 ```ts tab="Next.js" title="app/api/search/route.ts"
 import { source } from '@/lib/source';

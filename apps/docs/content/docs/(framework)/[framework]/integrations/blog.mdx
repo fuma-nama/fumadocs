@@ -23,6 +23,7 @@ import { type BlogAuthor, blogPageSchema } from './blog';
 export const blog = defineCollections({
   type: 'doc',
   dir: 'content/blog',
+  analysis: 'runtime',
   schema: blogPageSchema,
 });
 
@@ -318,7 +319,7 @@ export default async function Page(props: PageProps<'/blog/[slug]'>) {
   const MDX = page.data.body;
 
   return (
-    <BlogPage toc={page.data.toc}>
+    <BlogPage toc={page.data.toc()}>
       <BlogHeader>
         <BlogBackLink href="/blog" />
         <BlogTitle>{post.title}</BlogTitle>
@@ -375,7 +376,7 @@ export default function Page({ loaderData }: Route.ComponentProps) {
 
   return (
     <HomeLayout {...baseOptions()}>
-      <BlogPage toc={page.toc}>
+      <BlogPage toc={page.toc()}>
         <BlogHeader>
           <BlogBackLink href="/blog" />
           <BlogTitle>{post.title}</BlogTitle>
@@ -441,7 +442,7 @@ function Page() {
 
   return (
     <HomeLayout {...baseOptions()}>
-      <BlogPage toc={page.toc}>
+      <BlogPage toc={page.toc()}>
         <BlogHeader>
           <BlogBackLink href="/blog" />
           <BlogTitle>{post.title}</BlogTitle>
@@ -492,7 +493,7 @@ export default function Page({ slug }: PageProps<'/blog/[slug]'>) {
   const MDX = page.data.body;
 
   return (
-    <BlogPage toc={page.data.toc}>
+    <BlogPage toc={page.data.toc()}>
       <BlogHeader>
         <BlogBackLink href="/blog" />
         <BlogTitle>{post.title}</BlogTitle>

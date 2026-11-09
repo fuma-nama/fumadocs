@@ -19,6 +19,7 @@ import { defineDocs } from 'fumadocs-mdx/config';
 export const docs = defineDocs({
   dir: 'content/docs',
   docs: {
+    analysis: 'runtime',
     // [!code ++]
     async: true,
   },
@@ -31,6 +32,7 @@ import { defineCollections } from 'fumadocs-mdx/config';
 export const doc = defineCollections({
   type: 'doc',
   dir: 'content/docs',
+  analysis: 'runtime',
   // [!code ++]
   async: true,
 });
@@ -61,6 +63,7 @@ import { defineDocs } from 'fumadocs-mdx/config';
 export const docs = defineDocs({
   dir: 'content/docs',
   docs: {
+    analysis: 'runtime',
     // [!code ++]
     dynamic: true,
   },
@@ -73,6 +76,7 @@ import { defineCollections } from 'fumadocs-mdx/config';
 export const doc = defineCollections({
   type: 'doc',
   dir: 'content/docs',
+  analysis: 'runtime',
   // [!code ++]
   dynamic: true,
 });
@@ -108,7 +112,7 @@ if (page) {
   // Markdown content requires await
   const { body: MdxContent, toc } = await page.data.load();
 
-  console.log(toc);
+  console.log(toc());
 
   return <MdxContent components={getMDXComponents()} />;
 }

@@ -72,6 +72,9 @@ import { graphql } from '@/lib/graphql'; // [!code ++]
 
 const docs = defineDocs({
   dir: 'content/docs',
+  docs: {
+    analysis: 'runtime',
+  },
 });
 
 export const source = loader(
@@ -101,10 +104,11 @@ import { defineDocs } from 'fumadocs-mdx/macro'; // [!code --]
 import { docs } from '@/lib/collections';
 import { graphql } from '@/lib/graphql';
 
-// [!code --:6]
+// [!code --:7]
 export const docs = defineDocs({
   dir: 'content/docs',
   docs: {
+    analysis: 'runtime',
     async: true,
   },
 });
@@ -132,6 +136,7 @@ import { defineDocs } from 'fumadocs-mdx/macro';
 export const docs = defineDocs({
   dir: 'content/docs',
   docs: {
+    analysis: 'runtime',
     async: true,
   },
 });
@@ -148,10 +153,11 @@ import { defineDocs } from 'fumadocs-mdx/macro'; // [!code --]
 import { docs } from '@/lib/collections';
 import { graphql } from '@/lib/graphql';
 
-// [!code --:6]
+// [!code --:7]
 export const docs = defineDocs({
   dir: 'content/docs',
   docs: {
+    analysis: 'runtime',
     async: true,
   },
 });
@@ -179,6 +185,7 @@ import { defineDocs } from 'fumadocs-mdx/macro';
 export const docs = defineDocs({
   dir: 'content/docs',
   docs: {
+    analysis: 'runtime',
     async: true,
   },
 });
@@ -195,6 +202,9 @@ import { graphql } from '@/lib/graphql'; // [!code ++]
 
 const docs = defineDocs({
   dir: 'content/docs',
+  docs: {
+    analysis: 'runtime',
+  },
 });
 
 export const source = loader(

@@ -149,20 +149,35 @@ Unlike `mdxOptions`, the collection-level `satteriOptions` keeps the default pre
 
 > This API is only available on `doc` type.
 
-How Fumadocs MDX generates the table of contents, structured data, processed Markdown and extracted references of a page:
-
-- `runtime` (default): rendered for the props of the page, so they only include the `<show>` branches that show, and expressions render as values. `page.data.structuredData` is an async function.
-- `static`: analysed from the source, so they include every branch, and expressions keep their source. `page.data.structuredData` is an object, unless the collection is [async](/docs/mdx/async).
+How Fumadocs MDX generates the table of contents, structured data, processed Markdown and extracted references of a page. We recommend `runtime`:
 
 ```ts title="source.config.ts"
 import { defineDocs } from 'fumadocs-mdx/config';
 
 export const docs = defineDocs({
   docs: {
-    analysis: 'static',
+    analysis: 'runtime',
   },
 });
 ```
+
+- `runtime`: the outputs are functions of the page's props, so they follow its [path params](/docs/headless/page-conventions#path-params), [`<show>`](/docs/markdown#show) branches and custom props. Expressions render as values, in heading IDs too.
+- `static` (default): the outputs are values analysed from the source. They include every `<show>` branch, expressions keep their source, and heading IDs are slugged from it.
+
+With `runtime`, call the outputs to render them. The path params of the page are already passed:
+
+```ts
+import { source } from '@/lib/source';
+
+const page = source.getPage(['...'])!;
+
+const toc = page.data.toc();
+// when you pass custom props to the content, pass them here too
+const tocWithProps = page.data.toc({ version: 'v2' });
+const structuredData = await page.data.structuredData();
+```
+
+On [async](/docs/mdx/async) collections, `toc` comes from `await page.data.load()`, and you call it the same way.
 
 ### `postprocess`
 
