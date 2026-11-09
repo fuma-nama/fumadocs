@@ -36,6 +36,13 @@ export default function mdxPlugin<Config extends LoaderConfig = LoaderConfig>({
     };
   }
 
+  /** the data of a page with its MDX components as page props, its outputs render with them */
+  async function withComponents(ctx: PluginContext<Config>, page: Config['page']) {
+    const props = { components: await getComponents(ctx, page) };
+    const loader = await ctx.getLoader();
+    return (loader.getPage(page.slugs, { language: page.locale, props }) ?? page).data;
+  }
+
   return {
     name: 'mdx',
     async getPageBody(page) {
@@ -47,15 +54,16 @@ export default function mdxPlugin<Config extends LoaderConfig = LoaderConfig>({
     },
     async getPageText(page) {
       if (!isEntry(page.data)) return;
-      return page.data.getText('processed', {
-        components: await getComponents(this, page),
-      });
+      const data = await withComponents(this, page);
+      if (isEntry(data)) return data.getText('processed');
     },
     async getPageToc(page) {
       if (isEntry(page.data)) return (await load(page.data)).toc;
     },
     async getPageStructuredData(page) {
-      if (isEntry(page.data)) return (await load(page.data)).structuredData;
+      if (!isEntry(page.data)) return;
+      const data = await withComponents(this, page);
+      if (isEntry(data)) return (await load(data)).structuredData;
     },
     getPageCreatedAt({ data }) {
       if (!isEntry(data) || !('date' in data)) return;

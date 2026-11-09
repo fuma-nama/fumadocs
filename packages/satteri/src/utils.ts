@@ -8,7 +8,7 @@ import type {
   rehypeCodeFromHighlighter,
   RehypeCodeFromHighlighterOptions,
 } from 'fumadocs-core/mdx-plugins/rehype-code.core';
-import { createCodeOutput as createSharedCodeOutput, moduleScope } from '../../shared/code-output';
+import { createCodeOutput as createSharedCodeOutput } from '../../shared/code-output';
 import { createStringifier, offsets, type PositionedNode, type Stringifier } from './stringifier';
 
 export interface JsxElementNode {
@@ -183,12 +183,4 @@ export function highlightPlugin(
       },
     },
   });
-}
-
-/** the names declared by the ESM of a document */
-export function esmScope(root: { children: readonly MdastNode[] }): Set<string> {
-  const scope = new Set<string>();
-  for (const node of root.children)
-    if (node.type === 'mdxjsEsm') moduleScope(parse(node.value).body, scope);
-  return scope;
 }

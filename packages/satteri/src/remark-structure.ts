@@ -6,10 +6,12 @@ import { tableRowToStructuredData } from 'fumadocs-core/search';
 import { offsets, type Stringifier } from './stringifier';
 import { headingIdRegex, idCodeProperty } from '../../shared/heading-id';
 import type { ExtraPluginHooks } from './compile';
-import { createCodeOutput, type JsxElementNode } from './utils';
+import { createCodeOutput, parse, type JsxElementNode } from './utils';
 import {
   createStructuredRecords,
   isInline,
+  keptElement,
+  moduleScope,
   showConditions,
   toHtmlTag,
 } from '../../shared/code-output';
@@ -26,9 +28,11 @@ export interface StructureOptions {
   mdxTypes?: (node: Nodes) => boolean;
 
   /**
-   * Return `true` to keep a JSX element as an HTML tag, other elements are replaced by their content.
+   * Return `true` to keep a JSX element, other elements are replaced by their content. Static analysis keeps them as
+   * HTML tags, runtime analysis renders them into Markdown like processed Markdown.
    *
-   * Default: keep `File`, `TypeTable`, `Callout` and `Card` elements.
+   * Default: static analysis keeps `File`, `TypeTable`, `Callout` and `Card` elements, runtime analysis keeps the
+   * elements of components.
    */
   filterElement?: (node: Nodes & { name?: string | null }) => boolean;
 
@@ -41,6 +45,19 @@ export interface StructureOptions {
 
   /** @defaultValue the analysis of the content source, or `static` */
   analysis?: Analysis;
+}
+
+/** the elements that static analysis keeps as HTML tags by default */
+function keepByDefault(node: { name?: string | null }): boolean {
+  switch (node.name) {
+    case 'File':
+    case 'TypeTable':
+    case 'Callout':
+    case 'Card':
+      return true;
+    default:
+      return false;
+  }
 }
 
 /** the nodes that a function of `types` can match */
@@ -95,17 +112,7 @@ interface TableRecord {
 export function remarkStructure({
   types = ['heading', 'paragraph', 'blockquote', 'table', 'mdxJsxFlowElement', 'mdxFlowExpression'],
   mdxTypes = (node) => !('children' in node) || node.children.length === 0,
-  filterElement = (node) => {
-    switch (node.name) {
-      case 'File':
-      case 'TypeTable':
-      case 'Callout':
-      case 'Card':
-        return true;
-      default:
-        return false;
-    }
-  },
+  filterElement,
   exportAs = true,
   analysis,
 }: StructureOptions = {}) {
@@ -120,6 +127,9 @@ export function remarkStructure({
     let out: ReturnType<typeof createCodeOutput>;
     let s: Stringifier;
     let isStatic = false;
+    /** the names declared by the ESM nodes, complete when records stringify */
+    const scope = new Set<string>();
+    let keep: StructureOptions['filterElement'];
     const structured = createStructuredRecords();
     const { push } = structured;
 
@@ -128,17 +138,18 @@ export function remarkStructure({
     }
 
     function visit(node: Nodes, ctx: MdastVisitorContext) {
-      // links and elements become their content, unless kept as HTML tags, images are removed
+      // links and elements become their content, unless kept, images and ESM (like that of includes) are removed
       if (out.markCode(node)) {
         // rendered from code
       } else if (node.type === 'link' || node.type === 'linkReference')
         s.replace(node, (s) => s.inner(node));
       else if (node.type === 'image' || node.type === 'imageReference') s.replace(node, '');
       else if (isJsxElement(node))
-        s.replace(
-          node,
-          filterElement(node) ? (s) => toHtmlTag(node, s.inner(node)) : (s) => s.inner(node),
-        );
+        s.replace(node, (s) => {
+          const element = !isStatic && keptElement(node, scope);
+          if (!(keep ? keep(node) : element)) return s.inner(node);
+          return element ? out.wrap(element, s.inner(node)) : toHtmlTag(node, s.inner(node));
+        });
 
       if (node.data?.structuredData) {
         const when = showConditions(node, ctx);
@@ -184,6 +195,7 @@ export function remarkStructure({
       options: { position: true },
       before(_root: unknown, ctx: MdastVisitorContext) {
         isStatic = (analysis ?? ctx.data._analysis) !== 'runtime';
+        keep = filterElement ?? (isStatic ? keepByDefault : undefined);
         out = createCodeOutput(ctx, 'search', isStatic);
         s = out.s;
 
@@ -216,6 +228,10 @@ export function remarkStructure({
 
         ctx.data.structuredData ??= structured.toStatic(out);
         if (exportAs && !isStatic) ctx.data._structuredDataCode = structured.toCode(out);
+      },
+      mdxjsEsm(node) {
+        s.replace(node, '');
+        if (!isStatic) moduleScope(parse(node.value).body, scope);
       },
       ...Object.fromEntries(visitors.map((key) => [key, visit])),
     };

@@ -49,7 +49,7 @@ interface CodeStringifier<N> {
 const markerRegex = /\0(\/?)(\d+)\0/g;
 
 /**
- * A stringifier whose output can have parts rendered from code: replacements mark them, `toText()` splits the output on
+ * A stringifier whose output can have parts rendered from code: replacements mark them, `toCode()` splits the output on
  * their markers. Runtime outputs are functions of the props of the page, code reads them in render scope.
  *
  * @param isStatic - for static outputs: authored expressions keep their source, the content of every branch shows
@@ -121,8 +121,9 @@ export function createCodeOutput<N extends CodeNode, S extends CodeStringifier<N
       });
     },
     /** the output as one value: a string without parts, a fragment otherwise */
-    /** the output as the code of a string, for text like search records */
-    toText: (text: string) => chunksToText(chunks(text), literal),
+    toCode: (text: string) => chunksToCode(chunks(text), literal),
+    /** whether the output has elements of the MDX components `_c` */
+    usesComponents: (text: string) => usesComponents(chunks(text)),
     /**
      * The export of Markdown, a component rendered with `renderToMarkdown()` of `fumadocs-core/server`, or the string
      * of static Markdown, code of plugins is concatenated
@@ -297,7 +298,7 @@ interface StructuredHeading {
 /** the records of structured data in document order, their content with the markers of code */
 export function createStructuredRecords() {
   const records: ((StructuredHeading | StructuredContent) & { when: string[] })[] = [];
-  type Output = Pick<ReturnType<typeof createCodeOutput>, 'toStatic' | 'toText'>;
+  type Output = Pick<ReturnType<typeof createCodeOutput>, 'toStatic' | 'toCode' | 'usesComponents'>;
 
   return {
     /** `when`: the conditions of the branches of `<show>` around it */
@@ -325,8 +326,10 @@ export function createStructuredRecords() {
     /** the code of the runtime records, a function of the props giving the records that show, see `toStructuredData()` */
     toCode(out: Output): string {
       const items: { code: string; when: string[] }[] = [];
+      let components = false;
       for (const record of records) {
-        let code = `{content: ${out.toText(record.content)}`;
+        components ||= out.usesComponents(record.content);
+        let code = `{content: ${out.toCode(record.content)}`;
         if ('id' in record) code += `, id: ${record.code ?? JSON.stringify(record.id)}`;
         else {
           if (record.heading !== undefined) code += `, heading: ${JSON.stringify(record.heading)}`;
@@ -335,12 +338,10 @@ export function createStructuredRecords() {
         items.push({ code: `${code}}`, when: record.when });
       }
       const list = guardedArray(items);
-      if (!list.includes(`${textFunction}(`)) return `(props) => ${list}`;
-      // the text of values, elements by their children like when they render
-      return `(props) => {
-const ${textFunction} = (v) => typeof v === "string" || typeof v === "number" ? String(v) : Array.isArray(v) ? v.map(${textFunction}).join("") : v !== null && typeof v === "object" && "props" in v ? ${textFunction}(v.props.children) : "";
-return ${list};
-}`;
+      // the MDX components are page props, like in the content
+      return components
+        ? `(props) => {\nconst _c = props.components;\nreturn ${list};\n}`
+        : `(props) => ${list}`;
     },
   };
 }
@@ -359,23 +360,6 @@ export function guardedArray(items: { code: string; when: string[] }[]): string 
     out += test ? `...(${test} ? [${code}] : []),` : `${code},`;
   }
   return `${out}]`;
-}
-
-/** the function that gives the text of a value in the code of structured data */
-const textFunction = '_text';
-
-/** the chunks as the code of a string, values become their text with {@link textFunction} */
-function chunksToText(chunks: Chunk[], literal: (text: string) => string): string {
-  if (chunks.every((chunk) => typeof chunk === 'string')) return literal(chunks.join(''));
-  const parts: string[] = [];
-  for (const chunk of chunks) {
-    if (typeof chunk === 'string') parts.push(literal(chunk));
-    else if ('code' in chunk) parts.push(`${textFunction}(${chunk.code})`);
-    else if ('when' in chunk)
-      parts.push(`((${chunk.when}) ? ${chunksToText(chunk.children, literal)} : "")`);
-    else parts.push(chunksToText(chunk.children, literal));
-  }
-  return `[${parts.join(', ')}].join("")`;
 }
 
 function chunksToCode(chunks: Chunk[], literal: (text: string) => string): string {

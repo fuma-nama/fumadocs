@@ -5,7 +5,8 @@ import type { ElementType, ReactNode } from 'react';
 import { Fragment, jsx, jsxs } from 'react/jsx-runtime';
 import type { TOCItemType } from 'fumadocs-core/toc';
 import type { IslandNode } from './island';
-import type { StructuredRecord } from '../../shared/structured-data';
+import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
+import { toStructuredData, type StructuredRecords } from '../../shared/structured-data';
 
 /*
  * The runtime of compiled MDX files. It never imports the source of pages: MDX modules importing it
@@ -113,7 +114,7 @@ type Render = (props: MarkdownProps) => Output;
 /** the outputs of a compiled page, functions of the params of a page */
 export interface PageOutputs {
   toc: (props: Record<string, unknown>) => TOCItemType[];
-  structuredData: (props: Record<string, unknown>) => StructuredRecord[];
+  structuredData: StructuredRecords;
   /** with `includeProcessedMarkdown`, a string for static output */
   markdown?: string | Render;
   /** the MDX components of the content island */
@@ -129,6 +130,21 @@ export const pageOutputs = new Map<string, PageOutputs>();
 export async function renderMarkdown(render: Render, props: MarkdownProps): Promise<string> {
   const { renderToMarkdown } = await import('fumadocs-core/server');
   return renderToMarkdown(jsx(Markdown, { render, props }));
+}
+
+/** The structured data of a document for its props, its records render with the MDX components of the collection */
+export function renderStructuredData(
+  outputs: PageOutputs,
+  props: Record<string, unknown>,
+): StructuredData {
+  return toStructuredData(
+    (props) => {
+      const records = outputs.structuredData(props);
+      for (const record of records) record.content = toReact(record.content as Output);
+      return records;
+    },
+    { components: outputs.components, ...props },
+  );
 }
 
 function Markdown({ render, props }: { render: Render; props: MarkdownProps }) {

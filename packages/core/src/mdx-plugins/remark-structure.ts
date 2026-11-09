@@ -3,10 +3,11 @@ import { remark } from 'remark';
 import remarkGfm from 'remark-gfm';
 import type { PluggableList, Transformer } from 'unified';
 import { VFile } from 'vfile';
-import { createCodeOutput, isJsxElement, toMdxExport } from './utils';
+import { createCodeOutput, esmScope, isJsxElement, toMdxExport } from './utils';
 import {
   createStructuredRecords,
   isInline,
+  keptElement,
   showCondition,
   toHtmlTag,
 } from '../../../shared/code-output';
@@ -56,9 +57,11 @@ export interface StructureOptions {
   mdxTypes?: (node: JsxElement) => boolean;
 
   /**
-   * Return `true` to keep a JSX element as an HTML tag, other elements are replaced by their content.
+   * Return `true` to keep a JSX element, other elements are replaced by their content. Static analysis keeps them as
+   * HTML tags, runtime analysis renders them into Markdown like processed Markdown.
    *
-   * Default: keep `File`, `TypeTable`, `Callout` and `Card` elements.
+   * Default: static analysis keeps `File`, `TypeTable`, `Callout` and `Card` elements, runtime analysis keeps the
+   * elements of components.
    */
   filterElement?: (node: JsxElement) => boolean;
 
@@ -114,15 +117,15 @@ export const remarkStructureDefaultOptions = {
  * Extract content into structured data, as Markdown sliced from the authored source. Links and JSX elements are
  * replaced by their content, images are removed.
  *
- * With runtime analysis, the export is a function of the props giving the records that show, expressions render
- * strings and numbers into their content. `vfile.data.structuredData` is static.
+ * With runtime analysis, the export is a function of the props giving the records that show, their expressions and
+ * elements render like in processed Markdown. `vfile.data.structuredData` is static.
  *
  * By default, the output is stored into VFile (`vfile.data.structuredData`), you can specify `exportAs` to export it.
  */
 export function remarkStructure({
   types = remarkStructureDefaultOptions.types,
   mdxTypes = remarkStructureDefaultOptions.mdxTypes,
-  filterElement = remarkStructureDefaultOptions.filterElement,
+  filterElement,
   exportAs = remarkStructureDefaultOptions.exportAs,
   analysis,
 }: StructureOptions = {}): Transformer<Root, Root> {
@@ -134,6 +137,9 @@ export function remarkStructure({
     const { s } = out;
     const structured = createStructuredRecords();
     const { push } = structured;
+    const scope = isStatic ? new Set<string>() : esmScope(tree);
+    const keep =
+      filterElement ?? (isStatic ? remarkStructureDefaultOptions.filterElement : undefined);
 
     // Fumadocs OpenAPI Generated Structured Data
     const openapi = (file.data.frontmatter as { _openapi?: { structuredData?: StructuredData } })
@@ -153,17 +159,19 @@ export function remarkStructure({
     let tables = 0;
 
     const collect = (node: Nodes, when: string[]) => {
-      // links and elements become their content, unless kept as HTML tags, images are removed
+      // links and elements become their content, unless kept, images and ESM (like that of includes) are removed
       if (out.markCode(node)) {
         // rendered from code
       } else if (node.type === 'link' || node.type === 'linkReference')
         s.replace(node, (s) => s.inner(node));
-      else if (node.type === 'image' || node.type === 'imageReference') s.replace(node, '');
+      else if (node.type === 'image' || node.type === 'imageReference' || node.type === 'mdxjsEsm')
+        s.replace(node, '');
       else if (isJsxElement(node))
-        s.replace(
-          node,
-          filterElement(node) ? (s) => toHtmlTag(node, s.inner(node)) : (s) => s.inner(node),
-        );
+        s.replace(node, (s) => {
+          const element = !isStatic && keptElement(node, scope);
+          if (!(keep ? keep(node) : element)) return s.inner(node);
+          return element ? out.wrap(element, s.inner(node)) : toHtmlTag(node, s.inner(node));
+        });
 
       if (node.data?.structuredData) {
         const items = node.data.structuredData.contents;

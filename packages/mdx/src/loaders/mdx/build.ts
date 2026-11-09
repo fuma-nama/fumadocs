@@ -5,7 +5,7 @@ import type { FC } from 'react';
 import type { MDXProps } from 'mdx/types';
 import type { Core } from '@/core';
 import type { DocCollectionItem } from '@/config/build';
-import type { StructuredRecord } from '../../../../shared/structured-data';
+import type { StructuredRecords } from '../../../../shared/structured-data';
 
 export interface BuildMDXOptions {
   /**
@@ -31,7 +31,7 @@ export interface CompilerOptions {
 /** the exports of a compiled page, its content and runtime outputs read the params of a page as props */
 export interface CompiledMDXProperties<Frontmatter = Record<string, unknown>> {
   frontmatter: Frontmatter;
-  structuredData: StructuredData | ((props: Record<string, unknown>) => StructuredRecord[]);
+  structuredData: StructuredData | StructuredRecords;
   toc: TOCItemType[] | ((props: Record<string, unknown>) => TOCItemType[]);
   default: FC<MDXProps>;
   extractedReferences?:

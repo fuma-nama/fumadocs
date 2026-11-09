@@ -2,6 +2,7 @@ import * as fs from 'node:fs/promises';
 import * as os from 'node:os';
 import * as path from 'node:path';
 import { expect, test } from 'vitest';
+import { createElement, type FC } from 'react';
 import { loader } from 'fumadocs-core/source';
 import { applyMdxPreset, defineDocs, type DocCollection } from '@/config';
 import { buildConfig } from '@/config/build';
@@ -187,35 +188,48 @@ test('static analysis of a collection with its own options', async () => {
   }
 });
 
-test('custom props of getPage render the content and outputs of a page', async () => {
+test('page props render the content and outputs of a page', async () => {
   const { server, toFumadocsSource: toSource } = await import('@/runtime/server');
-  const { asMarkdown } = await import('fumadocs-core/server');
-  type Props = Record<string, string>;
+  const { asMarkdown, jsxComponents } = await import('fumadocs-core/server');
+  type Props = { framework: string; name?: string; components?: Record<string, FC> };
   const create = server<{ docs: DocCollection }, { DocData: { docs: object } }>();
   const docs = await create.doc('docs', '', {
     '[framework]/index.mdx': {
       frontmatter: { title: 'Home', staticParams: [{ framework: 'next' }] },
       default: () => null,
-      // like the outputs of runtime analysis
+      // like the outputs of runtime analysis, with `<ProductName />` from the MDX components
       toc: (props: Props) => [{ title: `${props.framework} ${props.name}`, url: '#a', depth: 2 }],
       structuredData: (props: Props) => [
         { id: 'a', content: ` ${props.framework} ${props.name} ` },
         { content: ' ' },
+        { content: createElement(props.components!.ProductName) },
       ],
-      _markdown: (props: Props) => (asMarkdown() ? `${props.framework} ${props.name}` : null),
+      _markdown: (props: Props) =>
+        asMarkdown()
+          ? [
+              `${props.framework} ${props.name} `,
+              createElement(jsxComponents(props.components).ProductName),
+            ]
+          : null,
     },
   });
-  const source = loader({ baseUrl: '/', source: toSource(docs, []) });
+  function ProductName() {
+    asMarkdown();
+    return 'Fumadocs';
+  }
+  const source = loader({ baseUrl: '/', source: toSource(docs, []), props: { name: 'Fuma' } });
 
-  // the outputs are values for the path params
-  expect(source.getPage(['next'])?.data.toc[0].title).toBe('next undefined');
-  const page = source.getPage(['next'], { props: { name: 'Fuma' } })!;
+  // the props of the loader, with the path params
+  expect(source.getPage(['next'])?.data.toc[0].title).toBe('next Fuma');
+  // MDX components are page props, the missing ones are kept as JSX syntax
+  expect(source.getPage(['next'])?.data.structuredData.contents[0].content).toBe('<ProductName />');
+  const page = source.getPage(['next'], { props: { components: { ProductName } } })!;
   expect(page.url).toBe('/next');
   expect(page.data.toc[0].title).toBe('next Fuma');
   // records are trimmed, empty ones are left out
   expect(page.data.structuredData).toEqual({
     headings: [{ id: 'a', content: 'next Fuma' }],
-    contents: [],
+    contents: [{ heading: 'a', content: 'Fumadocs' }],
   });
-  await expect(page.data.getText('processed')).resolves.toBe('next Fuma');
+  await expect(page.data.getText('processed')).resolves.toBe('next Fuma Fumadocs');
 });

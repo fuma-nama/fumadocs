@@ -32,7 +32,7 @@ export function pageAt<Page extends CompiledMDXProperties<unknown>>(
     toc: typeof toc === 'function' ? toc(props) : toc,
     structuredData:
       typeof structuredData === 'function'
-        ? toStructuredData(structuredData(props))
+        ? toStructuredData(structuredData, props)
         : structuredData,
     extractedReferences: typeof refs === 'function' ? refs(props) : refs,
     // called in place, so `asMarkdown()` of the component opts in when rendering into Markdown
