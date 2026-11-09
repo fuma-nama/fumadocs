@@ -317,7 +317,13 @@ export function createStructuredRecords() {
         if (table) code += `, table: ${JSON.stringify(table)}`;
         contentList.push({ code: `${code}}`, when });
       }
-      return `(props) => ({headings: ${guardedArray(headingList)}, contents: ${guardedArray(contentList)}})`;
+      const data = `{headings: ${guardedArray(headingList)}, contents: ${guardedArray(contentList)}}`;
+      if (!data.includes(`${textFunction}(`)) return `(props) => (${data})`;
+      // the text of values, elements by their children like when they render
+      return `(props) => {
+const ${textFunction} = (v) => typeof v === "string" || typeof v === "number" ? String(v) : Array.isArray(v) ? v.map(${textFunction}).join("") : v !== null && typeof v === "object" && "props" in v ? ${textFunction}(v.props.children) : "";
+return ${data};
+}`;
     },
   };
 }
@@ -338,14 +344,16 @@ export function guardedArray(items: { code: string; when: string[] }[]): string 
   return `${out}]`;
 }
 
-/** the chunks as the code of a string, like React, values other than strings and numbers render nothing */
+/** the function that gives the text of a value in the code of structured data */
+const textFunction = '_text';
+
+/** the chunks as the code of a string, values become their text with {@link textFunction} */
 function chunksToText(chunks: Chunk[], literal: (text: string) => string): string {
   if (chunks.every((chunk) => typeof chunk === 'string')) return literal(chunks.join(''));
   const parts: string[] = [];
   for (const chunk of chunks) {
     if (typeof chunk === 'string') parts.push(literal(chunk));
-    else if ('code' in chunk)
-      parts.push(`((v) => typeof v === "string" || typeof v === "number" ? v : "")(${chunk.code})`);
+    else if ('code' in chunk) parts.push(`${textFunction}(${chunk.code})`);
     else if ('when' in chunk)
       parts.push(`((${chunk.when}) ? ${chunksToText(chunk.children, literal)} : "")`);
     else parts.push(chunksToText(chunk.children, literal));

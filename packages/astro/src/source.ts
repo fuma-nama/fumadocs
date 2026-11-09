@@ -95,10 +95,10 @@ export function toFumadocsSource<Page extends PageEntry, Meta extends MetaEntry>
       // `filePath` is relative to the project root
       absolutePath: entry.filePath && path.resolve(root, entry.filePath),
       data: pageData(entry),
-      dataAt: (params) => pageData(entry, params),
-      withProps(data, props, params) {
-        const { load, structuredData, getText } = pageData(entry, params, props);
-        return { ...data, load, structuredData, getText };
+      dataAt(params, custom) {
+        if (!custom) return pageData(entry, params);
+        const { load, structuredData, getText } = pageData(entry, params, custom.props);
+        return { ...custom.data, load, structuredData, getText };
       },
     });
   for (const entry of meta) files.push({ type: 'meta', path: entry.id, data: entry.data });

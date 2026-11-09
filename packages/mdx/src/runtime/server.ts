@@ -272,8 +272,10 @@ export function toFumadocsSource<
       path: baseDir ? PathUtils.joinPath(baseDir, entry.info.path) : entry.info.path,
       absolutePath: entry.info.fullPath,
       data: entry,
-      dataAt: (params) => docAt(entry, params),
-      withProps: (data, props, params) => createDocAt(entry, { ...params, ...props }, data),
+      dataAt: (params, custom) =>
+        custom
+          ? createDocAt(entry, { ...params, ...custom.props }, custom.data)
+          : docAt(entry, params),
     });
   }
 

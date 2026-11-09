@@ -748,6 +748,23 @@ test('Remark LLMs: placeholder', async () => {
   ).toMatchFileSnapshot(path.resolve(cwd, './fixtures/remark-llms.output.md'));
 });
 
+test('Remark Structure: values of expressions with runtime analysis', async () => {
+  const { compile, run } = await import('@mdx-js/mdx');
+  const runtime = await import('react/jsx-runtime');
+  const code = await compile(
+    {
+      value: 'Version {<b>Beta {props.n}</b>} of {props.n}{false}{null}.\n',
+      data: { _analysis: 'runtime' },
+    },
+    { outputFormat: 'function-body', remarkPlugins: [[remarkStructure, { exportAs: true }]] },
+  );
+  const { structuredData } = await run(String(code), runtime as never);
+  // elements give the text of their children, like when they render
+  expect((structuredData as (props: object) => StructuredData)({ n: 2 }).contents).toEqual([
+    { heading: undefined, content: 'Version Beta 2 of 2.' },
+  ]);
+});
+
 test('Remark LLMs: placeholders with runtime analysis', async () => {
   const { compile, run } = await import('@mdx-js/mdx');
   const runtime = await import('react/jsx-runtime');

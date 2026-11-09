@@ -231,7 +231,7 @@ interface LocaleIndex {
 function createPageIndexer({ url }: ResolvedLoaderConfig) {
   /** locale (empty without i18n) -> index */
   const indexes = new Map<string, LocaleIndex>();
-  const binders = new WeakMap<Page, NonNullable<ContentStoragePageFile['withProps']>>();
+  const binders = new WeakMap<Page, NonNullable<ContentStoragePageFile['dataAt']>>();
 
   return {
     scan(storage: ContentStorage, lang?: string) {
@@ -264,7 +264,7 @@ function createPageIndexer({ url }: ResolvedLoaderConfig) {
           params: item.params,
           locale: lang,
         };
-        if (item.withProps) binders.set(page, item.withProps);
+        if (item.dataAt) binders.set(page, item.dataAt);
         index.pathToPage.set(path, page);
         index.pages.set(slugsKey(page.slugs), page);
         index.urlToPage.set(page.url, page);
@@ -285,7 +285,7 @@ function createPageIndexer({ url }: ResolvedLoaderConfig) {
     /** the page with props passed to its content, not cached */
     withProps(page: Page, props: Record<string, unknown>): Page {
       const bind = binders.get(page);
-      return bind ? { ...page, data: bind(page.data, props, page.params ?? {}) } : page;
+      return bind ? { ...page, data: bind(page.params ?? {}, { props, data: page.data }) } : page;
     },
     /** do not filter by language if `lang` is not specified */
     getPages(lang?: string) {

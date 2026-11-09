@@ -910,10 +910,13 @@ test('Loader: custom props of a page', () => {
           type: 'page',
           path: '[version]/index.mdx',
           data: { title: 'Install', staticParams: [{ version: 'v1' }] },
-          withProps: (data, props, params) => ({
-            ...data,
-            title: `${data.title} ${params.version} ${String(props.edition)}`,
-          }),
+          dataAt: (params, custom) =>
+            custom
+              ? {
+                  ...custom.data,
+                  title: `${custom.data.title} ${params.version} ${custom.props.edition}`,
+                }
+              : { title: 'Install' },
         },
       ],
     },

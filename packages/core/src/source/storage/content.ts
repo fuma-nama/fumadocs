@@ -41,8 +41,8 @@ export interface ContentStoragePageFile<
   data: Data;
   /** for a page of a dynamic file, its params */
   params?: Params;
-  /** see `withProps` of `VirtualFile` */
-  withProps?(data: Data, props: Record<string, unknown>, params: Params): Data;
+  /** see `dataAt` of `VirtualFile`, for custom props */
+  dataAt?(params: Params, custom?: { props: Record<string, unknown>; data: Data }): Data;
 }
 
 type ContentStorageFile = ContentStorageMetaFile | ContentStoragePageFile;
@@ -131,7 +131,7 @@ export function createContentStorageBuilder(loaderConfig: ResolvedLoaderConfig) 
           slugs: inputFile.slugs as string[],
           data: inputFile.data,
           absolutePath: inputFile.absolutePath,
-          withProps: inputFile.withProps,
+          dataAt: inputFile.dataAt,
         };
         const page = file;
         files = getStaticParams(path, {

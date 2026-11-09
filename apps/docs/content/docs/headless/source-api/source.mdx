@@ -157,7 +157,7 @@ const files: StaticSource['files'] = [
 
 #### Custom Props
 
-To support [custom props](/docs/headless/source-api#custom-props), give the page file a `withProps()` hook. It receives the data of the page, the custom props and the path params, and returns the data rendered for both:
+To support [custom props](/docs/headless/source-api#custom-props), `dataAt()` takes them as a second argument, with the data of the page after the plugins of the loader. Return that data rendered for the params and custom props:
 
 ```tsx twoslash
 import type { StaticSource } from 'fumadocs-core/source';
@@ -169,13 +169,13 @@ const files: StaticSource['files'] = [
     type: 'page',
     path: '[framework]/deploy.mdx',
     data: pageAt({}),
-    dataAt: (params) => pageAt(params),
-    withProps: (data, props, params) => ({ ...data, ...pageAt({ ...params, ...props }) }),
+    dataAt: (params, custom) =>
+      custom ? { ...custom.data, ...pageAt({ ...params, ...custom.props }) } : pageAt(params),
   },
 ];
 ```
 
-Without the hook, `getPage()` ignores custom props.
+A page without `dataAt()` ignores custom props.
 
 ### Dynamic Source
 
