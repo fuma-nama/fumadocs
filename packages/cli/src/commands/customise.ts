@@ -214,7 +214,7 @@ export async function rewriteLayoutImports(config: LoadedConfig, map: Map<string
     for (const node of source.program.body) {
       if (node.type !== 'ImportDeclaration') continue;
       const to = map.get(node.source.value);
-      if (to) source.s.overwrite(node.source.start + 1, node.source.end - 1, to);
+      if (to) source.s.overwrite(node.source.start! + 1, node.source.end! - 1, to);
     }
     if (!source.s.hasChanged()) continue;
     await source.save();

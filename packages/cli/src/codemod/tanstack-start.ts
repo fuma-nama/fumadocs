@@ -1,4 +1,4 @@
-import type { CallExpression } from '@yuku-toolchain/types';
+import type { CallExpression } from '@babel/types';
 import {
   addElements,
   find,

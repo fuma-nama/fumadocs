@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "dependencies": {
-    "fuma-cli": "^0.3.3"
+    "fuma-cli": "^0.3.4"
   },
   "devDependencies": {
     "@fumadocs/cli": "workspace:*",

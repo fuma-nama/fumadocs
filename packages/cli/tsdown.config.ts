@@ -14,7 +14,7 @@ export default defineConfig({
   target: 'node22',
   copy: 'schema.json',
   deps: {
-    onlyBundle: ['fuma-cli', '@fuma-cli/interactive'],
+    onlyBundle: ['fuma-cli', '@fuma-cli/interactive', '@babel/parser', '@babel/types'],
   },
   exports: {
     enabled: true,
