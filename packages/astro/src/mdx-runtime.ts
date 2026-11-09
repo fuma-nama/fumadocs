@@ -119,8 +119,8 @@ type Render = (props: MarkdownProps) => Output;
 export interface PageOutputs {
   toc: (props: Params) => TOCItemType[];
   structuredData: (props: Params) => StructuredDataNodes;
-  /** with `includeProcessedMarkdown` */
-  markdown?: Render;
+  /** with `includeProcessedMarkdown`, a string for static output */
+  markdown?: string | Render;
   /** the MDX components of the content island */
   components?: MDXComponents;
 }

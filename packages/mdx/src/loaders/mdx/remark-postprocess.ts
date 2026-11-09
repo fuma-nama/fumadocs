@@ -4,6 +4,10 @@ import { valueToEstree } from 'estree-util-value-to-estree';
 import { removePosition } from 'unist-util-remove-position';
 import { flattenNode, walk } from './mdast-utils';
 import type { LLMsOptions } from 'fumadocs-core/mdx-plugins';
+import type { OutputMode } from 'fumadocs-core/mdx-plugins/stringifier';
+import { Parser } from 'acorn';
+import type { MdxjsEsm } from 'mdast-util-mdx';
+import { guardedArray, showCondition } from '../../../../shared/code-output';
 import { remarkLLMs } from 'fumadocs-core/mdx-plugins/remark-llms';
 
 export interface ExtractedReference {
@@ -12,6 +16,7 @@ export interface ExtractedReference {
 
 export interface PostprocessOptions {
   _format: 'md' | 'mdx';
+  _output?: OutputMode;
 
   /**
    * Properties to export from `vfile.data`
@@ -47,6 +52,7 @@ export function remarkPostprocess({
   includeMDAST = false,
   extractLinkReferences = false,
   valueToExport = [],
+  _output,
 }: PostprocessOptions): Transformer<Root, Root> {
   return (tree, file) => {
     const frontmatter = (file.data.frontmatter ??= {});
@@ -66,26 +72,34 @@ export function remarkPostprocess({
     });
 
     if (extractLinkReferences) {
-      const urls: ExtractedReference[] = [];
-
-      walk<Nodes>(tree, (node) => {
-        if (node.type !== 'link') return;
-        urls.push({
-          href: node.url,
-        });
-        return 'skip';
-      });
-
-      file.data['mdx-export'].push({
-        name: 'extractedReferences',
-        value: urls,
+      const isStatic = _output === 'static';
+      const items: { code: string; when: string[] }[] = [];
+      const visit = (node: Nodes, when: string[]) => {
+        if (node.type === 'link')
+          return void items.push({ code: JSON.stringify({ href: node.url }), when });
+        if (!('children' in node)) return;
+        const condition = !isStatic && showCondition(node);
+        for (const child of node.children) visit(child, condition ? [...when, condition] : when);
+      };
+      visit(tree, []);
+      const list = guardedArray(items);
+      tree.children.unshift({
+        type: 'mdxjsEsm',
+        value: '',
+        data: {
+          estree: Parser.parse(
+            `export const extractedReferences = ${isStatic ? list : `(props) => ${list}`};`,
+            { ecmaVersion: 'latest', sourceType: 'module' },
+          ) as unknown as NonNullable<MdxjsEsm['data']>['estree'],
+        },
       });
     }
 
     if (includeProcessedMarkdown) {
-      const llms = remarkLLMs(
-        typeof includeProcessedMarkdown === 'object' ? includeProcessedMarkdown : undefined,
-      );
+      const llms = remarkLLMs({
+        output: _output,
+        ...(typeof includeProcessedMarkdown === 'object' && includeProcessedMarkdown),
+      });
       llms(tree, file, () => undefined);
     }
 

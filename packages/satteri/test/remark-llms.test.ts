@@ -13,7 +13,7 @@ import { defineMdastPlugin, type MdastPluginInput } from 'satteri';
 test('remark-llms handles many root blocks', async () => {
   const options = await applySatteriPreset({
     rehypeCodeOptions: false,
-    mdastPlugins: [remarkLlms()],
+    mdastPlugins: [remarkLlms({ output: 'static' })],
   })('bundler');
 
   const result = await compileMdx({
@@ -30,7 +30,7 @@ test('remark-llms handles many root blocks', async () => {
 test('remark-llms keeps the authored source form', async () => {
   const options = await applySatteriPreset({
     rehypeCodeOptions: false,
-    mdastPlugins: [remarkLlms()],
+    mdastPlugins: [remarkLlms({ output: 'static' })],
   })('bundler');
 
   const result = await compileMdx({
@@ -65,7 +65,7 @@ test('remark-llms keeps the authored source form', async () => {
 test('remark-llms splices included content', async () => {
   const options = await applySatteriPreset({
     rehypeCodeOptions: false,
-    mdastPlugins: [remarkInclude(), remarkLlms()],
+    mdastPlugins: [remarkInclude(), remarkLlms({ output: 'static' })],
   })('bundler');
 
   const result = await compileMdx({
@@ -84,7 +84,11 @@ test('remark-llms splices included content', async () => {
 test('included content goes through the plugins', async () => {
   const options = await applySatteriPreset({ rehypeCodeOptions: false })('bundler');
   // includes first, as in fumadocs-mdx
-  options.mdastPlugins = [remarkInclude(), ...(options.mdastPlugins ?? []), remarkLlms()];
+  options.mdastPlugins = [
+    remarkInclude(),
+    ...(options.mdastPlugins ?? []),
+    remarkLlms({ output: 'static' }),
+  ];
 
   const result = await compileMdx({
     source: '<include>./content.mdx</include>\n',
@@ -104,7 +108,7 @@ test('included content goes through the plugins', async () => {
 test('remark-llms function output keeps replaced content in elements', async () => {
   const options = await applySatteriPreset({
     rehypeCodeOptions: false,
-    mdastPlugins: [remarkInclude(), remarkLlms({ output: 'function' })],
+    mdastPlugins: [remarkInclude(), remarkLlms({ output: 'runtime' })],
   })('bundler');
 
   const result = await compileMdx({
@@ -135,7 +139,7 @@ test('remark-llms composes nested edits', async () => {
     const result = await compileMdx({
       source: '<Outer>\n  <Item />\n</Outer>\n\n<Item />\n',
       filePath: '/doc.mdx',
-      options: { mdastPlugins: [...plugins, remarkLlms()] },
+      options: { mdastPlugins: [...plugins, remarkLlms({ output: 'static' })] },
     });
     return result.data?.markdown;
   };
@@ -156,7 +160,7 @@ test('remark-llms composes nested edits', async () => {
 test('remark-llms keeps replacements inside their containers', async () => {
   const options = await applySatteriPreset({
     rehypeCodeOptions: false,
-    mdastPlugins: [remarkInclude(), remarkLlms()],
+    mdastPlugins: [remarkInclude(), remarkLlms({ output: 'static' })],
   })('bundler');
 
   const result = await compileMdx({
@@ -211,7 +215,7 @@ test('remark-llms shows generated content of replaced nodes', async () => {
         renderType: (type) => ({ type: 'text', value: type }),
         renderMarkdown: (md) => ({ type: 'text', value: md }),
       }),
-      remarkLlms(),
+      remarkLlms({ output: 'static' }),
     ],
   })('bundler');
 
@@ -237,7 +241,7 @@ test('remark-llms shows generated content of replaced nodes', async () => {
 test('remark-llms function output exports a component', async () => {
   const options = await applySatteriPreset({
     rehypeCodeOptions: false,
-    mdastPlugins: [remarkLlms({ output: 'function' })],
+    mdastPlugins: [remarkLlms({ output: 'runtime' })],
   })('bundler');
 
   const result = await compileMdx({
@@ -303,7 +307,7 @@ test('remark-llms function output exports a component', async () => {
 
 test('remark-llms outputs the URLs of imported images', async () => {
   const fixtures = path.resolve(import.meta.dirname, './fixtures');
-  const load = async (output?: 'function') => {
+  const load = async (output?: 'runtime') => {
     const options = await applySatteriPreset({
       rehypeCodeOptions: false,
       remarkImageOptions: { publicDir: fixtures },
@@ -325,7 +329,7 @@ test('remark-llms outputs the URLs of imported images', async () => {
 
   const expected = '![Image](</test/fixtures/img.png> "A \\"title\\"")\n\n![Public](/img.png)';
   await expect(renderToMarkdown(createElement(await load()))).resolves.toBe(expected);
-  await expect(renderToMarkdown(createElement(await load('function')))).resolves.toBe(expected);
+  await expect(renderToMarkdown(createElement(await load('runtime')))).resolves.toBe(expected);
 });
 
 test('included images use the URLs of their imports', async () => {

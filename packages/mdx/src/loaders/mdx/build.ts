@@ -1,4 +1,6 @@
+import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
 import type { StructuredDataNodes } from '../../../../shared/structured-data';
+import type { ExtractedReference } from './remark-postprocess';
 import type { TOCItemType } from 'fumadocs-core/toc';
 import type { FC } from 'react';
 import type { MDXProps } from 'mdx/types';
@@ -27,19 +29,20 @@ export interface CompilerOptions {
   addDependency: (file: string) => void;
 }
 
-/** the exports of a compiled page, its content and outputs read the params of a page as props */
+/** the exports of a compiled page, its content and runtime outputs read the params of a page as props */
 export interface CompiledMDXProperties<Frontmatter = Record<string, unknown>> {
   frontmatter: Frontmatter;
-  structuredData: (props: Params) => StructuredDataNodes;
-  toc: (props: Params) => TOCItemType[];
+  structuredData: StructuredData | ((props: Params) => StructuredDataNodes);
+  toc: TOCItemType[] | ((props: Params) => TOCItemType[]);
   default: FC<MDXProps>;
+  extractedReferences?: ExtractedReference[] | ((props: Params) => ExtractedReference[]);
 
   /**
    * Enable from `postprocess` option.
    *
-   * A component, render it with `renderToMarkdown` from `fumadocs-core/server`.
+   * A string, or for runtime output a component, render it with `renderToMarkdown` from `fumadocs-core/server`.
    */
-  _markdown?: FC<MDXProps>;
+  _markdown?: string | FC<MDXProps>;
   /**
    * Enable from `postprocess` option.
    */

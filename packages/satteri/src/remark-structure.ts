@@ -4,13 +4,14 @@ import type {
   StructuredData,
   StructuredDataContent,
 } from 'fumadocs-core/mdx-plugins/remark-structure';
+import type { OutputMode } from 'fumadocs-core/mdx-plugins/stringifier';
 import { tableRowToStructuredData } from 'fumadocs-core/search';
 import { offsets, type Stringifier } from './stringifier';
 import { headingIdRegex } from './heading-id';
 import { idCodeProperty } from '../../shared/heading-id';
 import type { ExtraPluginHooks } from './compile';
-import { createCodeOutput, showConditions, type JsxElementNode } from './utils';
-import { and, chunksToCode, guardedArray } from '../../shared/code-output';
+import { createCodeOutput, type JsxElementNode } from './utils';
+import { and, chunksToCode, guardedArray, showConditions } from '../../shared/code-output';
 
 declare module 'satteri' {
   interface DataMap {
@@ -36,6 +37,9 @@ export interface StructureOptions {
    * @default true
    */
   exportAs?: string | boolean;
+
+  /** @defaultValue 'runtime' */
+  output?: OutputMode;
 }
 
 /** the nodes that a function of `types` can match */
@@ -109,6 +113,7 @@ export function remarkStructure({
     }
   },
   exportAs = true,
+  output,
 }: StructureOptions = {}) {
   const matchType =
     typeof types === 'function' ? types : (node: Nodes) => types.includes(node.type);
@@ -200,7 +205,7 @@ export function remarkStructure({
       options: { position: true },
       before(_root: unknown, ctx: MdastVisitorContext) {
         ctx.data.structuredData ??= data;
-        out = createCodeOutput(ctx, 'search');
+        out = createCodeOutput(ctx, 'search', output === 'static');
         s = out.s;
 
         // Fumadocs OpenAPI Generated Structured Data
@@ -235,7 +240,7 @@ export function remarkStructure({
           if (content) data.headings.push({ id, content: out.toStatic(content) });
         for (const { when: _, after, heading = headings[after - 1]?.id, ...item } of contents)
           data.contents.push({ heading, ...item, content: out.toStatic(item.content) });
-        if (!exportAs) return;
+        if (!exportAs || output === 'static') return;
 
         const headingList: CodeItem[] = [];
         for (const { code, content, when } of headings)
@@ -260,7 +265,8 @@ export function remarkStructure({
     if (exportAs) {
       addExport(
         typeof exportAs === 'string' ? exportAs : 'structuredData',
-        data._structuredDataCode ?? '() => ({ headings: [], contents: [] })',
+        data._structuredDataCode ??
+          JSON.stringify(data.structuredData ?? { headings: [], contents: [] }),
       );
     }
   };

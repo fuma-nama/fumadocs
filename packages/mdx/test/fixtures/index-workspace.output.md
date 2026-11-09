@@ -7,6 +7,7 @@ import type * as Config from './config';
 
 const create = server<typeof Config, import("fumadocs-mdx/runtime/types").InternalTypeConfig & {
   DocData: {
+    docs: { structuredData: () => Promise<import("fumadocs-core/mdx-plugins/remark-structure").StructuredData> },
   }
 }>();
 
@@ -20,6 +21,7 @@ import * as Config from './config';
 
 const create = await dynamic<typeof Config, import("fumadocs-mdx/runtime/types").InternalTypeConfig & {
   DocData: {
+    docs: { structuredData: () => Promise<import("fumadocs-core/mdx-plugins/remark-structure").StructuredData> },
   }
 }>(Config, {"environment":"dynamic","root":"","configPath":"packages/mdx/test/fixtures/config.ts","outDir":"packages/mdx/test/fixtures"});
 ```
@@ -31,6 +33,7 @@ import type * as Config from './config';
 
 const create = browser<typeof Config, import("fumadocs-mdx/runtime/types").InternalTypeConfig & {
   DocData: {
+    docs: { structuredData: () => Promise<import("fumadocs-core/mdx-plugins/remark-structure").StructuredData> },
   }
 }>();
 const browserCollections = {
@@ -48,6 +51,7 @@ import type * as Config from '../config';
 
 const create = server<typeof Config, import("fumadocs-mdx/runtime/types").InternalTypeConfig & {
   DocData: {
+    docs: { structuredData: () => Promise<import("fumadocs-core/mdx-plugins/remark-structure").StructuredData> },
   }
 }>();
 
@@ -61,6 +65,7 @@ import * as Config from '../config';
 
 const create = await dynamic<typeof Config, import("fumadocs-mdx/runtime/types").InternalTypeConfig & {
   DocData: {
+    docs: { structuredData: () => Promise<import("fumadocs-core/mdx-plugins/remark-structure").StructuredData> },
   }
 }>(Config, {"environment":"dynamic","root":"","configPath":"packages/mdx/test/fixtures/config.ts","outDir":"packages/mdx/test/fixtures/test"});
 ```
@@ -72,6 +77,7 @@ import type * as Config from '../config';
 
 const create = browser<typeof Config, import("fumadocs-mdx/runtime/types").InternalTypeConfig & {
   DocData: {
+    docs: { structuredData: () => Promise<import("fumadocs-core/mdx-plugins/remark-structure").StructuredData> },
   }
 }>();
 const browserCollections = {

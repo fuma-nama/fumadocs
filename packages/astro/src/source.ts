@@ -142,6 +142,7 @@ function pageData<Entry extends PageEntry>(entry: Entry, params?: Params): Astro
       if (type === 'raw') return entry.body ?? '';
       const { markdown, components } = (await compile()).outputs;
       if (markdown === undefined) throw new NoProcessedMarkdownError();
+      if (typeof markdown === 'string') return markdown;
       return renderMarkdown(markdown, { ...props, components: options?.components ?? components });
     },
   };

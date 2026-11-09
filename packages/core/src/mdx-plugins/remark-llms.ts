@@ -3,6 +3,7 @@ import { createCodeOutput, isJsxElement } from './utils';
 import { keptElement, markdownCode } from '../../../shared/code-output';
 import type { Nodes, Root } from 'mdast';
 import type { MdxJsxFlowElement, MdxJsxTextElement } from 'mdast-util-mdx';
+import type { OutputMode } from './stringifier';
 import type { PlaceholderData } from './remark-llms.runtime';
 import { stringifyHeadingId } from './heading-id';
 
@@ -35,20 +36,23 @@ export interface LLMsOptions {
   /**
    * Tag names of MDX components to be output as placeholders, render them with `renderPlaceholder()`.
    *
-   * Ignored with `output: 'function'`.
+   * For static output only.
    */
   mdxAsPlaceholder?: string[];
 
   /**
-   * The export is a component of the props of the page, render it with `renderToMarkdown` from `fumadocs-core/server`.
+   * A runtime export is a component, render it with `renderToMarkdown` from `fumadocs-core/server`: JSX elements are
+   * kept as JSX, receiving their original props and resolving from `props.components`, a component can call
+   * `asMarkdown()` to define its own Markdown form. A static export is a string.
    *
-   * With `function`, JSX elements are kept as JSX, receiving their original props and resolving from
-   * `props.components`. A component can call `asMarkdown()` to define its own Markdown form.
+   * `string` and `function` are deprecated, use `static` and `runtime`.
+   *
+   * @defaultValue 'runtime'
    */
-  output?: 'function';
+  output?: OutputMode | 'string' | 'function';
 
   /**
-   * @internal output in file data, unavailable with `output: 'function'`
+   * @internal output in file data
    */
   _data?: boolean;
 }
@@ -71,10 +75,10 @@ export function remarkLLMs({
   output,
   filterElement,
 }: LLMsOptions = {}): Transformer<Root, Root> {
-  const jsx = output === 'function';
+  const isStatic = output === 'static' || output === 'string';
 
   return (tree, file) => {
-    const out = createCodeOutput(file);
+    const out = createCodeOutput(file, undefined, isStatic);
     const { s } = out;
 
     const visit = (nodes: Nodes[]) => {
@@ -91,11 +95,11 @@ export function remarkLLMs({
         } else if (out.markCode(node)) {
           // rendered from code
         } else if (node.type === 'heading') {
-          stringifyHeadingId(s, node, headingIds);
+          stringifyHeadingId(s, node, headingIds, isStatic);
         } else if (isJsxElement(node) && node.name) {
-          if (!jsx && mdxAsPlaceholder?.includes(node.name))
+          if (isStatic && mdxAsPlaceholder?.includes(node.name))
             s.replace(node, (s) => toPlaceholder(node, out.toStatic(s.inner(node))));
-          else if (jsx && componentNameRegex.test(node.name))
+          else if (!isStatic && componentNameRegex.test(node.name))
             s.replace(node, (s) => {
               let children = s.inner(node);
               // block content on its own lines
@@ -111,7 +115,7 @@ export function remarkLLMs({
     const value = text ? `${text}\n` : '';
     const chunks = out.chunks(value);
 
-    tree.children.unshift(out.esm(markdownCode(as, chunks)));
+    tree.children.unshift(out.esm(markdownCode(as, chunks, isStatic)));
     if (_data) file.data.markdown = out.toStatic(value);
   };
 }

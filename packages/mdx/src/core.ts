@@ -412,10 +412,12 @@ function postprocessPlugin(): Plugin {
           const docs = docCollectionOf(collection);
           if (!docs) continue;
 
-          const extras: string[] = [];
+          const structuredData = 'import("fumadocs-core/mdx-plugins/remark-structure").StructuredData';
+          const extras = [
+            `{ structuredData: ${docs.output === 'static' ? structuredData : `() => Promise<${structuredData}>`} }`,
+          ];
           if (docs.postprocess?.extractLinkReferences) extras.push(LinkReferenceTypes);
           if (docs.lastModified) extras.push(LastModifiedTypes);
-          if (extras.length === 0) continue;
 
           lines.push(ident(`${collection.name}: ${extras.join(' & ')},`, 2));
         }

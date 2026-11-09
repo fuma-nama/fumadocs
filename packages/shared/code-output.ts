@@ -49,11 +49,14 @@ const markerRegex = /\0(\/?)(\d+)\0/g;
 
 /**
  * A stringifier whose output can have parts rendered from code: replacements mark them, `chunks()` splits the output on
- * their markers. Outputs are functions of the props of the page, code reads them in render scope.
+ * their markers. Runtime outputs are functions of the props of the page, code reads them in render scope.
+ *
+ * @param isStatic - for static outputs: authored expressions keep their source, the content of every branch shows
  */
 export function createCodeOutput<N extends CodeNode, S extends CodeStringifier<N>>(
   createStringifier: (expression: (code: string, fallback: string) => string) => S,
   range: (node: N) => { start: number; end: number } | undefined,
+  isStatic = false,
 ) {
   const parts: CodePart[] = [];
   /** a value */
@@ -118,6 +121,7 @@ export function createCodeOutput<N extends CodeNode, S extends CodeStringifier<N
      */
     markCode(node: N): boolean {
       if (node.type === 'mdxTextExpression' || node.type === 'mdxFlowExpression') {
+        if (isStatic) return true;
         const position = range(node);
         const fallback = position ? s.source.slice(position.start, position.end) : '';
         s.replace(node, mark({ code: node.value as string, fallback }));
@@ -126,10 +130,35 @@ export function createCodeOutput<N extends CodeNode, S extends CodeStringifier<N
 
       const when = showCondition(node);
       if (!when) return false;
-      s.replace(node, (s) => wrap({ when }, s.inner(node)));
+      s.replace(node, (s) => (isStatic ? s.inner(node) : wrap({ when }, s.inner(node))));
       return true;
     },
   };
+}
+
+/** the conditions of the branches of `<show>` around a node, outermost first */
+export function showConditions(
+  node: object,
+  ctx: { parent: (node: never) => object | undefined },
+): string[] {
+  const out: string[] = [];
+  for (let p = ctx.parent(node as never); p; p = ctx.parent(p as never)) {
+    const condition = showCondition(p as CodeNode);
+    if (condition) out.unshift(condition);
+  }
+  return out;
+}
+
+/** content analysed from source, for static outputs: authored expressions as their source, the content of branches */
+export function staticContent<N extends CodeNode & { children?: N[] }>(nodes: N[]): N[] {
+  const out: N[] = [];
+  for (const node of nodes) {
+    if (node.type === 'mdxTextExpression') out.push({ type: 'text', value: `{${node.value}}` } as N);
+    else if (showCondition(node)) out.push(...staticContent(node.children!));
+    else if (node.children) out.push({ ...node, children: staticContent(node.children) });
+    else out.push(node);
+  }
+  return out;
 }
 
 /** the condition of a branch of `<show>` checked when rendering */
@@ -196,8 +225,17 @@ function chunksToJsx(chunks: Chunk[]): string {
   return out;
 }
 
-/** the export of Markdown, a component rendered with `renderToMarkdown()` of `fumadocs-core/server` */
-export function markdownCode(as: string, chunks: Chunk[]): string {
+/**
+ * The export of Markdown, a component rendered with `renderToMarkdown()` of `fumadocs-core/server`, or the string of
+ * static Markdown, code of plugins is concatenated
+ */
+export function markdownCode(as: string, chunks: Chunk[], isStatic = false): string {
+  if (isStatic) {
+    let out = '';
+    for (const chunk of chunks)
+      out += `${out ? ' + ' : ''}${typeof chunk === 'string' ? JSON.stringify(chunk) : `(${(chunk as { code: string }).code})`}`;
+    return `export const ${as} = ${out || '""'};`;
+  }
   const elements = hasElement(chunks);
   return [
     `import { asMarkdown as _asMarkdown${elements ? ', jsxComponents as _jsxComponents' : ''} } from "fumadocs-core/server";`,

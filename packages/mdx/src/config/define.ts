@@ -3,6 +3,7 @@ import type { MDXPresetOptions } from '@/config/preset';
 import type { ProcessorOptions } from '@mdx-js/mdx';
 import { metaSchema, pageSchema } from 'fumadocs-core/source/schema';
 import type { PostprocessOptions } from '@/loaders/mdx/remark-postprocess';
+import type { OutputMode } from 'fumadocs-core/mdx-plugins/stringifier';
 import type { LastModifiedFn } from '@/loaders/mdx/last-modified';
 import type { PluginOption } from '@/core';
 import type { SatteriPresetOptions } from '@fumadocs/satteri/preset';
@@ -31,6 +32,13 @@ export interface DocCollectionBase<
   Schema extends StandardSchemaV1 = StandardSchemaV1,
 > extends BaseCollection {
   postprocess?: Partial<PostprocessOptions>;
+  /**
+   * The output of structured data, the TOC, processed Markdown and extracted references, `static` makes
+   * `structuredData` a value.
+   *
+   * @defaultValue 'runtime'
+   */
+  output?: OutputMode;
   async?: boolean;
   dynamic?: boolean;
   schema?: CollectionSchema<Schema, { path: string; source: string }>;

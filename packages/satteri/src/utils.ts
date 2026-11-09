@@ -8,10 +8,7 @@ import type {
   rehypeCodeFromHighlighter,
   RehypeCodeFromHighlighterOptions,
 } from 'fumadocs-core/mdx-plugins/rehype-code.core';
-import {
-  createCodeOutput as createSharedCodeOutput,
-  showCondition,
-} from '../../shared/code-output';
+import { createCodeOutput as createSharedCodeOutput } from '../../shared/code-output';
 import { createStringifier, offsets, type PositionedNode, type Stringifier } from './stringifier';
 
 export interface JsxElementNode {
@@ -94,24 +91,16 @@ type CodeNode = PositionedNode & {
 };
 
 /** the shared code output, on the stringifier of Sätteri */
-export function createCodeOutput(ctx: MdastVisitorContext, namespace?: 'search') {
+export function createCodeOutput(
+  ctx: MdastVisitorContext,
+  namespace?: 'search',
+  isStatic?: boolean,
+) {
   return createSharedCodeOutput<CodeNode, Stringifier>(
     (expression) => createStringifier(ctx, namespace, expression),
     offsets,
+    isStatic,
   );
-}
-
-/** the conditions of the branches of `<show>` around a node, outermost first */
-export function showConditions(
-  node: object,
-  ctx: { parent: (node: never) => object | undefined },
-): string[] {
-  const out: string[] = [];
-  for (let p = ctx.parent(node as never); p; p = ctx.parent(p as never)) {
-    const condition = showCondition(p as { type: string });
-    if (condition) out.unshift(condition);
-  }
-  return out;
 }
 
 // Shiki writes literal HTML attribute names into hast `properties`. The

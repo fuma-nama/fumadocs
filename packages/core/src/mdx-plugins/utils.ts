@@ -120,7 +120,7 @@ function fill(node: object, expressions: Expression[]) {
 }
 
 /** the shared code output, on the stringifier of mdast: estree expressions of replacements go in by placeholders */
-export function createCodeOutput(file: VFile, namespace?: string) {
+export function createCodeOutput(file: VFile, namespace?: string, isStatic?: boolean) {
   const expressions: Expression[] = [];
   let stringifier: Stringifier;
   const out = createSharedCodeOutput<Nodes, Stringifier>(
@@ -129,6 +129,7 @@ export function createCodeOutput(file: VFile, namespace?: string) {
         expression(`_fumadocs${expressions.push(value) - 1}`, fallback),
       )),
     (node) => stringifier.range(node),
+    isStatic,
   );
   return Object.assign(out, { esm: (code: string) => toEsm(code, expressions) });
 }

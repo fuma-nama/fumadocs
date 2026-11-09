@@ -127,12 +127,35 @@ test('Remark Show: branches and expressions render from code in every output', a
   expect(astro.html).not.toContain('With pnpm');
   expect(pnpm.html).toContain('With pnpm');
 
-  // the static views have the authored source of expressions and every branch
+  // the static view has the authored source of expressions and every branch
   expect((data.structuredData as StructuredData).headings[0].content).toBe(
     'Deploy on {props.framework}',
   );
-  expect(data.markdown).toContain('# Deploy on {props.framework}');
-  expect(data.markdown).toContain('## With pnpm');
+});
+
+test('Remark Show: static outputs analyse the source', async () => {
+  const output = 'static';
+  const options = await applySatteriPreset({ output, mdastPlugins: [remarkLlms({ output })] })(
+    'runtime',
+  );
+  const { code } = await compileMdx({
+    source: '## Deploy on {props.framework}\n\n<show when={props.a}>\nAstro.\n</show>\n',
+    filePath: '/tmp/doc.mdx',
+    environment: 'runtime',
+    options,
+  });
+  const page = (await new AsyncFunction('opts', code)({
+    ...JsxRuntime,
+    ...server,
+    createHeadingIds,
+  })) as {
+    toc: { url: string }[];
+    structuredData: StructuredData;
+    _markdown: string;
+  };
+  expect(page.toc.map((item) => item.url)).toEqual(['#deploy-on-']);
+  expect(page.structuredData.headings[0].content).toBe('Deploy on {props.framework}');
+  expect(page._markdown).toBe('## Deploy on {props.framework} [#deploy-on-]\n\nAstro.\n');
 });
 
 test('Remark Show: code tabs end at a branch', async () => {

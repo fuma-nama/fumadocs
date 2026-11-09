@@ -3,7 +3,7 @@ import { defineMdastPlugin, type MdastVisitorContext } from 'satteri';
 import type { Heading } from 'mdast';
 import { headingIdRegex } from './heading-id';
 import { headingIdCode, idCodeProperty } from '../../shared/heading-id';
-import { showConditions } from './utils';
+import { showConditions } from '../../shared/code-output';
 
 export interface RemarkHeadingOptions {
   slug?: (heading: Heading, text: string) => string;

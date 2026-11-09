@@ -82,10 +82,14 @@ function toDocData(page: PageAt<CompiledMDXProperties>, exports: CompiledMDXProp
 
   for (const key of ['lastModified', 'extractedReferences']) {
     // @ts-expect-error -- handle passthrough properties
-    data[key] = exports[key];
+    data[key] = page[key];
   }
 
   return data;
+}
+
+async function resolveStructuredData(data: DocData['structuredData']) {
+  return typeof data === 'function' ? data() : data;
 }
 
 /** the page of compiled exports at params, with its doc data */
@@ -154,7 +158,7 @@ export function server<Config, TC extends InternalTypeConfig>() {
               return bind(await content(), {}).data;
             },
             async structuredData() {
-              return bind(await content(), {}).page.structuredData();
+              return resolveStructuredData(bind(await content(), {}).page.structuredData);
             },
           } satisfies AsyncDocCollectionEntry;
         }),
@@ -334,7 +338,7 @@ function createDocAt<Doc extends DocMethods>(doc: Doc, params: Params, key: stri
     ...createDocMethods(doc.info, async () => (await loadPage()).page),
     // memoized, it can be called in render
     load: () => (data ??= loadPage().then((item) => item.data)),
-    structuredData: async () => (await loadPage()).page.structuredData(),
+    structuredData: async () => resolveStructuredData((await loadPage()).page.structuredData),
     ...('body' in doc && {
       preload: () => loadPage().then(() => undefined),
       // like the body of the macro, it renders synchronously when loaded
@@ -361,6 +365,7 @@ function createDocMethods(
       const markdown =
         data._markdown ??
         (data as { _exports?: Pick<CompiledMDXProperties, '_markdown'> })._exports?._markdown;
+      if (typeof markdown === 'string') return markdown;
       if (markdown) {
         const { renderToMarkdown } = await import('fumadocs-core/server');
         return renderToMarkdown(createElement(markdown, { components: options?.components }));

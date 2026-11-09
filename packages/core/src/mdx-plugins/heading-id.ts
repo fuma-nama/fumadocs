@@ -7,7 +7,12 @@ import { idCodeProperty } from '../../../shared/heading-id';
 export const headingIdRegex = /\s*\[#(?<slug>[^]+?)]\s*$/;
 
 /** write the ID of a heading in stringified Markdown, or remove its custom ID */
-export function stringifyHeadingId(s: Stringifier, node: Heading, enabled: boolean): void {
+export function stringifyHeadingId(
+  s: Stringifier,
+  node: Heading,
+  enabled: boolean,
+  isStatic?: boolean,
+): void {
   const start = s.range(node)?.start;
   // the content ends with its last child, before the closing sequence or underline
   const last = node.children.at(-1);
@@ -21,7 +26,7 @@ export function stringifyHeadingId(s: Stringifier, node: Heading, enabled: boole
     s.edit(
       end,
       end,
-      ` [#${typeof code === 'string' ? s.expression(parseExpression(code), String(id)) : id}]`,
+      ` [#${typeof code === 'string' && !isStatic ? s.expression(parseExpression(code), String(id)) : id}]`,
       node,
     );
 }

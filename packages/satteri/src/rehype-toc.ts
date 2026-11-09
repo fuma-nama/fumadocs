@@ -6,10 +6,16 @@ import type {
   MdxTextExpression,
 } from 'satteri';
 import type { Element, ElementContent } from 'hast';
-import { handleTag, jsxToSource, parse, showConditions } from '@/utils';
-import { guardedArray, showCondition } from '../../shared/code-output';
+import { handleTag, jsxToSource, parse } from '@/utils';
+import {
+  guardedArray,
+  showCondition,
+  showConditions,
+  staticContent,
+} from '../../shared/code-output';
 import { idCodeProperty } from '../../shared/heading-id';
 import type { ExtraPluginHooks } from './compile';
+import type { OutputMode } from 'fumadocs-core/mdx-plugins/stringifier';
 
 export interface RehypeTocOptions {
   exportToc?:
@@ -19,6 +25,8 @@ export interface RehypeTocOptions {
         as: 'esm';
         name: string;
       };
+  /** @defaultValue 'runtime' */
+  output?: OutputMode;
 }
 
 export interface RehypeTocItemType {
@@ -48,7 +56,7 @@ declare module 'satteri' {
   }
 }
 
-export function rehypeToc({ exportToc = true }: RehypeTocOptions = {}): HastPluginInput &
+export function rehypeToc({ exportToc = true, output }: RehypeTocOptions = {}): HastPluginInput &
   ExtraPluginHooks {
   const resolved = exportToc === true ? { as: 'esm' as const, name: 'toc' } : exportToc;
   const plugin: HastPluginInput & ExtraPluginHooks = () => {
@@ -109,14 +117,18 @@ export function rehypeToc({ exportToc = true }: RehypeTocOptions = {}): HastPlug
             typeof element.properties['data-fd-step'] === 'number'
               ? element.properties['data-fd-step']
               : undefined;
-          const when = showConditions(element, ctx);
+          const isStatic = output === 'static';
+          const when = isStatic ? [] : showConditions(element, ctx);
           let obj = '{';
           obj += `title: ${
             resolved.as === 'esm'
-              ? jsxToSource({ type: 'root', children: titleChildren })
+              ? jsxToSource({
+                  type: 'root',
+                  children: isStatic ? staticContent(titleChildren) : titleChildren,
+                })
               : textCode(titleChildren)
           },`;
-          obj += `url: ${code ? `"#" + ${code}` : JSON.stringify(`#${id}`)},`;
+          obj += `url: ${code && !isStatic ? `"#" + ${code}` : JSON.stringify(`#${id}`)},`;
           obj += `depth: ${JSON.stringify(Number(element.tagName[1]))},`;
           if (step !== undefined) obj += `_step: ${JSON.stringify(step)},`;
           obj += '}';
@@ -134,8 +146,10 @@ export function rehypeToc({ exportToc = true }: RehypeTocOptions = {}): HastPlug
     };
   };
   plugin.collectExports = ({ data, addExport }) => {
-    if (resolved && resolved.as === 'esm')
-      addExport(resolved.name, `(props) => ${guardedArray(data._rehypeTocItems ?? [])}`);
+    if (resolved && resolved.as === 'esm') {
+      const list = guardedArray(data._rehypeTocItems ?? []);
+      addExport(resolved.name, output === 'static' ? list : `(props) => ${list}`);
+    }
   };
   return plugin;
 }

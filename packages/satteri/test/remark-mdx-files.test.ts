@@ -11,7 +11,7 @@ const fixtures = path.join(path.dirname(fileURLToPath(import.meta.url)), 'fixtur
 async function compile(source: string, filePath = '/test.mdx') {
   const options = await applySatteriPreset({
     rehypeCodeOptions: false,
-    mdastPlugins: [remarkMdxFiles(), remarkLlms()],
+    mdastPlugins: [remarkMdxFiles(), remarkLlms({ output: 'static' })],
   })('bundler');
 
   return compileMdx({ source, filePath, options });

@@ -53,6 +53,7 @@ export async function buildJSMDX(
     if (!processor) {
       const postprocessOptions: PostprocessOptions = {
         _format: format,
+        _output: collection?.output,
         ...collection?.postprocess,
       };
 
@@ -140,7 +141,9 @@ function getMDXOptions(
       const optionsFn = config.global.mdxOptions;
       const options = typeof optionsFn === 'function' ? await optionsFn() : optionsFn;
 
-      return applyMdxPreset(options)(environment);
+      return applyMdxPreset(
+        options?.preset === 'minimal' ? options : { output: collection?.output, ...options },
+      )(environment);
     })();
   }
 

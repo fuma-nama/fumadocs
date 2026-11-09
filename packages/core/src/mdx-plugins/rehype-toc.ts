@@ -3,7 +3,8 @@ import type { Root, Element, ElementContent, Nodes } from 'hast';
 import { toEstree } from 'hast-util-to-estree';
 import type { Expression, JSXElement } from 'estree-jsx';
 import { handleTag, parseExpression, toEsm } from './utils';
-import { guardedArray, showCondition } from '../../../shared/code-output';
+import { guardedArray, showCondition, staticContent } from '../../../shared/code-output';
+import type { OutputMode } from './stringifier';
 import { idCodeProperty } from '../../../shared/heading-id';
 
 export interface RehypeTocOptions {
@@ -28,6 +29,9 @@ export interface RehypeTocOptions {
         as: 'esm';
         name: string;
       };
+
+  /** @defaultValue 'runtime' */
+  output?: OutputMode;
 }
 
 declare module 'vfile' {
@@ -67,7 +71,7 @@ function getStep(properties: Element['properties']): number | undefined {
 
 export function rehypeToc(
   this: Processor,
-  { exportToc = true }: RehypeTocOptions = {},
+  { exportToc = true, output }: RehypeTocOptions = {},
 ): Transformer<Root, Root> {
   if (exportToc === true) {
     exportToc = { as: 'esm', name: 'toc' };
@@ -122,19 +126,25 @@ export function rehypeToc(
     if (exportToc.as === 'esm') {
       const titles: Expression[] = [];
       const list: { code: string; when: string[] }[] = [];
+      const isStatic = output === 'static';
       for (const { title, when, url, depth, _step, code: id } of items) {
         const i = titles.push({
           type: 'JSXFragment',
           openingFragment: { type: 'JSXOpeningFragment' },
           closingFragment: { type: 'JSXClosingFragment' },
-          children: toJsx(title).children,
+          children: toJsx(isStatic ? { ...title, children: staticContent(title.children) } : title)
+            .children,
         });
-        let code = `{depth: ${depth}, url: ${id ? `"#" + ${id}` : JSON.stringify(url)}`;
+        let code = `{depth: ${depth}, url: ${id && !isStatic ? `"#" + ${id}` : JSON.stringify(url)}`;
         if (_step !== undefined) code += `, _step: ${_step}`;
-        list.push({ code: `${code}, title: _fumadocs${i - 1}}`, when });
+        list.push({ code: `${code}, title: _fumadocs${i - 1}}`, when: isStatic ? [] : when });
       }
+      const array = guardedArray(list);
       tree.children.push(
-        toEsm(`export const ${exportToc.name} = (props) => ${guardedArray(list)};`, titles),
+        toEsm(
+          `export const ${exportToc.name} = ${isStatic ? array : `(props) => ${array}`};`,
+          titles,
+        ),
       );
     } else {
       file.data.rehypeToc = items.map(({ when: _, code: __, ...item }) => item);

@@ -9,7 +9,8 @@ import type * as Config from './config';
 
 const create = server<typeof Config, import("fumadocs-mdx/runtime/types").InternalTypeConfig & {
   DocData: {
-    blogs: {
+    docs: { structuredData: () => Promise<import("fumadocs-core/mdx-plugins/remark-structure").StructuredData> },
+    blogs: { structuredData: () => Promise<import("fumadocs-core/mdx-plugins/remark-structure").StructuredData> } & {
       /**
        * extracted references (e.g. hrefs, paths), useful for analyzing relationships between pages.
        */
@@ -30,7 +31,8 @@ import * as Config from './config';
 
 const create = await dynamic<typeof Config, import("fumadocs-mdx/runtime/types").InternalTypeConfig & {
   DocData: {
-    blogs: {
+    docs: { structuredData: () => Promise<import("fumadocs-core/mdx-plugins/remark-structure").StructuredData> },
+    blogs: { structuredData: () => Promise<import("fumadocs-core/mdx-plugins/remark-structure").StructuredData> } & {
       /**
        * extracted references (e.g. hrefs, paths), useful for analyzing relationships between pages.
        */
@@ -47,7 +49,8 @@ import type * as Config from './config';
 
 const create = browser<typeof Config, import("fumadocs-mdx/runtime/types").InternalTypeConfig & {
   DocData: {
-    blogs: {
+    docs: { structuredData: () => Promise<import("fumadocs-core/mdx-plugins/remark-structure").StructuredData> },
+    blogs: { structuredData: () => Promise<import("fumadocs-core/mdx-plugins/remark-structure").StructuredData> } & {
       /**
        * extracted references (e.g. hrefs, paths), useful for analyzing relationships between pages.
        */

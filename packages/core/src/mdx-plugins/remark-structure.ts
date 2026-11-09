@@ -3,9 +3,9 @@ import { remark } from 'remark';
 import remarkGfm from 'remark-gfm';
 import type { PluggableList, Transformer } from 'unified';
 import { VFile } from 'vfile';
-import { createCodeOutput, isJsxElement } from './utils';
+import { createCodeOutput, isJsxElement, toMdxExport } from './utils';
 import { and, chunksToCode, guardedArray, showCondition } from '../../../shared/code-output';
-import type { Stringifier } from './stringifier';
+import type { OutputMode, Stringifier } from './stringifier';
 import { headingIdRegex } from './heading-id';
 import { idCodeProperty } from '../../../shared/heading-id';
 import type { MdxJsxFlowElement, MdxJsxTextElement } from 'mdast-util-mdx';
@@ -62,6 +62,9 @@ export interface StructureOptions {
    * export as `structuredData` (if true) or specified variable name.
    */
   exportAs?: string | boolean;
+
+  /** @defaultValue 'runtime' */
+  output?: OutputMode;
 }
 
 declare module 'mdast' {
@@ -107,9 +110,8 @@ export const remarkStructureDefaultOptions = {
  * Extract content into structured data, as Markdown sliced from the authored source. Links and JSX elements are
  * replaced by their content, images are removed.
  *
- * The export is a function of the props of the page, authored expressions and the branches of `<show>` render from
- * code: its content can be React nodes, rendered into Markdown by the source. `vfile.data.structuredData` has the
- * authored source of expressions and every branch.
+ * A runtime export can have React nodes as content, rendered into Markdown by the source. `vfile.data.structuredData` is
+ * static.
  *
  * By default, the output is stored into VFile (`vfile.data.structuredData`), you can specify `exportAs` to export it.
  */
@@ -118,11 +120,12 @@ export function remarkStructure({
   mdxTypes = remarkStructureDefaultOptions.mdxTypes,
   filterElement = remarkStructureDefaultOptions.filterElement,
   exportAs = remarkStructureDefaultOptions.exportAs,
+  output,
 }: StructureOptions = {}): Transformer<Root, Root> {
   const isType = Array.isArray(types) ? (node: Nodes) => types.includes(node.type) : types;
 
   return (tree, file) => {
-    const out = createCodeOutput(file, 'search');
+    const out = createCodeOutput(file, 'search', output === 'static');
     const { s } = out;
     /** headings and contents in document order, their content with the markers of code, `code` is the ID as code */
     const headings: { id: string; code: string; content: string; when: string[] }[] = [];
@@ -229,6 +232,7 @@ export function remarkStructure({
 
     if (!exportAs) return;
     const name = typeof exportAs === 'string' ? exportAs : 'structuredData';
+    if (output === 'static') return void tree.children.unshift(toMdxExport(name, data));
 
     /**
      * The heading of content: the last heading before it that shows with it, the conditions of the branches decide

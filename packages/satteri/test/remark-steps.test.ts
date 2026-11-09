@@ -35,7 +35,7 @@ describe('remark-steps', () => {
   it('leaves the [step] tag out of search records only', async () => {
     const options = await applySatteriPreset({
       rehypeCodeOptions: false,
-      mdastPlugins: [remarkSteps(), remarkLlms()],
+      mdastPlugins: [remarkSteps(), remarkLlms({ output: 'static' })],
     })('bundler');
     const { data } = await compileMdx({
       source:
