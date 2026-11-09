@@ -66,8 +66,6 @@ export interface SourceInfo {
   dynamic: boolean;
   /** file configuring the collections, relative to cwd: `lib/source.ts` (Fumadocs MDX macro), `source.config.ts` or the Astro config; `null` for other content sources */
   collections: string | null;
-  /** collections are loaded lazily, `structuredData` is a function */
-  async: boolean;
   /** base URL of docs pages */
   baseUrl: string;
   /** content directory */
@@ -196,8 +194,6 @@ async function detectSource(
     loader: /export const source\b/.test(source),
     dynamic: /export (async )?function getSource\b/.test(source),
     collections,
-    // pages of Astro collections load their data on demand
-    async: astro || /async:\s*true/.test(content),
     baseUrl: baseUrl ?? '/docs',
     dir: /dir:\s*['"]([^'"]*)['"]/.exec(content)?.[1] ?? 'content/docs',
   };

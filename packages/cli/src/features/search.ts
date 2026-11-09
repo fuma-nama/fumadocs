@@ -73,11 +73,7 @@ const dialogBody = (footer: string, url: string, legacy = false) => `  return (
 }
 `;
 
-/** `structuredData` is a function on async collections (React Router & TanStack Start) */
-const typesenseDocuments = (
-  { ref, resolved }: SourceRef,
-  async: boolean,
-) => `import { ${ref} } from '@/lib/source';
+const typesenseDocuments = ({ ref, resolved }: SourceRef) => `import { ${ref} } from '@/lib/source';
 import type { DocumentRecord } from 'typesense-fumadocs-adapter';
 
 async function getDocuments() {
@@ -85,7 +81,7 @@ async function getDocuments() {
   for (const page of ${resolved}.getPages()) {
     documents.push({
       _id: page.url,
-      structured: ${async ? 'await page.data.structuredData()' : 'page.data.structuredData'},
+      structured: await page.data.structuredData(),
       url: page.url,
       title: page.data.title,
       description: page.data.description,
@@ -126,10 +122,7 @@ interface Provider {
   static: boolean;
   dialog: (env: Env) => string;
   /** exports search indexes to a pre-rendered `static.json`, synced by `sync` after build */
-  exportIndexes?: (
-    src: SourceRef,
-    async: boolean,
-  ) => {
+  exportIndexes?: (src: SourceRef) => {
     /** code before the route handler */
     head: string;
     /** expression producing the documents */
@@ -308,8 +301,8 @@ export default function CustomSearchDialog(props: SharedProps) {
   });
 
 ${dialogBody('Typesense', 'https://typesense.org', true)}`,
-    exportIndexes: (src, async) => ({
-      head: typesenseDocuments(src, async),
+    exportIndexes: (src) => ({
+      head: typesenseDocuments(src),
       documents: 'getDocuments()',
     }),
     sync: (env, { output }) =>
@@ -452,7 +445,7 @@ export const syncCommand = 'node --env-file-if-exists=.env.local scripts/sync-co
 export function templates(
   name: SearchProvider,
   framework: Framework,
-  { baseDir, source }: { baseDir: string; source: Pick<SourceInfo, 'dynamic' | 'async'> },
+  { baseDir, source }: { baseDir: string; source: Pick<SourceInfo, 'dynamic'> },
   output: string,
 ): [file: string, content: string][] {
   const provider: Provider = providers[name];
@@ -462,7 +455,7 @@ export function templates(
   ];
 
   if (provider.exportIndexes) {
-    const { head, documents } = provider.exportIndexes(sourceRef(source.dynamic), source.async);
+    const { head, documents } = provider.exportIndexes(sourceRef(source.dynamic));
     files.push([
       path.posix.join(baseDir, staticJson(framework).file),
       staticRoute(framework, head, documents),
