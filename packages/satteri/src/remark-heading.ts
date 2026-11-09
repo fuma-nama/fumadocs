@@ -2,7 +2,8 @@ import Slugger from 'github-slugger';
 import { defineMdastPlugin, type MdastVisitorContext } from 'satteri';
 import type { Heading } from 'mdast';
 import { headingIdRegex } from './heading-id';
-import { headingSlugImport, idCode, idCodeProperty } from '../../shared/heading-id';
+import { headingIdCode, idCodeProperty } from '../../shared/heading-id';
+import { showConditions } from './utils';
 
 export interface RemarkHeadingOptions {
   slug?: (heading: Heading, text: string) => string;
@@ -17,7 +18,7 @@ export function remarkHeading({
 }: RemarkHeadingOptions = {}) {
   return () => {
     let resolveSlug = slug;
-    let slugs = false;
+    const ids = headingIdCode();
     if (!resolveSlug) {
       const slugger = new Slugger();
       resolveSlug = (_, v) => slugger.slug(v);
@@ -50,11 +51,8 @@ export function remarkHeading({
 
         if (!hProperties.id) {
           hProperties.id = resolveSlug(node, title);
-          const code = !slug && idCode(node.children);
-          if (code) {
-            hProperties[idCodeProperty] = code;
-            slugs = true;
-          }
+          const code = !slug && ids.next(node.children, showConditions(node, ctx));
+          if (code) hProperties[idCodeProperty] = code;
         }
 
         ctx.setProperty(node, 'data', data);
@@ -65,7 +63,7 @@ export function remarkHeading({
         });
       },
       after(root, ctx) {
-        if (slugs) ctx.prependChild(root, { type: 'mdxjsEsm', value: headingSlugImport });
+        if (ids.esm) ctx.prependChild(root, { type: 'mdxjsEsm', value: ids.esm });
       },
     });
   };

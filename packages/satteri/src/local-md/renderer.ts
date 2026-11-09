@@ -1,7 +1,7 @@
 import type { TOCItemType } from 'fumadocs-core/toc';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
 import { asMarkdown, jsxComponents } from 'fumadocs-core/server';
-import { headingSlug } from 'fumadocs-core/mdx-plugins/remark-heading.runtime';
+import { createHeadingIds } from 'fumadocs-core/mdx-plugins/remark-heading.runtime';
 import type { ReactNode } from 'react';
 import * as JsxRuntime from 'react/jsx-runtime';
 import type { MDXComponents, MDXContent } from 'mdx/types';
@@ -70,7 +70,7 @@ export function fromJS<M>(options: MarkdownRendererJSOptions): MarkdownRenderer<
         // the runtime of generated code, like the JSX runtime
         asMarkdown,
         jsxComponents,
-        headingSlug,
+        createHeadingIds,
         baseUrl,
       },
       // the code of the module reads the params of a page as `props`, like its content

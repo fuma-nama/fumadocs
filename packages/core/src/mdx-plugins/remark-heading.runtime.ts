@@ -1,6 +1,22 @@
-import { slug } from 'github-slugger';
+import Slugger from 'github-slugger';
 
-/** the slug of a value rendered in a heading, booleans and nullish values render nothing */
-export function headingSlug(value: unknown): string {
-  return typeof value === 'string' || typeof value === 'number' ? slug(String(value)) : '';
+/** the IDs of the headings of a page for its props, a heading is the parts of its text or `null` when hidden */
+export function createHeadingIds(headings: ((props: object) => unknown[] | null)[]) {
+  const cache = new WeakMap<object, string[]>();
+  return (props: object): string[] => {
+    let ids = cache.get(props);
+    if (ids) return ids;
+    const slugger = new Slugger();
+    ids = [];
+    for (const heading of headings) {
+      const parts = heading(props);
+      let text = '';
+      // like React, booleans and nullish values render nothing
+      for (const part of parts ?? [])
+        if (typeof part === 'string' || typeof part === 'number') text += part;
+      ids.push(parts ? slugger.slug(text) : '');
+    }
+    cache.set(props, ids);
+    return ids;
+  };
 }

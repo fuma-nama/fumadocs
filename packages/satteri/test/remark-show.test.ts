@@ -6,7 +6,7 @@ import { createElement, type FC } from 'react';
 import * as JsxRuntime from 'react/jsx-runtime';
 import { renderToStaticMarkup } from 'react-dom/server';
 import * as server from 'fumadocs-core/server';
-import { headingSlug } from 'fumadocs-core/mdx-plugins/remark-heading.runtime';
+import { createHeadingIds } from 'fumadocs-core/mdx-plugins/remark-heading.runtime';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
 import { renderStructuredData, type StructuredDataNodes } from '../../shared/structured-data';
 import { compileMdx } from '@/compile';
@@ -52,7 +52,11 @@ After the branch.
    </show>
    <show when={props.framework === "astro"}>
      Astro.
-   </show>`;
+   </show>
+
+<show when={props.framework === "waku"}>
+## Setup
+</show>`;
 
 test('Remark Show: branches and expressions render from code in every output', async () => {
   const options = await applySatteriPreset({ mdastPlugins: [remarkLlms()] })('runtime');
@@ -66,7 +70,7 @@ test('Remark Show: branches and expressions render from code in every output', a
   const page = (await new AsyncFunction('opts', code)({
     ...JsxRuntime,
     ...server,
-    headingSlug,
+    createHeadingIds,
   })) as {
     default: FC<object>;
     toc: (props: object) => { url: string }[];
@@ -86,7 +90,8 @@ test('Remark Show: branches and expressions render from code in every output', a
 
   // every output keeps only the branches that show, IDs read the props
   expect(astro.toc).toEqual(['#deploy-on-astro', '#overview', '#setup']);
-  expect(waku.toc).toEqual(['#deploy-on-waku', '#overview']);
+  // a heading in two branches has the same ID in both
+  expect(waku.toc).toEqual(['#deploy-on-waku', '#overview', '#setup']);
   expect(pnpm.toc).toContain('#with-pnpm');
   expect(astro.structured.headings.map((item) => item.content)).toEqual([
     'Deploy on astro',
@@ -160,7 +165,11 @@ test('Remark Show: branches with included files', async () => {
       mdastPlugins: [remarkInclude({ cwd: dir }), ...options.mdastPlugins!, remarkLlms()],
     },
   });
-  const page = (await new AsyncFunction('opts', code)({ ...JsxRuntime, ...server })) as {
+  const page = (await new AsyncFunction('opts', code)({
+    ...JsxRuntime,
+    ...server,
+    createHeadingIds,
+  })) as {
     _markdown: FC<object>;
   };
   const markdown = (props: object) => server.renderToMarkdown(createElement(page._markdown, props));
@@ -188,7 +197,11 @@ test('Remark Show: branches of an included file, the page itself has none', asyn
       mdastPlugins: [remarkInclude({ cwd: dir }), ...options.mdastPlugins!, remarkLlms()],
     },
   });
-  const page = (await new AsyncFunction('opts', code)({ ...JsxRuntime, ...server })) as {
+  const page = (await new AsyncFunction('opts', code)({
+    ...JsxRuntime,
+    ...server,
+    createHeadingIds,
+  })) as {
     _markdown: FC<object>;
   };
   const markdown = (props: object) => server.renderToMarkdown(createElement(page._markdown, props));

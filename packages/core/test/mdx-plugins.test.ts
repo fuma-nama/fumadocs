@@ -786,7 +786,11 @@ After the branch.
    </show>
    <show when={props.framework === "astro"}>
      Astro.
-   </show>`;
+   </show>
+
+<show when={props.framework === "waku"}>
+## Setup
+</show>`;
 
   const code = await compile(source, {
     outputFormat: 'function-body',
@@ -819,7 +823,8 @@ After the branch.
 
   // every output keeps only the branches that show, IDs read the props
   expect(astro.toc).toEqual(['#deploy-on-astro', '#overview', '#setup']);
-  expect(waku.toc).toEqual(['#deploy-on-waku', '#overview']);
+  // a heading in two branches has the same ID in both
+  expect(waku.toc).toEqual(['#deploy-on-waku', '#overview', '#setup']);
   expect(pnpm.toc).toContain('#with-pnpm');
   expect(astro.structured.headings.map((item) => item.content)).toEqual([
     'Deploy on astro',
