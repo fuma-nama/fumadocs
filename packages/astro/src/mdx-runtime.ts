@@ -3,7 +3,6 @@ import { DevalueError, stringify } from 'devalue';
 import type { MDXComponents } from 'mdx/types';
 import type { ElementType, ReactNode } from 'react';
 import { Fragment, jsx, jsxs } from 'react/jsx-runtime';
-import type { Params } from 'fumadocs-core/source';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
 import {
   renderStructuredData as renderNodes,
@@ -117,8 +116,8 @@ type Render = (props: MarkdownProps) => Output;
 
 /** the outputs of a compiled page, functions of the params of a page */
 export interface PageOutputs {
-  toc: (props: Params) => TOCItemType[];
-  structuredData: (props: Params) => StructuredDataNodes;
+  toc: (props: Record<string, unknown>) => TOCItemType[];
+  structuredData: (props: Record<string, unknown>) => StructuredDataNodes;
   /** with `includeProcessedMarkdown`, a string for static output */
   markdown?: string | Render;
   /** the MDX components of the content island */

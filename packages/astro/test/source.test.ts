@@ -120,6 +120,9 @@ Run the installer of {props.version}.`,
       version === 'v2' ? ['Only in v2.', 'Run the installer of v2.'] : ['Run the installer of v1.'],
     );
   }
+  // the props you pass to the content render the outputs too
+  const { toc } = await source.getPage(['v1', 'install'])!.data.load({ version: 'v3' });
+  expect(toc[0].url).toBe('#install-v3');
   expect(new Set(render.mock.calls.map(([item]) => item))).toEqual(new Set([entry]));
 });
 

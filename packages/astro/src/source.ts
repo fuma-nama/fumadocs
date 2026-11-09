@@ -39,9 +39,13 @@ export interface DocData {
 }
 
 export type AstroPageData<Entry extends PageEntry = PageEntry> = Entry['data'] & {
-  /** the content, rendered with `render()` of `astro:content` */
-  load: () => Promise<DocData>;
-  structuredData: () => Promise<StructuredData>;
+  /**
+   * the content, rendered with `render()` of `astro:content`, and its outputs
+   *
+   * @param props - the props you pass to the content, the outputs render for them with the path params
+   */
+  load: (props?: Record<string, unknown>) => Promise<DocData>;
+  structuredData: (props?: Record<string, unknown>) => Promise<StructuredData>;
   /**
    * Get the content of page:
    * - `raw`: the source file, without frontmatter.
@@ -115,14 +119,14 @@ function pageData<Entry extends PageEntry>(entry: Entry, params?: Params): Astro
       );
     return { Content, outputs };
   }
-  const structuredData = (outputs: PageOutputs) =>
-    renderStructuredData(outputs.structuredData(props));
+  const structuredData = (outputs: PageOutputs, own?: Record<string, unknown>) =>
+    renderStructuredData(outputs.structuredData({ ...props, ...own }));
 
   return {
     ...entry.data,
     // the frontmatter in code of each params
     ...(params && entry.data._frontmatterAt?.[JSON.stringify(params)]),
-    async load() {
+    async load(own?: Record<string, unknown>) {
       const { Content, outputs } = await compile();
       const { toc } = outputs;
       return {
@@ -133,12 +137,12 @@ function pageData<Entry extends PageEntry>(entry: Entry, params?: Params): Astro
               Content,
             )
           : Content,
-        toc: toc(props),
-        structuredData: await structuredData(outputs),
+        toc: toc({ ...props, ...own }),
+        structuredData: await structuredData(outputs, own),
       };
     },
-    async structuredData() {
-      return structuredData((await compile()).outputs);
+    async structuredData(own?: Record<string, unknown>) {
+      return structuredData((await compile()).outputs, own);
     },
     async getText(type, options) {
       if (type === 'raw') return entry.body ?? '';
