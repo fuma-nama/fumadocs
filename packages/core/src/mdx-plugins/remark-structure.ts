@@ -45,7 +45,7 @@ export interface StructureOptions {
    *
    * If a node's type is listed in this array, it will be converted into a single content block, except tables which become a content block per row, along with the header row.
    *
-   * @defaultValue ['heading', 'paragraph', 'blockquote', 'table', 'mdxJsxFlowElement', 'mdxFlowExpression']
+   * @defaultValue ['heading', 'paragraph', 'blockquote', 'table', 'mdxJsxFlowElement']
    */
   types?: string[] | ((node: Nodes) => boolean);
 
@@ -95,7 +95,7 @@ declare module 'vfile' {
 }
 
 export const remarkStructureDefaultOptions = {
-  types: ['heading', 'paragraph', 'blockquote', 'table', 'mdxJsxFlowElement', 'mdxFlowExpression'],
+  types: ['heading', 'paragraph', 'blockquote', 'table', 'mdxJsxFlowElement'],
   mdxTypes(node) {
     return !node.children || node.children.length === 0;
   },

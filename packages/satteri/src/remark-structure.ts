@@ -68,7 +68,6 @@ const RECORD_VISITORS = [
   'table',
   'tableCell',
   'mdxJsxFlowElement',
-  'mdxFlowExpression',
 ];
 /** the nodes edited in records */
 const EDIT_VISITORS = [
@@ -110,7 +109,7 @@ interface TableRecord {
  * `<show>` that show. `ctx.data.structuredData` has the authored source of expressions and every branch.
  */
 export function remarkStructure({
-  types = ['heading', 'paragraph', 'blockquote', 'table', 'mdxJsxFlowElement', 'mdxFlowExpression'],
+  types = ['heading', 'paragraph', 'blockquote', 'table', 'mdxJsxFlowElement'],
   mdxTypes = (node) => !('children' in node) || node.children.length === 0,
   filterElement,
   exportAs = true,
