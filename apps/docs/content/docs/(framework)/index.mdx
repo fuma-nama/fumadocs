@@ -1,0 +1,86 @@
+---
+title: Introduction
+description: The documentation framework for React
+icon: SquareBookmark
+---
+
+import { CpuIcon, PanelsTopLeftIcon, DatabaseIcon, TerminalIcon } from 'lucide-react';
+import { FrameworkLogo } from '@/components/framework-logo';
+
+<AgentInstructions />
+
+Fumadocs <span className='text-fd-muted-foreground text-sm'>(Foo-ma docs)</span> is a **documentation framework**, designed to be fast, flexible,
+and composes seamlessly into your React framework. It consists of multiple layers:
+
+<Cards>
+
+<Card icon={<CpuIcon className="text-purple-300" />} title='Fumadocs Core' href='/docs/headless'>
+
+Handles most of the logic, including document search, content source adapters, and Markdown extensions.
+
+</Card>
+
+<Card icon={<PanelsTopLeftIcon className="text-blue-300" />} title='Fumadocs UI'  href='/docs/ui'>
+
+The default theme of Fumadocs offers a beautiful look for documentation sites and interactive components.
+
+</Card>
+
+<Card icon={<DatabaseIcon />} title='Content Source'>
+
+The source of your content, can be a CMS or local data layers like [Fumadocs MDX](/docs/mdx) (the official content source).
+
+</Card>
+
+<Card icon={<TerminalIcon />} title='Fumadocs CLI' href='/docs/cli'>
+
+A command line tool to install UI components and automate things, useful for customizing layouts.
+
+</Card>
+
+</Cards>
+
+<Callout title="Want to learn more?">
+  Read our in-depth [What is Fumadocs](/docs/what-is-fumadocs) introduction.
+</Callout>
+
+## Choosing a Framework
+
+The guides are written for each framework. Choose the one your app uses, or Next.js for a new project:
+
+<Cards>
+  <Card icon={<FrameworkLogo framework="next" />} title="Next.js (Recommended)" href="/docs/next">
+    Powerful and mature, the default for new projects.
+  </Card>
+  <Card
+    icon={<FrameworkLogo framework="react-router" />}
+    title="React Router"
+    href="/docs/react-router"
+  >
+    For React Router apps. Its SPA mode hosts the site statically on a CDN.
+  </Card>
+  <Card
+    icon={<FrameworkLogo framework="tanstack-start" />}
+    title="TanStack Start"
+    href="/docs/tanstack-start"
+  >
+    For TanStack Start apps. Its SPA mode hosts the site statically on a CDN.
+  </Card>
+  <Card icon={<FrameworkLogo framework="waku" />} title="Waku" href="/docs/waku">
+    Fast and simple, a React framework on Vite with server components.
+  </Card>
+  <Card icon={<FrameworkLogo framework="astro" />} title="Astro" href="/docs/astro">
+    For Astro sites, with content collections and MDX rendered as React islands.
+  </Card>
+</Cards>
+
+<Callout title="Try Fumadocs with simpler DX">
+
+[Fumapress](https://press.fumadocs.dev) is a site generator that manages more features on top of Fumadocs.
+
+- Automatic routing, `llms.txt`, MCP and more basic features.
+- Based on Vite ([Waku](https://waku.gg)).
+
+It enforces a React framework of its own, and offers a better DX in return.
+
+</Callout>

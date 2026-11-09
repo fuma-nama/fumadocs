@@ -1,4 +1,4 @@
-import type { CallExpression } from 'oxc-parser';
+import type { CallExpression } from '@yuku-toolchain/types';
 import {
   addElements,
   find,

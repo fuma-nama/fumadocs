@@ -3,5 +3,5 @@
   "description": "The docs framework",
   "icon": "Building",
   "root": true,
-  "pages": ["next", "react-router", "tanstack-start", "waku", "astro"]
+  "pages": ["index", "next", "react-router", "tanstack-start", "waku", "astro"]
 }

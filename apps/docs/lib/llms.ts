@@ -1,7 +1,7 @@
 import { source } from '@/lib/source';
 import { llms } from 'fumadocs-core/source';
 import { getSection } from './source/navigation';
-import { frameworks } from './framework';
+import { defaultFramework, frameworks } from './framework';
 
 export const docsLlms = llms(source, {
   renderPage: async (page) => {
@@ -34,3 +34,6 @@ ${page.data.description ?? ''}
 ${processed}`;
   },
 });
+
+/** `llms.txt` and `llms-full.txt` list the pages of the default framework, the other frameworks have the same pages */
+export const frameworkNote = `Each page under \`/docs/${defaultFramework}\` has a version for every framework at \`/docs/<framework>\`, where \`<framework>\` is one of ${frameworks.map((item) => `\`${item.value}\``).join(', ')}.`;

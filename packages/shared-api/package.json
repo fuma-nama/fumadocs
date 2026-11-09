@@ -64,7 +64,7 @@
     "@types/node": "26.6.6",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
-    "fuma-cli": "^0.3.1",
+    "fuma-cli": "^0.3.3",
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:@fumadocs/base-ui@*",
     "json-schema-typed": "^9.0.0",

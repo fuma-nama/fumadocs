@@ -1,4 +1,4 @@
-import type { ArrayExpression, ObjectProperty } from 'oxc-parser';
+import type { ArrayExpression, ObjectProperty } from '@yuku-toolchain/types';
 import {
   addElements,
   filterElements,

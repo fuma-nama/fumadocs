@@ -4,65 +4,15 @@ description: Getting Started with Fumadocs
 icon: Rocket
 ---
 
-import { CpuIcon, PanelsTopLeftIcon, DatabaseIcon, TerminalIcon } from 'lucide-react';
-
 <AgentInstructions />
 
-## Introduction
-
-Fumadocs <span className='text-fd-muted-foreground text-sm'>(Foo-ma docs)</span> is a **documentation framework**, designed to be fast, flexible,
-and composes seamlessly into your React framework. It consists of multiple layers:
-
-<Cards>
-
-<Card icon={<CpuIcon className="text-purple-300" />} title='Fumadocs Core' href='/docs/headless'>
-
-Handles most of the logic, including document search, content source adapters, and Markdown extensions.
-
-</Card>
-
-<Card icon={<PanelsTopLeftIcon className="text-blue-300" />} title='Fumadocs UI'  href='/docs/ui'>
-
-The default theme of Fumadocs offers a beautiful look for documentation sites and interactive components.
-
-</Card>
-
-<Card icon={<DatabaseIcon />} title='Content Source'>
-
-The source of your content, can be a CMS or local data layers like [Fumadocs MDX](/docs/mdx) (the official content source).
-
-</Card>
-
-<Card icon={<TerminalIcon />} title='Fumadocs CLI' href='/docs/cli'>
-
-A command line tool to install UI components and automate things, useful for customizing layouts.
-
-</Card>
-
-</Cards>
-
-<Callout title="Want to learn more?">
-  Read our in-depth [What is Fumadocs](/docs/what-is-fumadocs) introduction.
-</Callout>
-
-### Terminology
+## Terminology
 
 **Markdown/MDX:** Markdown is a markup language for creating formatted text. Fumadocs natively supports Markdown and MDX (superset of Markdown).
 
 **[Bun](https://bun.sh):** A JavaScript runtime, it will be used in our guides for running scripts. If you prefer Node.js, try [unrun](https://gugustinette.github.io/unrun/guide/getting-started.html#cli) instead.
 
 Some basic knowledge of React.js would be useful for further customizations.
-
-<Callout title="Try Fumadocs with simpler DX">
-
-[Fumapress](https://press.fumadocs.dev) is a site generator that manages more features on top of Fumadocs.
-
-- Automatic routing, `llms.txt`, MCP and more basic features.
-- Based on Vite ([Waku](https://waku.gg)).
-
-It enforces a React framework of its own, and offers a better DX in return.
-
-</Callout>
 
 ## Automatic Installation
 
