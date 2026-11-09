@@ -42,11 +42,11 @@ Headings, paragraphs, blockquotes, tables and JSX elements are recorded (see `ty
 
 - Links are replaced by their text, images are removed.
 - A table has a record per row, as a table of its header and that row. The rows share a `table` field.
-- JSX elements are replaced by their content, except those kept as HTML tags by `filterElement`, which search dialogs render as components.
+- JSX elements are replaced by their content, except those that `filterElement` keeps. Static analysis keeps them as HTML tags, which search dialogs render as components. Runtime analysis renders them with their [components](#components).
 - A JSX element is a record when it has no children (see `mdxTypes`), or fits on one line.
 - Content inside a record isn't recorded again.
 
-By default, `File`, `TypeTable`, `Callout` and `Card` are kept as HTML tags. Change it with `filterElement`:
+By default, static analysis keeps `File`, `TypeTable`, `Callout` and `Card`, and runtime analysis keeps the elements of components. Change it with `filterElement`:
 
 ```ts tab="unified" title="source.config.ts"
 import { defineConfig } from 'fumadocs-mdx/config';
@@ -80,10 +80,25 @@ export default defineConfig({
 
 The `analysis` option sets whether the records render for the props of the content:
 
-- `runtime`: `structuredData` is a function of the props. Its records only include the [`<show>`](/docs/markdown#show) branches that show, and expressions render as their values.
+- `runtime`: `structuredData` is a function of the props. Its records only include the [`<show>`](/docs/markdown#show) branches that show, expressions render as their values, and JSX elements render with their [components](#components).
 - `static` (default): `structuredData` is the records of the source. They include every branch, and expressions keep their source text.
 
 Fumadocs MDX passes the [`analysis`](/docs/mdx/collections#analysis) of the collection, `runtime` by default, and renders the records for the props of each page.
+
+### Components
+
+With runtime analysis, records render JSX elements like [processed Markdown](/docs/headless/mdx/remark-llms#jsx-elements): a name that the file imports or declares is that variable, and other names come from the MDX components in the [page props](/docs/headless/source-api#custom-props). A component puts its text in search by defining its Markdown form with [`asMarkdown()`](/docs/headless/utils/markdown#asmarkdown):
+
+```tsx
+import { asMarkdown } from 'fumadocs-core/server';
+
+export function ProductName() {
+  if (asMarkdown()) return 'Fumadocs';
+  return <span className="font-semibold">Fumadocs</span>;
+}
+```
+
+A component without a Markdown form stays as JSX syntax, and so does an MDX component that the page props don't have. Records render synchronously, so components that render asynchronously, like async server components and Markdown forms made with `md`, stay as JSX syntax too.
 
 ## Plugins
 

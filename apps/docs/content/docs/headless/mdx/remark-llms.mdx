@@ -60,15 +60,7 @@ Images in the public directory keep their address. Vite inlines images smaller t
 
 ## JSX Elements
 
-With [runtime analysis](#analysis), JSX elements render with the same components as the page: the components that the file imports or declares, and your MDX components for the other names. Pass your MDX components to `getText()`:
-
-```tsx
-import { getMDXComponents } from '@/components/mdx';
-
-const markdown = await page.data.getText('processed', {
-  components: getMDXComponents(),
-});
-```
+With [runtime analysis](#analysis), JSX elements render with the same components as the page: the components that the file imports or declares, and the MDX components in the [page props](/docs/headless/source-api#custom-props) for the other names.
 
 A component defines its Markdown form with [`asMarkdown()`](/docs/headless/utils/markdown#asmarkdown). Components that don't are kept as JSX. To remove elements, or replace them with their children, use `filterElement` (unavailable on Sätteri).
 
