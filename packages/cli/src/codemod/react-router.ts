@@ -1,4 +1,4 @@
-import type { ArrayExpression, ObjectProperty } from 'oxc-parser';
+import type { ArrayExpression, ObjectMethod } from '@babel/types';
 import {
   addElements,
   filterElements,
@@ -54,7 +54,7 @@ function getPrerenderArray(file: SourceFile, array: string): ArrayExpression | u
   if (!method) return;
 
   const initializer = find(
-    method.value,
+    method,
     'VariableDeclarator',
     (item) => item.id.type === 'Identifier' && item.id.name === array,
   )?.init;
@@ -111,9 +111,8 @@ function modifyReactRouterRoutes(file: SourceFile, mod: (array: ArrayExpression)
 /**
  * Find the prerender method from the config
  */
-function getPrerenderMethod(file: SourceFile): ObjectProperty | undefined {
+function getPrerenderMethod(file: SourceFile): ObjectMethod | undefined {
   const exported = getDefaultExport(file);
   const options = exported && find(exported, 'ObjectExpression');
-  const property = options && getProperty(options, 'prerender');
-  if (property?.method) return property;
+  return options && getProperty(options, 'prerender', ['ObjectMethod']);
 }

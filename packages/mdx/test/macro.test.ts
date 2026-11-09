@@ -121,16 +121,19 @@ export const docs = defineDocs({
   });
 
   test('reject non-static options', async () => {
-    await expect(() =>
-      transformMacroModule({
-        code: `import { defineDocs } from 'fumadocs-mdx/macro';
-const dir = 'content/docs';
-export const docs = defineDocs({ dir });`,
-        file: sourceFile,
-        root,
-        target: 'vite',
-      }),
-    ).rejects.toThrowError(MacroTransformError);
+    for (const code of [
+      `const dir = 'content/docs';\nexport const docs = defineDocs({ dir });`,
+      `const options = { async: true };\nexport const docs = defineDocs({ docs: { ...options, schema: undefined } });`,
+    ]) {
+      await expect(() =>
+        transformMacroModule({
+          code: `import { defineDocs } from 'fumadocs-mdx/macro';\n${code}`,
+          file: sourceFile,
+          root,
+          target: 'vite',
+        }),
+      ).rejects.toThrowError(MacroTransformError);
+    }
   });
 
   test('reject non-top-level calls', async () => {

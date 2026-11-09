@@ -1,3 +1,9 @@
+## @fumadocs/base-ui@16.18.4
+
+### Links to Tabs and Accordions with Non-ASCII IDs
+
+- `Tabs`, `Accordions` and `TypeTable` decode the URL hash before matching it, so links to an `id` with non-ASCII characters (e.g. `#标签-cpp`) open the tab or accordion.
+
 ## @fumadocs/base-ui@16.18.3
 
 ### GitHub links to bracketed paths

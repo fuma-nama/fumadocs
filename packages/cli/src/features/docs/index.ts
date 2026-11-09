@@ -273,7 +273,8 @@ async function suppressHydrationWarning(ctx: FeatureContext) {
   const { baseDir, info } = ctx.project;
   const edited = await ctx.source(path.join(baseDir, info.rootFile), (file) => {
     const html = findJsxElement(file, 'html')?.openingElement;
-    if (!html || file.code.slice(html.start, html.end).includes('suppressHydrationWarning')) return;
+    if (!html || file.code.slice(html.start!, html.end!).includes('suppressHydrationWarning'))
+      return;
     addJsxAttribute(file, html, 'suppressHydrationWarning');
   });
 

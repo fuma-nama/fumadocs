@@ -1,5 +1,5 @@
 import path from 'node:path';
-import type { ImportDeclaration } from 'oxc-parser';
+import type { ImportDeclaration } from '@babel/types';
 import type { Feature, FeatureContext } from '@/features';
 import { findSource, includeProcessedMarkdown } from './utils';
 import { docs } from './docs';
@@ -70,8 +70,8 @@ export const ai: Feature<{ provider: AIProvider }> = {
 
         layoutModule = declaration.source.value;
         file.s.overwrite(
-          declaration.source.start,
-          declaration.source.end,
+          declaration.source.start!,
+          declaration.source.end!,
           `'${clientLayoutImport}'`,
         );
       });

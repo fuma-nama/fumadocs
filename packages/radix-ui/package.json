@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-ui",
-  "version": "16.18.3",
+  "version": "16.18.4",
   "description": "The Radix UI version of Fumadocs UI",
   "keywords": [
     "Docs",
@@ -173,7 +173,7 @@
     "@types/node": "^26.6.6",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
-    "fuma-cli": "^0.3.1",
+    "fuma-cli": "^0.3.4",
     "fumadocs-core": "workspace:*",
     "react-medium-image-zoom": "^5.4.9",
     "tailwindcss": "^4.3.5",

@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "$schema": { "type": "string" },
+    "aliases": {
+      "type": "object",
+      "properties": {
+        "uiDir": { "type": "string", "default": "./components/ui" },
+        "componentsDir": { "type": "string", "default": "./components" },
+        "layoutDir": { "type": "string", "default": "./layouts" },
+        "cssDir": { "type": "string", "default": "./styles" },
+        "libDir": { "type": "string", "default": "./lib" },
+        "utils": {
+          "type": "string",
+          "description": "module exporting `cn`, installed components import it instead of `lib/cn.ts`"
+        }
+      }
+    },
+    "baseDir": {
+      "type": "string",
+      "description": "directory of app code, detected from the routes directory of your framework"
+    },
+    "uiLibrary": { "enum": ["radix-ui", "base-ui"], "default": "base-ui" },
+    "framework": {
+      "enum": ["next", "astro", "waku", "react-router", "tanstack-start"],
+      "description": "detected from your project"
+    },
+    "commands": {
+      "type": "object",
+      "properties": {
+        "format": { "type": "string", "description": "command to format output code automatically" }
+      }
+    }
+  }
+}

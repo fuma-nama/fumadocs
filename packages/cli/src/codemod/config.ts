@@ -1,4 +1,4 @@
-import type { Expression, ObjectExpression } from 'oxc-parser';
+import type { Expression, ObjectExpression } from '@babel/types';
 import {
   addElements,
   addImport,
@@ -22,7 +22,7 @@ export function getConfigObject(file: SourceFile): ObjectExpression | undefined 
       expr = expr.expression;
     } else if (expr.type === 'CallExpression' && expr.arguments.length > 0) {
       const arg = expr.arguments[0];
-      if (arg.type === 'SpreadElement') return;
+      if (arg.type === 'SpreadElement' || arg.type === 'ArgumentPlaceholder') return;
       expr = arg;
     } else if (expr.type === 'Identifier') {
       const { name } = expr;
@@ -108,9 +108,9 @@ export function wrapNextConfig(file: SourceFile): boolean {
   if (declaration.type === 'FunctionDeclaration' || declaration.type === 'ClassDeclaration')
     return false;
 
-  file.s.prependLeft(start, `const withMDX = createMDX();\n\n`);
-  file.s.appendLeft(declaration.start, 'withMDX(');
-  file.s.appendRight(declaration.end, ')');
+  file.s.prependLeft(start!, `const withMDX = createMDX();\n\n`);
+  file.s.appendLeft(declaration.start!, 'withMDX(');
+  file.s.appendRight(declaration.end!, ')');
   addImport(file, { from: 'fumadocs-mdx/next', named: ['createMDX'] });
   return true;
 }
@@ -124,7 +124,7 @@ export function addNextRewrites(
 ): boolean {
   const config = getConfigObject(file);
   if (!config) return false;
-  if (getProperty(config, 'rewrites')) return false;
+  if (getProperty(config, 'rewrites', ['ObjectProperty', 'ObjectMethod'])) return false;
 
   const items = rewrites.map(
     ({ source, destination }) =>

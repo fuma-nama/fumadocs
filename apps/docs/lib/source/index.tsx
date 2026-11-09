@@ -28,6 +28,7 @@ import catppuccinMocha from '@pierre/highlights/themes/catppuccin-mocha';
 import { transformerTwoslash } from 'fumadocs-twoslash';
 import { createFileSystemTypesCache } from 'fumadocs-twoslash/cache-fs';
 import type { MdastPluginDefinition } from 'satteri';
+import { remarkFrameworkLinks } from '@/lib/remark-framework-links';
 
 const typeTableGenerator = createGenerator({
   cache: createFileSystemGeneratorCache('.next/cache/fumadocs-typescript'),
@@ -140,8 +141,9 @@ const docs = defineDocs({
         },
         mdastPlugins: (plugins) =>
           isLint
-            ? [remarkElementIds(), ...plugins]
+            ? [remarkElementIds(), remarkFrameworkLinks(), ...plugins]
             : [
+                remarkFrameworkLinks(),
                 remarkSteps(),
                 remarkBlockId({ addDataAttribute: 'feedback' }),
                 remarkAutoTypeTable(typeTableOptions),

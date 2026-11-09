@@ -12,7 +12,7 @@ import {
   spinner,
   text,
 } from '@clack/prompts';
-import pc from 'picocolors';
+import { styleText } from 'node:util';
 import { getPackageManager, managers, type PackageManager } from './auto-install';
 import { create, type Template, type TemplatePlugin } from './index';
 import { isCI, templates } from './constants';
@@ -87,7 +87,7 @@ async function main(defaultName: string | undefined, config: CliOptions): Promis
   checkOption('template', config.template, templateNames);
   checkOption('pm', config.pm, managers);
   const skipPrompts = isCI || config.yes === true;
-  intro(pc.bgCyan(pc.bold('Create Fumadocs App')));
+  intro(styleText(['bgCyan', 'bold'], 'Create Fumadocs App'));
 
   const options = await group(
     {
@@ -257,12 +257,17 @@ async function main(defaultName: string | undefined, config: CliOptions): Promis
 
   const projectName = options.name.toLowerCase().replace(/\s/, '-');
   if (options.aiChat && isStatic(options.template)) {
-    console.warn(pc.yellow('AI Chat needs a server, the template is static, skipping it.'));
+    console.warn(
+      styleText('yellow', 'AI Chat needs a server, the template is static, skipping it.'),
+    );
     options.aiChat = false;
   }
   if (options.ogImage === 'next-og' && !options.template.startsWith('+next')) {
     console.warn(
-      pc.yellow('next/og is only available on Next.js, the template uses Takumi instead.'),
+      styleText(
+        'yellow',
+        'next/og is only available on Next.js, the template uses Takumi instead.',
+      ),
     );
   }
 
@@ -297,18 +302,18 @@ async function main(defaultName: string | undefined, config: CliOptions): Promis
 
   info.stop('Project Generated');
 
-  outro(pc.bgGreen(pc.bold('Done')));
+  outro(styleText(['bgGreen', 'bold'], 'Done'));
 
-  console.log(pc.bold('\nOpen the project'));
-  console.log(pc.cyan(`cd ${projectName}`));
+  console.log(styleText('bold', '\nOpen the project'));
+  console.log(styleText('cyan', `cd ${projectName}`));
 
-  console.log(pc.bold('\nRun Development Server'));
+  console.log(styleText('bold', '\nRun Development Server'));
   if (config.pm === 'npm' || config.pm === 'bun') {
-    console.log(pc.cyan(`${config.pm} run dev`));
+    console.log(styleText('cyan', `${config.pm} run dev`));
   } else {
-    console.log(pc.cyan(`${config.pm} dev`));
+    console.log(styleText('cyan', `${config.pm} dev`));
   }
-  console.log(pc.bold('\nYou can now open the project and start writing documents'));
+  console.log(styleText('bold', '\nYou can now open the project and start writing documents'));
 
   process.exit(0);
 }
@@ -352,6 +357,6 @@ try {
   cli.parse(process.argv, { run: false });
   await cli.runMatchedCommand();
 } catch (e) {
-  console.error(pc.red(e instanceof Error ? e.message : String(e)));
+  console.error(styleText('red', e instanceof Error ? e.message : String(e)));
   process.exit(1);
 }

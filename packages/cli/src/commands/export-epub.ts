@@ -1,10 +1,9 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { exists } from '@/utils/fs';
-import picocolors from 'picocolors';
 import { spinner } from '@clack/prompts';
 import { exec } from 'node:child_process';
-import { promisify } from 'node:util';
+import { promisify, styleText } from 'node:util';
 
 const execAsync = promisify(exec);
 
@@ -44,7 +43,7 @@ export async function exportEpub(options: { output?: string; framework: string }
   const buildPath = EPUB_BUILD_PATHS[framework];
   if (!(framework in EPUB_BUILD_PATHS)) {
     const valid = Object.keys(EPUB_BUILD_PATHS).join(', ');
-    console.error(picocolors.red(`Invalid --framework "${framework}". Must be one of: ${valid}`));
+    console.error(styleText('red', `Invalid --framework "${framework}". Must be one of: ${valid}`));
     process.exit(1);
   }
 
@@ -52,13 +51,13 @@ export async function exportEpub(options: { output?: string; framework: string }
   // Check for fumadocs-epub dependency
   if (!pkg) {
     console.error(
-      picocolors.red('Cannot read or parse package.json. Ensure it exists and is valid JSON.'),
+      styleText('red', 'Cannot read or parse package.json. Ensure it exists and is valid JSON.'),
     );
     process.exit(1);
   }
   const deps = { ...pkg.dependencies, ...pkg.devDependencies };
   if (!deps['fumadocs-epub']) {
-    console.log(picocolors.yellow('\nInstalling fumadocs-epub...'));
+    console.log(styleText('yellow', '\nInstalling fumadocs-epub...'));
     const packageManager = process.env.npm_execpath?.includes('pnpm')
       ? 'pnpm'
       : process.env.npm_execpath?.includes('bun')
@@ -72,7 +71,7 @@ export async function exportEpub(options: { output?: string; framework: string }
         err && typeof err === 'object' && 'stderr' in err
           ? String((err as { stderr?: string }).stderr)
           : '';
-      console.error(picocolors.red(`Failed to install fumadocs-epub. Command: ${installCmd}`));
+      console.error(styleText('red', `Failed to install fumadocs-epub. Command: ${installCmd}`));
       if (stderr) console.error(stderr);
       process.exit(1);
     }
@@ -82,7 +81,10 @@ export async function exportEpub(options: { output?: string; framework: string }
     const secret = process.env.EXPORT_SECRET;
     if (!secret) {
       console.error(
-        picocolors.red('EXPORT_SECRET is required to fetch the EPUB. Set it in your environment.'),
+        styleText(
+          'red',
+          'EXPORT_SECRET is required to fetch the EPUB. Set it in your environment.',
+        ),
       );
       process.exit(1);
     }
@@ -99,15 +101,19 @@ export async function exportEpub(options: { output?: string; framework: string }
       if (!res.ok) {
         if (res.status === 401 || res.status === 403) {
           console.error(
-            picocolors.red('Auth failed. Check that EXPORT_SECRET matches the value in your app.'),
+            styleText(
+              'red',
+              'Auth failed. Check that EXPORT_SECRET matches the value in your app.',
+            ),
           );
         } else if (res.status === 404) {
           console.error(
-            picocolors.red('Export route not found, run `fumadocs feature epub` to create it.'),
+            styleText('red', 'Export route not found, run `fumadocs feature epub` to create it.'),
           );
         } else {
           console.error(
-            picocolors.red(
+            styleText(
+              'red',
               `Server returned ${res.status}. Ensure the app is running (e.g. pnpm start) on port ${port}.`,
             ),
           );
@@ -117,16 +123,16 @@ export async function exportEpub(options: { output?: string; framework: string }
       const buffer = Buffer.from(await res.arrayBuffer());
       await fs.mkdir(path.dirname(outputPath), { recursive: true });
       await fs.writeFile(outputPath, buffer);
-      spin.stop(picocolors.green(`EPUB saved to ${outputPath}`));
+      spin.stop(styleText('green', `EPUB saved to ${outputPath}`));
     } catch (err: unknown) {
       if (err instanceof Error && err.name === 'AbortError') {
-        console.error(picocolors.red('Request timed out after 30 seconds.'));
+        console.error(styleText('red', 'Request timed out after 30 seconds.'));
       } else {
         const msg = err instanceof Error ? err.message : String(err);
-        console.error(picocolors.red(`Could not fetch EPUB: ${msg}`));
+        console.error(styleText('red', `Could not fetch EPUB: ${msg}`));
       }
       console.error(
-        picocolors.yellow(`Ensure the server is running (e.g. pnpm start) on port ${port}.`),
+        styleText('yellow', `Ensure the server is running (e.g. pnpm start) on port ${port}.`),
       );
       process.exit(1);
     } finally {
@@ -138,7 +144,8 @@ export async function exportEpub(options: { output?: string; framework: string }
   const fullBuildPath = path.join(cwd, buildPath);
   if (!(await exists(fullBuildPath))) {
     console.error(
-      picocolors.red(
+      styleText(
+        'red',
         `EPUB not found at ${buildPath}. Run production build first (e.g. pnpm build).`,
       ),
     );
@@ -148,5 +155,5 @@ export async function exportEpub(options: { output?: string; framework: string }
   spin.start('Copying EPUB');
   await fs.mkdir(path.dirname(outputPath), { recursive: true });
   await fs.copyFile(fullBuildPath, outputPath);
-  spin.stop(picocolors.green(`EPUB saved to ${outputPath}`));
+  spin.stop(styleText('green', `EPUB saved to ${outputPath}`));
 }
