@@ -180,7 +180,7 @@
     "@modelcontextprotocol/server": "2.x.x",
     "@orama/core": "1.x.x",
     "@oramacloud/client": "2.x.x",
-    "@pierre/highlights": "^0.2.0",
+    "@pierre/highlights": "0.x.x",
     "@tanstack/react-router": "1.x.x",
     "@types/estree-jsx": "*",
     "@types/hast": "*",
