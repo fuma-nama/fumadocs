@@ -3,9 +3,11 @@ title: Deploying
 description: Deploy your Fumadocs app
 ---
 
+import { frameworkName } from '@/lib/framework';
+
 ## Overview
 
-Your Fumadocs app deploys like any other {frameworkName} app.
+Your Fumadocs app deploys like any other {frameworkName(props.framework)} app.
 
 <show when={props.framework === 'next'}>
 

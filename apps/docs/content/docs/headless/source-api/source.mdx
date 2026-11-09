@@ -117,6 +117,8 @@ const params = getStaticParams('[framework]/deploy.mdx', {
 
 It returns `undefined` when nothing lists the values. The file is then one page at its literal path.
 
+A custom source that compiles MDX compiles each file once and passes the params of a page as props when rendering. See [Remark Show](/docs/headless/mdx/remark-show#custom-sources) for the outputs that depend on them.
+
 ### Dynamic Source
 
 For content sources with revalidation, return a `DynamicSource` instead:

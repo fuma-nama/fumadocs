@@ -7,55 +7,20 @@ description: Show content on a condition.
 
 Remark Show is a remark plugin. Fumadocs MDX and `@fumadocs/astro` enable it by default on both unified and Sätteri. See [Show](/docs/markdown#show) for the syntax.
 
-It decides conditions from the values in `define`. By default, those are the path params in `file.data.params`, read as `props`, and the public env vars. It runs before other remark plugins, so they only see the branches that show.
-
-<auto-type-table type="import('fumadocs-core/mdx-plugins/remark-show').RemarkShowOptions" />
-
-### Build-Time Values
-
-`define` works like the `define` option of Vite: each key is a name that code reads, like `import.meta.env.EDITION`. With Vite, the variables of `.env` files are only in `import.meta.env`, so add them yourself:
-
-```ts tab="unified" title="source.config.ts"
-import { defineConfig } from 'fumadocs-mdx/config';
-import { loadEnv } from 'vite';
-
-const env = loadEnv(process.env.NODE_ENV ?? 'development', process.cwd(), 'VITE_');
-
-export default defineConfig({
-  mdxOptions: {
-    remarkShowOptions: { define: { 'import.meta.env': env } },
-  },
-});
-```
-
-```ts tab="Sätteri" title="source.config.ts"
-import { defineConfig } from 'fumadocs-mdx/config';
-import { loadEnv } from 'vite';
-
-const env = loadEnv(process.env.NODE_ENV ?? 'development', process.cwd(), 'VITE_');
-
-export default defineConfig({
-  satteriOptions: {
-    remarkShowOptions: { define: { 'import.meta.env': env } },
-  },
-});
-```
-
-A function decides the values of each page from its params. The defaults it doesn't return are read when rendering, like the other params here:
-
-```ts twoslash
-import type { RemarkShowOptions } from 'fumadocs-core/mdx-plugins/remark-show';
-
-const remarkShowOptions: RemarkShowOptions = {
-  define: ({ params, defaults }) => ({
-    'import.meta.env': defaults['import.meta.env'],
-    'props.framework': params?.framework,
-  }),
-};
-```
+It turns `<show>` into a component that renders its content when `when` holds. Conditions are checked when rendering, so they can read the props of a page, like its path params. The other plugins of Fumadocs output the branches as conditions too: the table of contents, structured data and Markdown of a page only include the branches that show.
 
 ### Custom Sources
 
-A [custom source](/docs/headless/source-api/source#path-params) that compiles MDX itself passes the params of each page as `file.data.params`, when `dataAt()` compiles the page for them. The other expressions of the page read the params as props, so pass them to the compiled content when rendering too.
+A [custom source](/docs/headless/source-api/source#path-params) that compiles MDX compiles each file once and passes the params of a page as props when rendering. When a page reads its props, in a branch or an expression like `{props.framework}`, the `toc` and `structuredData` exports are functions of the props. Call them with the params of the page:
 
-Ports to other compilers, like the Sätteri one, build on `createShowContext()`, which evaluates conditions with the build-time values.
+```ts twoslash
+import type { Params } from 'fumadocs-core/source';
+import type { TOCItemType } from 'fumadocs-core/toc';
+
+declare const params: Params;
+declare const compiled: { toc: TOCItemType[] | ((props: Params) => TOCItemType[]) };
+// ---cut---
+const toc = typeof compiled.toc === 'function' ? compiled.toc(params) : compiled.toc;
+```
+
+The content of their structured data records can be React nodes, render them into text with `renderToMarkdown()` from `fumadocs-core/server`.

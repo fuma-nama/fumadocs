@@ -420,7 +420,7 @@ See [other usages of include](/docs/mdx/include).
 ### Show
 
 Show content on a condition. Fumadocs MDX and `@fumadocs/astro` always enable it with [Remark Show](/docs/headless/mdx/remark-show).
-`when` takes a JS expression:
+`when` takes a JS expression, checked when rendering. It can read the props of the page, like its [path params](/docs/headless/page-conventions#path-params):
 
 ```mdx title="[framework]/deploy.mdx"
 Deploy your {props.framework} site.
@@ -433,13 +433,10 @@ Add an adapter to your Astro config.
 </show>
 ```
 
-A condition is decided at build time when it only reads:
+The table of contents, the search index and the Markdown of a page only include the branches that show for its props. Expressions like `{props.framework}` render into them as values. Because the file compiles once:
 
-- the [path params](/docs/headless/page-conventions#path-params) of the page, as `props`.
-- the env vars that bundlers inline: `NEXT_PUBLIC_*`, `VITE_*` and `PUBLIC_*`.
-- the `define` option of Remark Show.
-
-Statically generated properties, like the table of contents and search index, only include the branches that show. Other conditions are checked when rendering.
+- heading IDs are unique across the file, so the same heading in two branches gets a `-1` suffix on the second one. Use a [custom anchor](#custom-anchor) to choose the ID.
+- a [tab group](#tab-groups) belongs to one branch: code blocks on both sides of a `<show>` tag form separate groups.
 
 ### NPM Commands
 

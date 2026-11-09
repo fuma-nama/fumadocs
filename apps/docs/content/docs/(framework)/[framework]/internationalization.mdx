@@ -2,6 +2,7 @@
 title: Internationalization
 ---
 
+import { frameworkName } from '@/lib/framework';
 import { frameworks } from '@/lib/framework';
 
 export const frontmatter = {
@@ -16,7 +17,7 @@ export const frontmatter = {
 
 ## Overview
 
-Configure i18n routing on both {frameworkName} and Fumadocs.
+Configure i18n routing on both {frameworkName(props.framework)} and Fumadocs.
 
 Fumadocs handles i18n for the docs content and sidebar. Internationalize the rest of your app with your own i18n setup.
 

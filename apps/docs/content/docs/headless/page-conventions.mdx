@@ -153,7 +153,7 @@ Fumadocs UI renders a [dropdown](/docs/ui/layouts/docs#tabs-groups) for each roo
 
 ## Path Params
 
-A folder or file named `[name]` is a dynamic segment. The meta file of a dynamic folder lists the values in `staticParams`, and Fumadocs generates a page for every value:
+A folder or file named `[name]` is a dynamic segment. The meta file of a dynamic folder lists its values in `staticParams`, and Fumadocs generates a page for every value:
 
 ```json title="[framework]/meta.json"
 {
@@ -167,9 +167,9 @@ A folder or file named `[name]` is a dynamic segment. The meta file of a dynamic
 | --------------------------------- | ------------------------------------------- |
 | `./[framework]/deploy.mdx`        | `['waku', 'deploy']`, `['astro', 'deploy']` |
 
-Each page is compiled once per param value. The content reads the params as `props.framework` and can branch on them with [`<show>`](/docs/markdown#show). In loader code, the params are in `page.params`.
+A page is a function of its params: the file compiles once, and its content reads them as `props` when rendering, so it can branch on them with [`<show>`](/docs/markdown#show). In loader code, the params are in `page.params`.
 
-The meta file of `[framework]` applies to every generated folder (`waku`, `astro`). A `[name]` segment whose meta file has no `staticParams` stays a literal folder name.
+The meta file of `[framework]` applies to every folder it generates (`waku`, `astro`). A `[name]` segment whose meta file has no `staticParams` stays a literal folder name.
 
 ### Page Params
 
@@ -187,7 +187,7 @@ The page only exists for `waku`, at `/docs/waku/fumadocs-mdx`.
 
 ### Data in Code
 
-Frontmatter and meta files written in YAML or JSON are the same for every param value. To set a different title or description for each value, like a title that names the framework, write them in code. Fumadocs MDX and [local Markdown](/docs/integrations/content/local-md) sources support it.
+Frontmatter and meta files written in YAML or JSON are the same for every param value. To set a different title or description for each value, like a title that names the framework, write them in code. Fumadocs MDX and [local Markdown](/docs/integrations/content/local-md) sources support it. [`@fumadocs/astro`](/docs/astro/manual-installation) supports frontmatter in code, and its meta files stay in JSON or YAML.
 
 A meta file can be a module (`meta.ts` or `meta.js`). In a dynamic folder, the default export is a function that receives the params, and `staticParams` is a named export:
 
