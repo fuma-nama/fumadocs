@@ -6,6 +6,7 @@ import { cn } from '@/utils/cn';
 import { useCopyButton } from '@/utils/use-copy-button';
 import { buttonVariants } from '@/components/ui/button';
 import { mergeRefs } from '@/utils/merge-refs';
+import { getHash } from '@/utils/urls';
 import { useTranslations } from '@fuma-translate/react';
 import {
   Accordion as Root,
@@ -29,7 +30,7 @@ export function Accordions({
   );
 
   useEffect(() => {
-    const id = window.location.hash.substring(1);
+    const id = getHash();
     const element = rootRef.current;
     if (!element || id.length === 0) return;
 

@@ -12,3 +12,13 @@ export function isActive(href: string, pathname: string, nested = false): boolea
 
   return href === pathname || (nested && pathname.startsWith(`${href}/`));
 }
+
+/** the URL hash without `#`, decoded like the browser does to find its target */
+export function getHash(): string {
+  const hash = window.location.hash.slice(1);
+  try {
+    return decodeURIComponent(hash);
+  } catch {
+    return hash;
+  }
+}
