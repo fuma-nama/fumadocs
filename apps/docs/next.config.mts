@@ -2,8 +2,8 @@ import createBundleAnalyzer from '@next/bundle-analyzer';
 import { createMDX } from 'fumadocs-mdx/next';
 import { createNextStory } from '@fumadocs/story/next';
 import type { NextConfig } from 'next';
-import { readdirSync } from 'node:fs';
 import { defaultFramework, frameworks } from './lib/framework.ts';
+import { frameworkPages } from './lib/remark-framework-links.ts';
 
 const withAnalyzer = createBundleAnalyzer({
   enabled: process.env.ANALYZE === 'true',
@@ -33,15 +33,7 @@ const config: NextConfig = {
   },
   async redirects() {
     const values = frameworks.map((item) => item.value).join('|');
-    // the top-level pages and folders of `[framework]`, links to them omit the framework segment
-    const names = new Set<string>();
-    for (const file of readdirSync(
-      new URL('./content/docs/(framework)/[framework]', import.meta.url),
-    )) {
-      if (!file.startsWith('.') && file !== 'index.mdx' && file !== 'meta.ts')
-        names.add(file.replace(/\.mdx$/, ''));
-    }
-    const pages = [...names].join('|');
+    const pages = [...frameworkPages].join('|');
 
     return [
       // the pages of each framework became one page per framework
@@ -55,18 +47,12 @@ const config: NextConfig = {
         destination: '/docs/integrations/story#installation',
         permanent: true,
       },
-      { source: '/docs', destination: `/docs/${defaultFramework}`, permanent: false },
       {
         source: `/docs/:page(${pages})/:path*`,
         destination: `/docs/${defaultFramework}/:page/:path*`,
         permanent: false,
       },
       // Markdown versions, see `proxy.ts`
-      {
-        source: '/docs.:ext(md|mdx)',
-        destination: `/docs/${defaultFramework}.:ext`,
-        permanent: false,
-      },
       {
         source: `/docs/:path((?:${pages})(?:/[^.]+)?\\.mdx?)`,
         destination: `/docs/${defaultFramework}/:path`,

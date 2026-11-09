@@ -32,7 +32,7 @@ import { getSuggestions } from './suggestions';
 import { PathUtils } from 'fumadocs-core/source';
 import { AsyncAPIPageLazy, GraphQLPageLazy, OpenAPIPageLazy } from './lazy';
 import { SponsorsMarquee } from '@fumari/sponsors';
-import { defaultFramework, frameworks, isFramework, withFramework } from '@/lib/framework';
+import { frameworks, isFramework } from '@/lib/framework';
 import { redirect } from 'next/navigation';
 
 function PreviewRenderer({ preview }: { preview: string }): ReactNode {
@@ -110,13 +110,9 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
   }
 
   const { body: Mdx, toc, lastModified } = await page.data.load();
-  const framework = isFramework(page.params?.framework) ? page.params.framework : undefined;
 
-  /** links to pages of `[framework]` omit the framework segment, they open the framework of the current page */
   function resolveLink(href: string) {
-    const found =
-      source.getPageByHref(href, { dir: PathUtils.dirname(page!.path) }) ??
-      source.getPageByHref(withFramework(href, framework ?? defaultFramework) ?? href);
+    const found = source.getPageByHref(href, { dir: PathUtils.dirname(page!.path) });
     if (!found) return;
 
     return {

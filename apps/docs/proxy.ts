@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { isMarkdownPreferred, rewritePath } from 'fumadocs-core/negotiation';
 
-const { rewrite: rewriteLLM } = rewritePath('/docs/*path', '/llms.mdx/*path');
+const { rewrite: rewriteLLM } = rewritePath('/docs{/*path}', '/llms.mdx{/*path}');
 const { rewrite: rewriteMd } = rewritePath('/docs{/*path}.md{x}', '/llms.mdx{/*path}');
 
 /** pages with a Markdown version, for clients that prefer Markdown */
