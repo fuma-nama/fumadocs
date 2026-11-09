@@ -921,7 +921,11 @@ After the branch.
 
 <show when={props.framework === "waku"}>
 ## Setup
-</show>`;
+</show>
+
+## Notes {/* draft */}
+
+## Mode <show when={props.framework === "waku"}>Waku</show>`;
 
   // set by the content source, like the collection of Fumadocs MDX
   const code = await compile(
@@ -957,15 +961,19 @@ After the branch.
   const pnpm = await outputs({ framework: 'astro', pm: 'pnpm' });
 
   // every output keeps only the branches that show, IDs read the props
-  expect(astro.toc).toEqual(['#deploy-on-astro', '#overview', '#setup']);
+  // a comment is no text, a branch in a heading counts when it shows
+  expect(astro.toc).toEqual(['#deploy-on-astro', '#overview', '#setup', '#notes', '#mode']);
   // a heading in two branches has the same ID in both
-  expect(waku.toc).toEqual(['#deploy-on-waku', '#overview', '#setup']);
+  expect(waku.toc).toEqual(['#deploy-on-waku', '#overview', '#setup', '#notes', '#mode-waku']);
   expect(pnpm.toc).toContain('#with-pnpm');
   expect(astro.structured.headings.map((item) => item.content)).toEqual([
     'Deploy on astro',
     'Overview',
     'Setup',
+    'Notes',
+    'Mode',
   ]);
+  expect(waku.html).toContain('<h2 id="mode-waku">Mode Waku</h2>');
   expect(waku.structured.contents.map((item) => item.content)).toContain(
     'Waku detects the **platform**.',
   );

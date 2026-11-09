@@ -14,7 +14,8 @@ export function createHeadingIds(headings: ((props: object) => unknown[] | null)
       // like React, booleans and nullish values render nothing
       for (const part of parts ?? [])
         if (typeof part === 'string' || typeof part === 'number') text += part;
-      ids.push(parts ? slugger.slug(text) : '');
+      // parts that render nothing leave the whitespace around them
+      ids.push(parts ? slugger.slug(text.trim()) : '');
     }
     cache.set(props, ids);
     return ids;

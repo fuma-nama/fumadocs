@@ -2,7 +2,7 @@ import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { expect, test } from 'vitest';
-import { createElement, type FC } from 'react';
+import { createElement, type FC, type ReactNode } from 'react';
 import * as JsxRuntime from 'react/jsx-runtime';
 import { renderToStaticMarkup } from 'react-dom/server';
 import * as server from 'fumadocs-core/server';
@@ -58,7 +58,11 @@ After the branch.
 
 <show when={props.framework === "waku"}>
 ## Setup
-</show>`;
+</show>
+
+## Notes {/* draft */}
+
+## Mode <show when={props.framework === "waku"}>Waku</show>`;
 
 test('Remark Show: branches and expressions render from code in every output', async () => {
   const options = await applySatteriPreset({
@@ -73,12 +77,13 @@ test('Remark Show: branches and expressions render from code in every output', a
   });
   const page = (await new AsyncFunction('opts', code)(scope)) as {
     default: FC<object>;
-    toc: (props: object) => { url: string }[];
+    toc: (props: object) => { url: string; title: ReactNode }[];
     structuredData: StructuredRecords;
     _markdown: FC<object>;
   };
   const outputs = async (props: Record<string, unknown>) => ({
     toc: page.toc(props).map((item) => item.url),
+    titles: page.toc(props).map((item) => renderToStaticMarkup(item.title)),
     structured: await renderStructuredData(page.structuredData, props),
     markdown: await server.renderToMarkdown(createElement(page._markdown, props)),
     html: renderToStaticMarkup(createElement(page.default, props)),
@@ -89,14 +94,19 @@ test('Remark Show: branches and expressions render from code in every output', a
   const pnpm = await outputs({ framework: 'astro', pm: 'pnpm' });
 
   // every output keeps only the branches that show, IDs read the props
-  expect(astro.toc).toEqual(['#deploy-on-astro', '#overview', '#setup']);
+  // a comment is no text, a branch in a heading counts when it shows
+  expect(astro.toc).toEqual(['#deploy-on-astro', '#overview', '#setup', '#notes', '#mode']);
   // a heading in two branches has the same ID in both
-  expect(waku.toc).toEqual(['#deploy-on-waku', '#overview', '#setup']);
+  expect(waku.toc).toEqual(['#deploy-on-waku', '#overview', '#setup', '#notes', '#mode-waku']);
+  expect(astro.titles.at(-1)).toBe('Mode ');
+  expect(waku.titles.at(-1)).toBe('Mode Waku');
   expect(pnpm.toc).toContain('#with-pnpm');
   expect(astro.structured.headings.map((item) => item.content)).toEqual([
     'Deploy on astro',
     'Overview',
     'Setup',
+    'Notes',
+    'Mode',
   ]);
   expect(waku.structured.contents.map((item) => item.content)).toContain(
     'Waku detects the **platform**.',

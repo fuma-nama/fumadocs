@@ -48,14 +48,20 @@ export function handleTag(value: string, tag: string): string | false {
 
 type JsxElement = Parameters<typeof defaultHandlers.mdxJsxFlowElement>[0];
 
-/** Sätteri's MDX expressions have no estree, elements using them are skipped */
-const element: Handle = (node: JsxElement, state) => {
-  for (const attr of node.attributes) {
-    const value = attr.type === 'mdxJsxAttribute' ? attr.value : attr;
-    if (typeof value === 'object' && value && !value.data?.estree) return;
-  }
-  return defaultHandlers.mdxJsxFlowElement(node, state);
-};
+/** Sätteri's MDX expressions have no estree, the attributes using them are parsed from their code */
+const element: Handle = (node: JsxElement, state) =>
+  defaultHandlers.mdxJsxFlowElement(
+    {
+      ...node,
+      attributes: node.attributes.map((attr) => {
+        if (attr.type === 'mdxJsxExpressionAttribute')
+          return { ...attr, data: { estree: parse(`({${attr.value}})`) } };
+        if (typeof attr.value !== 'object' || !attr.value) return attr;
+        return { ...attr, value: { ...attr.value, data: { estree: parse(attr.value.value) } } };
+      }),
+    },
+    state,
+  );
 
 /** Sätteri's MDX expressions have no estree, parsed from their code */
 const expression: Handle = (node: { type: 'mdxTextExpression'; value: string }, state) =>

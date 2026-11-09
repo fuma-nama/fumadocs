@@ -1,4 +1,4 @@
-import { and } from './code-output';
+import { and, showCondition } from './code-output';
 
 /** a custom ID at the end of heading text, like `[#id]` */
 export const headingIdRegex = /\s*\[#(?<slug>[^]+?)]\s*$/;
@@ -16,30 +16,38 @@ interface HeadingNode {
 }
 
 /**
- * IDs slugged when rendering, from the first heading with an authored expression or in a branch of `<show>`: only the
- * headings that show count for duplicates.
+ * IDs slugged when rendering, from the first heading that has an authored expression, or is in or around a branch of
+ * `<show>`: only the headings that show count for duplicates.
  */
 export function headingIdCode() {
   const entries: string[] = [];
   let dynamic = false;
 
+  /** the parts of the text as the items of an array */
+  function text(nodes: readonly HeadingNode[]): string {
+    let parts = '';
+    for (const node of nodes) {
+      const branch = showCondition(node);
+      if (node.type === 'mdxTextExpression') {
+        dynamic = true;
+        // in its own array, so an expression of comments is no part
+        parts += `...[${node.value}\n],`;
+      } else if (branch) {
+        dynamic = true;
+        parts += `...((${branch}) ? [${text(node.children!)}] : []),`;
+      } else if (node.children) parts += text(node.children);
+      else if (typeof node.value === 'string') parts += `${JSON.stringify(node.value)},`;
+    }
+    return parts;
+  }
+
   return {
     /** the code of the ID of the next heading in document order, when it renders from code */
     next(nodes: readonly HeadingNode[], when: string[]): string | undefined {
-      let parts = '';
-      const visit = (nodes: readonly HeadingNode[]) => {
-        for (const node of nodes) {
-          if (node.type === 'mdxTextExpression') {
-            dynamic = true;
-            parts += `(${node.value}\n),`;
-          } else if (node.children) visit(node.children);
-          else if (typeof node.value === 'string') parts += `${JSON.stringify(node.value)},`;
-        }
-      };
-      visit(nodes);
       const test = and(when);
       if (test) dynamic = true;
-      entries.push(`(props) => ${test ? `${test} ? [${parts}] : null` : `[${parts}]`}`);
+      const parts = `[${text(nodes)}]`;
+      entries.push(`(props) => ${test ? `${test} ? ${parts} : null` : parts}`);
       if (dynamic) return `_headingIds(props)[${entries.length - 1}]`;
     },
     get esm(): string | undefined {
