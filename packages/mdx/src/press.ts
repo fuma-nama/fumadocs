@@ -55,7 +55,9 @@ export default function mdxPlugin<Config extends LoaderConfig = LoaderConfig>({
       if (isEntry(page.data)) return (await load(page.data)).toc;
     },
     async getPageStructuredData(page) {
-      if (isEntry(page.data)) return (await load(page.data)).structuredData;
+      if (!isEntry(page.data)) return;
+      const { structuredData } = await load(page.data);
+      return typeof structuredData === 'function' ? structuredData() : structuredData;
     },
     getPageCreatedAt({ data }) {
       if (!isEntry(data) || !('date' in data)) return;

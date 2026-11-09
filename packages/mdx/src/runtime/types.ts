@@ -15,9 +15,10 @@ export interface DocData {
   toc: TOCItemType[];
 
   /**
-   * structured data for document search indexing.
+   * structured data for document search indexing, a function for pages with runtime content (authored expressions or
+   * `<show>` branches checked when rendering).
    */
-  structuredData: StructuredData;
+  structuredData: StructuredData | (() => Promise<StructuredData>);
 
   /**
    * Raw exports from the compiled MDX file.

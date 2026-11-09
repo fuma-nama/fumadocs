@@ -94,10 +94,10 @@ export const frontmatter = {
   );
   await fs.writeFile(names, 'export const names = { next: "Next.js", waku: "Waku" };');
   await fs.utimes(names, new Date(), new Date(Date.now() + 20_000));
-  // the module of the dynamic file has it too, the modules of its pages compile without the code
-  expect(await load(files.deploy, {})).toContain('"description":"Deploy on Waku"');
-  const waku = await load(files.deploy, { params: '{"framework":"waku"}' });
-  expect(waku).not.toContain('Deploy on');
+  // the page compiles once with the frontmatter of each params, its content doesn't run the code
+  const page = await load(files.deploy, {});
+  expect(page).toContain('"description": "Deploy on Waku"');
+  expect(page).not.toContain('names[props.framework]');
   // fields of the schema can be in code only, and the schema validates them
   expect(await load(files.home, { only: 'frontmatter' })).toContain('"title":"Home"');
   // the other statements of its block stay in the page
@@ -153,5 +153,6 @@ export const frontmatter = {
   expect(source.getPage(['waku', 'deploy'])?.data).toMatchObject({
     description: 'Deploy on Waku',
   });
+
   await fs.rm(dir, { recursive: true });
 });

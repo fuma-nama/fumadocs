@@ -7,7 +7,7 @@ import type { Environment, TransformResult } from 'vite';
 import { parse } from 'node:querystring';
 import { ValidationError } from '@/utils/validation';
 import type { LoaderContext } from 'webpack';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 
 export interface LoaderInput extends Pick<BuildMDXOptions, 'importsOnly'> {
   development: boolean;
@@ -117,7 +117,8 @@ export function toVite(
           development: this.environment ? this.environment.mode === 'dev' : false,
           compiler: {
             addDependency: (file) => {
-              this.addWatchFile(file);
+              // Vite resolves watched files like imports, a missing file (e.g. a meta file a dynamic folder may have) fails
+              if (existsSync(file)) this.addWatchFile(file);
             },
           },
         });

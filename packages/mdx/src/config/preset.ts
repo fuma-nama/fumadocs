@@ -17,7 +17,6 @@ export type DefaultMDXOptions = Omit<
    */
   valueToExport?: string[];
 
-  remarkShowOptions?: Plugins.RemarkShowOptions;
   remarkStructureOptions?: Plugins.StructureOptions | false;
   remarkHeadingOptions?: Plugins.RemarkHeadingOptions;
   remarkImageOptions?: Plugins.RemarkImageOptions | false;
@@ -63,13 +62,12 @@ export function applyMdxPreset(
       remarkStructureOptions,
       remarkCodeTabOptions,
       remarkNpmOptions,
-      remarkShowOptions,
       ...mdxOptions
     } = options;
 
     const remarkPlugins = pluginOption(
       (v) => [
-        [plugins.remarkShow, remarkShowOptions],
+        plugins.remarkShow,
         plugins.remarkGfm,
         [
           plugins.remarkHeading,

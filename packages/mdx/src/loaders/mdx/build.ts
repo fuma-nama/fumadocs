@@ -1,4 +1,5 @@
-import type { StructuredData } from 'fumadocs-core/mdx-plugins';
+import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
+import type { StructuredDataNodes } from '../../../../shared/structured-data';
 import type { TOCItemType } from 'fumadocs-core/toc';
 import type { FC } from 'react';
 import type { MDXProps } from 'mdx/types';
@@ -13,8 +14,6 @@ export interface BuildMDXOptions {
   filePath: string;
   source: string;
   frontmatter?: Record<string, unknown>;
-  /** for a page of a dynamic file, its params */
-  params?: Params;
 
   environment: 'bundler' | 'runtime';
   isDevelopment: boolean;
@@ -29,16 +28,20 @@ export interface CompilerOptions {
   addDependency: (file: string) => void;
 }
 
+/**
+ * The exports of a compiled page. The content reads the params of a page as props, so do the outputs of a page with
+ * authored expressions or `<show>` branches checked when rendering, they are then functions of the props.
+ */
 export interface CompiledMDXProperties<Frontmatter = Record<string, unknown>> {
   frontmatter: Frontmatter;
-  structuredData: StructuredData;
-  toc: TOCItemType[];
+  structuredData: StructuredData | ((props: Params) => StructuredDataNodes);
+  toc: TOCItemType[] | ((props: Params) => TOCItemType[]);
   default: FC<MDXProps>;
 
   /**
    * Enable from `postprocess` option.
    *
-   * A component with `output: 'function'` in `includeProcessedMarkdown`,
+   * A component with `output: 'function'` in `includeProcessedMarkdown`, or for runtime content,
    * render it with `renderToMarkdown` from `fumadocs-core/server`.
    */
   _markdown?: string | FC<MDXProps>;
@@ -46,8 +49,6 @@ export interface CompiledMDXProperties<Frontmatter = Record<string, unknown>> {
    * Enable from `postprocess` option.
    */
   _mdast?: string;
-  /** for a dynamic file, the module compiled for each of its params, by the params as JSON */
-  _pages?: Record<string, CompiledMDXProperties<Frontmatter>>;
 }
 
 export async function buildMDX(

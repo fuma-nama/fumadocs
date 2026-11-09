@@ -1,4 +1,5 @@
 import path from 'node:path';
+import { statSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { compileFunction } from 'node:vm';
 import { buildSync } from 'esbuild';
@@ -19,12 +20,30 @@ const esm = mdxjsEsm({
   addResult: true,
 });
 
-/** run a module in code synchronously, like a meta file in TypeScript */
+/** the last run of each module: its code, the modification times of the files it read, its exports */
+const modules = new Map<
+  string,
+  { contents: string; inputs: [string, number][]; exports: Record<string, unknown> }
+>();
+
+/**
+ * Run a module in code synchronously, like a meta file in TypeScript. Every page of a dynamic folder reads its meta
+ * file, it runs again only when it or a file it reads changes.
+ */
 export function runModule(
   file: string,
   contents: string,
   addDependency: (file: string) => void,
 ): Record<string, unknown> {
+  const cached = modules.get(file);
+  if (
+    cached?.contents === contents &&
+    cached.inputs.every(([input, time]) => mtime(input) === time)
+  ) {
+    for (const [input] of cached.inputs) addDependency(input);
+    return cached.exports;
+  }
+
   const { outputFiles, metafile } = buildSync({
     stdin: {
       contents,
@@ -39,15 +58,25 @@ export function runModule(
     write: false,
     metafile: true,
   });
-  for (const input in metafile.inputs)
-    if (!input.startsWith('<')) addDependency(path.resolve(input));
+  const inputs: [string, number][] = [];
+  for (const input in metafile.inputs) {
+    if (input.startsWith('<')) continue;
+    const resolved = path.resolve(input);
+    addDependency(resolved);
+    inputs.push([resolved, mtime(resolved)]);
+  }
   const module = { exports: {} as Record<string, unknown> };
   compileFunction(outputFiles[0].text, ['module', 'exports', 'require'], { filename: file })(
     module,
     module.exports,
     createRequire(file),
   );
+  modules.set(file, { contents, inputs, exports: module.exports });
   return module.exports;
+}
+
+function mtime(file: string): number {
+  return statSync(file, { throwIfNoEntry: false })?.mtimeMs ?? -1;
 }
 
 /**
@@ -111,4 +140,39 @@ function collectNames(node: unknown, out: Set<string>) {
   if (typeof node !== 'object' || node === null) return;
   if ('type' in node && node.type === 'Identifier' && 'name' in node) out.add(node.name as string);
   for (const value of Object.values(node)) collectNames(value, out);
+}
+
+/**
+ * The frontmatter of a page, validated: the YAML with its frontmatter in code. A dynamic file has the frontmatter in
+ * code of each params in `_frontmatterAt`.
+ *
+ * @param listed - whether to run the frontmatter in code of a dynamic file
+ */
+export async function resolveFrontmatter({
+  code,
+  yaml,
+  staticParams,
+  validate,
+  addDependency,
+  listed = true,
+}: {
+  code: ReturnType<typeof frontmatterCode>;
+  yaml: Record<string, unknown>;
+  staticParams: Params[] | undefined;
+  validate: (data: Record<string, unknown>) => unknown;
+  addDependency: (file: string) => void;
+  listed?: boolean;
+}): Promise<Record<string, unknown>> {
+  if (!code || !staticParams) {
+    const data = code ? { ...yaml, ...code.compile(addDependency)() } : yaml;
+    return (await validate(data)) as Record<string, unknown>;
+  }
+
+  const frontmatterAt: Record<string, unknown> = {};
+  if (listed) {
+    const run = code.compile(addDependency);
+    for (const item of staticParams)
+      frontmatterAt[JSON.stringify(item)] = await validate({ ...yaml, ...run(item) });
+  }
+  return { ...yaml, _frontmatterAt: frontmatterAt };
 }
