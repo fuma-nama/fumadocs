@@ -37,6 +37,7 @@ import {
   replaceSource,
 } from '@/mdx-plugins/stringifier';
 import { walk } from '@/mdx-plugins/utils';
+import { renderStructuredData, type StructuredDataNodes } from '../../shared/structured-data';
 
 const cwd = path.dirname(fileURLToPath(import.meta.url));
 
@@ -742,12 +743,13 @@ test('Remark LLMs: placeholder', async () => {
   ).toMatchFileSnapshot(path.resolve(cwd, './fixtures/remark-llms.output.md'));
 });
 
-test('Remark Show: branches decided at compile time, before other plugins', async () => {
-  const { evaluate } = await import('@mdx-js/mdx');
+test('Remark Show: branches and expressions render from code in every output', async () => {
+  const { compile, run } = await import('@mdx-js/mdx');
   const runtime = await import('react/jsx-runtime');
   const { renderToStaticMarkup } = await import('react-dom/server');
+  const server = await import('@/server');
+  const { renderToMarkdown } = server;
   const { remarkShow } = await import('@/mdx-plugins/remark-show');
-  type RemarkShowOptions = import('@/mdx-plugins/remark-show').RemarkShowOptions;
 
   const source = `# Deploy on {props.framework}
 
@@ -755,102 +757,120 @@ test('Remark Show: branches decided at compile time, before other plugins', asyn
 
 A {props.framework === "next" && "x"} B {true}
 
-<div>
-{props.framework}
-</div>
-
-<show when={import.meta.env.EDITION === "pro"}>
+<show when={props.edition === "pro"}>
 ## Pro
 </show>
 
+## Overview
+
+Shared.
+
 <show when={props.framework === "astro"}>
 ## Setup
+
+Astro only.
 </show>
+
+After the branch.
 
 <show when={props.framework === "waku"}>Waku detects the **platform**.</show>
 
 <show when={props.framework === "astro" && props.pm === "pnpm"}>
 ## With pnpm
-</show>`;
+</show>
 
-  async function compile(
-    framework: string,
-    define: RemarkShowOptions['define'] = { 'import.meta.env.EDITION': 'free' },
-  ) {
-    let structured: StructuredData | undefined;
-    let markdown = '';
-    const mod = await evaluate(
-      { value: source, data: { params: { framework } } },
-      {
-        ...runtime,
-        remarkPlugins: [
-          [remarkShow, { define } satisfies RemarkShowOptions],
-          remarkHeading,
-          remarkStructure,
-          [remarkLLMs, { _data: true }],
-          () => (_tree, file) => {
-            structured = file.data.structuredData;
-            markdown = file.data.markdown as string;
-          },
-        ],
-      },
-    );
-    const html = (props: object) => renderToStaticMarkup(runtime.jsx(mod.default, props));
-    return { html, structured: structured!, markdown };
-  }
+1. First.
+2. <show when={props.framework === "waku"}>
+     Waku, on two
+     lines.
+   </show>
+   <show when={props.framework === "astro"}>
+     Astro.
+   </show>`;
 
-  const waku = await compile('waku');
-  const astro = await compile('astro');
+  const code = await compile(source, {
+    outputFormat: 'function-body',
+    baseUrl: import.meta.url,
+    remarkPlugins: [remarkShow, remarkHeading, [remarkStructure, { exportAs: true }], remarkLLMs],
+    rehypePlugins: [rehypeToc],
+  });
+  // the generated imports of `fumadocs-core/server`, from the source
+  const body = String(code).replace(
+    /await import\([^)]*"fumadocs-core\/server"\)\)?/g,
+    'arguments[0]._server',
+  );
+  const mod = await run(body, { ...runtime, _server: server } as never);
+  type Page = {
+    toc: (props: object) => { url: string }[];
+    structuredData: (props: object) => StructuredDataNodes;
+    _markdown: (props: object) => unknown;
+  };
+  const page = mod as unknown as Page;
+  const outputs = async (props: object) => ({
+    toc: page.toc(props).map((item) => item.url),
+    structured: await renderStructuredData(page.structuredData, props),
+    markdown: await renderToMarkdown(runtime.jsx(page._markdown as never, props)),
+    html: renderToStaticMarkup(runtime.jsx(mod.default, props)),
+  });
 
-  // plugins only see the branches that show
-  expect(astro.structured.headings.map((item) => item.id)).toEqual([
-    'deploy-on-astro',
-    'setup',
-    'with-pnpm',
+  const astro = await outputs({ framework: 'astro' });
+  const waku = await outputs({ framework: 'waku' });
+  const pnpm = await outputs({ framework: 'astro', pm: 'pnpm' });
+
+  // every output keeps only the branches that show
+  expect(astro.toc).toEqual(['#deploy-on-', '#overview', '#setup']);
+  expect(waku.toc).toEqual(['#deploy-on-', '#overview']);
+  expect(pnpm.toc).toContain('#with-pnpm');
+  expect(astro.structured.headings.map((item) => item.content)).toEqual([
+    'Deploy on astro',
+    'Overview',
+    'Setup',
   ]);
   expect(waku.structured.contents.map((item) => item.content)).toContain(
     'Waku detects the **platform**.',
   );
-  // other expressions and the branches checked when rendering stay as authored
-  expect(astro.markdown).toContain(
-    '<show when={props.framework === "astro" && props.pm === "pnpm"}>',
+  expect(astro.structured.contents.map((item) => item.content)).not.toContain(
+    'Waku detects the **platform**.',
   );
+  // content after a branch belongs to the last heading that shows with it
+  const after = (data: StructuredData) =>
+    data.contents.find((item) => item.content === 'After the branch.')?.heading;
+  expect(after(astro.structured)).toBe('setup');
+  expect(after(waku.structured)).toBe('overview');
+  // expressions are values
   expect(waku.markdown).toContain('# Deploy on waku');
-  expect(waku.markdown).toContain('<span data-framework={props.framework} />');
   expect(waku.markdown).not.toContain('Pro');
-  // a removed branch leaves no blank lines
+  expect(waku.markdown).toContain('Waku detects the **platform**.');
+  expect(astro.markdown).toContain('Astro only.');
+  expect(waku.markdown).not.toContain('Astro only.');
   expect(waku.markdown).not.toMatch(/\n{3,}/);
+  // a branch in a list item keeps its prefixes, the whitespace after a branch goes with it
+  expect(waku.markdown).toContain('2. Waku, on two\n   lines.');
+  expect(astro.markdown).toContain('2. Astro.');
 
-  // they read the params as props when rendering
-  const html = waku.html({ framework: 'waku' });
-  expect(html).toContain('data-framework="waku"');
+  expect(waku.html).toContain('data-framework="waku"');
   // booleans render nothing
-  expect(html).toContain('<p>A  B </p>');
-  expect(html).toContain('<div>waku</div>');
-  expect(astro.html({ framework: 'astro' })).not.toContain('With pnpm');
-  expect(astro.html({ framework: 'astro', pm: 'pnpm' })).toContain('With pnpm');
-
-  // a function decides the values of each page
-  const pro = await compile('astro', ({ params }) => ({
-    'props.framework': params?.framework,
-    'import.meta.env.EDITION': 'pro',
-  }));
-  expect(pro.markdown).toContain('# Deploy on astro');
-  expect(pro.markdown).toContain('## Pro');
+  expect(waku.html).toContain('<p>A  B </p>');
+  expect(astro.html).not.toContain('With pnpm');
+  expect(pnpm.html).toContain('With pnpm');
 });
 
-test('Remark Show: the content of a branch joins the content around it', async () => {
+test('Remark Show: a branch in a heading makes the TOC a function', async () => {
   const { compile } = await import('@mdx-js/mdx');
   const { remarkShow } = await import('@/mdx-plugins/remark-show');
-  const { remarkCodeTab } = await import('@/mdx-plugins/remark-code-tab');
   const file = await compile(
-    {
-      value:
-        '```ts tab="Shared"\na\n```\n\n<show when={props.framework === "astro"}>\n```ts tab="Astro"\nb\n```\n</show>\n',
-      data: { params: { framework: 'astro' } },
-    },
+    '## Deploy <show when={props.framework === "next"}>on Vercel</show>\n\n<show when={props.a}>\nParagraph.\n</show>\n',
+    { remarkPlugins: [remarkShow, remarkHeading], rehypePlugins: [rehypeToc] },
+  );
+  expect(String(file)).toMatch(/let toc = props => \[/);
+});
+
+test('Remark Show: code tabs end at a branch', async () => {
+  const { compile } = await import('@mdx-js/mdx');
+  const { remarkShow } = await import('@/mdx-plugins/remark-show');
+  const file = await compile(
+    '```ts tab="Shared"\na\n```\n\n<show when={props.framework === "astro"}>\n```ts tab="Astro"\nb\n```\n</show>\n',
     { remarkPlugins: [remarkShow, remarkCodeTab] },
   );
-  // one tab group, across the branch
-  expect(String(file).match(/defaultValue:/g)).toHaveLength(1);
+  expect(String(file).match(/defaultValue:/g)).toHaveLength(2);
 });

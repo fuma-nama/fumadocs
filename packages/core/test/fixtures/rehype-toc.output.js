@@ -1,43 +1,43 @@
 import {Fragment as _Fragment, jsx as _jsx, jsxs as _jsxs} from "react/jsx-runtime";
 export let toc = [{
-  depth: 1,
-  url: "#heading-1",
+  "depth": 1,
+  "url": "#heading-1",
   title: _jsx(_Fragment, {
     children: "Heading 1"
   })
 }, {
-  depth: 2,
-  url: "#heading-2",
+  "depth": 2,
+  "url": "#heading-2",
   title: _jsx(_Fragment, {
     children: "Heading 2"
   })
 }, {
-  depth: 3,
-  url: "#heading-3",
+  "depth": 3,
+  "url": "#heading-3",
   title: _jsx(_Fragment, {
     children: "Heading 3"
   })
 }, {
-  depth: 3,
-  url: "#hello-world",
+  "depth": 3,
+  "url": "#hello-world",
   title: _jsx(_Fragment, {
     children: "Custom heading id"
   })
 }, {
-  depth: 3,
-  url: "#math-c_l",
+  "depth": 3,
+  "url": "#math-c_l",
   title: _jsx(_Fragment, {
     children: "math $$C_L$$"
   })
 }, {
-  depth: 3,
-  url: "#custom-heading-id-hello-world",
+  "depth": 3,
+  "url": "#custom-heading-id-hello-world",
   title: _jsx(_Fragment, {
     children: "Custom heading id hello-world]"
   })
 }, {
-  depth: 3,
-  url: "#code-here",
+  "depth": 3,
+  "url": "#code-here",
   title: _jsxs(_Fragment, {
     children: [_jsx("code", {
       children: "code"

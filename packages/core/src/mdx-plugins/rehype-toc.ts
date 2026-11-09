@@ -1,8 +1,16 @@
 import type { Processor, Transformer } from 'unified';
 import type { Root, Element, Nodes } from 'hast';
 import { toEstree } from 'hast-util-to-estree';
-import type { JSXElement, ObjectExpression } from 'estree-jsx';
-import { handleTag, toMdxExportRaw, walk } from './utils';
+import type { Expression, ObjectExpression } from 'estree-jsx';
+import { valueToEstree } from 'estree-util-value-to-estree';
+import {
+  guardedArray,
+  handleTag,
+  property,
+  propsFunction,
+  showCondition,
+  toMdxExportRaw,
+} from './utils';
 
 export interface RehypeTocOptions {
   /**
@@ -47,6 +55,12 @@ export interface RehypeTOCItemType {
   _step?: number;
 }
 
+/** whether content reads render scope: authored expressions, or branches of `<show>` checked when rendering */
+function readsProps(node: Nodes): boolean {
+  if (node.type === 'mdxTextExpression' || showCondition(node as never)) return true;
+  return 'children' in node && node.children.some(readsProps);
+}
+
 const TocOnlyTag = '[toc]';
 const NoTocTag = '[!toc]';
 const HeadingTags = new Set(['h1', 'h2', 'h3', 'h4', 'h5', 'h6']);
@@ -76,148 +90,72 @@ export function rehypeToc(
   }
 
   return (tree, file) => {
-    const items: RehypeTOCItemType[] = [];
+    const items: (RehypeTOCItemType & { when: Expression[] })[] = [];
+    let dynamic = false;
 
-    walk<Nodes>(tree, (element, idx, parent) => {
-      if (element.type !== 'element') return;
-      if (!HeadingTags.has(element.tagName) || element.children.length === 0) return;
-
-      const id = element.properties.id;
-      if (typeof id !== 'string') return 'skip';
-      let isTocOnly = false;
-
-      const last = element.children[element.children.length - 1];
-      if (last.type === 'text') {
-        const noToc = handleTag(last.value, NoTocTag);
-
-        if (noToc !== false) {
-          last.value = noToc;
-          return 'skip';
+    const visit = (nodes: Nodes[], when: Expression[]) => {
+      for (let i = 0; i < nodes.length; i++) {
+        const node = nodes[i];
+        if (!('children' in node)) continue;
+        if (node.type !== 'element' || !HeadingTags.has(node.tagName) || !node.children.length) {
+          const condition = showCondition(node as never);
+          visit(node.children, condition ? [...when, condition] : when);
+          continue;
         }
 
-        const tocOnly = handleTag(last.value, TocOnlyTag);
-        if (tocOnly !== false) {
-          isTocOnly = true;
-          last.value = tocOnly;
+        const id = node.properties.id;
+        if (typeof id !== 'string') continue;
+        const last = node.children[node.children.length - 1];
+        const text = last.type === 'text' ? last : undefined;
+        const noToc = text && handleTag(text.value, NoTocTag);
+        if (typeof noToc === 'string') {
+          text!.value = noToc;
+          continue;
         }
+        const tocOnly = text && handleTag(text.value, TocOnlyTag);
+        if (typeof tocOnly === 'string') {
+          text!.value = tocOnly;
+          nodes.splice(i--, 1);
+        }
+
+        dynamic ||= when.length > 0 || readsProps(node);
+        items.push({
+          title: node,
+          depth: Number(node.tagName[1]),
+          url: `#${id}`,
+          _step: getStep(node.properties),
+          when,
+        });
       }
-
-      items.push({
-        title: element,
-        depth: Number(element.tagName[1]),
-        url: `#${id}`,
-        _step: getStep(element.properties),
-      });
-
-      if (isTocOnly && parent && typeof idx === 'number') {
-        parent.children.splice(idx, 1);
-      }
-
-      return 'skip';
-    });
+    };
+    visit(tree.children, []);
 
     if (exportToc.as === 'esm') {
-      const esmItems: {
-        title: JSXElement;
-        url: string;
-        depth: number;
-        _step?: number;
-      }[] = [];
-      for (const item of items) {
-        const root = toEstree(item.title, {
+      const list: { value: Expression; when: Expression[] }[] = [];
+      for (const { title, when, _step, ...item } of items) {
+        const root = toEstree(title, {
           elementAttributeNameCase: 'react',
           stylePropertyNameCase: 'dom',
         }).body[0];
+        if (root.type !== 'ExpressionStatement' || root.expression.type !== 'JSXElement') continue;
 
-        if (root.type === 'ExpressionStatement' && root.expression.type === 'JSXElement') {
-          esmItems.push({
-            ...item,
-            title: root.expression,
-          });
-        }
-      }
-
-      tree.children.push(
-        toMdxExportRaw(exportToc.name, {
-          type: 'ArrayExpression',
-          elements: esmItems.map((item) => {
-            const obj: ObjectExpression = {
-              type: 'ObjectExpression',
-              properties: [
-                {
-                  type: 'Property',
-                  method: false,
-                  shorthand: false,
-                  computed: false,
-                  key: {
-                    type: 'Identifier',
-                    name: 'depth',
-                  },
-                  value: {
-                    type: 'Literal',
-                    value: item.depth,
-                  },
-                  kind: 'init',
-                },
-                {
-                  type: 'Property',
-                  method: false,
-                  shorthand: false,
-                  computed: false,
-                  key: {
-                    type: 'Identifier',
-                    name: 'url',
-                  },
-                  value: {
-                    type: 'Literal',
-                    value: item.url,
-                  },
-                  kind: 'init',
-                },
-                {
-                  type: 'Property',
-                  method: false,
-                  shorthand: false,
-                  computed: false,
-                  key: {
-                    type: 'Identifier',
-                    name: 'title',
-                  },
-                  value: {
-                    type: 'JSXFragment',
-                    openingFragment: { type: 'JSXOpeningFragment' },
-                    closingFragment: { type: 'JSXClosingFragment' },
-                    children: item.title.children,
-                  },
-                  kind: 'init',
-                },
-              ],
-            };
-
-            if (typeof item._step === 'number') {
-              obj.properties.push({
-                type: 'Property',
-                method: false,
-                shorthand: false,
-                computed: false,
-                key: {
-                  type: 'Identifier',
-                  name: '_step',
-                },
-                value: {
-                  type: 'Literal',
-                  value: item._step,
-                },
-                kind: 'init',
-              });
-            }
-
-            return obj;
+        const value = valueToEstree(
+          _step === undefined ? item : { ...item, _step },
+        ) as ObjectExpression;
+        value.properties.push(
+          property('title', {
+            type: 'JSXFragment',
+            openingFragment: { type: 'JSXOpeningFragment' },
+            closingFragment: { type: 'JSXClosingFragment' },
+            children: root.expression.children,
           }),
-        }),
-      );
+        );
+        list.push({ value, when });
+      }
+      const array = guardedArray(list);
+      tree.children.push(toMdxExportRaw(exportToc.name, dynamic ? propsFunction(array) : array));
     } else {
-      file.data.rehypeToc = items;
+      file.data.rehypeToc = items.map(({ when: _, ...item }) => item);
     }
   };
 }

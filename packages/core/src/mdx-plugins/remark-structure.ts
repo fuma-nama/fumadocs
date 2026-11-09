@@ -3,12 +3,25 @@ import { remark } from 'remark';
 import remarkGfm from 'remark-gfm';
 import type { PluggableList, Transformer } from 'unified';
 import { VFile } from 'vfile';
-import { isJsxElement, toMdxExport, walk } from './utils';
-import { createStringifier, type Stringifier } from './stringifier';
+import type { Expression } from 'estree-jsx';
+import {
+  and,
+  chunksToExpression,
+  createCodeOutput,
+  guardedArray,
+  isJsxElement,
+  property,
+  propsFunction,
+  showCondition,
+  toMdxExport,
+  toMdxExportRaw,
+} from './utils';
+import type { Stringifier } from './stringifier';
 import { headingIdRegex } from './heading-id';
 import type { MdxJsxFlowElement, MdxJsxTextElement } from 'mdast-util-mdx';
 import { remarkHeading } from './remark-heading';
 import { tableRowToStructuredData } from '@/search';
+import { valueToEstree } from 'estree-util-value-to-estree';
 
 interface StructuredDataHeading {
   id: string;
@@ -38,7 +51,7 @@ export interface StructureOptions {
    *
    * If a node's type is listed in this array, it will be converted into a single content block, except tables which become a content block per row, along with the header row.
    *
-   * @defaultValue ['heading', 'paragraph', 'blockquote', 'table', 'mdxJsxFlowElement']
+   * @defaultValue ['heading', 'paragraph', 'blockquote', 'table', 'mdxJsxFlowElement', 'mdxFlowExpression']
    */
   types?: string[] | ((node: Nodes) => boolean);
 
@@ -83,7 +96,7 @@ declare module 'vfile' {
 }
 
 export const remarkStructureDefaultOptions = {
-  types: ['heading', 'paragraph', 'blockquote', 'table', 'mdxJsxFlowElement'],
+  types: ['heading', 'paragraph', 'blockquote', 'table', 'mdxJsxFlowElement', 'mdxFlowExpression'],
   mdxTypes(node) {
     return !node.children || node.children.length === 0;
   },
@@ -105,6 +118,10 @@ export const remarkStructureDefaultOptions = {
  * Extract content into structured data, as Markdown sliced from the authored source. Links and JSX elements are
  * replaced by their content, images are removed.
  *
+ * Authored expressions and the branches of `<show>` checked when rendering are rendered from code: the export is then
+ * a function of the props, its content can be React nodes, rendered into Markdown by the source. `vfile.data.structuredData`
+ * has the authored source of expressions and every branch.
+ *
  * By default, the output is stored into VFile (`vfile.data.structuredData`), you can specify `exportAs` to export it.
  */
 export function remarkStructure({
@@ -116,23 +133,19 @@ export function remarkStructure({
   const isType = Array.isArray(types) ? (node: Nodes) => types.includes(node.type) : types;
 
   return (tree, file) => {
-    const data: StructuredData = { contents: [], headings: [] };
-    const s = createStringifier(file, 'search');
+    const out = createCodeOutput(file, 'search');
+    const { s } = out;
+    /** headings and contents in document order, their content with the markers of code */
+    const headings: { id: string; content: string; when: Expression[] }[] = [];
+    const contents: (StructuredDataContent & { when: Expression[]; after: number })[] = [];
+    const pushContent = (item: StructuredDataContent, when: Expression[]) =>
+      contents.push({ ...item, when, after: headings.length });
 
     // Fumadocs OpenAPI Generated Structured Data
-    if (file.data.frontmatter) {
-      const frontmatter = file.data.frontmatter as {
-        _openapi?: {
-          structuredData?: StructuredData;
-        };
-      };
-
-      const openapiData = frontmatter._openapi?.structuredData;
-      if (openapiData) {
-        data.headings.push(...openapiData.headings);
-        data.contents.push(...openapiData.contents);
-      }
-    }
+    const openapi = (file.data.frontmatter as { _openapi?: { structuredData?: StructuredData } })
+      ?._openapi?.structuredData;
+    for (const item of openapi?.headings ?? []) headings.push({ ...item, when: [] });
+    for (const item of openapi?.contents ?? []) pushContent(item, []);
 
     const toCells = (row: TableRow) => {
       const cells: string[] = [];
@@ -143,23 +156,22 @@ export function remarkStructure({
     // in document order, stringified after the edits of every node
     const records: (() => void)[] = [];
     let covered: { start: number; end: number } | undefined;
-    let lastHeading: string | undefined;
     let tables = 0;
 
-    const collect = (node: Nodes) => {
+    const collect = (node: Nodes, when: Expression[]) => {
       // links and elements become their content, unless kept as HTML tags, images are removed
-      if (node.type === 'link' || node.type === 'linkReference')
+      if (out.markCode(node)) {
+        // rendered from code
+      } else if (node.type === 'link' || node.type === 'linkReference')
         s.replace(node, (s) => s.inner(node));
       else if (node.type === 'image' || node.type === 'imageReference') s.replace(node, '');
       else if (isJsxElement(node))
         s.replace(node, filterElement(node) ? (s) => toHtmlTag(node, s) : (s) => s.inner(node));
 
-      const heading = lastHeading;
       if (node.data?.structuredData) {
-        const { contents } = node.data.structuredData;
+        const items = node.data.structuredData.contents;
         records.push(() => {
-          for (const item of contents)
-            data.contents.push({ ...item, heading: item.heading ?? heading });
+          for (const item of items) pushContent(item, when);
         });
         covered = s.range(node) ?? covered;
         return;
@@ -178,8 +190,9 @@ export function remarkStructure({
           const [head, ...rows] = node.children;
           const header = toCells(head);
           for (const row of rows)
-            data.contents.push(
-              tableRowToStructuredData({ table, heading, row: toCells(row), header }),
+            pushContent(
+              tableRowToStructuredData({ table, heading: undefined, row: toCells(row), header }),
+              when,
             );
         });
       } else if (node.type === 'heading') {
@@ -191,28 +204,103 @@ export function remarkStructure({
           return;
         }
 
-        lastHeading = id;
         records.push(() => {
           const content = s.inner(node).replace(headingIdRegex, '').trim();
-          if (content.length > 0) data.headings.push({ id, content });
+          headings.push({ id, content, when });
         });
       } else {
         records.push(() => {
           const content = s.stringify(node).trim();
-          if (content.length > 0) data.contents.push({ heading, content });
+          if (content.length > 0) pushContent({ heading: undefined, content }, when);
         });
       }
     };
-    walk<Nodes>(tree, collect);
+    const visit = (node: Nodes, when: Expression[]) => {
+      collect(node, when);
+      if (!('children' in node)) return;
+      const condition = isJsxElement(node) ? showCondition(node) : undefined;
+      for (const child of node.children) visit(child, condition ? [...when, condition] : when);
+    };
+    visit(tree, []);
     for (const record of records) record();
 
+    const data: StructuredData = { contents: [], headings: [] };
+    for (const { id, content } of headings)
+      if (content) data.headings.push({ id, content: out.toStatic(content) });
+    for (const { when: _, after, heading = headings[after - 1]?.id, ...item } of contents)
+      data.contents.push({ heading, ...item, content: out.toStatic(item.content) });
     file.data.structuredData = data;
-    if (exportAs) {
-      tree.children.unshift(
-        toMdxExport(typeof exportAs === 'string' ? exportAs : 'structuredData', data),
-      );
+
+    if (!exportAs) return;
+    const name = typeof exportAs === 'string' ? exportAs : 'structuredData';
+    if (!out.dynamic) {
+      tree.children.unshift(toMdxExport(name, data));
+      return;
     }
+
+    /**
+     * The heading of content: the last heading before it that shows with it, the conditions of the branches decide
+     * those in other branches.
+     */
+    function headingOf(when: Expression[], after: number): Expression {
+      let value: Expression = { type: 'Identifier', name: 'undefined' };
+      let i = after - 1;
+      for (; i >= 0; i--) {
+        if (!and(headings[i].when.filter((item) => !when.includes(item)))) {
+          value = { type: 'Literal', value: headings[i].id };
+          break;
+        }
+      }
+      for (let j = i + 1; j < after; j++) {
+        const test = and(headings[j].when.filter((item) => !when.includes(item)))!;
+        value = {
+          type: 'ConditionalExpression',
+          test,
+          consequent: { type: 'Literal', value: headings[j].id },
+          alternate: value,
+        };
+      }
+      return value;
+    }
+
+    const code = (content: string) => property('content', chunksToExpression(out.chunks(content)));
+    const headingList: { value: Expression; when: Expression[] }[] = [];
+    for (const { id, content, when } of headings) {
+      if (!content) continue;
+      headingList.push({
+        value: {
+          type: 'ObjectExpression',
+          properties: [property('id', { type: 'Literal', value: id }), code(content)],
+        },
+        when,
+      });
+    }
+    const contentList: { value: Expression; when: Expression[] }[] = [];
+    for (const { when, after, heading, table, content } of contents) {
+      const properties = [
+        property('heading', heading === undefined ? headingOf(when, after) : toObject(heading)),
+        code(content),
+      ];
+      if (table) properties.push(property('table', { type: 'Literal', value: table }));
+      contentList.push({ value: { type: 'ObjectExpression', properties }, when });
+    }
+    tree.children.unshift(
+      toMdxExportRaw(
+        name,
+        propsFunction({
+          type: 'ObjectExpression',
+          properties: [
+            property('headings', guardedArray(headingList)),
+            property('contents', guardedArray(contentList)),
+          ],
+        }),
+      ),
+    );
   };
+}
+
+function toObject(value: unknown): Expression {
+  return valueToEstree(value) as Expression;
 }
 
 /** an element on one line has inline content, recorded like a paragraph */
