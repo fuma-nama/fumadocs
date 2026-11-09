@@ -114,8 +114,8 @@ export const remarkStructureDefaultOptions = {
  * Extract content into structured data, as Markdown sliced from the authored source. Links and JSX elements are
  * replaced by their content, images are removed.
  *
- * A runtime export can have React nodes as content, rendered into Markdown by the source. `vfile.data.structuredData` is
- * static.
+ * With runtime analysis, the export is a function of the props, expressions render strings and numbers into the
+ * content. `vfile.data.structuredData` is static.
  *
  * By default, the output is stored into VFile (`vfile.data.structuredData`), you can specify `exportAs` to export it.
  */

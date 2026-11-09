@@ -74,9 +74,9 @@ export const GET: APIRoute = ({ request }) => server.GET(request);
 
 ### From Search Indexes
 
-Create the server from search indexes. Each index needs the `structuredData` of its page, from your content source or the [Remark Structure](/docs/headless/mdx/structure) plugin.
+Create the server from search indexes, each index needs a `structuredData` field.
 
-With Fumadocs MDX and `@fumadocs/astro`, get it with `await page.data.structuredData()`. On Fumadocs MDX collections with [static analysis](/docs/mdx/collections#analysis), it's an object unless the collection is async.
+Usually, it is provided by your content source (e.g. Fumadocs MDX). You can also extract it from Markdown/MDX document using the [Remark Structure](/docs/headless/mdx/structure) plugin.
 
 Serve it from your search route in place of `flexsearchFromSource()`:
 
@@ -85,16 +85,13 @@ import { source } from '@/lib/source';
 import { flexsearch } from 'fumadocs-core/search/flexsearch';
 
 const server = flexsearch({
-  indexes: () =>
-    Promise.all(
-      source.getPages().map(async (page) => ({
-        title: page.data.title!,
-        description: page.data.description,
-        url: page.url,
-        id: page.url,
-        structuredData: await page.data.structuredData(),
-      })),
-    ),
+  indexes: source.getPages().map((page) => ({
+    title: page.data.title!,
+    description: page.data.description,
+    url: page.url,
+    id: page.url,
+    structuredData: page.data.structuredData,
+  })),
 });
 ```
 
@@ -124,13 +121,13 @@ import { source } from '@/lib/source';
 import { flexsearchFromSource } from 'fumadocs-core/search/flexsearch';
 
 const server = flexsearchFromSource(source, {
-  async buildIndex(page) {
+  buildIndex(page) {
     return {
       title: page.data.title!,
       description: page.data.description,
       url: page.url,
       id: page.url,
-      structuredData: await page.data.structuredData(),
+      structuredData: page.data.structuredData,
       // use your desired value, like page.slugs[0] [!code ++:2]
       tag: '<value>',
     };
@@ -283,16 +280,13 @@ const server = flexsearchI18n({
     // [locale]: Flexsearch options [!code ++:2]
     jp: { encoder: Charset.CJK },
   },
-  indexes: () =>
-    Promise.all(
-      source.getPages().map(async (page) => ({
-        title: page.data.title!,
-        description: page.data.description,
-        structuredData: await page.data.structuredData(),
-        id: page.url,
-        url: page.url,
-        locale: page.locale!,
-      })),
-    ),
+  indexes: source.getPages().map((page) => ({
+    title: page.data.title!,
+    description: page.data.description,
+    structuredData: page.data.structuredData,
+    id: page.url,
+    url: page.url,
+    locale: page.locale!,
+  })),
 });
 ```

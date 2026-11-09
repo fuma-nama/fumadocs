@@ -36,8 +36,6 @@ Run the [command](/docs/cli) below.
 
 Remark Structure is a remark plugin. Fumadocs MDX enables it by default and exports the records as `structuredData`. Pass options with `remarkStructureOptions`.
 
-By default, the export is the records of the source. With the `analysis: 'runtime'` option, it's a function of the page's props, so records render the expressions of the page and only include the `<show>` branches that show. Fumadocs MDX passes the [`analysis`](/docs/mdx/collections#analysis) of the collection. With `runtime`, `await page.data.structuredData()` renders the records with the path params of the page.
-
 ## Records
 
 Headings, paragraphs, blockquotes, tables and JSX elements are recorded (see `types`):
@@ -77,6 +75,15 @@ export default defineConfig({
   },
 });
 ```
+
+## Analysis
+
+The `analysis` option sets whether the records render for the props of the content:
+
+- `runtime`: `structuredData` is a function of the props. Its records only include the [`<show>`](/docs/markdown#show) branches that show, and expressions render as their values.
+- `static` (default): `structuredData` is the records of the source. They include every branch, and expressions keep their source text.
+
+Fumadocs MDX passes the [`analysis`](/docs/mdx/collections#analysis) of the collection, `runtime` by default, and renders the records for the props of each page.
 
 ## Plugins
 

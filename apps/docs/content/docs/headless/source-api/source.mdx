@@ -117,29 +117,65 @@ const params = getStaticParams('[framework]/deploy.mdx', {
 
 It returns `undefined` when nothing lists the values. The file is then one page at its literal path.
 
-When your source compiles MDX, compile each file once with the `analysis: 'runtime'` option of the Fumadocs plugins, and pass the params of a page as props when rendering. The `toc` export of Rehype TOC and the `structuredData` export of Remark Structure are then functions of the same props:
+When your source compiles MDX, compile each file once and pass the params of a page as props to its content.
+
+With their `analysis: 'runtime'` option, the Fumadocs plugins export the outputs of a page as functions of its props, like the `toc` of [Rehype TOC](/docs/headless/mdx/headings#rehype-toc) and the `structuredData` of [Remark Structure](/docs/headless/mdx/structure). Call them with the same props:
 
 ```tsx twoslash
-import type { ReactNode } from 'react';
-import type { MDXContent } from 'mdx/types';
-import type { Params } from 'fumadocs-core/source';
+import type { StaticSource } from 'fumadocs-core/source';
+import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
 import type { TOCItemType } from 'fumadocs-core/toc';
+import type { MDXContent, MDXProps } from 'mdx/types';
 
-declare const params: Params;
 declare const compiled: {
   default: MDXContent;
-  toc: (props: Params) => TOCItemType[];
-  structuredData: (props: Params) => { contents: { heading?: string; content: ReactNode }[] };
+  toc: (props: object) => TOCItemType[];
+  structuredData: (props: object) => StructuredData;
 };
 // ---cut---
 const { default: Content, toc, structuredData } = compiled;
 
-const body = <Content {...params} />;
-const items = toc(params);
-const records = structuredData(params);
+// the page for some props
+function pageAt(props: object) {
+  return {
+    title: 'Deploy',
+    body: (own: MDXProps) => <Content {...props} {...own} />,
+    toc: toc(props),
+    structuredData: structuredData(props),
+  };
+}
+
+const files: StaticSource['files'] = [
+  {
+    type: 'page',
+    path: '[framework]/deploy.mdx',
+    data: pageAt({}),
+    dataAt: (params) => pageAt(params),
+  },
+];
 ```
 
-A record that renders an expression has React nodes as its content. Turn them into text with [`renderToMarkdown()`](/docs/headless/utils/markdown).
+#### Custom Props
+
+To support [custom props](/docs/headless/source-api#custom-props), give the page file a `withProps()` hook. It receives the data of the page, the custom props and the path params, and returns the data rendered for both:
+
+```tsx twoslash
+import type { StaticSource } from 'fumadocs-core/source';
+
+declare function pageAt(props: object): { title: string };
+// ---cut---
+const files: StaticSource['files'] = [
+  {
+    type: 'page',
+    path: '[framework]/deploy.mdx',
+    data: pageAt({}),
+    dataAt: (params) => pageAt(params),
+    withProps: (data, props, params) => ({ ...data, ...pageAt({ ...params, ...props }) }),
+  },
+];
+```
+
+Without the hook, `getPage()` ignores custom props.
 
 ### Dynamic Source
 

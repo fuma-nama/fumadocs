@@ -8,7 +8,7 @@ preview: inlineTOC
 
 ## Usage
 
-You can use it in your MDX content:
+You can use it in your MDX content. With [runtime analysis](/docs/mdx/collections#analysis), the default, the `toc` export is a function of the props of the page:
 
 ```mdx title="content.mdx"
 import { InlineTOC } from 'fumadocs-ui/components/inline-toc';
@@ -27,7 +27,7 @@ export default function Page() {
   return (
     <DocsPage>
       {/* [!code ++] */}
-      <InlineTOC items={page.data.toc()}>Table of Contents</InlineTOC>
+      <InlineTOC items={page.data.toc}>Table of Contents</InlineTOC>
     </DocsPage>
   );
 }

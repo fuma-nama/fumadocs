@@ -30,7 +30,6 @@ import { defineDocs } from 'fumadocs-mdx/config';
 
 export const docs = defineDocs({
   docs: {
-    analysis: 'runtime',
     postprocess: {
       // `true`, or the options of `remarkLLMs`
       includeProcessedMarkdown: true,
@@ -59,13 +58,9 @@ Images beside your pages, imported by [Remark Image](/docs/headless/mdx/remark-i
 
 Images in the public directory keep their address. Vite inlines images smaller than [`build.assetsInlineLimit`](https://vite.dev/config/build-options#build-assetsinlinelimit) as `data:` URLs.
 
-## Runtime Analysis
+## JSX Elements
 
-With the `analysis: 'runtime'` option, `_markdown` is a component that renders the Markdown of a page for its props: expressions render as values, and only the `<show>` branches that show are included. Fumadocs MDX passes the [`analysis`](/docs/mdx/collections#analysis) of the collection, and `getText('processed')` renders the component with the path params of the page.
-
-### JSX Elements
-
-The component is rendered into Markdown with [`renderToMarkdown()`](/docs/headless/utils/markdown). Pass your MDX components to render JSX elements with them:
+With [runtime analysis](#analysis), JSX elements are rendered by your MDX components. Pass them to `getText()`:
 
 ```tsx
 import { getMDXComponents } from '@/components/mdx';
@@ -75,13 +70,11 @@ const markdown = await page.data.getText('processed', {
 });
 ```
 
-Components define their Markdown form with [`asMarkdown()`](/docs/headless/utils/markdown#asmarkdown), others are kept as JSX. To remove elements, or replace them with their children, use `filterElement` (unavailable on Sätteri).
+A component defines its Markdown form with [`asMarkdown()`](/docs/headless/utils/markdown#asmarkdown). Components that don't are kept as JSX. To remove elements, or replace them with their children, use `filterElement` (unavailable on Sätteri).
 
-## Static Analysis
+### Placeholders
 
-By default, `_markdown` is a string: expressions keep their source, every `<show>` branch is included, and JSX elements are kept as you wrote them.
-
-To render JSX elements later, list them as placeholders:
+To render JSX elements yourself, list them as placeholders:
 
 ```ts
 import type { LLMsOptions } from 'fumadocs-core/mdx-plugins/remark-llms';
@@ -103,6 +96,15 @@ const markdown = await renderPlaceholder(await page.data.getText('processed'), {
 ```
 
 On Sätteri, `mdxAsPlaceholder` is unavailable.
+
+## Analysis
+
+The `analysis` option sets whether the Markdown renders for the props of the content:
+
+- `runtime`: `_markdown` is a component, rendered into Markdown with [`renderToMarkdown()`](/docs/headless/utils/markdown). It only includes the [`<show>`](/docs/markdown#show) branches that show. Expressions render as their values, and JSX elements render with your components.
+- `static` (default): `_markdown` is a string. It includes every branch, and JSX elements and expressions keep their source text.
+
+Fumadocs MDX passes the [`analysis`](/docs/mdx/collections#analysis) of the collection, `runtime` by default, and `getText('processed')` renders the Markdown for the props of each page. `@fumadocs/astro` always uses `runtime`.
 
 ## Options
 

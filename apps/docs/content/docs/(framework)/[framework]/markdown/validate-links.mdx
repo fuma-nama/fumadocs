@@ -46,7 +46,7 @@ const scanned = await scanURLs({
   preset: 'react-router',
   routerConfig: routes,
   populate: {
-    // the content of async collections loads with its TOC
+    // async collections load the TOC with the content
     'docs/[[...splat]]': await Promise.all(
       source.getPages().map(async (page) => ({
         value: { splat: page.slugs },
@@ -68,7 +68,7 @@ import { source } from '@/lib/source';
 const scanned = await scanURLs({
   preset: 'tanstack-start',
   populate: {
-    // the content of async collections loads with its TOC
+    // async collections load the TOC with the content
     'docs/[[..._splat]]': await Promise.all(
       source.getPages().map(async (page) => ({
         value: { _splat: page.slugs },
@@ -120,8 +120,8 @@ printErrors(
   true,
 );
 
-function getHeadings({ toc }: { toc: () => TOCItemType[] }): string[] {
-  return toc().map((item) => item.url.slice(1));
+function getHeadings({ toc }: { toc: TOCItemType[] }): string[] {
+  return toc.map((item) => item.url.slice(1));
 }
 
 function getFiles() {

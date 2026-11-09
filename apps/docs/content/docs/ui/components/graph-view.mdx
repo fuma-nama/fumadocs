@@ -18,14 +18,13 @@ For TypeScript, also install its types:
 npm i -D @types/d3-force
 ```
 
-Enable `extractLinkReferences` on your content source, with [runtime analysis](/docs/mdx/collections#analysis).
+Enable `extractLinkReferences` on your content source.
 
 ```ts title="source.config.ts"
 import { defineDocs } from 'fumadocs-mdx/config';
 
 export const docs = defineDocs({
   docs: {
-    analysis: 'runtime',
     postprocess: {
       // [!code ++]
       extractLinkReferences: true,

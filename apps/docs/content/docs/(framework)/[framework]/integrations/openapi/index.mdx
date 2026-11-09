@@ -65,9 +65,6 @@ import { openapi } from '@/lib/openapi'; // [!code ++]
 
 const docs = defineDocs({
   dir: 'content/docs',
-  docs: {
-    analysis: 'runtime',
-  },
 });
 
 export const source = loader(
@@ -97,11 +94,10 @@ import { defineDocs } from 'fumadocs-mdx/macro'; // [!code --]
 import { docs } from '@/lib/collections';
 import { openapi } from '@/lib/openapi';
 
-// [!code --:7]
+// [!code --:6]
 export const docs = defineDocs({
   dir: 'content/docs',
   docs: {
-    analysis: 'runtime',
     async: true,
   },
 });
@@ -129,7 +125,6 @@ import { defineDocs } from 'fumadocs-mdx/macro';
 export const docs = defineDocs({
   dir: 'content/docs',
   docs: {
-    analysis: 'runtime',
     async: true,
   },
 });
@@ -146,11 +141,10 @@ import { defineDocs } from 'fumadocs-mdx/macro'; // [!code --]
 import { docs } from '@/lib/collections';
 import { openapi } from '@/lib/openapi';
 
-// [!code --:7]
+// [!code --:6]
 export const docs = defineDocs({
   dir: 'content/docs',
   docs: {
-    analysis: 'runtime',
     async: true,
   },
 });
@@ -178,7 +172,6 @@ import { defineDocs } from 'fumadocs-mdx/macro';
 export const docs = defineDocs({
   dir: 'content/docs',
   docs: {
-    analysis: 'runtime',
     async: true,
   },
 });
@@ -195,9 +188,6 @@ import { openapi } from '@/lib/openapi'; // [!code ++]
 
 const docs = defineDocs({
   dir: 'content/docs',
-  docs: {
-    analysis: 'runtime',
-  },
 });
 
 export const source = loader(

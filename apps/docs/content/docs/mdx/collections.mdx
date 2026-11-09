@@ -149,37 +149,22 @@ Unlike `mdxOptions`, the collection-level `satteriOptions` keeps the default pre
 
 > This API is only available on `doc` type.
 
-How Fumadocs MDX generates the table of contents, structured data, processed Markdown and extracted references of a page. We recommend `runtime`:
+Set how Fumadocs MDX generates the outputs of a page: its table of contents, structured data, processed Markdown and extracted references.
+
+- `runtime` (default): the outputs render for the props of the content, like the [path params](/docs/headless/page-conventions#path-params) of the page. They only include the [`<show>`](/docs/markdown#show) branches that show, expressions render as their values, and heading IDs are slugged from the rendered text.
+- `static`: the outputs are analysed from the source. They include every `<show>` branch, expressions keep their source text, and heading IDs are slugged from the source.
 
 ```ts title="source.config.ts"
 import { defineDocs } from 'fumadocs-mdx/config';
 
 export const docs = defineDocs({
   docs: {
-    analysis: 'runtime',
+    analysis: 'static',
   },
 });
 ```
 
-- `runtime`: the outputs are functions of the page's props, so they follow its [path params](/docs/headless/page-conventions#path-params), [`<show>`](/docs/markdown#show) branches and custom props. Expressions render as values, in heading IDs too.
-- `static` (default): the outputs are values analysed from the source. They include every `<show>` branch, expressions keep their source, and heading IDs are slugged from it.
-
-With `runtime`, call the outputs to render them. The path params of the page are already passed:
-
-```ts
-import { source } from '@/lib/source';
-
-const page = source.getPage(['...'])!;
-
-const toc = page.data.toc();
-// when you pass custom props to the content, pass them here too
-const tocWithProps = page.data.toc({ version: 'v2' });
-const structuredData = await page.data.structuredData();
-// processed Markdown, with `includeProcessedMarkdown`
-const markdown = await page.data.getText('processed', { props: { version: 'v2' } });
-```
-
-On [async](/docs/mdx/async) collections, `toc` comes from `await page.data.load()`, and you call it the same way.
+With runtime analysis, the outputs also render for the [custom props](/docs/headless/source-api#custom-props) that you pass to `getPage()`.
 
 ### `postprocess`
 

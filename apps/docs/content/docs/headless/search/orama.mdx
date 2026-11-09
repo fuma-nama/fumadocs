@@ -3,7 +3,7 @@ title: Built-in Search
 description: Built-in document search of Fumadocs
 ---
 
-Fumadocs supports document search with [ZBSearch](https://www.zbsearch.dev). It is the default and recommended option, since it can be self-hosted for free.
+Fumadocs supports document search with [ZBSearch](https://www.zbsearch.dev), It is the default but also the recommended option since it can be self-hosted and totally free.
 
 ## Setup
 
@@ -44,25 +44,22 @@ export const GET: APIRoute = ({ request }) => server.GET(request);
 
 ### From Search Indexes
 
-Create the server from search indexes. Each index needs the `structuredData` of its page, from your content source or the [Remark Structure](/docs/headless/mdx/structure) plugin.
+Create the server from search indexes, each index needs a `structuredData` field.
 
-With Fumadocs MDX and `@fumadocs/astro`, get it with `await page.data.structuredData()`. On Fumadocs MDX collections with [static analysis](/docs/mdx/collections#analysis), it's an object unless the collection is async.
+Usually, it is provided by your content source (e.g. Fumadocs MDX). You can also extract it from Markdown/MDX document using the [Remark Structure](/docs/headless/mdx/structure) plugin.
 
 ```ts tab="Next.js" title="app/api/search/route.ts"
 import { source } from '@/lib/source';
 import { createSearchAPI } from 'fumadocs-core/search/server';
 
 export const { GET } = createSearchAPI('advanced', {
-  indexes: () =>
-    Promise.all(
-      source.getPages().map(async (page) => ({
-        title: page.data.title,
-        description: page.data.description,
-        url: page.url,
-        id: page.url,
-        structuredData: await page.data.structuredData(),
-      })),
-    ),
+  indexes: source.getPages().map((page) => ({
+    title: page.data.title,
+    description: page.data.description,
+    url: page.url,
+    id: page.url,
+    structuredData: page.data.structuredData,
+  })),
 });
 ```
 
@@ -72,16 +69,13 @@ import { createSearchAPI } from 'fumadocs-core/search/server';
 import { source } from '@/lib/source';
 
 const server = createSearchAPI('advanced', {
-  indexes: () =>
-    Promise.all(
-      source.getPages().map(async (page) => ({
-        title: page.data.title,
-        description: page.data.description,
-        url: page.url,
-        id: page.url,
-        structuredData: await page.data.structuredData(),
-      })),
-    ),
+  indexes: source.getPages().map((page) => ({
+    title: page.data.title,
+    description: page.data.description,
+    url: page.url,
+    id: page.url,
+    structuredData: page.data.structuredData,
+  })),
 });
 
 export async function loader({ request }: Route.LoaderArgs) {
@@ -95,16 +89,13 @@ import { source } from '@/lib/source';
 import { createSearchAPI } from 'fumadocs-core/search/server';
 
 const server = createSearchAPI('advanced', {
-  indexes: () =>
-    Promise.all(
-      source.getPages().map(async (page) => ({
-        title: page.data.title,
-        description: page.data.description,
-        url: page.url,
-        id: page.url,
-        structuredData: await page.data.structuredData(),
-      })),
-    ),
+  indexes: source.getPages().map((page) => ({
+    title: page.data.title,
+    description: page.data.description,
+    url: page.url,
+    id: page.url,
+    structuredData: page.data.structuredData,
+  })),
 });
 
 export const Route = createFileRoute('/api/search')({
@@ -121,16 +112,13 @@ import { source } from '@/lib/source';
 import { createSearchAPI } from 'fumadocs-core/search/server';
 
 export const { GET } = createSearchAPI('advanced', {
-  indexes: () =>
-    Promise.all(
-      source.getPages().map(async (page) => ({
-        title: page.data.title,
-        description: page.data.description,
-        url: page.url,
-        id: page.url,
-        structuredData: await page.data.structuredData(),
-      })),
-    ),
+  indexes: source.getPages().map((page) => ({
+    title: page.data.title,
+    description: page.data.description,
+    url: page.url,
+    id: page.url,
+    structuredData: page.data.structuredData,
+  })),
 });
 ```
 
@@ -140,6 +128,7 @@ import { createSearchAPI } from 'fumadocs-core/search/server';
 import { source } from '@/lib/source';
 
 const server = createSearchAPI('advanced', {
+  // `structuredData` is loaded on demand
   indexes: () =>
     Promise.all(
       source.getPages().map(async (page) => ({
@@ -184,13 +173,13 @@ import { source } from '@/lib/source';
 import { createFromSource } from 'fumadocs-core/search/server';
 
 const server = createFromSource(source, {
-  async buildIndex(page) {
+  buildIndex(page) {
     return {
       title: page.data.title,
       description: page.data.description,
       url: page.url,
       id: page.url,
-      structuredData: await page.data.structuredData(),
+      structuredData: page.data.structuredData,
       // use your desired value, like page.slugs[0] [!code ++:2]
       tag: '<value>',
     };
@@ -330,19 +319,16 @@ import { i18n } from '@/lib/i18n';
 
 const server = createI18nSearchAPI('advanced', {
   i18n, // [!code ++]
-  indexes: () =>
-    Promise.all(
-      source.getLanguages().flatMap(({ language, pages }) =>
-        pages.map(async (page) => ({
-          title: page.data.title,
-          description: page.data.description,
-          structuredData: await page.data.structuredData(),
-          id: page.url,
-          url: page.url,
-          locale: language, // [!code ++]
-        })),
-      ),
-    ),
+  indexes: source.getLanguages().flatMap(({ language, pages }) =>
+    pages.map((page) => ({
+      title: page.data.title,
+      description: page.data.description,
+      structuredData: page.data.structuredData,
+      id: page.url,
+      url: page.url,
+      locale: language, // [!code ++]
+    })),
+  ),
 });
 ```
 

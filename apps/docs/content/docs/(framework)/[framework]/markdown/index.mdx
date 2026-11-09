@@ -420,12 +420,14 @@ See [other usages of include](/docs/mdx/include).
 ### Show
 
 Show content on a condition. Fumadocs MDX and `@fumadocs/astro` always enable it with [Remark Show](/docs/headless/mdx/remark-show).
-`when` takes a JS expression, checked when rendering. It can read the props of the page, like its [path params](/docs/headless/page-conventions#path-params):
+
+`when` takes a JS expression, checked when the page renders. It can read the props of the content, like the [path params](/docs/headless/page-conventions#path-params) of the page:
 
 ```mdx title="[framework]/deploy.mdx"
 Deploy your {props.framework} site.
 
 <show when={props.framework === 'astro'}>
+
 ## Adapters
 
 Add an adapter to your Astro config.
@@ -433,11 +435,11 @@ Add an adapter to your Astro config.
 </show>
 ```
 
-The table of contents, search index and Markdown of a page only include the branches that show for its props. Expressions like `{props.framework}` render as values in them, and in heading IDs.
+The outputs of the page, like its table of contents, search index and Markdown for LLMs, only include the branches that show. Expressions like `{props.framework}` render as values in them, and in heading IDs.
 
 <show when={props.framework !== 'astro'}>
 
-Fumadocs MDX renders them this way with [`analysis: 'runtime'`](/docs/mdx/collections#analysis) on the collection.
+To include every branch instead, set [`analysis: 'static'`](/docs/mdx/collections#analysis) on your collection.
 
 </show>
 

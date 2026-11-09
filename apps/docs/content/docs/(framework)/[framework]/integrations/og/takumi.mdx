@@ -146,7 +146,7 @@ import { getPageImageUrl } from '@/lib/shared';
 
 // Somewhere in your page component
 return (
-  <DocsPage toc={page.data.toc()}>
+  <DocsPage toc={page.data.toc}>
     {/* [!code ++] */}
     <meta property="og:image" content={getPageImageUrl(page).url} />
     {/* ... */}

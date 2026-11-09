@@ -20,9 +20,6 @@ import { loader } from 'fumadocs-core/source';
 
 export const docs = defineDocs({
   dir: 'content/docs',
-  docs: {
-    analysis: 'runtime',
-  },
 });
 
 export const source = loader({
@@ -194,8 +191,6 @@ Macro calls are compiled statically. Keep these rules in mind:
   ```
 
 - Options that shape how content is bundled (`dir`, `files`, `async`) must be statically analyzable (string / boolean literals). Put dynamic logic in options like `schema` or `mdxOptions` instead.
-
-- [`analysis`](/docs/mdx/collections#analysis) must be a string literal too, since it decides the types of the outputs.
 
 - [`dynamic`](/docs/mdx/async#dynamic-mode) collections are not supported by the Macro API yet. Prefer [`async`](/docs/mdx/async) for lazy loading.
 

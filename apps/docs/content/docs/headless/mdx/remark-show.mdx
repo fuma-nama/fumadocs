@@ -7,11 +7,15 @@ description: Show content on a condition.
 
 Remark Show is a remark plugin. Fumadocs MDX and `@fumadocs/astro` enable it by default on both unified and Sätteri. See [Show](/docs/markdown#show) for the syntax.
 
-It compiles `<show>` into a component that renders its content when `when` holds. The condition is checked when rendering, so it can read the props of a page, like its [path params](/docs/headless/page-conventions#path-params).
+It compiles `<show>` into a component that renders its content when `when` holds. The condition is checked when rendering, so it can read the props of the content, like the [path params](/docs/headless/page-conventions#path-params) of a page.
 
-The table of contents, structured data and Markdown of a page include:
+## Analysis
 
-- With runtime analysis, only the branches that show for its props. Fumadocs MDX uses it with [`analysis: 'runtime'`](/docs/mdx/collections#analysis) on the collection, and `@fumadocs/astro` always does.
-- With static analysis, the default of Fumadocs MDX, every branch.
+The plugins that generate the outputs of a page have an `analysis` option, which sets the `<show>` branches that the outputs include:
 
-To render these outputs from a custom source, see [Path Params](/docs/headless/source-api/source#path-params).
+- `runtime`: the outputs render for the props of the content, and only include the branches that show.
+- `static` (default): the outputs are analysed from the source, and include every branch.
+
+These plugins are [Remark Heading](/docs/headless/mdx/headings#analysis) for heading IDs, [Rehype TOC](/docs/headless/mdx/headings#rehype-toc), [Remark Structure](/docs/headless/mdx/structure#analysis) and [Remark LLMs](/docs/headless/mdx/remark-llms#analysis).
+
+Fumadocs MDX passes the [`analysis`](/docs/mdx/collections#analysis) of each collection, `runtime` by default. `@fumadocs/astro` and [local Markdown](/docs/integrations/content/local-md) always use `runtime`. To render the outputs in a custom source, see [Path Params](/docs/headless/source-api/source#path-params).

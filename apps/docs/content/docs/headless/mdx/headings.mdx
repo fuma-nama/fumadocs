@@ -7,8 +7,6 @@ description: Process headings from your document
 
 A remark plugin that applies ids to headings. Fumadocs MDX enables it by default. Pass options with `remarkHeadingOptions`.
 
-By default, ids are slugged from the source. With the `analysis: 'runtime'` option, headings with expressions, like `## Deploy on {props.framework}`, and headings inside `<show>` get their ids when rendering, from their rendered text. Duplicate ids then only count the headings that show. Fumadocs MDX passes the [`analysis`](/docs/mdx/collections#analysis) of the collection.
-
 ### Custom Ids [#custom-heading-id]
 
 You can customize the heading id with `[#slug]`.
@@ -54,6 +52,15 @@ Fumadocs MDX turns it off with `generateToc: false` and exports the table of con
 
 <auto-type-table path="../props.ts" name="TOCItemType" />
 
+### Analysis
+
+The `analysis` option sets how headings with expressions, like `## Deploy on {props.framework}`, get their ids:
+
+- `runtime`: ids are slugged from the rendered text, like `deploy-on-astro`. Suffixes of duplicate ids, like `-1`, only count the headings that [show](/docs/markdown#show).
+- `static` (default): ids are slugged from the source, like `deploy-on-propsframework`. Suffixes of duplicate ids count the headings of every branch.
+
+With a custom `slug` function, ids are always slugged from the source. Fumadocs MDX passes the [`analysis`](/docs/mdx/collections#analysis) of the collection, `runtime` by default.
+
 ## Rehype TOC
 
 A rehype plugin that exports the table of contents. Unlike Remark Heading, it keeps JSX nodes in heading titles.
@@ -68,7 +75,7 @@ For a Markdown document:
 ## Hello `code`
 ```
 
-It exports an array of `TOCItemType`. With the `analysis: 'runtime'` option, it exports a function of the page's props, returning only the headings in `<show>` branches that show:
+It exports an array of `TOCItemType`. With the `analysis: 'runtime'` option, it exports a function of the props of the content instead, which only returns the headings that show:
 
 ```jsx tab="static"
 export const toc = [
@@ -98,4 +105,4 @@ export const toc = (props) => [
 ];
 ```
 
-Fumadocs MDX passes the [`analysis`](/docs/mdx/collections#analysis) of the collection. With `runtime`, `page.data.toc()` calls the export with the path params of the page.
+Fumadocs MDX passes the [`analysis`](/docs/mdx/collections#analysis) of the collection, `runtime` by default, and renders the table of contents for the props of each page.
