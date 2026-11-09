@@ -1,3 +1,9 @@
+## create-fumadocs-app@16.2.33
+
+### Smaller installs
+
+- Reduced the install size of `@fumadocs/cli` from 17 MB to 2.2 MB, and of `create-fumadocs-app` from 18 MB to 3.2 MB.
+
 ## create-fumadocs-app@16.2.32
 
 ### ESLint on TypeScript 7
