@@ -12,6 +12,7 @@ import {
 } from 'react';
 import { Tabs as Primitive } from '@base-ui/react/tabs';
 import { mergeRefs } from '@/utils/merge-refs';
+import { getHash } from '@/utils/urls';
 
 type ChangeListener = (v: string) => void;
 const listeners = new Map<string, Set<ChangeListener>>();
@@ -99,7 +100,7 @@ export function Tabs({
   });
 
   const openFromHash = useEffectEvent(() => {
-    const hash = window.location.hash.slice(1);
+    const hash = getHash();
     if (!hash) return;
 
     // hash points to a tab's own anchor id
