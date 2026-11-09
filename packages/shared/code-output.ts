@@ -14,9 +14,10 @@ export type CodePart =
 
 /** a kept JSX element */
 export interface KeptElement {
-  /** the opening tag without its end, with the name prefixed */
+  /** the opening tag without its end */
   open: string;
-  name: string;
+  /** the name in code, see {@link keptElement} */
+  ref: string;
   inline: boolean;
 }
 
@@ -134,7 +135,7 @@ export function createCodeOutput<N extends CodeNode, S extends CodeStringifier<N
           out += `${out ? ' + ' : ''}${typeof chunk === 'string' ? literal(chunk) : `(${(chunk as { code: string }).code})`}`;
         return `export const ${as} = ${out || '""'};`;
       }
-      const elements = hasElement(list);
+      const elements = usesComponents(list);
       return [
         `import { asMarkdown as _asMarkdown${elements ? ', jsxComponents as _jsxComponents' : ''} } from "fumadocs-core/server";`,
         `export function ${as}(props) {`,
@@ -202,11 +203,15 @@ export function showCondition(node: CodeNode): string | undefined {
 
 const componentNameRegex = /^[A-Z][\w$]*$/;
 
-/** a kept JSX element of a component, its name resolves from `_c` */
-export function keptElement(node: CodeNode): KeptElement | undefined {
+/**
+ * A kept JSX element of a component, its name resolves like in MDX: the names declared in the module are its variables,
+ * other components are from the MDX components `_c`.
+ */
+export function keptElement(node: CodeNode, scope: ReadonlySet<string>): KeptElement | undefined {
   const name = node.name;
   if (typeof name !== 'string' || !componentNameRegex.test(name)) return;
-  let open = `<_c.${name}`;
+  const ref = scope.has(name) ? name : `_c.${name}`;
+  let open = `<${ref}`;
   for (const attr of node.attributes as JsxAttributes) {
     if (attr.type === 'mdxJsxExpressionAttribute') open += ` {${attr.value}}`;
     else if (attr.value == null) open += ` ${attr.name}`;
@@ -214,7 +219,27 @@ export function keptElement(node: CodeNode): KeptElement | undefined {
       open += ` ${attr.name}={${JSON.stringify(attr.value)}}`;
     else open += ` ${attr.name}={${attr.value.value}}`;
   }
-  return { open, name, inline: node.type === 'mdxJsxTextElement' };
+  return { open, ref, inline: node.type === 'mdxJsxTextElement' };
+}
+
+interface EsmNode {
+  type: string;
+  specifiers?: readonly { local: { name?: string } }[];
+  declaration?: EsmNode | null;
+  declarations?: readonly { id: { type: string; name?: string } }[];
+  id?: { name?: string } | null;
+}
+
+/** the names declared by the ESM statements of a module: imports and top-level declarations */
+export function moduleScope(statements: Iterable<object>, scope = new Set<string>()): Set<string> {
+  for (const item of statements as Iterable<EsmNode>) {
+    for (const { local } of item.specifiers ?? []) if (local.name) scope.add(local.name);
+    const declaration = item.type === 'ExportNamedDeclaration' ? item.declaration : item;
+    if (declaration?.id?.name) scope.add(declaration.id.name);
+    for (const { id } of declaration?.declarations ?? [])
+      if (id.type === 'Identifier' && id.name) scope.add(id.name);
+  }
+  return scope;
 }
 
 /** an element on one line has inline content, recorded like a paragraph */
@@ -370,11 +395,9 @@ function chunksToJsx(chunks: Chunk[], literal: (text: string) => string): string
     else if ('when' in chunk)
       out += `{(${chunk.when}) ? <>${chunksToJsx(chunk.children, literal)}</> : null}`;
     else {
-      const { open, name, inline, children } = chunk;
+      const { open, ref, inline, children } = chunk;
       const element =
-        children.length > 0
-          ? `${open}>${chunksToJsx(children, literal)}</_c.${name}>`
-          : `${open} />`;
+        children.length > 0 ? `${open}>${chunksToJsx(children, literal)}</${ref}>` : `${open} />`;
       // keep inline elements in inline context when rendered
       out += inline ? `<span>${element}</span>` : element;
     }
@@ -382,10 +405,12 @@ function chunksToJsx(chunks: Chunk[], literal: (text: string) => string): string
   return out;
 }
 
-function hasElement(chunks: Chunk[]): boolean {
+/** whether the chunks have elements of the MDX components `_c` */
+function usesComponents(chunks: Chunk[]): boolean {
   return chunks.some(
     (chunk) =>
       typeof chunk !== 'string' &&
-      ('open' in chunk || ('children' in chunk && hasElement(chunk.children))),
+      'children' in chunk &&
+      (('ref' in chunk && chunk.ref.startsWith('_c.')) || usesComponents(chunk.children)),
   );
 }

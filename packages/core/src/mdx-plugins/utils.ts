@@ -1,4 +1,4 @@
-import type { Nodes, RootContent } from 'mdast';
+import type { Nodes, Root, RootContent } from 'mdast';
 import { valueToEstree } from 'estree-util-value-to-estree';
 import type { Expression, Program } from 'estree-jsx';
 import type { MdxJsxFlowElement, MdxJsxTextElement, MdxjsEsm } from 'mdast-util-mdx';
@@ -7,7 +7,10 @@ import acornJsx from 'acorn-jsx';
 import type Hast from 'hast';
 import type { VFile } from 'vfile';
 import { createStringifier, type Stringifier } from './stringifier';
-import { createCodeOutput as createSharedCodeOutput } from '../../../shared/code-output';
+import {
+  createCodeOutput as createSharedCodeOutput,
+  moduleScope,
+} from '../../../shared/code-output';
 
 export function isJsxElement(node: Nodes): node is MdxJsxFlowElement | MdxJsxTextElement {
   return node.type === 'mdxJsxFlowElement' || node.type === 'mdxJsxTextElement';
@@ -134,4 +137,12 @@ export function createCodeOutput(file: VFile, namespace?: string, isStatic?: boo
     (value) => `_fumadocs${expressions.push({ type: 'Literal', value }) - 1}`,
   );
   return Object.assign(out, { esm: (code: string) => toEsm(code, expressions) });
+}
+
+/** the names declared by the ESM of a document */
+export function esmScope(tree: Root): Set<string> {
+  const scope = new Set<string>();
+  for (const node of tree.children)
+    if (node.type === 'mdxjsEsm' && node.data?.estree) moduleScope(node.data.estree.body, scope);
+  return scope;
 }

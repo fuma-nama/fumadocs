@@ -1,5 +1,5 @@
 import type { Transformer } from 'unified';
-import { createCodeOutput, isJsxElement } from './utils';
+import { createCodeOutput, esmScope, isJsxElement } from './utils';
 import { keptElement } from '../../../shared/code-output';
 import type { Nodes, Root } from 'mdast';
 import type { MdxJsxFlowElement, MdxJsxTextElement } from 'mdast-util-mdx';
@@ -76,6 +76,7 @@ export function remarkLLMs({
   return (tree, file) => {
     const isStatic = (analysis ?? file.data._analysis) !== 'runtime';
     const out = createCodeOutput(file, undefined, isStatic);
+    const scope = isStatic ? new Set<string>() : esmScope(tree);
     const { s } = out;
 
     const visit = (nodes: Nodes[]) => {
@@ -100,7 +101,7 @@ export function remarkLLMs({
             isStatic ? undefined : out.expression,
           );
         } else if (isJsxElement(node) && node.name) {
-          const element = !isStatic && keptElement(node);
+          const element = !isStatic && keptElement(node, scope);
           if (mdxAsPlaceholder?.includes(node.name))
             s.replace(node, (s) => toPlaceholder(node, out.toStatic(s.inner(node))));
           else if (element)

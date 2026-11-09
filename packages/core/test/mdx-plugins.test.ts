@@ -766,6 +766,40 @@ test('Remark Structure: values of expressions with runtime analysis', async () =
   ]);
 });
 
+test('Remark LLMs: elements resolve like in MDX with runtime analysis', async () => {
+  const { compile, run } = await import('@mdx-js/mdx');
+  const runtime = await import('react/jsx-runtime');
+  const server = await import('@/server');
+  const code = await compile(
+    {
+      value: `export function Note({ children }) {
+  _server.asMarkdown();
+  return <>Note: {children}</>;
+}
+
+<Note>Hello</Note>
+
+<Callout>World</Callout>
+`,
+      data: { _analysis: 'runtime' },
+    },
+    { outputFormat: 'function-body', baseUrl: import.meta.url, remarkPlugins: [remarkLLMs] },
+  );
+  // the module reads `fumadocs-core/server` as `_server`
+  const body = String(code).replace(
+    /await import\([^)]*"fumadocs-core\/server"\)\)?/g,
+    'arguments[0]._server',
+  );
+  const { _markdown } = await run(`const _server = arguments[0]._server;\n${body}`, {
+    ...runtime,
+    _server: server,
+  } as never);
+  // a name declared in the module is its variable, other components are from the MDX components
+  await expect(server.renderToMarkdown(runtime.jsx(_markdown as never, {}))).resolves.toBe(
+    'Note: \nHello\n\n<Callout>\nWorld\n</Callout>',
+  );
+});
+
 test('Remark LLMs: placeholders with runtime analysis', async () => {
   const { compile, run } = await import('@mdx-js/mdx');
   const runtime = await import('react/jsx-runtime');

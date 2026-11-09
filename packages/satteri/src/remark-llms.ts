@@ -3,7 +3,7 @@ import { defineMdastPlugin } from 'satteri';
 import { offsets, type PositionedNode } from './stringifier';
 import type { Analysis } from 'fumadocs-core/mdx-plugins/stringifier';
 import { stringifyHeadingId } from '../../shared/heading-id';
-import { createCodeOutput, type JsxElementNode } from './utils';
+import { createCodeOutput, esmScope, type JsxElementNode } from './utils';
 import { keptElement } from '../../shared/code-output';
 
 export interface LLMsOptions {
@@ -40,12 +40,13 @@ export function remarkLlms({
   const factory = () => {
     let out: ReturnType<typeof createCodeOutput>;
     let isStatic = false;
+    let scope: Set<string>;
 
     const drop = (node: PositionedNode) => out.s.replace(node, '');
     const element = (node: JsxElementNode & { type: string; children: PositionedNode[] }) => {
       // elements are kept in runtime output only
       if (out.markCode(node) || isStatic) return;
-      const kept = keptElement(node);
+      const kept = keptElement(node, scope);
       if (!kept) return;
 
       out.s.replace(node, (s) => {
@@ -62,8 +63,9 @@ export function remarkLlms({
     return defineMdastPlugin({
       name: 'remark-llms',
       options: { position: true },
-      before(_root, ctx) {
+      before(root, ctx) {
         isStatic = (analysis ?? ctx.data._analysis) !== 'runtime';
+        scope = isStatic ? new Set() : esmScope(root);
         out = createCodeOutput(ctx, undefined, isStatic);
       },
       mdxjsEsm: drop,
