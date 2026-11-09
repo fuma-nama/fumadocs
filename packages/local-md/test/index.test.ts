@@ -141,7 +141,11 @@ test('fromJS: a user context does not displace the jsx runtime', async () => {
   const compiled = await createMarkdownCompiler().compile({ path: filePath, value: content });
   if (compiled.type !== 'js') throw new Error('expected a js result');
 
-  const renderer = fromJS({ code: compiled.code, filePath: compiled.file.path });
+  const renderer = fromJS({
+    code: compiled.code,
+    filePath: compiled.file.path,
+    baseUrl: pathToFileURL(compiled.file.path).href,
+  });
   const expected = renderToStaticMarkup((await renderer.render()).body);
 
   // `function-body` output reads its runtime from `arguments[0]`, so extra

@@ -3,6 +3,10 @@
     "contents": [
       {
         "heading": "jsx-expressions",
+        "content": "{<div id=\"native-jsx\">Native JSX child</div>}"
+      },
+      {
+        "heading": "jsx-expressions",
         "content": "A"
       },
       {

@@ -143,19 +143,24 @@ export function fromJS<M>(options: MarkdownRendererJSOptions): MarkdownRenderer<
     };
   }
 
+  /** the outputs of content rendered from code read the props too */
+  type Exports = {
+    toc?: TOCItemType[] | ((props: Record<string, unknown>) => TOCItemType[]);
+    default: MDXContent;
+  };
+  const tocOf = ({ toc = [] }: Exports) =>
+    typeof toc === 'function' ? toc(options.props ?? {}) : toc;
+
   return {
     structuredData,
     async render(components, context) {
       const fullScope = createScope(context);
 
       const hydrateFn = new AsyncFunction(...Object.keys(fullScope), code);
-      const out = (await hydrateFn.apply(hydrateFn, Object.values(fullScope))) as {
-        toc?: TOCItemType[];
-        default: MDXContent;
-      } & M;
+      const out = (await hydrateFn.apply(hydrateFn, Object.values(fullScope))) as Exports & M;
 
       return {
-        toc: out.toc ?? [],
+        toc: tocOf(out),
         body: JsxRuntime.jsx(out.default, { ...options.props, components }),
         exports: out,
       };
@@ -164,13 +169,10 @@ export function fromJS<M>(options: MarkdownRendererJSOptions): MarkdownRenderer<
       const fullScope = createScope(context);
 
       const hydrateFn = new Function(...Object.keys(fullScope), code);
-      const out = hydrateFn.apply(hydrateFn, Object.values(fullScope)) as {
-        toc?: TOCItemType[];
-        default: MDXContent;
-      } & M;
+      const out = hydrateFn.apply(hydrateFn, Object.values(fullScope)) as Exports & M;
 
       return {
-        toc: out.toc ?? [],
+        toc: tocOf(out),
         body: JsxRuntime.jsx(out.default, { ...options.props, components }),
         exports: out,
       };
