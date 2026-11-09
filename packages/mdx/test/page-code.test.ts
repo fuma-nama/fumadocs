@@ -3,7 +3,7 @@ import * as os from 'node:os';
 import * as path from 'node:path';
 import { expect, test } from 'vitest';
 import { loader } from 'fumadocs-core/source';
-import { applyMdxPreset, defineDocs } from '@/config';
+import { applyMdxPreset, defineDocs, type DocCollection } from '@/config';
 import { buildConfig } from '@/config/build';
 import { createCore } from '@/core';
 import { createMdxLoader } from '@/loaders/mdx';
@@ -209,7 +209,8 @@ test('runtime outputs bind the params of a page and take custom props', async ()
   // processed Markdown takes them too
   const { server, docAt } = await import('@/runtime/server');
   const { asMarkdown } = await import('fumadocs-core/server');
-  const [entry] = await server().doc('docs', '', {
+  const create = server<{ docs: DocCollection }, { DocData: { docs: object } }>();
+  const [entry] = await create.doc('docs', '', {
     'index.mdx': {
       frontmatter: {},
       default: () => null,
@@ -219,7 +220,7 @@ test('runtime outputs bind the params of a page and take custom props', async ()
       _markdown: (props: Record<string, string>) =>
         asMarkdown() ? `${props.framework} ${props.name}` : null,
     },
-  } as never);
-  const at = docAt(entry as never, { framework: 'next' }) as typeof entry;
+  });
+  const at = docAt(entry, { framework: 'next' });
   await expect(at.getText('processed', { props: { name: 'Fuma' } })).resolves.toBe('next Fuma');
 });
