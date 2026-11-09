@@ -1,4 +1,4 @@
-import type { Expression, ObjectExpression } from 'oxc-parser';
+import type { Expression, ObjectExpression } from '@yuku-toolchain/types';
 import {
   addElements,
   addImport,

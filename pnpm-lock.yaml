@@ -275,8 +275,8 @@ importers:
         specifier: ^0.8.212
         version: 0.8.212
       fuma-cli:
-        specifier: ^0.3.1
-        version: 0.3.2
+        specifier: ^0.3.3
+        version: 0.3.3
       fumadocs-core:
         specifier: workspace:*
         version: link:../../packages/core
@@ -2253,8 +2253,8 @@ importers:
         specifier: ^7.0.164
         version: 7.0.164(zod@4.6.7)
       fuma-cli:
-        specifier: ^0.3.1
-        version: 0.3.2
+        specifier: ^0.3.3
+        version: 0.3.3
       fumadocs-core:
         specifier: workspace:*
         version: link:../core
@@ -2420,8 +2420,8 @@ importers:
         specifier: ^19.3.0
         version: 19.3.0(@types/react@19.3.0)
       fuma-cli:
-        specifier: ^0.3.1
-        version: 0.3.2
+        specifier: ^0.3.3
+        version: 0.3.3
       fumadocs-core:
         specifier: workspace:*
         version: link:../core
@@ -2517,8 +2517,8 @@ importers:
         specifier: ^19.3.0
         version: 19.3.0(@types/react@19.3.0)
       fuma-cli:
-        specifier: ^0.3.1
-        version: 0.3.2
+        specifier: ^0.3.3
+        version: 0.3.3
       fumadocs-core:
         specifier: workspace:*
         version: link:../core
@@ -2547,8 +2547,8 @@ importers:
         specifier: 9.6.0
         version: 9.6.0(@babel/runtime@7.29.7)(@types/react@19.3.0)(debug@4.4.3(supports-color@8.1.1))(react@19.3.1)(supports-color@8.1.1)
       fuma-cli:
-        specifier: ^0.3.1
-        version: 0.3.2
+        specifier: ^0.3.3
+        version: 0.3.3
       fumadocs-core:
         specifier: workspace:*
         version: link:../core
@@ -2588,34 +2588,37 @@ importers:
       '@clack/prompts':
         specifier: ^1.8.1
         version: 1.8.1
-      '@fuma-cli/interactive':
-        specifier: ^0.1.2
-        version: 0.1.3
+      '@yuku-toolchain/types':
+        specifier: ^0.10.2
+        version: 0.10.2
       cac:
         specifier: ^7.1.0
         version: 7.1.0
-      fuma-cli:
-        specifier: ^0.3.1
-        version: 0.3.2
       magic-string:
         specifier: ^1.4.5
         version: 1.4.5
-      oxc-parser:
-        specifier: ^0.157.0
-        version: 0.157.0
+      package-manager-detector:
+        specifier: ^1.8.0
+        version: 1.9.0
       picocolors:
         specifier: ^1.1.1
         version: 1.1.1
       tinyexec:
         specifier: ^1.3.1
         version: 1.3.1
-      zod:
-        specifier: ^4.6.7
-        version: 4.6.7
+      yuku-analyzer:
+        specifier: ^0.10.2
+        version: 0.10.2
     devDependencies:
+      '@fuma-cli/interactive':
+        specifier: ^0.1.4
+        version: 0.1.4
       '@types/node':
         specifier: 26.6.6
         version: 26.6.6
+      fuma-cli:
+        specifier: ^0.3.3
+        version: 0.3.3
       tsconfig:
         specifier: workspace:*
         version: link:../tsconfig
@@ -2847,9 +2850,6 @@ importers:
       cac:
         specifier: ^7.1.0
         version: 7.1.0
-      fuma-cli:
-        specifier: ^0.3.1
-        version: 0.3.2
       picocolors:
         specifier: ^1.1.1
         version: 1.1.1
@@ -2863,6 +2863,9 @@ importers:
       '@types/node':
         specifier: 26.6.6
         version: 26.6.6
+      fuma-cli:
+        specifier: ^0.3.3
+        version: 0.3.3
       tinyglobby:
         specifier: ^0.2.17
         version: 0.2.17
@@ -3083,8 +3086,8 @@ importers:
         specifier: ^19.3.0
         version: 19.3.0(@types/react@19.3.0)
       fuma-cli:
-        specifier: ^0.3.1
-        version: 0.3.2
+        specifier: ^0.3.3
+        version: 0.3.3
       fumadocs-core:
         specifier: workspace:*
         version: link:../core
@@ -3743,8 +3746,8 @@ importers:
         specifier: ^4.0.1
         version: 4.0.1
       fuma-cli:
-        specifier: ^0.3.1
-        version: 0.3.2
+        specifier: ^0.3.3
+        version: 0.3.3
       fumadocs-core:
         specifier: workspace:*
         version: link:../core
@@ -4158,8 +4161,8 @@ importers:
         specifier: ^19.3.0
         version: 19.3.0(@types/react@19.3.0)
       fuma-cli:
-        specifier: ^0.3.1
-        version: 0.3.2
+        specifier: ^0.3.3
+        version: 0.3.3
       fumadocs-core:
         specifier: workspace:*
         version: link:../core
@@ -4198,8 +4201,8 @@ importers:
         specifier: ^19.3.0
         version: 19.3.0
       fuma-cli:
-        specifier: ^0.3.1
-        version: 0.3.2
+        specifier: ^0.3.3
+        version: 0.3.3
       fumadocs-core:
         specifier: workspace:*
         version: link:../core
@@ -4365,8 +4368,8 @@ importers:
   packages/shared:
     dependencies:
       fuma-cli:
-        specifier: ^0.3.1
-        version: 0.3.2
+        specifier: ^0.3.3
+        version: 0.3.3
     devDependencies:
       '@fumadocs/cli':
         specifier: workspace:*
@@ -4442,8 +4445,8 @@ importers:
         specifier: ^19.3.0
         version: 19.3.0(@types/react@19.3.0)
       fuma-cli:
-        specifier: ^0.3.1
-        version: 0.3.2
+        specifier: ^0.3.3
+        version: 0.3.3
       fumadocs-core:
         specifier: workspace:*
         version: link:../core
@@ -4516,8 +4519,8 @@ importers:
         specifier: ^1.4.0
         version: 1.4.0
       fuma-cli:
-        specifier: ^0.3.1
-        version: 0.3.2
+        specifier: ^0.3.3
+        version: 0.3.3
       fumadocs-core:
         specifier: workspace:*
         version: link:../core
@@ -6335,8 +6338,8 @@ packages:
   '@formatjs/intl-localematcher@0.10.1':
     resolution: {integrity: sha512-gBqglQK9rXuHsLmM8wzTMBy4Xo4d0jamirIVKuEL8F1rwbskWdpMA1kZarSkny+uvr5q/K6GSzE0Rcq1wZLl3g==}
 
-  '@fuma-cli/interactive@0.1.3':
-    resolution: {integrity: sha512-sGdugZ1JS3JRS8TWOhulXAYsSap/B7GUNw4+IVVDHig+x812LYLmkfFvw3z2TiAFoPQlSlTx1IqFIQ1s35POlg==}
+  '@fuma-cli/interactive@0.1.4':
+    resolution: {integrity: sha512-MutJspf9dc/oT36YR+uw9hrttVp3vffeLwD0JqGlLEzaEN0ATWAOBgq3KnMZPos3voQdLzLE8YD12Ik6+ZVzvg==}
 
   '@fuma-translate/binding-darwin-arm64@1.0.2':
     resolution: {integrity: sha512-SDM90GlvwwFmsj+dVjkTxJVyV3oFucv+Fow4V6lcjqxAeTYNMr3ICWA3nXzfBsMlr2398BH/W0W894SoE7TM6Q==}
@@ -7319,128 +7322,6 @@ packages:
 
   '@oslojs/encoding@1.1.0':
     resolution: {integrity: sha512-70wQhgYmndg4GCPxPPxPGevRKqTIJ2Nh4OkiMWmDAVYsTQ+Ta7Sq+rPevXyXGdzr30/qZBnyOalCszoMxlyldQ==}
-
-  '@oxc-parser/binding-android-arm-eabi@0.157.0':
-    resolution: {integrity: sha512-zFtSEal1K/17LATxVs0VcT/Itt+fxUQ9Ni8HtG+pPcEqy/TenRO74XffkY2dBiy3Pd+w0FuebwCZ6PJx1z7scQ==}
-    engines: {node: ^20.19.0 || >=22.12.0}
-    cpu: [arm]
-    os: [android]
-
-  '@oxc-parser/binding-android-arm64@0.157.0':
-    resolution: {integrity: sha512-WSlkFUnjamuv+2+TXW5F1rp2I24KVEXj4S+H7J7Y8T/KLR2xXbHj8lgxbZZtjSKi3Z/aGGrlFEOy7EmCWpIUlg==}
-    engines: {node: ^20.19.0 || >=22.12.0}
-    cpu: [arm64]
-    os: [android]
-
-  '@oxc-parser/binding-darwin-arm64@0.157.0':
-    resolution: {integrity: sha512-Usk8UoURmtG2qBLwrO+il+kf6CahEJJriRQACuAwF2CqcWqGsvl9xj9JIMDxP9VTinOt/BZUuDZxcpn68QKsAA==}
-    engines: {node: ^20.19.0 || >=22.12.0}
-    cpu: [arm64]
-    os: [darwin]
-
-  '@oxc-parser/binding-darwin-x64@0.157.0':
-    resolution: {integrity: sha512-yOvjPixSD2sYJxtQXOzprXdV1xbr2RZyEnbkwFnnxz332Q4+gwkQgCGXZkFlQpc95Fk4XFITACfbFzze4XXktA==}
-    engines: {node: ^20.19.0 || >=22.12.0}
-    cpu: [x64]
-    os: [darwin]
-
-  '@oxc-parser/binding-freebsd-x64@0.157.0':
-    resolution: {integrity: sha512-BLTsP8TWvmV53jgGBynwv2DR3hKtjpdpL6fXnQs2Fg5P6HsFTShFjrgQrHMSM1cA4lGmlcj7tdTx96RoJfYuuA==}
-    engines: {node: ^20.19.0 || >=22.12.0}
-    cpu: [x64]
-    os: [freebsd]
-
-  '@oxc-parser/binding-linux-arm-gnueabihf@0.157.0':
-    resolution: {integrity: sha512-wGMDInIrhayQpNxwpXIWqa2QiKk+/6RxOi4GxPVoqmwrCdn2xj3xXyDUm3RujxQaraZjeWfh0+h9nedoivnL1w==}
-    engines: {node: ^20.19.0 || >=22.12.0}
-    cpu: [arm]
-    os: [linux]
-
-  '@oxc-parser/binding-linux-arm-musleabihf@0.157.0':
-    resolution: {integrity: sha512-N6OLfOnku4otlU6eF+HLU+1fH2XAaItc+c7dE+S09SzRZHvkaltU9aGTlMhmAIee95hOqkOCVFHNzQYJ1KS+gQ==}
-    engines: {node: ^20.19.0 || >=22.12.0}
-    cpu: [arm]
-    os: [linux]
-
-  '@oxc-parser/binding-linux-arm64-gnu@0.157.0':
-    resolution: {integrity: sha512-YfY+qZ8d9tHJEvIq+zXyCcSve/jWgTNDiDtr1W4WVMh5+4fsOjYtH2JDIXIXUkILZzPKgJYbQ08Y/mwhr1gQLQ==}
-    engines: {node: ^20.19.0 || >=22.12.0}
-    cpu: [arm64]
-    os: [linux]
-    libc: [glibc]
-
-  '@oxc-parser/binding-linux-arm64-musl@0.157.0':
-    resolution: {integrity: sha512-ytZeO8BKkezwkLoWH3hK0R9Jd+S1BQhcQaWiSAWhXE7Dncq1XiJKb4w5hCe4lwl2ytgoSBgB0XEABhwD2/IhJg==}
-    engines: {node: ^20.19.0 || >=22.12.0}
-    cpu: [arm64]
-    os: [linux]
-    libc: [musl]
-
-  '@oxc-parser/binding-linux-ppc64-gnu@0.157.0':
-    resolution: {integrity: sha512-54w3SexApRhsw3DOAXBZ85rEMR2y29NDOUr18t69fcsnemS/N1YU+zQddHCol/HDhBPyLHg5fpxChRCSzxHwqw==}
-    engines: {node: ^20.19.0 || >=22.12.0}
-    cpu: [ppc64]
-    os: [linux]
-    libc: [glibc]
-
-  '@oxc-parser/binding-linux-riscv64-gnu@0.157.0':
-    resolution: {integrity: sha512-byg0y1OHdjjhll0qWJQyowKdCxM/zCKysIIOqkWgCid/cR+RU5nTz/63OeAZvIb1z/VB1CyypDRdLn2Ov3r+HQ==}
-    engines: {node: ^20.19.0 || >=22.12.0}
-    cpu: [riscv64]
-    os: [linux]
-    libc: [glibc]
-
-  '@oxc-parser/binding-linux-riscv64-musl@0.157.0':
-    resolution: {integrity: sha512-CiQrt8esQTeL17kscbsfpdx5cywItx3y95YejsihET68oYnxHjbEgj8JaqlIWmhpL2h98piqPBLhWmZbp67nQQ==}
-    engines: {node: ^20.19.0 || >=22.12.0}
-    cpu: [riscv64]
-    os: [linux]
-    libc: [musl]
-
-  '@oxc-parser/binding-linux-s390x-gnu@0.157.0':
-    resolution: {integrity: sha512-wSzuUshJVxcrx0c9UJYUOuUf0XHThC1+f8CEfeFbosg7FzTkjCdt89JKKU7BH8C9eTPrnJ5ir4QM0pWpVSmHnA==}
-    engines: {node: ^20.19.0 || >=22.12.0}
-    cpu: [s390x]
-    os: [linux]
-    libc: [glibc]
-
-  '@oxc-parser/binding-linux-x64-gnu@0.157.0':
-    resolution: {integrity: sha512-C4BY4QSVzN6R03Ner3r6EtIvLNR4VW4RAb63m+L0tiF/zD7grkBHMn1svyrOBFR4i32+GWJHu05xC4gGQYBhtA==}
-    engines: {node: ^20.19.0 || >=22.12.0}
-    cpu: [x64]
-    os: [linux]
-    libc: [glibc]
-
-  '@oxc-parser/binding-linux-x64-musl@0.157.0':
-    resolution: {integrity: sha512-kN3LdZ2xp9z+TLuzYUWPR/mz/HrKd20vMCGWyby1d8T8K5t5NPemcqfSv3y0oMwXK8OF3lW7MNJnc3uWphvwvw==}
-    engines: {node: ^20.19.0 || >=22.12.0}
-    cpu: [x64]
-    os: [linux]
-    libc: [musl]
-
-  '@oxc-parser/binding-openharmony-arm64@0.157.0':
-    resolution: {integrity: sha512-cQKUrgBAFUaGcqp9Umb3GToFkvow92YeJxJuzbk8YPnButv9aY5HLyKUpxxh4WqJvP6POiNR5fUDDB5wI8Wiaw==}
-    engines: {node: ^20.19.0 || >=22.12.0}
-    cpu: [arm64]
-    os: [openharmony]
-
-  '@oxc-parser/binding-win32-arm64-msvc@0.157.0':
-    resolution: {integrity: sha512-qZsymd8L67o5bpzZ7gVO7qJUIF9Uf0/mXcoG0MDchBvdL7Q2tAF4aZBZFqc/YRd0WP3jTvqjs3CxlFhHgi48dA==}
-    engines: {node: ^20.19.0 || >=22.12.0}
-    cpu: [arm64]
-    os: [win32]
-
-  '@oxc-parser/binding-win32-ia32-msvc@0.157.0':
-    resolution: {integrity: sha512-Ro9PcgwvRglGKI9fEYkbTKvIgh/hzWjv+yPyCTNuxp173i79YbTkkYeOvAEC9SFQPZXYr4+SuIrpCIaWN6sbUA==}
-    engines: {node: ^20.19.0 || >=22.12.0}
-    cpu: [ia32]
-    os: [win32]
-
-  '@oxc-parser/binding-win32-x64-msvc@0.157.0':
-    resolution: {integrity: sha512-Ea0fqR+HLzzCt9tYhKbb6aJlM6wBXKWfuDwLhcG519B8HGtxthDzLGfbqMQdlX2Ii5gAZt/Hgxig/iApdxZSzQ==}
-    engines: {node: ^20.19.0 || >=22.12.0}
-    cpu: [x64]
-    os: [win32]
 
   '@oxc-project/types@0.156.0':
     resolution: {integrity: sha512-1Duyg48TdJNdyhEB8Xn1L36bT9Pv6GUtlKjHxOys8xkaF/rQq3XJE+bAurSK/AgIz5mGFsb77cn9Pb20+WCScw==}
@@ -12188,8 +12069,8 @@ packages:
     engines: {node: ^8.16.0 || ^10.6.0 || >=11.0.0}
     os: [darwin]
 
-  fuma-cli@0.3.2:
-    resolution: {integrity: sha512-4ghIJJjt2uniKgUh7Cwp5u0J6ESpnoomQjslauIA7Sq2hJz1sSF78Jw1IYLKjER46q8Dy03gone2YvYbV4TkYg==}
+  fuma-cli@0.3.3:
+    resolution: {integrity: sha512-lWAFtZFTogW8E6Jh54D/j3uT3E7y4yY4cW48MV9Kzubuz3lakWV4qqJf5eLPaulImhTufO4FUp0TzTCrEwrKfg==}
 
   fuma-content@1.4.0:
     resolution: {integrity: sha512-f/qi38LowBY7hMNfj5opeIJk1oHnNg0l+buemzJh1BdkuPpcUcuENwtulhMmyR0VCMsXbCdkCOXl+VUSYxvCNA==}
@@ -13855,10 +13736,6 @@ packages:
   ow@0.28.2:
     resolution: {integrity: sha512-dD4UpyBh/9m4X2NVjA+73/ZPBRF+uF4zIMFvvQsabMiEK8x41L3rQ8EENOi35kyyoaJwNxEeJcP6Fj1H4U409Q==}
     engines: {node: '>=12'}
-
-  oxc-parser@0.157.0:
-    resolution: {integrity: sha512-2MJ9tZGXUbEIhQT/O2OPLlYCgur75ES26t2Pb1sYrvDQcRjrE7GmubkALgPEB6LzOY6sM81AAHKfl5M/FgnjJg==}
-    engines: {node: ^20.19.0 || >=22.12.0}
 
   oxc-resolver@11.24.2:
     resolution: {integrity: sha512-FY91FiDBj7ls5MsFS9jN3tjz2o0/zsdSsymlakySaBwVJZorHhkWyICLZMKxlu1R9vYo+sd3z1jwb4J8x7bNDw==}
@@ -18016,10 +17893,10 @@ snapshots:
     dependencies:
       '@formatjs/fast-memoize': 3.1.7
 
-  '@fuma-cli/interactive@0.1.3':
+  '@fuma-cli/interactive@0.1.4':
     dependencies:
       '@clack/prompts': 1.8.1
-      fuma-cli: 0.3.2
+      fuma-cli: 0.3.3
       picocolors: 1.1.1
 
   '@fuma-translate/binding-darwin-arm64@1.0.2':
@@ -19016,63 +18893,6 @@ snapshots:
       lodash: 4.18.1
 
   '@oslojs/encoding@1.1.0': {}
-
-  '@oxc-parser/binding-android-arm-eabi@0.157.0':
-    optional: true
-
-  '@oxc-parser/binding-android-arm64@0.157.0':
-    optional: true
-
-  '@oxc-parser/binding-darwin-arm64@0.157.0':
-    optional: true
-
-  '@oxc-parser/binding-darwin-x64@0.157.0':
-    optional: true
-
-  '@oxc-parser/binding-freebsd-x64@0.157.0':
-    optional: true
-
-  '@oxc-parser/binding-linux-arm-gnueabihf@0.157.0':
-    optional: true
-
-  '@oxc-parser/binding-linux-arm-musleabihf@0.157.0':
-    optional: true
-
-  '@oxc-parser/binding-linux-arm64-gnu@0.157.0':
-    optional: true
-
-  '@oxc-parser/binding-linux-arm64-musl@0.157.0':
-    optional: true
-
-  '@oxc-parser/binding-linux-ppc64-gnu@0.157.0':
-    optional: true
-
-  '@oxc-parser/binding-linux-riscv64-gnu@0.157.0':
-    optional: true
-
-  '@oxc-parser/binding-linux-riscv64-musl@0.157.0':
-    optional: true
-
-  '@oxc-parser/binding-linux-s390x-gnu@0.157.0':
-    optional: true
-
-  '@oxc-parser/binding-linux-x64-gnu@0.157.0':
-    optional: true
-
-  '@oxc-parser/binding-linux-x64-musl@0.157.0':
-    optional: true
-
-  '@oxc-parser/binding-openharmony-arm64@0.157.0':
-    optional: true
-
-  '@oxc-parser/binding-win32-arm64-msvc@0.157.0':
-    optional: true
-
-  '@oxc-parser/binding-win32-ia32-msvc@0.157.0':
-    optional: true
-
-  '@oxc-parser/binding-win32-x64-msvc@0.157.0':
-    optional: true
 
   '@oxc-project/types@0.156.0': {}
 
@@ -24305,9 +24125,9 @@ snapshots:
   fsevents@2.3.3:
     optional: true
 
-  fuma-cli@0.3.2:
+  fuma-cli@0.3.3:
     dependencies:
-      magic-string: 1.4.3
+      magic-string: 1.4.5
       oxc-resolver: 11.24.2
       package-manager-detector: 1.9.0
       picomatch: 4.0.7
@@ -26344,30 +26164,6 @@ snapshots:
       dot-prop: 6.0.1
       lodash.isequal: 4.5.0
       vali-date: 1.0.0
-
-  oxc-parser@0.157.0:
-    dependencies:
-      '@oxc-project/types': 0.157.0
-    optionalDependencies:
-      '@oxc-parser/binding-android-arm-eabi': 0.157.0
-      '@oxc-parser/binding-android-arm64': 0.157.0
-      '@oxc-parser/binding-darwin-arm64': 0.157.0
-      '@oxc-parser/binding-darwin-x64': 0.157.0
-      '@oxc-parser/binding-freebsd-x64': 0.157.0
-      '@oxc-parser/binding-linux-arm-gnueabihf': 0.157.0
-      '@oxc-parser/binding-linux-arm-musleabihf': 0.157.0
-      '@oxc-parser/binding-linux-arm64-gnu': 0.157.0
-      '@oxc-parser/binding-linux-arm64-musl': 0.157.0
-      '@oxc-parser/binding-linux-ppc64-gnu': 0.157.0
-      '@oxc-parser/binding-linux-riscv64-gnu': 0.157.0
-      '@oxc-parser/binding-linux-riscv64-musl': 0.157.0
-      '@oxc-parser/binding-linux-s390x-gnu': 0.157.0
-      '@oxc-parser/binding-linux-x64-gnu': 0.157.0
-      '@oxc-parser/binding-linux-x64-musl': 0.157.0
-      '@oxc-parser/binding-openharmony-arm64': 0.157.0
-      '@oxc-parser/binding-win32-arm64-msvc': 0.157.0
-      '@oxc-parser/binding-win32-ia32-msvc': 0.157.0
-      '@oxc-parser/binding-win32-x64-msvc': 0.157.0
 
   oxc-resolver@11.24.2:
     optionalDependencies:

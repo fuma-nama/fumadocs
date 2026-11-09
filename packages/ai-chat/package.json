@@ -51,7 +51,7 @@
     "@types/node": "26.6.6",
     "@types/react": "^19.3.0",
     "ai": "^7.0.164",
-    "fuma-cli": "^0.3.1",
+    "fuma-cli": "^0.3.3",
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:@fumadocs/base-ui@*",
     "react": "^19.3.1",

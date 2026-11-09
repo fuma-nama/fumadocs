@@ -1,20 +1,22 @@
-import {
-  parseSync,
-  type ArrayExpression,
-  type ExportDefaultDeclaration,
-  type ImportDeclaration,
-  type JSXElement,
-  type JSXOpeningElement,
-  type Node,
-  type ObjectExpression,
-  type ObjectProperty,
-  type Program,
-  type Span,
-} from 'oxc-parser';
+import { analyze } from 'yuku-analyzer';
+import type {
+  ArrayExpression,
+  ExportDefaultDeclaration,
+  ImportDeclaration,
+  JSXElement,
+  JSXOpeningElement,
+  Node,
+  NodeOfType,
+  NodeType,
+  ObjectExpression,
+  ObjectProperty,
+  Program,
+  Span,
+} from '@yuku-toolchain/types';
 import MagicString from 'magic-string';
 import fs from 'node:fs/promises';
 
-export type NodeOfType<T extends Node['type']> = Extract<Node, { type: T }>;
+export type { NodeOfType };
 
 export interface SourceFile {
   path: string;
@@ -27,8 +29,9 @@ export interface SourceFile {
 }
 
 export function parseSourceFile(path: string, code: string): SourceFile {
-  const { program, errors } = parseSync(path, code);
-  if (errors.length > 0) throw new Error(`Failed to parse ${path}: ${errors[0].message}`);
+  const { ast: program, diagnostics } = analyze(code, { path });
+  const error = diagnostics.find((item) => item.severity === 'error');
+  if (error) throw new Error(`Failed to parse ${path}: ${error.message}`);
   const s = new MagicString(code);
 
   return {
@@ -64,7 +67,7 @@ export function* descendants(node: Node): Generator<Node> {
   }
 }
 
-export function find<T extends Node['type']>(
+export function find<T extends NodeType>(
   node: Node,
   type: T,
   predicate?: (node: NodeOfType<T>) => boolean,
