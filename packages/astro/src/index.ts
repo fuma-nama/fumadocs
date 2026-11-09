@@ -6,18 +6,22 @@ import type { FSWatcher, Plugin } from 'vite';
 import react from '@astrojs/react';
 import mdx from '@astrojs/mdx';
 import type { SatteriResolvedOptions } from '@astrojs/markdown-satteri';
-import type {
-  HastPluginDefinition,
-  HastPluginEntry,
-  MdastPluginDefinition,
-  MdastPluginEntry,
-  PluginFactoryContext,
+import {
+  mdxToMdast,
+  type HastPluginDefinition,
+  type HastPluginEntry,
+  type HastPluginInput,
+  type MdastPluginDefinition,
+  type MdastPluginEntry,
+  type MdastPluginInput,
+  type PluginFactoryContext,
 } from 'satteri';
+import { parse, type ImportDeclaration, type Node } from 'yuku-parser';
 import { applySatteriPreset, type DefaultSatteriOptions } from '@fumadocs/satteri/preset';
 import { remarkInclude } from '@fumadocs/satteri/remark-include';
 import { remarkLlms, type LLMsOptions } from '@fumadocs/satteri/remark-llms';
 import { islandPlugin } from './island-plugin';
-import { dataKey, parseDynamicPageFile, type FumadocsData } from './shared';
+import { dataKey, frontmatterQuery, hasFrontmatterCode } from './shared';
 import { output } from './sitemap';
 import type * as RuntimeConfig from 'virtual:fumadocs/config';
 
@@ -31,7 +35,6 @@ export interface CollectionOptions extends Pick<
   | 'remarkCodeTabOptions'
   | 'remarkNpmOptions'
   | 'remarkStructureOptions'
-  | 'remarkShowOptions'
   | 'rehypeCodeOptions'
   | 'rehypeKatexOptions'
 > {
@@ -109,42 +112,93 @@ const restoreCode: HastPluginDefinition = {
   },
 };
 
-const exportData: HastPluginDefinition = {
-  name: 'fumadocs-astro-data',
-  after(_root, ctx) {
-    ctx.data.astro!.frontmatter[dataKey] = {
-      toc: ctx.data.rehypeToc ?? [],
-      structuredData: ctx.data.structuredData ?? { headings: [], contents: [] },
-      markdown: ctx.data.markdown,
-      markdownId: ctx.data._markdownId,
-    } satisfies FumadocsData;
-  },
-};
+/**
+ * The frontmatter in the code of a page, `export const frontmatter = {...}`, leaves the content, which has the
+ * frontmatter export of Astro. Like Fumadocs MDX, it is a function of the params of a page as `props`, with the imports
+ * it reads and the exports before it in its ESM block.
+ *
+ * @param onModule - receives the module of the function, `_frontmatter(props = {})`
+ */
+function frontmatterCode(onModule?: (module: string) => void): MdastPluginInput {
+  return ({ source }) => {
+    if (!hasFrontmatterCode(source)) return;
+    const imports: [ImportDeclaration, string][] = [];
+    let done = false;
 
-declare module 'satteri' {
-  interface DataMap {
-    /** the key of the function output in `registerMarkdown()` */
-    _markdownId?: string;
-  }
-}
-
-/** register the function output of `remarkLlms()` for `getText('processed')`, with the MDX components of the island */
-function registerMarkdownPlugin(root: string, island?: string): MdastPluginEntry {
-  return ({ fileURL }) => {
-    if (!fileURL) return;
-    const file = path.relative(root, fileURLToPath(fileURL)).replaceAll(path.sep, '/');
     return {
-      name: 'fumadocs-astro-markdown',
-      after(tree, ctx) {
-        ctx.data._markdownId = file;
-        ctx.prependChild(tree, {
-          type: 'mdxjsEsm',
-          value: `import { registerMarkdown as _registerMarkdown } from ${JSON.stringify(internalModule('mdx-runtime'))};
-${island ? `import { components as _components } from ${JSON.stringify(island)};\n` : ''}export const _fumadocsMarkdown = _registerMarkdown(${JSON.stringify(file)}, _markdown${island ? ', _components' : ''});`,
-        });
+      name: 'fumadocs-astro-frontmatter-code',
+      mdxjsEsm(node, ctx) {
+        if (done) return;
+        const { value } = node;
+        let body = '';
+        const declarations: Node[] = [];
+        for (const statement of parse(value, { lang: 'tsx' }).program.body) {
+          if (statement.type === 'ImportDeclaration')
+            imports.push([statement, value.slice(statement.start, statement.end)]);
+          if (statement.type !== 'ExportNamedDeclaration' || !statement.declaration) continue;
+          const { declaration } = statement;
+          body += `${value.slice(declaration.start, declaration.end)}\n`;
+          declarations.push(declaration);
+          if (
+            declaration.type !== 'VariableDeclaration' ||
+            !declaration.declarations.some(
+              (item) => item.id.type === 'Identifier' && item.id.name === 'frontmatter',
+            )
+          )
+            continue;
+
+          const names = new Set<string>();
+          collectNames(declarations, names);
+          let code = '';
+          for (const [item, text] of imports)
+            if (item.specifiers.some((specifier) => names.has(specifier.local.name)))
+              code += `${text}\n`;
+          onModule?.(
+            `${code}export function _frontmatter(props = {}) {\n${body}return frontmatter;\n}`,
+          );
+          ctx.setField(node, 'value', value.slice(0, statement.start) + value.slice(statement.end));
+          done = true;
+          return;
+        }
       },
     };
   };
+}
+
+function collectNames(node: unknown, out: Set<string>) {
+  if (typeof node !== 'object' || node === null) return;
+  if ('type' in node && node.type === 'Identifier' && 'name' in node) out.add(node.name as string);
+  for (const value of Object.values(node)) collectNames(value, out);
+}
+
+/**
+ * Register the outputs of a page with `pageOutputs` of the runtime, under a key in its frontmatter: rendering the
+ * page imports its module.
+ *
+ * @param markdown - whether the page has the output of `remarkLlms()`
+ */
+function outputsPlugin(root: string, markdown: boolean, island?: string): HastPluginInput {
+  return ({ fileURL }) =>
+    fileURL && {
+      name: 'fumadocs-astro-outputs',
+      after(tree, ctx) {
+        const key = path.relative(root, fileURLToPath(fileURL)).replaceAll(path.sep, '/');
+        ctx.data.astro!.frontmatter[dataKey] = key;
+        const { data } = ctx;
+        const outputs = [
+          `toc: ${data._rehypeTocCode ?? JSON.stringify(data.rehypeToc ?? [])}`,
+          `structuredData: ${data._structuredDataCode ?? JSON.stringify(data.structuredData ?? { headings: [], contents: [] })}`,
+        ];
+        if (markdown) outputs.push('markdown: _markdown');
+        if (island) outputs.push('components: _components');
+        // after the declaration of `_markdown`, in an export as ESM of MDX only has imports and exports
+        ctx.appendChild(tree, {
+          type: 'mdxjsEsm',
+          value: `import { pageOutputs as _pageOutputs } from ${JSON.stringify(internalModule('mdx-runtime'))};
+${island ? `import { components as _components } from ${JSON.stringify(island)};\n` : ''}export const _fumadocs = void _pageOutputs.set(${JSON.stringify(key)}, { ${outputs.join(', ')} });`,
+        });
+      },
+    };
 }
 
 /** a collection with its Sätteri plugins */
@@ -208,7 +262,7 @@ document.addEventListener('astro:before-swap', onBeforeSwap);`,
         updateConfig({
           integrations: missingIntegrations(config.integrations),
           vite: {
-            plugins: [virtualPlugin(modules), includes.plugin(), dynamicPagesPlugin()],
+            plugins: [virtualPlugin(modules), frontmatterPlugin(), includes.plugin()],
             optimizeDeps: { exclude: ['@fumadocs/astro'] },
             ssr: { noExternal: ['@fumadocs/astro'] },
           },
@@ -265,28 +319,29 @@ async function resolveCollection(
     ...options,
     features: satteri.features,
     remarkImageOptions: false,
+    // the code of structured data that reads the props of a page
     remarkStructureOptions: options.remarkStructureOptions !== false && {
       ...options.remarkStructureOptions,
-      exportAs: false,
+      exportAs: true,
     },
+    // titles stay text for islands
     rehypeTocOptions: { exportToc: { as: 'data' } },
   })('bundler');
 
   return {
     dir: realPath(path.resolve(root, dir)),
     mdastPlugins: [
+      frontmatterCode(),
       include,
       preset.mdastPlugins,
-      llms?.output === 'function'
-        ? [remarkLlms({ ...llms, as: '_markdown' }), registerMarkdownPlugin(root, island)]
-        : llms && remarkLlms({ ...llms, as: '' }),
+      llms && remarkLlms({ ...llms, as: '_markdown' }),
       hideCode,
     ],
     // the island plugin has the state of a file
     hastPlugins: [
       restoreCode,
       preset.hastPlugins,
-      exportData,
+      outputsPlugin(root, llms !== undefined, island),
       island !== undefined && (() => islandPlugin(island, internalModule('mdx-runtime'))),
     ],
   };
@@ -300,40 +355,18 @@ function addCollectionPlugins(
 ) {
   function collectionOf({ fileURL, sourceFormat }: PluginFactoryContext) {
     if (!fileURL || sourceFormat !== 'mdx') return;
-    let file = fileURLToPath(fileURL);
-    const page = parseDynamicPageFile(file);
-    if (page) file = page.file;
+    const file = fileURLToPath(fileURL);
     const collection = collections.find(({ dir }) => isInside(dir, file));
-    return collection && { file, collection, params: page?.params };
+    return collection && { file, collection };
   }
 
   satteri.mdastPlugins.push((ctx) => {
     const match = collectionOf(ctx);
     if (!match) return;
     ctx.data._compiler = { addDependency: (dependency) => includes.add(dependency, match.file) };
-    ctx.data.params = match.params;
     return match.collection.mdastPlugins;
   });
   satteri.hastPlugins.push((ctx) => collectionOf(ctx)?.collection.hastPlugins);
-}
-
-function dynamicPagesPlugin(): Plugin {
-  return {
-    name: '@fumadocs/astro:dynamic-pages',
-    enforce: 'pre',
-    resolveId(source, importer) {
-      if (!parseDynamicPageFile(source.split('?', 1)[0])) return;
-      return importer && source.startsWith('.')
-        ? path.resolve(path.dirname(importer), source)
-        : source;
-    },
-    async load(id) {
-      const page = parseDynamicPageFile(id.split('?', 1)[0]);
-      if (!page) return;
-      this.addWatchFile(page.file);
-      return fs.promises.readFile(page.file, 'utf-8');
-    },
-  };
 }
 
 /** `virtual:fumadocs/config` */
@@ -343,6 +376,34 @@ function runtimeConfigModule(runtime: typeof RuntimeConfig): string {
     code += `export const ${key} = ${JSON.stringify(value)};\n`;
   }
   return code;
+}
+
+/** the frontmatter in code of an MDX file as a module, `_frontmatter` is `undefined` without it */
+function frontmatterPlugin(): Plugin {
+  return {
+    name: '@fumadocs/astro:frontmatter',
+    load: {
+      filter: { id: new RegExp(`${frontmatterQuery.replace(/[?.]/g, '\\$&')}$`) },
+      async handler(id) {
+        let module = 'export const _frontmatter = undefined;';
+        mdxToMdast(await fs.promises.readFile(id.slice(0, -frontmatterQuery.length), 'utf8'), {
+          features: { frontmatter: true },
+          position: false,
+          mdastPlugins: [frontmatterCode((code) => (module = code))],
+        });
+        return module;
+      },
+    },
+    // in dev, a change of a file that the frontmatter in code imports loads its page again
+    hotUpdate({ file, modules, server }) {
+      const visited = new Set(modules);
+      for (const item of visited) {
+        if (item.id?.endsWith(frontmatterQuery)) {
+          if (item.file !== file) server.watcher.emit('change', item.file);
+        } else for (const importer of item.importers) visited.add(importer);
+      }
+    },
+  };
 }
 
 /** the content island of the MDX components */
