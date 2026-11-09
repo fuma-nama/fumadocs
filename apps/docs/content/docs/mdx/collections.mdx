@@ -145,6 +145,22 @@ export const blog = defineCollections({
 
 Unlike `mdxOptions`, the collection-level `satteriOptions` keeps the default preset unless you pass `preset: 'minimal'`. It replaces the global `satteriOptions` instead of merging with them.
 
+### `output`
+
+By default, structured data, the table of contents, processed Markdown and extracted references are rendered for the props of each page, like `<show>` branches. Use `static` for values analysed from the source instead: expressions keep their source and every branch shows.
+
+```ts title="source.config.ts"
+import { defineDocs } from 'fumadocs-mdx/config';
+
+export const docs = defineDocs({
+  docs: {
+    output: 'static',
+  },
+});
+```
+
+`page.data.structuredData` is then an object, rather than an async function.
+
 ### `postprocess`
 
 > This API is only available on `doc` type.

@@ -60,13 +60,12 @@ Images in the public directory keep their address. Vite inlines images smaller t
 
 ## JSX Elements
 
-JSX elements are kept as you wrote them. To change them:
+JSX elements are rendered by their components, into Markdown. With `output: 'static'`, `_markdown` is a string and they are kept as you wrote them. To change them:
 
-| Option               | Elements                                      |
-| -------------------- | --------------------------------------------- |
-| `filterElement`      | Removed, or replaced by their children        |
-| `mdxAsPlaceholder`   | Turned into placeholders, rendered at runtime |
-| `output: 'function'` | Rendered by their components, into Markdown   |
+| Option             | Elements                                                    |
+| ------------------ | ----------------------------------------------------------- |
+| `filterElement`    | Removed, or replaced by their children                      |
+| `mdxAsPlaceholder` | Turned into placeholders, rendered at runtime (static only) |
 
 On Sätteri, `filterElement` and `mdxAsPlaceholder` are unavailable.
 
@@ -93,19 +92,9 @@ const markdown = await renderPlaceholder(await page.data.getText('processed'), {
 });
 ```
 
-### Function Output [#output]
+### Components [#output]
 
-With `output: 'function'`, Markdown stays as you wrote it and JSX elements are rendered by your components.
-
-```ts
-import type { LLMsOptions } from 'fumadocs-core/mdx-plugins/remark-llms';
-
-const llmsOptions: LLMsOptions = {
-  output: 'function',
-};
-```
-
-Render it with your components:
+Render `_markdown` with your components:
 
 ```tsx
 import { getMDXComponents } from '@/components/mdx';

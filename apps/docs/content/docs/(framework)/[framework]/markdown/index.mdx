@@ -435,10 +435,7 @@ Add an adapter to your Astro config.
 
 The table of contents, search index and Markdown of a page only include the branches that show for its props, and expressions like `{props.framework}` render into them as values, heading IDs included.
 
-All branches compile together in one file, so:
-
-- Heading IDs are unique across the file. The same heading in two branches gets a `-1` suffix on the second one, unless it has a [custom anchor](#custom-anchor).
-- A [tab group](#tab-groups) ends at a `<show>` tag.
+All branches compile together in one file, so a [tab group](#tab-groups) ends at a `<show>` tag.
 
 ### NPM Commands
 

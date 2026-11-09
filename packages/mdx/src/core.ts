@@ -412,7 +412,8 @@ function postprocessPlugin(): Plugin {
           const docs = docCollectionOf(collection);
           if (!docs) continue;
 
-          const structuredData = 'import("fumadocs-core/mdx-plugins/remark-structure").StructuredData';
+          const structuredData =
+            'import("fumadocs-core/mdx-plugins/remark-structure").StructuredData';
           const extras = [
             `{ structuredData: ${docs.output === 'static' ? structuredData : `() => Promise<${structuredData}>`} }`,
           ];
