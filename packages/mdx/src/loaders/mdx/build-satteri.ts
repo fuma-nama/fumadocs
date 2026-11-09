@@ -1,17 +1,12 @@
 import { pathToFileURL } from 'node:url';
 import type { Core } from '@/core';
-import {
-  analysisOf,
-  type BuildEnvironment,
-  type DocCollectionItem,
-  type LoadedConfig,
-} from '@/config/build';
+import type { BuildEnvironment, DocCollectionItem, LoadedConfig } from '@/config/build';
 import type { BuildMDXOptions, CompiledMDXProperties } from '@/loaders/mdx/build';
 import type { PostprocessOptions } from '@/loaders/mdx/remark-postprocess';
 import { resolveLastModified } from '@/loaders/mdx/last-modified';
 import type { MdxCompileOptions, Data, MdastPluginInput, MdastPluginDefinition } from 'satteri';
 import type { SatteriPresetOptions } from '@fumadocs/satteri/preset';
-import { isStaticOutput, listCode, showConditions } from '../../../../shared/code-output';
+import { listCode, showConditions } from '../../../../shared/code-output';
 import type { ExtraPluginHooks } from '@fumadocs/satteri/compile';
 
 export type CompiledSatteriMDXProperties<Frontmatter = Record<string, unknown>> =
@@ -39,7 +34,7 @@ export async function buildSatteriMDX(
     _compiler,
     _cwd: collection?.cwd,
     _valueToExport: collection?.postprocess?.valueToExport,
-    _analysis: collection && analysisOf(collection),
+    _analysis: collection && 'runtime',
   };
 
   const mdastPlugins: MdastPluginInput[] = [remarkInclude({ cwd: collection?.cwd })];
@@ -104,10 +99,7 @@ function postprocessPlugin(
     },
     collectExports({ data, addExport }) {
       if (extractLinkReferences) {
-        addExport(
-          'extractedReferences',
-          listCode(data.extractedReferences!, isStaticOutput(undefined, data)),
-        );
+        addExport('extractedReferences', listCode(data.extractedReferences!, false));
       }
 
       if (lastModified) {

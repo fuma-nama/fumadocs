@@ -4,7 +4,6 @@ import type { MDXComponents } from 'mdx/types';
 import { createElement, type ComponentProps } from 'react';
 import type { AsyncDocCollectionEntry } from '@/runtime/server';
 import type { DocData, DocMethods } from '@/runtime/types';
-import { loadStructuredData } from '@/utils/page';
 
 type Awaitable<T> = T | Promise<T>;
 
@@ -64,7 +63,7 @@ export default function mdxPlugin<Config extends LoaderConfig = LoaderConfig>({
     async getPageStructuredData(page) {
       if (!isEntry(page.data)) return;
       const data = await withComponents(this, page);
-      if (isEntry(data)) return loadStructuredData((await load(data)).structuredData);
+      if (isEntry(data)) return (await load(data)).structuredData;
     },
     getPageCreatedAt({ data }) {
       if (!isEntry(data) || !('date' in data)) return;

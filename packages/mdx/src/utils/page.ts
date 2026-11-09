@@ -4,16 +4,16 @@ import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure'
 import type { TOCItemType } from 'fumadocs-core/toc';
 import type { CompiledMDXProperties } from '@/loaders/mdx/build';
 import type { ExtractedReference } from '@/loaders/mdx/remark-postprocess';
-import { renderStructuredData } from '../../../shared/structured-data';
+import { readStructuredData, renderStructuredData } from '../../../shared/structured-data';
 
-/** the exports of a compiled page for its props, outputs of runtime analysis are rendered for them */
+/** the exports of a compiled page for its props, with its outputs for them */
 export type PageAt<Page extends CompiledMDXProperties<unknown>> = Omit<
   Page,
   'toc' | 'structuredData' | 'extractedReferences'
 > & {
   toc: TOCItemType[];
-  /** a function with runtime analysis */
-  structuredData: StructuredData | (() => Promise<StructuredData>);
+  /** read without rendering, components stay as tags: {@link loadStructuredData} renders them */
+  structuredData: StructuredData;
   extractedReferences?: ExtractedReference[];
 };
 
@@ -31,10 +31,12 @@ export function pageAt<Page extends CompiledMDXProperties<unknown>>(
       ? (own: MDXProps) => createElement(page.default, { ...props, ...own })
       : page.default,
     toc: typeof toc === 'function' ? toc(props) : toc,
-    structuredData:
-      typeof structuredData === 'function'
-        ? () => renderStructuredData(structuredData, props)
-        : structuredData,
+    // read when asked, async entries render it instead
+    get structuredData() {
+      return typeof structuredData === 'function'
+        ? readStructuredData(structuredData, props)
+        : structuredData;
+    },
     extractedReferences: typeof refs === 'function' ? refs(props) : refs,
     // called in place, so `asMarkdown()` of the component opts in when rendering into Markdown
     _markdown:
@@ -44,9 +46,12 @@ export function pageAt<Page extends CompiledMDXProperties<unknown>>(
   };
 }
 
-/** structured data of a page, rendered with runtime analysis */
+/** the structured data of a compiled page for its props, with its components rendered */
 export async function loadStructuredData(
-  structuredData: PageAt<CompiledMDXProperties>['structuredData'],
+  { structuredData }: CompiledMDXProperties<unknown>,
+  props: Record<string, unknown>,
 ): Promise<StructuredData> {
-  return typeof structuredData === 'function' ? structuredData() : structuredData;
+  return typeof structuredData === 'function'
+    ? renderStructuredData(structuredData, props)
+    : structuredData;
 }

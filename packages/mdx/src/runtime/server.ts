@@ -21,15 +21,7 @@ export type DocCollectionEntry<
   Name extends string = string,
   Frontmatter = unknown,
   TC extends InternalTypeConfig = InternalTypeConfig,
-> = Omit<DocData, 'structuredData'> & {
-  structuredData: TC['DocData'][Name] extends {
-    structuredData: infer T extends PageData['structuredData'];
-  }
-    ? T
-    : StructuredData;
-} & DocMethods &
-  Frontmatter &
-  TC['DocData'][Name];
+> = DocData & DocMethods & Frontmatter & TC['DocData'][Name];
 
 interface ToFumadocsSourceOptions {
   /** base directory for virtual file paths */
@@ -80,12 +72,16 @@ export type ServerCreate<Config, TC extends InternalTypeConfig = InternalTypeCon
   typeof server<Config, TC>
 >;
 
-function toDocData(page: PageAt<CompiledMDXProperties>, exports: CompiledMDXProperties): DocData {
+/** @param structuredData - read from the page without rendering, unless given */
+function toDocData(
+  page: PageAt<CompiledMDXProperties>,
+  exports: CompiledMDXProperties,
+  structuredData = page.structuredData,
+): DocData {
   const data: DocData = {
     body: page.default,
     toc: page.toc,
-    // a function with runtime analysis, the type config of the collection gives its type
-    structuredData: page.structuredData as StructuredData,
+    structuredData,
     _exports: exports as unknown as Record<string, unknown>,
   };
 
@@ -97,16 +93,16 @@ function toDocData(page: PageAt<CompiledMDXProperties>, exports: CompiledMDXProp
   return data;
 }
 
-/** the page of compiled exports for its props, with its doc data */
-function bind(exports: CompiledMDXProperties, props: Record<string, unknown>) {
-  const page = pageAt(exports, props);
-  return { page, data: toDocData(page, exports) };
+/** the doc data of a loaded page for its props, its structured data renders components */
+async function loadDocData(
+  exports: CompiledMDXProperties,
+  props: Record<string, unknown>,
+): Promise<DocData> {
+  return toDocData(pageAt(exports, props), exports, await loadStructuredData(exports, props));
 }
 
-/** the doc data of a loaded page, its structured data is rendered like the rest of it */
-async function loadDocData({ page, data }: ReturnType<typeof bind>): Promise<DocData> {
-  return { ...data, structuredData: await loadStructuredData(page.structuredData) };
-}
+/** the exports of a lazy entry, loading them doesn't render its outputs */
+type Content = () => Promise<CompiledMDXProperties>;
 
 export function server<Config, TC extends InternalTypeConfig>() {
   function fileInfo(file: string, base: string): FileInfo {
@@ -134,10 +130,10 @@ export function server<Config, TC extends InternalTypeConfig>() {
       const out = await Promise.all(
         Object.entries(glob).map(async ([k, v]) => {
           const exports: CompiledMDXProperties = typeof v === 'function' ? await v() : v;
-          const { page, data } = bind(exports, {});
+          const page = pageAt(exports, {});
 
           return {
-            ...data,
+            ...toDocData(page, exports),
             ...(exports.frontmatter as object),
             ...createDocMethods(fileInfo(k, base), () => page),
           } satisfies DocCollectionEntry;
@@ -159,17 +155,18 @@ export function server<Config, TC extends InternalTypeConfig>() {
       const out = await Promise.all(
         Object.entries(head).map(async ([k, v]) => {
           const data = typeof v === 'function' ? await v() : v;
-          const content = body[k] as () => Promise<CompiledMDXProperties>;
+          const content = body[k] as Content;
 
           return {
             ...data,
-            ...createDocMethods(fileInfo(k, base), async () => bind(await content(), {}).page),
+            ...createDocMethods(fileInfo(k, base), async () => pageAt(await content(), {})),
             async load() {
-              return loadDocData(bind(await content(), {}));
+              return loadDocData(await content(), {});
             },
             async structuredData() {
-              return loadStructuredData(bind(await content(), {}).page.structuredData);
+              return loadStructuredData(await content(), {});
             },
+            _content: content,
           } satisfies AsyncDocCollectionEntry;
         }),
       );
@@ -343,29 +340,30 @@ function createDocAt<Doc extends DocMethods>(
   props: Record<string, unknown>,
   base: Doc,
 ): Doc {
-  const at = (data: { _exports?: Record<string, unknown> }) =>
-    bind(data._exports as unknown as CompiledMDXProperties, props);
-  // eager entries have the exports, lazy entries load them, the macro has both
-  const { load } = doc as { load?: () => Promise<DocData> };
-  if (!load) {
-    const { page, data } = at(doc as { _exports?: Record<string, unknown> });
-    return { ...base, ...data, ...createDocMethods(doc.info, () => page) };
+  // eager entries have the exports, lazy entries load them
+  const { _exports: exports, _content: content } = doc as {
+    _exports?: CompiledMDXProperties;
+    _content?: Content;
+  };
+  if (!content) {
+    const page = pageAt(exports!, props);
+    return { ...base, ...toDocData(page, exports!), ...createDocMethods(doc.info, () => page) };
   }
 
-  let loaded: ReturnType<typeof at> | undefined;
-  let loading: Promise<ReturnType<typeof at>> | undefined;
+  let loaded: PageAt<CompiledMDXProperties> | undefined;
+  let loading: Promise<PageAt<CompiledMDXProperties>> | undefined;
   let data: Promise<DocData> | undefined;
-  const loadPage = () => (loading ??= load().then((data) => (loaded = at(data))));
+  const loadPage = () => (loading ??= content().then((v) => (loaded = pageAt(v, props))));
   return {
     ...base,
-    ...createDocMethods(doc.info, async () => (await loadPage()).page),
+    ...createDocMethods(doc.info, loadPage),
     // memoized, it can be called in render
-    load: () => (data ??= loadPage().then(loadDocData)),
-    structuredData: async () => loadStructuredData((await loadPage()).page.structuredData),
+    load: () => (data ??= content().then((v) => loadDocData(v, props))),
+    structuredData: async () => loadStructuredData(await content(), props),
     ...('body' in doc && {
       preload: () => loadPage().then(() => undefined),
       // like the body of the macro, it renders synchronously when loaded
-      body: (props: MDXProps) => createElement((loaded ?? use(loadPage())).page.default, props),
+      body: (props: MDXProps) => createElement((loaded ?? use(loadPage())).default, props),
     }),
   };
 }

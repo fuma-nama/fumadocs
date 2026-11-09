@@ -6,7 +6,7 @@ import { flattenNode, walk } from './mdast-utils';
 import type { LLMsOptions } from 'fumadocs-core/mdx-plugins';
 import { Parser } from 'acorn';
 import type { MdxjsEsm } from 'mdast-util-mdx';
-import { isStaticOutput, listCode, showCondition } from '../../../../shared/code-output';
+import { listCode, showCondition } from '../../../../shared/code-output';
 import { remarkLLMs } from 'fumadocs-core/mdx-plugins/remark-llms';
 
 export interface ExtractedReference {
@@ -69,7 +69,6 @@ export function remarkPostprocess({
     });
 
     if (extractLinkReferences) {
-      const isStatic = isStaticOutput(undefined, file.data);
       const items: { code: string; when: string[] }[] = [];
       const visit = (node: Nodes, when: string[]) => {
         if (node.type === 'link')
@@ -83,7 +82,7 @@ export function remarkPostprocess({
         type: 'mdxjsEsm',
         value: '',
         data: {
-          estree: Parser.parse(`export const extractedReferences = ${listCode(items, isStatic)};`, {
+          estree: Parser.parse(`export const extractedReferences = ${listCode(items, false)};`, {
             ecmaVersion: 'latest',
             sourceType: 'module',
           }) as unknown as NonNullable<MdxjsEsm['data']>['estree'],

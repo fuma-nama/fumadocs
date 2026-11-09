@@ -5,7 +5,6 @@ import type {
   GlobalConfig,
   MetaCollection,
 } from '@/config/define';
-import type { Analysis } from 'fumadocs-core/mdx-plugins/stringifier';
 import picomatch from 'picomatch';
 import path from 'node:path';
 
@@ -39,11 +38,6 @@ interface PrimitiveCollectionItem {
 
 export type MetaCollectionItem = PrimitiveCollectionItem & Omit<MetaCollection, 'files' | 'dir'>;
 export type DocCollectionItem = PrimitiveCollectionItem & Omit<DocCollection, 'files' | 'dir'>;
-
-/** the analysis of a collection: by default, `runtime` when its content is loaded asynchronously */
-export function analysisOf(collection: DocCollectionItem): Analysis {
-  return collection.analysis ?? (collection.async || collection.dynamic ? 'runtime' : 'static');
-}
 
 export interface DocsCollectionItem
   extends Omit<DocsCollection, 'dir' | 'meta' | 'docs'>, Omit<PrimitiveCollectionItem, 'patterns'> {

@@ -4,7 +4,6 @@ import * as path from 'node:path';
 import { expect, test } from 'vitest';
 import { createElement, type FC } from 'react';
 import { loader } from 'fumadocs-core/source';
-import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
 import { applyMdxPreset, defineDocs, type DocCollection } from '@/config';
 import { buildConfig } from '@/config/build';
 import { createCore } from '@/core';
@@ -141,7 +140,7 @@ export const frontmatter = {
         {
           info: { path: '[framework]/deploy.mdx', fullPath: files.deploy },
           title: 'Deploy',
-          load: async () => ({}),
+          _content: async () => ({}),
           _frontmatterAt: {
             '{"framework":"next"}': { title: 'Deploy', description: 'Deploy on Next.js' },
             '{"framework":"waku"}': { title: 'Deploy', description: 'Deploy on Waku' },
@@ -159,7 +158,7 @@ export const frontmatter = {
   await fs.rm(dir, { recursive: true });
 });
 
-test('static analysis of a collection with its own options', async () => {
+test('the outputs of a collection with its own options read the props', async () => {
   const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'page-code-'));
   const file = path.join(dir, 'index.mdx');
   await fs.writeFile(file, '---\ntitle: Home\n---\n\n## Hello {props.name}\n\n[Link](/a)\n');
@@ -167,7 +166,6 @@ test('static analysis of a collection with its own options', async () => {
     defineDocs({
       dir,
       docs: {
-        analysis: 'static',
         postprocess: { extractLinkReferences: true, includeProcessedMarkdown: true },
         ...(compiler ? { compiler } : { mdxOptions: applyMdxPreset() }),
       },
@@ -183,9 +181,10 @@ test('static analysis of a collection with its own options', async () => {
       development: false,
       compiler: { addDependency() {} },
     }))!;
-    for (const name of ['toc', 'structuredData', 'extractedReferences', '_markdown'])
-      expect(code).not.toMatch(new RegExp(`(const|let) ${name} = \\(?props\\)? =>`));
-    expect(code).not.toContain('_headingIds');
+    for (const name of ['toc', 'structuredData', 'extractedReferences'])
+      expect(code).toMatch(new RegExp(`(const|let) ${name} = \\(?props\\)? =>`));
+    expect(code).toContain('function _markdown(props)');
+    expect(code).toContain('_headingIds');
   }
 });
 
@@ -193,48 +192,61 @@ test('page props render the content and outputs of a page', async () => {
   const { server, toFumadocsSource: toSource } = await import('@/runtime/server');
   const { asMarkdown, jsxComponents } = await import('fumadocs-core/server');
   type Props = { framework: string; name?: string; components?: Record<string, FC> };
-  // the type config of a collection with runtime analysis
-  const create = server<
-    { docs: DocCollection },
-    { DocData: { docs: { structuredData: () => Promise<StructuredData> } } }
-  >();
-  const docs = await create.doc('docs', '', {
-    '[framework]/index.mdx': {
-      frontmatter: { title: 'Home', staticParams: [{ framework: 'next' }] },
-      default: () => null,
-      // like the outputs of runtime analysis, with `<ProductName />` from the MDX components
-      toc: (props: Props) => [{ title: `${props.framework} ${props.name}`, url: '#a', depth: 2 }],
-      structuredData: (props: Props) => [
-        { id: 'a', content: ` ${props.framework} ${props.name} ` },
-        { content: ' ' },
-        { content: createElement(props.components!.ProductName) },
-      ],
-      _markdown: (props: Props) =>
-        asMarkdown()
-          ? [
-              `${props.framework} ${props.name} `,
-              createElement(jsxComponents(props.components).ProductName),
-            ]
-          : null,
-    },
-  });
+  const create = server<{ docs: DocCollection }, { DocData: { docs: unknown } }>();
+  const frontmatter = { title: 'Home', staticParams: [{ framework: 'next' }] };
+  const file = '[framework]/index.mdx';
+  const compiled = {
+    frontmatter,
+    default: () => null,
+    // like the compiled outputs, with `<ProductName />` from the MDX components
+    toc: (props: Props) => [{ title: `${props.framework} ${props.name}`, url: '#a', depth: 2 }],
+    structuredData: (props: Props) => [
+      { id: 'a', content: ` ${props.framework} ${props.name} ` },
+      { content: ' ' },
+      { content: createElement(props.components!.ProductName) },
+    ],
+    _markdown: (props: Props) =>
+      asMarkdown()
+        ? [
+            `${props.framework} ${props.name} `,
+            createElement(jsxComponents(props.components).ProductName),
+          ]
+        : null,
+  };
+  const docs = await create.doc('docs', '', { [file]: compiled });
+  const lazy = await create.docLazy(
+    'docs',
+    '',
+    { [file]: frontmatter },
+    { [file]: async () => compiled },
+  );
   function ProductName() {
     asMarkdown();
     return 'Fumadocs';
   }
   const source = loader({ baseUrl: '/', source: toSource(docs, []) });
 
-  // the outputs are values for the path params, the missing MDX components are kept as JSX syntax
+  // the outputs are values for the path params
   const next = source.getPage(['next'])!;
   expect(next.data.toc[0].title).toBe('next undefined');
-  expect((await next.data.structuredData()).contents[0].content).toBe('<ProductName />');
-  const page = source.getPage(['next'], { props: { name: 'Fuma', components: { ProductName } } })!;
+  const props = { name: 'Fuma', components: { ProductName } };
+  const page = source.getPage(['next'], { props })!;
   expect(page.url).toBe('/next');
   expect(page.data.toc[0].title).toBe('next Fuma');
-  // records are trimmed, empty ones are left out
-  await expect(page.data.structuredData()).resolves.toEqual({
+  // read without rendering: components stay as tags, records are trimmed, empty ones are left out
+  expect(page.data.structuredData).toEqual({
+    headings: [{ id: 'a', content: 'next Fuma' }],
+    contents: [{ heading: 'a', content: '<ProductName />' }],
+  });
+  await expect(page.data.getText('processed')).resolves.toBe('next Fuma Fumadocs');
+
+  // loaded asynchronously, components render, the unbound page isn't rendered for it
+  const lazyPage = loader({ baseUrl: '/', source: toSource(lazy, []) }).getPage(['next'], {
+    props,
+  })!;
+  await expect(lazyPage.data.structuredData()).resolves.toEqual({
     headings: [{ id: 'a', content: 'next Fuma' }],
     contents: [{ heading: 'a', content: 'Fumadocs' }],
   });
-  await expect(page.data.getText('processed')).resolves.toBe('next Fuma Fumadocs');
+  expect((await lazyPage.data.load()).toc[0].title).toBe('next Fuma');
 });

@@ -17,8 +17,7 @@ async function setup() {
   });
   const config = buildConfig(
     {
-      // runtime analysis, so records render the components that includes import
-      docs: defineCollections({ type: 'doc', dir, analysis: 'runtime' }),
+      docs: defineCollections({ type: 'doc', dir }),
       default: { mdxOptions: { rehypeCodeOptions: false, remarkPlugins: [remarkDirective] } },
     },
     process.cwd(),

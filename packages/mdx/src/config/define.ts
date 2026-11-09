@@ -3,7 +3,6 @@ import type { MDXPresetOptions } from '@/config/preset';
 import type { ProcessorOptions } from '@mdx-js/mdx';
 import { metaSchema, pageSchema } from 'fumadocs-core/source/schema';
 import type { PostprocessOptions } from '@/loaders/mdx/remark-postprocess';
-import type { Analysis } from 'fumadocs-core/mdx-plugins/stringifier';
 import type { LastModifiedFn } from '@/loaders/mdx/last-modified';
 import type { PluginOption } from '@/core';
 import type { SatteriPresetOptions } from '@fumadocs/satteri/preset';
@@ -32,15 +31,6 @@ export interface DocCollectionBase<
   Schema extends StandardSchemaV1 = StandardSchemaV1,
 > extends BaseCollection {
   postprocess?: Partial<PostprocessOptions>;
-  /**
-   * The analysis of the outputs of a page: its table of contents, structured data, processed Markdown and extracted
-   * references. `runtime` renders them for the props of the page, `static` analyses them from the source.
-   *
-   * With `runtime`, the structured data of pages is `() => Promise<StructuredData>`.
-   *
-   * @defaultValue `runtime` for `async` and `dynamic` collections, `static` otherwise
-   */
-  analysis?: Analysis;
   async?: boolean;
   dynamic?: boolean;
   schema?: CollectionSchema<Schema, { path: string; source: string }>;
