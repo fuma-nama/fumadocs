@@ -324,8 +324,9 @@ test('remark-llms outputs the URLs of imported images', async () => {
   };
 
   const expected = '![Image](</test/fixtures/img.png> "A \\"title\\"")\n\n![Public](/img.png)';
-  await expect(load('string')).resolves.toBe(`${expected}\n`);
-  await expect(renderToMarkdown(createElement(await load('function')))).resolves.toBe(expected);
+  // the URLs are code, both forms are components
+  for (const output of ['string', 'function'] as const)
+    await expect(renderToMarkdown(createElement(await load(output)))).resolves.toBe(expected);
 });
 
 test('included images use the URLs of their imports', async () => {
@@ -338,7 +339,7 @@ test('included images use the URLs of their imports', async () => {
     options,
   });
 
-  expect(result.code).toContain('With ![image](<" + (__img0.src ?? __img0) + ">).');
+  expect(result.code).toContain('With ![image](<",\n        __img0.src ?? __img0,\n        ">).');
   expect(result.data?.structuredData?.contents).toEqual([
     { heading: undefined, content: 'Intro text.' },
     { heading: undefined, content: 'With .' },

@@ -49,8 +49,7 @@ const markerRegex = /\0(\/?)(\d+)\0/g;
 
 /**
  * A stringifier whose output can have parts rendered from code: replacements mark them, `chunks()` splits the output on
- * their markers. Authored expressions and the branches of `<show>` checked when rendering read render scope (`props`),
- * an output with them is a function of the props.
+ * their markers. Code reads the props of the page, an output with it is a function of the props.
  */
 export function createCodeOutput<N extends CodeNode, S extends CodeStringifier<N>>(
   createStringifier: (expression: (code: string, fallback: string) => string) => S,
@@ -69,12 +68,15 @@ export function createCodeOutput<N extends CodeNode, S extends CodeStringifier<N
     const i = parts.push(part) - 1;
     return `\0${i}\0${content}\0/${i}\0`;
   };
-  const s = createStringifier((code, fallback) => mark({ code, fallback }));
+  const s = createStringifier((code, fallback) => {
+    dynamic = true;
+    return mark({ code, fallback });
+  });
 
   return {
     s,
     wrap,
-    /** whether a marked part reads render scope */
+    /** whether the output has code */
     get dynamic() {
       return dynamic;
     },
