@@ -85,13 +85,19 @@ import { source } from '@/lib/source';
 import { flexsearch } from 'fumadocs-core/search/flexsearch';
 
 const server = flexsearch({
-  indexes: source.getPages().map((page) => ({
-    title: page.data.title!,
-    description: page.data.description,
-    url: page.url,
-    id: page.url,
-    structuredData: page.data.structuredData,
-  })),
+  indexes: () =>
+    Promise.all(
+      source.getPages().map(async (page) => ({
+        title: page.data.title!,
+        description: page.data.description,
+        url: page.url,
+        id: page.url,
+        structuredData:
+          typeof page.data.structuredData === 'function'
+            ? await page.data.structuredData()
+            : page.data.structuredData,
+      })),
+    ),
 });
 ```
 
@@ -121,13 +127,16 @@ import { source } from '@/lib/source';
 import { flexsearchFromSource } from 'fumadocs-core/search/flexsearch';
 
 const server = flexsearchFromSource(source, {
-  buildIndex(page) {
+  async buildIndex(page) {
     return {
       title: page.data.title!,
       description: page.data.description,
       url: page.url,
       id: page.url,
-      structuredData: page.data.structuredData,
+      structuredData:
+        typeof page.data.structuredData === 'function'
+          ? await page.data.structuredData()
+          : page.data.structuredData,
       // use your desired value, like page.slugs[0] [!code ++:2]
       tag: '<value>',
     };
@@ -280,13 +289,19 @@ const server = flexsearchI18n({
     // [locale]: Flexsearch options [!code ++:2]
     jp: { encoder: Charset.CJK },
   },
-  indexes: source.getPages().map((page) => ({
-    title: page.data.title!,
-    description: page.data.description,
-    structuredData: page.data.structuredData,
-    id: page.url,
-    url: page.url,
-    locale: page.locale!,
-  })),
+  indexes: () =>
+    Promise.all(
+      source.getPages().map(async (page) => ({
+        title: page.data.title!,
+        description: page.data.description,
+        structuredData:
+          typeof page.data.structuredData === 'function'
+            ? await page.data.structuredData()
+            : page.data.structuredData,
+        id: page.url,
+        url: page.url,
+        locale: page.locale!,
+      })),
+    ),
 });
 ```

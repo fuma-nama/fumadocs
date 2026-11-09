@@ -53,13 +53,19 @@ import { source } from '@/lib/source';
 import { createSearchAPI } from 'fumadocs-core/search/server';
 
 export const { GET } = createSearchAPI('advanced', {
-  indexes: source.getPages().map((page) => ({
-    title: page.data.title,
-    description: page.data.description,
-    url: page.url,
-    id: page.url,
-    structuredData: page.data.structuredData,
-  })),
+  indexes: () =>
+    Promise.all(
+      source.getPages().map(async (page) => ({
+        title: page.data.title,
+        description: page.data.description,
+        url: page.url,
+        id: page.url,
+        structuredData:
+          typeof page.data.structuredData === 'function'
+            ? await page.data.structuredData()
+            : page.data.structuredData,
+      })),
+    ),
 });
 ```
 
@@ -69,13 +75,19 @@ import { createSearchAPI } from 'fumadocs-core/search/server';
 import { source } from '@/lib/source';
 
 const server = createSearchAPI('advanced', {
-  indexes: source.getPages().map((page) => ({
-    title: page.data.title,
-    description: page.data.description,
-    url: page.url,
-    id: page.url,
-    structuredData: page.data.structuredData,
-  })),
+  indexes: () =>
+    Promise.all(
+      source.getPages().map(async (page) => ({
+        title: page.data.title,
+        description: page.data.description,
+        url: page.url,
+        id: page.url,
+        structuredData:
+          typeof page.data.structuredData === 'function'
+            ? await page.data.structuredData()
+            : page.data.structuredData,
+      })),
+    ),
 });
 
 export async function loader({ request }: Route.LoaderArgs) {
@@ -89,13 +101,19 @@ import { source } from '@/lib/source';
 import { createSearchAPI } from 'fumadocs-core/search/server';
 
 const server = createSearchAPI('advanced', {
-  indexes: source.getPages().map((page) => ({
-    title: page.data.title,
-    description: page.data.description,
-    url: page.url,
-    id: page.url,
-    structuredData: page.data.structuredData,
-  })),
+  indexes: () =>
+    Promise.all(
+      source.getPages().map(async (page) => ({
+        title: page.data.title,
+        description: page.data.description,
+        url: page.url,
+        id: page.url,
+        structuredData:
+          typeof page.data.structuredData === 'function'
+            ? await page.data.structuredData()
+            : page.data.structuredData,
+      })),
+    ),
 });
 
 export const Route = createFileRoute('/api/search')({
@@ -112,13 +130,19 @@ import { source } from '@/lib/source';
 import { createSearchAPI } from 'fumadocs-core/search/server';
 
 export const { GET } = createSearchAPI('advanced', {
-  indexes: source.getPages().map((page) => ({
-    title: page.data.title,
-    description: page.data.description,
-    url: page.url,
-    id: page.url,
-    structuredData: page.data.structuredData,
-  })),
+  indexes: () =>
+    Promise.all(
+      source.getPages().map(async (page) => ({
+        title: page.data.title,
+        description: page.data.description,
+        url: page.url,
+        id: page.url,
+        structuredData:
+          typeof page.data.structuredData === 'function'
+            ? await page.data.structuredData()
+            : page.data.structuredData,
+      })),
+    ),
 });
 ```
 
@@ -173,13 +197,16 @@ import { source } from '@/lib/source';
 import { createFromSource } from 'fumadocs-core/search/server';
 
 const server = createFromSource(source, {
-  buildIndex(page) {
+  async buildIndex(page) {
     return {
       title: page.data.title,
       description: page.data.description,
       url: page.url,
       id: page.url,
-      structuredData: page.data.structuredData,
+      structuredData:
+        typeof page.data.structuredData === 'function'
+          ? await page.data.structuredData()
+          : page.data.structuredData,
       // use your desired value, like page.slugs[0] [!code ++:2]
       tag: '<value>',
     };
@@ -319,16 +346,22 @@ import { i18n } from '@/lib/i18n';
 
 const server = createI18nSearchAPI('advanced', {
   i18n, // [!code ++]
-  indexes: source.getLanguages().flatMap(({ language, pages }) =>
-    pages.map((page) => ({
-      title: page.data.title,
-      description: page.data.description,
-      structuredData: page.data.structuredData,
-      id: page.url,
-      url: page.url,
-      locale: language, // [!code ++]
-    })),
-  ),
+  indexes: () =>
+    Promise.all(
+      source.getLanguages().flatMap(({ language, pages }) =>
+        pages.map(async (page) => ({
+          title: page.data.title,
+          description: page.data.description,
+          structuredData:
+            typeof page.data.structuredData === 'function'
+              ? await page.data.structuredData()
+              : page.data.structuredData,
+          id: page.url,
+          url: page.url,
+          locale: language, // [!code ++]
+        })),
+      ),
+    ),
 });
 ```
 

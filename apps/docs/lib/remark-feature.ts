@@ -104,13 +104,16 @@ export default defineConfig({
 `;
 
 /** builds the documents of a custom search integration in the `static.json` route */
-const customDocuments = (async: boolean) => `import { source } from '@/lib/source';
+const customDocuments = `import { source } from '@/lib/source';
 
 async function getDocuments() {
   const documents = [];
   for (const page of source.getPages()) {
     documents.push({
-      structured: ${async ? 'await page.data.structuredData()' : 'page.data.structuredData'},
+      structured:
+        typeof page.data.structuredData === 'function'
+          ? await page.data.structuredData()
+          : page.data.structuredData,
       url: page.url,
       title: page.data.title,
       description: page.data.description,
@@ -291,7 +294,7 @@ await sync(client, records);
     ]);
 
     addGroup('search/custom', framework, [
-      [routeFile, staticRoute(framework, customDocuments(source.async), 'getDocuments()')],
+      [routeFile, staticRoute(framework, customDocuments, 'getDocuments()')],
       ...registration,
       [
         'scripts/sync-content.ts',
