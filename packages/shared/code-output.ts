@@ -49,10 +49,11 @@ const markerRegex = /\0(\/?)(\d+)\0/g;
 
 /**
  * A stringifier whose output can have parts rendered from code: replacements mark them, `chunks()` splits the output on
- * their markers. Code reads the props of the page, an output with it is a function of the props.
+ * their markers. Authored expressions, the branches of `<show>` checked when rendering and code of plugins that reads
+ * `props` read render scope, an output with them is a function of the props.
  */
 export function createCodeOutput<N extends CodeNode, S extends CodeStringifier<N>>(
-  createStringifier: (expression: (code: string, fallback: string) => string) => S,
+  createStringifier: (expression: (code: string, fallback: string, reads: boolean) => string) => S,
   options: {
     /** the program of an authored expression */
     program: (node: N) => { body: unknown[] } | null | undefined;
@@ -68,15 +69,15 @@ export function createCodeOutput<N extends CodeNode, S extends CodeStringifier<N
     const i = parts.push(part) - 1;
     return `\0${i}\0${content}\0/${i}\0`;
   };
-  const s = createStringifier((code, fallback) => {
-    dynamic = true;
+  const s = createStringifier((code, fallback, reads) => {
+    dynamic ||= reads;
     return mark({ code, fallback });
   });
 
   return {
     s,
     wrap,
-    /** whether the output has code */
+    /** whether a marked part reads render scope */
     get dynamic() {
       return dynamic;
     },
@@ -161,6 +162,15 @@ function literalText(program: { body: unknown[] } | null | undefined): string | 
   const { value } = statement.expression;
   if (typeof value === 'string' || typeof value === 'number') return String(value);
   if (typeof value === 'boolean' || value === null) return '';
+}
+
+/** whether code reads the props of the page: an estree node with a `props` identifier */
+export function readsProps(node: unknown): boolean {
+  if (typeof node !== 'object' || node === null) return false;
+  if ('type' in node && node.type === 'Identifier' && 'name' in node && node.name === 'props')
+    return true;
+  for (const value of Object.values(node)) if (readsProps(value)) return true;
+  return false;
 }
 
 /** the condition of a branch of `<show>` checked when rendering */

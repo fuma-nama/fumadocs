@@ -87,9 +87,7 @@ test('Remark LLMs: URLs of imported images', async () => {
 
   const expected =
     '![Test](</test/fixtures/test.png> "A \\"title\\"")\n\n![Public](/remark-image.svg)';
-  // the URLs are code, both forms are components
-  for (const output of ['string', 'function'] as const) {
-    const Md = (await load(output)) as FC;
-    await expect(renderToMarkdown(<Md />)).resolves.toBe(expected);
-  }
+  await expect(load('string')).resolves.toBe(`${expected}\n`);
+  const Md = (await load('function')) as FC;
+  await expect(renderToMarkdown(<Md />)).resolves.toBe(expected);
 });

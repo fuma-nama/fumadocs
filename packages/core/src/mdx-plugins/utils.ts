@@ -7,7 +7,10 @@ import acornJsx from 'acorn-jsx';
 import type Hast from 'hast';
 import type { VFile } from 'vfile';
 import { createStringifier, type Stringifier } from './stringifier';
-import { createCodeOutput as createSharedCodeOutput } from '../../../shared/code-output';
+import {
+  createCodeOutput as createSharedCodeOutput,
+  readsProps,
+} from '../../../shared/code-output';
 
 export function isJsxElement(node: Nodes): node is MdxJsxFlowElement | MdxJsxTextElement {
   return node.type === 'mdxJsxFlowElement' || node.type === 'mdxJsxTextElement';
@@ -122,7 +125,7 @@ export function createCodeOutput(file: VFile, namespace?: string) {
   const out = createSharedCodeOutput<Nodes, Stringifier>(
     (expression) =>
       (stringifier = createStringifier(file, namespace, (value, fallback) =>
-        expression(`_fumadocs${expressions.push(value) - 1}`, fallback),
+        expression(`_fumadocs${expressions.push(value) - 1}`, fallback, readsProps(value)),
       )),
     {
       program: (node) => (node.data && 'estree' in node.data ? node.data.estree : undefined),
