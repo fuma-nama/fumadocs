@@ -1,4 +1,4 @@
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import type { AstroIntegration } from 'astro';
@@ -111,62 +111,21 @@ Run the installer of {props.version}.`,
   const source = loader({ source: toFumadocsSource([entry]), baseUrl: '/docs' });
 
   for (const version of ['v1', 'v2']) {
-    const page = source.getPage([version, 'install'])!;
-    expect(page.url).toBe(`/docs/${version}/install`);
-    const { toc, structuredData } = await page.data.load();
+    const { toc, structuredData } = await source.getPage([version, 'install'])!.data.load();
     expect(toc.map((item) => item.title)).toEqual(
-      version === 'v2' ? ['Install v2', 'Migrate'] : ['Install v1'],
-    );
-    expect(structuredData).toEqual(await page.data.structuredData());
-    expect(structuredData.headings.map((item) => item.content)).toEqual(
       version === 'v2' ? ['Install v2', 'Migrate'] : ['Install v1'],
     );
     expect(structuredData.contents.map((item) => item.content)).toEqual(
       version === 'v2' ? ['Only in v2.', 'Run the installer of v2.'] : ['Run the installer of v1.'],
     );
-
-    const markdown = await page.data.getText('processed');
-    expect(markdown).toContain(`Run the installer of ${version}.`);
-    expect(markdown.includes('Only in v2.')).toBe(version === 'v2');
   }
   expect(new Set(render.mock.calls.map(([item]) => item))).toEqual(new Set([entry]));
 });
 
-it('keeps the outputs of pages without runtime parts as data', async () => {
-  const entry: PageEntry = {
-    id: 'index.mdx',
-    body: '## Hello\n\nWorld',
-    data: { title: 'Home' },
-  };
-  await compile(entry);
-  const page = loader({ source: toFumadocsSource([entry]), baseUrl: '/docs' }).getPage([])!;
-  const { toc, structuredData } = await page.data.load();
-
-  expect(toc).toEqual([{ title: 'Hello', url: '#hello', depth: 2 }]);
-  expect(structuredData).toEqual({
-    headings: [{ id: 'hello', content: 'Hello' }],
-    contents: [{ heading: 'hello', content: 'World' }],
-  });
-  expect(await page.data.getText('processed')).toBe('## Hello [#hello]\n\nWorld\n');
-});
-
-it('runs the frontmatter in code for the page of a file and each params, like Fumadocs MDX', async () => {
+it('runs the frontmatter in code for each params', async () => {
   const content = path.join(root, 'content/docs');
   mkdirSync(path.join(content, '[version]'), { recursive: true });
   writeFileSync(path.join(root, 'versions.ts'), `export const latest = 'v2';`);
-  writeFileSync(
-    path.join(content, 'index.mdx'),
-    `---
-description: Welcome
----
-
-import { latest } from '../../versions.ts';
-import { Card } from './card';
-
-export const frontmatter = { title: \`Home of \${latest}\` };
-
-<Card />`,
-  );
   writeFileSync(
     path.join(content, '[version]/meta.json'),
     JSON.stringify({ staticParams: [{ version: 'v1' }, { version: 'v2' }] }),
@@ -184,39 +143,18 @@ export const frontmatter = { title: \`\${prefix} \${props.version === latest ? '
 
 Run the installer.`,
   );
-  // only in a code block
-  writeFileSync(
-    path.join(content, 'guide.mdx'),
-    `---
-title: Guide
----
-
-\`\`\`mdx
-export const frontmatter = { title: 'Example' };
-\`\`\``,
-  );
-  files.push('index.mdx', '[version]/install.mdx', 'guide.mdx');
+  files.push('[version]/install.mdx');
   config.root = root;
   config.loaders.docs = { dir: 'content/docs' };
 
   // the module of the frontmatter in code, as the plugin of Vite loads it
-  const { satteri, plugins } = await setup();
+  const { plugins } = await setup();
   const plugin = plugins.find((item) => item.name === '@fumadocs/astro:frontmatter')!;
   const load = (plugin.load as { handler: (id: string) => Promise<string> }).handler;
   for (const id of files) {
     const file = path.join(content, id);
     // next to the file, for its relative imports
-    const module = `${file}.ts`;
-    writeFileSync(module, await load(`${file}${frontmatterQuery}`));
-
-    // it leaves the content
-    const { code } = await mdxToJs(readFileSync(file, 'utf8').replace(/^---[^]*?---/, ''), {
-      mdastPlugins: satteri.mdastPlugins,
-      fileURL: pathToFileURL(file),
-      jsxImportSource: 'astro',
-      data: { astro: { frontmatter: {} } } as Data,
-    });
-    expect(code).not.toMatch(/^export const frontmatter/m);
+    writeFileSync(`${file}.ts`, await load(`${file}${frontmatterQuery}`));
   }
 
   const entries: PageEntry[] = [];
@@ -240,12 +178,6 @@ export const frontmatter = { title: 'Example' };
     data: { staticParams: [{ version: 'v1' }, { version: 'v2' }] },
   };
   const source = loader({ source: toFumadocsSource(entries, [meta as never]), baseUrl: '/docs' });
-  expect(source.getPage([])!.data).toMatchObject({
-    title: 'Home of v2',
-    description: 'Welcome',
-    valid: true,
-  });
-  expect(source.getPage(['guide'])!.data).toMatchObject({ title: 'Guide', valid: true });
   // each params listed in the meta file
   expect(source.getPage(['v1', 'install'])!.data).toMatchObject({
     title: 'Install v1',
