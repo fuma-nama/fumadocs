@@ -100,11 +100,8 @@ async function listParams(
   // `glob()` parses files with them, they aren't in the type of the context
   const { entryTypes } = context as LoaderContext & { entryTypes: Map<string, DataEntryType> };
   const lists = new Map<string, Params[] | undefined>();
-  // the meta files that it reads, then their contents
-  getStaticParams(file, {
-    staticParams,
-    readStaticParams: (meta) => void lists.set(meta, undefined),
-  });
+  // the meta files that it reads, without its own list as it can lack the names they list, then their contents
+  getStaticParams(file, { readStaticParams: (meta) => void lists.set(meta, undefined) });
   for (const meta of lists.keys())
     for (const ext of ['.json', '.yaml']) {
       const fileUrl = pathToFileURL(path.join(base, meta + ext));

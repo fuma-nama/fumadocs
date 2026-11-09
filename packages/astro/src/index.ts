@@ -132,20 +132,20 @@ function frontmatterCode(onModule?: (module: string) => void): MdastPluginInput 
         const { value } = node;
         let body = '';
         const declarations: Node[] = [];
-        for (const statement of parse(value, { lang: 'tsx' }).program.body) {
+        const statements = parse(value, { lang: 'tsx' }).program.body;
+        // imports are hoisted, the frontmatter can read those after it
+        for (const statement of statements)
           if (statement.type === 'ImportDeclaration')
             imports.push([statement, value.slice(statement.start, statement.end)]);
+        for (const statement of statements) {
           if (statement.type !== 'ExportNamedDeclaration' || !statement.declaration) continue;
           const { declaration } = statement;
           body += `${value.slice(declaration.start, declaration.end)}\n`;
           declarations.push(declaration);
-          if (
-            declaration.type !== 'VariableDeclaration' ||
-            !declaration.declarations.some(
-              (item) => item.id.type === 'Identifier' && item.id.name === 'frontmatter',
-            )
-          )
-            continue;
+          if (declaration.type !== 'VariableDeclaration') continue;
+          // first, as `hasFrontmatterCode()` detects it
+          const [first, second] = declaration.declarations;
+          if (first.id.type !== 'Identifier' || first.id.name !== 'frontmatter') continue;
 
           const names = new Set<string>();
           collectNames(declarations, names);
@@ -156,7 +156,11 @@ function frontmatterCode(onModule?: (module: string) => void): MdastPluginInput 
           onModule?.(
             `${code}export function _frontmatter(props = {}) {\n${body}return frontmatter;\n}`,
           );
-          ctx.setField(node, 'value', value.slice(0, statement.start) + value.slice(statement.end));
+          // the other declarators of the statement stay in the content
+          const [start, end] = second
+            ? [first.start, second.start]
+            : [statement.start, statement.end];
+          ctx.setField(node, 'value', value.slice(0, start) + value.slice(end));
           done = true;
           return;
         }

@@ -126,8 +126,8 @@ export function createMarkdownCompiler(options?: MarkdownCompilerOptions): Markd
       outputFormat: 'function-body',
       development: false,
       remarkPlugins: plugins(
-        remarkShow,
         plugin(remarkInclude, { getProcessor }),
+        remarkShow,
         remarkGfm,
         remarkHeadingOptions !== false &&
           plugin(remarkHeading, { generateToc: false, ...remarkHeadingOptions }),
