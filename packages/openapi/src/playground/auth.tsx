@@ -241,13 +241,22 @@ export async function requestOAuthToken(
 /**
  * Finish an `implicit` or `authorizationCode` flow of `requestOAuthToken()` from the URL it returned to.
  *
- * @returns the token, `undefined` when the URL isn't returning from it
+ * @returns the token, rejected with the provider's error, `undefined` when the URL isn't returning from it
  */
 export function finishOAuthFlow(url: URL, data: unknown): Promise<string> | string | undefined {
   const flow = data as OAuthFlowData;
-  const code = url.searchParams.get('code');
-  // only accept the flow started in this tab
-  if (code && url.searchParams.get('state') === flow.state) {
+  const hash = new URLSearchParams(url.hash.slice(1));
+  // only accept the flow started in this tab, `implicit` returns in the hash
+  let params: URLSearchParams;
+  if (url.searchParams.get('state') === flow.state) params = url.searchParams;
+  else if (hash.get('state') === flow.state) params = hash;
+  else return;
+
+  const error = params.get('error');
+  if (error) return Promise.reject(oauthError(error, params.get('error_description')));
+
+  const code = params.get('code');
+  if (code) {
     const body = new URLSearchParams({
       grant_type: 'authorization_code',
       code,
@@ -257,10 +266,13 @@ export function finishOAuthFlow(url: URL, data: unknown): Promise<string> | stri
     return fetchToken(flow.token_url!, body, flow);
   }
 
-  const hash = new URLSearchParams(url.hash.slice(1));
-  const token = hash.get('access_token');
-  if (token && hash.get('state') === flow.state)
-    return `${hash.get('token_type') ?? 'Bearer'} ${token}`;
+  const token = params.get('access_token');
+  if (token) return `${params.get('token_type') ?? 'Bearer'} ${token}`;
+}
+
+/** the `error` code of OAuth 2.0 endpoints is the cause */
+function oauthError(error: string, description?: string | null): Error {
+  return new Error(description ? `${error}: ${description}` : error, { cause: error });
 }
 
 async function postForm<T>(
@@ -286,12 +298,7 @@ async function postForm<T>(
   } catch {}
   // some servers respond errors with 200
   if (res.ok && data && !data.error) return data;
-
-  let message = text;
-  if (data?.error)
-    message = data.error_description ? `${data.error}: ${data.error_description}` : data.error;
-  // the `error` code of OAuth 2.0 endpoints
-  throw new Error(message, { cause: data?.error });
+  throw data?.error ? oauthError(data.error, data.error_description) : new Error(text);
 }
 
 async function fetchToken(
