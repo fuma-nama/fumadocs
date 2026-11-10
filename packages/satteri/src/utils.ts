@@ -15,14 +15,6 @@ import {
 } from '../../shared/code-output';
 import { createStringifier, offsets, type PositionedNode, type Stringifier } from './stringifier';
 
-export interface JsxElementNode {
-  name?: string | null;
-  attributes: (
-    | { type: 'mdxJsxAttribute'; name: string; value?: string | { value: string } | null }
-    | { type: 'mdxJsxExpressionAttribute'; value: string }
-  )[];
-}
-
 /**
  * Flatten a node's text content by walking it in JavaScript.
  *

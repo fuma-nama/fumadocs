@@ -7,7 +7,7 @@ import { toHtmlTag } from './code-output';
 import { toStructuredData } from './structured-records';
 
 /** a record of structured data that `remarkStructure` exports for props, a heading has an `id` */
-export interface StructuredRecord extends Partial<Omit<StructuredDataContent, 'content'>> {
+interface StructuredRecord extends Partial<Omit<StructuredDataContent, 'content'>> {
   id?: string;
   content: ReactNode;
 }

@@ -11,14 +11,14 @@ import { createLocalSource, type SourceFile } from '@fumadocs/local-content';
 export const defaultInclude = ['**/*.{md,mdx,json}', '**/meta{,.*}.{js,ts}'];
 
 /** a compiled Markdown file */
-export interface MarkdownRendererBase {
+interface MarkdownRendererBase {
   /** the structured data of the authored source, every branch */
   structuredData: StructuredData;
   render: () => Promise<{ exports: Record<string, unknown> }>;
 }
 
 /** a Markdown file with its frontmatter, `code` when it has frontmatter in code */
-export interface ParsedMarkdown {
+interface ParsedMarkdown {
   data: unknown;
   content: string;
   code: boolean;
@@ -35,7 +35,7 @@ export interface MarkdownPage<Frontmatter, Renderer> extends PageData {
   structuredData: () => Promise<StructuredData>;
 }
 
-export interface MarkdownSourceConfig<
+interface MarkdownSourceConfig<
   FrontmatterSchema extends StandardSchemaV1,
   MetaSchema extends StandardSchemaV1,
   Renderer extends MarkdownRendererBase,
