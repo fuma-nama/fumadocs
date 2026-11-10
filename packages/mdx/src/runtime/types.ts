@@ -39,7 +39,7 @@ export interface FileInfo {
 
 export interface GetTextOptions {
   /**
-   * MDX components for JSX elements in the output, with the runtime analysis of `includeProcessedMarkdown`.
+   * MDX components for JSX elements in the output, when processed Markdown is a component.
    *
    * @deprecated pass them as page props, with the `props` option of `getPage()`
    */

@@ -44,7 +44,7 @@ interface RecordOutput<N> {
   componentsCode(scope: () => ReadonlySet<string>, from: string): string;
 }
 
-export interface StructuredRecordsOptions<N> {
+interface StructuredRecordsOptions<N> {
   /** whether a node is a record */
   isType: (node: N) => boolean;
   /** whether a JSX element with content on several lines is a record as a whole */

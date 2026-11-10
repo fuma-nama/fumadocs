@@ -154,19 +154,12 @@ export function server<Config, TC extends InternalTypeConfig>() {
       const out = await Promise.all(
         Object.entries(head).map(async ([k, v]) => {
           const data = typeof v === 'function' ? await v() : v;
-          const content = body[k] as Content;
-
-          return {
-            ...data,
-            ...createDocMethods(fileInfo(k, base), async () => pageAt(await content(), {})),
-            async load() {
-              return loadDocData(await content(), {});
-            },
-            async structuredData() {
-              return loadStructuredData(await content(), {});
-            },
-            _content: content,
-          } satisfies AsyncDocCollectionEntry;
+          // the entry of a file is its page without props
+          return createDocAt<AsyncDocCollectionEntry>(
+            { info: fileInfo(k, base), _content: body[k] as Content },
+            {},
+            data,
+          );
         }),
       );
 
@@ -315,7 +308,7 @@ export function docAt<Doc extends DocMethods>(doc: Doc, params: Params): Doc {
   if (!page) {
     // the frontmatter in code of each params
     const frontmatter = (doc as { _frontmatterAt?: Record<string, object> })._frontmatterAt?.[key];
-    pages.set(key, (page = createDocAt(doc, params, merge(doc, frontmatter))));
+    pages.set(key, (page = createDocAt<Doc>(doc, params, merge(doc, frontmatter))));
   }
   return page;
 }
@@ -334,21 +327,19 @@ function dataAt<Meta>(entry: Meta): ((params: Params) => Meta) | undefined {
  *
  * @param base - the data of the page that the content and outputs replace
  */
-function createDocAt<Doc extends DocMethods>(
-  doc: Doc,
-  props: Record<string, unknown>,
-  base: Doc,
-): Doc {
+function createDocAt<Doc>(
   // eager entries have the exports, lazy entries load them
-  const { _exports: exports, _content: content } = doc as {
-    _exports?: CompiledMDXProperties;
-    _content?: Content;
-  };
+  doc: Pick<DocMethods, 'info'> & { _exports?: unknown; _content?: Content },
+  props: Record<string, unknown>,
+  base: object,
+): Doc {
+  const { _content: content } = doc;
+  const exports = doc._exports as CompiledMDXProperties;
   if (!content) {
-    const page = pageAt(exports!, props);
+    const page = pageAt(exports, props);
     return merge(
       base,
-      toDocData(page, exports!),
+      toDocData(page, exports),
       createDocMethods(doc.info, () => page),
     );
   }
@@ -360,6 +351,7 @@ function createDocAt<Doc extends DocMethods>(
   return {
     ...base,
     ...createDocMethods(doc.info, loadPage),
+    _content: content,
     // memoized, it can be called in render
     load: () => (data ??= content().then((v) => loadDocData(v, props))),
     structuredData: async () => loadStructuredData(await content(), props),
@@ -368,7 +360,7 @@ function createDocAt<Doc extends DocMethods>(
       // like the body of the macro, it renders synchronously when loaded
       body: (props: MDXProps) => createElement((loaded ?? use(loadPage())).default, props),
     }),
-  };
+  } as Doc;
 }
 
 function createDocMethods(

@@ -21,7 +21,7 @@ export interface KeptElement {
 }
 
 /** Markdown and the parts of it rendered from code, the content of branches and elements as chunks */
-export type Chunk =
+type Chunk =
   | string
   | Extract<CodePart, { code: string }>
   | (Exclude<CodePart, { code: string }> & { children: Chunk[] });

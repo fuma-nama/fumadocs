@@ -56,7 +56,7 @@ export type AstroPageData<Entry extends PageEntry = PageEntry> = Entry['data'] &
 
 export interface GetTextOptions {
   /**
-   * MDX components for JSX elements in the output, with the runtime analysis of `includeProcessedMarkdown`.
+   * MDX components for JSX elements in the output, when processed Markdown is a component.
    *
    * @deprecated pass them as page props, with the `props` option of `getPage()`
    * @defaultValue the MDX components of the collection
