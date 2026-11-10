@@ -80,10 +80,10 @@ export default defineConfig({
 
 ## Components
 
-The records of kept JSX elements depend on the collection:
+The records of kept JSX elements depend on how you read them:
 
-- Sync collections: `page.data.structuredData` is an object, read without rendering. Kept elements are HTML tags, which search dialogs render as components.
-- Collections with `async` or `dynamic`: `await page.data.structuredData()` renders the records like [processed Markdown](/docs/headless/mdx/remark-llms#jsx-elements), and kept elements give their Markdown form.
+- `page.data.structuredData` is an object, read without rendering. Kept elements are HTML tags, which search dialogs render as components. Sync collections have it, and so does a page loaded from a collection with `async` or `dynamic`.
+- `await page.data.structuredData()` renders the records like [processed Markdown](/docs/headless/mdx/remark-llms#jsx-elements), for the [`search` target](/docs/headless/utils/markdown#targets): kept elements give their Markdown form. Collections with `async` or `dynamic` have it.
 
 When rendering, components resolve like in MDX: a name that the file imports or declares is that variable, and other names come from the MDX components in the [page props](/docs/headless/source-api#custom-props). Search reads pages from `getPages()`, which only have their path params, so a component that search should render is imported or declared in the file. It puts its text in search by defining its Markdown form with [`asMarkdown()`](/docs/headless/utils/markdown#asmarkdown):
 
