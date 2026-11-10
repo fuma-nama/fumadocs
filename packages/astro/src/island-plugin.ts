@@ -7,7 +7,7 @@ import type {
 } from 'satteri';
 import type { Program } from 'estree-jsx';
 import { parse, type JSXElement, type JSXFragment, type Node } from 'yuku-parser';
-import { showElement } from '../../shared/show';
+import { showCondition } from '../../shared/show';
 
 const islandName = '_FumadocsIsland';
 
@@ -129,13 +129,8 @@ function serialize(nodes: HastNode[], locals: Set<string>) {
       case 'mdxJsxTextElement': {
         const { name } = node;
         // a `<show>` branch checked when rendering, its content stays in the island
-        if (name === showElement) {
-          const when = node.attributes.find(
-            (attribute) => attribute.type === 'mdxJsxAttribute' && attribute.name === 'when',
-          )?.value;
-          const condition = typeof when === 'object' && when ? expression(when.value) : 'true';
-          return `...((${condition}) ? [${list(node.children).slice(1)}] : [])`;
-        }
+        const when = showCondition(node);
+        if (when) return `...((${expression(when)}) ? [${list(node.children).slice(1)}] : [])`;
         // a heading with its ID from code, see `rehypeHeadingIds`
         if (name && /^h[1-6]$/.test(name))
           return `[${JSON.stringify(name)},${attributes(node)}${list(node.children)}]`;
