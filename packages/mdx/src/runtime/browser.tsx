@@ -2,6 +2,7 @@ import { type ReactNode, type FC, use } from 'react';
 import type { StandardSchemaV1 } from '@standard-schema/spec';
 import type { DocCollection, DocsCollection } from '@/config/define';
 import type { CompiledMDXProperties } from '@/loaders/mdx/build';
+import type { Params } from 'fumadocs-core/source';
 import type { InternalTypeConfig } from './types';
 import { pageAt, type PageAt } from '@/utils/page';
 
@@ -26,18 +27,19 @@ export interface ClientLoaderOptions<Doc, Props> {
   component: (loaded: Doc, props: Props) => ReactNode;
 }
 
+/** `params`: for a file of a dynamic path, the params of the page, like `page.params` of the loader */
 export interface ClientLoader<Doc, Props> {
-  preload: (path: string) => Promise<Doc>;
+  preload: (path: string, params?: Params) => Promise<Doc>;
   /**
    * Get a component that renders content with `use()`.
    */
-  getComponent: (path: string) => FC<Props>;
+  getComponent: (path: string, params?: Params) => FC<Props>;
   /**
    * Get react nodes that renders content.
    */
   useContent: undefined extends Props
-    ? (path: string, props?: Props) => ReactNode
-    : (path: string, props: Props) => ReactNode;
+    ? (path: string, props?: Props, params?: Params) => ReactNode
+    : (path: string, props: Props, params?: Params) => ReactNode;
 }
 
 export type BrowserCreate<Config, TC extends InternalTypeConfig> = ReturnType<
@@ -102,39 +104,41 @@ export function createClientLoader<
     loaders.set(k.startsWith('./') ? k.slice(2) : k, globEntries[k]);
   }
 
-  /** the page of a path, its outputs resolved */
-  async function load(path: string): Promise<PageAt<Doc>> {
+  /** a page is its file at its params, the same page for the same params */
+  const keyOf = (path: string, params?: Params) =>
+    params ? `${path}?${JSON.stringify(params)}` : path;
+
+  async function load(path: string, params: Params = {}): Promise<PageAt<Doc>> {
     const loader = loaders.get(path);
     if (!loader)
       throw new Error(`[createClientLoader] ${path} does not exist in available entries`);
-    return pageAt(await loader(), {});
+    return pageAt(await loader(), params);
   }
 
-  function getRenderer(path: string): FC<Props> {
-    if (path in renderers) return renderers[path];
+  function getRenderer(path: string, params?: Params): FC<Props> {
+    const key = keyOf(path, params);
+    if (key in renderers) return renderers[key];
 
     let promise: Promise<PageAt<Doc>> | undefined;
     function Renderer(props: Props) {
-      let doc = store.preloaded.get(path) as PageAt<Doc> | undefined;
-      doc ??= use((promise ??= load(path)));
+      let doc = store.preloaded.get(key) as PageAt<Doc> | undefined;
+      doc ??= use((promise ??= load(path, params)));
 
       return useRenderer(doc, props);
     }
 
-    return (renderers[path] = Renderer);
+    return (renderers[key] = Renderer);
   }
 
   return {
-    async preload(path) {
-      const loaded = await load(path);
-      store.preloaded.set(path, loaded as never);
+    async preload(path, params) {
+      const loaded = await load(path, params);
+      store.preloaded.set(keyOf(path, params), loaded as never);
       return loaded;
     },
-    getComponent(path) {
-      return getRenderer(path);
-    },
-    useContent(path: string, props: Props & object) {
-      const Comp = getRenderer(path);
+    getComponent: getRenderer,
+    useContent(path: string, props: Props & object, params?: Params) {
+      const Comp = getRenderer(path, params);
       return <Comp {...props} />;
     },
   } as ClientLoader<PageAt<Doc>, Props>;
