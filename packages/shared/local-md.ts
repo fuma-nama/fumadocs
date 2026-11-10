@@ -47,7 +47,10 @@ export interface MarkdownSourceConfig<
   frontmatterSchema?: FrontmatterSchema;
   metaSchema?: MetaSchema;
   /** compile a file once, the renderer of each page reads its params as props */
-  compile: (file: SourceFile, parsed: ParsedMarkdown) => Promise<(props?: Params) => Renderer>;
+  compile: (
+    file: SourceFile,
+    parsed: ParsedMarkdown,
+  ) => Promise<(props?: Record<string, unknown>) => Renderer>;
 }
 
 /**
@@ -72,7 +75,10 @@ export function createMarkdownSource<
   type Meta = StandardSchemaV1.InferOutput<MetaSchema> & MetaData;
 
   /** compiled once per parsed file, which is cached until the file changes */
-  const compiled = new WeakMap<ParsedMarkdown, Promise<(props?: Params) => Renderer>>();
+  const compiled = new WeakMap<
+    ParsedMarkdown,
+    Promise<(props?: Record<string, unknown>) => Renderer>
+  >();
   function compiledOf(file: SourceFile, parsed: ParsedMarkdown) {
     let out = compiled.get(parsed);
     if (!out) compiled.set(parsed, (out = compile(file, parsed)));
@@ -88,13 +94,34 @@ export function createMarkdownSource<
     throw new Error(`invalid data in "${file.absolutePath}": ${issues.join('\n')}`);
   }
 
+  /** the content and outputs of a file for props: its params, and the custom props of `getPage()` */
+  function bind(file: SourceFile, parsed: ParsedMarkdown, props?: Record<string, unknown>) {
+    let loaded: Promise<Renderer> | undefined;
+    const load = () => (loaded ??= compiledOf(file, parsed).then((create) => create(props)));
+    return {
+      load,
+      async structuredData() {
+        const renderer = await load();
+        // Markdown has no code, and rendering it renders the body
+        if (!file.path.endsWith('.mdx')) return renderer.structuredData;
+        const { structuredData } = (await renderer.render()).exports as {
+          structuredData?: StructuredRecords;
+        };
+        return structuredData
+          ? renderStructuredData(structuredData, props ?? {})
+          : renderer.structuredData;
+      },
+    };
+  }
+
   /** the page at params, the frontmatter in code runs with them, the dynamic file itself has none */
   async function page(file: SourceFile, parsed: ParsedMarkdown, params?: Params): Promise<Page> {
-    let loaded: Promise<Renderer> | undefined;
-    const load = () => (loaded ??= compiledOf(file, parsed).then((create) => create(params)));
+    const bound = bind(file, parsed, params);
     let frontmatter = parsed.data as Frontmatter;
     if (!parsed.code || params || !isDynamicPath(file.path)) {
-      const code = parsed.code ? (await (await load()).render()).exports.frontmatter : undefined;
+      const code = parsed.code
+        ? (await (await bound.load()).render()).exports.frontmatter
+        : undefined;
       frontmatter = await validate(frontmatterSchema, file, {
         ...(parsed.data as object),
         ...(code as object),
@@ -112,18 +139,7 @@ export function createMarkdownSource<
 
       content: parsed.content,
       frontmatter,
-      load,
-      async structuredData() {
-        const renderer = await load();
-        // Markdown has no code, and rendering it renders the body
-        if (!file.path.endsWith('.mdx')) return renderer.structuredData;
-        const { structuredData } = (await renderer.render()).exports as {
-          structuredData?: StructuredRecords;
-        };
-        return structuredData
-          ? renderStructuredData(structuredData, params ?? {})
-          : renderer.structuredData;
-      },
+      ...bound,
     };
   }
 
@@ -166,7 +182,11 @@ export function createMarkdownSource<
             return {
               type: 'page',
               data: await page(file, parsed),
-              dataAt: (params) => page(file, parsed, params),
+              // the file is compiled once, custom props only bind its content and outputs
+              dataAt: (params, custom) =>
+                custom
+                  ? { ...custom.data, ...bind(file, parsed, { ...params, ...custom.props }) }
+                  : page(file, parsed, params),
             };
           }
         }

@@ -243,7 +243,7 @@ export default ({ framework }: { framework: string }) => ({ title: \`Framework \
     );
     await fs.writeFile(
       path.join(dir, '[framework]/deploy.mdx'),
-      '---\ntitle: Deploy\n---\n\nexport const frontmatter = { description: `Deploy on ${props.framework}` };\n',
+      '---\ntitle: Deploy\n---\n\nexport const frontmatter = { description: `Deploy on ${props.framework}` };\n\n## {props.version} on {props.framework}\n',
     );
     await fs.writeFile(
       path.join(dir, 'index.mdx'),
@@ -263,6 +263,18 @@ export default ({ framework }: { framework: string }) => ({ title: \`Framework \
     expect(source.getPageTree().children.map((node) => node.name)).toContain('Framework waku');
     expect(source.getPage(['waku', 'waku'])?.data.title).toBe('WAKU');
     expect(source.getPage(['next', 'waku'])).toBeUndefined();
+
+    // custom props bind the content and outputs of the page, with its params
+    const custom = source.getPage(['waku', 'deploy'], { props: { version: 'v2' } })!;
+    expect(custom.data.description).toBe('Deploy on waku');
+    const rendered = await (await custom.data.load()).render();
+    expect(serializeToc(rendered.toc)).toEqual([
+      { url: '#v2-on-waku', depth: 2, _step: undefined, titleHtml: 'v2 on waku' },
+    ]);
+    expect(renderToStaticMarkup(rendered.body)).toBe('<h2 id="v2-on-waku">v2 on waku</h2>');
+    expect((await custom.data.structuredData()).headings).toEqual([
+      { id: 'v2-on-waku', content: 'v2 on waku' },
+    ]);
 
     // the schema validates the YAML of each params once
     const exclaim: StandardSchemaV1<unknown, Record<string, unknown>> = {

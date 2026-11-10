@@ -102,8 +102,11 @@ export function createLocalSource<Page extends PageData, Meta extends MetaData>(
             if (!cache.has(key)) cache.set(key, await dataAt(item));
           }),
         );
-        // the data of the type of the file
-        v.dataAt = ((item: Params) => cache.get(JSON.stringify(item))) as never;
+        // the data of the type of the file, custom props are bound when a page is requested
+        v.dataAt = ((item: Params, custom?: { props: Record<string, unknown>; data: Page }) =>
+          custom && parsed.type === 'page'
+            ? dataAt(item, custom as never)
+            : cache.get(JSON.stringify(item))) as never;
         return v;
       }),
     );
