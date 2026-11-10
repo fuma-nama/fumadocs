@@ -301,6 +301,30 @@ interface StructuredHeading {
   content: string;
 }
 
+/**
+ * Structured data from its records in document order and their content as text: content goes under the last heading
+ * before it, records are trimmed and empty ones are left out.
+ */
+export function toStructuredData(
+  records: readonly { id?: string; heading?: string; table?: string }[],
+  contents: string[],
+) {
+  const data = {
+    contents: [] as StructuredContent[],
+    headings: [] as { id: string; content: string }[],
+  };
+  let heading: string | undefined;
+  for (let i = 0; i < records.length; i++) {
+    const { id, table, heading: own = heading } = records[i];
+    const content = contents[i].trim();
+    if (id !== undefined) heading = id;
+    if (!content) continue;
+    if (id !== undefined) data.headings.push({ id, content });
+    else data.contents.push(table ? { heading: own, content, table } : { heading: own, content });
+  }
+  return data;
+}
+
 /** the records of structured data in document order, their content with the markers of code */
 export function createStructuredRecords() {
   const records: ((StructuredHeading | StructuredContent) & { when: string[] })[] = [];
@@ -311,23 +335,9 @@ export function createStructuredRecords() {
     push: (item: StructuredHeading | StructuredContent, when: string[] = []) =>
       records.push({ ...item, when }),
     toStatic(out: Output) {
-      const data = {
-        contents: [] as StructuredContent[],
-        headings: [] as { id: string; content: string }[],
-      };
-      let heading: string | undefined;
-      for (const record of records) {
-        const content = out.toStatic(record.content);
-        if ('id' in record) {
-          heading = record.id;
-          if (content) data.headings.push({ id: record.id, content });
-          continue;
-        }
-        const item: StructuredContent = { heading: record.heading ?? heading, content };
-        if (record.table) item.table = record.table;
-        data.contents.push(item);
-      }
-      return data;
+      const contents: string[] = [];
+      for (const record of records) contents.push(out.toStatic(record.content));
+      return toStructuredData(records, contents);
     },
     /** the code of the runtime records, a function of the props giving the records that show, see `renderStructuredData()` */
     toCode(out: Output): string {

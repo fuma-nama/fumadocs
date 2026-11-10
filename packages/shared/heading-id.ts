@@ -6,6 +6,22 @@ export const headingIdRegex = /\s*\[#(?<slug>[^]+?)]\s*$/;
 /** the element that `remarkHeading` wraps a heading in to give it an ID from code, `HeadingId` of the runtime */
 export const headingIdElement = '_HeadingId';
 
+/** the element of a heading with its ID from code, the heading goes in its children */
+export function headingIdWrapper(code: string) {
+  return {
+    type: 'mdxJsxFlowElement' as const,
+    name: headingIdElement,
+    attributes: [
+      {
+        type: 'mdxJsxAttribute' as const,
+        name: 'id',
+        value: { type: 'mdxJsxAttributeValueExpression' as const, value: code },
+      },
+    ],
+    children: [],
+  };
+}
+
 /** the code of IDs from code by the static ID of their heading, in the data of a file for the plugins after `remarkHeading` */
 export type HeadingIds = Record<string, string | undefined>;
 

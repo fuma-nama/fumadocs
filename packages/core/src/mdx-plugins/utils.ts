@@ -107,10 +107,6 @@ export function toEsm(code: string, expressions: Expression[] = []): MdxjsEsm {
   return { type: 'mdxjsEsm', value: '', data: { estree: program as unknown as Program } };
 }
 
-export function parseExpression(code: string): Expression {
-  return parser.parseExpressionAt(code, 0, { ecmaVersion: 'latest' }) as unknown as Expression;
-}
-
 function fill(node: object, expressions: Expression[]) {
   const record = node as Record<string, { type?: string; name?: string } | null>;
   for (const key in record) {

@@ -1,11 +1,12 @@
 import Slugger from 'github-slugger';
 import type { Heading, Root, RootContent } from 'mdast';
 import type { Transformer } from 'unified';
+import type { MdxJsxAttributeValueExpression, MdxJsxFlowElement } from 'mdast-util-mdx';
 import type { TOCItemType } from '@/toc';
 import { flattenNode, toEsm } from '@/mdx-plugins/utils';
 import type { Analysis } from '@/mdx-plugins/stringifier';
 import { showCondition } from '../../../shared/code-output';
-import { headingIdCode, headingIdElement, headingIdRegex } from '../../../shared/heading-id';
+import { headingIdCode, headingIdRegex, headingIdWrapper } from '../../../shared/heading-id';
 
 export interface RemarkHeadingOptions {
   slug?: (root: Root, heading: Heading, text: string) => string;
@@ -77,22 +78,9 @@ export function remarkHeading({
         const code = assign(heading, when);
         if (!code) continue;
         (file.data._headingIds ??= {})[heading.data!.hProperties!.id as string] = code;
-        nodes[i] = {
-          type: 'mdxJsxFlowElement',
-          name: headingIdElement,
-          attributes: [
-            {
-              type: 'mdxJsxAttribute',
-              name: 'id',
-              value: {
-                type: 'mdxJsxAttributeValueExpression',
-                value: code,
-                data: { estree: toEsm(code).data!.estree },
-              },
-            },
-          ],
-          children: [heading],
-        };
+        const wrapper: MdxJsxFlowElement = { ...headingIdWrapper(code), children: [heading] };
+        (wrapper.attributes[0].value as MdxJsxAttributeValueExpression).data = toEsm(code).data;
+        nodes[i] = wrapper;
       }
     };
     /** @returns the code of its ID, when it renders from code */
