@@ -79,7 +79,7 @@ export async function buildJSMDX(
     path: filePath,
     cwd: collection?.cwd,
     // the outputs of a page in a collection render for its props
-    data: { frontmatter, _compiler, _analysis: collection && 'runtime' },
+    data: { frontmatter, _compiler, unstable_runtimeOutputs: collection !== undefined },
   });
 
   if (collection) {

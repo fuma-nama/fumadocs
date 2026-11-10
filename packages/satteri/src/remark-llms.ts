@@ -1,7 +1,6 @@
 import type { MdastPluginEntry } from 'satteri';
 import { defineMdastPlugin } from 'satteri';
 import { offsets, type PositionedNode } from './stringifier';
-import type { Analysis } from 'fumadocs-core/mdx-plugins/stringifier';
 import { stringifyHeadingId } from '../../shared/heading-id';
 import { createCodeOutput, esmScope, type JsxElementNode } from './utils';
 import { isStaticOutput } from '../../shared/code-output';
@@ -21,9 +20,7 @@ export interface LLMsOptions {
    */
   headingIds?: boolean;
 
-  /** see `analysis` of `remarkLLMs()` from `fumadocs-core/mdx-plugins/remark-llms` */
-  analysis?: Analysis;
-  /** @deprecated use `analysis`: `string` is `static`, `function` is `runtime` */
+  /** see `output` of `remarkLLMs()` from `fumadocs-core/mdx-plugins/remark-llms` */
   output?: 'string' | 'function';
 }
 
@@ -35,7 +32,6 @@ export function remarkLlms({
   as = '_markdown',
   headingIds = true,
   output,
-  analysis = output && (output === 'string' ? 'static' : 'runtime'),
 }: LLMsOptions = {}): MdastPluginEntry {
   const factory = () => {
     let out: ReturnType<typeof createCodeOutput>;
@@ -63,7 +59,7 @@ export function remarkLlms({
       name: 'remark-llms',
       options: { position: true },
       before(_root, ctx) {
-        isStatic = isStaticOutput(analysis, ctx.data);
+        isStatic = isStaticOutput(ctx.data, output && output === 'string');
         out = createCodeOutput(ctx, undefined, isStatic);
       },
       mdxjsEsm(node) {

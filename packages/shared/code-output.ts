@@ -224,19 +224,20 @@ export function showConditions(
 }
 
 /**
- * Whether an output is static. Static outputs can't tell which branches of `<show>` show, so they fail on a document
- * that `remarkShow` marked as having them.
+ * Whether an output is static, a value analysed from the source. Static outputs can't tell which branches of `<show>`
+ * show, nor read the values of props, so they fail on a document with branches.
+ *
+ * @param isStatic - whether the output is static, by default unless its source renders pages for props
  */
 export function isStaticOutput(
-  analysis: 'static' | 'runtime' | undefined,
-  data: { _analysis?: 'static' | 'runtime'; _show?: boolean },
+  data: { unstable_runtimeOutputs?: boolean; _show?: boolean },
+  isStatic = !data.unstable_runtimeOutputs,
 ): boolean {
-  if ((analysis ?? data._analysis) === 'runtime') return false;
-  if (data._show)
+  if (isStatic && data._show)
     throw new Error(
-      "`<show>` needs runtime analysis: static outputs can't tell which branches show. Set `analysis: 'runtime'` on the Fumadocs plugins of your MDX options.",
+      "`<show>` is checked when rendering, but the outputs of this document are static: its content source doesn't set `unstable_runtimeOutputs` in the data of the file, or processed Markdown has `output: 'string'`.",
     );
-  return true;
+  return isStatic;
 }
 
 /** the condition of a branch of `<show>`, checked when rendering */
@@ -288,7 +289,7 @@ export function and(conditions: string[]): string | undefined {
   if (conditions.length > 0) return `(${conditions.join(') && (')})`;
 }
 
-/** the code of an output list: a function of the props in runtime analysis */
+/** the code of an output list: a function of the props, unless static */
 export function listCode(items: { code: string; when: string[] }[], isStatic: boolean): string {
   const list = guardedArray(items);
   return isStatic ? list : `(props) => ${list}`;

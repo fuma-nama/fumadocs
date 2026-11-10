@@ -151,7 +151,7 @@ export function createMarkdownCompiler(options?: MarkdownCompilerOptions): Markd
     async compile(input) {
       const file = new VFile(input);
       // the outputs are rendered for the props of a page
-      file.data._analysis ??= 'runtime';
+      file.data.unstable_runtimeOutputs = true;
       if (file.extname === '.mdx') {
         mdx ??= createMdxCompiler();
         const out = await mdx.process(file);

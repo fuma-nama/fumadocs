@@ -1,9 +1,8 @@
 import type { Transformer } from 'unified';
-import { createCodeOutput, esmScope, isJsxElement } from './utils';
 import { isStaticOutput } from '../../../shared/code-output';
+import { createCodeOutput, esmScope, isJsxElement } from './utils';
 import type { Nodes, Root } from 'mdast';
 import type { MdxJsxFlowElement, MdxJsxTextElement } from 'mdast-util-mdx';
-import type { Analysis } from './stringifier';
 import type { PlaceholderData } from './remark-llms.runtime';
 import { stringifyHeadingId } from '../../../shared/heading-id';
 
@@ -39,15 +38,15 @@ export interface LLMsOptions {
   mdxAsPlaceholder?: string[];
 
   /**
-   * A runtime export is a component, render it with `renderToMarkdown` from `fumadocs-core/server`: JSX elements are
-   * kept as JSX, receiving their original props and resolving from `props.components`, a component can call
-   * `asMarkdown()` to define its own Markdown form. A static export is a string.
+   * Form of the export:
    *
-   * @defaultValue the analysis of the content source, or `static`
+   * - `string`: the output Markdown, authored expressions keep their source.
+   * - `function`: a component, render it with `renderToMarkdown` from `fumadocs-core/server`: JSX elements are kept
+   *   as JSX, receiving their original props and resolving like in the content, a component can call `asMarkdown()`
+   *   to define its own Markdown form.
+   *
+   * @defaultValue `function` for a content source that renders pages for props, otherwise `string`
    */
-  analysis?: Analysis;
-
-  /** @deprecated use `analysis`: `string` is `static`, `function` is `runtime` */
   output?: 'string' | 'function';
 
   /**
@@ -70,11 +69,10 @@ export function remarkLLMs({
   _data = false,
   mdxAsPlaceholder,
   output,
-  analysis = output && (output === 'string' ? 'static' : 'runtime'),
   filterElement,
 }: LLMsOptions = {}): Transformer<Root, Root> {
   return (tree, file) => {
-    const isStatic = isStaticOutput(analysis, file.data);
+    const isStatic = isStaticOutput(file.data, output && output === 'string');
     const out = createCodeOutput(file, undefined, isStatic);
     const { s } = out;
 

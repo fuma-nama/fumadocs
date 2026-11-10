@@ -68,7 +68,7 @@ test('Remark LLMs: heading IDs', async () => {
     const result = await remark()
       .use(remarkMdx)
       .use(remarkHeading)
-      .use(remarkLLMs, { _data: true, analysis: 'static', headingIds })
+      .use(remarkLLMs, { _data: true, headingIds })
       .process('# Title\n\n## Custom [#custom]\n');
     return result.data.markdown;
   };
@@ -95,10 +95,7 @@ test('Remark Mdx Files: auto files in Markdown output', async () => {
     path: path.resolve(cwd, './fixtures/page.mdx'),
     value: '<auto-files dir="page-trees" pattern="basic.tree.json" />\n',
   });
-  const processor = remark()
-    .use(remarkMdx)
-    .use(remarkMdxFiles)
-    .use(remarkLLMs, { _data: true, analysis: 'static' });
+  const processor = remark().use(remarkMdx).use(remarkMdxFiles).use(remarkLLMs, { _data: true });
   await processor.run(processor.parse(file), file);
 
   expect(file.data.markdown).toBe('```\nbasic.tree.json\n```\n');
@@ -227,7 +224,7 @@ test('Remark Steps: tags in search records only', async () => {
     .use(remarkHeading)
     .use(remarkSteps)
     .use(remarkStructure)
-    .use(remarkLLMs, { _data: true, analysis: 'static' });
+    .use(remarkLLMs, { _data: true });
   await processor.run(processor.parse(file), file);
 
   expect(file.data.structuredData).toEqual({
@@ -400,7 +397,6 @@ test('Remark LLMs: filterElement', async () => {
     .use(remarkMdx)
     .use(remarkLLMs, {
       _data: true,
-      analysis: 'static',
       filterElement(node) {
         if (node.type !== 'mdxJsxFlowElement' && node.type !== 'mdxJsxTextElement') return true;
         return node.name !== 'Callout';
@@ -465,7 +461,6 @@ test('Remark LLMs: keep the authored source', async () => {
     .use(remarkNpm)
     .use(remarkLLMs, {
       _data: true,
-      analysis: 'static',
       mdxAsPlaceholder: ['Callout'],
       filterElement: (node) =>
         node.type !== 'mdxJsxFlowElement' || node.name !== 'Unwrap' || 'children-only',
@@ -512,7 +507,7 @@ test('Remark LLMs: ignore generated nodes', async () => {
       .use(remarkMdx)
       .use(() => plugin)
       .use(remarkHeading)
-      .use(remarkLLMs, { _data: true, analysis: 'static' })
+      .use(remarkLLMs, { _data: true })
       .process('# Title\n\nFirst paragraph.\n\n## Section\n\nLast paragraph.\n');
     return result.data.markdown;
   };
@@ -543,7 +538,7 @@ test('Remark LLMs: nested replacements', async () => {
       .use(remarkMdx)
       .use(() => plugin)
       .use(remarkHeading)
-      .use(remarkLLMs, { _data: true, analysis: 'static' })
+      .use(remarkLLMs, { _data: true })
       .process(content);
     return result.data.markdown;
   };
@@ -630,7 +625,7 @@ test('Remark LLMs: replaced headings', async () => {
         });
       })
       .use(remarkHeading)
-      .use(remarkLLMs, { _data: true, analysis: 'static' })
+      .use(remarkLLMs, { _data: true })
       .process('## Heading\n\nText.\n');
     return result.data.markdown;
   };
@@ -664,7 +659,7 @@ test('Remark LLMs: replacements of embedded content', async () => {
           replaceSource(file, node, 'Multi\n\nline');
       });
     })
-    .use(remarkLLMs, { _data: true, analysis: 'static' })
+    .use(remarkLLMs, { _data: true })
     .process('Before.\n\n<Embed />\n\nAfter.\n');
 
   expect(result.data.markdown).toBe(
@@ -710,7 +705,7 @@ test('Remark LLMs: edits of plugins', async () => {
       replaceSource(file, { type: 'paragraph', children: [] }, 'broken');
     })
     .use(remarkHeading)
-    .use(remarkLLMs, { _data: true, analysis: 'static', mdxAsPlaceholder: ['Note'] })
+    .use(remarkLLMs, { _data: true, mdxAsPlaceholder: ['Note'] })
     .process(content);
 
   const rendered = await renderPlaceholder(result.data.markdown as string, {
@@ -739,7 +734,7 @@ test('Remark LLMs: placeholder', async () => {
   const content = await fs.readFile(file);
   const result = await remark()
     .use(remarkMdx)
-    .use(remarkLLMs, { _data: true, analysis: 'static', mdxAsPlaceholder: ['MyPage'] })
+    .use(remarkLLMs, { _data: true, mdxAsPlaceholder: ['MyPage'] })
     .process(content);
 
   const markdown = result.data.markdown as string;
@@ -753,13 +748,13 @@ test('Remark LLMs: placeholder', async () => {
   ).toMatchFileSnapshot(path.resolve(cwd, './fixtures/remark-llms.output.md'));
 });
 
-test('Remark Structure: values of expressions with runtime analysis', async () => {
+test('Remark Structure: values of expressions in outputs that read the props', async () => {
   const { compile, run } = await import('@mdx-js/mdx');
   const runtime = await import('react/jsx-runtime');
   const code = await compile(
     {
       value: 'Version {<b>Beta {props.n}</b>} of {props.n}{false}{null}.\n',
-      data: { _analysis: 'runtime' },
+      data: { unstable_runtimeOutputs: true },
     },
     { outputFormat: 'function-body', remarkPlugins: [[remarkStructure, { exportAs: true }]] },
   );
@@ -770,7 +765,7 @@ test('Remark Structure: values of expressions with runtime analysis', async () =
   ).toEqual([{ heading: undefined, content: 'Version **Beta 2** of 2.' }]);
 });
 
-test('Remark Structure: components render with runtime analysis', async () => {
+test('Remark Structure: components render in outputs that read the props', async () => {
   const { compile, run } = await import('@mdx-js/mdx');
   const runtime = await import('react/jsx-runtime');
   // the module instance that renders records
@@ -795,7 +790,7 @@ From MDX components, as a value: {<ProductName />}.
 
 <Card icon={<Icon />} title="Core" />
 `,
-      data: { _analysis: 'runtime' },
+      data: { unstable_runtimeOutputs: true },
     },
     { outputFormat: 'function-body', remarkPlugins: [[remarkStructure, { exportAs: true }]] },
   );
@@ -831,7 +826,7 @@ From MDX components, as a value: {<ProductName />}.
   ]);
 });
 
-test('Remark LLMs: elements resolve like in MDX with runtime analysis', async () => {
+test('Remark LLMs: elements resolve like in MDX in outputs that read the props', async () => {
   const { compile, run } = await import('@mdx-js/mdx');
   const runtime = await import('react/jsx-runtime');
   const server = await import('@/server');
@@ -846,7 +841,7 @@ test('Remark LLMs: elements resolve like in MDX with runtime analysis', async ()
 
 <Callout>World</Callout>
 `,
-      data: { _analysis: 'runtime' },
+      data: { unstable_runtimeOutputs: true },
     },
     { outputFormat: 'function-body', baseUrl: import.meta.url, remarkPlugins: [remarkLLMs] },
   );
@@ -865,14 +860,14 @@ test('Remark LLMs: elements resolve like in MDX with runtime analysis', async ()
   );
 });
 
-test('Remark LLMs: placeholders with runtime analysis', async () => {
+test('Remark LLMs: placeholders in outputs that read the props', async () => {
   const { compile, run } = await import('@mdx-js/mdx');
   const runtime = await import('react/jsx-runtime');
   const server = await import('@/server');
   const code = await compile(
     {
       value: 'For {props.name}.\n\n<MyPage title="Hi">Body</MyPage>\n',
-      data: { _analysis: 'runtime' },
+      data: { unstable_runtimeOutputs: true },
     },
     {
       outputFormat: 'function-body',
@@ -948,7 +943,7 @@ After the branch.
 
   // set by the content source, like the collection of Fumadocs MDX
   const code = await compile(
-    { value: source, data: { _analysis: 'runtime' } },
+    { value: source, data: { unstable_runtimeOutputs: true } },
     {
       outputFormat: 'function-body',
       baseUrl: import.meta.url,
@@ -1027,14 +1022,10 @@ test('Remark Show: static outputs analyse the source', async () => {
   const { compile } = await import('@mdx-js/mdx');
   const { remarkShow } = await import('@/mdx-plugins/remark-show');
   const compileStatic = (value: string, remarkPlugins: PluggableList = []) =>
-    compile(
-      // set by the content source, like the collection of Fumadocs MDX
-      { value, data: { _analysis: 'static' } },
-      {
-        remarkPlugins: [remarkShow, remarkHeading, ...remarkPlugins],
-        rehypePlugins: [rehypeToc],
-      },
-    );
+    compile(value, {
+      remarkPlugins: [remarkShow, remarkHeading, ...remarkPlugins],
+      rehypePlugins: [rehypeToc],
+    });
   const file = String(
     await compileStatic('## Deploy on {props.framework}\n\nAstro.\n', [
       [remarkStructure, { exportAs: true }],
@@ -1052,15 +1043,17 @@ test('Remark Show: static outputs analyse the source', async () => {
   expect(file).toContain('id: "deploy-on-propsframework"');
   expect(file).not.toContain('_headingIds');
 
-  // static outputs can't tell which branches show, each of them says so
+  // the source decides whether outputs read the props, a static output fails on branches that only props tell apart
   const branch = '<show when={props.a}>\n## Astro\n\n[Astro](/astro).\n</show>\n';
-  for (const plugins of [[], [[remarkStructure, { exportAs: true }]], [remarkLLMs]])
+  for (const plugins of [
+    [],
+    [[remarkStructure, { exportAs: true }]],
+    [remarkLLMs],
+    [[remarkLLMs, { output: 'string' }]],
+  ])
     await expect(compileStatic(branch, plugins as PluggableList)).rejects.toThrow(
-      '`<show>` needs runtime analysis',
+      'the outputs of this document are static',
     );
-  await expect(compileStatic('## On <show when={props.a}>Astro</show>\n')).rejects.toThrow(
-    '`<show>` needs runtime analysis',
-  );
 });
 
 test('Remark Show: code tabs end at a branch', async () => {

@@ -66,7 +66,7 @@ After the branch.
 
 test('Remark Show: branches and expressions render from code in every output', async () => {
   const options = await applySatteriPreset({
-    data: { _analysis: 'runtime' },
+    data: { unstable_runtimeOutputs: true },
     mdastPlugins: [remarkLlms()],
   })('runtime');
   const { code, data } = await compileMdx({
@@ -144,11 +144,7 @@ test('Remark Show: branches and expressions render from code in every output', a
 });
 
 test('Remark Show: static outputs analyse the source', async () => {
-  // set by the content source, like the collection of Fumadocs MDX
-  const options = await applySatteriPreset({
-    data: { _analysis: 'static' },
-    mdastPlugins: [remarkLlms()],
-  })('runtime');
+  const options = await applySatteriPreset({ mdastPlugins: [remarkLlms()] })('runtime');
   const compile = (source: string) =>
     compileMdx({ source, filePath: '/tmp/doc.mdx', environment: 'runtime', options });
   const { code } = await compile('## Deploy on {1 + 1}\n\nAstro.\n');
@@ -164,17 +160,15 @@ test('Remark Show: static outputs analyse the source', async () => {
   expect(page.structuredData.headings[0].content).toBe('Deploy on {1 + 1}');
   expect(page._markdown).toBe('## Deploy on {1 + 1} [#deploy-on-]\n\nAstro.\n');
 
-  // static outputs can't tell which branches show
-  for (const source of [
-    '<show when={props.a}>\n## Astro\n</show>\n',
-    '## On <show when={props.a}>Astro</show>\n',
-  ])
-    await expect(compile(source)).rejects.toThrow('`<show>` needs runtime analysis');
+  // the source decides whether outputs read the props, a static output fails on branches that only props tell apart
+  await expect(compile('<show when={props.a}>\n## Astro\n</show>\n')).rejects.toThrow(
+    'the outputs of this document are static',
+  );
 });
 
 test('components in authored code resolve like in the content', async () => {
   const options = await applySatteriPreset({
-    data: { _analysis: 'runtime' },
+    data: { unstable_runtimeOutputs: true },
     mdastPlugins: [remarkLlms()],
   })('runtime');
   const { code } = await compileMdx({
@@ -199,7 +193,7 @@ test('components in authored code resolve like in the content', async () => {
 });
 
 test('Remark Show: code tabs end at a branch', async () => {
-  const options = await applySatteriPreset({ data: { _analysis: 'runtime' } })('runtime');
+  const options = await applySatteriPreset({ data: { unstable_runtimeOutputs: true } })('runtime');
   const { code } = await compileMdx({
     source:
       '```ts tab="Shared"\na\n```\n\n<show when={props.framework === "astro"}>\n```ts tab="Astro"\nb\n```\n</show>\n',
@@ -217,7 +211,7 @@ test('Remark Show: branches with included files', async () => {
     path.join(dir, 'branchy.mdx'),
     '## Inner\n\n<show when={props.edition === "pro"}>\nIncluded branch.\n</show>\n',
   );
-  const options = await applySatteriPreset({ data: { _analysis: 'runtime' } })('runtime');
+  const options = await applySatteriPreset({ data: { unstable_runtimeOutputs: true } })('runtime');
   const { code } = await compileMdx({
     source:
       '# Page\n\n<show when={props.edition === "pro"}>\nWaku.\n\n<include>./shared.mdx</include>\n</show>\n\n<include>./branchy.mdx</include>\n\nEnd.\n',
@@ -246,7 +240,7 @@ test('Remark Show: branches of an included file, the page itself has none', asyn
     path.join(dir, 'branchy.mdx'),
     '<show when={props.edition === "pro"}>\nIncluded branch.\n</show>\n',
   );
-  const options = await applySatteriPreset({ data: { _analysis: 'runtime' } })('runtime');
+  const options = await applySatteriPreset({ data: { unstable_runtimeOutputs: true } })('runtime');
   const { code } = await compileMdx({
     source: '# Page\n\n<include>./branchy.mdx</include>\n',
     filePath: path.join(dir, 'page.mdx'),

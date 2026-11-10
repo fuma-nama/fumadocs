@@ -4,7 +4,6 @@ import type { Transformer } from 'unified';
 import type { MdxJsxAttributeValueExpression, MdxJsxFlowElement } from 'mdast-util-mdx';
 import type { TOCItemType } from '@/toc';
 import { flattenNode, toEsm } from '@/mdx-plugins/utils';
-import type { Analysis } from '@/mdx-plugins/stringifier';
 import { showCondition } from '../../../shared/code-output';
 import { headingIdCode, headingIdRegex, headingIdWrapper } from '../../../shared/heading-id';
 
@@ -24,13 +23,6 @@ export interface RemarkHeadingOptions {
    * @defaultValue true
    */
   generateToc?: boolean;
-
-  /**
-   * With `static`, IDs are always slugged from the source.
-   *
-   * @defaultValue the analysis of the content source, or `static`
-   */
-  analysis?: Analysis;
 }
 
 declare module 'vfile' {
@@ -43,14 +35,13 @@ declare module 'vfile' {
 }
 
 /**
- * Add heading ids and extract TOC. With the default slugs and runtime analysis, IDs of headings with authored
+ * Add heading ids and extract TOC. With the default slugs, when the outputs of the document read the props, IDs of headings with authored
  * expressions or in branches of `<show>` render from code: the heading is wrapped in an element that gives it the ID.
  */
 export function remarkHeading({
   slug,
   customId = true,
   generateToc = true,
-  analysis,
 }: RemarkHeadingOptions = {}): Transformer<Root, Root> {
   let slugger: Slugger | undefined;
   const defaultSlug = !slug;
@@ -63,7 +54,7 @@ export function remarkHeading({
   return (root, file) => {
     const toc: TOCItemType[] = [];
     const ids = headingIdCode();
-    const fromCode = defaultSlug && (analysis ?? file.data._analysis) === 'runtime';
+    const fromCode = defaultSlug && file.data.unstable_runtimeOutputs;
     slugger?.reset();
 
     const visit = (nodes: RootContent[], when: string[]) => {

@@ -342,7 +342,7 @@ function addCollectionPlugins(
     if (!match) return;
     ctx.data._compiler = { addDependency: (dependency) => includes.add(dependency, match.file) };
     // the source renders the outputs for the props of a page
-    ctx.data._analysis = 'runtime';
+    ctx.data.unstable_runtimeOutputs = true;
     return match.collection.mdastPlugins;
   });
   satteri.hastPlugins.push((ctx) => collectionOf(ctx)?.collection.hastPlugins);

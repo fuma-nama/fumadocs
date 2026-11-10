@@ -1,4 +1,3 @@
-import type { Analysis } from 'fumadocs-core/mdx-plugins/stringifier';
 import type { HeadingIds } from '../../shared/heading-id';
 import type { MdastVisitorContext } from 'satteri';
 
@@ -36,9 +35,14 @@ declare module 'satteri' {
     /** sources embedded after the document's, e.g. included files */
     _embeddedSource?: string;
     _embeds?: Embed[];
-    /** @internal the analysis of the content source, for plugins without the option */
-    _analysis?: Analysis;
-    /** @internal set by `remarkShow` on a document with branches of `<show>` */
+    /**
+     * Set by a content source that renders pages for props, like path params: the outputs of the Fumadocs plugins
+     * (the TOC, structured data, processed Markdown) are functions of the props, to call with the props of a page.
+     *
+     * The source decides for all of its documents, so the shape of an export never depends on the content.
+     */
+    unstable_runtimeOutputs?: boolean;
+    /** @internal set by `remarkShow` on a document with branches, which only props tell apart */
     _show?: boolean;
     /** @internal set by `remarkHeading`, see {@link HeadingIds} */
     _headingIds?: HeadingIds;

@@ -9,7 +9,6 @@ import type { Element, ElementContent } from 'hast';
 import { handleTag, jsxToSource, parse } from '@/utils';
 import { isStaticOutput, listCode, showCondition, showConditions } from '../../shared/code-output';
 import type { ExtraPluginHooks } from './compile';
-import type { Analysis } from 'fumadocs-core/mdx-plugins/stringifier';
 
 export interface RehypeTocOptions {
   exportToc?:
@@ -19,8 +18,6 @@ export interface RehypeTocOptions {
         as: 'esm';
         name: string;
       };
-  /** @defaultValue the analysis of the content source, or `static` */
-  analysis?: Analysis;
 }
 
 export interface RehypeTocItemType {
@@ -50,7 +47,7 @@ declare module 'satteri' {
   }
 }
 
-export function rehypeToc({ exportToc = true, analysis }: RehypeTocOptions = {}): HastPluginInput &
+export function rehypeToc({ exportToc = true }: RehypeTocOptions = {}): HastPluginInput &
   ExtraPluginHooks {
   const resolved = exportToc === true ? { as: 'esm' as const, name: 'toc' } : exportToc;
   const plugin: HastPluginInput & ExtraPluginHooks = () => {
@@ -58,7 +55,6 @@ export function rehypeToc({ exportToc = true, analysis }: RehypeTocOptions = {})
     return {
       name: 'rehype-toc',
       before(_root: unknown, ctx: HastVisitorContext) {
-        isStatic = isStaticOutput(analysis, ctx.data);
         if (resolved && resolved.as === 'data') ctx.data.rehypeToc ??= [];
       },
       after(_root: unknown, ctx: HastVisitorContext) {
@@ -121,10 +117,7 @@ export function rehypeToc({ exportToc = true, analysis }: RehypeTocOptions = {})
   };
   plugin.collectExports = ({ data, addExport }) => {
     if (resolved && resolved.as === 'esm') {
-      addExport(
-        resolved.name,
-        listCode(data._rehypeTocItems ?? [], (analysis ?? data._analysis) !== 'runtime'),
-      );
+      addExport(resolved.name, listCode(data._rehypeTocItems ?? [], isStaticOutput(data)));
     }
   };
   return plugin;

@@ -3,21 +3,17 @@ import { defineMdastPlugin, type MdastVisitorContext } from 'satteri';
 import type { Heading } from 'mdast';
 import { headingIdCode, headingIdRegex, headingIdWrapper } from '../../shared/heading-id';
 import { showConditions } from '../../shared/code-output';
-import type { Analysis } from 'fumadocs-core/mdx-plugins/stringifier';
 
 export interface RemarkHeadingOptions {
   slug?: (heading: Heading, text: string) => string;
   customId?: boolean;
   generateToc?: boolean;
-  /** see `analysis` of `remarkHeading()` from `fumadocs-core/mdx-plugins/remark-heading` */
-  analysis?: Analysis;
 }
 
 export function remarkHeading({
   slug,
   customId = true,
   generateToc = true,
-  analysis,
 }: RemarkHeadingOptions = {}) {
   return () => {
     let resolveSlug = slug;
@@ -32,7 +28,7 @@ export function remarkHeading({
       name: 'remark-heading',
       before(_root, ctx) {
         if (generateToc) ctx.data.toc ??= [];
-        fromCode = !slug && (analysis ?? ctx.data._analysis) === 'runtime';
+        fromCode = !slug && ctx.data.unstable_runtimeOutputs === true;
       },
       heading(node, ctx: MdastVisitorContext) {
         // visited nodes are frozen, so mutate copies

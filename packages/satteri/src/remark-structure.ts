@@ -1,7 +1,6 @@
 import type { MdastPluginDefinition, MdastVisitorContext } from 'satteri';
 import type { Nodes } from 'mdast';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
-import type { Analysis } from 'fumadocs-core/mdx-plugins/stringifier';
 import { tableRowToStructuredData } from 'fumadocs-core/search';
 import type { ExtraPluginHooks } from './compile';
 import { createCodeOutput, esmScope } from './utils';
@@ -20,11 +19,11 @@ export interface StructureOptions {
   mdxTypes?: (node: Nodes) => boolean;
 
   /**
-   * Return `true` to keep a JSX element, other elements are replaced by their content. Static analysis keeps them as
-   * HTML tags, runtime analysis renders them into Markdown like processed Markdown.
+   * Return `true` to keep a JSX element, other elements are replaced by their content. Kept elements are HTML tags, or
+   * render into Markdown like processed Markdown when the export is a function of the props.
    *
-   * Default: static analysis keeps `File`, `TypeTable`, `Callout` and `Card` elements, runtime analysis keeps the
-   * elements of components.
+   * Default: `File`, `TypeTable`, `Callout` and `Card` elements, or the elements of components when the export is a
+   * function of the props.
    */
   filterElement?: (node: Nodes & { name?: string | null }) => boolean;
 
@@ -34,12 +33,9 @@ export interface StructureOptions {
    * @default true
    */
   exportAs?: string | boolean;
-
-  /** @defaultValue the analysis of the content source, or `static` */
-  analysis?: Analysis;
 }
 
-/** the elements that static analysis keeps as HTML tags by default */
+/** the elements kept as HTML tags by default */
 function keepByDefault(node: { name?: string | null }): boolean {
   switch (node.name) {
     case 'File':
@@ -77,7 +73,7 @@ const EDIT_VISITORS = [
  * Extract content into structured data, as Markdown sliced from the authored source. Links and JSX elements are
  * replaced by their content, images are removed.
  *
- * With runtime analysis, the export is a function of the props, rendering authored expressions and the branches of
+ * For a content source that renders pages for props, the export is a function of the props, rendering authored expressions and the branches of
  * `<show>` that show. `ctx.data.structuredData` has the authored source of expressions and every branch.
  */
 export function remarkStructure({
@@ -85,7 +81,6 @@ export function remarkStructure({
   mdxTypes = (node) => !('children' in node) || node.children.length === 0,
   filterElement,
   exportAs = true,
-  analysis,
 }: StructureOptions = {}) {
   const matchType =
     typeof types === 'function' ? types : (node: Nodes) => types.includes(node.type);
@@ -104,7 +99,7 @@ export function remarkStructure({
       // positions tell authored nodes from generated ones
       options: { position: true },
       before(_root: unknown, ctx: MdastVisitorContext) {
-        isStatic = isStaticOutput(analysis, ctx.data);
+        isStatic = isStaticOutput(ctx.data);
         records = createStructuredRecords<Nodes>(createCodeOutput(ctx, 'search', isStatic), {
           isType: matchType,
           mdxTypes,

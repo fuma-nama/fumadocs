@@ -4,7 +4,6 @@ import { toEstree } from 'hast-util-to-estree';
 import type { Expression, JSXElement } from 'estree-jsx';
 import { handleTag, toEsm } from './utils';
 import { isStaticOutput, listCode, showCondition } from '../../../shared/code-output';
-import type { Analysis } from './stringifier';
 
 export interface RehypeTocOptions {
   /**
@@ -28,9 +27,6 @@ export interface RehypeTocOptions {
         as: 'esm';
         name: string;
       };
-
-  /** @defaultValue the analysis of the content source, or `static` */
-  analysis?: Analysis;
 }
 
 declare module 'vfile' {
@@ -70,14 +66,13 @@ function getStep(properties: Element['properties']): number | undefined {
 
 export function rehypeToc(
   this: Processor,
-  { exportToc = true, analysis }: RehypeTocOptions = {},
+  { exportToc = true }: RehypeTocOptions = {},
 ): Transformer<Root, Root> {
   if (exportToc === true) {
     exportToc = { as: 'esm', name: 'toc' };
   }
 
   return (tree, file) => {
-    const isStatic = isStaticOutput(analysis, file.data);
     const items: (RehypeTOCItemType & { when: string[] })[] = [];
 
     const visit = (nodes: Nodes[], when: string[]) => {
@@ -133,7 +128,10 @@ export function rehypeToc(
         list.push({ code: `${code}, title: _fumadocs${i - 1}}`, when });
       }
       tree.children.push(
-        toEsm(`export const ${exportToc.name} = ${listCode(list, isStatic)};`, titles),
+        toEsm(
+          `export const ${exportToc.name} = ${listCode(list, isStaticOutput(file.data))};`,
+          titles,
+        ),
       );
     } else {
       file.data.rehypeToc = items.map(({ when: _, ...item }) => item);

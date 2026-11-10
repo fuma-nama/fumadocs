@@ -9,20 +9,16 @@ import type { HeadingIds } from '../../../shared/heading-id';
  */
 export type Replacement = string | ((s: Stringifier) => string);
 
-/**
- * How a plugin analyses the code of a page for its output:
- *
- * - `runtime`: a function of the props of a page, authored expressions and the branches of `<show>` render for them.
- * - `static`: a value analysed from source, authored expressions keep their source. It can't tell which branches of
- *   `<show>` show, so a document with them fails to compile.
- */
-export type Analysis = 'static' | 'runtime';
-
 declare module 'vfile' {
   interface DataMap {
-    /** @internal the analysis of the content source, for plugins without the option */
-    _analysis?: Analysis;
-    /** @internal set by `remarkShow` on a document with branches of `<show>` */
+    /**
+     * Set by a content source that renders pages for props, like path params: the outputs of the Fumadocs plugins
+     * (the TOC, structured data, processed Markdown) are functions of the props, to call with the props of a page.
+     *
+     * The source decides for all of its documents, so the shape of an export never depends on the content.
+     */
+    unstable_runtimeOutputs?: boolean;
+    /** @internal set by `remarkShow` on a document with branches, which only props tell apart */
     _show?: boolean;
     /** @internal set by `remarkHeading`, see {@link HeadingIds} */
     _headingIds?: HeadingIds;

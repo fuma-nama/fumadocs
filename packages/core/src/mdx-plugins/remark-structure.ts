@@ -6,7 +6,6 @@ import { VFile } from 'vfile';
 import { createCodeOutput, esmScope, toMdxExport } from './utils';
 import { isStaticOutput, showCondition } from '../../../shared/code-output';
 import { createStructuredRecords } from '../../../shared/structured-records';
-import type { Analysis } from './stringifier';
 import type { MdxJsxFlowElement, MdxJsxTextElement } from 'mdast-util-mdx';
 import { remarkHeading } from './remark-heading';
 import { tableRowToStructuredData } from '@/search';
@@ -51,11 +50,11 @@ export interface StructureOptions {
   mdxTypes?: (node: JsxElement) => boolean;
 
   /**
-   * Return `true` to keep a JSX element, other elements are replaced by their content. Static analysis keeps them as
-   * HTML tags, runtime analysis renders them into Markdown like processed Markdown.
+   * Return `true` to keep a JSX element, other elements are replaced by their content. Kept elements are HTML tags, or
+   * render into Markdown like processed Markdown when the export is a function of the props.
    *
-   * Default: static analysis keeps `File`, `TypeTable`, `Callout` and `Card` elements, runtime analysis keeps the
-   * elements of components.
+   * Default: `File`, `TypeTable`, `Callout` and `Card` elements, or the elements of components when the export is a
+   * function of the props.
    */
   filterElement?: (node: JsxElement) => boolean;
 
@@ -63,9 +62,6 @@ export interface StructureOptions {
    * export as `structuredData` (if true) or specified variable name.
    */
   exportAs?: string | boolean;
-
-  /** @defaultValue the analysis of the content source, or `static` */
-  analysis?: Analysis;
 }
 
 declare module 'mdast' {
@@ -111,7 +107,7 @@ export const remarkStructureDefaultOptions = {
  * Extract content into structured data, as Markdown sliced from the authored source. Links and JSX elements are
  * replaced by their content, images are removed.
  *
- * With runtime analysis, the export is a function of the props giving the records that show, their expressions and
+ * For a content source that renders pages for props, the export is a function of the props giving the records that show, their expressions and
  * elements render like in processed Markdown. `vfile.data.structuredData` is static.
  *
  * By default, the output is stored into VFile (`vfile.data.structuredData`), you can specify `exportAs` to export it.
@@ -121,12 +117,11 @@ export function remarkStructure({
   mdxTypes = remarkStructureDefaultOptions.mdxTypes,
   filterElement,
   exportAs = remarkStructureDefaultOptions.exportAs,
-  analysis,
 }: StructureOptions = {}): Transformer<Root, Root> {
   const isType = Array.isArray(types) ? (node: Nodes) => types.includes(node.type) : types;
 
   return (tree, file) => {
-    const isStatic = isStaticOutput(analysis, file.data);
+    const isStatic = isStaticOutput(file.data);
     const out = createCodeOutput(file, 'search', isStatic);
     const records = createStructuredRecords<Nodes>(out, {
       isType,
