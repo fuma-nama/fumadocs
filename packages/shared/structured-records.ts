@@ -85,8 +85,7 @@ export function createStructuredRecords<N extends CodeNode>(
       const isElement = type === 'mdxJsxFlowElement' || type === 'mdxJsxTextElement';
       out.edit(node);
 
-      const { children, data } = node as {
-        children?: { children: N[] }[];
+      const { data } = node as {
         data?: {
           hProperties?: { id?: unknown };
           structuredData?: { contents: StructuredContent[] };
@@ -115,7 +114,8 @@ export function createStructuredRecords<N extends CodeNode>(
       if (type === 'table') {
         const table = `table-${tables++}`;
         pending.push(() => {
-          const [head, ...rows] = children!;
+          // read here only: reading the children of a node has a cost in Sätteri
+          const [head, ...rows] = (node as unknown as { children: { children: N[] }[] }).children;
           const header = cells(head);
           for (const row of rows) push(tableRow({ table, row: cells(row), header }), conditions);
         });

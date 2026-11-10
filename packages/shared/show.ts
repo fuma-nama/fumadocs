@@ -19,12 +19,16 @@ export function showCondition(node: object): string | undefined {
       return attr.value?.value;
 }
 
-/** the conditions of the branches around a node, outermost first, for trees that give the parent of a node */
+/**
+ * The conditions of the branches around a node, outermost first, for trees that give the parent of a node. A document
+ * without branches doesn't read its parents, see `_show` of `remarkShow`.
+ */
 export function showConditions(
   node: object,
-  ctx: { parent: (node: never) => object | undefined },
+  ctx: { data: object; parent: (node: never) => object | undefined },
 ): string[] {
   const out: string[] = [];
+  if (!(ctx.data as { _show?: boolean })._show) return out;
   for (let p = ctx.parent(node as never); p; p = ctx.parent(p as never)) {
     const condition = showCondition(p);
     if (condition) out.unshift(condition);
