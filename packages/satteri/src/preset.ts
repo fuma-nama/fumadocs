@@ -1,6 +1,6 @@
 import type { HastPluginInput, MdxCompileOptions, MdxOnlyOptions } from 'satteri';
 import type { BuildEnvironment } from '@/index';
-import { rehypeHeadingIds, remarkHeading, type RemarkHeadingOptions } from '@/remark-heading';
+import { rehypeHeading, remarkHeading, type RemarkHeadingOptions } from '@/remark-heading';
 import { remarkImage, type RemarkImageOptions } from '@/remark-image';
 import { remarkCodeTab, type RemarkCodeTabOptions } from '@/remark-code-tab';
 import { remarkNpm, type RemarkNpmOptions } from '@/remark-npm';
@@ -126,7 +126,7 @@ export function applySatteriPreset(
         ...plugins,
         rehypeTable(),
         rehypeToc(rehypeTocOptions),
-        rehypeHeadingIds(),
+        rehypeHeading(),
       ],
       hastPlugins,
     );

@@ -215,7 +215,7 @@ describe('content island', () => {
   });
 
   it('gives a heading its ID from code', async () => {
-    // like `rehypeHeadingIds` writes a heading whose ID renders from code
+    // like `rehypeHeading` writes a heading whose ID renders from code
     const { island } = await compile('<h2 id={`on-${props.framework}`}>Setup</h2>');
 
     expect(render(island, { framework: 'astro' })).toBe('<h2 id="on-astro">Setup</h2>');

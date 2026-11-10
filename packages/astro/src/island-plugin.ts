@@ -131,7 +131,7 @@ function serialize(nodes: HastNode[], locals: Set<string>) {
         // a `<show>` branch checked when rendering, its content stays in the island
         const when = showCondition(node);
         if (when) return `...((${expression(when)}) ? [${list(node.children).slice(1)}] : [])`;
-        // a heading with its ID from code, see `rehypeHeadingIds`
+        // a heading with its ID from code, see `rehypeHeading`
         if (name && /^h[1-6]$/.test(name))
           return `[${JSON.stringify(name)},${attributes(node)}${list(node.children)}]`;
         if (name === 'Fragment' || (name && locals.has(name.split('.')[0]))) return slot([node]);

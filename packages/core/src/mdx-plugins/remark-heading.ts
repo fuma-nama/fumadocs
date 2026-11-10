@@ -50,7 +50,7 @@ declare module 'vfile' {
  * Add heading ids and extract TOC.
  *
  * For a content source that renders pages for props, the IDs of headings with authored expressions or in branches of
- * `<show>` are slugged when rendering: {@link rehypeHeadingIds} gives them to the headings.
+ * `<show>` are slugged when rendering: {@link rehypeHeading} gives them to the headings.
  */
 export function remarkHeading({
   slug,
@@ -114,7 +114,7 @@ export function remarkHeading({
  * Give headings their IDs from code, the IDs that {@link remarkHeading} computes for a content source that renders
  * pages for props. It runs after the plugins that read headings: a heading with an ID from code is JSX.
  */
-export function rehypeHeadingIds(): Transformer<Hast.Root, Hast.Root> {
+export function rehypeHeading(): Transformer<Hast.Root, Hast.Root> {
   return (tree, file) => {
     const ids = file.data._headingIds;
     if (!ids) return;

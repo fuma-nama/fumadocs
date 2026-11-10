@@ -133,7 +133,7 @@ const file = new VFile({
 
 On Sätteri, set it in the `data` of the compile options. The `unstable_` prefix means the API may change.
 
-Add `rehypeHeadingIds` as your last rehype plugin too. It gives headings the IDs that [Remark Heading](/docs/headless/mdx/headings#headings-with-expressions) computes for the props.
+Add `rehypeHeading` as your last rehype plugin too. It gives headings the IDs that [Remark Heading](/docs/headless/mdx/headings#headings-with-expressions) computes for the props.
 
 With the flag, the plugins export runtime outputs: functions of the props of the page, like the `toc` of [Rehype TOC](/docs/headless/mdx/headings#rehype-toc) and the `_markdown` component of [Remark LLMs](/docs/headless/mdx/remark-llms). Call them with the props of each page:
 

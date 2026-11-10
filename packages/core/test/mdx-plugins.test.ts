@@ -5,7 +5,7 @@ import path from 'node:path';
 import { remark } from 'remark';
 import {
   parseCodeBlockAttributes,
-  rehypeHeadingIds,
+  rehypeHeading,
   rehypeToc,
   remarkCodeTab,
   remarkDirectiveAdmonition,
@@ -959,7 +959,7 @@ After the branch.
       outputFormat: 'function-body',
       baseUrl: import.meta.url,
       remarkPlugins: [remarkShow, remarkHeading, [remarkStructure, { exportAs: true }], remarkLLMs],
-      rehypePlugins: [rehypeToc, rehypeHeadingIds],
+      rehypePlugins: [rehypeToc, rehypeHeading],
     },
   );
   // the generated imports of `fumadocs-core/server`, from the source
@@ -1043,7 +1043,7 @@ test('Remark Heading: headings with IDs from code stay headings for other plugin
       outputFormat: 'function-body',
       baseUrl: import.meta.url,
       remarkPlugins: [remarkHeading, remarkSteps],
-      rehypePlugins: [rehypeToc, rehypeHeadingIds],
+      rehypePlugins: [rehypeToc, rehypeHeading],
     },
   );
   const mod = await run(String(code), runtime as never);
@@ -1098,7 +1098,7 @@ test('Remark Heading: a custom slug slugs when rendering with its own runtime', 
     String(
       await compile(
         { value: '## On {props.framework}\n', data: { unstable_runtimeOutputs: true } },
-        { remarkPlugins: [[remarkHeading, options]], rehypePlugins: [rehypeHeadingIds] },
+        { remarkPlugins: [[remarkHeading, options]], rehypePlugins: [rehypeHeading] },
       ),
     );
 

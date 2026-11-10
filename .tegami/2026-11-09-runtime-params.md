@@ -19,7 +19,7 @@ packages:
 - Search records of Fumadocs MDX keep the elements of every component by default, set `filterElement` of `remarkStructure` to choose them.
 - Deprecated the `components` option of `getText()`, pass MDX components as page props.
 - Added `unstable_runtimeOutputs` in file data for custom content sources: the plugins export the outputs of a page as functions of its props. Without it, a document with `<show>` fails to compile.
-- Added `rehypeHeadingIds`, which gives headings their IDs from code. Fumadocs MDX, `@fumadocs/astro` and local Markdown enable it.
+- Added `rehypeHeading`, which gives headings their IDs from code. Fumadocs MDX, `@fumadocs/astro` and local Markdown enable it.
 - Added `slugImportSource` of `remarkHeading`: a module that slugs heading IDs from the rendered text, for a custom `slug`.
 - The client loader of Fumadocs MDX takes the params of a page: `preload(path, params)`, `getComponent(path, params)` and `useContent(path, props, params)`.
 - Table of contents titles resolve MDX components from the page props.

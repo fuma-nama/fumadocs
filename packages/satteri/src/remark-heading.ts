@@ -81,10 +81,10 @@ export function remarkHeading({
   };
 }
 
-/** Sätteri port of `rehypeHeadingIds()` from `fumadocs-core/mdx-plugins/remark-heading` */
-export function rehypeHeadingIds(): HastPluginInput {
+/** Sätteri port of `rehypeHeading()` from `fumadocs-core/mdx-plugins/remark-heading` */
+export function rehypeHeading(): HastPluginInput {
   return () => ({
-    name: 'rehype-heading-ids',
+    name: 'rehype-heading',
     element: {
       filter: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'],
       visit(node, ctx) {
