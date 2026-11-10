@@ -36,6 +36,8 @@ It enables processed Markdown on your docs collection, adds `docsLlms` to `lib/s
 
 <feature title="source.config.ts">llms/source.config.ts</feature>
 
+MDX components appear as JSX syntax. To render them into their [Markdown form](/docs/headless/utils/markdown#asmarkdown), [pass your MDX components](/docs/headless/mdx/remark-llms#jsx-elements) as page props.
+
 </show>
 
 <show when={props.framework === 'astro'}>
@@ -47,15 +49,15 @@ import fumadocs from '@fumadocs/astro';
 export default defineConfig({
   integrations: [
     fumadocs({
-      includeProcessedMarkdown: { output: 'function' }, // [!code ++]
+      includeProcessedMarkdown: true, // [!code ++]
     }),
   ],
 });
 ```
 
-</show>
+MDX components appear as JSX syntax unless they define their [Markdown form](/docs/headless/utils/markdown#asmarkdown).
 
-MDX components appear as JSX syntax by default. Render them into meaningful Markdown with the [`output` option](/docs/headless/mdx/remark-llms#output).
+</show>
 
 Runtime content sources like [`@fumadocs/local-md`](/docs/integrations/content/local-md) resolve on demand. Pass their `getSource` and the CLI generates the same routes:
 

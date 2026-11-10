@@ -1,6 +1,6 @@
 "use strict";
 const {Fragment: _Fragment, jsxDEV: _jsxDEV} = arguments[0];
-let toc = [{
+const toc = [{
   depth: 2,
   url: "#you-found-me",
   title: _jsxDEV(_Fragment, {

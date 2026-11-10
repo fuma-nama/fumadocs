@@ -7,55 +7,12 @@ description: Show content on a condition.
 
 Remark Show is a remark plugin. Fumadocs MDX and `@fumadocs/astro` enable it by default on both unified and Sätteri. See [Show](/docs/markdown#show) for the syntax.
 
-It decides conditions from the values in `define`. By default, those are the path params in `file.data.params`, read as `props`, and the public env vars. It runs before other remark plugins, so they only see the branches that show.
+It compiles `<show>` into a component that renders its content when `when` holds. The condition is checked when rendering, so it can read the props of the page, like its [path params](/docs/headless/page-conventions#path-params). A `<show>` without `when` fails to compile.
 
-<auto-type-table type="import('fumadocs-core/mdx-plugins/remark-show').RemarkShowOptions" />
+## Outputs
 
-### Build-Time Values
+The outputs of a page, which are its table of contents, [heading IDs](/docs/headless/mdx/headings), [structured data](/docs/headless/mdx/structure) and [processed Markdown](/docs/headless/mdx/remark-llms), only include the branches that show. Fumadocs MDX, `@fumadocs/astro` and [local Markdown](/docs/integrations/content/local-md) render them for the props of each page.
 
-`define` works like the `define` option of Vite: each key is a name that code reads, like `import.meta.env.EDITION`. With Vite, the variables of `.env` files are only in `import.meta.env`, so add them yourself:
-
-```ts tab="unified" title="source.config.ts"
-import { defineConfig } from 'fumadocs-mdx/config';
-import { loadEnv } from 'vite';
-
-const env = loadEnv(process.env.NODE_ENV ?? 'development', process.cwd(), 'VITE_');
-
-export default defineConfig({
-  mdxOptions: {
-    remarkShowOptions: { define: { 'import.meta.env': env } },
-  },
-});
-```
-
-```ts tab="Sätteri" title="source.config.ts"
-import { defineConfig } from 'fumadocs-mdx/config';
-import { loadEnv } from 'vite';
-
-const env = loadEnv(process.env.NODE_ENV ?? 'development', process.cwd(), 'VITE_');
-
-export default defineConfig({
-  satteriOptions: {
-    remarkShowOptions: { define: { 'import.meta.env': env } },
-  },
-});
-```
-
-A function decides the values of each page from its params. The defaults it doesn't return are read when rendering, like the other params here:
-
-```ts twoslash
-import type { RemarkShowOptions } from 'fumadocs-core/mdx-plugins/remark-show';
-
-const remarkShowOptions: RemarkShowOptions = {
-  define: ({ params, defaults }) => ({
-    'import.meta.env': defaults['import.meta.env'],
-    'props.framework': params?.framework,
-  }),
-};
-```
-
-### Custom Sources
-
-A [custom source](/docs/headless/source-api/source#path-params) that compiles MDX itself passes the params of each page as `file.data.params`, when `dataAt()` compiles the page for them. The other expressions of the page read the params as props, so pass them to the compiled content when rendering too.
-
-Ports to other compilers, like the Sätteri one, build on `createShowContext()`, which evaluates conditions with the build-time values.
+<Callout type="warn">
+  Used on their own, Rehype TOC, Remark Structure and Remark LLMs give static outputs, which are analysed from the source before any condition is checked. A document with `<show>` then fails to compile, unless a custom content source asks for [runtime outputs](/docs/headless/source-api/source#runtime-outputs).
+</Callout>

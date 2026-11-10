@@ -5,11 +5,11 @@ description: Process headings from your document
 
 ## Remark Heading
 
-A remark plugin that applies ids to headings. Fumadocs MDX enables it by default. Pass options with `remarkHeadingOptions`.
+A remark plugin that applies IDs to headings. Fumadocs MDX enables it by default. Pass options with `remarkHeadingOptions`.
 
-### Custom Ids [#custom-heading-id]
+### Custom IDs [#custom-heading-id]
 
-You can customize the heading id with `[#slug]`.
+You can customize the heading ID with `[#slug]`.
 
 ```md
 # heading [#slug]
@@ -52,9 +52,65 @@ Fumadocs MDX turns it off with `generateToc: false` and exports the table of con
 
 <auto-type-table path="../props.ts" name="TOCItemType" />
 
+### Headings with Expressions
+
+In Fumadocs MDX, headings with expressions or inside a [`<show>`](/docs/headless/mdx/remark-show) branch get their IDs from the rendered text. For `framework: 'astro'`, `## Deploy on {props.framework}` is `deploy-on-astro`.
+
+Suffixes of duplicate IDs, like `-1`, only count the headings that show. So a heading repeated in two branches has the same ID in both.
+
+The headings get these IDs from `rehypeHeading`, a rehype plugin that Fumadocs MDX adds after your rehype plugins.
+
+Static outputs, when the plugin is used on its own, slug IDs from the source instead, like `deploy-on-propsframework`.
+
+### Custom Slugs
+
+With a custom `slug` function, IDs are slugged from the source too. To slug them from the rendered text, write a module that exports `createHeadingIds()` with your slugger:
+
+```ts title="lib/heading.ts"
+import { createHeadingIds as create } from 'fumadocs-core/mdx-plugins/remark-heading.runtime';
+
+export const createHeadingIds: typeof create = (headings) =>
+  // called for each page, so a slugger can count duplicates
+  create(headings, () => (text) => text.toLowerCase().replaceAll(' ', '_'));
+```
+
+Then pass it as `slugImportSource`. Compiled pages import the module, like the JSX runtime from `jsxImportSource` of MDX, so use a package name or an import alias:
+
+```ts tab="unified" title="source.config.ts"
+import { defineConfig } from 'fumadocs-mdx/config';
+
+export default defineConfig({
+  mdxOptions: {
+    remarkHeadingOptions: {
+      slug: (_root, _heading, text) => text.toLowerCase().replaceAll(' ', '_'),
+      slugImportSource: '@/lib/heading',
+    },
+  },
+});
+```
+
+```ts tab="Sätteri" title="source.config.ts"
+import { defineConfig, defineDocs } from 'fumadocs-mdx/config';
+
+export const docs = defineDocs({
+  docs: { compiler: 'satteri' },
+});
+
+export default defineConfig({
+  satteriOptions: {
+    remarkHeadingOptions: {
+      slug: (_heading, text) => text.toLowerCase().replaceAll(' ', '_'),
+      slugImportSource: '@/lib/heading',
+    },
+  },
+});
+```
+
+`slug` still gives the IDs of the headings before the first one with an expression, so both should slug the same way.
+
 ## Rehype TOC
 
-A rehype plugin that exports the table of contents (an array of `TOCItemType`). Unlike Remark Heading, it keeps JSX nodes in heading titles.
+A rehype plugin that exports the table of contents. Unlike Remark Heading, it keeps JSX nodes in heading titles.
 
 Fumadocs MDX enables it by default. On Sätteri, pass options with `rehypeTocOptions`.
 
@@ -66,9 +122,23 @@ For a Markdown document:
 ## Hello `code`
 ```
 
-An export will be created:
+Fumadocs MDX compiles the `toc` export as a function of the page props, which only returns the headings that show. Used on its own, the plugin exports static outputs, an array of `TOCItemType`:
 
-```jsx
+```jsx tab="Fumadocs MDX"
+export const toc = (props) => [
+  {
+    title: (
+      <>
+        Hello <code>code</code>
+      </>
+    ),
+    depth: 2,
+    url: '#hello-code',
+  },
+];
+```
+
+```jsx tab="Static outputs"
 export const toc = [
   {
     title: (
@@ -81,3 +151,7 @@ export const toc = [
   },
 ];
 ```
+
+Fumadocs MDX calls it for the props of each page, so `page.data.toc` is an array. Inside an MDX file, `toc` is the function, see [Inline TOC](/docs/ui/components/inline-toc#usage) for an example.
+
+A custom content source can ask for the function with [runtime outputs](/docs/headless/source-api/source#runtime-outputs).

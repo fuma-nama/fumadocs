@@ -4,6 +4,8 @@ description: Getting Started with Fumadocs
 icon: Rocket
 ---
 
+import { frameworkName } from '@/lib/framework';
+
 <AgentInstructions />
 
 ## Terminology
@@ -91,7 +93,7 @@ pnpm update -i -r --latest
 
 <Accordion id='change-base-url' title="How to change the base route of docs?">
 
-Routing is handled by {frameworkName}. Move the docs route first (`/docs/*` -> `/info/*`).
+Routing is handled by {frameworkName(props.framework)}. Move the docs route first (`/docs/*` -> `/info/*`).
 
 <show when={props.framework === 'next'}>
 

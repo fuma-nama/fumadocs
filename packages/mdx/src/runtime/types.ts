@@ -15,7 +15,7 @@ export interface DocData {
   toc: TOCItemType[];
 
   /**
-   * structured data for document search indexing.
+   * structured data for document search indexing, read without rendering: MDX components stay as tags.
    */
   structuredData: StructuredData;
 
@@ -39,7 +39,9 @@ export interface FileInfo {
 
 export interface GetTextOptions {
   /**
-   * MDX components for JSX elements in the output, only available with `output: 'function'` in `includeProcessedMarkdown`.
+   * MDX components for JSX elements in the output, when processed Markdown is a component.
+   *
+   * @deprecated pass them as page props, with the `props` option of `getPage()`
    */
   components?: MDXComponents;
 }

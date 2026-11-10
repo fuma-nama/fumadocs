@@ -2,6 +2,7 @@ import type { TOCItemType } from 'fumadocs-core/toc';
 import type { RehypeTOCItemType, StructuredData } from 'fumadocs-core/mdx-plugins';
 import type { ReactNode } from 'react';
 import * as JsxRuntime from 'react/jsx-runtime';
+import * as HeadingRuntime from 'fumadocs-core/mdx-plugins/remark-heading.runtime';
 import { type Components, type Evaluator, toJsx } from 'fumadocs-core/utils/hast-to-jsx';
 import type { Root } from 'hast';
 import type { JSExecutor, JSExecutorConfig } from '@/js/executor';
@@ -135,6 +136,7 @@ export function fromJS<M>(options: MarkdownRendererJSOptions): MarkdownRenderer<
     return {
       opts: {
         ...JsxRuntime,
+        ...HeadingRuntime,
         baseUrl,
       },
       // the code of the module reads the params of a page as `props`, like its content
@@ -143,19 +145,19 @@ export function fromJS<M>(options: MarkdownRendererJSOptions): MarkdownRenderer<
     };
   }
 
+  type Exports = { toc?: (props: Record<string, unknown>) => TOCItemType[]; default: MDXContent };
+  const tocOf = ({ toc }: Exports) => toc?.(options.props ?? {}) ?? [];
+
   return {
     structuredData,
     async render(components, context) {
       const fullScope = createScope(context);
 
       const hydrateFn = new AsyncFunction(...Object.keys(fullScope), code);
-      const out = (await hydrateFn.apply(hydrateFn, Object.values(fullScope))) as {
-        toc?: TOCItemType[];
-        default: MDXContent;
-      } & M;
+      const out = (await hydrateFn.apply(hydrateFn, Object.values(fullScope))) as Exports & M;
 
       return {
-        toc: out.toc ?? [],
+        toc: tocOf(out),
         body: JsxRuntime.jsx(out.default, { ...options.props, components }),
         exports: out,
       };
@@ -164,13 +166,10 @@ export function fromJS<M>(options: MarkdownRendererJSOptions): MarkdownRenderer<
       const fullScope = createScope(context);
 
       const hydrateFn = new Function(...Object.keys(fullScope), code);
-      const out = hydrateFn.apply(hydrateFn, Object.values(fullScope)) as {
-        toc?: TOCItemType[];
-        default: MDXContent;
-      } & M;
+      const out = hydrateFn.apply(hydrateFn, Object.values(fullScope)) as Exports & M;
 
       return {
-        toc: out.toc ?? [],
+        toc: tocOf(out),
         body: JsxRuntime.jsx(out.default, { ...options.props, components }),
         exports: out,
       };

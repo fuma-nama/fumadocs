@@ -27,7 +27,7 @@ const scanned = await scanURLs({
   populate: {
     'docs/[[...slug]]': source.getPages().map((page) => ({
       value: { slug: page.slugs },
-      hashes: getHeadings(page),
+      hashes: getHeadings(page.data),
     })),
   },
 });
@@ -46,10 +46,13 @@ const scanned = await scanURLs({
   preset: 'react-router',
   routerConfig: routes,
   populate: {
-    'docs/[[...splat]]': source.getPages().map((page) => ({
-      value: { splat: page.slugs },
-      hashes: getHeadings(page),
-    })),
+    // async collections load the TOC with the content
+    'docs/[[...splat]]': await Promise.all(
+      source.getPages().map(async (page) => ({
+        value: { splat: page.slugs },
+        hashes: getHeadings(await page.data.load()),
+      })),
+    ),
   },
 });
 ```
@@ -65,10 +68,13 @@ import { source } from '@/lib/source';
 const scanned = await scanURLs({
   preset: 'tanstack-start',
   populate: {
-    'docs/[[..._splat]]': source.getPages().map((page) => ({
-      value: { _splat: page.slugs },
-      hashes: getHeadings(page),
-    })),
+    // async collections load the TOC with the content
+    'docs/[[..._splat]]': await Promise.all(
+      source.getPages().map(async (page) => ({
+        value: { _splat: page.slugs },
+        hashes: getHeadings(await page.data.load()),
+      })),
+    ),
   },
 });
 ```
@@ -86,7 +92,7 @@ const scanned = await scanURLs({
   populate: {
     'docs/[[...slugs]]': source.getPages().map((page) => ({
       value: { slugs: page.slugs },
-      hashes: getHeadings(page),
+      hashes: getHeadings(page.data),
     })),
   },
 });
@@ -97,6 +103,8 @@ const scanned = await scanURLs({
 In the same script, validate your content files against the scanned URLs:
 
 ```ts title="scripts/lint.ts"
+import type { TOCItemType } from 'fumadocs-core/toc';
+
 printErrors(
   await validateFiles(await getFiles(), {
     scanned,
@@ -112,8 +120,8 @@ printErrors(
   true,
 );
 
-function getHeadings({ data }: (typeof source)['$inferPage']): string[] {
-  return data.toc.map((item) => item.url.slice(1));
+function getHeadings({ toc }: { toc: TOCItemType[] }): string[] {
+  return toc.map((item) => item.url.slice(1));
 }
 
 function getFiles() {

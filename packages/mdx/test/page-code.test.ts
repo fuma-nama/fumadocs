@@ -2,8 +2,9 @@ import * as fs from 'node:fs/promises';
 import * as os from 'node:os';
 import * as path from 'node:path';
 import { expect, test } from 'vitest';
+import { createElement, type FC } from 'react';
 import { loader } from 'fumadocs-core/source';
-import { defineDocs } from '@/config';
+import { applyMdxPreset, defineDocs, type DocCollection } from '@/config';
 import { buildConfig } from '@/config/build';
 import { createCore } from '@/core';
 import { createMdxLoader } from '@/loaders/mdx';
@@ -56,10 +57,10 @@ export const frontmatter = {
     files.math,
     'export function Note() { return <b>note</b>; }\nexport const frontmatter = { title: props.title ?? "Math" };\n\n$x_{\\alpha}$\n',
   );
-  // the required title of a dynamic page only in code
+  // the required title of a dynamic page only in code, an import after it, another declarator stays
   await fs.writeFile(
     files.named,
-    `import { names } from '../names';\n\nexport const frontmatter = { title: names[props.framework] };\n`,
+    `export const frontmatter = { title: names[props.framework] }, label = 'x';\nimport { names } from '../names';\n\n{label}\n`,
   );
 
   const core = createCore({
@@ -94,10 +95,10 @@ export const frontmatter = {
   );
   await fs.writeFile(names, 'export const names = { next: "Next.js", waku: "Waku" };');
   await fs.utimes(names, new Date(), new Date(Date.now() + 20_000));
-  // the module of the dynamic file has it too, the modules of its pages compile without the code
-  expect(await load(files.deploy, {})).toContain('"description":"Deploy on Waku"');
-  const waku = await load(files.deploy, { params: '{"framework":"waku"}' });
-  expect(waku).not.toContain('Deploy on');
+  // the page compiles once with the frontmatter of each params, its content doesn't run the code
+  const page = await load(files.deploy, {});
+  expect(page).toContain('"description": "Deploy on Waku"');
+  expect(page).not.toContain('names[props.framework]');
   // fields of the schema can be in code only, and the schema validates them
   expect(await load(files.home, { only: 'frontmatter' })).toContain('"title":"Home"');
   // the other statements of its block stay in the page
@@ -139,7 +140,7 @@ export const frontmatter = {
         {
           info: { path: '[framework]/deploy.mdx', fullPath: files.deploy },
           title: 'Deploy',
-          load: async () => ({}),
+          _content: async () => ({}),
           _frontmatterAt: {
             '{"framework":"next"}': { title: 'Deploy', description: 'Deploy on Next.js' },
             '{"framework":"waku"}': { title: 'Deploy', description: 'Deploy on Waku' },
@@ -153,5 +154,123 @@ export const frontmatter = {
   expect(source.getPage(['waku', 'deploy'])?.data).toMatchObject({
     description: 'Deploy on Waku',
   });
+
   await fs.rm(dir, { recursive: true });
+});
+
+test('the outputs of a collection with its own options read the props', async () => {
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'page-code-'));
+  const file = path.join(dir, 'index.mdx');
+  await fs.writeFile(file, '---\ntitle: Home\n---\n\n## Hello {props.name}\n\n[Link](/a)\n');
+  const docs = (compiler?: 'satteri') =>
+    defineDocs({
+      dir,
+      docs: {
+        postprocess: { extractLinkReferences: true, includeProcessedMarkdown: true },
+        ...(compiler ? { compiler } : { mdxOptions: applyMdxPreset() }),
+      },
+    });
+
+  for (const compiler of [undefined, 'satteri'] as const) {
+    const core = createCore({ environment: 'vite', outDir: dir });
+    await core.init({ config: buildConfig({ docs: docs(compiler) }, dir) });
+    const { code } = (await createMdxLoader({ getCore: async () => core }).load({
+      filePath: file,
+      query: { collection: 'docs' },
+      getSource: () => fs.readFile(file, 'utf-8'),
+      development: false,
+      compiler: { addDependency() {} },
+    }))!;
+    for (const name of ['toc', 'structuredData', 'extractedReferences'])
+      expect(code).toMatch(new RegExp(`(const|let) ${name} = \\(?props\\)? =>`));
+    expect(code).toContain('function _markdown(props)');
+    expect(code).toContain('_headingIds');
+  }
+});
+
+test('page props render the content and outputs of a page', async () => {
+  const { server, toFumadocsSource: toSource } = await import('@/runtime/server');
+  const { asMarkdown, jsxComponents } = await import('fumadocs-core/server');
+  type Props = { framework: string; name?: string; components?: Record<string, FC> };
+  const create = server<{ docs: DocCollection }, { DocData: { docs: unknown } }>();
+  const frontmatter = { title: 'Home', staticParams: [{ framework: 'next' }] };
+  const file = '[framework]/index.mdx';
+  const compiled = {
+    frontmatter,
+    default: () => null,
+    // like the compiled outputs, with `<ProductName />` from the MDX components
+    // it reads its params, which the entry of the file doesn't have
+    toc: (props: Props) => [
+      { title: `${props.framework.toString()} ${props.name}`, url: '#a', depth: 2 },
+    ],
+    structuredData: (props: Props) => [
+      { id: 'a', content: ` ${props.framework} ${props.name} ` },
+      { content: ' ' },
+      { content: createElement(props.components!.ProductName) },
+    ],
+    _markdown: (props: Props) =>
+      asMarkdown()
+        ? [
+            `${props.framework} ${props.name} `,
+            createElement(jsxComponents(props.components).ProductName),
+          ]
+        : null,
+  };
+  const docs = await create.doc('docs', '', { [file]: compiled });
+  const lazy = await create.docLazy(
+    'docs',
+    '',
+    { [file]: frontmatter },
+    { [file]: async () => compiled },
+  );
+  function ProductName() {
+    asMarkdown();
+    return 'Fumadocs';
+  }
+  const source = loader({ baseUrl: '/', source: toSource(docs, []) });
+
+  // the outputs are values for the path params
+  const next = source.getPage(['next'])!;
+  expect(next.data.toc[0].title).toBe('next undefined');
+  const props = { name: 'Fuma', components: { ProductName } };
+  const page = source.getPage(['next'], { props })!;
+  expect(page.url).toBe('/next');
+  expect(page.data.toc[0].title).toBe('next Fuma');
+  // read without rendering: components stay as tags, records are trimmed, empty ones are left out
+  expect(page.data.structuredData).toEqual({
+    headings: [{ id: 'a', content: 'next Fuma' }],
+    contents: [{ heading: 'a', content: '<ProductName />' }],
+  });
+  await expect(page.data.getText('processed')).resolves.toBe('next Fuma Fumadocs');
+
+  // loaded asynchronously, components render, the unbound page isn't rendered for it
+  const lazyPage = loader({ baseUrl: '/', source: toSource(lazy, []) }).getPage(['next'], {
+    props,
+  })!;
+  await expect(lazyPage.data.structuredData()).resolves.toEqual({
+    headings: [{ id: 'a', content: 'next Fuma' }],
+    contents: [{ heading: 'a', content: 'Fumadocs' }],
+  });
+  // loading a page renders none of its outputs, its structured data is read like in an eager entry
+  const lazyData = await lazyPage.data.load();
+  expect(lazyData.toc[0].title).toBe('next Fuma');
+  expect(lazyData.structuredData).toEqual(page.data.structuredData);
+
+  // on the client, a page is its file at the params that the server sends, the same page for the same params
+  const { createClientLoader } = await import('@/runtime/browser');
+  const client = createClientLoader(
+    { [file]: async () => compiled as never },
+    {
+      id: 'page-props',
+      component: () => null,
+    },
+  );
+  const loaded = await client.preload(file, { framework: 'next' });
+  expect(loaded.toc[0].title).toBe('next undefined');
+  expect(client.getComponent(file, { framework: 'next' })).toBe(
+    client.getComponent(file, { framework: 'next' }),
+  );
+  expect(client.getComponent(file, { framework: 'waku' })).not.toBe(
+    client.getComponent(file, { framework: 'next' }),
+  );
 });

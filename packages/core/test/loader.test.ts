@@ -900,3 +900,39 @@ test('Static params of a dynamic file', () => {
     getStaticParams('[a]/[b].mdx', { readStaticParams, staticParams: [{ a: 'x' }] }),
   ).toThrowError('No value of "[b]" is listed for "[a]/[b].mdx"');
 });
+
+test('Loader: custom props of a page', () => {
+  const source = loader({
+    baseUrl: '/',
+    source: {
+      files: [
+        {
+          type: 'page',
+          path: '[version]/index.mdx',
+          data: { title: 'Install', staticParams: [{ version: 'v1' }] },
+          dataAt: (params, custom) =>
+            custom
+              ? {
+                  ...custom.data,
+                  title: `${custom.data.title} ${params.version} ${custom.props.edition}`,
+                }
+              : { title: 'Install' },
+        },
+      ],
+    },
+    plugins: [
+      {
+        transformStorage({ storage }) {
+          for (const file of storage.getFiles()) {
+            const item = storage.read(file);
+            if (item?.format === 'page') item.data = { ...item.data, title: `${item.data.title}!` };
+          }
+        },
+      },
+    ],
+  });
+
+  expect(source.getPage(['v1'])?.data.title).toBe('Install!');
+  // the data after plugins, with the props
+  expect(source.getPage(['v1'], { props: { edition: 'pro' } })?.data.title).toBe('Install! v1 pro');
+});

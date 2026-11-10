@@ -44,7 +44,7 @@ export function remarkNote() {
 - A function runs after every plugin. `s.stringify(node)` and `s.inner(node)` (its children) give their Markdown, with the edits inside.
 - When a node is edited more than once, the last edit wins.
 
-To edit a namespace only, like `search` for the records of Remark Structure, pass it as the last argument:
+To edit one output only, pass its namespace as the last argument: `search` for the records of Remark Structure, `markdown` for Remark LLMs.
 
 ```ts
 // the Markdown for LLMs keeps the tag, search records don't

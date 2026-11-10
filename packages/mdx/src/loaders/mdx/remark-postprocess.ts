@@ -4,6 +4,10 @@ import { valueToEstree } from 'estree-util-value-to-estree';
 import { removePosition } from 'unist-util-remove-position';
 import { flattenNode, walk } from './mdast-utils';
 import type { LLMsOptions } from 'fumadocs-core/mdx-plugins';
+import { Parser } from 'acorn';
+import type { MdxjsEsm } from 'mdast-util-mdx';
+import { listCode } from '../../../../shared/code-output';
+import { walkBranches } from '../../../../shared/show';
 import { remarkLLMs } from 'fumadocs-core/mdx-plugins/remark-llms';
 
 export interface ExtractedReference {
@@ -66,19 +70,19 @@ export function remarkPostprocess({
     });
 
     if (extractLinkReferences) {
-      const urls: ExtractedReference[] = [];
-
-      walk<Nodes>(tree, (node) => {
-        if (node.type !== 'link') return;
-        urls.push({
-          href: node.url,
-        });
-        return 'skip';
+      const items: { code: string; when: string[] }[] = [];
+      walkBranches<Nodes>(tree, (node, when) => {
+        if (node.type === 'link') items.push({ code: JSON.stringify({ href: node.url }), when });
       });
-
-      file.data['mdx-export'].push({
-        name: 'extractedReferences',
-        value: urls,
+      tree.children.unshift({
+        type: 'mdxjsEsm',
+        value: '',
+        data: {
+          estree: Parser.parse(`export const extractedReferences = ${listCode(items, false)};`, {
+            ecmaVersion: 'latest',
+            sourceType: 'module',
+          }) as unknown as NonNullable<MdxjsEsm['data']>['estree'],
+        },
       });
     }
 

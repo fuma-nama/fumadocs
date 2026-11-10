@@ -1,8 +1,17 @@
-import type { Nodes, RootContent } from 'mdast';
+import type { Nodes, Root, RootContent } from 'mdast';
 import { valueToEstree } from 'estree-util-value-to-estree';
-import type { Expression } from 'estree-jsx';
+import type { Expression, Program } from 'estree-jsx';
 import type { MdxJsxFlowElement, MdxJsxTextElement, MdxjsEsm } from 'mdast-util-mdx';
+import { Parser } from 'acorn';
+import acornJsx from 'acorn-jsx';
 import type Hast from 'hast';
+import type { VFile } from 'vfile';
+import { createStringifier, type Stringifier } from './stringifier';
+import {
+  createCodeOutput as createSharedCodeOutput,
+  moduleScope,
+  type CodeOutputOptions,
+} from '../../../shared/code-output';
 
 export function isJsxElement(node: Nodes): node is MdxJsxFlowElement | MdxJsxTextElement {
   return node.type === 'mdxJsxFlowElement' || node.type === 'mdxJsxTextElement';
@@ -43,41 +52,7 @@ export function flattenNodeHast(node: Hast.RootContent): string {
 }
 
 export function toMdxExport(name: string, value: unknown): MdxjsEsm {
-  return toMdxExportRaw(name, valueToEstree(value));
-}
-
-export function toMdxExportRaw(name: string, expression: Expression): MdxjsEsm {
-  return {
-    type: 'mdxjsEsm',
-    value: '',
-    data: {
-      estree: {
-        type: 'Program',
-        sourceType: 'module',
-        body: [
-          {
-            type: 'ExportNamedDeclaration',
-            attributes: [],
-            specifiers: [],
-            declaration: {
-              type: 'VariableDeclaration',
-              kind: 'let',
-              declarations: [
-                {
-                  type: 'VariableDeclarator',
-                  id: {
-                    type: 'Identifier',
-                    name,
-                  },
-                  init: expression,
-                },
-              ],
-            },
-          },
-        ],
-      },
-    },
-  };
+  return toEsm(`export let ${name} = _fumadocs0;`, [valueToEstree(value)]);
 }
 
 export function handleTag(value: string, tag: string): string | false {
@@ -87,4 +62,57 @@ export function handleTag(value: string, tag: string): string | false {
   }
 
   return false;
+}
+
+const parser = Parser.extend(acornJsx());
+const placeholderRegex = /^_fumadocs(\d+)$/;
+
+/** the code of an ESM block, the identifiers `_fumadocs<index>` are the expressions */
+export function toEsm(code: string, expressions: Expression[] = []): MdxjsEsm {
+  const program = parser.parse(code, { ecmaVersion: 'latest', sourceType: 'module' });
+  if (expressions.length > 0) fill(program, expressions);
+  return { type: 'mdxjsEsm', value: '', data: { estree: program as unknown as Program } };
+}
+
+function fill(node: object, expressions: Expression[]) {
+  const record = node as Record<string, { type?: string; name?: string } | null>;
+  for (const key in record) {
+    const value = record[key];
+    if (typeof value !== 'object' || value === null) continue;
+    const match = value.type === 'Identifier' && placeholderRegex.exec(value.name!);
+    if (match) record[key] = expressions[Number(match[1])];
+    else fill(value, expressions);
+  }
+}
+
+/** the shared code output, on the stringifier of mdast: estree expressions of replacements go in by placeholders */
+export function createCodeOutput(
+  file: VFile,
+  options: Pick<CodeOutputOptions<Nodes, Stringifier>, 'target' | 'isStatic' | 'keep'>,
+) {
+  const expressions: Expression[] = [];
+  let stringifier: Stringifier;
+  const out = createSharedCodeOutput<Nodes, Stringifier>({
+    ...options,
+    stringifier: (expression) =>
+      (stringifier = createStringifier(file, options.target, (value, fallback) =>
+        expression(`_fumadocs${expressions.push(value) - 1}`, fallback),
+      )),
+    range: (node) => stringifier.range(node),
+    parse: (code) => parser.parse(code, { ecmaVersion: 'latest', sourceType: 'module' }),
+    // strings skip the parser
+    literal: (value) => `_fumadocs${expressions.push({ type: 'Literal', value }) - 1}`,
+  });
+  return Object.assign(out, { esm: (code: string) => toEsm(code, expressions) });
+}
+
+/** read the names declared by the ESM of a document, wherever its nodes are (like in the content of includes) */
+export function esmScope(tree: Root): () => Set<string> {
+  return () => {
+    const scope = new Set<string>();
+    walk<Nodes>(tree, (node) => {
+      if (node.type === 'mdxjsEsm' && node.data?.estree) moduleScope(node.data.estree.body, scope);
+    });
+    return scope;
+  };
 }

@@ -1,10 +1,11 @@
-import type { StructuredData } from 'fumadocs-core/mdx-plugins';
+import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
+import type { ExtractedReference } from './remark-postprocess';
 import type { TOCItemType } from 'fumadocs-core/toc';
 import type { FC } from 'react';
 import type { MDXProps } from 'mdx/types';
 import type { Core } from '@/core';
 import type { DocCollectionItem } from '@/config/build';
-import type { Params } from 'fumadocs-core/source';
+import type { StructuredRecords } from '../../../../shared/structured-data';
 
 export interface BuildMDXOptions {
   /**
@@ -13,8 +14,6 @@ export interface BuildMDXOptions {
   filePath: string;
   source: string;
   frontmatter?: Record<string, unknown>;
-  /** for a page of a dynamic file, its params */
-  params?: Params;
 
   environment: 'bundler' | 'runtime';
   isDevelopment: boolean;
@@ -29,25 +28,26 @@ export interface CompilerOptions {
   addDependency: (file: string) => void;
 }
 
+/** the exports of a compiled page, its content and runtime outputs read the params of a page as props */
 export interface CompiledMDXProperties<Frontmatter = Record<string, unknown>> {
   frontmatter: Frontmatter;
-  structuredData: StructuredData;
-  toc: TOCItemType[];
+  structuredData: StructuredData | StructuredRecords;
+  toc: TOCItemType[] | ((props: Record<string, unknown>) => TOCItemType[]);
   default: FC<MDXProps>;
+  extractedReferences?:
+    | ExtractedReference[]
+    | ((props: Record<string, unknown>) => ExtractedReference[]);
 
   /**
    * Enable from `postprocess` option.
    *
-   * A component with `output: 'function'` in `includeProcessedMarkdown`,
-   * render it with `renderToMarkdown` from `fumadocs-core/server`.
+   * A string, or for runtime output a component, render it with `renderToMarkdown` from `fumadocs-core/server`.
    */
   _markdown?: string | FC<MDXProps>;
   /**
    * Enable from `postprocess` option.
    */
   _mdast?: string;
-  /** for a dynamic file, the module compiled for each of its params, by the params as JSON */
-  _pages?: Record<string, CompiledMDXProperties<Frontmatter>>;
 }
 
 export async function buildMDX(

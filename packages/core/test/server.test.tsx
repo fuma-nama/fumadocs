@@ -161,6 +161,48 @@ describe('components', () => {
     ).toBe('> **Note**\n>\n> <Card title="Hi">\n> body\n> </Card>');
   });
 
+  it('renders for search: the text of links, no images or code blocks, HTML tags', async () => {
+    function Card({ title }: { title: string; data?: object; children?: ReactNode }) {
+      return <div>{title}</div>;
+    }
+    // a component tells the targets apart, the Markdown of its children is for the same target
+    function Note({ children }: { children: ReactNode }) {
+      const target = asMarkdown();
+      if (target) return md`${target === 'markdown' ? 'Note for agents: ' : ''}${children}`;
+      return null;
+    }
+    const tree = (
+      <Note>
+        See the <a href="/guide">guide</a>
+        <img src="/logo.png" alt="logo" />
+        <pre>
+          <code>code</code>
+        </pre>
+        <Card title="Deploy" data={{ a: 1 }}>
+          <p>Ship it.</p>
+        </Card>
+      </Note>
+    );
+
+    expect(await renderToMarkdown(tree, { target: 'search' })).toBe(
+      'See the guide<Card title="Deploy">Ship it.</Card>',
+    );
+    expect(await renderToMarkdown(tree)).toBe(
+      [
+        'Note for agents: See the [guide](/guide)',
+        '![logo](/logo.png)',
+        '',
+        '```',
+        'code',
+        '```',
+        '',
+        '<Card title="Deploy" data={{"a":1}}>',
+        'Ship it.',
+        '</Card>',
+      ].join('\n'),
+    );
+  });
+
   it("renderRoute returns undefined for pages that don't opt in", async () => {
     function Plain() {
       return <p>html</p>;

@@ -6,6 +6,8 @@ import type { PostprocessOptions } from '@/loaders/mdx/remark-postprocess';
 import { resolveLastModified } from '@/loaders/mdx/last-modified';
 import type { MdxCompileOptions, Data, MdastPluginInput, MdastPluginDefinition } from 'satteri';
 import type { SatteriPresetOptions } from '@fumadocs/satteri/preset';
+import { listCode } from '../../../../shared/code-output';
+import { showConditions } from '../../../../shared/show';
 import type { ExtraPluginHooks } from '@fumadocs/satteri/compile';
 
 export type CompiledSatteriMDXProperties<Frontmatter = Record<string, unknown>> =
@@ -14,7 +16,7 @@ export type CompiledSatteriMDXProperties<Frontmatter = Record<string, unknown>> 
 export async function buildSatteriMDX(
   core: Core,
   collection: DocCollectionItem | undefined,
-  { filePath, frontmatter, source, _compiler, environment, isDevelopment, params }: BuildMDXOptions,
+  { filePath, frontmatter, source, _compiler, environment, isDevelopment }: BuildMDXOptions,
 ): Promise<{ code: string }> {
   const satteriOptions = await getSatteriOptions(core.getConfig(), collection, environment);
   const format = filePath.endsWith('.mdx') ? 'mdx' : 'md';
@@ -31,9 +33,9 @@ export async function buildSatteriMDX(
   const data: Data = {
     frontmatter,
     _compiler,
-    params,
     _cwd: collection?.cwd,
     _valueToExport: collection?.postprocess?.valueToExport,
+    unstable_runtimeOutputs: collection !== undefined,
   };
 
   const mdastPlugins: MdastPluginInput[] = [remarkInclude({ cwd: collection?.cwd })];
@@ -71,7 +73,8 @@ export async function buildSatteriMDX(
 
 declare module 'satteri' {
   interface DataMap {
-    extractedReferences?: { href: string }[];
+    /** the code of references, with the conditions of the branches of `<show>` around them */
+    extractedReferences?: { code: string; when: string[] }[];
   }
 }
 
@@ -91,13 +94,13 @@ function postprocessPlugin(
       }
     },
     link(node, ctx) {
-      if (extractLinkReferences) {
-        ctx.data.extractedReferences!.push({ href: node.url });
-      }
+      if (!extractLinkReferences) return;
+      const when = showConditions(node, ctx);
+      ctx.data.extractedReferences!.push({ code: JSON.stringify({ href: node.url }), when });
     },
     collectExports({ data, addExport }) {
       if (extractLinkReferences) {
-        addExport('extractedReferences', JSON.stringify(data.extractedReferences));
+        addExport('extractedReferences', listCode(data.extractedReferences!, false));
       }
 
       if (lastModified) {

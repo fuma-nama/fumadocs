@@ -63,7 +63,7 @@ test('Remark LLMs: jsx', async () => {
 test('Remark LLMs: URLs of imported images', async () => {
   // a page-relative image, and one in the public directory
   const value = '![Test](./test.png "A \\"title\\"")\n\n![Public](/remark-image.svg)\n';
-  const load = async (output: 'function' | 'string') => {
+  const load = async (output?: 'function') => {
     const compiled = String(
       await compile(
         { value, path: path.resolve(cwd, './fixtures/page.mdx') },
@@ -87,7 +87,8 @@ test('Remark LLMs: URLs of imported images', async () => {
 
   const expected =
     '![Test](</test/fixtures/test.png> "A \\"title\\"")\n\n![Public](/remark-image.svg)';
-  await expect(load('string')).resolves.toBe(`${expected}\n`);
+  // a string by default
+  await expect(load()).resolves.toBe(`${expected}\n`);
   const Md = (await load('function')) as FC;
   await expect(renderToMarkdown(<Md />)).resolves.toBe(expected);
 });

@@ -2,7 +2,9 @@ import { type ReactNode, type FC, use } from 'react';
 import type { StandardSchemaV1 } from '@standard-schema/spec';
 import type { DocCollection, DocsCollection } from '@/config/define';
 import type { CompiledMDXProperties } from '@/loaders/mdx/build';
+import type { Params } from 'fumadocs-core/source';
 import type { InternalTypeConfig } from './types';
+import { pageAt, type PageAt } from '@/utils/page';
 
 type CompiledMDXFile<
   Name extends string,
@@ -25,18 +27,19 @@ export interface ClientLoaderOptions<Doc, Props> {
   component: (loaded: Doc, props: Props) => ReactNode;
 }
 
+/** `params`: for a file of a dynamic path, the params of the page, like `page.params` of the loader */
 export interface ClientLoader<Doc, Props> {
-  preload: (path: string) => Promise<Doc>;
+  preload: (path: string, params?: Params) => Promise<Doc>;
   /**
    * Get a component that renders content with `use()`.
    */
-  getComponent: (path: string) => FC<Props>;
+  getComponent: (path: string, params?: Params) => FC<Props>;
   /**
    * Get react nodes that renders content.
    */
   useContent: undefined extends Props
-    ? (path: string, props?: Props) => ReactNode
-    : (path: string, props: Props) => ReactNode;
+    ? (path: string, props?: Props, params?: Params) => ReactNode
+    : (path: string, props: Props, params?: Params) => ReactNode;
 }
 
 export type BrowserCreate<Config, TC extends InternalTypeConfig> = ReturnType<
@@ -51,8 +54,8 @@ export interface DocCollectionEntry<
   raw: Record<string, () => Promise<CompiledMDXFile<Name, Frontmatter, TC>>>;
 
   createClientLoader: <Props extends object | undefined = undefined>(
-    options: ClientLoaderOptions<CompiledMDXFile<Name, Frontmatter, TC>, Props>,
-  ) => ClientLoader<CompiledMDXFile<Name, Frontmatter, TC>, Props>;
+    options: ClientLoaderOptions<PageAt<CompiledMDXFile<Name, Frontmatter, TC>>, Props>,
+  ) => ClientLoader<PageAt<CompiledMDXFile<Name, Frontmatter, TC>>, Props>;
 }
 
 export function browser<Config, TC extends InternalTypeConfig>() {
@@ -78,17 +81,17 @@ export function browser<Config, TC extends InternalTypeConfig>() {
 const loaderStore = new Map<
   string,
   {
-    preloaded: Map<string, CompiledMDXProperties>;
+    preloaded: Map<string, PageAt<CompiledMDXProperties>>;
   }
 >();
 
 export function createClientLoader<
-  Doc = CompiledMDXProperties,
+  Doc extends CompiledMDXProperties<unknown> = CompiledMDXProperties,
   Props extends object | undefined = undefined,
 >(
   globEntries: Record<string, () => Promise<Doc>>,
-  options: ClientLoaderOptions<Doc, Props>,
-): ClientLoader<Doc, Props> {
+  options: ClientLoaderOptions<PageAt<Doc>, Props>,
+): ClientLoader<PageAt<Doc>, Props> {
   const { id = '', component: useRenderer } = options;
   const renderers: Record<string, FC<Props>> = {};
   const loaders = new Map<string, () => Promise<Doc>>();
@@ -101,39 +104,42 @@ export function createClientLoader<
     loaders.set(k.startsWith('./') ? k.slice(2) : k, globEntries[k]);
   }
 
-  function getLoader(path: string) {
+  /** a page is its file at its params, the same page for the same params */
+  const keyOf = (path: string, params?: Params) =>
+    params ? `${path}?${JSON.stringify(params)}` : path;
+
+  async function load(path: string, params: Params = {}): Promise<PageAt<Doc>> {
     const loader = loaders.get(path);
     if (!loader)
       throw new Error(`[createClientLoader] ${path} does not exist in available entries`);
-    return loader;
+    return pageAt(await loader(), params);
   }
 
-  function getRenderer(path: string): FC<Props> {
-    if (path in renderers) return renderers[path];
+  function getRenderer(path: string, params?: Params): FC<Props> {
+    const key = keyOf(path, params);
+    if (key in renderers) return renderers[key];
 
-    let promise: Promise<Doc> | undefined;
+    let promise: Promise<PageAt<Doc>> | undefined;
     function Renderer(props: Props) {
-      let doc = store.preloaded.get(path);
-      doc ??= use((promise ??= getLoader(path)()));
+      let doc = store.preloaded.get(key) as PageAt<Doc> | undefined;
+      doc ??= use((promise ??= load(path, params)));
 
       return useRenderer(doc, props);
     }
 
-    return (renderers[path] = Renderer);
+    return (renderers[key] = Renderer);
   }
 
   return {
-    async preload(path) {
-      const loaded = await getLoader(path)();
-      store.preloaded.set(path, loaded);
+    async preload(path, params) {
+      const loaded = await load(path, params);
+      store.preloaded.set(keyOf(path, params), loaded as never);
       return loaded;
     },
-    getComponent(path) {
-      return getRenderer(path);
-    },
-    useContent(path: string, props: Props & object) {
-      const Comp = getRenderer(path);
+    getComponent: getRenderer,
+    useContent(path: string, props: Props & object, params?: Params) {
+      const Comp = getRenderer(path, params);
       return <Comp {...props} />;
     },
-  } as ClientLoader<Doc, Props>;
+  } as ClientLoader<PageAt<Doc>, Props>;
 }

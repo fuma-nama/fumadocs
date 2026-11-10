@@ -1,9 +1,11 @@
 import { expect, test } from 'vitest';
+import type { PluggableList } from 'unified';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { remark } from 'remark';
 import {
   parseCodeBlockAttributes,
+  rehypeHeading,
   rehypeToc,
   remarkCodeTab,
   remarkDirectiveAdmonition,
@@ -37,6 +39,11 @@ import {
   replaceSource,
 } from '@/mdx-plugins/stringifier';
 import { walk } from '@/mdx-plugins/utils';
+import {
+  readStructuredData,
+  renderStructuredData,
+  type StructuredRecords,
+} from '../../shared/structured-data';
 
 const cwd = path.dirname(fileURLToPath(import.meta.url));
 
@@ -742,12 +749,112 @@ test('Remark LLMs: placeholder', async () => {
   ).toMatchFileSnapshot(path.resolve(cwd, './fixtures/remark-llms.output.md'));
 });
 
-test('Remark Show: branches decided at compile time, before other plugins', async () => {
-  const { evaluate } = await import('@mdx-js/mdx');
+test('Remark Structure: components render in outputs that read the props', async () => {
+  const { compile, run } = await import('@mdx-js/mdx');
+  const runtime = await import('react/jsx-runtime');
+  // the module instance that renders records
+  const server = await import('fumadocs-core/server');
+  const code = await compile(
+    {
+      value: `export function Local() {
+  _server.asMarkdown();
+  return 'Fumadocs';
+}
+
+export function Bold({ children }) {
+  if (_server.asMarkdown()) return _server.md\`**\${children}**\`;
+  return <b>{children}</b>;
+}
+
+export function Linked() {
+  _server.asMarkdown();
+  return <a href="/docs">the docs</a>;
+}
+
+Declared: <Local />, from MDX components: <ProductName />, as a value: {<Local />}.
+
+Made with md: <Bold>text</Bold>.
+
+From MDX components, as a value: {<ProductName />}.
+
+<Card icon={<Icon />} title="Core" data={{ a: 1 }} />
+
+See <Linked /> and [a guide](/guide).
+`,
+      data: { unstable_runtimeOutputs: true },
+    },
+    { outputFormat: 'function-body', remarkPlugins: [[remarkStructure, { exportAs: true }]] },
+  );
+  const { structuredData } = await run(`const _server = arguments[0]._server;\n${String(code)}`, {
+    ...runtime,
+    _server: server,
+  } as never);
+  const records = structuredData as StructuredRecords;
+  function ProductName() {
+    server.asMarkdown();
+    return 'Fumadocs UI';
+  }
+
+  // MDX components are page props, the missing ones are kept as JSX syntax
+  expect((await renderStructuredData(records, {})).contents[0].content).toBe(
+    'Declared: Fumadocs, from MDX components: <ProductName />, as a value: Fumadocs.',
+  );
+  const data = await renderStructuredData(records, { components: { ProductName } });
+  expect(data.contents.map((item) => item.content)).toEqual([
+    'Declared: Fumadocs, from MDX components: Fumadocs UI, as a value: Fumadocs.',
+    // Markdown forms render like in processed Markdown
+    'Made with md: **text**.',
+    // components in authored code resolve like in the content
+    'From MDX components, as a value: Fumadocs UI.',
+    // rendered for search: an HTML tag without the props that aren't text, the text of a rendered link like an authored one
+    '<Card title="Core" />',
+    'See the docs and a guide.',
+  ]);
+  // read without rendering, components are tags
+  expect(readStructuredData(records, {}).contents.map((item) => item.content)).toEqual([
+    'Declared: <Local />, from MDX components: <ProductName />, as a value: <Local />.',
+    'Made with md: <Bold>text</Bold>.',
+    'From MDX components, as a value: <ProductName />.',
+    '<Card title="Core" />',
+    'See <Linked /> and a guide.',
+  ]);
+});
+
+test('Remark LLMs: placeholders in outputs that read the props', async () => {
+  const { compile, run } = await import('@mdx-js/mdx');
+  const runtime = await import('react/jsx-runtime');
+  const server = await import('@/server');
+  const code = await compile(
+    {
+      value: 'For {props.name}.\n\n<MyPage title="Hi">Body</MyPage>\n',
+      data: { unstable_runtimeOutputs: true },
+    },
+    {
+      outputFormat: 'function-body',
+      baseUrl: import.meta.url,
+      remarkPlugins: [[remarkLLMs, { mdxAsPlaceholder: ['MyPage'] }]],
+    },
+  );
+  const body = String(code).replace(
+    /await import\([^)]*"fumadocs-core\/server"\)\)?/g,
+    'arguments[0]._server',
+  );
+  const { _markdown } = await run(body, { ...runtime, _server: server } as never);
+  const markdown = await server.renderToMarkdown(runtime.jsx(_markdown as never, { name: 'Fuma' }));
+  await expect(
+    renderPlaceholder(markdown, {
+      MyPage: ({ attributes, children }) => `${attributes.title}: ${children}`,
+    }),
+  ).resolves.toBe('For Fuma.\n\nHi: Body');
+});
+
+test('Remark Show: branches and expressions render from code in every output', async () => {
+  const { compile, run } = await import('@mdx-js/mdx');
   const runtime = await import('react/jsx-runtime');
   const { renderToStaticMarkup } = await import('react-dom/server');
+  const server = await import('@/server');
+  const { renderToMarkdown } = server;
   const { remarkShow } = await import('@/mdx-plugins/remark-show');
-  type RemarkShowOptions = import('@/mdx-plugins/remark-show').RemarkShowOptions;
 
   const source = `# Deploy on {props.framework}
 
@@ -755,102 +862,243 @@ test('Remark Show: branches decided at compile time, before other plugins', asyn
 
 A {props.framework === "next" && "x"} B {true}
 
-<div>
-{props.framework}
-</div>
-
-<show when={import.meta.env.EDITION === "pro"}>
+<show when={props.edition === "pro"}>
 ## Pro
 </show>
 
+## Overview
+
+Shared.
+
 <show when={props.framework === "astro"}>
 ## Setup
+
+Astro only.
 </show>
+
+After the branch.
 
 <show when={props.framework === "waku"}>Waku detects the **platform**.</show>
 
 <show when={props.framework === "astro" && props.pm === "pnpm"}>
 ## With pnpm
-</show>`;
+</show>
 
-  async function compile(
-    framework: string,
-    define: RemarkShowOptions['define'] = { 'import.meta.env.EDITION': 'free' },
-  ) {
-    let structured: StructuredData | undefined;
-    let markdown = '';
-    const mod = await evaluate(
-      { value: source, data: { params: { framework } } },
-      {
-        ...runtime,
-        remarkPlugins: [
-          [remarkShow, { define } satisfies RemarkShowOptions],
-          remarkHeading,
-          remarkStructure,
-          [remarkLLMs, { _data: true }],
-          () => (_tree, file) => {
-            structured = file.data.structuredData;
-            markdown = file.data.markdown as string;
-          },
-        ],
-      },
-    );
-    const html = (props: object) => renderToStaticMarkup(runtime.jsx(mod.default, props));
-    return { html, structured: structured!, markdown };
-  }
+1. First.
+2. <show when={props.framework === "waku"}>
+     Waku, on two
+     lines.
+   </show>
+   <show when={props.framework === "astro"}>
+     Astro.
+   </show>
 
-  const waku = await compile('waku');
-  const astro = await compile('astro');
+<show when={props.framework === "waku"}>
+## Setup
+</show>
 
-  // plugins only see the branches that show
-  expect(astro.structured.headings.map((item) => item.id)).toEqual([
-    'deploy-on-astro',
-    'setup',
-    'with-pnpm',
+## Notes {/* draft */}
+
+## Mode <show when={props.framework === "waku"}>Waku</show>`;
+
+  // set by the content source, like the collection of Fumadocs MDX
+  const code = await compile(
+    { value: source, data: { unstable_runtimeOutputs: true } },
+    {
+      outputFormat: 'function-body',
+      baseUrl: import.meta.url,
+      remarkPlugins: [remarkShow, remarkHeading, [remarkStructure, { exportAs: true }], remarkLLMs],
+      rehypePlugins: [rehypeToc, rehypeHeading],
+    },
+  );
+  // the generated imports of `fumadocs-core/server`, from the source
+  const body = String(code).replace(
+    /await import\([^)]*"fumadocs-core\/server"\)\)?/g,
+    'arguments[0]._server',
+  );
+  const mod = await run(body, { ...runtime, _server: server } as never);
+  type Page = {
+    toc: (props: object) => { url: string }[];
+    structuredData: StructuredRecords;
+    _markdown: (props: object) => unknown;
+  };
+  const page = mod as unknown as Page;
+  const outputs = async (props: Record<string, unknown>) => ({
+    toc: page.toc(props).map((item) => item.url),
+    structured: await renderStructuredData(page.structuredData, props),
+    markdown: await renderToMarkdown(runtime.jsx(page._markdown as never, props)),
+    html: renderToStaticMarkup(runtime.jsx(mod.default, props)),
+  });
+
+  const astro = await outputs({ framework: 'astro' });
+  const waku = await outputs({ framework: 'waku' });
+  const pnpm = await outputs({ framework: 'astro', pm: 'pnpm' });
+
+  // every output keeps only the branches that show, IDs read the props
+  // a comment is no text, a branch in a heading counts when it shows
+  expect(astro.toc).toEqual(['#deploy-on-astro', '#overview', '#setup', '#notes', '#mode']);
+  // a heading in two branches has the same ID in both
+  expect(waku.toc).toEqual(['#deploy-on-waku', '#overview', '#setup', '#notes', '#mode-waku']);
+  expect(pnpm.toc).toContain('#with-pnpm');
+  expect(astro.structured.headings.map((item) => item.content)).toEqual([
+    'Deploy on astro',
+    'Overview',
+    'Setup',
+    'Notes',
+    'Mode',
   ]);
+  expect(waku.html).toContain('<h2 id="mode-waku">Mode Waku</h2>');
   expect(waku.structured.contents.map((item) => item.content)).toContain(
     'Waku detects the **platform**.',
   );
-  // other expressions and the branches checked when rendering stay as authored
-  expect(astro.markdown).toContain(
-    '<show when={props.framework === "astro" && props.pm === "pnpm"}>',
+  expect(astro.structured.contents.map((item) => item.content)).not.toContain(
+    'Waku detects the **platform**.',
   );
-  expect(waku.markdown).toContain('# Deploy on waku');
-  expect(waku.markdown).toContain('<span data-framework={props.framework} />');
+  // content after a branch belongs to the last heading that shows with it
+  const after = (data: StructuredData) =>
+    data.contents.find((item) => item.content === 'After the branch.')?.heading;
+  expect(after(astro.structured)).toBe('setup');
+  expect(after(waku.structured)).toBe('overview');
+  // expressions are values
+  expect(waku.markdown).toContain('# Deploy on waku [#deploy-on-waku]');
+  expect(waku.html).toContain('<h1 id="deploy-on-waku">Deploy on waku</h1>');
   expect(waku.markdown).not.toContain('Pro');
-  // a removed branch leaves no blank lines
+  expect(waku.markdown).toContain('Waku detects the **platform**.');
+  expect(astro.markdown).toContain('Astro only.');
+  expect(waku.markdown).not.toContain('Astro only.');
   expect(waku.markdown).not.toMatch(/\n{3,}/);
+  // a branch in a list item keeps its prefixes, the whitespace after a branch goes with it
+  expect(waku.markdown).toContain('2. Waku, on two\n   lines.');
+  expect(astro.markdown).toContain('2. Astro.');
 
-  // they read the params as props when rendering
-  const html = waku.html({ framework: 'waku' });
-  expect(html).toContain('data-framework="waku"');
+  expect(waku.html).toContain('data-framework="waku"');
   // booleans render nothing
-  expect(html).toContain('<p>A  B </p>');
-  expect(html).toContain('<div>waku</div>');
-  expect(astro.html({ framework: 'astro' })).not.toContain('With pnpm');
-  expect(astro.html({ framework: 'astro', pm: 'pnpm' })).toContain('With pnpm');
-
-  // a function decides the values of each page
-  const pro = await compile('astro', ({ params }) => ({
-    'props.framework': params?.framework,
-    'import.meta.env.EDITION': 'pro',
-  }));
-  expect(pro.markdown).toContain('# Deploy on astro');
-  expect(pro.markdown).toContain('## Pro');
+  expect(waku.html).toContain('<p>A  B </p>');
+  expect(astro.html).not.toContain('With pnpm');
+  expect(pnpm.html).toContain('With pnpm');
 });
 
-test('Remark Show: the content of a branch joins the content around it', async () => {
-  const { compile } = await import('@mdx-js/mdx');
-  const { remarkShow } = await import('@/mdx-plugins/remark-show');
-  const { remarkCodeTab } = await import('@/mdx-plugins/remark-code-tab');
-  const file = await compile(
+test('Remark Heading: headings with IDs from code stay headings for other plugins', async () => {
+  const { compile, run } = await import('@mdx-js/mdx');
+  const runtime = await import('react/jsx-runtime');
+  const { renderToStaticMarkup } = await import('react-dom/server');
+  const code = await compile(
     {
       value:
-        '```ts tab="Shared"\na\n```\n\n<show when={props.framework === "astro"}>\n```ts tab="Astro"\nb\n```\n</show>\n',
-      data: { params: { framework: 'astro' } },
+        '### Install [step]\n\nA\n\n### Use {props.name} <Badge>new</Badge> [step]\n\nB\n\n### Deploy [step]\n',
+      data: { unstable_runtimeOutputs: true },
     },
-    { remarkPlugins: [remarkShow, remarkCodeTab] },
+    {
+      outputFormat: 'function-body',
+      baseUrl: import.meta.url,
+      remarkPlugins: [remarkHeading, remarkSteps],
+      rehypePlugins: [rehypeToc, rehypeHeading],
+    },
   );
-  // one tab group, across the branch
-  expect(String(file).match(/defaultValue:/g)).toHaveLength(1);
+  const mod = await run(String(code), runtime as never);
+  const toc = mod.toc as (props: object) => { url: string; _step?: number; title: never }[];
+  const components = {
+    Badge: (props: { children: string }) => runtime.jsx('b', props),
+    // headings are MDX components like before
+    h3: (props: object) => runtime.jsx('h4', props),
+  };
+
+  expect(renderToStaticMarkup(runtime.jsx(mod.default, { name: 'X', components }))).toBe(
+    '<div class="fd-steps"><div class="fd-step"><h4 id="install-step" data-fd-step="1">Install</h4><p>A</p></div><div class="fd-step"><h4 id="use-x-new-step" data-fd-step="2">Use X <b>new</b></h4><p>B</p></div><div class="fd-step"><h4 id="deploy-step" data-fd-step="3">Deploy</h4></div></div>',
+  );
+  const titles = (props: object) =>
+    toc(props).map((item) => [item.url, item._step, renderToStaticMarkup(item.title)]);
+  expect(titles({ name: 'X', components })).toEqual([
+    ['#install-step', 1, 'Install'],
+    ['#use-x-new-step', 2, 'Use X <b>new</b>'],
+    ['#deploy-step', 3, 'Deploy'],
+  ]);
+  // without the MDX components, a component of a title is its content
+  expect(titles({ name: 'X' })[1][2]).toBe('Use X new');
+});
+
+test('Remark Heading: a custom slug slugs when rendering with its own runtime', async () => {
+  const { compile } = await import('@mdx-js/mdx');
+  const { createHeadingIds } = await import('@/mdx-plugins/remark-heading.runtime');
+  const slug = (_root: unknown, _heading: unknown, text: string) => text.toUpperCase();
+  const run = async (options: object) =>
+    String(
+      await compile(
+        { value: '## On {props.framework}\n', data: { unstable_runtimeOutputs: true } },
+        { remarkPlugins: [[remarkHeading, options]], rehypePlugins: [rehypeHeading] },
+      ),
+    );
+
+  // slugged from the source
+  const fromSource = await run({ slug });
+  expect(fromSource).toContain('id: "ON PROPS.FRAMEWORK"');
+  expect(fromSource).not.toContain('_headingIds');
+
+  // its module replaces the runtime of Fumadocs
+  const fromCode = await run({ slug, slugImportSource: '@/lib/heading' });
+  expect(fromCode).toContain(
+    'import {createHeadingIds as _createHeadingIds} from "@/lib/heading";',
+  );
+  expect(fromCode).toContain('id: _headingIds(props)[0]');
+
+  // which the module can call with its own slugger, created for each page
+  const ids = createHeadingIds([() => ['On ', 'next'], () => null, () => ['On next']], () => {
+    const seen = new Set<string>();
+    return (text) => {
+      const id = text.toUpperCase();
+      if (seen.has(id)) return `${id}-AGAIN`;
+      seen.add(id);
+      return id;
+    };
+  });
+  expect(ids({})).toEqual(['ON NEXT', '', 'ON NEXT-AGAIN']);
+});
+
+test('Remark Show: static outputs analyse the source', async () => {
+  const { compile } = await import('@mdx-js/mdx');
+  const { remarkShow } = await import('@/mdx-plugins/remark-show');
+  const compileStatic = (value: string, remarkPlugins: PluggableList = []) =>
+    compile(value, {
+      remarkPlugins: [remarkShow, remarkHeading, ...remarkPlugins],
+      rehypePlugins: [rehypeToc],
+    });
+  const file = String(
+    await compileStatic('## Deploy on {props.framework}\n\nAstro.\n', [
+      [remarkStructure, { exportAs: true }],
+      remarkLLMs,
+    ]),
+  );
+  expect(file).toContain(
+    'export const _markdown = "## Deploy on {props.framework} [#deploy-on-propsframework]\\n\\nAstro.\\n";',
+  );
+  expect(file).toContain('"content": "Deploy on {props.framework}"');
+  expect(file).toMatch(
+    /export const toc = \[\{\n\s+depth: 2,\n\s+url: "#deploy-on-propsframework"/,
+  );
+  // IDs are slugged from the source, like the TOC
+  expect(file).toContain('id: "deploy-on-propsframework"');
+  expect(file).not.toContain('_headingIds');
+
+  // a string of Markdown is static in a source that renders pages for props too, with the ID slugged from the source
+  const mixed = String(
+    await compile(
+      { value: '## Deploy on {props.framework}\n', data: { unstable_runtimeOutputs: true } },
+      { remarkPlugins: [remarkHeading, [remarkLLMs, { output: 'string' }]] },
+    ),
+  );
+  expect(mixed).toContain(
+    'export const _markdown = "## Deploy on {props.framework} [#deploy-on-propsframework]\\n";',
+  );
+
+  // the source decides whether outputs read the props, a static output fails on branches that only props tell apart
+  const branch = '<show when={props.a}>\n## Astro\n\n[Astro](/astro).\n</show>\n';
+  for (const plugins of [
+    [],
+    [[remarkStructure, { exportAs: true }]],
+    [remarkLLMs],
+    [[remarkLLMs, { output: 'string' }]],
+  ])
+    await expect(compileStatic(branch, plugins as PluggableList)).rejects.toThrow(
+      'the outputs of this document are static',
+    );
 });

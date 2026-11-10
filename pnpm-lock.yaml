@@ -2288,9 +2288,6 @@ importers:
       satteri:
         specifier: ^0.11.7
         version: 0.11.7
-      yaml:
-        specifier: ^2.9.1
-        version: 2.9.1
       yuku-parser:
         specifier: ^0.19.0
         version: 0.19.0
@@ -2678,6 +2675,12 @@ importers:
       '@fumari/image-size':
         specifier: workspace:^
         version: link:../image-size
+      acorn:
+        specifier: ^8.19.0
+        version: 8.19.0
+      acorn-jsx:
+        specifier: ^5.3.2
+        version: 5.3.2(acorn@8.19.0)
       estree-util-value-to-estree:
         specifier: ^3.5.0
         version: 3.5.0
@@ -4365,12 +4368,24 @@ importers:
       '@fumadocs/cli':
         specifier: workspace:*
         version: link:../cli
+      '@fumadocs/local-content':
+        specifier: workspace:*
+        version: link:../local-content
+      '@standard-schema/spec':
+        specifier: ^1.1.0
+        version: 1.1.0
       '@types/node':
         specifier: ^26.6.6
         version: 26.6.6
+      '@types/react':
+        specifier: ^19.3.0
+        version: 19.3.0
       fuma-translate:
         specifier: ^1.0.2
         version: 1.0.2
+      fumadocs-core:
+        specifier: workspace:*
+        version: link:../core
       tsconfig:
         specifier: workspace:*
         version: link:../tsconfig

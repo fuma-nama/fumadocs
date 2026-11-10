@@ -16,7 +16,7 @@ export interface MdxPluginOptions<P extends Page = Page> {
 }
 
 /** a page of a Fumadocs MDX collection, loaded eagerly or with `async: true` */
-type Entry = DocMethods & (DocData | Pick<AsyncDocCollectionEntry, 'load'>);
+type Entry = DocMethods & (DocData | Pick<AsyncDocCollectionEntry, 'load' | 'structuredData'>);
 
 /**
  * Render the pages of Fumadocs MDX collections: their body, Markdown, table of contents, structured data and dates.
@@ -36,6 +36,13 @@ export default function mdxPlugin<Config extends LoaderConfig = LoaderConfig>({
     };
   }
 
+  /** the data of a page with its MDX components as page props, its outputs render with them */
+  async function withComponents(ctx: PluginContext<Config>, page: Config['page']) {
+    const props = { components: await getComponents(ctx, page) };
+    const loader = await ctx.getLoader();
+    return (loader.getPage(page.slugs, { language: page.locale, props }) ?? page).data;
+  }
+
   return {
     name: 'mdx',
     async getPageBody(page) {
@@ -47,15 +54,20 @@ export default function mdxPlugin<Config extends LoaderConfig = LoaderConfig>({
     },
     async getPageText(page) {
       if (!isEntry(page.data)) return;
-      return page.data.getText('processed', {
-        components: await getComponents(this, page),
-      });
+      const data = await withComponents(this, page);
+      if (isEntry(data)) return data.getText('processed');
     },
     async getPageToc(page) {
       if (isEntry(page.data)) return (await load(page.data)).toc;
     },
     async getPageStructuredData(page) {
-      if (isEntry(page.data)) return (await load(page.data)).structuredData;
+      if (!isEntry(page.data)) return;
+      const data = await withComponents(this, page);
+      if (!isEntry(data)) return;
+      // async entries render it, with the components
+      return typeof data.structuredData === 'function'
+        ? data.structuredData()
+        : data.structuredData;
     },
     getPageCreatedAt({ data }) {
       if (!isEntry(data) || !('date' in data)) return;

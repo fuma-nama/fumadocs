@@ -1,15 +1,17 @@
 import type { Processor, Transformer } from 'unified';
 import type { Root, Element, Nodes } from 'hast';
 import { toEstree } from 'hast-util-to-estree';
-import type { JSXElement, ObjectExpression } from 'estree-jsx';
-import { handleTag, toMdxExportRaw, walk } from './utils';
+import type { Expression, JSXElement } from 'estree-jsx';
+import { esmScope, handleTag, toEsm } from './utils';
+import { componentsCode, jsxComponents, listCode } from '../../../shared/code-output';
+import { isStaticOutput, walkBranches } from '../../../shared/show';
 
 export interface RehypeTocOptions {
   /**
    * Export the generated toc.
    *
    * - `true` (default): as an ESM export named `toc`.
-   * - `false`: disable the plugin.
+   * - `false`: no TOC.
    */
   exportToc?:
     | boolean
@@ -71,153 +73,80 @@ export function rehypeToc(
     exportToc = { as: 'esm', name: 'toc' };
   }
 
-  if (exportToc === false) {
-    return () => undefined;
-  }
-
   return (tree, file) => {
-    const items: RehypeTOCItemType[] = [];
+    const items: (RehypeTOCItemType & { when: string[] })[] = [];
 
-    walk<Nodes>(tree, (element, idx, parent) => {
-      if (element.type !== 'element') return;
-      if (!HeadingTags.has(element.tagName) || element.children.length === 0) return;
+    walkBranches<Nodes>(tree, (node, when, parent) => {
+      if (node.type !== 'element' || !HeadingTags.has(node.tagName)) return;
+      const { id } = node.properties;
+      const last = node.children.at(-1);
+      if (typeof id !== 'string' || !last) return 'skip';
 
-      const id = element.properties.id;
-      if (typeof id !== 'string') return 'skip';
-      let isTocOnly = false;
-
-      const last = element.children[element.children.length - 1];
-      if (last.type === 'text') {
-        const noToc = handleTag(last.value, NoTocTag);
-
-        if (noToc !== false) {
-          last.value = noToc;
-          return 'skip';
-        }
-
-        const tocOnly = handleTag(last.value, TocOnlyTag);
-        if (tocOnly !== false) {
-          isTocOnly = true;
-          last.value = tocOnly;
-        }
+      const text = last.type === 'text' ? last : undefined;
+      const noToc = text && handleTag(text.value, NoTocTag);
+      if (typeof noToc === 'string') {
+        text!.value = noToc;
+        return 'skip';
+      }
+      const tocOnly = text && handleTag(text.value, TocOnlyTag);
+      if (typeof tocOnly === 'string') {
+        text!.value = tocOnly;
+        const siblings = (parent as Root | Element).children;
+        siblings.splice(siblings.indexOf(node), 1);
       }
 
       items.push({
-        title: element,
-        depth: Number(element.tagName[1]),
+        title: node,
+        depth: Number(node.tagName[1]),
         url: `#${id}`,
-        _step: getStep(element.properties),
+        _step: getStep(node.properties),
+        when,
       });
-
-      if (isTocOnly && parent && typeof idx === 'number') {
-        parent.children.splice(idx, 1);
-      }
-
       return 'skip';
     });
 
+    if (exportToc === false) return;
     if (exportToc.as === 'esm') {
-      const esmItems: {
-        title: JSXElement;
-        url: string;
-        depth: number;
-        _step?: number;
-      }[] = [];
-      for (const item of items) {
-        const root = toEstree(item.title, {
-          elementAttributeNameCase: 'react',
-          stylePropertyNameCase: 'dom',
-        }).body[0];
-
-        if (root.type === 'ExpressionStatement' && root.expression.type === 'JSXElement') {
-          esmItems.push({
-            ...item,
-            title: root.expression,
-          });
-        }
+      const titles: Expression[] = [];
+      const list: { code: string; when: string[] }[] = [];
+      const components = new Set<string>();
+      for (const { title, when, url, depth, _step } of items) {
+        const { children } = toJsx(title);
+        jsxComponents(children, components);
+        const i = titles.push({
+          type: 'JSXFragment',
+          openingFragment: { type: 'JSXOpeningFragment' },
+          closingFragment: { type: 'JSXClosingFragment' },
+          children,
+        });
+        const id = file.data._headingIds?.[url.slice(1)];
+        let code = `{depth: ${depth}, url: ${id ? `"#" + ${id}` : JSON.stringify(url)}`;
+        if (_step !== undefined) code += `, _step: ${_step}`;
+        list.push({ code: `${code}, title: _fumadocs${i - 1}}`, when });
       }
-
+      // like in the content, the other components of titles are MDX components: without them, their content
+      const declaration = componentsCode(
+        components,
+        esmScope(tree as never),
+        'props.components ?? {}',
+        '((props) => props.children)',
+      );
       tree.children.push(
-        toMdxExportRaw(exportToc.name, {
-          type: 'ArrayExpression',
-          elements: esmItems.map((item) => {
-            const obj: ObjectExpression = {
-              type: 'ObjectExpression',
-              properties: [
-                {
-                  type: 'Property',
-                  method: false,
-                  shorthand: false,
-                  computed: false,
-                  key: {
-                    type: 'Identifier',
-                    name: 'depth',
-                  },
-                  value: {
-                    type: 'Literal',
-                    value: item.depth,
-                  },
-                  kind: 'init',
-                },
-                {
-                  type: 'Property',
-                  method: false,
-                  shorthand: false,
-                  computed: false,
-                  key: {
-                    type: 'Identifier',
-                    name: 'url',
-                  },
-                  value: {
-                    type: 'Literal',
-                    value: item.url,
-                  },
-                  kind: 'init',
-                },
-                {
-                  type: 'Property',
-                  method: false,
-                  shorthand: false,
-                  computed: false,
-                  key: {
-                    type: 'Identifier',
-                    name: 'title',
-                  },
-                  value: {
-                    type: 'JSXFragment',
-                    openingFragment: { type: 'JSXOpeningFragment' },
-                    closingFragment: { type: 'JSXClosingFragment' },
-                    children: item.title.children,
-                  },
-                  kind: 'init',
-                },
-              ],
-            };
-
-            if (typeof item._step === 'number') {
-              obj.properties.push({
-                type: 'Property',
-                method: false,
-                shorthand: false,
-                computed: false,
-                key: {
-                  type: 'Identifier',
-                  name: '_step',
-                },
-                value: {
-                  type: 'Literal',
-                  value: item._step,
-                },
-                kind: 'init',
-              });
-            }
-
-            return obj;
-          }),
-        }),
+        toEsm(
+          `export const ${exportToc.name} = ${listCode(list, isStaticOutput(file.data), declaration)};`,
+          titles,
+        ),
       );
     } else {
-      file.data.rehypeToc = items;
+      file.data.rehypeToc = items.map(({ when: _, ...item }) => item);
     }
   };
+}
+
+function toJsx(element: Element): JSXElement {
+  const root = toEstree(element, {
+    elementAttributeNameCase: 'react',
+    stylePropertyNameCase: 'dom',
+  });
+  return (root.body[0] as { expression: JSXElement }).expression;
 }

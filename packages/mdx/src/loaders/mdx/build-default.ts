@@ -41,7 +41,6 @@ export async function buildJSMDX(
     environment,
     isDevelopment,
     importsOnly = false,
-    params,
   }: BuildMDXOptions,
 ) {
   const mdxOptions = await getMDXOptions(core.getConfig(), collection, environment);
@@ -79,15 +78,13 @@ export async function buildJSMDX(
     value: source,
     path: filePath,
     cwd: collection?.cwd,
-    data: { frontmatter, _compiler },
+    // the outputs of a page in a collection render for its props
+    data: { frontmatter, _compiler, unstable_runtimeOutputs: collection !== undefined },
   });
 
   if (collection) {
     vfile = await core.transformVFile({ collection, filePath, source }, vfile);
   }
-  // after `transformVFile`, which may return a different vfile
-  vfile.data.params = params;
-
   // the processor is cached per collection, so this per-file value rides the vfile instead.
   // set after `transformVFile`, which may return a different vfile.
   const lastModified = await resolveLastModified(collection, filePath);

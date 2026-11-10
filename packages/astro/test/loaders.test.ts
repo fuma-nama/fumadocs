@@ -35,8 +35,6 @@ it.skipIf(process.platform === 'win32')(
       store: {
         set: ({ id, data }: { id: string; data: { lastModified?: Date } }) =>
           dates.set(id, data.lastModified),
-        keys: () => [],
-        values: () => [],
       },
       generateDigest: String,
     } as unknown as LoaderContext);

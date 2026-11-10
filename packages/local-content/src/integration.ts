@@ -14,8 +14,16 @@ export type ParsedFile<Page, Meta> =
   | {
       type: 'page';
       data: Page;
-      /** for a file of a dynamic path, like `[framework]/deploy.mdx`, the data of its page at some params */
-      dataAt?: (params: Params) => Page | Promise<Page>;
+      /**
+       * For a file of a dynamic path, like `[framework]/deploy.mdx`, the data of its page at some params.
+       *
+       * With `custom`, the page with the custom props of `getPage()`, returned synchronously: `data` is the data of the
+       * page at these params.
+       */
+      dataAt?: (
+        params: Params,
+        custom?: { props: Record<string, unknown>; data: Page },
+      ) => Page | Promise<Page>;
     }
   | {
       type: 'meta';

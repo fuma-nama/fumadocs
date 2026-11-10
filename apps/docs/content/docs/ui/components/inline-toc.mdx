@@ -8,12 +8,12 @@ preview: inlineTOC
 
 ## Usage
 
-You can use it in your MDX content:
+You can use it in your MDX content. In an MDX file of Fumadocs MDX, the `toc` export is a function of the props of the page:
 
 ```mdx title="content.mdx"
 import { InlineTOC } from 'fumadocs-ui/components/inline-toc';
 
-<InlineTOC items={toc}>Table of Contents</InlineTOC>
+<InlineTOC items={toc(props)}>Table of Contents</InlineTOC>
 ```
 
 Or adding it to every page.

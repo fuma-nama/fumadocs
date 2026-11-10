@@ -1,12 +1,30 @@
+import type { MarkdownTarget } from '@/server';
 import type { Expression } from 'estree-jsx';
 import type { Nodes } from 'mdast';
 import type { VFile } from 'vfile';
+import type { HeadingIds } from '../../../shared/heading-id';
 
 /**
  * The Markdown of a node. A string covers the edits inside the node made before it and blocks those made after, a
  * function runs when stringifying instead, and its `s.stringify()` & `s.inner()` apply the edits inside.
  */
 export type Replacement = string | ((s: Stringifier) => string);
+
+declare module 'vfile' {
+  interface DataMap {
+    /**
+     * Set by a content source that renders pages for props, like path params: the outputs of the Fumadocs plugins
+     * (the TOC, structured data, processed Markdown) are functions of the props, to call with the props of a page.
+     *
+     * The source decides for all of its documents, so the shape of an export never depends on the content.
+     */
+    unstable_runtimeOutputs?: boolean;
+    /** @internal set by `remarkShow` on a document with branches, which only props tell apart */
+    _show?: boolean;
+    /** @internal set by `remarkHeading`, see {@link HeadingIds} */
+    _headingIds?: HeadingIds;
+  }
+}
 
 interface Range {
   start: number;
@@ -58,13 +76,14 @@ function getRange(node: Nodes): Range | undefined {
 /**
  * Replace the Markdown of an authored node, ignored without a position. The last edit of a node wins.
  *
- * @param namespace - limit the edit to the stringifiers of a namespace, like `search` for search records
+ * @param namespace - limit the edit to the stringifiers of a namespace: `search` for search records, `markdown` for
+ *   processed Markdown
  */
 export function replaceSource(
   file: VFile,
   node: Nodes,
   text: Replacement,
-  namespace?: 'search' | (string & {}),
+  namespace?: MarkdownTarget | (string & {}),
 ): void {
   getDocument(file).replacements.push({ node, text, namespace });
 }
@@ -129,12 +148,12 @@ export interface Stringifier {
 }
 
 /**
- * @param namespace - also apply the edits of this namespace, like `search` for search records
+ * @param namespace - also apply the edits of this namespace
  * @param expression - output the expressions of replacements, their fallbacks are output without it
  */
 export function createStringifier(
   file: VFile,
-  namespace?: 'search' | (string & {}),
+  namespace?: MarkdownTarget | (string & {}),
   expression: Stringifier['expression'] = (_, fallback) => fallback,
 ): Stringifier {
   const doc = documents.get(file);

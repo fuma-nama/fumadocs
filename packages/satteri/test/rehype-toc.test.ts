@@ -46,14 +46,19 @@ describe('rehype-toc', () => {
     `);
   });
 
-  it('skips elements with expressions in headings', async () => {
+  it('keeps elements with expressions in headings', async () => {
     const code = await compile('## A ![icon](./icon.png) <Badge value={1} /> <Badge text="b" />');
 
     expect(tocExport(code)).toMatchInlineSnapshot(`
       "[{
           title: _jsxs(_Fragment, { children: [
               "A ",
+              _jsx("img", {
+                  alt: "icon",
+                  src: __img0
+              }),
               " ",
+              _jsx(Badge, { value: 1 }),
               " ",
               _jsx(Badge, { text: "b" })
           ] }),

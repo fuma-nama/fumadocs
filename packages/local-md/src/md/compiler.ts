@@ -1,6 +1,10 @@
 import { remarkGfm } from 'fumadocs-core/mdx-plugins/remark-gfm';
 import { plugin, plugins } from './utils';
-import { remarkHeading, type RemarkHeadingOptions } from 'fumadocs-core/mdx-plugins/remark-heading';
+import {
+  rehypeHeading,
+  remarkHeading,
+  type RemarkHeadingOptions,
+} from 'fumadocs-core/mdx-plugins/remark-heading';
 import { remarkNpm, type RemarkNpmOptions } from 'fumadocs-core/mdx-plugins/remark-npm';
 import {
   remarkCodeTab,
@@ -10,13 +14,14 @@ import { rehypeCode, type RehypeCodeOptions } from 'fumadocs-core/mdx-plugins/re
 import { rehypeToc, type RehypeTocOptions } from 'fumadocs-core/mdx-plugins/rehype-toc';
 import { remarkStructure, type StructureOptions } from 'fumadocs-core/mdx-plugins/remark-structure';
 import { remarkInclude, type RemarkIncludeOptions } from 'fumadocs-core/mdx-plugins/remark-include';
-import { remarkShow, type RemarkShowOptions } from 'fumadocs-core/mdx-plugins/remark-show';
+import { remarkShow } from 'fumadocs-core/mdx-plugins/remark-show';
 import { Compatible, VFile } from 'vfile';
 import type { Root } from 'hast';
 import * as Mdx from '@mdx-js/mdx';
 import { remark } from 'remark';
 import type { PluggableList } from 'unified';
 import remarkRehype, { type Options as RemarkRehypeOptions } from 'remark-rehype';
+import { headingRuntime } from '../../../shared/heading-id';
 
 export interface MarkdownCompilerOptions {
   mdOptions?: MarkdownProcessorOptions;
@@ -37,7 +42,6 @@ export interface MarkdownProcessorOptions {
 }
 
 export interface MDXProcessorOptions extends Mdx.ProcessorOptions {
-  remarkShowOptions?: RemarkShowOptions;
   remarkStructureOptions?: StructureOptions | false;
   remarkHeadingOptions?: RemarkHeadingOptions | false;
   remarkCodeTabOptions?: RemarkCodeTabOptions | false;
@@ -111,7 +115,6 @@ export function createMarkdownCompiler(options?: MarkdownCompilerOptions): Markd
 
   function createMdxCompiler() {
     const {
-      remarkShowOptions,
       remarkCodeTabOptions,
       remarkHeadingOptions,
       remarkNpmOptions,
@@ -128,21 +131,23 @@ export function createMarkdownCompiler(options?: MarkdownCompilerOptions): Markd
       outputFormat: 'function-body',
       development: false,
       remarkPlugins: plugins(
-        plugin(remarkShow, remarkShowOptions),
         plugin(remarkInclude, { getProcessor }),
+        remarkShow,
         remarkGfm,
         remarkHeadingOptions !== false &&
           plugin(remarkHeading, { generateToc: false, ...remarkHeadingOptions }),
         remarkNpmOptions !== false && plugin(remarkNpm, remarkNpmOptions),
         remarkCodeTabOptions !== false && plugin(remarkCodeTab, remarkCodeTabOptions),
         ...(remarkPlugins ?? []),
-        remarkStructureOptions !== false && plugin(remarkStructure, remarkStructureOptions),
+        remarkStructureOptions !== false &&
+          plugin(remarkStructure, { exportAs: 'structuredData', ...remarkStructureOptions }),
       ),
       rehypePlugins: plugins(
         rehypeCodeOptions !== false && plugin(rehypeCode, rehypeCodeOptions),
         ...(rehypePlugins ?? []),
         rehypeTocOptions !== false &&
           plugin(rehypeToc, { exportToc: { as: 'esm', name: 'toc' }, ...rehypeTocOptions }),
+        rehypeHeading,
       ),
     });
   }
@@ -150,13 +155,20 @@ export function createMarkdownCompiler(options?: MarkdownCompilerOptions): Markd
   return {
     async compile(input) {
       const file = new VFile(input);
+      // the outputs are rendered for the props of a page
+      file.data.unstable_runtimeOutputs = true;
       if (file.extname === '.mdx') {
         mdx ??= createMdxCompiler();
         const out = await mdx.process(file);
         return {
           type: 'js',
           file,
-          code: String(out.value),
+          // like the JSX runtime, the runtime of generated code reads from `arguments[0]`, a dynamic import can't run
+          // synchronously or in browsers
+          code: String(out.value).replace(
+            `await import(_resolveDynamicMdxSpecifier(${JSON.stringify(headingRuntime)}))`,
+            'arguments[0]',
+          ),
         };
       }
 

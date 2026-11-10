@@ -1,3 +1,5 @@
+import type { MarkdownTarget } from 'fumadocs-core/server';
+import type { HeadingIds } from '../../shared/heading-id';
 import type { MdastVisitorContext } from 'satteri';
 
 /**
@@ -34,6 +36,17 @@ declare module 'satteri' {
     /** sources embedded after the document's, e.g. included files */
     _embeddedSource?: string;
     _embeds?: Embed[];
+    /**
+     * Set by a content source that renders pages for props, like path params: the outputs of the Fumadocs plugins
+     * (the TOC, structured data, processed Markdown) are functions of the props, to call with the props of a page.
+     *
+     * The source decides for all of its documents, so the shape of an export never depends on the content.
+     */
+    unstable_runtimeOutputs?: boolean;
+    /** @internal set by `remarkShow` on a document with branches, which only props tell apart */
+    _show?: boolean;
+    /** @internal set by `remarkHeading`, see {@link HeadingIds} */
+    _headingIds?: HeadingIds;
   }
 }
 
@@ -59,13 +72,14 @@ export function offsets(node: PositionedNode): Range | undefined {
 /**
  * Replace the Markdown of an authored node, ignored without a position. The last edit of a node wins.
  *
- * @param namespace - limit the edit to the stringifiers of a namespace, like `search` for search records
+ * @param namespace - limit the edit to the stringifiers of a namespace: `search` for search records, `markdown` for
+ *   processed Markdown
  */
 export function replaceSource(
   ctx: MdastVisitorContext,
   node: PositionedNode,
   text: Replacement,
-  namespace?: 'search' | (string & {}),
+  namespace?: MarkdownTarget | (string & {}),
 ): void {
   const range = offsets(node);
   if (range && range.end > range.start)
@@ -139,8 +153,8 @@ export interface Stringifier {
   /** whether `range` is output inside `outer`, embedded sources are output in place of the node they replace */
   within: (range: Range, outer: Range) => boolean;
   /**
-   * Markdown evaluated where the output is exported, like the URL of an imported file. `fallback` in outputs that
-   * can't evaluate it.
+   * Markdown evaluated where the output is exported, like the URL of an imported file. Code that reads `props` makes
+   * the output a function of the props of the page. `fallback` in outputs that can't evaluate it.
    *
    * @param code - a JS expression
    */
@@ -148,12 +162,12 @@ export interface Stringifier {
 }
 
 /**
- * @param namespace - also apply the edits of this namespace, like `search` for search records
+ * @param namespace - also apply the edits of this namespace
  * @param expression - output the expressions of replacements, their fallbacks are output without it
  */
 export function createStringifier(
   ctx: MdastVisitorContext,
-  namespace?: 'search' | (string & {}),
+  namespace?: MarkdownTarget | (string & {}),
   expression: Stringifier['expression'] = (_, fallback) => fallback,
 ): Stringifier {
   const source = ctx.source + (ctx.data._embeddedSource ?? '');

@@ -101,7 +101,7 @@ const files: StaticSource['files'] = [
 ];
 ```
 
-To compile the pages ahead of the loader, `getStaticParams()` lists the params with the same rules. It reads the `staticParams` of meta files from your storage, by their paths without extension:
+To resolve the data of each param value ahead of the loader, like the frontmatter in code, `getStaticParams()` lists the params with the same rules. It reads the `staticParams` of meta files from your storage, by their paths without extension:
 
 ```ts twoslash
 import { getStaticParams, type Params } from 'fumadocs-core/source';
@@ -116,6 +116,89 @@ const params = getStaticParams('[framework]/deploy.mdx', {
 ```
 
 It returns `undefined` when nothing lists the values. The file is then one page at its literal path.
+
+#### Runtime Outputs [#runtime-outputs]
+
+When your source compiles MDX, compile each file once and pass the params of a page as props to its content. To get the outputs of the Fumadocs plugins for the same props, set `unstable_runtimeOutputs: true` in the data of the file you compile:
+
+```ts
+import { VFile } from 'vfile';
+
+const file = new VFile({
+  path: '[framework]/deploy.mdx',
+  value: source,
+  data: { unstable_runtimeOutputs: true },
+});
+```
+
+On Sätteri, set it in the `data` of the compile options. The `unstable_` prefix means the API may change.
+
+Add `rehypeHeading` as your last rehype plugin too. It gives headings the IDs that [Remark Heading](/docs/headless/mdx/headings#headings-with-expressions) computes for the props.
+
+With the flag, the plugins export runtime outputs: functions of the props of the page, like the `toc` of [Rehype TOC](/docs/headless/mdx/headings#rehype-toc) and the `_markdown` component of [Remark LLMs](/docs/headless/mdx/remark-llms). Call them with the props of each page:
+
+```tsx twoslash
+import type { StaticSource } from 'fumadocs-core/source';
+import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
+import type { TOCItemType } from 'fumadocs-core/toc';
+import { renderToMarkdown } from 'fumadocs-core/server';
+import type { MDXContent, MDXProps } from 'mdx/types';
+
+declare const compiled: {
+  default: MDXContent;
+  toc: (props: object) => TOCItemType[];
+  _markdown: MDXContent;
+};
+declare const file: { data: { structuredData: StructuredData } };
+// ---cut---
+const { default: Content, toc, _markdown: Markdown } = compiled;
+
+// the page for some props
+function pageAt(props: object) {
+  return {
+    title: 'Deploy',
+    body: (own: MDXProps) => <Content {...props} {...own} />,
+    toc: toc(props),
+    getMarkdown: () => renderToMarkdown(<Markdown {...props} />),
+    structuredData: file.data.structuredData,
+  };
+}
+
+const files: StaticSource['files'] = [
+  {
+    type: 'page',
+    path: '[framework]/deploy.mdx',
+    data: pageAt({}),
+    dataAt: (params) => pageAt(params),
+  },
+];
+```
+
+For search, read the records of [Remark Structure](/docs/headless/mdx/structure) from `file.data.structuredData`. These records are static: they include every `<show>` branch, and expressions keep their source text. Don't read the `structuredData` export instead: with the flag, it has no public type and only Fumadocs sources resolve it.
+
+> Without the flag, the plugins give static outputs, and a document with [`<show>`](/docs/markdown#show) fails to compile when Rehype TOC, Remark Structure or Remark LLMs runs.
+
+#### Custom Props
+
+To support [custom props](/docs/headless/source-api#custom-props), `dataAt()` takes them as a second argument, with the data of the page after the plugins of the loader. Return that data rendered for the params and custom props:
+
+```tsx twoslash
+import type { StaticSource } from 'fumadocs-core/source';
+
+declare function pageAt(props: object): { title: string };
+// ---cut---
+const files: StaticSource['files'] = [
+  {
+    type: 'page',
+    path: '[framework]/deploy.mdx',
+    data: pageAt({}),
+    dataAt: (params, custom) =>
+      custom ? { ...custom.data, ...pageAt({ ...params, ...custom.props }) } : pageAt(params),
+  },
+];
+```
+
+A page without `dataAt()` ignores custom props.
 
 ### Dynamic Source
 
