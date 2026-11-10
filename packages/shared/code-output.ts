@@ -27,12 +27,12 @@ export type Chunk =
   | (Exclude<CodePart, { code: string }> & { children: Chunk[] });
 
 /** the attributes of a JSX element, in mdast and Sätteri */
-type JsxAttributes = (
+export type JsxAttributes = (
   | { type: 'mdxJsxAttribute'; name: string; value?: string | { value: string } | null }
   | { type: 'mdxJsxExpressionAttribute'; value: string }
 )[];
 
-interface CodeNode {
+export interface CodeNode {
   type: string;
   name?: unknown;
   attributes?: unknown;
@@ -116,6 +116,7 @@ export function createCodeOutput<N extends CodeNode, S extends CodeStringifier<N
 
   return {
     s,
+    range,
     wrap,
     /** mark the code of a value, `fallback` in static outputs */
     expression,
@@ -282,116 +283,9 @@ export function moduleScope(statements: Iterable<object>, scope = new Set<string
   return scope;
 }
 
-/** an element on one line has inline content, recorded like a paragraph */
-export function isInline(source: string, range: { start: number; end: number }): boolean {
-  const line = source.indexOf('\n', range.start);
-  return line === -1 || line >= range.end;
-}
-
-/**
- * A JSX element as an HTML tag, so search dialogs render it as an element. Expression values become strings, values
- * and content are kept on one line, values are truncated.
- */
-export function toHtmlTag(node: CodeNode, inner: string): string {
-  let attrs = '';
-  for (const attr of node.attributes as JsxAttributes) {
-    if (attr.type === 'mdxJsxExpressionAttribute') continue;
-    if (attr.value == null) {
-      attrs += ` ${attr.name}`;
-      continue;
-    }
-
-    let value = (typeof attr.value === 'string' ? attr.value : attr.value.value).replace(
-      /\s+/g,
-      ' ',
-    );
-    if (value.length > 100) value = `${value.slice(0, 100)}…`;
-    attrs += ` ${attr.name}="${value.replaceAll('&', '&amp;').replaceAll('"', '&quot;')}"`;
-  }
-
-  const children = inner.replace(/\s+/g, ' ');
-  const name = node.name as string;
-  if (!children) return `<${name}${attrs} />`;
-  return `<${name}${attrs}>${children}</${name}>`;
-}
-
 /** all of the conditions */
 export function and(conditions: string[]): string | undefined {
   if (conditions.length > 0) return `(${conditions.join(') && (')})`;
-}
-
-/** a content of structured data, see `fumadocs-core/mdx-plugins/remark-structure` */
-interface StructuredContent {
-  heading: string | undefined;
-  content: string;
-  table?: string;
-}
-
-/** a heading of structured data, `code` is its ID as code */
-interface StructuredHeading {
-  id: string;
-  code?: string;
-  content: string;
-}
-
-/**
- * Structured data from its records in document order and their content as text: content goes under the last heading
- * before it, records are trimmed and empty ones are left out.
- */
-export function toStructuredData(
-  records: readonly { id?: string; heading?: string; table?: string }[],
-  contents: string[],
-) {
-  const data = {
-    contents: [] as StructuredContent[],
-    headings: [] as { id: string; content: string }[],
-  };
-  let heading: string | undefined;
-  for (let i = 0; i < records.length; i++) {
-    const { id, table, heading: own = heading } = records[i];
-    const content = contents[i].trim();
-    if (id !== undefined) heading = id;
-    if (!content) continue;
-    if (id !== undefined) data.headings.push({ id, content });
-    else data.contents.push(table ? { heading: own, content, table } : { heading: own, content });
-  }
-  return data;
-}
-
-/** the records of structured data in document order, their content with the markers of code */
-export function createStructuredRecords() {
-  const records: ((StructuredHeading | StructuredContent) & { when: string[] })[] = [];
-  type Output = Pick<ReturnType<typeof createCodeOutput>, 'toStatic' | 'toCode' | 'componentsCode'>;
-
-  return {
-    /** `when`: the conditions of the branches of `<show>` around it */
-    push: (item: StructuredHeading | StructuredContent, when: string[] = []) =>
-      records.push({ ...item, when }),
-    toStatic(out: Output) {
-      const contents: string[] = [];
-      for (const record of records) contents.push(out.toStatic(record.content));
-      return toStructuredData(records, contents);
-    },
-    /** the code of the runtime records, a function of the props giving the records that show, see `renderStructuredData()` */
-    toCode(out: Output, scope: () => ReadonlySet<string>): string {
-      const items: { code: string; when: string[] }[] = [];
-      for (const record of records) {
-        let code = `{content: ${out.toCode(record.content)}`;
-        if ('id' in record) code += `, id: ${record.code ?? JSON.stringify(record.id)}`;
-        else {
-          if (record.heading !== undefined) code += `, heading: ${JSON.stringify(record.heading)}`;
-          if (record.table) code += `, table: ${JSON.stringify(record.table)}`;
-        }
-        items.push({ code: `${code}}`, when: record.when });
-      }
-      const list = guardedArray(items);
-      // the MDX components are page props, like in the content
-      const declaration = out.componentsCode(scope, 'props.components');
-      return declaration
-        ? `(props) => {\n${declaration}\nreturn ${list};\n}`
-        : `(props) => ${list}`;
-    },
-  };
 }
 
 /** the code of an output list: a function of the props in runtime analysis */

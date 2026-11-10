@@ -3,7 +3,7 @@ import type {
   StructuredData,
   StructuredDataContent,
 } from 'fumadocs-core/mdx-plugins/remark-structure';
-import { toHtmlTag, toStructuredData } from './code-output';
+import { toHtmlTag, toStructuredData } from './structured-records';
 
 /** a record of the runtime structured data from `remarkStructure`, a heading has an `id` */
 export interface StructuredRecord extends Partial<Omit<StructuredDataContent, 'content'>> {
