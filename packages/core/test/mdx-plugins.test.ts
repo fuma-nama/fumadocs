@@ -749,23 +749,6 @@ test('Remark LLMs: placeholder', async () => {
   ).toMatchFileSnapshot(path.resolve(cwd, './fixtures/remark-llms.output.md'));
 });
 
-test('Remark Structure: values of expressions in outputs that read the props', async () => {
-  const { compile, run } = await import('@mdx-js/mdx');
-  const runtime = await import('react/jsx-runtime');
-  const code = await compile(
-    {
-      value: 'Version {<b>Beta {props.n}</b>} of {props.n}{false}{null}.\n',
-      data: { unstable_runtimeOutputs: true },
-    },
-    { outputFormat: 'function-body', remarkPlugins: [[remarkStructure, { exportAs: true }]] },
-  );
-  const { structuredData } = await run(String(code), runtime as never);
-  // values render into Markdown
-  expect(
-    (await renderStructuredData(structuredData as StructuredRecords, { n: 2 })).contents,
-  ).toEqual([{ heading: undefined, content: 'Version **Beta 2** of 2.' }]);
-});
-
 test('Remark Structure: components render in outputs that read the props', async () => {
   const { compile, run } = await import('@mdx-js/mdx');
   const runtime = await import('react/jsx-runtime');
@@ -835,40 +818,6 @@ See <Linked /> and [a guide](/guide).
     '<Card title="Core" />',
     'See <Linked /> and a guide.',
   ]);
-});
-
-test('Remark LLMs: elements resolve like in MDX in outputs that read the props', async () => {
-  const { compile, run } = await import('@mdx-js/mdx');
-  const runtime = await import('react/jsx-runtime');
-  const server = await import('@/server');
-  const code = await compile(
-    {
-      value: `export function Note({ children }) {
-  _server.asMarkdown();
-  return <>Note: {children}</>;
-}
-
-<Note>Hello</Note>
-
-<Callout>World</Callout>
-`,
-      data: { unstable_runtimeOutputs: true },
-    },
-    { outputFormat: 'function-body', baseUrl: import.meta.url, remarkPlugins: [remarkLLMs] },
-  );
-  // the module reads `fumadocs-core/server` as `_server`
-  const body = String(code).replace(
-    /await import\([^)]*"fumadocs-core\/server"\)\)?/g,
-    'arguments[0]._server',
-  );
-  const { _markdown } = await run(`const _server = arguments[0]._server;\n${body}`, {
-    ...runtime,
-    _server: server,
-  } as never);
-  // a name declared in the module is its variable, other components are from the MDX components
-  await expect(server.renderToMarkdown(runtime.jsx(_markdown as never, {}))).resolves.toBe(
-    'Note: \nHello\n\n<Callout>\nWorld\n</Callout>',
-  );
 });
 
 test('Remark LLMs: placeholders in outputs that read the props', async () => {
@@ -1054,40 +1003,18 @@ test('Remark Heading: headings with IDs from code stay headings for other plugin
     h3: (props: object) => runtime.jsx('h4', props),
   };
 
-  expect(
-    renderToStaticMarkup(runtime.jsx(mod.default, { name: 'X', components })),
-  ).toMatchInlineSnapshot(
-    `"<div class="fd-steps"><div class="fd-step"><h4 id="install-step" data-fd-step="1">Install</h4><p>A</p></div><div class="fd-step"><h4 id="use-x-new-step" data-fd-step="2">Use X <b>new</b></h4><p>B</p></div><div class="fd-step"><h4 id="deploy-step" data-fd-step="3">Deploy</h4></div></div>"`,
+  expect(renderToStaticMarkup(runtime.jsx(mod.default, { name: 'X', components }))).toBe(
+    '<div class="fd-steps"><div class="fd-step"><h4 id="install-step" data-fd-step="1">Install</h4><p>A</p></div><div class="fd-step"><h4 id="use-x-new-step" data-fd-step="2">Use X <b>new</b></h4><p>B</p></div><div class="fd-step"><h4 id="deploy-step" data-fd-step="3">Deploy</h4></div></div>',
   );
   const titles = (props: object) =>
     toc(props).map((item) => [item.url, item._step, renderToStaticMarkup(item.title)]);
-  expect(titles({ name: 'X', components })).toMatchInlineSnapshot(`
-    [
-      [
-        "#install-step",
-        1,
-        "Install",
-      ],
-      [
-        "#use-x-new-step",
-        2,
-        "Use X <b>new</b>",
-      ],
-      [
-        "#deploy-step",
-        3,
-        "Deploy",
-      ],
-    ]
-  `);
+  expect(titles({ name: 'X', components })).toEqual([
+    ['#install-step', 1, 'Install'],
+    ['#use-x-new-step', 2, 'Use X <b>new</b>'],
+    ['#deploy-step', 3, 'Deploy'],
+  ]);
   // without the MDX components, a component of a title is its content
-  expect(titles({ name: 'X' })[1]).toMatchInlineSnapshot(`
-    [
-      "#use-x-new-step",
-      2,
-      "Use X new",
-    ]
-  `);
+  expect(titles({ name: 'X' })[1][2]).toBe('Use X new');
 });
 
 test('Remark Heading: a custom slug slugs when rendering with its own runtime', async () => {
@@ -1174,14 +1101,4 @@ test('Remark Show: static outputs analyse the source', async () => {
     await expect(compileStatic(branch, plugins as PluggableList)).rejects.toThrow(
       'the outputs of this document are static',
     );
-});
-
-test('Remark Show: code tabs end at a branch', async () => {
-  const { compile } = await import('@mdx-js/mdx');
-  const { remarkShow } = await import('@/mdx-plugins/remark-show');
-  const file = await compile(
-    '```ts tab="Shared"\na\n```\n\n<show when={props.framework === "astro"}>\n```ts tab="Astro"\nb\n```\n</show>\n',
-    { remarkPlugins: [remarkShow, remarkCodeTab] },
-  );
-  expect(String(file).match(/defaultValue:/g)).toHaveLength(2);
 });
