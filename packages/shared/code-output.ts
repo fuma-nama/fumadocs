@@ -52,7 +52,7 @@ const markerRegex = /\0(\/?)(\d+)\0/g;
  * A stringifier whose output can have parts rendered from code: replacements mark them, `toCode()` splits the output on
  * their markers. Runtime outputs are functions of the props of the page, code reads them in render scope.
  *
- * @param isStatic - for static outputs: authored expressions keep their source, a branch of `<show>` fails
+ * @param isStatic - for static outputs: authored expressions keep their source
  * @param literal - the code of a string
  */
 export function createCodeOutput<N extends CodeNode, S extends CodeStringifier<N>>(
@@ -163,7 +163,7 @@ export function createCodeOutput<N extends CodeNode, S extends CodeStringifier<N
         return true;
       }
 
-      const when = showCondition(node, isStatic);
+      const when = showCondition(node);
       if (!when) return false;
       s.replace(node, (s) => wrap({ when }, s.inner(node)));
       return true;
@@ -175,41 +175,34 @@ export function createCodeOutput<N extends CodeNode, S extends CodeStringifier<N
 export function showConditions(
   node: object,
   ctx: { parent: (node: never) => object | undefined },
-  isStatic?: boolean,
 ): string[] {
   const out: string[] = [];
   for (let p = ctx.parent(node as never); p; p = ctx.parent(p as never)) {
-    const condition = showCondition(p as CodeNode, isStatic);
+    const condition = showCondition(p as CodeNode);
     if (condition) out.unshift(condition);
   }
   return out;
 }
 
-/** content analysed from source, for static outputs: authored expressions as their source */
-export function staticContent<N extends CodeNode & { children?: N[] }>(nodes: N[]): N[] {
-  const out: N[] = [];
-  for (const node of nodes) {
-    if (node.type === 'mdxTextExpression')
-      out.push({ type: 'text', value: `{${node.value}}` } as N);
-    else if (node.children) {
-      showCondition(node, true);
-      out.push({ ...node, children: staticContent(node.children) });
-    } else out.push(node);
-  }
-  return out;
+/**
+ * Whether an output is static. Static outputs can't tell which branches of `<show>` show, so they fail on a document
+ * that `remarkShow` marked as having them.
+ */
+export function isStaticOutput(
+  analysis: 'static' | 'runtime' | undefined,
+  data: { _analysis?: 'static' | 'runtime'; _show?: boolean },
+): boolean {
+  if ((analysis ?? data._analysis) === 'runtime') return false;
+  if (data._show)
+    throw new Error(
+      "`<show>` needs runtime analysis: static outputs can't tell which branches show. Set `analysis: 'runtime'` on the Fumadocs plugins of your MDX options.",
+    );
+  return true;
 }
 
-/**
- * The condition of a branch of `<show>`, checked when rendering.
- *
- * @param isStatic - for static outputs, which can't tell the branches that show: it fails
- */
-export function showCondition(node: CodeNode, isStatic = false): string | undefined {
+/** the condition of a branch of `<show>`, checked when rendering */
+export function showCondition(node: CodeNode): string | undefined {
   if (node.name !== showElement) return;
-  if (isStatic)
-    throw new Error(
-      "`<show>` needs runtime analysis: static outputs can't tell which branches show. Set `analysis: 'runtime'` on the collection, or on the Fumadocs plugins of your MDX options.",
-    );
   for (const attr of node.attributes as JsxAttributes)
     if (attr.type === 'mdxJsxAttribute' && attr.name === 'when' && typeof attr.value === 'object')
       return attr.value?.value;

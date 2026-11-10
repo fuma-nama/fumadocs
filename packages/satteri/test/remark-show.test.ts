@@ -6,7 +6,7 @@ import { createElement, type FC, type ReactNode } from 'react';
 import * as JsxRuntime from 'react/jsx-runtime';
 import { renderToStaticMarkup } from 'react-dom/server';
 import * as server from 'fumadocs-core/server';
-import { createHeadingIds } from 'fumadocs-core/mdx-plugins/remark-heading.runtime';
+import * as headingRuntime from 'fumadocs-core/mdx-plugins/remark-heading.runtime';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
 import { renderStructuredData, type StructuredRecords } from '../../shared/structured-data';
 import { compileMdx } from '@/compile';
@@ -17,7 +17,7 @@ import { remarkLlms } from '@/remark-llms';
 const AsyncFunction: new (...args: string[]) => (...args: unknown[]) => Promise<unknown> =
   Object.getPrototypeOf(async function () {}).constructor;
 // the generated imports of Fumadocs read from the scope
-const scope = { ...JsxRuntime, ...server, createHeadingIds };
+const scope = { ...JsxRuntime, ...server, ...headingRuntime };
 
 const source = `# Deploy on {props.framework}
 
@@ -151,7 +151,7 @@ test('Remark Show: static outputs analyse the source', async () => {
   })('runtime');
   const compile = (source: string) =>
     compileMdx({ source, filePath: '/tmp/doc.mdx', environment: 'runtime', options });
-  const { code } = await compile('## Deploy on {props.framework}\n\nAstro.\n');
+  const { code } = await compile('## Deploy on {1 + 1}\n\nAstro.\n');
   const page = (await new AsyncFunction('opts', code)(scope)) as {
     toc: { url: string }[];
     structuredData: StructuredData;
@@ -160,8 +160,9 @@ test('Remark Show: static outputs analyse the source', async () => {
   // IDs are slugged from the source, like the TOC
   expect(code).not.toContain('_headingIds');
   expect(page.toc.map((item) => item.url)).toEqual(['#deploy-on-']);
-  expect(page.structuredData.headings[0].content).toBe('Deploy on {props.framework}');
-  expect(page._markdown).toBe('## Deploy on {props.framework} [#deploy-on-]\n\nAstro.\n');
+  // expressions keep their source in text, and render in the titles of the TOC as before
+  expect(page.structuredData.headings[0].content).toBe('Deploy on {1 + 1}');
+  expect(page._markdown).toBe('## Deploy on {1 + 1} [#deploy-on-]\n\nAstro.\n');
 
   // static outputs can't tell which branches show
   for (const source of [

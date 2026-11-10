@@ -6,7 +6,7 @@ import { flattenNode, walk } from './mdast-utils';
 import type { LLMsOptions } from 'fumadocs-core/mdx-plugins';
 import { Parser } from 'acorn';
 import type { MdxjsEsm } from 'mdast-util-mdx';
-import { listCode, showCondition } from '../../../../shared/code-output';
+import { isStaticOutput, listCode, showCondition } from '../../../../shared/code-output';
 import { remarkLLMs } from 'fumadocs-core/mdx-plugins/remark-llms';
 
 export interface ExtractedReference {
@@ -69,13 +69,13 @@ export function remarkPostprocess({
     });
 
     if (extractLinkReferences) {
-      const isStatic = file.data._analysis !== 'runtime';
+      const isStatic = isStaticOutput(undefined, file.data);
       const items: { code: string; when: string[] }[] = [];
       const visit = (node: Nodes, when: string[]) => {
         if (node.type === 'link')
           return void items.push({ code: JSON.stringify({ href: node.url }), when });
         if (!('children' in node)) return;
-        const condition = showCondition(node, isStatic);
+        const condition = showCondition(node);
         for (const child of node.children) visit(child, condition ? [...when, condition] : when);
       };
       visit(tree, []);

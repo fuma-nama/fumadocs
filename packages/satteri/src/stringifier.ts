@@ -1,4 +1,5 @@
 import type { Analysis } from 'fumadocs-core/mdx-plugins/stringifier';
+import type { HeadingIds } from '../../shared/heading-id';
 import type { MdastVisitorContext } from 'satteri';
 
 /**
@@ -37,6 +38,10 @@ declare module 'satteri' {
     _embeds?: Embed[];
     /** @internal the analysis of the content source, for plugins without the option */
     _analysis?: Analysis;
+    /** @internal set by `remarkShow` on a document with branches of `<show>` */
+    _show?: boolean;
+    /** @internal set by `remarkHeading`, see {@link HeadingIds} */
+    _headingIds?: HeadingIds;
   }
 }
 

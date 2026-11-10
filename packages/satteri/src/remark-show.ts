@@ -23,7 +23,7 @@ export function remarkShow(): (
       if (node.name !== 'show') return;
       if (!showCondition({ ...node, name: showElement }))
         throw new Error(`[remark-show] \`<show>\` needs a \`when\` expression (${ctx.fileURL})`);
-      used = true;
+      ctx.data._show = used = true;
       ctx.setProperty<Element, 'name'>(node, 'name', showElement);
     }
 

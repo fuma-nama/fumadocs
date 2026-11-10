@@ -16,6 +16,8 @@ export function remarkShow(): Transformer<Root, Root> {
       if (!showCondition(node)) file.fail('`<show>` needs a `when` expression', node);
       used = true;
     });
-    if (used) tree.children.unshift(toEsm(showDeclaration));
+    if (!used) return;
+    tree.children.unshift(toEsm(showDeclaration));
+    file.data._show = true;
   };
 }

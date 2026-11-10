@@ -8,6 +8,7 @@ import type {
 import type { Program } from 'estree-jsx';
 import { parse, type JSXElement, type JSXFragment, type Node } from 'yuku-parser';
 import { showElement } from '../../shared/code-output';
+import { headingIdElement } from '../../shared/heading-id';
 
 const islandName = '_FumadocsIsland';
 
@@ -135,6 +136,12 @@ function serialize(nodes: HastNode[], locals: Set<string>) {
           )?.value;
           const condition = typeof when === 'object' && when ? expression(when.value) : 'true';
           return `...((${condition}) ? [${list(node.children).slice(1)}] : [])`;
+        }
+        // a heading with its ID from code, see `remarkHeading`
+        if (name === headingIdElement) {
+          const [heading] = node.children;
+          if (heading?.type !== 'element') return;
+          return `[${JSON.stringify(heading.tagName)},{...${JSON.stringify(heading.properties)},${attributes(node).slice(1)}${list(heading.children)}]`;
         }
         if (name === 'Fragment' || (name && locals.has(name.split('.')[0]))) return slot([node]);
         // HTML elements are converted like Markdown ones, for attributes like `class` and `style="..."`

@@ -5,7 +5,7 @@ import type { TOCItemType } from '@/toc';
 import { flattenNode, toEsm } from '@/mdx-plugins/utils';
 import type { Analysis } from '@/mdx-plugins/stringifier';
 import { showCondition } from '../../../shared/code-output';
-import { headingIdCode, headingIdRegex, idCodeProperty } from '../../../shared/heading-id';
+import { headingIdCode, headingIdElement, headingIdRegex } from '../../../shared/heading-id';
 
 export interface RemarkHeadingOptions {
   slug?: (root: Root, heading: Heading, text: string) => string;
@@ -43,7 +43,7 @@ declare module 'vfile' {
 
 /**
  * Add heading ids and extract TOC. With the default slugs and runtime analysis, IDs of headings with authored
- * expressions or in branches of `<show>` render from code.
+ * expressions or in branches of `<show>` render from code: the heading is wrapped in an element that gives it the ID.
  */
 export function remarkHeading({
   slug,
@@ -65,14 +65,38 @@ export function remarkHeading({
     const fromCode = defaultSlug && (analysis ?? file.data._analysis) === 'runtime';
     slugger?.reset();
 
-    const visit = (heading: RootContent, when: string[]) => {
-      if (heading.type !== 'heading') {
-        const condition = showCondition(heading);
-        if ('children' in heading)
-          for (const child of heading.children)
-            visit(child, condition ? [...when, condition] : when);
-        return;
+    const visit = (nodes: RootContent[], when: string[]) => {
+      for (let i = 0; i < nodes.length; i++) {
+        const heading = nodes[i];
+        if (heading.type !== 'heading') {
+          const condition = showCondition(heading);
+          if ('children' in heading)
+            visit(heading.children as RootContent[], condition ? [...when, condition] : when);
+          continue;
+        }
+        const code = assign(heading, when);
+        if (!code) continue;
+        (file.data._headingIds ??= {})[heading.data!.hProperties!.id as string] = code;
+        nodes[i] = {
+          type: 'mdxJsxFlowElement',
+          name: headingIdElement,
+          attributes: [
+            {
+              type: 'mdxJsxAttribute',
+              name: 'id',
+              value: {
+                type: 'mdxJsxAttributeValueExpression',
+                value: code,
+                data: { estree: toEsm(code).data!.estree },
+              },
+            },
+          ],
+          children: [heading],
+        };
       }
+    };
+    /** @returns the code of its ID, when it renders from code */
+    const assign = (heading: Heading, when: string[]): string | false | undefined => {
       heading.data ||= {};
       heading.data.hProperties ||= {};
       const props = heading.data.hProperties;
@@ -88,12 +112,12 @@ export function remarkHeading({
       }
 
       let flattened: string | null = null;
+      let code: string | false | undefined;
       if (!props.id) {
         flattened ??= flattenNode(heading);
 
         props.id = slug(root, heading, flattened);
-        const code = fromCode && ids.next(heading.children, when);
-        if (code) props[idCodeProperty] = code;
+        code = fromCode && ids.next(heading.children, when);
       }
 
       if (generateToc) {
@@ -103,8 +127,9 @@ export function remarkHeading({
           depth: heading.depth,
         });
       }
+      return code;
     };
-    for (const child of root.children) visit(child, []);
+    visit(root.children, []);
 
     if (ids.esm) root.children.unshift(toEsm(ids.esm));
     if (generateToc) file.data.toc = toc;

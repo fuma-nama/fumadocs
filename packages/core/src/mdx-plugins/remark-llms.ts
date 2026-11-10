@@ -1,6 +1,6 @@
 import type { Transformer } from 'unified';
 import { createCodeOutput, esmScope, isJsxElement } from './utils';
-import { keptElement } from '../../../shared/code-output';
+import { isStaticOutput, keptElement } from '../../../shared/code-output';
 import type { Nodes, Root } from 'mdast';
 import type { MdxJsxFlowElement, MdxJsxTextElement } from 'mdast-util-mdx';
 import type { Analysis } from './stringifier';
@@ -74,7 +74,7 @@ export function remarkLLMs({
   filterElement,
 }: LLMsOptions = {}): Transformer<Root, Root> {
   return (tree, file) => {
-    const isStatic = (analysis ?? file.data._analysis) !== 'runtime';
+    const isStatic = isStaticOutput(analysis, file.data);
     const out = createCodeOutput(file, undefined, isStatic);
     const scope = isStatic ? new Set<string>() : esmScope(tree);
     const { s } = out;
@@ -93,12 +93,14 @@ export function remarkLLMs({
         } else if (out.markCode(node)) {
           // rendered from code
         } else if (node.type === 'heading') {
+          const id = node.data?.hProperties?.id;
+          const code = typeof id === 'string' && file.data._headingIds?.[id];
           stringifyHeadingId(
             s,
             node,
             headingIds,
             (node: Nodes) => s.range(node),
-            isStatic ? undefined : out.expression,
+            code ? out.expression(code, id as string) : (id ?? undefined),
           );
         } else if (isJsxElement(node) && node.name) {
           const element = !isStatic && keptElement(node, scope);

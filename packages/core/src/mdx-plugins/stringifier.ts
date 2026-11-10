@@ -1,6 +1,7 @@
 import type { Expression } from 'estree-jsx';
 import type { Nodes } from 'mdast';
 import type { VFile } from 'vfile';
+import type { HeadingIds } from '../../../shared/heading-id';
 
 /**
  * The Markdown of a node. A string covers the edits inside the node made before it and blocks those made after, a
@@ -13,7 +14,7 @@ export type Replacement = string | ((s: Stringifier) => string);
  *
  * - `runtime`: a function of the props of a page, authored expressions and the branches of `<show>` render for them.
  * - `static`: a value analysed from source, authored expressions keep their source. It can't tell which branches of
- *   `<show>` show, so a page with them fails to compile.
+ *   `<show>` show, so a document with them fails to compile.
  */
 export type Analysis = 'static' | 'runtime';
 
@@ -21,6 +22,10 @@ declare module 'vfile' {
   interface DataMap {
     /** @internal the analysis of the content source, for plugins without the option */
     _analysis?: Analysis;
+    /** @internal set by `remarkShow` on a document with branches of `<show>` */
+    _show?: boolean;
+    /** @internal set by `remarkHeading`, see {@link HeadingIds} */
+    _headingIds?: HeadingIds;
   }
 }
 

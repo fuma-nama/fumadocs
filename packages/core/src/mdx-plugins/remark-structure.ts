@@ -7,12 +7,13 @@ import { createCodeOutput, esmScope, isJsxElement, toMdxExport } from './utils';
 import {
   createStructuredRecords,
   isInline,
+  isStaticOutput,
   keptElement,
   showCondition,
   toHtmlTag,
 } from '../../../shared/code-output';
 import type { Analysis } from './stringifier';
-import { headingIdRegex, idCodeProperty } from '../../../shared/heading-id';
+import { headingIdRegex } from '../../../shared/heading-id';
 import type { MdxJsxFlowElement, MdxJsxTextElement } from 'mdast-util-mdx';
 import { remarkHeading } from './remark-heading';
 import { tableRowToStructuredData } from '@/search';
@@ -132,7 +133,7 @@ export function remarkStructure({
   const isType = Array.isArray(types) ? (node: Nodes) => types.includes(node.type) : types;
 
   return (tree, file) => {
-    const isStatic = (analysis ?? file.data._analysis) !== 'runtime';
+    const isStatic = isStaticOutput(analysis, file.data);
     const out = createCodeOutput(file, 'search', isStatic);
     const { s } = out;
     const structured = createStructuredRecords();
@@ -209,10 +210,9 @@ export function remarkStructure({
           return;
         }
 
-        const code = node.data?.hProperties?.[idCodeProperty];
         records.push(() => {
           const content = s.inner(node).replace(headingIdRegex, '').trim();
-          push({ id, code: typeof code === 'string' ? code : undefined, content }, when);
+          push({ id, code: file.data._headingIds?.[id], content }, when);
         });
       } else {
         records.push(() => {

@@ -7,8 +7,7 @@ import type {
 } from 'satteri';
 import type { Element, ElementContent } from 'hast';
 import { handleTag, jsxToSource, parse } from '@/utils';
-import { listCode, showCondition, showConditions, staticContent } from '../../shared/code-output';
-import { idCodeProperty } from '../../shared/heading-id';
+import { isStaticOutput, listCode, showCondition, showConditions } from '../../shared/code-output';
 import type { ExtraPluginHooks } from './compile';
 import type { Analysis } from 'fumadocs-core/mdx-plugins/stringifier';
 
@@ -59,7 +58,7 @@ export function rehypeToc({ exportToc = true, analysis }: RehypeTocOptions = {})
     return {
       name: 'rehype-toc',
       before(_root: unknown, ctx: HastVisitorContext) {
-        isStatic = (analysis ?? ctx.data._analysis) !== 'runtime';
+        isStatic = isStaticOutput(analysis, ctx.data);
         if (resolved && resolved.as === 'data') ctx.data.rehypeToc ??= [];
       },
       after(_root: unknown, ctx: HastVisitorContext) {
@@ -72,9 +71,9 @@ export function rehypeToc({ exportToc = true, analysis }: RehypeTocOptions = {})
           const element = node as Element;
           if (element.children.length === 0) return;
 
-          const { id, [idCodeProperty]: idCode } = element.properties;
+          const { id } = element.properties;
           if (typeof id !== 'string') return;
-          const code = !isStatic && typeof idCode === 'string' ? idCode : undefined;
+          const code = ctx.data._headingIds?.[id];
 
           let title = ctx.textContent(element);
           let children: ElementContent[] = element.children;
@@ -90,7 +89,6 @@ export function rehypeToc({ exportToc = true, analysis }: RehypeTocOptions = {})
           }
 
           if (typeof tocOnly === 'string') ctx.removeNode(element);
-          else if (code) ctx.replaceNode(element, withIdCode(element, children, code));
           else if (text && typeof noToc === 'string') ctx.setProperty(text, 'value', noToc);
           if (typeof noToc === 'string') return;
           if (!resolved) return;
@@ -99,15 +97,10 @@ export function rehypeToc({ exportToc = true, analysis }: RehypeTocOptions = {})
             typeof element.properties['data-fd-step'] === 'number'
               ? element.properties['data-fd-step']
               : undefined;
-          const when = showConditions(element, ctx, isStatic);
+          const when = showConditions(element, ctx);
           let obj = '{';
           obj += `title: ${
-            resolved.as === 'esm'
-              ? jsxToSource({
-                  type: 'root',
-                  children: isStatic ? staticContent(children) : children,
-                })
-              : textCode(children)
+            resolved.as === 'esm' ? jsxToSource({ type: 'root', children }) : textCode(children)
           },`;
           obj += `url: ${code ? `"#" + ${code}` : JSON.stringify(`#${id}`)},`;
           obj += `depth: ${JSON.stringify(Number(element.tagName[1]))},`;
@@ -128,8 +121,10 @@ export function rehypeToc({ exportToc = true, analysis }: RehypeTocOptions = {})
   };
   plugin.collectExports = ({ data, addExport }) => {
     if (resolved && resolved.as === 'esm') {
-      const isStatic = (analysis ?? data._analysis) !== 'runtime';
-      addExport(resolved.name, listCode(data._rehypeTocItems ?? [], isStatic));
+      addExport(
+        resolved.name,
+        listCode(data._rehypeTocItems ?? [], (analysis ?? data._analysis) !== 'runtime'),
+      );
     }
   };
   return plugin;
@@ -160,26 +155,4 @@ function textCode(nodes: readonly ElementContent[]): string {
   visit(nodes);
   if (text || parts.length === 0) parts.push(JSON.stringify(text));
   return parts.join(' + ');
-}
-
-/** the heading with its ID rendered from code, Sätteri maps JSX of Markdown elements to MDX components */
-function withIdCode(element: Element, children: ElementContent[], code: string) {
-  const attributes: MdxJsxAttributeNode[] = [];
-  for (const [name, value] of Object.entries(element.properties)) {
-    if (name === idCodeProperty || value == null) continue;
-    // space-separated, like `className`
-    const expression =
-      name === 'id' ? code : JSON.stringify(Array.isArray(value) ? value.join(' ') : value);
-    attributes.push({
-      type: 'mdxJsxAttribute',
-      name,
-      value: { type: 'mdxJsxAttributeValueExpression', value: expression },
-    });
-  }
-  return {
-    type: 'mdxJsxFlowElement',
-    name: element.tagName,
-    attributes,
-    children,
-  } as MdxJsxFlowElementHast;
 }

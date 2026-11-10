@@ -1,4 +1,10 @@
 import Slugger from 'github-slugger';
+import { cloneElement, isValidElement, type ReactNode } from 'react';
+
+/** gives the heading that `remarkHeading` wrapped in it its ID from code */
+export function HeadingId({ id, children }: { id: string; children?: ReactNode }): ReactNode {
+  return isValidElement<{ id: string }>(children) ? cloneElement(children, { id }) : children;
+}
 
 /** the IDs of the headings of a page for its props, a heading is the parts of its text or `null` when hidden */
 export function createHeadingIds(headings: ((props: object) => unknown[] | null)[]) {

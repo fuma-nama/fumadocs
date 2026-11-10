@@ -4,12 +4,13 @@ import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure'
 import type { Analysis } from 'fumadocs-core/mdx-plugins/stringifier';
 import { tableRowToStructuredData } from 'fumadocs-core/search';
 import { offsets, type Stringifier } from './stringifier';
-import { headingIdRegex, idCodeProperty } from '../../shared/heading-id';
+import { headingIdRegex } from '../../shared/heading-id';
 import type { ExtraPluginHooks } from './compile';
 import { createCodeOutput, parse, type JsxElementNode } from './utils';
 import {
   createStructuredRecords,
   isInline,
+  isStaticOutput,
   keptElement,
   moduleScope,
   showConditions,
@@ -173,15 +174,9 @@ export function remarkStructure({
       }
 
       if (node.type === 'heading') {
-        const { id, [idCodeProperty]: code } =
-          (node.data as { hProperties?: Record<string, unknown> } | undefined)?.hProperties ?? {};
+        const id = (node.data as { hProperties?: { id?: unknown } } | undefined)?.hProperties?.id;
         if (typeof id === 'string' && id)
-          records.push({
-            node,
-            when,
-            id,
-            code: typeof code === 'string' ? code : undefined,
-          });
+          records.push({ node, when, id, code: ctx.data._headingIds?.[id] });
         return;
       }
 
@@ -193,7 +188,7 @@ export function remarkStructure({
       // positions tell authored nodes from generated ones
       options: { position: true },
       before(_root: unknown, ctx: MdastVisitorContext) {
-        isStatic = (analysis ?? ctx.data._analysis) !== 'runtime';
+        isStatic = isStaticOutput(analysis, ctx.data);
         keep = filterElement ?? (isStatic ? keepByDefault : undefined);
         out = createCodeOutput(ctx, 'search', isStatic);
         s = out.s;

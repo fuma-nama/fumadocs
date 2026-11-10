@@ -1,7 +1,7 @@
 import Slugger from 'github-slugger';
 import { defineMdastPlugin, type MdastVisitorContext } from 'satteri';
 import type { Heading } from 'mdast';
-import { headingIdCode, headingIdRegex, idCodeProperty } from '../../shared/heading-id';
+import { headingIdCode, headingIdElement, headingIdRegex } from '../../shared/heading-id';
 import { showConditions } from '../../shared/code-output';
 import type { Analysis } from 'fumadocs-core/mdx-plugins/stringifier';
 
@@ -57,7 +57,22 @@ export function remarkHeading({
         if (!hProperties.id) {
           hProperties.id = resolveSlug(node, title);
           const code = fromCode && ids.next(node.children, showConditions(node, ctx));
-          if (code) hProperties[idCodeProperty] = code;
+          if (code) {
+            (ctx.data._headingIds ??= {})[hProperties.id as string] = code;
+            // gives the heading its ID from code
+            ctx.wrapNode(node, {
+              type: 'mdxJsxFlowElement',
+              name: headingIdElement,
+              attributes: [
+                {
+                  type: 'mdxJsxAttribute',
+                  name: 'id',
+                  value: { type: 'mdxJsxAttributeValueExpression', value: code },
+                },
+              ],
+              children: [],
+            });
+          }
         }
 
         ctx.setProperty(node, 'data', data);

@@ -2,7 +2,7 @@ import type { TOCItemType } from 'fumadocs-core/toc';
 import type { RehypeTOCItemType, StructuredData } from 'fumadocs-core/mdx-plugins';
 import type { ReactNode } from 'react';
 import * as JsxRuntime from 'react/jsx-runtime';
-import { createHeadingIds } from 'fumadocs-core/mdx-plugins/remark-heading.runtime';
+import * as HeadingRuntime from 'fumadocs-core/mdx-plugins/remark-heading.runtime';
 import { type Components, type Evaluator, toJsx } from 'fumadocs-core/utils/hast-to-jsx';
 import type { Root } from 'hast';
 import type { JSExecutor, JSExecutorConfig } from '@/js/executor';
@@ -136,7 +136,7 @@ export function fromJS<M>(options: MarkdownRendererJSOptions): MarkdownRenderer<
     return {
       opts: {
         ...JsxRuntime,
-        createHeadingIds,
+        ...HeadingRuntime,
         baseUrl,
       },
       // the code of the module reads the params of a page as `props`, like its content

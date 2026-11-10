@@ -3,8 +3,11 @@ import { and, showCondition } from './code-output';
 /** a custom ID at the end of heading text, like `[#id]` */
 export const headingIdRegex = /\s*\[#(?<slug>[^]+?)]\s*$/;
 
-/** the key of `hProperties` with the code of an ID, rehype-toc renders it into the heading */
-export const idCodeProperty = '_idCode';
+/** the element that `remarkHeading` wraps a heading in to give it an ID from code, `HeadingId` of the runtime */
+export const headingIdElement = '_HeadingId';
+
+/** the code of IDs from code by the static ID of their heading, in the data of a file for the plugins after `remarkHeading` */
+export type HeadingIds = Record<string, string | undefined>;
 
 /** the runtime of ID code, function bodies read it from `arguments[0]` like the JSX runtime */
 export const headingRuntime = 'fumadocs-core/mdx-plugins/remark-heading.runtime';
@@ -52,7 +55,7 @@ export function headingIdCode() {
     },
     get esm(): string | undefined {
       if (dynamic)
-        return `import { createHeadingIds as _createHeadingIds } from "${headingRuntime}";\nexport const _headingIds = _createHeadingIds([${entries.join(', ')}]);`;
+        return `import { createHeadingIds as _createHeadingIds, HeadingId as ${headingIdElement} } from "${headingRuntime}";\nexport const _headingIds = _createHeadingIds([${entries.join(', ')}]);`;
     },
   };
 }
@@ -60,14 +63,14 @@ export function headingIdCode() {
 /**
  * Write the ID of a heading in stringified Markdown, or remove its custom ID.
  *
- * @param expression - outputs the code of an ID, static outputs have none
+ * @param id - the ID to write, as Markdown
  */
-export function stringifyHeadingId<N extends { children: readonly unknown[]; data?: unknown }>(
+export function stringifyHeadingId<N extends { children: readonly unknown[] }>(
   s: { source: string; edit: (start: number, end: number, text: string, node: N) => void },
   node: N,
   enabled: boolean,
   range: (node: never) => { start: number; end: number } | undefined,
-  expression?: (code: string, fallback: string) => string,
+  id: string | undefined,
 ): void {
   const start = range(node as never)?.start;
   // the content ends with its last child, before the closing sequence or underline
@@ -76,14 +79,6 @@ export function stringifyHeadingId<N extends { children: readonly unknown[]; dat
   if (start === undefined || end === undefined) return;
 
   const marker = headingIdRegex.exec(s.source.slice(start, end));
-  const { id, [idCodeProperty]: code } =
-    (node.data as { hProperties?: Record<string, unknown> } | undefined)?.hProperties ?? {};
   if (!enabled && marker) s.edit(start + marker.index, end, '', node);
-  else if (enabled && !marker && typeof id === 'string')
-    s.edit(
-      end,
-      end,
-      ` [#${typeof code === 'string' && expression ? expression(code, id) : id}]`,
-      node,
-    );
+  else if (enabled && !marker && id !== undefined) s.edit(end, end, ` [#${id}]`, node);
 }

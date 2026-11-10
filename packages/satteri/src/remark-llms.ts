@@ -4,7 +4,7 @@ import { offsets, type PositionedNode } from './stringifier';
 import type { Analysis } from 'fumadocs-core/mdx-plugins/stringifier';
 import { stringifyHeadingId } from '../../shared/heading-id';
 import { createCodeOutput, parse, type JsxElementNode } from './utils';
-import { keptElement, moduleScope } from '../../shared/code-output';
+import { isStaticOutput, keptElement, moduleScope } from '../../shared/code-output';
 
 export interface LLMsOptions {
   /**
@@ -65,7 +65,7 @@ export function remarkLlms({
       name: 'remark-llms',
       options: { position: true },
       before(_root, ctx) {
-        isStatic = (analysis ?? ctx.data._analysis) !== 'runtime';
+        isStatic = isStaticOutput(analysis, ctx.data);
         out = createCodeOutput(ctx, undefined, isStatic);
       },
       mdxjsEsm(node) {
@@ -74,8 +74,11 @@ export function remarkLlms({
       },
       yaml: drop,
       toml: drop,
-      heading: (node) =>
-        stringifyHeadingId(out.s, node, headingIds, offsets, isStatic ? undefined : out.expression),
+      heading(node, ctx) {
+        const id = (node.data as { hProperties?: { id?: string } } | undefined)?.hProperties?.id;
+        const code = id && ctx.data._headingIds?.[id];
+        stringifyHeadingId(out.s, node, headingIds, offsets, code ? out.expression(code, id) : id);
+      },
       mdxTextExpression: expression,
       mdxFlowExpression: expression,
       mdxJsxFlowElement: element,

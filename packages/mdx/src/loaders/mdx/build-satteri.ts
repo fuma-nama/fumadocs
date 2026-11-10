@@ -11,7 +11,7 @@ import type { PostprocessOptions } from '@/loaders/mdx/remark-postprocess';
 import { resolveLastModified } from '@/loaders/mdx/last-modified';
 import type { MdxCompileOptions, Data, MdastPluginInput, MdastPluginDefinition } from 'satteri';
 import type { SatteriPresetOptions } from '@fumadocs/satteri/preset';
-import { listCode, showConditions } from '../../../../shared/code-output';
+import { isStaticOutput, listCode, showConditions } from '../../../../shared/code-output';
 import type { ExtraPluginHooks } from '@fumadocs/satteri/compile';
 
 export type CompiledSatteriMDXProperties<Frontmatter = Record<string, unknown>> =
@@ -99,14 +99,14 @@ function postprocessPlugin(
     },
     link(node, ctx) {
       if (!extractLinkReferences) return;
-      const when = showConditions(node, ctx, ctx.data._analysis !== 'runtime');
+      const when = showConditions(node, ctx);
       ctx.data.extractedReferences!.push({ code: JSON.stringify({ href: node.url }), when });
     },
     collectExports({ data, addExport }) {
       if (extractLinkReferences) {
         addExport(
           'extractedReferences',
-          listCode(data.extractedReferences!, data._analysis !== 'runtime'),
+          listCode(data.extractedReferences!, isStaticOutput(undefined, data)),
         );
       }
 
