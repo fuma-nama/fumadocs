@@ -1,3 +1,4 @@
+import type { MarkdownTarget } from 'fumadocs-core/server';
 import type { HeadingIds } from '../../shared/heading-id';
 import type { MdastVisitorContext } from 'satteri';
 
@@ -71,13 +72,14 @@ export function offsets(node: PositionedNode): Range | undefined {
 /**
  * Replace the Markdown of an authored node, ignored without a position. The last edit of a node wins.
  *
- * @param namespace - limit the edit to the stringifiers of a namespace, like `search` for search records
+ * @param namespace - limit the edit to the stringifiers of a namespace: `search` for search records, `markdown` for
+ *   processed Markdown
  */
 export function replaceSource(
   ctx: MdastVisitorContext,
   node: PositionedNode,
   text: Replacement,
-  namespace?: 'search' | (string & {}),
+  namespace?: MarkdownTarget | (string & {}),
 ): void {
   const range = offsets(node);
   if (range && range.end > range.start)
@@ -160,12 +162,12 @@ export interface Stringifier {
 }
 
 /**
- * @param namespace - also apply the edits of this namespace, like `search` for search records
+ * @param namespace - also apply the edits of this namespace
  * @param expression - output the expressions of replacements, their fallbacks are output without it
  */
 export function createStringifier(
   ctx: MdastVisitorContext,
-  namespace?: 'search' | (string & {}),
+  namespace?: MarkdownTarget | (string & {}),
   expression: Stringifier['expression'] = (_, fallback) => fallback,
 ): Stringifier {
   const source = ctx.source + (ctx.data._embeddedSource ?? '');

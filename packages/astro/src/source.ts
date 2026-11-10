@@ -7,7 +7,8 @@ import { root } from 'virtual:fumadocs/config';
 import type { MetaData, PageData, Params, StaticSource, VirtualFile } from 'fumadocs-core/source';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
 import type { TOCItemType } from 'fumadocs-core/toc';
-import { pageOutputs, renderMarkdown, structuredDataOf, type PageOutputs } from './mdx-runtime';
+import { pageOutputs, recordsOf, renderMarkdown, type PageOutputs } from './mdx-runtime';
+import { readStructuredData, renderStructuredData } from '../../shared/structured-data';
 import { dataKey } from './shared';
 
 /** an entry of Astro content collections */
@@ -142,11 +143,16 @@ function pageData<Entry extends PageEntry>(
             )
           : Content,
         toc: outputs.toc(props),
-        structuredData: await structuredDataOf(outputs, props),
+        // read without rendering, `structuredData()` renders it
+        get structuredData() {
+          return readStructuredData(recordsOf(outputs), props);
+        },
       };
     },
     async structuredData() {
-      return structuredDataOf((await compile()).outputs, props);
+      const { outputs } = await compile();
+      // with the MDX components of the collection by default
+      return renderStructuredData(recordsOf(outputs), { components: outputs.components, ...props });
     },
     async getText(type, options) {
       if (type === 'raw') return entry.body ?? '';

@@ -119,6 +119,7 @@ export function applyMdxPreset(
         rehypeCodeOptions !== false && [plugins.rehypeCode, rehypeCodeOptions],
         ...v,
         plugins.rehypeToc,
+        plugins.rehypeHeadingIds,
       ],
       mdxOptions.rehypePlugins,
     );

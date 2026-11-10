@@ -251,5 +251,26 @@ test('page props render the content and outputs of a page', async () => {
     headings: [{ id: 'a', content: 'next Fuma' }],
     contents: [{ heading: 'a', content: 'Fumadocs' }],
   });
-  expect((await lazyPage.data.load()).toc[0].title).toBe('next Fuma');
+  // loading a page renders none of its outputs, its structured data is read like in an eager entry
+  const lazyData = await lazyPage.data.load();
+  expect(lazyData.toc[0].title).toBe('next Fuma');
+  expect(lazyData.structuredData).toEqual(page.data.structuredData);
+
+  // on the client, a page is its file at the params that the server sends, the same page for the same params
+  const { createClientLoader } = await import('@/runtime/browser');
+  const client = createClientLoader(
+    { [file]: async () => compiled as never },
+    {
+      id: 'page-props',
+      component: () => null,
+    },
+  );
+  const loaded = await client.preload(file, { framework: 'next' });
+  expect(loaded.toc[0].title).toBe('next undefined');
+  expect(client.getComponent(file, { framework: 'next' })).toBe(
+    client.getComponent(file, { framework: 'next' }),
+  );
+  expect(client.getComponent(file, { framework: 'waku' })).not.toBe(
+    client.getComponent(file, { framework: 'next' }),
+  );
 });

@@ -1,14 +1,26 @@
 import Slugger from 'github-slugger';
-import type { Heading, Root, RootContent } from 'mdast';
+import type { Heading, Nodes, Root } from 'mdast';
+import type * as Hast from 'hast';
 import type { Transformer } from 'unified';
-import type { MdxJsxAttributeValueExpression, MdxJsxFlowElement } from 'mdast-util-mdx';
+import type { ExpressionStatement, JSXElement } from 'estree-jsx';
+import { toEstree } from 'hast-util-to-estree';
 import type { TOCItemType } from '@/toc';
-import { flattenNode, toEsm } from '@/mdx-plugins/utils';
-import { showCondition } from '../../../shared/code-output';
-import { headingIdCode, headingIdRegex, headingIdWrapper } from '../../../shared/heading-id';
+import { flattenNode, toEsm, walk } from '@/mdx-plugins/utils';
+import { walkBranches } from '../../../shared/show';
+import { headingIdCode, headingIdRegex } from '../../../shared/heading-id';
 
 export interface RemarkHeadingOptions {
+  /** slug the IDs of headings, the IDs slugged when rendering come from `slugImportSource` */
   slug?: (root: Root, heading: Heading, text: string) => string;
+
+  /**
+   * The module that slugs IDs when rendering, compiled pages import `createHeadingIds()` from it like the JSX runtime
+   * from `jsxImportSource`. It replaces `fumadocs-core/mdx-plugins/remark-heading.runtime`, which it can call with
+   * its own slugger.
+   *
+   * @defaultValue the runtime of Fumadocs, or with a custom `slug`, none: IDs are slugged from the source
+   */
+  slugImportSource?: string;
 
   /**
    * Allow custom headings ids
@@ -35,16 +47,20 @@ declare module 'vfile' {
 }
 
 /**
- * Add heading ids and extract TOC. With the default slugs, when the outputs of the document read the props, IDs of headings with authored
- * expressions or in branches of `<show>` render from code: the heading is wrapped in an element that gives it the ID.
+ * Add heading ids and extract TOC.
+ *
+ * For a content source that renders pages for props, the IDs of headings with authored expressions or in branches of
+ * `<show>` are slugged when rendering: {@link rehypeHeadingIds} gives them to the headings.
  */
 export function remarkHeading({
   slug,
+  slugImportSource,
   customId = true,
   generateToc = true,
 }: RemarkHeadingOptions = {}): Transformer<Root, Root> {
   let slugger: Slugger | undefined;
-  const defaultSlug = !slug;
+  // a custom slug needs its own runtime to slug when rendering
+  const hasRuntime = !slug || slugImportSource !== undefined;
 
   if (!slug) {
     slugger = new Slugger();
@@ -53,32 +69,13 @@ export function remarkHeading({
 
   return (root, file) => {
     const toc: TOCItemType[] = [];
-    const ids = headingIdCode();
-    const fromCode = defaultSlug && file.data.unstable_runtimeOutputs;
+    const ids = headingIdCode(slugImportSource);
+    const fromCode = hasRuntime && file.data.unstable_runtimeOutputs;
     slugger?.reset();
 
-    const visit = (nodes: RootContent[], when: string[]) => {
-      for (let i = 0; i < nodes.length; i++) {
-        const heading = nodes[i];
-        if (heading.type !== 'heading') {
-          const condition = showCondition(heading);
-          if ('children' in heading)
-            visit(heading.children as RootContent[], condition ? [...when, condition] : when);
-          continue;
-        }
-        const code = assign(heading, when);
-        if (!code) continue;
-        (file.data._headingIds ??= {})[heading.data!.hProperties!.id as string] = code;
-        const wrapper: MdxJsxFlowElement = { ...headingIdWrapper(code), children: [heading] };
-        (wrapper.attributes[0].value as MdxJsxAttributeValueExpression).data = toEsm(code).data;
-        nodes[i] = wrapper;
-      }
-    };
-    /** @returns the code of its ID, when it renders from code */
-    const assign = (heading: Heading, when: string[]): string | false | undefined => {
-      heading.data ||= {};
-      heading.data.hProperties ||= {};
-      const props = heading.data.hProperties;
+    walkBranches<Nodes>(root, (heading, when) => {
+      if (heading.type !== 'heading') return;
+      const props = ((heading.data ||= {}).hProperties ||= {});
 
       const lastNode = heading.children.at(-1);
       if (lastNode?.type === 'text' && customId) {
@@ -90,27 +87,58 @@ export function remarkHeading({
         }
       }
 
-      let flattened: string | null = null;
-      let code: string | false | undefined;
+      let text: string | undefined;
       if (!props.id) {
-        flattened ??= flattenNode(heading);
-
-        props.id = slug(root, heading, flattened);
-        code = fromCode && ids.next(heading.children, when);
+        text = flattenNode(heading);
+        props.id = slug(root, heading, text);
+        const code = fromCode && ids.next(heading.children, when);
+        if (code) (file.data._headingIds ??= {})[props.id as string] = code;
       }
 
       if (generateToc) {
         toc.push({
-          title: flattened ?? flattenNode(heading),
+          title: text ?? flattenNode(heading),
           url: `#${props.id}`,
           depth: heading.depth,
         });
       }
-      return code;
-    };
-    visit(root.children, []);
+      return 'skip';
+    });
 
     if (ids.esm) root.children.unshift(toEsm(ids.esm));
     if (generateToc) file.data.toc = toc;
+  };
+}
+
+/**
+ * Give headings their IDs from code, the IDs that {@link remarkHeading} computes for a content source that renders
+ * pages for props. It runs after the plugins that read headings: a heading with an ID from code is JSX.
+ */
+export function rehypeHeadingIds(): Transformer<Hast.Root, Hast.Root> {
+  return (tree, file) => {
+    const ids = file.data._headingIds;
+    if (!ids) return;
+    walk<Hast.Nodes>(tree as Hast.Nodes, (node, index, parent) => {
+      const code = node.type === 'element' && ids[node.properties.id as string];
+      if (!code || !parent) return;
+
+      const estree = toEstree(node, {
+        elementAttributeNameCase: 'react',
+        stylePropertyNameCase: 'dom',
+      });
+      const { expression } = estree.body[0] as { expression: JSXElement };
+      for (const attribute of expression.openingElement.attributes)
+        if (attribute.type === 'JSXAttribute' && attribute.name.name === 'id')
+          attribute.value = {
+            type: 'JSXExpressionContainer',
+            expression: (toEsm(code).data!.estree!.body[0] as ExpressionStatement).expression,
+          };
+      parent.children[index!] = {
+        type: 'mdxFlowExpression',
+        value: '',
+        data: { estree },
+      } as Hast.Nodes;
+      return 'skip';
+    });
   };
 }

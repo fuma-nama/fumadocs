@@ -65,12 +65,13 @@ export function fromJS<M>(options: MarkdownRendererJSOptions): MarkdownRenderer<
 
     return {
       opts: {
+        // the runtime of heading IDs, unless the scope gives the one of `slugImportSource`
+        ...HeadingRuntime,
         ...(opts as object),
         ...JsxRuntime,
         // the runtime of generated code, like the JSX runtime
         asMarkdown,
         jsxComponents,
-        ...HeadingRuntime,
         baseUrl,
       },
       // the code of the module reads the params of a page as `props`, like its content

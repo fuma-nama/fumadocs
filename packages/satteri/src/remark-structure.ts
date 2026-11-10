@@ -4,7 +4,7 @@ import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure'
 import { tableRowToStructuredData } from 'fumadocs-core/search';
 import type { ExtraPluginHooks } from './compile';
 import { createCodeOutput, esmScope } from './utils';
-import { isStaticOutput, showConditions } from '../../shared/code-output';
+import { isStaticOutput, showConditions } from '../../shared/show';
 import { createStructuredRecords } from '../../shared/structured-records';
 
 declare module 'satteri' {
@@ -35,19 +35,6 @@ export interface StructureOptions {
   exportAs?: string | boolean;
 }
 
-/** the elements kept as HTML tags by default */
-function keepByDefault(node: { name?: string | null }): boolean {
-  switch (node.name) {
-    case 'File':
-    case 'TypeTable':
-    case 'Callout':
-    case 'Card':
-      return true;
-    default:
-      return false;
-  }
-}
-
 /** the nodes that a function of `types` can match */
 const RECORD_VISITORS = [
   'heading',
@@ -73,8 +60,8 @@ const EDIT_VISITORS = [
  * Extract content into structured data, as Markdown sliced from the authored source. Links and JSX elements are
  * replaced by their content, images are removed.
  *
- * For a content source that renders pages for props, the export is a function of the props, rendering authored expressions and the branches of
- * `<show>` that show. `ctx.data.structuredData` has the authored source of expressions and every branch.
+ * For a content source that renders pages for props, the export is a function of the props giving the records that
+ * show. `ctx.data.structuredData` is static: authored expressions as their source, the content of every branch.
  */
 export function remarkStructure({
   types = ['heading', 'paragraph', 'blockquote', 'table', 'mdxJsxFlowElement'],
@@ -100,10 +87,14 @@ export function remarkStructure({
       options: { position: true },
       before(_root: unknown, ctx: MdastVisitorContext) {
         isStatic = isStaticOutput(ctx.data);
-        records = createStructuredRecords<Nodes>(createCodeOutput(ctx, 'search', isStatic), {
+        const out = createCodeOutput(ctx, {
+          target: 'search',
+          isStatic,
+          keep: filterElement as ((node: unknown) => boolean) | undefined,
+        });
+        records = createStructuredRecords<Nodes>(out, {
           isType: matchType,
           mdxTypes,
-          keep: filterElement ?? (isStatic ? keepByDefault : undefined),
           tableRow: tableRowToStructuredData,
           headingIds: ctx.data._headingIds,
         });

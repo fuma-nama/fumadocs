@@ -6,7 +6,7 @@ import type {
   MdxJsxTextElement,
   PluginFactoryContext,
 } from 'satteri';
-import { showCondition, showDeclaration, showElement } from '../../shared/code-output';
+import { showCondition, showDeclaration, showElement } from '../../shared/show';
 
 type Element = MdxJsxFlowElement | MdxJsxTextElement;
 

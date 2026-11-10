@@ -4,7 +4,8 @@ import remarkGfm from 'remark-gfm';
 import type { PluggableList, Transformer } from 'unified';
 import { VFile } from 'vfile';
 import { createCodeOutput, esmScope, toMdxExport } from './utils';
-import { isStaticOutput, showCondition } from '../../../shared/code-output';
+import { isStaticOutput, walkBranches } from '../../../shared/show';
+import { staticTagRegex } from '../../../shared/code-output';
 import { createStructuredRecords } from '../../../shared/structured-records';
 import type { MdxJsxFlowElement, MdxJsxTextElement } from 'mdast-util-mdx';
 import { remarkHeading } from './remark-heading';
@@ -90,15 +91,7 @@ export const remarkStructureDefaultOptions = {
     return !node.children || node.children.length === 0;
   },
   filterElement(node) {
-    switch (node.name) {
-      case 'File':
-      case 'TypeTable':
-      case 'Callout':
-      case 'Card':
-        return true;
-      default:
-        return false;
-    }
+    return staticTagRegex.test(node.name ?? '');
   },
   exportAs: false,
 } satisfies StructureOptions;
@@ -122,14 +115,14 @@ export function remarkStructure({
 
   return (tree, file) => {
     const isStatic = isStaticOutput(file.data);
-    const out = createCodeOutput(file, 'search', isStatic);
+    const out = createCodeOutput(file, {
+      target: 'search',
+      isStatic,
+      keep: filterElement as ((node: Nodes) => boolean) | undefined,
+    });
     const records = createStructuredRecords<Nodes>(out, {
       isType,
       mdxTypes: (node) => mdxTypes(node as JsxElement),
-      keep: (filterElement ??
-        (isStatic ? remarkStructureDefaultOptions.filterElement : undefined)) as
-        | ((node: Nodes) => boolean)
-        | undefined,
       tableRow: tableRowToStructuredData,
       headingIds: file.data._headingIds,
     });
@@ -140,13 +133,7 @@ export function remarkStructure({
     for (const item of openapi?.headings ?? []) records.push(item);
     for (const item of openapi?.contents ?? []) records.push(item);
 
-    const visit = (node: Nodes, when: string[]) => {
-      records.collect(node, () => when);
-      if (!('children' in node)) return;
-      const condition = showCondition(node);
-      for (const child of node.children) visit(child, condition ? [...when, condition] : when);
-    };
-    visit(tree, []);
+    walkBranches<Nodes>(tree, (node, when) => records.collect(node, () => when));
 
     const data: StructuredData = records.toStatic();
     file.data.structuredData = data;

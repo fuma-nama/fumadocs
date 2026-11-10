@@ -1,5 +1,5 @@
 import type { Transformer } from 'unified';
-import { isStaticOutput } from '../../../shared/code-output';
+import { isStaticOutput } from '../../../shared/show';
 import { createCodeOutput, esmScope, isJsxElement } from './utils';
 import type { Nodes, Root } from 'mdast';
 import type { MdxJsxFlowElement, MdxJsxTextElement } from 'mdast-util-mdx';
@@ -73,12 +73,12 @@ export function remarkLLMs({
 }: LLMsOptions = {}): Transformer<Root, Root> {
   return (tree, file) => {
     const isStatic = isStaticOutput(file.data, output && output === 'string');
-    const out = createCodeOutput(file, undefined, isStatic);
+    const out = createCodeOutput(file, { target: 'markdown', isStatic });
     const { s } = out;
 
     const visit = (nodes: Nodes[]) => {
       for (const node of nodes) {
-        const visibility = node.type === 'mdxjsEsm' ? false : (filterElement?.(node) ?? true);
+        const visibility = filterElement?.(node) ?? true;
         if (visibility === false) {
           s.replace(node, '');
           continue;
@@ -87,30 +87,18 @@ export function remarkLLMs({
         if ('children' in node) visit(node.children);
         if (visibility === 'children-only') {
           s.replace(node, (s) => s.inner(node));
-        } else if (out.markCode(node)) {
-          // rendered from code
         } else if (node.type === 'heading') {
-          const id = node.data?.hProperties?.id;
-          const code = typeof id === 'string' && file.data._headingIds?.[id];
+          const id = node.data?.hProperties?.id ?? undefined;
+          const code = !isStatic && id !== undefined && file.data._headingIds?.[id];
           stringifyHeadingId(
             s,
             node,
-            headingIds,
             (node: Nodes) => s.range(node),
-            code ? out.expression(code, id as string) : (id ?? undefined),
+            headingIds && (code ? out.expression(code, id as string) : id),
           );
-        } else if (isJsxElement(node) && node.name) {
-          const element = !mdxAsPlaceholder?.includes(node.name) && out.keep(node);
-          if (element === false)
-            s.replace(node, (s) => toPlaceholder(node, out.toStatic(s.inner(node))));
-          else if (element)
-            s.replace(node, (s) => {
-              let children = s.inner(node);
-              // block content on its own lines
-              if (children && node.type === 'mdxJsxFlowElement') children = `\n${children}\n`;
-              return out.wrap(element, children);
-            });
-        }
+        } else if (isJsxElement(node) && node.name && mdxAsPlaceholder?.includes(node.name)) {
+          s.replace(node, (s) => toPlaceholder(node, out.toStatic(s.inner(node))));
+        } else out.edit(node);
       }
     };
 
@@ -118,7 +106,13 @@ export function remarkLLMs({
     const text = s.stringify(tree).trim();
     const value = text ? `${text}\n` : '';
 
-    tree.children.unshift(out.esm(out.markdownCode(as, value, esmScope(tree))));
+    tree.children.unshift(
+      out.esm(
+        isStatic
+          ? `export const ${as} = ${out.toConcat(value)};`
+          : out.markdownCode(as, value, esmScope(tree)),
+      ),
+    );
     if (_data) file.data.markdown = out.toStatic(value);
   };
 }

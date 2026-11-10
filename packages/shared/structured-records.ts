@@ -1,10 +1,4 @@
-import {
-  guardedArray,
-  type CodeNode,
-  type JsxAttributes,
-  type KeptElement,
-  type CodePart,
-} from './code-output';
+import { listCode, type CodeNode } from './code-output';
 import { headingIdRegex, type HeadingIds } from './heading-id';
 
 interface Range {
@@ -26,19 +20,16 @@ interface StructuredHeading {
   content: string;
 }
 
-/** the code output of a compiler, as the records use it */
+/** the code output of a compiler for search, as the records use it */
 interface RecordOutput<N> {
   s: {
     source: string;
-    replace(node: N, text: string | (() => string)): void;
     inner(node: N): string;
     stringify(node: N): string;
     within(range: Range, outer: Range): boolean;
   };
   range(node: N): Range | undefined;
-  markCode(node: N): boolean;
-  keep(node: N): KeptElement | undefined;
-  wrap(part: CodePart, content: string): string;
+  edit(node: N): void;
   toStatic(text: string): string;
   toCode(text: string): string;
   componentsCode(scope: () => ReadonlySet<string>, from: string): string;
@@ -49,8 +40,6 @@ interface StructuredRecordsOptions<N> {
   isType: (node: N) => boolean;
   /** whether a JSX element with content on several lines is a record as a whole */
   mdxTypes: (node: N) => boolean;
-  /** whether to keep a JSX element in records, by default the elements that the output can render */
-  keep?: (node: N) => boolean;
   /** `tableRowToStructuredData()` of `fumadocs-core/search` */
   tableRow: (row: { table: string; row: string[]; header: string[] }) => StructuredContent;
   /** the IDs of headings from code */
@@ -58,16 +47,16 @@ interface StructuredRecordsOptions<N> {
 }
 
 /**
- * The records of structured data of a document, in document order: Markdown sliced from the authored source, with the
- * markers of the code in it. Links and JSX elements are replaced by their content, images and ESM are removed.
+ * The records of structured data of a document, in document order: slices of its Markdown for search, see the
+ * `target` of the code output.
  */
 export function createStructuredRecords<N extends CodeNode>(
   out: RecordOutput<N>,
-  { isType, mdxTypes, keep, tableRow, headingIds }: StructuredRecordsOptions<N>,
+  { isType, mdxTypes, tableRow, headingIds }: StructuredRecordsOptions<N>,
 ) {
   const { s } = out;
   const records: ((StructuredHeading | StructuredContent) & { when: string[] })[] = [];
-  /** stringified after the edits of every node */
+  /** records are stringified after the edits of every node */
   const pending: (() => void)[] = [];
   let covered: Range | undefined;
   let tables = 0;
@@ -83,7 +72,6 @@ export function createStructuredRecords<N extends CodeNode>(
     for (const record of pending) record();
     pending.length = 0;
   };
-
   return {
     /** `when`: the conditions of the branches of `<show>` around it */
     push,
@@ -95,17 +83,7 @@ export function createStructuredRecords<N extends CodeNode>(
     collect(node: N, when: () => string[]): void {
       const { type } = node;
       const isElement = type === 'mdxJsxFlowElement' || type === 'mdxJsxTextElement';
-      if (out.markCode(node)) {
-        // rendered from code
-      } else if (type === 'link' || type === 'linkReference') s.replace(node, () => s.inner(node));
-      else if (type === 'image' || type === 'imageReference' || type === 'mdxjsEsm')
-        s.replace(node, '');
-      else if (isElement)
-        s.replace(node, () => {
-          const element = out.keep(node);
-          if (!(keep ? keep(node) : element)) return s.inner(node);
-          return element ? out.wrap(element, s.inner(node)) : toHtmlTag(node, s.inner(node));
-        });
+      out.edit(node);
 
       const { children, data } = node as {
         children?: { children: N[] }[];
@@ -161,14 +139,14 @@ export function createStructuredRecords<N extends CodeNode>(
         });
       }
     },
-    /** the structured data of the source: authored expressions as their source, every branch */
+    /** the structured data of the source: authored expressions as their source, the content of every branch */
     toStatic() {
       flush();
       const contents: string[] = [];
       for (const record of records) contents.push(out.toStatic(record.content));
       return toStructuredData(records, contents);
     },
-    /** the code of the runtime records, a function of the props giving the records that show, see `renderStructuredData()` */
+    /** the code of the records that show for the props of a page, a function of the props: see `structured-data.ts` */
     toCode(scope: () => ReadonlySet<string>): string {
       flush();
       const items: { code: string; when: string[] }[] = [];
@@ -181,12 +159,8 @@ export function createStructuredRecords<N extends CodeNode>(
         }
         items.push({ code: `${code}}`, when: record.when });
       }
-      const list = guardedArray(items);
       // the MDX components are page props, like in the content
-      const declaration = out.componentsCode(scope, 'props.components');
-      return declaration
-        ? `(props) => {\n${declaration}\nreturn ${list};\n}`
-        : `(props) => ${list}`;
+      return listCode(items, false, out.componentsCode(scope, 'props.components'));
     },
   };
 }
@@ -213,31 +187,4 @@ export function toStructuredData(
     else data.contents.push(table ? { heading: own, content, table } : { heading: own, content });
   }
   return data;
-}
-
-/**
- * A JSX element as an HTML tag, so search dialogs render it as an element. Expression values become strings, values
- * and content are kept on one line, values are truncated.
- */
-export function toHtmlTag(node: CodeNode, inner: string): string {
-  let attrs = '';
-  for (const attr of node.attributes as JsxAttributes) {
-    if (attr.type === 'mdxJsxExpressionAttribute') continue;
-    if (attr.value == null) {
-      attrs += ` ${attr.name}`;
-      continue;
-    }
-
-    let value = (typeof attr.value === 'string' ? attr.value : attr.value.value).replace(
-      /\s+/g,
-      ' ',
-    );
-    if (value.length > 100) value = `${value.slice(0, 100)}…`;
-    attrs += ` ${attr.name}="${value.replaceAll('&', '&amp;').replaceAll('"', '&quot;')}"`;
-  }
-
-  const children = inner.replace(/\s+/g, ' ');
-  const name = node.name as string;
-  if (!children) return `<${name}${attrs} />`;
-  return `<${name}${attrs}>${children}</${name}>`;
 }

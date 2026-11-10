@@ -6,7 +6,8 @@ import { flattenNode, walk } from './mdast-utils';
 import type { LLMsOptions } from 'fumadocs-core/mdx-plugins';
 import { Parser } from 'acorn';
 import type { MdxjsEsm } from 'mdast-util-mdx';
-import { listCode, showCondition } from '../../../../shared/code-output';
+import { listCode } from '../../../../shared/code-output';
+import { walkBranches } from '../../../../shared/show';
 import { remarkLLMs } from 'fumadocs-core/mdx-plugins/remark-llms';
 
 export interface ExtractedReference {
@@ -70,14 +71,9 @@ export function remarkPostprocess({
 
     if (extractLinkReferences) {
       const items: { code: string; when: string[] }[] = [];
-      const visit = (node: Nodes, when: string[]) => {
-        if (node.type === 'link')
-          return void items.push({ code: JSON.stringify({ href: node.url }), when });
-        if (!('children' in node)) return;
-        const condition = showCondition(node);
-        for (const child of node.children) visit(child, condition ? [...when, condition] : when);
-      };
-      visit(tree, []);
+      walkBranches<Nodes>(tree, (node, when) => {
+        if (node.type === 'link') items.push({ code: JSON.stringify({ href: node.url }), when });
+      });
       tree.children.unshift({
         type: 'mdxjsEsm',
         value: '',

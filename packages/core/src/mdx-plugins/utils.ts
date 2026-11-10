@@ -10,6 +10,7 @@ import { createStringifier, type Stringifier } from './stringifier';
 import {
   createCodeOutput as createSharedCodeOutput,
   moduleScope,
+  type CodeOutputOptions,
 } from '../../../shared/code-output';
 
 export function isJsxElement(node: Nodes): node is MdxJsxFlowElement | MdxJsxTextElement {
@@ -85,20 +86,23 @@ function fill(node: object, expressions: Expression[]) {
 }
 
 /** the shared code output, on the stringifier of mdast: estree expressions of replacements go in by placeholders */
-export function createCodeOutput(file: VFile, namespace?: string, isStatic?: boolean) {
+export function createCodeOutput(
+  file: VFile,
+  options: Pick<CodeOutputOptions<Nodes, Stringifier>, 'target' | 'isStatic' | 'keep'>,
+) {
   const expressions: Expression[] = [];
   let stringifier: Stringifier;
-  const out = createSharedCodeOutput<Nodes, Stringifier>(
-    (expression) =>
-      (stringifier = createStringifier(file, namespace, (value, fallback) =>
+  const out = createSharedCodeOutput<Nodes, Stringifier>({
+    ...options,
+    stringifier: (expression) =>
+      (stringifier = createStringifier(file, options.target, (value, fallback) =>
         expression(`_fumadocs${expressions.push(value) - 1}`, fallback),
       )),
-    (node) => stringifier.range(node),
-    (code) => parser.parse(code, { ecmaVersion: 'latest', sourceType: 'module' }),
-    isStatic,
+    range: (node) => stringifier.range(node),
+    parse: (code) => parser.parse(code, { ecmaVersion: 'latest', sourceType: 'module' }),
     // strings skip the parser
-    (value) => `_fumadocs${expressions.push({ type: 'Literal', value }) - 1}`,
-  );
+    literal: (value) => `_fumadocs${expressions.push({ type: 'Literal', value }) - 1}`,
+  });
   return Object.assign(out, { esm: (code: string) => toEsm(code, expressions) });
 }
 

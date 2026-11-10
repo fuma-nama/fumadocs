@@ -1,36 +1,31 @@
-/** the element of `<show>` branches, defined in the module by {@link showDeclaration} */
-export const showElement = '_Show';
+import type { MarkdownTarget } from 'fumadocs-core/server';
+import { showCondition, type JsxAttributes } from './show';
 
-/** the ESM code that defines {@link showElement} */
-export const showDeclaration = `export function ${showElement}(props) { return props.when ? props.children : null }`;
+/** a value from code, like an authored expression: `fallback` is its text in outputs that can't run it */
+interface Value {
+  code: string;
+  fallback: string;
+  inline?: boolean;
+}
 
-/** a part of an output that renders from code */
-export type CodePart =
-  /** a value, like an authored expression, `fallback` in outputs that can't render it */
-  | { code: string; fallback: string; inline?: boolean }
-  /** content shown when `when` holds, a branch of `<show>` checked when rendering */
-  | { when: string }
-  | KeptElement;
+/** content that shows when `when` holds, a branch of `<show>` */
+interface Branch {
+  when: string;
+}
 
-/** a kept JSX element of a component */
-export interface KeptElement {
+/** a JSX element of a component, kept in the output */
+interface KeptElement {
   /** the opening tag without its end */
   open: string;
   name: string;
   inline: boolean;
 }
 
-/** Markdown and the parts of it rendered from code, the content of branches and elements as chunks */
-type Chunk =
-  | string
-  | Extract<CodePart, { code: string }>
-  | (Exclude<CodePart, { code: string }> & { children: Chunk[] });
+/** a part of an output that renders from code */
+type CodePart = Value | Branch | KeptElement;
 
-/** the attributes of a JSX element, in mdast and Sätteri */
-export type JsxAttributes = (
-  | { type: 'mdxJsxAttribute'; name: string; value?: string | { value: string } | null }
-  | { type: 'mdxJsxExpressionAttribute'; value: string }
-)[];
+/** Markdown and its parts from code, branches and elements hold their content */
+type Chunk = string | Value | ((Branch | KeptElement) & { children: Chunk[] });
 
 export interface CodeNode {
   type: string;
@@ -45,42 +40,65 @@ interface CodeStringifier<N> {
   inner(node: N): string;
 }
 
+export interface CodeOutputOptions<N, S> {
+  /**
+   * What the output is for, like in `renderToMarkdown()` of `fumadocs-core/server`. Search has the text of links and
+   * no images, and the content of the JSX elements it doesn't keep.
+   */
+  target: MarkdownTarget;
+  /** whether the output is static: it has no parts from code, the elements kept for search are HTML tags */
+  isStatic: boolean;
+  /**
+   * Whether to keep a JSX element. By default the elements of components, or for static search, `File`, `TypeTable`,
+   * `Callout` and `Card`.
+   */
+  keep?: (node: N) => boolean;
+  /** create the stringifier of the output, `expression` marks the code of its replacements */
+  stringifier: (expression: (code: string, fallback: string) => string) => S;
+  range: (node: N) => { start: number; end: number } | undefined;
+  /** parse code with JSX */
+  parse: (code: string) => object;
+  /** the code of a string, JSON by default */
+  literal?: (text: string) => string;
+}
+
 const markerRegex = /\0(\/?)(\d+)\0/g;
+const componentNameRegex = /^[A-Z][\w$]*$/;
+/** the elements that static search keeps as HTML tags by default */
+export const staticTagRegex = /^(File|TypeTable|Callout|Card)$/;
 
 /**
- * A stringifier whose output can have parts rendered from code: replacements mark them, `toCode()` splits the output on
- * their markers. Runtime outputs are functions of the props of the page, code reads them in render scope.
- *
- * @param parse - the program of code, with JSX
- * @param isStatic - for static outputs: authored expressions keep their source
- * @param literal - the code of a string
+ * Markdown stringified from the authored source for a target, with parts that render from code. Replacements mark the
+ * parts, so edits apply to their content like to other content (e.g. the prefixes of list items), and the code of the
+ * output splits it on the markers. The code runs in a function of the props of the page, in the scope of its module.
  */
-export function createCodeOutput<N extends CodeNode, S extends CodeStringifier<N>>(
-  createStringifier: (expression: (code: string, fallback: string) => string) => S,
-  range: (node: N) => { start: number; end: number } | undefined,
-  parse: (code: string) => object,
-  isStatic = false,
-  literal: (text: string) => string = JSON.stringify,
-) {
+export function createCodeOutput<N extends CodeNode, S extends CodeStringifier<N>>({
+  target,
+  isStatic,
+  keep,
+  stringifier,
+  range,
+  parse,
+  literal = JSON.stringify,
+}: CodeOutputOptions<N, S>) {
   const parts: CodePart[] = [];
   /** the components that the code refers to in JSX: kept elements, and the JSX in authored code */
   const components = new Set<string>();
   const readJsx = (code: string) => {
     if (code.includes('<')) jsxComponents(parse(code), components);
   };
-  /** a value */
-  const mark = (part: CodePart) => `\0${parts.push(part) - 1}\0`;
-  /** content, it stays in the output so edits apply to it like to other content (e.g. the prefixes of lists) */
-  const wrap = (part: CodePart, content: string) => {
+  const mark = (part: Value) => `\0${parts.push(part) - 1}\0`;
+  const wrap = (part: Branch | KeptElement, content: string) => {
     const i = parts.push(part) - 1;
     return `\0${i}\0${content}\0/${i}\0`;
   };
   const expression = (code: string, fallback: string) => mark({ code, fallback });
-  const s = createStringifier(expression);
-  const chunks = (text: string): Chunk[] => {
+  const s = stringifier(expression);
+
+  function chunks(text: string): Chunk[] {
     const root: Chunk[] = [];
-    const stack: Chunk[][] = [root];
-    /** a branch just closed, the whitespace after it goes with it */
+    const stack = [root];
+    /** a branch that just closed, the line break after it goes with it */
     let branch: Chunk[] | undefined;
     let idx = 0;
     const pushText = (end: number) => {
@@ -102,156 +120,181 @@ export function createCodeOutput<N extends CodeNode, S extends CodeStringifier<N
       const part = parts[Number(match[2])];
       if (match[1]) {
         const children = stack.pop()!;
-        stack.at(-1)!.push({ ...part, children } as Chunk);
+        stack.at(-1)!.push({ ...(part as Branch | KeptElement), children });
         if ('when' in part) branch = children;
-      } else if ('code' in part) {
-        stack.at(-1)!.push(part);
-      } else {
-        stack.push([]);
-      }
+      } else if ('code' in part) stack.at(-1)!.push(part);
+      else stack.push([]);
     }
     pushText(text.length);
     return root;
-  };
+  }
+
+  /** see {@link componentsCode}, of the components of the code */
+  const declare = (scope: () => ReadonlySet<string>, from: string) =>
+    componentsCode(components, scope, from);
+
+  /** the JSX element of a component, with the code of its attributes */
+  function component(node: N): KeptElement | undefined {
+    const { name } = node;
+    if (typeof name !== 'string' || !componentNameRegex.test(name)) return;
+    components.add(name);
+    let open = `<${name}`;
+    for (const attr of node.attributes as JsxAttributes) {
+      if (attr.type === 'mdxJsxExpressionAttribute') {
+        open += ` {${attr.value}}`;
+        readJsx(`({${attr.value}})`);
+      } else if (attr.value == null) open += ` ${attr.name}`;
+      else if (typeof attr.value === 'string')
+        open += ` ${attr.name}={${JSON.stringify(attr.value)}}`;
+      else {
+        open += ` ${attr.name}={${attr.value.value}}`;
+        readJsx(`(${attr.value.value}\n)`);
+      }
+    }
+    return { open, name, inline: node.type === 'mdxJsxTextElement' };
+  }
+
+  function element(node: N) {
+    const when = showCondition(node);
+    if (when) return s.replace(node, (s) => wrap({ when }, s.inner(node)));
+
+    const kept = keep ? keep(node) : !isStatic || staticTagRegex.test(String(node.name));
+    const part = kept && !isStatic ? component(node) : undefined;
+    if (part)
+      s.replace(node, (s) => {
+        const inner = s.inner(node);
+        // in Markdown, block content is on its own lines
+        return wrap(part, target === 'markdown' && inner && !part.inline ? `\n${inner}\n` : inner);
+      });
+    // Markdown has the source of other elements, search their content, as an HTML tag when kept
+    else if (target === 'search')
+      s.replace(node, (s) => {
+        if (!kept || !(keep || isStatic)) return s.inner(node);
+        const attributes: Record<string, unknown> = {};
+        for (const attr of node.attributes as JsxAttributes)
+          if (attr.type === 'mdxJsxAttribute')
+            attributes[attr.name] =
+              attr.value == null
+                ? true
+                : typeof attr.value === 'string'
+                  ? attr.value
+                  : attr.value.value;
+        return toHtmlTag(node.name as string, attributes, s.inner(node));
+      });
+  }
 
   return {
     s,
     range,
-    wrap,
-    /** mark the code of a value, `fallback` in static outputs */
+    /** mark the code of a value */
     expression,
-    /** the output without code: expressions as their fallbacks, branches unwrapped */
+    /** Edit a node for the target: authored expressions, `<show>` branches, JSX elements, links, images and ESM. */
+    edit(node: N): void {
+      const { type } = node;
+      if (type === 'mdxjsEsm') s.replace(node, '');
+      else if (type === 'mdxJsxFlowElement' || type === 'mdxJsxTextElement') element(node);
+      else if (type === 'mdxTextExpression' || type === 'mdxFlowExpression') {
+        if (isStatic) return;
+        const code = node.value as string;
+        const position = range(node);
+        s.replace(
+          node,
+          mark({
+            code,
+            fallback: position ? s.source.slice(position.start, position.end) : '',
+            inline: type === 'mdxTextExpression',
+          }),
+        );
+        readJsx(`(${code}\n)`);
+      } else if (target === 'search') {
+        if (type === 'link' || type === 'linkReference') s.replace(node, (s) => s.inner(node));
+        else if (type === 'image' || type === 'imageReference') s.replace(node, '');
+      }
+    },
+    /** the output without code: values as their fallbacks, the content of every branch and element */
     toStatic(text: string): string {
       return text.replace(markerRegex, (_, close: string, i: string) => {
         const part = parts[Number(i)];
         return !close && 'fallback' in part ? part.fallback : '';
       });
     },
-    /** the output as one value: a string without parts, a fragment otherwise */
-    toCode: (text: string) => chunksToCode(chunks(text), literal),
-    /**
-     * The declaration of the components of the code that the module doesn't declare. Like in the content, they are
-     * MDX components.
-     *
-     * @param scope - the names that the module declares, read when there are components
-     * @param from - the code of the MDX components
-     */
-    componentsCode(scope: () => ReadonlySet<string>, from: string): string {
-      let names = '';
-      if (components.size > 0) {
-        const declared = scope();
-        for (const name of components) if (!declared.has(name)) names += `${name}, `;
-      }
-      return names && `const { ${names}} = ${from};`;
+    /** the output as a string in code, its values are concatenated: for an output without branches or elements */
+    toConcat(text: string): string {
+      let out = '';
+      for (const chunk of chunks(text))
+        out += `${out ? ' + ' : ''}${typeof chunk === 'string' ? literal(chunk) : `(${(chunk as Value).code})`}`;
+      return out || '""';
     },
+    /** the output as a value in code: a string without parts, a fragment otherwise */
+    toCode(text: string): string {
+      return chunksToCode(chunks(text), literal);
+    },
+    componentsCode: declare,
     /**
-     * The export of Markdown, a component rendered with `renderToMarkdown()` of `fumadocs-core/server`, or the string
-     * of static Markdown, code of plugins is concatenated
+     * The export of processed Markdown: a component, rendered with `renderToMarkdown()` of `fumadocs-core/server`.
+     * Its elements resolve like in the content, a missing MDX component is kept as JSX syntax.
      */
     markdownCode(as: string, text: string, scope: () => ReadonlySet<string>): string {
-      const list = chunks(text);
-      if (isStatic) {
-        let out = '';
-        for (const chunk of list)
-          out += `${out ? ' + ' : ''}${typeof chunk === 'string' ? literal(chunk) : `(${(chunk as { code: string }).code})`}`;
-        return `export const ${as} = ${out || '""'};`;
-      }
-      const declaration = this.componentsCode(scope, '_jsxComponents(props.components)');
+      const declaration = declare(scope, '_jsxComponents(props.components)');
       return [
         `import { asMarkdown as _asMarkdown${declaration && ', jsxComponents as _jsxComponents'} } from "fumadocs-core/server";`,
         `export function ${as}(props) {`,
         '  if (!_asMarkdown()) return null;',
         declaration,
-        `  return ${chunksToCode(list, literal)};`,
+        `  return ${chunksToCode(chunks(text), literal)};`,
         '}',
       ].join('\n');
-    },
-    /** A JSX element of a component to keep in a runtime output, with the JSX of its attributes. */
-    keep(node: N): KeptElement | undefined {
-      const { name } = node;
-      if (isStatic || typeof name !== 'string' || !componentNameRegex.test(name)) return;
-      components.add(name);
-      let open = `<${name}`;
-      for (const attr of node.attributes as JsxAttributes) {
-        if (attr.type === 'mdxJsxExpressionAttribute') {
-          open += ` {${attr.value}}`;
-          readJsx(`({${attr.value}})`);
-        } else if (attr.value == null) open += ` ${attr.name}`;
-        else if (typeof attr.value === 'string')
-          open += ` ${attr.name}={${JSON.stringify(attr.value)}}`;
-        else {
-          open += ` ${attr.name}={${attr.value.value}}`;
-          readJsx(`(${attr.value.value}\n)`);
-        }
-      }
-      return { open, name, inline: node.type === 'mdxJsxTextElement' };
-    },
-    /**
-     * Mark a node rendered from code: an authored expression, or a branch of `<show>` checked when rendering.
-     *
-     * @returns whether it is one
-     */
-    markCode(node: N): boolean {
-      if (node.type === 'mdxTextExpression' || node.type === 'mdxFlowExpression') {
-        if (isStatic) return true;
-        const position = range(node);
-        const fallback = position ? s.source.slice(position.start, position.end) : '';
-        const inline = node.type === 'mdxTextExpression';
-        s.replace(node, mark({ code: node.value as string, fallback, inline }));
-        readJsx(`(${node.value as string}\n)`);
-        return true;
-      }
-
-      const when = showCondition(node);
-      if (!when) return false;
-      s.replace(node, (s) => wrap({ when }, s.inner(node)));
-      return true;
     },
   };
 }
 
-/** the conditions of the branches of `<show>` around a node, outermost first */
-export function showConditions(
-  node: object,
-  ctx: { parent: (node: never) => object | undefined },
-): string[] {
-  const out: string[] = [];
-  for (let p = ctx.parent(node as never); p; p = ctx.parent(p as never)) {
-    const condition = showCondition(p as CodeNode);
-    if (condition) out.unshift(condition);
+/**
+ * An element as an HTML tag, so search dialogs render it as an element: its attributes that are text or `true`, with
+ * values and content on one line, values truncated.
+ */
+export function toHtmlTag(
+  name: string,
+  attributes: Record<string, unknown>,
+  inner: string,
+): string {
+  let open = `<${name}`;
+  for (const key in attributes) {
+    const value = attributes[key];
+    if (value === true) open += ` ${key}`;
+    if (key === 'children' || (typeof value !== 'string' && typeof value !== 'number')) continue;
+    let text = String(value).replace(/\s+/g, ' ');
+    if (text.length > 100) text = `${text.slice(0, 100)}…`;
+    open += ` ${key}="${text.replaceAll('&', '&amp;').replaceAll('"', '&quot;')}"`;
   }
-  return out;
+  const children = inner.replace(/\s+/g, ' ');
+  return children ? `${open}>${children}</${name}>` : `${open} />`;
 }
 
 /**
- * Whether an output is static, a value analysed from the source. Static outputs can't tell which branches of `<show>`
- * show, nor read the values of props, so they fail on a document with branches.
+ * The declaration of the components that code refers to and the module doesn't declare. Like in the content, they
+ * are MDX components.
  *
- * @param isStatic - whether the output is static, by default unless its source renders pages for props
+ * @param scope - the names that the module declares, read when there are components
+ * @param from - the code of the MDX components
+ * @param fallback - the code of a component that `from` doesn't have
  */
-export function isStaticOutput(
-  data: { unstable_runtimeOutputs?: boolean; _show?: boolean },
-  isStatic = !data.unstable_runtimeOutputs,
-): boolean {
-  if (isStatic && data._show)
-    throw new Error(
-      "`<show>` is checked when rendering, but the outputs of this document are static: its content source doesn't set `unstable_runtimeOutputs` in the data of the file, or processed Markdown has `output: 'string'`.",
-    );
-  return isStatic;
+export function componentsCode(
+  components: ReadonlySet<string>,
+  scope: () => ReadonlySet<string>,
+  from: string,
+  fallback?: string,
+): string {
+  let names = '';
+  if (components.size > 0) {
+    const declared = scope();
+    for (const name of components)
+      if (!declared.has(name)) names += fallback ? `${name} = ${fallback}, ` : `${name}, `;
+  }
+  return names && `const { ${names}} = ${from};`;
 }
-
-/** the condition of a branch of `<show>`, checked when rendering */
-export function showCondition(node: CodeNode): string | undefined {
-  if (node.name !== showElement) return;
-  for (const attr of node.attributes as JsxAttributes)
-    if (attr.type === 'mdxJsxAttribute' && attr.name === 'when' && typeof attr.value === 'object')
-      return attr.value?.value;
-}
-
-const componentNameRegex = /^[A-Z][\w$]*$/;
 
 /** the components that a program refers to in JSX, like MDX: the first name of a tag that isn't an HTML element */
-function jsxComponents(node: unknown, out: Set<string>): void {
+export function jsxComponents(node: unknown, out: Set<string>): void {
   if (typeof node !== 'object' || node === null) return;
   let { type, name } = node as {
     type?: string;
@@ -289,20 +332,24 @@ export function and(conditions: string[]): string | undefined {
   if (conditions.length > 0) return `(${conditions.join(') && (')})`;
 }
 
-/** the code of an output list: a function of the props, unless static */
-export function listCode(items: { code: string; when: string[] }[], isStatic: boolean): string {
-  const list = guardedArray(items);
-  return isStatic ? list : `(props) => ${list}`;
-}
-
-/** an array of items, each kept only when its conditions hold */
-export function guardedArray(items: { code: string; when: string[] }[]): string {
-  let out = '[';
+/**
+ * The code of a list output: a function of the props giving the items whose conditions hold, or the list when static.
+ *
+ * @param declaration - the code that declares the names of the items, see {@link componentsCode}
+ */
+export function listCode(
+  items: { code: string; when: string[] }[],
+  isStatic: boolean,
+  declaration = '',
+): string {
+  let list = '[';
   for (const { code, when } of items) {
     const test = and(when);
-    out += test ? `...(${test} ? [${code}] : []),` : `${code},`;
+    list += test ? `...(${test} ? [${code}] : []),` : `${code},`;
   }
-  return `${out}]`;
+  list += ']';
+  if (isStatic) return list;
+  return declaration ? `(props) => {\n${declaration}\nreturn ${list};\n}` : `(props) => ${list}`;
 }
 
 function chunksToCode(chunks: Chunk[], literal: (text: string) => string): string {

@@ -1,17 +1,18 @@
-import { createElement, isValidElement, type ElementType, type ReactNode } from 'react';
+import { isValidElement, type ElementType, type ReactNode } from 'react';
 import type {
   StructuredData,
   StructuredDataContent,
 } from 'fumadocs-core/mdx-plugins/remark-structure';
-import { toHtmlTag, toStructuredData } from './structured-records';
+import { toHtmlTag } from './code-output';
+import { toStructuredData } from './structured-records';
 
-/** a record of the runtime structured data from `remarkStructure`, a heading has an `id` */
+/** a record of structured data that `remarkStructure` exports for props, a heading has an `id` */
 export interface StructuredRecord extends Partial<Omit<StructuredDataContent, 'content'>> {
   id?: string;
   content: ReactNode;
 }
 
-/** the export of runtime structured data: the records that show for the props of a page, in document order */
+/** the export of `remarkStructure` for props: the records that show for the props of a page, in document order */
 export type StructuredRecords = (props: Record<string, unknown>) => StructuredRecord[];
 
 /** Render the structured data of a page for its props, like its processed Markdown. */
@@ -29,8 +30,7 @@ export async function renderStructuredData(
     list.map((record) =>
       typeof record.content === 'string'
         ? record.content
-        : // inline content, so elements stay on one line like search dialogs show them
-          renderToMarkdown(createElement('span', null, record.content)),
+        : renderToMarkdown(record.content, { target: 'search' }),
     ),
   );
   return toStructuredData(list, rendered);
@@ -54,6 +54,7 @@ export function readStructuredData(
   );
 }
 
+/** the text of nodes without rendering them, the elements of components are HTML tags */
 function toText(node: ReactNode): string {
   if (typeof node === 'string' || typeof node === 'number') return String(node);
   if (Array.isArray(node)) {
@@ -63,22 +64,12 @@ function toText(node: ReactNode): string {
   }
   if (!isValidElement<Record<string, unknown>>(node)) return '';
 
-  const { children, ...props } = node.props;
-  const inner = toText(children as ReactNode);
+  const { props } = node;
+  const inner = toText(props.children as ReactNode);
   const { type } = node as { type: string | { displayName?: string; name?: string } };
   const name = typeof type === 'string' ? type : (type.displayName ?? type.name);
   // fragments and HTML elements are their content
   if (!name || /^[a-z]/.test(name)) return inner;
 
-  const attributes = [];
-  for (const key in props) {
-    const value = props[key];
-    if (typeof value === 'string' || typeof value === 'number' || value === true)
-      attributes.push({
-        type: 'mdxJsxAttribute',
-        name: key,
-        value: value === true ? null : String(value),
-      });
-  }
-  return toHtmlTag({ type: 'mdxJsxFlowElement', name, attributes }, inner);
+  return toHtmlTag(name, props, inner);
 }

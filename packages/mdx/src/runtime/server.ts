@@ -34,6 +34,7 @@ export type AsyncDocCollectionEntry<
   TC extends InternalTypeConfig = InternalTypeConfig,
 > = {
   load: () => Promise<DocData & TC['DocData'][Name]>;
+  /** render the structured data, with the MDX components of the page props */
   structuredData: () => Promise<StructuredData>;
 } & DocMethods &
   Frontmatter;
@@ -72,11 +73,9 @@ export type ServerCreate<Config, TC extends InternalTypeConfig = InternalTypeCon
   typeof server<Config, TC>
 >;
 
-/** @param structuredData - read from the page without rendering, unless given */
 function toDocData(
   page: PageAt<CompiledMDXProperties> & { lastModified?: Date },
   exports: CompiledMDXProperties,
-  structuredData?: StructuredData,
 ): DocData {
   return lazy(
     {
@@ -86,18 +85,10 @@ function toDocData(
     },
     {
       toc: () => page.toc,
-      structuredData: () => structuredData ?? page.structuredData,
+      structuredData: () => page.structuredData,
       extractedReferences: () => page.extractedReferences,
     },
   );
-}
-
-/** the doc data of a loaded page for its props, its structured data renders components */
-async function loadDocData(
-  exports: CompiledMDXProperties,
-  props: Record<string, unknown>,
-): Promise<DocData> {
-  return toDocData(pageAt(exports, props), exports, await loadStructuredData(exports, props));
 }
 
 /** the exports of a lazy entry, loading them doesn't render its outputs */
@@ -129,12 +120,11 @@ export function server<Config, TC extends InternalTypeConfig>() {
       const out = await Promise.all(
         Object.entries(glob).map(async ([k, v]) => {
           const exports: CompiledMDXProperties = typeof v === 'function' ? await v() : v;
-          const page = pageAt(exports, {});
-
-          return merge<DocCollectionEntry>(
-            toDocData(page, exports),
-            exports.frontmatter as object,
-            createDocMethods(fileInfo(k, base), () => page),
+          // the entry of a file is its page without props
+          return createDocAt<DocCollectionEntry>(
+            { info: fileInfo(k, base), _exports: exports },
+            {},
+            exports.frontmatter,
           );
         }),
       );
@@ -154,7 +144,6 @@ export function server<Config, TC extends InternalTypeConfig>() {
       const out = await Promise.all(
         Object.entries(head).map(async ([k, v]) => {
           const data = typeof v === 'function' ? await v() : v;
-          // the entry of a file is its page without props
           return createDocAt<AsyncDocCollectionEntry>(
             { info: fileInfo(k, base), _content: body[k] as Content },
             {},
@@ -353,7 +342,7 @@ function createDocAt<Doc>(
     ...createDocMethods(doc.info, loadPage),
     _content: content,
     // memoized, it can be called in render
-    load: () => (data ??= content().then((v) => loadDocData(v, props))),
+    load: () => (data ??= content().then((v) => toDocData(pageAt(v, props), v))),
     structuredData: async () => loadStructuredData(await content(), props),
     ...('body' in doc && {
       preload: () => loadPage().then(() => undefined),

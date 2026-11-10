@@ -1,13 +1,9 @@
-import type {
-  HastPluginInput,
-  HastVisitorContext,
-  MdxJsxAttributeNode,
-  MdxJsxFlowElementHast,
-  MdxTextExpression,
-} from 'satteri';
+import type { HastPluginInput, HastVisitorContext } from 'satteri';
 import type { Element, ElementContent } from 'hast';
-import { handleTag, jsxToSource, parse } from '@/utils';
-import { isStaticOutput, listCode, showCondition, showConditions } from '../../shared/code-output';
+import { esmScope, handleTag, jsxToSource, parse } from '@/utils';
+import { componentsCode, jsxComponents, listCode } from '../../shared/code-output';
+import { textParts } from '../../shared/heading-id';
+import { isStaticOutput, showConditions } from '../../shared/show';
 import type { ExtraPluginHooks } from './compile';
 
 export interface RehypeTocOptions {
@@ -40,9 +36,7 @@ const HeadingTags = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
 
 declare module 'satteri' {
   interface DataMap {
-    /** the code of items with the conditions of their branches, exported by `compileMdx` */
-    _rehypeTocItems?: { code: string; when: string[] }[];
-    /** in data mode, the code of the items as a function of the props, titles are text */
+    /** the code of the items, exported by `compileMdx`. In data mode, a function of the props with text titles */
     _rehypeTocCode?: string;
   }
 }
@@ -51,15 +45,33 @@ export function rehypeToc({ exportToc = true }: RehypeTocOptions = {}): HastPlug
   ExtraPluginHooks {
   const resolved = exportToc === true ? { as: 'esm' as const, name: 'toc' } : exportToc;
   const plugin: HastPluginInput & ExtraPluginHooks = () => {
-    let isStatic = false;
+    const items: { code: string; when: string[] }[] = [];
+    /** the components of titles */
+    const components = new Set<string>();
+    /** the code of the ESM nodes */
+    const esm: string[] = [];
     return {
       name: 'rehype-toc',
       before(_root: unknown, ctx: HastVisitorContext) {
         if (resolved && resolved.as === 'data') ctx.data.rehypeToc ??= [];
       },
       after(_root: unknown, ctx: HastVisitorContext) {
-        if (resolved && resolved.as === 'data')
-          ctx.data._rehypeTocCode = listCode(ctx.data._rehypeTocItems ?? [], false);
+        if (!resolved) return;
+        // like in the content, the other components of titles are MDX components: without them, their content
+        const declaration = componentsCode(
+          components,
+          esmScope(esm),
+          'props.components ?? {}',
+          '((props) => props.children)',
+        );
+        ctx.data._rehypeTocCode = listCode(
+          items,
+          resolved.as === 'esm' && isStaticOutput(ctx.data),
+          declaration,
+        );
+      },
+      mdxjsEsm(node: { value: string }) {
+        esm.push(node.value);
       },
       element: {
         filter: HeadingTags,
@@ -94,15 +106,24 @@ export function rehypeToc({ exportToc = true }: RehypeTocOptions = {}): HastPlug
               ? element.properties['data-fd-step']
               : undefined;
           const when = showConditions(element, ctx);
-          let obj = '{';
-          obj += `title: ${
-            resolved.as === 'esm' ? jsxToSource({ type: 'root', children }) : textCode(children)
-          },`;
+          let titleCode: string;
+          if (resolved.as === 'esm') {
+            titleCode = jsxToSource({ type: 'root', children });
+            if (/<[A-Z_$]/.test(titleCode)) jsxComponents(parse(titleCode), components);
+          } else {
+            // titles in data are text
+            let dynamic = false;
+            const parts = textParts(children, () => (dynamic = true));
+            titleCode = dynamic
+              ? `[${parts}].filter((v) => typeof v === "string" || typeof v === "number").join("")`
+              : JSON.stringify(title);
+          }
+          let obj = `{title: ${titleCode},`;
           obj += `url: ${code ? `"#" + ${code}` : JSON.stringify(`#${id}`)},`;
           obj += `depth: ${JSON.stringify(Number(element.tagName[1]))},`;
           if (step !== undefined) obj += `_step: ${JSON.stringify(step)},`;
           obj += '}';
-          (ctx.data._rehypeTocItems ??= []).push({ code: obj, when });
+          items.push({ code: obj, when });
           if (resolved.as === 'esm') return;
 
           (ctx.data.rehypeToc ??= []).push({
@@ -116,36 +137,7 @@ export function rehypeToc({ exportToc = true }: RehypeTocOptions = {}): HastPlug
     };
   };
   plugin.collectExports = ({ data, addExport }) => {
-    if (resolved && resolved.as === 'esm') {
-      addExport(resolved.name, listCode(data._rehypeTocItems ?? [], isStaticOutput(data)));
-    }
+    if (resolved && resolved.as === 'esm') addExport(resolved.name, data._rehypeTocCode ?? '[]');
   };
   return plugin;
-}
-
-/** the text content as code, authored expressions are values */
-function textCode(nodes: readonly ElementContent[]): string {
-  const parts: string[] = [];
-  let text = '';
-  const push = (code: string) => {
-    if (text || parts.length === 0) parts.push(JSON.stringify(text));
-    parts.push(code);
-    text = '';
-  };
-  const visit = (nodes: readonly (ElementContent | MdxTextExpression)[]) => {
-    for (const node of nodes) {
-      if (node.type === 'mdxTextExpression') {
-        // comments render nothing, so do booleans and nullish values in React
-        if (parse(node.value).body.length > 0)
-          push(`((v) => typeof v === "string" || typeof v === "number" ? v : "")(${node.value})`);
-      } else if ('children' in node) {
-        const when = showCondition(node);
-        if (when) push(`((${when}) ? ${textCode(node.children)} : "")`);
-        else visit(node.children);
-      } else if ('value' in node) text += node.value;
-    }
-  };
-  visit(nodes);
-  if (text || parts.length === 0) parts.push(JSON.stringify(text));
-  return parts.join(' + ');
 }

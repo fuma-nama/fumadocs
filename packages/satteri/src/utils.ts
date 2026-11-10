@@ -8,7 +8,11 @@ import type {
   rehypeCodeFromHighlighter,
   RehypeCodeFromHighlighterOptions,
 } from 'fumadocs-core/mdx-plugins/rehype-code.core';
-import { createCodeOutput as createSharedCodeOutput, moduleScope } from '../../shared/code-output';
+import {
+  createCodeOutput as createSharedCodeOutput,
+  moduleScope,
+  type CodeOutputOptions,
+} from '../../shared/code-output';
 import { createStringifier, offsets, type PositionedNode, type Stringifier } from './stringifier';
 
 export interface JsxElementNode {
@@ -108,15 +112,14 @@ type CodeNode = PositionedNode & {
 /** the shared code output, on the stringifier of Sätteri */
 export function createCodeOutput(
   ctx: MdastVisitorContext,
-  namespace?: 'search',
-  isStatic?: boolean,
+  options: Pick<CodeOutputOptions<CodeNode, Stringifier>, 'target' | 'isStatic' | 'keep'>,
 ) {
-  return createSharedCodeOutput<CodeNode, Stringifier>(
-    (expression) => createStringifier(ctx, namespace, expression),
-    offsets,
+  return createSharedCodeOutput<CodeNode, Stringifier>({
+    ...options,
+    stringifier: (expression) => createStringifier(ctx, options.target, expression),
+    range: offsets,
     parse,
-    isStatic,
-  );
+  });
 }
 
 // Shiki writes literal HTML attribute names into hast `properties`. The

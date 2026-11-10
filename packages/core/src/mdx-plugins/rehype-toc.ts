@@ -2,8 +2,9 @@ import type { Processor, Transformer } from 'unified';
 import type { Root, Element, Nodes } from 'hast';
 import { toEstree } from 'hast-util-to-estree';
 import type { Expression, JSXElement } from 'estree-jsx';
-import { handleTag, toEsm } from './utils';
-import { isStaticOutput, listCode, showCondition } from '../../../shared/code-output';
+import { esmScope, handleTag, toEsm } from './utils';
+import { componentsCode, jsxComponents, listCode } from '../../../shared/code-output';
+import { isStaticOutput, walkBranches } from '../../../shared/show';
 
 export interface RehypeTocOptions {
   /**
@@ -75,61 +76,64 @@ export function rehypeToc(
   return (tree, file) => {
     const items: (RehypeTOCItemType & { when: string[] })[] = [];
 
-    const visit = (nodes: Nodes[], when: string[]) => {
-      for (let i = 0; i < nodes.length; i++) {
-        const node = nodes[i];
-        if (!('children' in node)) continue;
-        if (node.type !== 'element' || !HeadingTags.has(node.tagName) || !node.children.length) {
-          const condition = showCondition(node);
-          visit(node.children, condition ? [...when, condition] : when);
-          continue;
-        }
+    walkBranches<Nodes>(tree, (node, when, parent) => {
+      if (node.type !== 'element' || !HeadingTags.has(node.tagName)) return;
+      const { id } = node.properties;
+      const last = node.children.at(-1);
+      if (typeof id !== 'string' || !last) return 'skip';
 
-        const { id } = node.properties;
-        if (typeof id !== 'string') continue;
-        const last = node.children[node.children.length - 1];
-        const text = last.type === 'text' ? last : undefined;
-        const noToc = text && handleTag(text.value, NoTocTag);
-        if (typeof noToc === 'string') {
-          text!.value = noToc;
-          continue;
-        }
-        const tocOnly = text && handleTag(text.value, TocOnlyTag);
-        if (typeof tocOnly === 'string') {
-          text!.value = tocOnly;
-          nodes.splice(i--, 1);
-        }
-
-        items.push({
-          title: node,
-          depth: Number(node.tagName[1]),
-          url: `#${id}`,
-          _step: getStep(node.properties),
-          when,
-        });
+      const text = last.type === 'text' ? last : undefined;
+      const noToc = text && handleTag(text.value, NoTocTag);
+      if (typeof noToc === 'string') {
+        text!.value = noToc;
+        return 'skip';
       }
-    };
-    visit(tree.children, []);
+      const tocOnly = text && handleTag(text.value, TocOnlyTag);
+      if (typeof tocOnly === 'string') {
+        text!.value = tocOnly;
+        const siblings = (parent as Root | Element).children;
+        siblings.splice(siblings.indexOf(node), 1);
+      }
+
+      items.push({
+        title: node,
+        depth: Number(node.tagName[1]),
+        url: `#${id}`,
+        _step: getStep(node.properties),
+        when,
+      });
+      return 'skip';
+    });
 
     if (exportToc === false) return;
     if (exportToc.as === 'esm') {
       const titles: Expression[] = [];
       const list: { code: string; when: string[] }[] = [];
+      const components = new Set<string>();
       for (const { title, when, url, depth, _step } of items) {
+        const { children } = toJsx(title);
+        jsxComponents(children, components);
         const i = titles.push({
           type: 'JSXFragment',
           openingFragment: { type: 'JSXOpeningFragment' },
           closingFragment: { type: 'JSXClosingFragment' },
-          children: toJsx(title).children,
+          children,
         });
         const id = file.data._headingIds?.[url.slice(1)];
         let code = `{depth: ${depth}, url: ${id ? `"#" + ${id}` : JSON.stringify(url)}`;
         if (_step !== undefined) code += `, _step: ${_step}`;
         list.push({ code: `${code}, title: _fumadocs${i - 1}}`, when });
       }
+      // like in the content, the other components of titles are MDX components: without them, their content
+      const declaration = componentsCode(
+        components,
+        esmScope(tree as never),
+        'props.components ?? {}',
+        '((props) => props.children)',
+      );
       tree.children.push(
         toEsm(
-          `export const ${exportToc.name} = ${listCode(list, isStaticOutput(file.data))};`,
+          `export const ${exportToc.name} = ${listCode(list, isStaticOutput(file.data), declaration)};`,
           titles,
         ),
       );

@@ -1,6 +1,10 @@
 import { remarkGfm } from 'fumadocs-core/mdx-plugins/remark-gfm';
 import { plugin, plugins } from './utils';
-import { remarkHeading, type RemarkHeadingOptions } from 'fumadocs-core/mdx-plugins/remark-heading';
+import {
+  rehypeHeadingIds,
+  remarkHeading,
+  type RemarkHeadingOptions,
+} from 'fumadocs-core/mdx-plugins/remark-heading';
 import { remarkNpm, type RemarkNpmOptions } from 'fumadocs-core/mdx-plugins/remark-npm';
 import {
   remarkCodeTab,
@@ -143,6 +147,7 @@ export function createMarkdownCompiler(options?: MarkdownCompilerOptions): Markd
         ...(rehypePlugins ?? []),
         rehypeTocOptions !== false &&
           plugin(rehypeToc, { exportToc: { as: 'esm', name: 'toc' }, ...rehypeTocOptions }),
+        rehypeHeadingIds,
       ),
     });
   }

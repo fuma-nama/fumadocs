@@ -1,6 +1,6 @@
 import type { Nodes, Root } from 'mdast';
 import type { Transformer } from 'unified';
-import { showCondition, showDeclaration, showElement } from '../../../shared/code-output';
+import { showCondition, showDeclaration, showElement } from '../../../shared/show';
 import { isJsxElement, toEsm, walk } from './utils';
 
 /**

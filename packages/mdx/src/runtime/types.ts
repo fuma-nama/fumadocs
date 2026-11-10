@@ -15,7 +15,7 @@ export interface DocData {
   toc: TOCItemType[];
 
   /**
-   * structured data for document search indexing.
+   * structured data for document search indexing, read without rendering: MDX components stay as tags.
    */
   structuredData: StructuredData;
 

@@ -258,3 +258,88 @@ test('Remark Show: branches of an included file, the page itself has none', asyn
   expect(await markdown({ edition: 'pro' })).toContain('Included branch.');
   await fs.rm(dir, { recursive: true });
 });
+
+test('Remark Heading: a custom slug slugs when rendering with its own runtime', async () => {
+  const slug = (_heading: unknown, text: string) => text.toUpperCase();
+  const run = async (remarkHeadingOptions: object) => {
+    const options = await applySatteriPreset({
+      data: { unstable_runtimeOutputs: true },
+      remarkHeadingOptions,
+    })('bundler');
+    const { code } = await compileMdx({
+      source: '## On {props.framework}\n',
+      filePath: '/tmp/doc.mdx',
+      options,
+    });
+    return code;
+  };
+
+  // slugged from the source, the text of Sätteri has no expressions
+  const fromSource = await run({ slug });
+  expect(fromSource).toContain('id: "ON "');
+  expect(fromSource).not.toContain('_headingIds');
+
+  // its module replaces the runtime of Fumadocs
+  const fromCode = await run({ slug, slugImportSource: '@/lib/heading' });
+  expect(fromCode).toContain('from "@/lib/heading"');
+  expect(fromCode).toContain('_headingIds(props)[0]');
+});
+
+test('Remark Heading: headings with IDs from code stay headings for other plugins', async () => {
+  const { remarkSteps } = await import('@/remark-steps');
+  const options = await applySatteriPreset({
+    data: { unstable_runtimeOutputs: true },
+    mdastPlugins: [remarkSteps()],
+  })('runtime');
+  const { code } = await compileMdx({
+    source:
+      '### Install [step]\n\nA\n\n### Use {props.name} <Badge>new</Badge> [step]\n\nB\n\n### Deploy [step]\n',
+    filePath: '/tmp/doc.mdx',
+    environment: 'runtime',
+    options,
+  });
+  const page = (await new AsyncFunction('opts', code)(scope)) as {
+    default: FC<Record<string, unknown>>;
+    toc: (props: object) => { url: string; _step?: number; title: ReactNode }[];
+  };
+  const components = {
+    Badge: (props: { children?: ReactNode }) => createElement('b', props),
+    // headings are MDX components like before
+    h3: (props: object) => createElement('h4', props),
+  };
+
+  expect(
+    renderToStaticMarkup(createElement(page.default, { name: 'X', components })),
+  ).toMatchInlineSnapshot(
+    `"<div class="fd-steps"><div class="fd-step"><h4 id="install-step" data-fd-step="1">Install</h4><p>A</p></div><div class="fd-step"><h4 id="use-x-new-step" data-fd-step="2">Use X <b>new</b></h4><p>B</p></div><div class="fd-step"><h4 id="deploy-step" data-fd-step="3">Deploy</h4></div></div>"`,
+  );
+  const titles = (props: object) =>
+    page.toc(props).map((item) => [item.url, item._step, renderToStaticMarkup(item.title)]);
+  expect(titles({ name: 'X', components })).toMatchInlineSnapshot(`
+    [
+      [
+        "#install-step",
+        1,
+        "Install",
+      ],
+      [
+        "#use-x-new-step",
+        2,
+        "Use X <b>new</b>",
+      ],
+      [
+        "#deploy-step",
+        3,
+        "Deploy",
+      ],
+    ]
+  `);
+  // without the MDX components, a component of a title is its content
+  expect(titles({ name: 'X' })[1]).toMatchInlineSnapshot(`
+    [
+      "#use-x-new-step",
+      2,
+      "Use X new",
+    ]
+  `);
+});
