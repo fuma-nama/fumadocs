@@ -139,8 +139,8 @@ export interface Stringifier {
   /** whether `range` is output inside `outer`, embedded sources are output in place of the node they replace */
   within: (range: Range, outer: Range) => boolean;
   /**
-   * Markdown evaluated where the output is exported, like the URL of an imported file. Code that reads `props` makes
-   * the output a function of the props of the page. `fallback` in outputs that can't evaluate it.
+   * Markdown evaluated where the output is exported, like the URL of an imported file. `fallback` in outputs that
+   * can't evaluate it.
    */
   expression: (expression: Expression, fallback: string) => string;
 }

@@ -51,41 +51,7 @@ export function flattenNodeHast(node: Hast.RootContent): string {
 }
 
 export function toMdxExport(name: string, value: unknown): MdxjsEsm {
-  return toMdxExportRaw(name, valueToEstree(value));
-}
-
-export function toMdxExportRaw(name: string, expression: Expression): MdxjsEsm {
-  return {
-    type: 'mdxjsEsm',
-    value: '',
-    data: {
-      estree: {
-        type: 'Program',
-        sourceType: 'module',
-        body: [
-          {
-            type: 'ExportNamedDeclaration',
-            attributes: [],
-            specifiers: [],
-            declaration: {
-              type: 'VariableDeclaration',
-              kind: 'let',
-              declarations: [
-                {
-                  type: 'VariableDeclarator',
-                  id: {
-                    type: 'Identifier',
-                    name,
-                  },
-                  init: expression,
-                },
-              ],
-            },
-          },
-        ],
-      },
-    },
-  };
+  return toEsm(`export let ${name} = _fumadocs0;`, [valueToEstree(value)]);
 }
 
 export function handleTag(value: string, tag: string): string | false {
