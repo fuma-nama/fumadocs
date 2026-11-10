@@ -117,23 +117,39 @@ const params = getStaticParams('[framework]/deploy.mdx', {
 
 It returns `undefined` when nothing lists the values. The file is then one page at its literal path.
 
-When your source compiles MDX, compile each file once and pass the params of a page as props to its content.
+#### Runtime Outputs [#runtime-outputs]
 
-With their `analysis: 'runtime'` option, the Fumadocs plugins export the outputs of a page as functions of its props, like the `toc` of [Rehype TOC](/docs/headless/mdx/headings#rehype-toc) and the `structuredData` of [Remark Structure](/docs/headless/mdx/structure). Call them with the same props:
+When your source compiles MDX, compile each file once and pass the params of a page as props to its content. To get the outputs of the Fumadocs plugins for the same props, set `unstable_runtimeOutputs: true` in the data of the file you compile:
+
+```ts
+import { VFile } from 'vfile';
+
+const file = new VFile({
+  path: '[framework]/deploy.mdx',
+  value: source,
+  data: { unstable_runtimeOutputs: true },
+});
+```
+
+On Sätteri, set it in the `data` of the compile options. The `unstable_` prefix means the API may change.
+
+With the flag, the plugins export runtime outputs: functions of the props of the page, like the `toc` of [Rehype TOC](/docs/headless/mdx/headings#rehype-toc) and the `_markdown` component of [Remark LLMs](/docs/headless/mdx/remark-llms). Call them with the props of each page:
 
 ```tsx twoslash
 import type { StaticSource } from 'fumadocs-core/source';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
 import type { TOCItemType } from 'fumadocs-core/toc';
+import { renderToMarkdown } from 'fumadocs-core/server';
 import type { MDXContent, MDXProps } from 'mdx/types';
 
 declare const compiled: {
   default: MDXContent;
   toc: (props: object) => TOCItemType[];
-  structuredData: (props: object) => StructuredData;
+  _markdown: MDXContent;
 };
+declare const file: { data: { structuredData: StructuredData } };
 // ---cut---
-const { default: Content, toc, structuredData } = compiled;
+const { default: Content, toc, _markdown: Markdown } = compiled;
 
 // the page for some props
 function pageAt(props: object) {
@@ -141,7 +157,8 @@ function pageAt(props: object) {
     title: 'Deploy',
     body: (own: MDXProps) => <Content {...props} {...own} />,
     toc: toc(props),
-    structuredData: structuredData(props),
+    getMarkdown: () => renderToMarkdown(<Markdown {...props} />),
+    structuredData: file.data.structuredData,
   };
 }
 
@@ -154,6 +171,10 @@ const files: StaticSource['files'] = [
   },
 ];
 ```
+
+For search, read the records of [Remark Structure](/docs/headless/mdx/structure) from `file.data.structuredData`. These records are static: they include every `<show>` branch, and expressions keep their source text. Don't read the `structuredData` export instead: with the flag, it has no public type and only Fumadocs sources resolve it.
+
+> Without the flag, the plugins give static outputs, and a document with [`<show>`](/docs/markdown#show) fails to compile when Rehype TOC, Remark Structure or Remark LLMs runs.
 
 #### Custom Props
 

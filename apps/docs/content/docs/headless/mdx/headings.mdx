@@ -5,11 +5,11 @@ description: Process headings from your document
 
 ## Remark Heading
 
-A remark plugin that applies ids to headings. Fumadocs MDX enables it by default. Pass options with `remarkHeadingOptions`.
+A remark plugin that applies IDs to headings. Fumadocs MDX enables it by default. Pass options with `remarkHeadingOptions`.
 
-### Custom Ids [#custom-heading-id]
+### Custom IDs [#custom-heading-id]
 
-You can customize the heading id with `[#slug]`.
+You can customize the heading ID with `[#slug]`.
 
 ```md
 # heading [#slug]
@@ -52,14 +52,13 @@ Fumadocs MDX turns it off with `generateToc: false` and exports the table of con
 
 <auto-type-table path="../props.ts" name="TOCItemType" />
 
-### Analysis
+### Headings with Expressions
 
-The `analysis` option sets how headings with expressions, like `## Deploy on {props.framework}`, get their ids:
+In Fumadocs MDX, headings with expressions or inside a [`<show>`](/docs/headless/mdx/remark-show) branch get their IDs from the rendered text. For `framework: 'astro'`, `## Deploy on {props.framework}` is `deploy-on-astro`.
 
-- `runtime`: ids are slugged from the rendered text, like `deploy-on-astro`. Suffixes of duplicate ids, like `-1`, only count the headings that [show](/docs/markdown#show).
-- `static` (default): ids are slugged from the source, like `deploy-on-propsframework`. Suffixes of duplicate ids count the headings of every branch.
+Suffixes of duplicate IDs, like `-1`, only count the headings that show. So a heading repeated in two branches has the same ID in both.
 
-With a custom `slug` function, ids are always slugged from the source. Fumadocs MDX passes the [`analysis`](/docs/mdx/collections#analysis) of the collection, `runtime` by default.
+With a custom `slug` function, IDs are always slugged from the source, like `deploy-on-propsframework`. So are the IDs of static outputs, when the plugin is used on its own.
 
 ## Rehype TOC
 
@@ -75,23 +74,9 @@ For a Markdown document:
 ## Hello `code`
 ```
 
-It exports an array of `TOCItemType`. With the `analysis: 'runtime'` option, it exports a function of the props of the content instead, which only returns the headings that show:
+Fumadocs MDX compiles the `toc` export as a function of the page props, which only returns the headings that show. Used on its own, the plugin exports static outputs, an array of `TOCItemType`:
 
-```jsx tab="static"
-export const toc = [
-  {
-    title: (
-      <>
-        Hello <code>code</code>
-      </>
-    ),
-    depth: 2,
-    url: '#hello-code',
-  },
-];
-```
-
-```jsx tab="runtime"
+```jsx tab="Fumadocs MDX"
 export const toc = (props) => [
   {
     title: (
@@ -105,4 +90,20 @@ export const toc = (props) => [
 ];
 ```
 
-Fumadocs MDX passes the [`analysis`](/docs/mdx/collections#analysis) of the collection, `runtime` by default, and renders the table of contents for the props of each page.
+```jsx tab="Static outputs"
+export const toc = [
+  {
+    title: (
+      <>
+        Hello <code>code</code>
+      </>
+    ),
+    depth: 2,
+    url: '#hello-code',
+  },
+];
+```
+
+Fumadocs MDX calls it for the props of each page, so `page.data.toc` is an array. Inside an MDX file, `toc` is the function, see [Inline TOC](/docs/ui/components/inline-toc#usage) for an example.
+
+A custom content source can ask for the function with [runtime outputs](/docs/headless/source-api/source#runtime-outputs).

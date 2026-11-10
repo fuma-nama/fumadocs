@@ -7,15 +7,12 @@ description: Show content on a condition.
 
 Remark Show is a remark plugin. Fumadocs MDX and `@fumadocs/astro` enable it by default on both unified and Sätteri. See [Show](/docs/markdown#show) for the syntax.
 
-It compiles `<show>` into a component that renders its content when `when` holds. The condition is checked when rendering, so it can read the props of the content, like the [path params](/docs/headless/page-conventions#path-params) of a page.
+It compiles `<show>` into a component that renders its content when `when` holds. The condition is checked when rendering, so it can read the props of the page, like its [path params](/docs/headless/page-conventions#path-params). A `<show>` without `when` fails to compile.
 
-## Analysis
+## Outputs
 
-The plugins that generate the outputs of a page have an `analysis` option, which sets the `<show>` branches that the outputs include:
+The outputs of a page, which are its table of contents, [heading IDs](/docs/headless/mdx/headings), [structured data](/docs/headless/mdx/structure) and [processed Markdown](/docs/headless/mdx/remark-llms), only include the branches that show. Fumadocs MDX, `@fumadocs/astro` and [local Markdown](/docs/integrations/content/local-md) render them for the props of each page.
 
-- `runtime`: the outputs render for the props of the content, and only include the branches that show.
-- `static` (default): the outputs are analysed from the source, and include every branch.
-
-These plugins are [Remark Heading](/docs/headless/mdx/headings#analysis) for heading IDs, [Rehype TOC](/docs/headless/mdx/headings#rehype-toc), [Remark Structure](/docs/headless/mdx/structure#analysis) and [Remark LLMs](/docs/headless/mdx/remark-llms#analysis).
-
-Fumadocs MDX passes the [`analysis`](/docs/mdx/collections#analysis) of each collection, `runtime` by default. `@fumadocs/astro` and [local Markdown](/docs/integrations/content/local-md) always use `runtime`. To render the outputs in a custom source, see [Path Params](/docs/headless/source-api/source#path-params).
+<Callout type="warn">
+  Used on their own, Rehype TOC, Remark Structure and Remark LLMs give static outputs, which are analysed from the source before any condition is checked. A document with `<show>` then fails to compile, unless a custom content source asks for [runtime outputs](/docs/headless/source-api/source#runtime-outputs).
+</Callout>
