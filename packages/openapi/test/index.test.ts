@@ -443,7 +443,9 @@ test('OAuth handler sends users back to the page that started the flow', async (
   const page = handler(new Request('https://docs.example.com/api/oauth?code=abc'));
   expect(page.headers.get('content-type')).toBe('text/html');
   expect(page.headers.get('referrer-policy')).toBe('no-referrer');
-  expect(await page.text()).toBe('<script src="?script"></script>');
+  expect(await page.text()).toBe(
+    '<meta name="referrer" content="no-referrer"><script src="?script"></script>',
+  );
 
   expect(
     handler(new Request('https://docs.example.com/api/oauth?script')).headers.get('content-type'),
@@ -467,4 +469,14 @@ test('OAuth handler sends users back to the page that started the flow', async (
   // stays on the site, even for a path that looks like a protocol-relative URL
   expect(run('//evil.example')).toEqual([['https://docs.example.com//evil.example?code=abc#x']]);
   expect(run(null)).toEqual([]);
+});
+
+test('inline OAuth handler responds without reading the request', async () => {
+  const handler = createOpenAPI().createOAuthHandler({ inline: true });
+  // throws if the handler reads the request
+  const page = handler(undefined as never);
+  expect(page.headers.get('content-type')).toBe('text/html');
+  const html = await page.text();
+  expect(html).toMatch(/^<meta name="referrer" content="no-referrer"><script>const page = /);
+  expect(html).toContain('location.replace(');
 });

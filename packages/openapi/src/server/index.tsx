@@ -291,3 +291,4 @@ export async function openapiSource(server: OpenAPIServer, options: OpenAPISourc
 }
 
 export type { CreateProxyOptions, Proxy } from './proxy';
+export type { OAuthHandlerOptions } from './oauth';
