@@ -8,7 +8,7 @@ import type {
   rehypeCodeFromHighlighter,
   RehypeCodeFromHighlighterOptions,
 } from 'fumadocs-core/mdx-plugins/rehype-code.core';
-import { createCodeOutput as createSharedCodeOutput } from '../../shared/code-output';
+import { createCodeOutput as createSharedCodeOutput, moduleScope } from '../../shared/code-output';
 import { createStringifier, offsets, type PositionedNode, type Stringifier } from './stringifier';
 
 export interface JsxElementNode {
@@ -89,6 +89,15 @@ export function parse(code: string): Program {
   return parseCode(code, { lang: 'jsx', preserveParens: false }).program as Program;
 }
 
+/** read the names declared by the ESM nodes of a document, from their code */
+export function esmScope(esm: readonly string[]): () => Set<string> {
+  return () => {
+    const scope = new Set<string>();
+    for (const code of esm) moduleScope(parse(code).body, scope);
+    return scope;
+  };
+}
+
 type CodeNode = PositionedNode & {
   type: string;
   name?: unknown;
@@ -105,6 +114,7 @@ export function createCodeOutput(
   return createSharedCodeOutput<CodeNode, Stringifier>(
     (expression) => createStringifier(ctx, namespace, expression),
     offsets,
+    parse,
     isStatic,
   );
 }

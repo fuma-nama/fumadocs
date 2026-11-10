@@ -183,7 +183,8 @@ function track<T>(promise: Promise<T>): TrackedPromise<T> {
 const eagerPreload = async () => {};
 
 function withPreload<Entry extends object>(entries: Entry[]): (Entry & BrowserDocMethods)[] {
-  return entries.map((entry) => ({ ...entry, preload: eagerPreload }));
+  // assigned, a copy would read the outputs of every page
+  return entries.map((entry) => Object.assign(entry, { preload: eagerPreload }));
 }
 
 type RawAsyncEntry = DocMethods & {

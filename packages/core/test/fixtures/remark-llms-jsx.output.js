@@ -2,18 +2,18 @@ import {Fragment as _Fragment, jsx as _jsx, jsxs as _jsxs} from "react/jsx-runti
 import {asMarkdown as _asMarkdown, jsxComponents as _jsxComponents} from "fumadocs-core/server";
 export function _markdown(props) {
   if (!_asMarkdown()) return null;
-  const _c = _jsxComponents(props.components);
+  const {Badge, Tabs, Callout} = _jsxComponents(props.components);
   return _jsxs(_Fragment, {
     children: ["## Hello World\n\nContent with ", _jsx("span", {
-      children: _jsx(_c.Badge, {
+      children: _jsx(Badge, {
         type: "info",
         children: "inline **bold**"
       })
-    }), " element.\n\n", _jsxs(_c.Callout, {
+    }), " element.\n\n", _jsxs(Callout, {
       title: "Note",
       count: 1 + 1,
       open: true,
-      children: ["\nSome *content* here.\n\n", _jsx(_c.Tabs, {
+      children: ["\nSome *content* here.\n\n", _jsx(Tabs, {
         items: ["a", "b"],
         children: "\nnested\n"
       }), "\n"]

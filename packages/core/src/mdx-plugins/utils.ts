@@ -128,6 +128,7 @@ export function createCodeOutput(file: VFile, namespace?: string, isStatic?: boo
         expression(`_fumadocs${expressions.push(value) - 1}`, fallback),
       )),
     (node) => stringifier.range(node),
+    (code) => parser.parse(code, { ecmaVersion: 'latest', sourceType: 'module' }),
     isStatic,
     // strings skip the parser
     (value) => `_fumadocs${expressions.push({ type: 'Literal', value }) - 1}`,
@@ -135,11 +136,13 @@ export function createCodeOutput(file: VFile, namespace?: string, isStatic?: boo
   return Object.assign(out, { esm: (code: string) => toEsm(code, expressions) });
 }
 
-/** the names declared by the ESM of a document, wherever its nodes are (like in the content of includes) */
-export function esmScope(tree: Root): Set<string> {
-  const scope = new Set<string>();
-  walk<Nodes>(tree, (node) => {
-    if (node.type === 'mdxjsEsm' && node.data?.estree) moduleScope(node.data.estree.body, scope);
-  });
-  return scope;
+/** read the names declared by the ESM of a document, wherever its nodes are (like in the content of includes) */
+export function esmScope(tree: Root): () => Set<string> {
+  return () => {
+    const scope = new Set<string>();
+    walk<Nodes>(tree, (node) => {
+      if (node.type === 'mdxjsEsm' && node.data?.estree) moduleScope(node.data.estree.body, scope);
+    });
+    return scope;
+  };
 }

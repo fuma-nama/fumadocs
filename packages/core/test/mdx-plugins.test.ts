@@ -38,7 +38,11 @@ import {
   replaceSource,
 } from '@/mdx-plugins/stringifier';
 import { walk } from '@/mdx-plugins/utils';
-import { renderStructuredData, type StructuredRecords } from '../../shared/structured-data';
+import {
+  readStructuredData,
+  renderStructuredData,
+  type StructuredRecords,
+} from '../../shared/structured-data';
 
 const cwd = path.dirname(fileURLToPath(import.meta.url));
 
@@ -786,6 +790,10 @@ export function Bold({ children }) {
 Declared: <Local />, from MDX components: <ProductName />, as a value: {<Local />}.
 
 Made with md: <Bold>text</Bold>.
+
+From MDX components, as a value: {<ProductName />}.
+
+<Card icon={<Icon />} title="Core" />
 `,
       data: { _analysis: 'runtime' },
     },
@@ -810,6 +818,16 @@ Made with md: <Bold>text</Bold>.
     'Declared: Fumadocs, from MDX components: Fumadocs UI, as a value: Fumadocs.',
     // Markdown forms render like in processed Markdown
     'Made with md: **text**.',
+    // components in authored code resolve like in the content
+    'From MDX components, as a value: Fumadocs UI.',
+    '<Card title="Core" />',
+  ]);
+  // read without rendering, components are tags
+  expect(readStructuredData(records, {}).contents.map((item) => item.content)).toEqual([
+    'Declared: <Local />, from MDX components: <ProductName />, as a value: <Local />.',
+    'Made with md: <Bold>text</Bold>.',
+    'From MDX components, as a value: <ProductName />.',
+    '<Card title="Core" />',
   ]);
 });
 

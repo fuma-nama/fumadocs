@@ -3,8 +3,8 @@ import { defineMdastPlugin } from 'satteri';
 import { offsets, type PositionedNode } from './stringifier';
 import type { Analysis } from 'fumadocs-core/mdx-plugins/stringifier';
 import { stringifyHeadingId } from '../../shared/heading-id';
-import { createCodeOutput, parse, type JsxElementNode } from './utils';
-import { isStaticOutput, keptElement, moduleScope } from '../../shared/code-output';
+import { createCodeOutput, esmScope, type JsxElementNode } from './utils';
+import { isStaticOutput } from '../../shared/code-output';
 
 export interface LLMsOptions {
   /**
@@ -40,14 +40,12 @@ export function remarkLlms({
   const factory = () => {
     let out: ReturnType<typeof createCodeOutput>;
     let isStatic = false;
-    /** the names declared by the ESM nodes, which come before the content that reads them */
-    const scope = new Set<string>();
+    /** the code of the ESM nodes */
+    const esm: string[] = [];
 
     const drop = (node: PositionedNode) => out.s.replace(node, '');
     const element = (node: JsxElementNode & { type: string; children: PositionedNode[] }) => {
-      // elements are kept in runtime output only
-      if (out.markCode(node) || isStatic) return;
-      const kept = keptElement(node, scope);
+      const kept = !out.markCode(node) && out.keep(node);
       if (!kept) return;
 
       out.s.replace(node, (s) => {
@@ -70,7 +68,7 @@ export function remarkLlms({
       },
       mdxjsEsm(node) {
         drop(node);
-        if (!isStatic) moduleScope(parse(node.value).body, scope);
+        esm.push(node.value);
       },
       yaml: drop,
       toml: drop,
@@ -88,7 +86,11 @@ export function remarkLlms({
         const value = text ? `${text}\n` : '';
 
         if (isStatic) ctx.data.markdown ??= out.toStatic(value);
-        if (as) ctx.prependChild(root, { type: 'mdxjsEsm', value: out.markdownCode(as, value) });
+        if (as)
+          ctx.prependChild(root, {
+            type: 'mdxjsEsm',
+            value: out.markdownCode(as, value, esmScope(esm)),
+          });
       },
     });
   };

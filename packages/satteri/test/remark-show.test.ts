@@ -172,6 +172,32 @@ test('Remark Show: static outputs analyse the source', async () => {
     await expect(compile(source)).rejects.toThrow('`<show>` needs runtime analysis');
 });
 
+test('components in authored code resolve like in the content', async () => {
+  const options = await applySatteriPreset({
+    data: { _analysis: 'runtime' },
+    mdastPlugins: [remarkLlms()],
+  })('runtime');
+  const { code } = await compileMdx({
+    source:
+      'export function Local() {\n  return null;\n}\n\n<Card icon={<Icon />} title="Core" />\n\nA value: {<Badge />} and <Local />.\n',
+    filePath: '/tmp/doc.mdx',
+    environment: 'runtime',
+    options,
+  });
+  const page = (await new AsyncFunction('opts', code)(scope)) as {
+    structuredData: StructuredRecords;
+    _markdown: FC<object>;
+  };
+  // components that the module doesn't declare are MDX components, missing ones are kept as JSX syntax
+  expect((await renderStructuredData(page.structuredData, {})).contents).toEqual([
+    { heading: undefined, content: '<Card title="Core" />' },
+    { heading: undefined, content: 'A value: <Badge /> and <Local />.' },
+  ]);
+  await expect(server.renderToMarkdown(createElement(page._markdown))).resolves.toBe(
+    '<Card title="Core" />\n\nA value: <Badge /> and <Local />.',
+  );
+});
+
 test('Remark Show: code tabs end at a branch', async () => {
   const options = await applySatteriPreset({ data: { _analysis: 'runtime' } })('runtime');
   const { code } = await compileMdx({

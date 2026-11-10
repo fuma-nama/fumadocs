@@ -10,7 +10,7 @@ import type { MDXProps } from 'mdx/types';
 import type { DocCollection, DocsCollection, MetaCollection } from '@/config';
 import type { StandardSchemaV1 } from '@standard-schema/spec';
 import type { CompiledMDXProperties } from '@/loaders/mdx/build';
-import { loadStructuredData, pageAt, type PageAt } from '@/utils/page';
+import { lazy, loadStructuredData, merge, pageAt, type PageAt } from '@/utils/page';
 import type { InternalTypeConfig, DocData, DocMethods, FileInfo, MetaMethods } from './types';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
 import { createElement, use } from 'react';
@@ -74,23 +74,22 @@ export type ServerCreate<Config, TC extends InternalTypeConfig = InternalTypeCon
 
 /** @param structuredData - read from the page without rendering, unless given */
 function toDocData(
-  page: PageAt<CompiledMDXProperties>,
+  page: PageAt<CompiledMDXProperties> & { lastModified?: Date },
   exports: CompiledMDXProperties,
-  structuredData = page.structuredData,
+  structuredData?: StructuredData,
 ): DocData {
-  const data: DocData = {
-    body: page.default,
-    toc: page.toc,
-    structuredData,
-    _exports: exports as unknown as Record<string, unknown>,
-  };
-
-  for (const key of ['lastModified', 'extractedReferences']) {
-    // @ts-expect-error -- handle passthrough properties
-    data[key] = page[key];
-  }
-
-  return data;
+  return lazy(
+    {
+      body: page.default,
+      _exports: exports as unknown as Record<string, unknown>,
+      lastModified: page.lastModified,
+    },
+    {
+      toc: () => page.toc,
+      structuredData: () => structuredData ?? page.structuredData,
+      extractedReferences: () => page.extractedReferences,
+    },
+  );
 }
 
 /** the doc data of a loaded page for its props, its structured data renders components */
@@ -132,11 +131,11 @@ export function server<Config, TC extends InternalTypeConfig>() {
           const exports: CompiledMDXProperties = typeof v === 'function' ? await v() : v;
           const page = pageAt(exports, {});
 
-          return {
-            ...toDocData(page, exports),
-            ...(exports.frontmatter as object),
-            ...createDocMethods(fileInfo(k, base), () => page),
-          } satisfies DocCollectionEntry;
+          return merge<DocCollectionEntry>(
+            toDocData(page, exports),
+            exports.frontmatter as object,
+            createDocMethods(fileInfo(k, base), () => page),
+          );
         }),
       );
 
@@ -316,7 +315,7 @@ export function docAt<Doc extends DocMethods>(doc: Doc, params: Params): Doc {
   if (!page) {
     // the frontmatter in code of each params
     const frontmatter = (doc as { _frontmatterAt?: Record<string, object> })._frontmatterAt?.[key];
-    pages.set(key, (page = createDocAt(doc, params, { ...doc, ...frontmatter })));
+    pages.set(key, (page = createDocAt(doc, params, merge(doc, frontmatter))));
   }
   return page;
 }
@@ -347,7 +346,11 @@ function createDocAt<Doc extends DocMethods>(
   };
   if (!content) {
     const page = pageAt(exports!, props);
-    return { ...base, ...toDocData(page, exports!), ...createDocMethods(doc.info, () => page) };
+    return merge(
+      base,
+      toDocData(page, exports!),
+      createDocMethods(doc.info, () => page),
+    );
   }
 
   let loaded: PageAt<CompiledMDXProperties> | undefined;

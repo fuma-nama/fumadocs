@@ -1,6 +1,6 @@
 import type { Transformer } from 'unified';
 import { createCodeOutput, esmScope, isJsxElement } from './utils';
-import { isStaticOutput, keptElement } from '../../../shared/code-output';
+import { isStaticOutput } from '../../../shared/code-output';
 import type { Nodes, Root } from 'mdast';
 import type { MdxJsxFlowElement, MdxJsxTextElement } from 'mdast-util-mdx';
 import type { Analysis } from './stringifier';
@@ -76,7 +76,6 @@ export function remarkLLMs({
   return (tree, file) => {
     const isStatic = isStaticOutput(analysis, file.data);
     const out = createCodeOutput(file, undefined, isStatic);
-    const scope = isStatic ? new Set<string>() : esmScope(tree);
     const { s } = out;
 
     const visit = (nodes: Nodes[]) => {
@@ -103,8 +102,8 @@ export function remarkLLMs({
             code ? out.expression(code, id as string) : (id ?? undefined),
           );
         } else if (isJsxElement(node) && node.name) {
-          const element = !isStatic && keptElement(node, scope);
-          if (mdxAsPlaceholder?.includes(node.name))
+          const element = !mdxAsPlaceholder?.includes(node.name) && out.keep(node);
+          if (element === false)
             s.replace(node, (s) => toPlaceholder(node, out.toStatic(s.inner(node))));
           else if (element)
             s.replace(node, (s) => {
@@ -121,7 +120,7 @@ export function remarkLLMs({
     const text = s.stringify(tree).trim();
     const value = text ? `${text}\n` : '';
 
-    tree.children.unshift(out.esm(out.markdownCode(as, value)));
+    tree.children.unshift(out.esm(out.markdownCode(as, value, esmScope(tree))));
     if (_data) file.data.markdown = out.toStatic(value);
   };
 }

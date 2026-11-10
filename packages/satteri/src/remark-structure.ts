@@ -6,13 +6,11 @@ import { tableRowToStructuredData } from 'fumadocs-core/search';
 import { offsets, type Stringifier } from './stringifier';
 import { headingIdRegex } from '../../shared/heading-id';
 import type { ExtraPluginHooks } from './compile';
-import { createCodeOutput, parse, type JsxElementNode } from './utils';
+import { createCodeOutput, esmScope, type JsxElementNode } from './utils';
 import {
   createStructuredRecords,
   isInline,
   isStaticOutput,
-  keptElement,
-  moduleScope,
   showConditions,
   toHtmlTag,
 } from '../../shared/code-output';
@@ -127,8 +125,8 @@ export function remarkStructure({
     let out: ReturnType<typeof createCodeOutput>;
     let s: Stringifier;
     let isStatic = false;
-    /** the names declared by the ESM nodes, complete when records stringify */
-    const scope = new Set<string>();
+    /** the code of the ESM nodes */
+    const esm: string[] = [];
     let keep: StructureOptions['filterElement'];
     const structured = createStructuredRecords();
     const { push } = structured;
@@ -146,7 +144,7 @@ export function remarkStructure({
       else if (node.type === 'image' || node.type === 'imageReference') s.replace(node, '');
       else if (isJsxElement(node))
         s.replace(node, (s) => {
-          const element = !isStatic && keptElement(node, scope);
+          const element = out.keep(node);
           if (!(keep ? keep(node) : element)) return s.inner(node);
           return element ? out.wrap(element, s.inner(node)) : toHtmlTag(node, s.inner(node));
         });
@@ -221,11 +219,12 @@ export function remarkStructure({
         }
 
         ctx.data.structuredData ??= structured.toStatic(out);
-        if (exportAs && !isStatic) ctx.data._structuredDataCode = structured.toCode(out);
+        if (exportAs && !isStatic)
+          ctx.data._structuredDataCode = structured.toCode(out, esmScope(esm));
       },
       mdxjsEsm(node) {
         s.replace(node, '');
-        if (!isStatic) moduleScope(parse(node.value).body, scope);
+        esm.push(node.value);
       },
       ...Object.fromEntries(visitors.map((key) => [key, visit])),
     };

@@ -8,7 +8,6 @@ import {
   createStructuredRecords,
   isInline,
   isStaticOutput,
-  keptElement,
   showCondition,
   toHtmlTag,
 } from '../../../shared/code-output';
@@ -138,7 +137,6 @@ export function remarkStructure({
     const { s } = out;
     const structured = createStructuredRecords();
     const { push } = structured;
-    const scope = isStatic ? new Set<string>() : esmScope(tree);
     const keep =
       filterElement ?? (isStatic ? remarkStructureDefaultOptions.filterElement : undefined);
 
@@ -169,7 +167,7 @@ export function remarkStructure({
         s.replace(node, '');
       else if (isJsxElement(node))
         s.replace(node, (s) => {
-          const element = !isStatic && keptElement(node, scope);
+          const element = out.keep(node);
           if (!(keep ? keep(node) : element)) return s.inner(node);
           return element ? out.wrap(element, s.inner(node)) : toHtmlTag(node, s.inner(node));
         });
@@ -238,7 +236,7 @@ export function remarkStructure({
     tree.children.unshift(
       isStatic
         ? toMdxExport(name, data)
-        : out.esm(`export const ${name} = ${structured.toCode(out)};`),
+        : out.esm(`export const ${name} = ${structured.toCode(out, esmScope(tree))};`),
     );
   };
 }

@@ -199,7 +199,10 @@ test('page props render the content and outputs of a page', async () => {
     frontmatter,
     default: () => null,
     // like the compiled outputs, with `<ProductName />` from the MDX components
-    toc: (props: Props) => [{ title: `${props.framework} ${props.name}`, url: '#a', depth: 2 }],
+    // it reads its params, which the entry of the file doesn't have
+    toc: (props: Props) => [
+      { title: `${props.framework.toString()} ${props.name}`, url: '#a', depth: 2 },
+    ],
     structuredData: (props: Props) => [
       { id: 'a', content: ` ${props.framework} ${props.name} ` },
       { content: ' ' },
