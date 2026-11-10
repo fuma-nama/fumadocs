@@ -18,6 +18,7 @@
         ".output",
         "public/registry",
         ".source/**",
+        ".type-tables/**",
         ".next/**",
         "!.next/cache/**",
         "dist/**",
