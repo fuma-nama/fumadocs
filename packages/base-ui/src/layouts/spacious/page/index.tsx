@@ -96,7 +96,7 @@ export function DocsPage({
           {tocPopoverEnabled && <slots.toc.popover {...tocPopoverProps} />}
           <div className="absolute inset-x-2 top-full h-[calc(var(--fd-layout-height)-var(--fd-header-height)-100%)] rounded-t-2xl border-x border-t outline-8 outline-fd-card [clip-path:inset(0_-8px_-8px)] bg-origin-border bg-linear-to-b from-fd-background to-transparent to-[16px] pointer-events-none" />
         </div>
-        <div
+        <main
           // a new page starts from the top of panel
           key={pathname}
           id="nd-page-panel"
@@ -149,7 +149,7 @@ export function DocsPage({
             </article>
             {tocEnabled && <slots.toc.main {...tocProps} />}
           </div>
-        </div>
+        </main>
       </slots.toc.provider>
     </PageContext>
   );
