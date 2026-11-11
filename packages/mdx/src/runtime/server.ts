@@ -342,7 +342,8 @@ function createDocAt<Doc>(
     _content: content,
     load,
     async structuredData() {
-      const { structuredData } = await content();
+      await load();
+      const { structuredData } = exports;
       return typeof structuredData === 'function'
         ? renderStructuredData(structuredData, props ?? {})
         : structuredData;

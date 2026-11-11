@@ -635,6 +635,7 @@ describe('runtime', () => {
     const v2 = collection.getPage('[version].mdx', { version: 'v2' })!;
     await v2.load();
     expect(v2.body({})).toBeTruthy();
+    await v2.structuredData();
     expect(loads).toBe(3);
   });
 });

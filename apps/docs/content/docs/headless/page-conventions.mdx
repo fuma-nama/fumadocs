@@ -351,13 +351,13 @@ export default ({ framework }: { framework: keyof typeof names }) => ({
 
 <Callout title='Good to Know'>
 
-A `[name]` folder without `staticParams` is a normal folder.
+A `[name]` folder stays a normal folder when nothing lists its values.
 
 </Callout>
 
 ### Page Params
 
-A page can also list `staticParams` in its frontmatter. It is only generated for the values listed in both.
+A page can also list `staticParams` in its frontmatter. When its folder lists them too, the page is only generated for the values in both.
 
 ```mdx title="[framework]/fumadocs-mdx.mdx"
 ---
