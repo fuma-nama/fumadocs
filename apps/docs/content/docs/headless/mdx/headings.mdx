@@ -65,9 +65,9 @@ With a custom `slug` function, IDs are slugged from the source too. To slug them
 ```ts title="lib/heading.ts"
 import { createHeadingIds as create } from 'fumadocs-core/mdx-plugins/remark-heading.runtime';
 
-export const createHeadingIds: typeof create = (headings) =>
+export const createHeadingIds: typeof create = (ids) =>
   // called for each page, so a slugger can count duplicates
-  create(headings, () => (text) => text.toLowerCase().replaceAll(' ', '_'));
+  create(ids, () => (text) => text.toLowerCase().replaceAll(' ', '_'));
 ```
 
 Then pass it as `slugImportSource`. Compiled pages import the module, like the JSX runtime from `jsxImportSource` of MDX, so use a package name or an import alias:

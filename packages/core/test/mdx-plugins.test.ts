@@ -1042,7 +1042,12 @@ test('Remark Heading: a custom slug slugs when rendering with its own runtime', 
   expect(fromCode).toContain('id: _headingIds(props)[0]');
 
   // which the module can call with its own slugger, created for each page
-  const ids = createHeadingIds([() => ['On ', 'next'], () => null, () => ['On next']], () => {
+  const list = (_props: object, slug: (parts: unknown[]) => string) => [
+    slug(['On ', 'next']),
+    '',
+    slug(['On next']),
+  ];
+  const ids = createHeadingIds(list, () => {
     const seen = new Set<string>();
     return (text) => {
       const id = text.toUpperCase();
