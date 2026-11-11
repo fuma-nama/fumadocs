@@ -87,8 +87,12 @@ export function remarkPostprocess({
     }
 
     if (includeProcessedMarkdown) {
+      const options = typeof includeProcessedMarkdown === 'object' ? includeProcessedMarkdown : {};
+      // the MDAST holds the export, which stays the component of pages that render for props
       const llms = remarkLLMs(
-        typeof includeProcessedMarkdown === 'object' ? includeProcessedMarkdown : undefined,
+        includeMDAST && file.data.unstable_runtimeOutputs
+          ? { ...options, output: options.output ?? 'function' }
+          : options,
       );
       llms(tree, file, () => undefined);
     }
