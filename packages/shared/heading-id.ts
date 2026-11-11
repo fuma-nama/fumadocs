@@ -1,4 +1,4 @@
-import { and, type CodeNode } from './code-output';
+import { and, type CodeNode, type CodeStringifier } from './code-output';
 import { showCondition } from './show';
 
 /** a custom ID at the end of heading text, like `[#id]` */
@@ -72,16 +72,15 @@ export function headingIdCode(runtime = headingRuntime) {
  *
  * @param id - the ID to write as Markdown when the heading has no custom ID, `false` removes its custom ID
  */
-export function stringifyHeadingId<N extends { children: readonly unknown[] }>(
-  s: { source: string; edit: (start: number, end: number, text: string, node: N) => void },
-  node: N,
-  range: (node: never) => { start: number; end: number } | undefined,
+export function stringifyHeadingId<N extends CodeNode>(
+  s: CodeStringifier<N>,
+  node: N & { children: readonly N[] },
   id: string | false | undefined,
 ): void {
-  const start = range(node as never)?.start;
+  const start = s.range(node)?.start;
   // the content ends with its last child, before the closing sequence or underline
-  const last = node.children.at(-1);
-  const end = last === undefined ? undefined : range(last as never)?.end;
+  const last: N | undefined = node.children[node.children.length - 1];
+  const end = last && s.range(last)?.end;
   if (start === undefined || end === undefined) return;
 
   const marker = headingIdRegex.exec(s.source.slice(start, end));

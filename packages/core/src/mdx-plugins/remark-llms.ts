@@ -93,7 +93,6 @@ export function remarkLLMs({
           stringifyHeadingId(
             s,
             node,
-            (node: Nodes) => s.range(node),
             headingIds && (code ? out.expression(code, id as string) : id),
           );
         } else if (isJsxElement(node) && node.name && mdxAsPlaceholder?.includes(node.name)) {

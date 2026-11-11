@@ -140,6 +140,8 @@ export function embedSource(
 export interface Stringifier {
   /** the document's source, followed by embedded sources */
   readonly source: string;
+  /** the range of a node in `source` */
+  range: (node: PositionedNode) => Range | undefined;
   /** replace a node in this output, after the edits of plugins */
   replace: (node: PositionedNode, text: Replacement) => void;
   /** replace a range of `source` in this output, an empty range inserts text, the edit goes with `node` if given */
@@ -259,6 +261,7 @@ export function createStringifier(
 
   const s: Stringifier = {
     source,
+    range: offsets,
     replace(node, text) {
       const range = offsets(node);
       if (!range || range.end === range.start) return;

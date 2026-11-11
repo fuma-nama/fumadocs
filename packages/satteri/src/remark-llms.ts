@@ -1,6 +1,6 @@
 import type { MdastPluginEntry } from 'satteri';
 import { defineMdastPlugin } from 'satteri';
-import { offsets, type PositionedNode } from './stringifier';
+import type { PositionedNode } from './stringifier';
 import { stringifyHeadingId } from '../../shared/heading-id';
 import { createCodeOutput, esmScope } from './utils';
 import { isStaticOutput } from '../../shared/show';
@@ -39,7 +39,7 @@ export function remarkLlms({
     /** the code of the ESM nodes */
     const esm: string[] = [];
 
-    const drop = (node: PositionedNode) => out.s.replace(node, '');
+    const drop = (node: PositionedNode & { type: string }) => out.s.replace(node, '');
     const edit = (node: PositionedNode & { type: string }) => out.edit(node);
 
     return defineMdastPlugin({
@@ -58,12 +58,7 @@ export function remarkLlms({
       heading(node, ctx) {
         const id = (node.data as { hProperties?: { id?: string } } | undefined)?.hProperties?.id;
         const code = !isStatic && id !== undefined && ctx.data._headingIds?.[id];
-        stringifyHeadingId(
-          out.s,
-          node,
-          offsets,
-          headingIds && (code ? out.expression(code, id!) : id),
-        );
+        stringifyHeadingId(out.s, node, headingIds && (code ? out.expression(code, id!) : id));
       },
       mdxTextExpression: edit,
       mdxFlowExpression: edit,
