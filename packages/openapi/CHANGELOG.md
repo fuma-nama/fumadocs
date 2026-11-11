@@ -1,3 +1,13 @@
+## fumadocs-openapi@12.6.1
+
+### OAuth redirect on static sites
+
+- `createOAuthHandler({ inline: true })` puts its script in the page, so the redirect route can be prerendered on static sites.
+
+### Show OAuth provider errors in the playground
+
+- When the OAuth provider refuses a flow (e.g. `access_denied`), the playground shows its error instead of returning silently.
+
 ## fumadocs-openapi@12.6.0
 
 ### Framework plugins
