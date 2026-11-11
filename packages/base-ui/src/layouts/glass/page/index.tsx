@@ -45,7 +45,7 @@ export function DocsPage({ full = false, toc = Empty, tableOfContent, children }
       }}
     >
       <TOCProvider toc={toc}>
-        <div
+        <main
           id="nd-page"
           data-fd-full={full}
           className={cn(
@@ -56,7 +56,7 @@ export function DocsPage({ full = false, toc = Empty, tableOfContent, children }
           <Breadcrumb />
           {children}
           <Footer />
-        </div>
+        </main>
         <TOC {...tableOfContent} />
       </TOCProvider>
     </PageContext>
