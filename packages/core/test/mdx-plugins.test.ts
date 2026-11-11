@@ -26,6 +26,7 @@ import type { RehypeTOCItemType } from '@/mdx-plugins/rehype-toc';
 import type { StructuredData } from '@/mdx-plugins/remark-structure';
 import { createProcessor } from '@mdx-js/mdx';
 import { remarkSteps } from '@/mdx-plugins/remark-steps';
+import type { ReactNode } from 'react';
 import remarkDirective from 'remark-directive';
 import { remarkLLMs } from '@/mdx-plugins/remark-llms';
 import { renderPlaceholder } from '@/mdx-plugins/remark-llms.runtime';
@@ -1052,6 +1053,179 @@ test('Remark Heading: a custom slug slugs when rendering with its own runtime', 
     };
   });
   expect(ids({})).toEqual(['ON NEXT', '', 'ON NEXT-AGAIN']);
+});
+
+test('Remark Show: steps and tabs go on through branches', async () => {
+  const { compile, run } = await import('@mdx-js/mdx');
+  const runtime = await import('react/jsx-runtime');
+  const { jsx } = runtime;
+  const { renderToStaticMarkup } = await import('react-dom/server');
+  const server = await import('@/server');
+  const { remarkShow } = await import('@/mdx-plugins/remark-show');
+  const { remarkCodeTab } = await import('@/mdx-plugins/remark-code-tab');
+
+  const source = `### Install [step]
+
+#### Download [step]
+
+#### Unpack [step]
+
+<show when={props.framework === "waku"}>
+
+### Create the Source [step] [!toc]
+
+</show>
+
+<show when={props.framework === "astro"}>
+
+### Add the Collection [step]
+
+</show>
+
+### Done [step]
+
+\`\`\`ts tab="source.config.ts"
+shared
+\`\`\`
+
+<show when={props.framework === "waku"}>
+
+\`\`\`ts tab="waku.config.ts"
+waku
+\`\`\`
+
+</show>
+
+## Deploy
+
+<show when={props.framework === "astro"}>
+
+\`\`\`ts tab="astro.config.ts"
+astro
+\`\`\`
+
+</show>
+
+\`\`\`ts tab="lib/source.ts"
+source
+\`\`\`
+
+<show when={props.framework === "waku"}>
+
+### Build [step]
+
+## Check
+
+### Run [step]
+
+\`\`\`ts tab="a.ts"
+a
+\`\`\`
+
+\`\`\`ts tab="b.ts"
+b
+\`\`\`
+
+</show>
+`;
+  const code = await compile(
+    { value: source, data: { unstable_runtimeOutputs: true } },
+    {
+      outputFormat: 'function-body',
+      baseUrl: import.meta.url,
+      remarkPlugins: [
+        remarkShow,
+        remarkSteps,
+        remarkCodeTab,
+        remarkHeading,
+        [remarkStructure, { exportAs: true }],
+        remarkLLMs,
+      ],
+      rehypePlugins: [rehypeToc, rehypeHeading],
+    },
+  );
+  const body = String(code).replace(
+    /await import\([^)]*"fumadocs-core\/server"\)\)?/g,
+    'arguments[0]._server',
+  );
+  const mod = await run(body, { ...runtime, _server: server } as never);
+  const page = mod as unknown as {
+    toc: (props: object) => { _step?: number }[];
+    structuredData: StructuredRecords;
+    _markdown: (props: object) => unknown;
+  };
+  const components = {
+    CodeBlockTabs: (props: { defaultValue: string; children: ReactNode }) =>
+      jsx('section', { 'data-default': props.defaultValue, children: props.children }),
+    CodeBlockTabsList: (props: { children: ReactNode }) => jsx('nav', props),
+    CodeBlockTabsTrigger: (props: { children: ReactNode }) =>
+      jsx('b', { children: props.children }),
+    CodeBlockTab: (props: { children: ReactNode }) => props.children,
+  };
+  const outputs = async (props: Record<string, unknown>) => ({
+    steps: page.toc(props).map((item) => item._step),
+    headings: (await renderStructuredData(page.structuredData, props)).headings.map(
+      (item) => item.content,
+    ),
+    markdown: await server.renderToMarkdown(jsx(page._markdown as never, props)),
+    html: renderToStaticMarkup(jsx(mod.default, props)),
+  });
+
+  const waku = await outputs({ framework: 'waku', components });
+  const astro = await outputs({ framework: 'astro', components });
+  const next = await outputs({ framework: 'next', components });
+
+  // a step in a branch is a step of the list around it, numbered among the steps that show
+  // a step that isn't in the TOC counts
+  expect(waku.steps).toEqual([1, 1, 2, 3, undefined, 1, undefined, 1]);
+  // a list in a step has its own numbers
+  expect(astro.steps).toEqual([1, 1, 2, 2, 3, undefined]);
+  expect(next.steps).toEqual([1, 1, 2, 2, undefined]);
+  expect(next.html.match(/class="fd-steps"/g)).toHaveLength(2);
+  expect(next.html.match(/class="fd-step"/g)).toHaveLength(4);
+  expect(astro.html.match(/class="fd-step"/g)).toHaveLength(5);
+  // a heading of another kind ends the list in its branch: the branch has lists of its own
+  expect(waku.html.match(/class="fd-steps"/g)).toHaveLength(4);
+  expect(waku.html).toContain('</div><h2 id="check">Check</h2><div class="fd-steps">');
+
+  // a tab in a branch is a tab of the code blocks around it
+  const tabs = (html: string) => {
+    const out: string[] = [];
+    for (const [, value, list] of html.matchAll(
+      /<section data-default="([^"]+)"><nav>(.+?)<\/nav>/g,
+    ))
+      out.push(`${value}: ${list.replaceAll('</b><b>', ', ').replace(/<\/?b>/g, '')}`);
+    return out;
+  };
+  expect(tabs(waku.html)).toEqual([
+    'source.config.ts: source.config.ts, waku.config.ts',
+    'lib/source.ts: lib/source.ts',
+    // the tabs of a branch alone
+    'a.ts: a.ts, b.ts',
+  ]);
+  // the first tab that shows is the default one
+  expect(tabs(astro.html)).toEqual([
+    'source.config.ts: source.config.ts',
+    'astro.config.ts: astro.config.ts, lib/source.ts',
+  ]);
+  expect(tabs(next.html)).toEqual([
+    'source.config.ts: source.config.ts',
+    'lib/source.ts: lib/source.ts',
+  ]);
+
+  // the other outputs read the same branches
+  expect(waku.markdown).toContain('### Create the Source [step]');
+  expect(waku.markdown).toContain('```ts tab="waku.config.ts"');
+  expect(astro.markdown).not.toContain('waku');
+  expect(astro.markdown).not.toContain('<show');
+  expect(astro.headings).toEqual([
+    'Install',
+    'Download',
+    'Unpack',
+    'Add the Collection',
+    'Done',
+    'Deploy',
+  ]);
 });
 
 test('Remark Show: static outputs analyse the source', async () => {

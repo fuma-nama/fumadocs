@@ -335,20 +335,25 @@ export function and(conditions: string[]): string | undefined {
   if (conditions.length > 0) return `(${conditions.join(') && (')})`;
 }
 
+/** an entry of a list output: the code of an item with the conditions it shows on, with `run` it only runs its code */
+export interface ListEntry {
+  code: string;
+  when: string[];
+  run?: boolean;
+}
+
 /**
  * The code of a list output: a function of the props giving the items whose conditions hold, or the list when static.
+ * The list is read in document order, so an entry with `run` can count the items that show.
  *
  * @param declaration - the code that declares the names of the items, see {@link componentsCode}
  */
-export function listCode(
-  items: { code: string; when: string[] }[],
-  isStatic: boolean,
-  declaration = '',
-): string {
+export function listCode(items: ListEntry[], isStatic: boolean, declaration = ''): string {
   let list = '[';
-  for (const { code, when } of items) {
+  for (const { code, when, run } of items) {
     const test = and(when);
-    list += test ? `...(${test} ? [${code}] : []),` : `${code},`;
+    const item = run ? `...((${code}), [])` : code;
+    list += test ? `...(${test} ? [${item}] : []),` : `${item},`;
   }
   list += ']';
   if (isStatic) return list;

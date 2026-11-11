@@ -1,9 +1,10 @@
 import type { HastPluginInput, HastVisitorContext } from 'satteri';
 import type { Element, ElementContent } from 'hast';
 import { esmScope, handleTag, jsxToSource, parse } from '@/utils';
-import { componentsCode, jsxComponents, listCode } from '../../shared/code-output';
+import { componentsCode, jsxComponents, listCode, type ListEntry } from '../../shared/code-output';
 import { textParts } from '../../shared/heading-id';
 import { isStaticOutput, showConditions } from '../../shared/show';
+import { stepNumberCode } from '../../shared/steps';
 import type { ExtraPluginHooks } from './compile';
 
 export interface RehypeTocOptions {
@@ -45,7 +46,8 @@ export function rehypeToc({ exportToc = true }: RehypeTocOptions = {}): HastPlug
   ExtraPluginHooks {
   const resolved = exportToc === true ? { as: 'esm' as const, name: 'toc' } : exportToc;
   const plugin: HastPluginInput & ExtraPluginHooks = () => {
-    const items: { code: string; when: string[] }[] = [];
+    const items: ListEntry[] = [];
+    const numbers = stepNumberCode();
     /** the components of titles */
     const components = new Set<string>();
     /** the code of the ESM nodes */
@@ -67,7 +69,7 @@ export function rehypeToc({ exportToc = true }: RehypeTocOptions = {}): HastPlug
         ctx.data._rehypeTocCode = listCode(
           items,
           resolved.as === 'esm' && isStaticOutput(ctx.data),
-          declaration,
+          numbers.declaration + declaration,
         );
       },
       mdxjsEsm(node: { value: string }) {
@@ -98,7 +100,6 @@ export function rehypeToc({ exportToc = true }: RehypeTocOptions = {}): HastPlug
 
           if (typeof tocOnly === 'string') ctx.removeNode(element);
           else if (text && typeof noToc === 'string') ctx.setProperty(text, 'value', noToc);
-          if (typeof noToc === 'string') return;
           if (!resolved) return;
 
           const step =
@@ -106,6 +107,14 @@ export function rehypeToc({ exportToc = true }: RehypeTocOptions = {}): HastPlug
               ? element.properties['data-fd-step']
               : undefined;
           const when = showConditions(element, ctx);
+          let stepCode = step?.toString();
+          // without branches, the number of a step among the steps of its list is the one that shows
+          if (step !== undefined && ctx.data._show) {
+            stepCode = numbers.next(step, Number(element.tagName[1]));
+            // a step that isn't in the TOC counts among the steps
+            if (typeof noToc === 'string') items.push({ code: stepCode, when, run: true });
+          }
+          if (typeof noToc === 'string') return;
           let titleCode: string;
           if (resolved.as === 'esm') {
             titleCode = jsxToSource({ type: 'root', children });
@@ -119,7 +128,7 @@ export function rehypeToc({ exportToc = true }: RehypeTocOptions = {}): HastPlug
               : JSON.stringify(title);
           }
           let obj = `{title: ${titleCode}, url: ${code ? `"#" + ${code}` : JSON.stringify(`#${id}`)}, depth: ${element.tagName[1]}`;
-          if (step !== undefined) obj += `, _step: ${step}`;
+          if (stepCode) obj += `, _step: ${stepCode}`;
           items.push({ code: `${obj}}`, when });
           if (resolved.as === 'esm') return;
 
