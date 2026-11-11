@@ -99,8 +99,8 @@ export const remarkStructureDefaultOptions = {
  * replaced by their content, images are removed.
  *
  * For a content source that renders pages for props, a document whose records read props (authored expressions,
- * `<show>`, heading IDs from code) exports a function of the props giving the records that show, the content of a
- * record with authored expressions is an array of its text parts. `vfile.data.structuredData` is static.
+ * `<show>`, heading IDs from code) exports a function of the props giving the records that show.
+ * `vfile.data.structuredData` is static.
  *
  * By default, the output is stored into VFile (`vfile.data.structuredData`), you can specify `exportAs` to export it.
  */
