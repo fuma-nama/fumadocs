@@ -4,7 +4,7 @@ import type { DataStore } from 'astro/loaders';
 import type { AstroComponentFactory } from 'astro/runtime/server/index.js';
 import type { MDXComponents } from 'mdx/types';
 import { root } from 'virtual:fumadocs/config';
-import type { MetaData, PageData, Params, StaticSource, VirtualFile } from 'fumadocs-core/source';
+import type { MetaData, PageData, StaticSource, VirtualFile } from 'fumadocs-core/source';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
 import type { TOCItemType } from 'fumadocs-core/toc';
 import { pageOutputs, recordsOf, renderMarkdown, type PageOutputs } from './mdx-runtime';
@@ -24,7 +24,10 @@ export interface PageEntry extends Pick<DataEntry, 'id' | 'filePath' | 'body'> {
 
 /** an entry of `metaLoader()` */
 export interface MetaEntry extends Pick<DataEntry, 'id'> {
-  data: MetaData;
+  data: MetaData & {
+    /** for a meta module of a dynamic folder, its data in the folder of each listed params, by the params as JSON */
+    _dataAt?: Record<string, MetaData>;
+  };
 }
 
 /** a link in the content of a page */
@@ -89,34 +92,40 @@ export function toFumadocsSource<Page extends PageEntry, Meta extends MetaEntry>
   options?: Pick<StaticSource, 'baseDir'>,
 ): StaticSource<AstroSourceConfig<Page, Meta>> {
   const files: VirtualFile<AstroSourceConfig<Page, Meta>>[] = [];
-  for (const entry of pages)
+  for (const entry of pages) {
+    const { data } = entry;
+    const { _frontmatterAt: at } = data;
     files.push({
       type: 'page',
       path: entry.id,
       // `filePath` is relative to the project root
       absolutePath: entry.filePath && path.resolve(root, entry.filePath),
-      data: pageData(entry),
-      dataAt(params, custom) {
-        if (!custom) return pageData(entry, params);
-        const { load, structuredData, getText } = pageData(entry, params, custom.props);
-        return { ...custom.data, load, structuredData, getText };
-      },
+      data: pageData(entry, data),
+      dataAt: (params, custom) =>
+        custom
+          ? pageData(entry, custom.data, { ...params, ...custom.props })
+          : // the frontmatter in code of each params
+            pageData(entry, at ? { ...data, ...at[JSON.stringify(params)] } : data, params),
     });
-  for (const entry of meta) files.push({ type: 'meta', path: entry.id, data: entry.data });
+  }
+  for (const { id, data } of meta) {
+    const { _dataAt: at } = data;
+    files.push({
+      type: 'meta',
+      path: id,
+      data,
+      dataAt: at && ((params) => ({ ...data, ...at[JSON.stringify(params)] })),
+    });
+  }
   return { files, baseDir: options?.baseDir };
 }
 
-/**
- * @param params - for a page of a dynamic file, the params that its content and outputs read as props
- * @param custom - the custom props passed to the content, the outputs render for them too
- */
-function pageData<Entry extends PageEntry>(
-  entry: Entry,
-  params?: Params,
-  custom?: Record<string, unknown>,
-): AstroPageData<Entry> {
-  const props = { ...params, ...custom };
-  const bound = Object.keys(props).length > 0;
+/** the data of a page with its content, which renders for props: the path params and custom props */
+function pageData<Data extends PageEntry['data']>(
+  entry: PageEntry,
+  data: Data,
+  props?: Record<string, unknown>,
+): Data & AstroPageData {
   async function compile(): Promise<{ Content: AstroComponentFactory; outputs: PageOutputs }> {
     // `render()` is typed by `astro sync` of projects, it imports the module that registers the outputs
     const { Content, remarkPluginFrontmatter } = await render(entry);
@@ -129,30 +138,32 @@ function pageData<Entry extends PageEntry>(
   }
 
   return {
-    ...entry.data,
-    // the frontmatter in code of each params
-    ...(params && entry.data._frontmatterAt?.[JSON.stringify(params)]),
+    ...data,
     async load() {
       const { Content, outputs } = await compile();
+      const { toc, structuredData } = outputs;
       return {
-        body: bound
+        body: props
           ? Object.assign(
               (...[result, own, slots]: Parameters<AstroComponentFactory>) =>
                 Content(result, { ...props, ...own }, slots),
               Content,
             )
           : Content,
-        toc: outputs.toc(props),
+        toc: typeof toc === 'function' ? toc(props ?? {}) : toc,
         // read without rendering, `structuredData()` renders it
         get structuredData() {
-          return readStructuredData(recordsOf(outputs), props);
+          return typeof structuredData === 'function'
+            ? readStructuredData(recordsOf(structuredData), props ?? {})
+            : structuredData;
         },
       };
     },
     async structuredData() {
-      const { outputs } = await compile();
+      const { structuredData, components } = (await compile()).outputs;
+      if (typeof structuredData !== 'function') return structuredData;
       // with the MDX components of the collection by default
-      return renderStructuredData(recordsOf(outputs), { components: outputs.components, ...props });
+      return renderStructuredData(recordsOf(structuredData), { components, ...props });
     },
     async getText(type, options) {
       if (type === 'raw') return entry.body ?? '';

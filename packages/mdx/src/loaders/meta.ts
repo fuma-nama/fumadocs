@@ -7,6 +7,7 @@ import { runModule } from '@/loaders/mdx/code';
 import { slash } from '@/utils/codegen';
 import { getStaticParams, type MetaData, type Params } from 'fumadocs-core/source';
 import { readFileSync } from 'node:fs';
+import { metaModule } from '../../../shared/frontmatter-code';
 import path from 'node:path';
 
 const querySchema = z.looseObject({
@@ -15,24 +16,13 @@ const querySchema = z.looseObject({
   macro_id: z.string().optional(),
 });
 
-/**
- * The data of a meta file. A module, like `meta.ts`, has a default export, which can be a function of the params of
- * its folder, and the `staticParams` as a named export or in its data.
- */
+/** the data of a meta file, see {@link metaModule} for modules like `meta.ts` */
 function parse(
   filePath: string,
   source: string,
   addDependency: (file: string) => void,
 ): { data: MetaData; dataAt?: (params: Params) => MetaData } {
-  if (/\.[jt]s$/.test(filePath)) {
-    const { default: data, staticParams = (data as MetaData | undefined)?.staticParams } =
-      runModule(filePath, source, addDependency) as {
-        default?: MetaData | ((params: Params) => MetaData);
-        staticParams?: Params[];
-      };
-    if (typeof data === 'function') return { data: { staticParams }, dataAt: data };
-    return { data: { ...data, staticParams } };
-  }
+  if (/\.[jt]s$/.test(filePath)) return metaModule(runModule(filePath, source, addDependency));
 
   try {
     if (filePath.endsWith('.json')) return { data: JSON.parse(source) };
@@ -124,10 +114,7 @@ export function createMetaLoader(
         readStaticParams: (file) => readStaticParams(dir, file, compiler.addDependency),
       });
       for (const params of list ?? [])
-        out._dataAt[JSON.stringify(params)] = await core.transformMeta(options, {
-          staticParams: data.staticParams,
-          ...dataAt(params),
-        });
+        out._dataAt[JSON.stringify(params)] = await core.transformMeta(options, dataAt(params));
       return out;
     };
   }

@@ -7,6 +7,7 @@ import { renderStructuredData, type StructuredRecords } from './structured-data'
 import { isDynamicPath, type MetaData, type PageData, type Params } from 'fumadocs-core/source';
 import * as defaultSchemas from 'fumadocs-core/source/schema';
 import { createLocalSource, type SourceFile } from '@fumadocs/local-content';
+import { metaModule } from './frontmatter-code';
 
 export const defaultInclude = ['**/*.{md,mdx,json}', '**/meta{,.*}.{js,ts}'];
 
@@ -105,9 +106,9 @@ export function createMarkdownSource<
         // Markdown has no code, and rendering it renders the body
         if (!file.path.endsWith('.mdx')) return renderer.structuredData;
         const { structuredData } = (await renderer.render()).exports as {
-          structuredData?: StructuredRecords;
+          structuredData?: StructuredData | StructuredRecords;
         };
-        return structuredData
+        return typeof structuredData === 'function'
           ? renderStructuredData(structuredData, props ?? {})
           : renderer.structuredData;
       },
@@ -159,19 +160,15 @@ export function createMarkdownSource<
             // a new module after the file changes
             const url = pathToFileURL(file.absolutePath);
             url.searchParams.set('t', String(Date.now()));
-            const { default: data, staticParams } = (await import(
-              /* webpackIgnore: true */ /* @vite-ignore */ url.href
-            )) as { default: Meta | ((params: Params) => Meta); staticParams?: Params[] };
-            if (typeof data !== 'function')
-              return {
-                type: 'meta',
-                data: await validate<Meta>(metaSchema, file, { staticParams, ...data }),
-              };
+            const { data, dataAt } = metaModule<Meta>(
+              await import(/* webpackIgnore: true */ /* @vite-ignore */ url.href),
+            );
+            if (!dataAt)
+              return { type: 'meta', data: await validate<Meta>(metaSchema, file, data) };
             return {
               type: 'meta',
-              data: { staticParams } as Meta,
-              dataAt: (params) =>
-                validate<Meta>(metaSchema, file, { staticParams, ...data(params) }),
+              data,
+              dataAt: (params) => validate<Meta>(metaSchema, file, { ...data, ...dataAt(params) }),
             };
           }
           case '.md':
@@ -179,14 +176,18 @@ export function createMarkdownSource<
             const { data, content } = parseFrontmatter(await file.read());
             const code = file.path.endsWith('.mdx') && /^export const frontmatter\b/m.test(content);
             const parsed: ParsedMarkdown = { data, content, code };
+            const base = await page(file, parsed);
             return {
               type: 'page',
-              data: await page(file, parsed),
-              // the file is compiled once, custom props only bind its content and outputs
+              data: base,
+              // the file is compiled once, the params and custom props only bind its content and outputs
               dataAt: (params, custom) =>
-                custom
-                  ? { ...custom.data, ...bind(file, parsed, { ...params, ...custom.props }) }
-                  : page(file, parsed, params),
+                code && !custom
+                  ? page(file, parsed, params)
+                  : {
+                      ...(custom?.data ?? base),
+                      ...bind(file, parsed, { ...params, ...custom?.props }),
+                    },
             };
           }
         }

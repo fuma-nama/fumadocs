@@ -108,7 +108,7 @@ export function createClientLoader<
   const keyOf = (path: string, params?: Params) =>
     params ? `${path}?${JSON.stringify(params)}` : path;
 
-  async function load(path: string, params: Params = {}): Promise<PageAt<Doc>> {
+  async function load(path: string, params?: Params): Promise<PageAt<Doc>> {
     const loader = loaders.get(path);
     if (!loader)
       throw new Error(`[createClientLoader] ${path} does not exist in available entries`);

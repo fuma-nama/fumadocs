@@ -615,5 +615,12 @@ describe('runtime', () => {
     const loaded = await page.load();
     expect(loaded.body).toBe(compiled.default);
     expect(loads).toBe(1);
+
+    // the page of some params is created once, so it renders with what was preloaded
+    const v1 = collection.getPage('index.mdx', { version: 'v1' })!;
+    expect(collection.getPage('index.mdx', { version: 'v1' })).toBe(v1);
+    await v1.preload();
+    expect(v1.body({})).toBeTruthy();
+    expect(loads).toBe(2);
   });
 });

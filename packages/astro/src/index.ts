@@ -22,7 +22,7 @@ import { applySatteriPreset, type DefaultSatteriOptions } from '@fumadocs/satter
 import { remarkInclude } from '@fumadocs/satteri/remark-include';
 import { remarkLlms, type LLMsOptions } from '@fumadocs/satteri/remark-llms';
 import { islandPlugin } from './island-plugin';
-import { dataKey, frontmatterQuery, hasFrontmatterCode } from './shared';
+import { dataKey, frontmatterQuery, hasFrontmatterCode, metaQuery } from './shared';
 import { output } from './sitemap';
 import type * as RuntimeConfig from 'virtual:fumadocs/config';
 
@@ -373,11 +373,11 @@ function frontmatterPlugin(): Plugin {
         return module;
       },
     },
-    // in dev, a change of a file that the frontmatter in code imports loads its page again
+    // in dev, a change of a file that the frontmatter or a meta file in code imports loads the file again
     hotUpdate({ file, modules, server }) {
       const visited = new Set(modules);
       for (const item of visited) {
-        if (item.id?.endsWith(frontmatterQuery)) {
+        if (item.id?.endsWith(frontmatterQuery) || item.id?.endsWith(metaQuery)) {
           if (item.file !== file) server.watcher.emit('change', item.file);
         } else for (const importer of item.importers) visited.add(importer);
       }

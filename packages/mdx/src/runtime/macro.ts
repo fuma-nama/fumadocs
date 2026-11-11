@@ -1,8 +1,8 @@
 import type { MetaData, PageData, Params, Source } from 'fumadocs-core/source';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
-import type { MDXContent, MDXProps } from 'mdx/types';
-import { createElement, use } from 'react';
+import type { MDXContent } from 'mdx/types';
 import { docAt, server, toFumadocsSource } from './server';
+import { browserMethods } from '@/utils/page';
 import type { DocData, DocMethods, MetaMethods } from './types';
 
 export interface BrowserDocMethods {
@@ -135,49 +135,31 @@ function normalize(file: string): string {
 }
 
 function accessor<Entry extends { info: { path: string } }>(entries: Entry[]) {
+  const byPath = new Map<string, Entry>();
+  for (const entry of entries) byPath.set(entry.info.path, entry);
   return {
     entries,
     get(path: string): Entry | undefined {
-      path = normalize(path);
-      return entries.find((entry) => entry.info.path === path);
+      return byPath.get(normalize(path));
     },
   };
 }
 
 function docAccessor<Entry extends DocMethods>(entries: Entry[]) {
   const { get } = accessor(entries);
+  // like the entry of a file, the page of some params is created once: it renders and preloads its content once
+  const pages = new Map<string, Entry>();
   return {
     entries,
     get(path: string, params?: Params): Entry | undefined {
       const entry = get(path);
-      return entry && params ? docAt(entry, params) : entry;
+      if (!entry || !params) return entry;
+      const key = `${entry.info.path}?${JSON.stringify(params)}`;
+      let page = pages.get(key);
+      if (!page) pages.set(key, (page = docAt(entry, params)));
+      return page;
     },
   };
-}
-
-interface TrackedPromise<T> extends Promise<T> {
-  status?: 'pending' | 'fulfilled' | 'rejected';
-  value?: T;
-  reason?: unknown;
-}
-
-/**
- * annotate promise state in the convention understood by React `use()`, so settled promises are unwrapped without suspending.
- */
-function track<T>(promise: Promise<T>): TrackedPromise<T> {
-  const tracked = promise as TrackedPromise<T>;
-  tracked.status = 'pending';
-  promise.then(
-    (value) => {
-      tracked.status = 'fulfilled';
-      tracked.value = value;
-    },
-    (reason) => {
-      tracked.status = 'rejected';
-      tracked.reason = reason;
-    },
-  );
-  return tracked;
 }
 
 const eagerPreload = async () => {};
@@ -193,26 +175,8 @@ type RawAsyncEntry = DocMethods & {
 };
 
 function asyncEntries(raw: RawAsyncEntry[]): MacroAsyncDocEntry[] {
-  return raw.map((entry) => {
-    let promise: TrackedPromise<DocData> | undefined;
-    const load = () => (promise ??= track(entry.load()));
-
-    function Body(props: MDXProps) {
-      const loaded = load();
-      // when preloaded, render synchronously instead of suspending
-      const data = loaded.status === 'fulfilled' ? loaded.value! : use(loaded as Promise<DocData>);
-      return createElement(data.body, props);
-    }
-
-    return {
-      ...entry,
-      load,
-      async preload() {
-        await load();
-      },
-      body: Body,
-    };
-  });
+  for (const entry of raw) Object.assign(entry, browserMethods(entry.load));
+  return raw as MacroAsyncDocEntry[];
 }
 
 export async function doc(args: BaseArgs & { entries: GlobEntries }): Promise<MacroDocCollection> {
