@@ -9,7 +9,7 @@ import { getSlugs } from 'fumadocs-core/source';
 import { getPageImageUrl } from './src/lib/shared';
 
 const imageRoutes: string[] = [];
-for await (const entry of glob('**/*.mdx', { cwd: 'content/docs' })) {
+for await (const entry of glob('**/*.{md,mdx}', { cwd: 'content/docs' })) {
   imageRoutes.push(getPageImageUrl({ slugs: getSlugs(entry) }).url);
 }
 

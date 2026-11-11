@@ -15,7 +15,7 @@ export default {
       if (!excluded.includes(path)) paths.push(path);
     }
 
-    for await (const entry of glob('**/*.mdx', { cwd: 'content/docs' })) {
+    for await (const entry of glob('**/*.{md,mdx}', { cwd: 'content/docs' })) {
       const slugs = getSlugs(entry);
 
       paths.push(getUrl(slugs));

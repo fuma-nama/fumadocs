@@ -280,7 +280,7 @@ export default {
   async prerender({ getStaticPaths }) {
     const paths = [...getStaticPaths()];
 
-    for await (const entry of glob('**/*.mdx', { cwd: 'content/docs' })) {
+    for await (const entry of glob('**/*.{md,mdx}', { cwd: 'content/docs' })) {
       const slugs = getSlugs(entry);
 
       paths.push(getUrl(slugs));
@@ -332,7 +332,7 @@ import { getPageImageUrl } from './src/lib/shared';
 
 // [!code ++:4]
 const imageRoutes: string[] = [];
-for await (const entry of glob('**/*.mdx', { cwd: 'content/docs' })) {
+for await (const entry of glob('**/*.{md,mdx}', { cwd: 'content/docs' })) {
   imageRoutes.push(getPageImageUrl({ slugs: getSlugs(entry) }).url);
 }
 
