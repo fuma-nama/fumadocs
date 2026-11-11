@@ -1,7 +1,7 @@
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
-import type { AstroIntegration } from 'astro';
+import type { AstroIntegration, DataEntryType } from 'astro';
 import type { LoaderContext } from 'astro/loaders';
 import type { Plugin } from 'vite';
 import type { SatteriResolvedOptions } from '@astrojs/markdown-satteri';
@@ -11,7 +11,7 @@ import { pageSchema } from 'fumadocs-core/source/schema';
 import { afterAll, expect, it, vi } from 'vitest';
 import fumadocs from '@/index';
 import { frontmatterQuery } from '@/shared';
-import { toFumadocsSource, type PageEntry } from '@/source';
+import { toFumadocsSource, type MetaEntry, type PageEntry } from '@/source';
 
 const config = vi.hoisted(() => ({ loaders: {} as Record<string, object>, root: '/' }));
 vi.mock('virtual:fumadocs/config', () => config);
@@ -19,15 +19,28 @@ vi.mock('virtual:fumadocs/config', () => config);
 const files = vi.hoisted(() => [] as string[]);
 vi.mock('astro/loaders', async () => {
   const fs = await import('node:fs/promises');
+  const { pathToFileURL } = await import('node:url');
   const { frontmatter } = await import('fumadocs-core/content/md/frontmatter');
   return {
     glob: ({ base }: { base: string }) => ({
       name: 'glob',
-      async load({ parseData, store, generateDigest, config }: LoaderContext) {
+      async load({
+        parseData,
+        store,
+        generateDigest,
+        config,
+        entryTypes,
+      }: LoaderContext & { entryTypes: Map<string, DataEntryType> }) {
         for (const id of files) {
           const filePath = `${config.root}/${base}/${id}`;
           const contents = await fs.readFile(filePath, 'utf8');
-          const { data, content } = frontmatter(contents);
+          const type = entryTypes.get(id.slice(id.lastIndexOf('.')));
+          const { data, content } = type
+            ? {
+                ...(await type.getEntryInfo({ contents, fileUrl: pathToFileURL(filePath) })),
+                content: undefined,
+              }
+            : frontmatter(contents);
           const digest = generateDigest(contents);
           const parsed = await parseData({ id, data: data as Record<string, unknown>, filePath });
           store.set({ id, data: parsed, body: content, filePath: `${base}/${id}`, digest });
@@ -128,13 +141,24 @@ Run the installer of {props.version}.`,
   expect(new Set(render.mock.calls.map(([item]) => item))).toEqual(new Set([entry]));
 });
 
+it('renders the compiled content without props', async () => {
+  const entry: PageEntry = { id: 'index.mdx', body: 'Hello', data: { title: 'Home' } };
+  await compile(entry);
+  const source = loader({ source: toFumadocsSource([entry]), baseUrl: '/docs' });
+  const { body } = await source.getPage([], { props: {} })!.data.load();
+  expect(body).toBe((rendered.get(entry.id) as { Content: unknown }).Content);
+});
+
 it('runs the frontmatter in code for each params', async () => {
   const content = path.join(root, 'content/docs');
   mkdirSync(path.join(content, '[version]'), { recursive: true });
   writeFileSync(path.join(root, 'versions.ts'), `export const latest = 'v2';`);
   writeFileSync(
-    path.join(content, '[version]/meta.json'),
-    JSON.stringify({ staticParams: [{ version: 'v1' }, { version: 'v2' }] }),
+    path.join(content, '[version]/meta.ts'),
+    `import { latest } from '../../../versions.ts';
+
+export const staticParams = [{ version: 'v1' }, { version: 'v2' }];
+export default (params: { version: string }) => ({ title: params.version === latest ? 'Latest' : params.version });`,
   );
   writeFileSync(
     path.join(content, '[version]/install.mdx'),
@@ -179,11 +203,20 @@ Run the installer.`,
     ]),
   } as unknown as LoaderContext);
 
-  const meta = {
-    id: '[version]/meta.json',
-    data: { staticParams: [{ version: 'v1' }, { version: 'v2' }] },
-  };
-  const source = loader({ source: toFumadocsSource(entries, [meta as never]), baseUrl: '/docs' });
+  // a meta file in code runs for each params
+  const meta: MetaEntry[] = [];
+  files.splice(0, files.length, '[version]/meta.ts');
+  const { metaLoader } = await import('@/loaders');
+  await metaLoader().load({
+    config: { root },
+    store: { set: (entry: MetaEntry) => meta.push(entry) },
+    generateDigest: String,
+    parseData: async ({ data }: { data: unknown }) => data,
+    entryTypes: new Map(),
+  } as unknown as LoaderContext);
+
+  const source = loader({ source: toFumadocsSource(entries, meta), baseUrl: '/docs' });
+  expect(source.pageTree.children.map((node) => node.name)).toEqual(['v1', 'Latest']);
   // each params listed in the meta file
   expect(source.getPage(['v1', 'install'])!.data).toMatchObject({
     title: 'Install v1',

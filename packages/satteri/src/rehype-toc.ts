@@ -118,12 +118,9 @@ export function rehypeToc({ exportToc = true }: RehypeTocOptions = {}): HastPlug
               ? `[${parts}].filter((v) => typeof v === "string" || typeof v === "number").join("")`
               : JSON.stringify(title);
           }
-          let obj = `{title: ${titleCode},`;
-          obj += `url: ${code ? `"#" + ${code}` : JSON.stringify(`#${id}`)},`;
-          obj += `depth: ${JSON.stringify(Number(element.tagName[1]))},`;
-          if (step !== undefined) obj += `_step: ${JSON.stringify(step)},`;
-          obj += '}';
-          items.push({ code: obj, when });
+          let obj = `{title: ${titleCode}, url: ${code ? `"#" + ${code}` : JSON.stringify(`#${id}`)}, depth: ${element.tagName[1]}`;
+          if (step !== undefined) obj += `, _step: ${step}`;
+          items.push({ code: `${obj}}`, when });
           if (resolved.as === 'esm') return;
 
           (ctx.data.rehypeToc ??= []).push({

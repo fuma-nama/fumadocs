@@ -124,7 +124,7 @@ source.getPage(['slug', 'of', 'page'], 'locale');
 
 #### Custom Props
 
-Pass props to the content of a page, like a version that the reader picks. The content reads them as `props`, like the [path params](/docs/headless/page-conventions#path-params) of the page:
+Pass props to the content of a page, like a version that the reader picks. The content reads them as `props`, like [path params](/docs/headless/page-conventions#path-params):
 
 ```ts
 import { source } from '@/lib/source';
@@ -136,20 +136,7 @@ const page = source.getPage(['slug', 'of', 'page'], {
 });
 ```
 
-Content sources that [support it](/docs/headless/source-api/source#custom-props), like Fumadocs MDX, `@fumadocs/astro` and local Markdown, return the page with its content and outputs, like the table of contents, rendered for those props. On Fumadocs MDX:
-
-```tsx
-import { DocsPage } from 'fumadocs-ui/layouts/docs/page';
-
-const MDX = page.data.body;
-
-// the content and table of contents render for `version: 'v2'`
-<DocsPage toc={page.data.toc}>
-  <MDX />
-</DocsPage>;
-```
-
-MDX components are props as well. Pass them to render the components in the outputs, like processed Markdown:
+The page data, like its content and table of contents, follows these props. MDX components are props too. Pass them to render the components in outputs like processed Markdown:
 
 ```ts
 import { getMDXComponents } from '@/components/mdx';
@@ -160,7 +147,11 @@ const page = source.getPage(['slug', 'of', 'page'], {
 const markdown = await page.data.getText('processed');
 ```
 
-Search and LLM routes read pages from `getPages()`, which only have their path params. Content that search or LLMs should see for each variant must come from path params.
+<Callout title="Good to Know">
+
+Search and LLM routes read pages from `getPages()`, which only have their path params. A variant that search or LLMs should see must be a path param.
+
+</Callout>
 
 ### Get Pages
 

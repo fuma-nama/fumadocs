@@ -1,8 +1,8 @@
 import type { MetaData, PageData, Params, Source } from 'fumadocs-core/source';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
-import type { MDXContent, MDXProps } from 'mdx/types';
-import { createElement, use } from 'react';
+import type { MDXContent } from 'mdx/types';
 import { docAt, server, toFumadocsSource } from './server';
+import { browserMethods } from '@/utils/page';
 import type { DocData, DocMethods, MetaMethods } from './types';
 
 export interface BrowserDocMethods {
@@ -155,31 +155,6 @@ function docAccessor<Entry extends DocMethods>(entries: Entry[]) {
   };
 }
 
-interface TrackedPromise<T> extends Promise<T> {
-  status?: 'pending' | 'fulfilled' | 'rejected';
-  value?: T;
-  reason?: unknown;
-}
-
-/**
- * annotate promise state in the convention understood by React `use()`, so settled promises are unwrapped without suspending.
- */
-function track<T>(promise: Promise<T>): TrackedPromise<T> {
-  const tracked = promise as TrackedPromise<T>;
-  tracked.status = 'pending';
-  promise.then(
-    (value) => {
-      tracked.status = 'fulfilled';
-      tracked.value = value;
-    },
-    (reason) => {
-      tracked.status = 'rejected';
-      tracked.reason = reason;
-    },
-  );
-  return tracked;
-}
-
 const eagerPreload = async () => {};
 
 function withPreload<Entry extends object>(entries: Entry[]): (Entry & BrowserDocMethods)[] {
@@ -193,26 +168,8 @@ type RawAsyncEntry = DocMethods & {
 };
 
 function asyncEntries(raw: RawAsyncEntry[]): MacroAsyncDocEntry[] {
-  return raw.map((entry) => {
-    let promise: TrackedPromise<DocData> | undefined;
-    const load = () => (promise ??= track(entry.load()));
-
-    function Body(props: MDXProps) {
-      const loaded = load();
-      // when preloaded, render synchronously instead of suspending
-      const data = loaded.status === 'fulfilled' ? loaded.value! : use(loaded as Promise<DocData>);
-      return createElement(data.body, props);
-    }
-
-    return {
-      ...entry,
-      load,
-      async preload() {
-        await load();
-      },
-      body: Body,
-    };
-  });
+  for (const entry of raw) Object.assign(entry, browserMethods(entry.load));
+  return raw as MacroAsyncDocEntry[];
 }
 
 export async function doc(args: BaseArgs & { entries: GlobEntries }): Promise<MacroDocCollection> {

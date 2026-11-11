@@ -66,9 +66,21 @@ title: This is a document
 
 For this reason, h1 title (`# Heading`) is usually unused when writing Markdown/MDX unless you have custom logic for page title rendering.
 
+When your content source supports it, you can also export frontmatter in code. It is merged over the YAML frontmatter, and can read [props](#props):
+
+```mdx
+---
+title: Deploy
+---
+
+export const frontmatter = {
+  description: `Deploy your ${props.framework} site.`,
+};
+```
+
 <Callout title='In Fumadocs MDX'>
 
-You can use the [`schema`](/docs/mdx/collections#schema-1) option to add frontmatter properties.
+You can use the [`schema`](/docs/mdx/collections#schema-1) option to add frontmatter properties. See [Customize Frontmatter](/docs/mdx#customize-frontmatter) for details.
 
 </Callout>
 
@@ -417,11 +429,21 @@ Specify the target file path in `<include>` tag (relative to the MDX file itself
 
 See [other usages of include](/docs/mdx/include).
 
+### Props
+
+MDX content reads the props passed to it as `props`. Pages of [path params](/docs/page-conventions#path-params) receive their params as props:
+
+```mdx title="[framework]/deploy.mdx"
+Deploy your {props.framework} site.
+```
+
+You can also pass [custom props](/docs/headless/source-api#custom-props) to a page.
+
 ### Show
 
-Show content on a condition. Fumadocs MDX and `@fumadocs/astro` always enable it with [Remark Show](/docs/headless/mdx/remark-show).
+Show content on a condition, enabled by default with [Remark Show](/docs/headless/mdx/remark-show).
 
-`when` takes a JS expression, checked when the page renders. It can read the props of the content, like the [path params](/docs/headless/page-conventions#path-params) of the page:
+`when` takes a JS expression, checked when the page renders. It can read [props](#props):
 
 ```mdx title="[framework]/deploy.mdx"
 Deploy your {props.framework} site.
@@ -435,7 +457,7 @@ Add an adapter to your Astro config.
 </show>
 ```
 
-The outputs of the page, like its table of contents, search index and Markdown for LLMs, only include the branches that show. Expressions like `{props.framework}` render as values in them, and in heading IDs.
+The table of contents, search index and Markdown for LLMs of the page only include the branches that show. Expressions like `{props.framework}` give their values there, and in heading IDs.
 
 A [tab group](#tab-groups) can't span a `<show>` tag, so keep its code blocks in the same branch.
 

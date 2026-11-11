@@ -130,7 +130,7 @@ These properties are exported from MDX files by default.
 
 Use the [`schema`](/docs/mdx/collections#schema-1) option to pass a validation schema to validate frontmatter and define its output properties.
 
-An MDX page can also export `frontmatter` in code. The export is merged over the YAML frontmatter, and the collection schema validates the result:
+An MDX page can also export [frontmatter in code](/docs/markdown#frontmatter). The export is merged over the YAML frontmatter, and the collection schema validates the result:
 
 ```mdx title="content/docs/index.mdx"
 ---
@@ -144,7 +144,7 @@ export const frontmatter = {
 };
 ```
 
-The export runs at build time. It can use the page's imports and the exports written before it in the same block, but not the content or components of the page. On pages with [dynamic paths](/docs/headless/page-conventions#data-in-code), it reads the path params as `props`.
+The export runs at build time. It can use the page's imports and the exports written before it in the same block, but not the content or components of the page. `staticParams` stays in the YAML frontmatter, because the loader reads it before the export runs.
 
 ### Customize Compiler
 

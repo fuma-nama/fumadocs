@@ -1,3 +1,5 @@
+import type { MetaData, Params } from 'fumadocs-core/source';
+
 /** a node of ESTree, from acorn or yuku */
 interface EsmNode {
   type: string;
@@ -50,4 +52,19 @@ function collectNames(node: unknown, out: Set<string>) {
   if (typeof node !== 'object' || node === null) return;
   if ('type' in node && node.type === 'Identifier' && 'name' in node) out.add(node.name as string);
   for (const value of Object.values(node)) collectNames(value, out);
+}
+
+/**
+ * The data of a meta file in code, like `meta.ts`, from its exports: the default export, which can be a function of
+ * the params of its folder, and the `staticParams` as a named export or in its data.
+ */
+export function metaModule<Meta extends MetaData>({
+  default: data,
+  staticParams = (data as MetaData | undefined)?.staticParams,
+}: {
+  default?: Meta | ((params: Params) => Meta);
+  staticParams?: Params[];
+}): { data: Meta; dataAt?: (params: Params) => Meta } {
+  if (typeof data === 'function') return { data: { staticParams } as Meta, dataAt: data };
+  return { data: { ...data, staticParams } as Meta };
 }

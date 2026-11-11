@@ -21,9 +21,6 @@ interface KeptElement {
   inline: boolean;
 }
 
-/** a part of an output that renders from code */
-type CodePart = Value | Branch | KeptElement;
-
 /** Markdown and its parts from code, branches and elements hold their content */
 type Chunk = string | Value | ((Branch | KeptElement) & { children: Chunk[] });
 
@@ -32,15 +29,26 @@ export interface CodeNode {
   name?: unknown;
   attributes?: unknown;
   value?: unknown;
+  children?: readonly CodeNode[];
 }
 
-interface CodeStringifier<N> {
+interface Range {
+  start: number;
+  end: number;
+}
+
+/** the stringifier of a compiler, see `fumadocs-core/mdx-plugins/stringifier` */
+export interface CodeStringifier<N> {
   source: string;
+  range(node: N): Range | undefined;
   replace(node: N, text: string | ((s: this) => string)): void;
+  edit(start: number, end: number, text: string, node?: N): void;
+  stringify(node: N): string;
   inner(node: N): string;
+  within(range: Range, outer: Range): boolean;
 }
 
-export interface CodeOutputOptions<N, S> {
+export interface CodeOutputOptions<N> {
   /**
    * What the output is for, like in `renderToMarkdown()` of `fumadocs-core/server`. Search has the text of links and
    * no images, and the content of the JSX elements it doesn't keep.
@@ -54,8 +62,7 @@ export interface CodeOutputOptions<N, S> {
    */
   keep?: (node: N) => boolean;
   /** create the stringifier of the output, `expression` marks the code of its replacements */
-  stringifier: (expression: (code: string, fallback: string) => string) => S;
-  range: (node: N) => { start: number; end: number } | undefined;
+  stringifier: (expression: (code: string, fallback: string) => string) => CodeStringifier<N>;
   /** parse code with JSX */
   parse: (code: string) => object;
   /** the code of a string, JSON by default */
@@ -72,16 +79,15 @@ export const staticTagRegex = /^(File|TypeTable|Callout|Card)$/;
  * parts, so edits apply to their content like to other content (e.g. the prefixes of list items), and the code of the
  * output splits it on the markers. The code runs in a function of the props of the page, in the scope of its module.
  */
-export function createCodeOutput<N extends CodeNode, S extends CodeStringifier<N>>({
+export function createCodeOutput<N extends CodeNode>({
   target,
   isStatic,
   keep,
   stringifier,
-  range,
   parse,
   literal = JSON.stringify,
-}: CodeOutputOptions<N, S>) {
-  const parts: CodePart[] = [];
+}: CodeOutputOptions<N>) {
+  const parts: (Value | Branch | KeptElement)[] = [];
   /** the components that the code refers to in JSX: kept elements, and the JSX in authored code */
   const components = new Set<string>();
   const readJsx = (code: string) => {
@@ -174,18 +180,13 @@ export function createCodeOutput<N extends CodeNode, S extends CodeStringifier<N
         for (const attr of node.attributes as JsxAttributes)
           if (attr.type === 'mdxJsxAttribute')
             attributes[attr.name] =
-              attr.value == null
-                ? true
-                : typeof attr.value === 'string'
-                  ? attr.value
-                  : attr.value.value;
+              (typeof attr.value === 'object' ? attr.value?.value : attr.value) ?? true;
         return toHtmlTag(node.name as string, attributes, s.inner(node));
       });
   }
 
   return {
     s,
-    range,
     /** mark the code of a value */
     expression,
     /** Edit a node for the target: authored expressions, `<show>` branches, JSX elements, links, images and ESM. */
@@ -196,7 +197,7 @@ export function createCodeOutput<N extends CodeNode, S extends CodeStringifier<N
       else if (type === 'mdxTextExpression' || type === 'mdxFlowExpression') {
         if (isStatic) return;
         const code = node.value as string;
-        const position = range(node);
+        const position = s.range(node);
         s.replace(
           node,
           mark({
@@ -247,6 +248,8 @@ export function createCodeOutput<N extends CodeNode, S extends CodeStringifier<N
     },
   };
 }
+
+export type CodeOutput<N extends CodeNode> = ReturnType<typeof createCodeOutput<N>>;
 
 /**
  * An element as an HTML tag, so search dialogs render it as an element: its attributes that are text or `true`, with

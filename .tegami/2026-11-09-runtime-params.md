@@ -28,4 +28,5 @@ packages:
 - Added the `markdown` namespace of `replaceSource()`, for edits of processed Markdown only.
 - Search records no longer include the imports of included files.
 - The frontmatter in code of Fumadocs MDX can use imports declared after it, and keeps the other variables declared in its statement.
-- `@fumadocs/astro` supports frontmatter in code.
+- `@fumadocs/astro` supports frontmatter in code and meta files in code, like `meta.ts`.
+- Async pages of Fumadocs MDX load their content once, and render without suspending again once loaded.

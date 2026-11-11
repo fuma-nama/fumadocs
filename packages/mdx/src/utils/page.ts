@@ -1,49 +1,25 @@
-import { createElement } from 'react';
-import type { MDXProps } from 'mdx/types';
+import { createElement, use, type FC, type ReactPromise } from 'react';
+import type { MDXContent, MDXProps } from 'mdx/types';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
 import type { TOCItemType } from 'fumadocs-core/toc';
 import type { CompiledMDXProperties } from '@/loaders/mdx/build';
 import type { ExtractedReference } from '@/loaders/mdx/remark-postprocess';
-import { readStructuredData, renderStructuredData } from '../../../shared/structured-data';
+import { readStructuredData } from '../../../shared/structured-data';
 
-/** the exports of a compiled page for its props, with its outputs for them */
-export type PageAt<Page extends CompiledMDXProperties<unknown>> = Omit<
-  Page,
-  'toc' | 'structuredData' | 'extractedReferences'
-> & {
+type Props = Record<string, unknown>;
+
+/** the outputs of a compiled page for its props */
+export interface PageOutputs {
   toc: TOCItemType[];
-  /** read without rendering, components stay as tags: {@link loadStructuredData} renders them */
   structuredData: StructuredData;
   extractedReferences?: ExtractedReference[];
-};
-
-/**
- * Define properties that are computed when first read. The outputs of a page run its code, so binding a page computes
- * none of them: the entry of a dynamic file has no params to run it with, and most pages are never asked for all.
- */
-export function lazy<T extends object, G extends Record<string, () => unknown>>(
-  target: T,
-  getters: G,
-): T & { [K in keyof G]: ReturnType<G[K]> } {
-  for (const key in getters) {
-    let read = false;
-    let value: unknown;
-    Object.defineProperty(target, key, {
-      enumerable: true,
-      configurable: true,
-      get() {
-        if (!read) {
-          value = getters[key]();
-          read = true;
-        }
-        return value;
-      },
-    });
-  }
-  return target as never;
 }
 
-/** merge objects like a spread, without reading their {@link lazy} properties */
+/** the exports of a compiled page for its props, with its outputs for them */
+export type PageAt<Page extends CompiledMDXProperties<unknown>> = Omit<Page, keyof PageOutputs> &
+  PageOutputs;
+
+/** merge objects like a spread, without reading the outputs of {@link defineOutputs} */
 export function merge<T>(...sources: (object | undefined)[]): T {
   const out = {};
   for (const source of sources)
@@ -51,43 +27,89 @@ export function merge<T>(...sources: (object | undefined)[]): T {
   return out as T;
 }
 
+/** the content of a compiled page with props, the compiled component without them */
+export function bind(component: FC<MDXProps>, props?: Props): FC<MDXProps> {
+  return props && Object.keys(props).length > 0
+    ? (own) => createElement(component, { ...props, ...own })
+    : component;
+}
+
+/**
+ * Define the outputs of a compiled page for its props on `target`, computed when first read: the outputs of a page run
+ * its code, the entry of a dynamic file has no params to run it with, and most pages are never asked for all.
+ */
+export function defineOutputs<T extends object>(
+  target: T,
+  { toc, structuredData, extractedReferences: refs }: CompiledMDXProperties<unknown>,
+  props: Props = {},
+): T & PageOutputs {
+  lazy(target, 'toc', () => (typeof toc === 'function' ? toc(props) : toc));
+  lazy(target, 'structuredData', () =>
+    typeof structuredData === 'function'
+      ? readStructuredData(structuredData, props)
+      : structuredData,
+  );
+  lazy(target, 'extractedReferences', () => (typeof refs === 'function' ? refs(props) : refs));
+  return target as T & PageOutputs;
+}
+
+function lazy(target: object, key: keyof PageOutputs, get: () => unknown) {
+  let read = false;
+  let value: unknown;
+  Object.defineProperty(target, key, {
+    enumerable: true,
+    configurable: true,
+    get() {
+      if (!read) {
+        value = get();
+        read = true;
+      }
+      return value;
+    },
+  });
+}
+
 /** the exports of a compiled page for its props: path params and custom props, the content and its outputs read them */
 export function pageAt<Page extends CompiledMDXProperties<unknown>>(
   page: Page,
-  props: Record<string, unknown>,
+  props?: Props,
 ): PageAt<Page> {
-  const { toc, structuredData, extractedReferences: refs, _markdown: markdown } = page;
-  // without props, the content is the compiled component
-  const bound = Object.keys(props).length > 0;
-  return lazy(
+  const { _markdown: markdown } = page;
+  return defineOutputs(
     {
       ...page,
-      default: bound
-        ? (own: MDXProps) => createElement(page.default, { ...props, ...own })
-        : page.default,
+      default: bind(page.default, props),
       // called in place, so `asMarkdown()` of the component opts in when rendering into Markdown
       _markdown:
-        typeof markdown === 'function' && bound
+        typeof markdown === 'function' && props && Object.keys(props).length > 0
           ? (own: MDXProps) => markdown({ ...props, ...own })
           : markdown,
     },
-    {
-      toc: () => (typeof toc === 'function' ? toc(props) : toc),
-      structuredData: () =>
-        typeof structuredData === 'function'
-          ? readStructuredData(structuredData, props)
-          : structuredData,
-      extractedReferences: () => (typeof refs === 'function' ? refs(props) : refs),
-    },
+    page,
+    props,
   );
 }
 
-/** the structured data of a compiled page for its props, with its components rendered */
-export async function loadStructuredData(
-  { structuredData }: CompiledMDXProperties<unknown>,
-  props: Record<string, unknown>,
-): Promise<StructuredData> {
-  return typeof structuredData === 'function'
-    ? renderStructuredData(structuredData, props)
-    : structuredData;
+/** a promise that React `use()` reads without suspending once it settles */
+export function track<T>(promise: Promise<T>): Promise<T> & ReactPromise<T> {
+  promise.then(
+    (value) => Object.assign(promise, { status: 'fulfilled', value }),
+    (reason: unknown) => Object.assign(promise, { status: 'rejected', reason }),
+  );
+  return promise;
+}
+
+/** the methods of an async entry of the macro in the browser, its content renders synchronously once loaded */
+export function browserMethods(load: () => ReactPromise<{ body: MDXContent }>) {
+  function Body(props: MDXProps) {
+    const loaded = load();
+    return createElement((loaded.status === 'fulfilled' ? loaded.value : use(loaded)).body, props);
+  }
+
+  return {
+    async preload() {
+      await load();
+    },
+    body: Body,
+  };
 }

@@ -54,13 +54,9 @@ Fumadocs MDX turns it off with `generateToc: false` and exports the table of con
 
 ### Headings with Expressions
 
-In Fumadocs MDX, headings with expressions or inside a [`<show>`](/docs/headless/mdx/remark-show) branch get their IDs from the rendered text. For `framework: 'astro'`, `## Deploy on {props.framework}` is `deploy-on-astro`.
+Headings with expressions, or inside a [`<show>`](/docs/markdown#show) branch, get their IDs from the rendered text. For `framework: 'astro'`, `## Deploy on {props.framework}` is `deploy-on-astro`. Suffixes of duplicate IDs, like `-1`, only count the headings that show.
 
-Suffixes of duplicate IDs, like `-1`, only count the headings that show. So a heading repeated in two branches has the same ID in both.
-
-The headings get these IDs from `rehypeHeading`, a rehype plugin that Fumadocs MDX adds after your rehype plugins.
-
-Static outputs, when the plugin is used on its own, slug IDs from the source instead, like `deploy-on-propsframework`.
+The IDs are given by `rehypeHeading`, which Fumadocs MDX adds after your rehype plugins. Used on its own, Remark Heading slugs them from the source, like `deploy-on-propsframework`.
 
 ### Custom Slugs
 
@@ -122,23 +118,9 @@ For a Markdown document:
 ## Hello `code`
 ```
 
-Fumadocs MDX compiles the `toc` export as a function of the page props, which only returns the headings that show. Used on its own, the plugin exports static outputs, an array of `TOCItemType`:
+The plugin exports it as `toc`:
 
-```jsx tab="Fumadocs MDX"
-export const toc = (props) => [
-  {
-    title: (
-      <>
-        Hello <code>code</code>
-      </>
-    ),
-    depth: 2,
-    url: '#hello-code',
-  },
-];
-```
-
-```jsx tab="Static outputs"
+```jsx
 export const toc = [
   {
     title: (
@@ -152,6 +134,4 @@ export const toc = [
 ];
 ```
 
-Fumadocs MDX calls it for the props of each page, so `page.data.toc` is an array. Inside an MDX file, `toc` is the function, see [Inline TOC](/docs/ui/components/inline-toc#usage) for an example.
-
-A custom content source can ask for the function with [runtime outputs](/docs/headless/source-api/source#runtime-outputs).
+Fumadocs MDX gives `page.data.toc` for the props of each page, with only the headings that show. A custom content source gets the same with [runtime outputs](/docs/headless/source-api/source#runtime-outputs).
