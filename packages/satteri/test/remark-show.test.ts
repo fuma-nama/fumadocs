@@ -13,6 +13,7 @@ import { compileMdx } from '@/compile';
 import { applySatteriPreset } from '@/preset';
 import { remarkInclude } from '@/remark-include';
 import { remarkLlms } from '@/remark-llms';
+import { remarkSteps } from '@/remark-steps';
 
 const AsyncFunction: new (...args: string[]) => (...args: unknown[]) => Promise<unknown> =
   Object.getPrototypeOf(async function () {}).constructor;
@@ -140,6 +141,75 @@ test('Remark Show: branches and expressions render from code in every output', a
   // the static view has the authored source of expressions and every branch
   expect((data.structuredData as StructuredData).headings[0].content).toBe(
     'Deploy on {props.framework}',
+  );
+});
+
+test('Remark Show: steps and tabs go on through branches', async () => {
+  const { jsx } = JsxRuntime;
+  const options = await applySatteriPreset({
+    data: { unstable_runtimeOutputs: true },
+    rehypeCodeOptions: false,
+    mdastPlugins: [remarkSteps()],
+  })('runtime');
+  const { code } = await compileMdx({
+    source: `### Install [step]
+
+#### Download [step]
+
+#### Unpack [step]
+
+<show when={props.framework === "waku"}>
+
+### Create the Source [step] [!toc]
+
+</show>
+
+### Done [step]
+
+<show when={props.framework === "astro"}>
+
+\`\`\`ts tab="astro.config.ts"
+astro
+\`\`\`
+
+</show>
+
+\`\`\`ts tab="lib/source.ts"
+source
+\`\`\`
+`,
+    filePath: '/tmp/doc.mdx',
+    environment: 'runtime',
+    options,
+  });
+  const page = (await new AsyncFunction('opts', code)(scope)) as {
+    default: FC<Record<string, unknown>>;
+    toc: (props: object) => { _step?: number }[];
+  };
+  const components = {
+    CodeBlockTabs: (props: { defaultValue: string; children: ReactNode }) =>
+      jsx('section', { 'data-default': props.defaultValue, children: props.children }),
+    CodeBlockTabsList: (props: { children: ReactNode }) => jsx('nav', props),
+    CodeBlockTabsTrigger: (props: { children: ReactNode }) =>
+      jsx('b', { children: props.children }),
+    CodeBlockTab: (props: { children: ReactNode }) => props.children,
+  };
+  const html = (framework: string) =>
+    renderToStaticMarkup(createElement(page.default, { framework, components }));
+  const steps = (framework: string) => page.toc({ framework }).map((item) => item._step);
+
+  // a step in a branch is a step of the list around it, a step that isn't in the TOC counts
+  // a list in a step has its own numbers
+  expect(steps('waku')).toEqual([1, 1, 2, 3]);
+  expect(steps('next')).toEqual([1, 1, 2, 2]);
+  expect(html('waku').match(/class="fd-steps?"/g)).toHaveLength(7);
+  expect(html('next').match(/class="fd-steps?"/g)).toHaveLength(6);
+  // a tab in a branch is a tab of the code blocks around it, the first tab that shows is the default one
+  expect(html('astro')).toContain(
+    '<section data-default="astro.config.ts"><nav><b>astro.config.ts</b><b>lib/source.ts</b></nav>',
+  );
+  expect(html('next')).toContain(
+    '<section data-default="lib/source.ts"><nav><b>lib/source.ts</b></nav>',
   );
 });
 

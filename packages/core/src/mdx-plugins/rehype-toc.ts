@@ -3,8 +3,14 @@ import type { Root, Element, Nodes } from 'hast';
 import { toEstree } from 'hast-util-to-estree';
 import type { Expression, JSXElement } from 'estree-jsx';
 import { esmScope, handleTag, toEsm } from './utils';
-import { componentsCode, jsxComponents, listCode } from '../../../shared/code-output';
+import {
+  componentsCode,
+  jsxComponents,
+  listCode,
+  type ListEntry,
+} from '../../../shared/code-output';
 import { isStaticOutput, walkBranches } from '../../../shared/show';
+import { stepNumberCode } from '../../../shared/steps';
 
 export interface RehypeTocOptions {
   /**
@@ -74,7 +80,8 @@ export function rehypeToc(
   }
 
   return (tree, file) => {
-    const items: (RehypeTOCItemType & { when: string[] })[] = [];
+    /** `hidden` is a step that isn't in the TOC, which counts among the steps */
+    const items: (RehypeTOCItemType & { when: string[]; hidden?: boolean })[] = [];
 
     walkBranches<Nodes>(tree, (node, when, parent) => {
       if (node.type !== 'element' || !HeadingTags.has(node.tagName)) return;
@@ -83,9 +90,17 @@ export function rehypeToc(
       if (typeof id !== 'string' || !last) return 'skip';
 
       const text = last.type === 'text' ? last : undefined;
+      const item = {
+        title: node,
+        depth: Number(node.tagName[1]),
+        url: `#${id}`,
+        _step: getStep(node.properties),
+        when,
+      };
       const noToc = text && handleTag(text.value, NoTocTag);
       if (typeof noToc === 'string') {
         text!.value = noToc;
+        if (item._step !== undefined) items.push({ ...item, hidden: true });
         return 'skip';
       }
       const tocOnly = text && handleTag(text.value, TocOnlyTag);
@@ -95,22 +110,25 @@ export function rehypeToc(
         siblings.splice(siblings.indexOf(node), 1);
       }
 
-      items.push({
-        title: node,
-        depth: Number(node.tagName[1]),
-        url: `#${id}`,
-        _step: getStep(node.properties),
-        when,
-      });
+      items.push(item);
       return 'skip';
     });
 
     if (exportToc === false) return;
     if (exportToc.as === 'esm') {
       const titles: Expression[] = [];
-      const list: { code: string; when: string[] }[] = [];
+      const list: ListEntry[] = [];
       const components = new Set<string>();
-      for (const { title, when, url, depth, _step } of items) {
+      const isStatic = isStaticOutput(file.data);
+      // without branches, the number of a step among the steps of its list is the one that shows
+      const numbers = file.data._show ? stepNumberCode() : undefined;
+      for (const { title, when, url, depth, _step, hidden } of items) {
+        const step =
+          _step === undefined ? undefined : (numbers?.next(_step, depth) ?? String(_step));
+        if (hidden) {
+          if (numbers) list.push({ code: step!, when, run: true });
+          continue;
+        }
         const { children } = toJsx(title);
         jsxComponents(children, components);
         const i = titles.push({
@@ -121,7 +139,7 @@ export function rehypeToc(
         });
         const id = file.data._headingIds?.[url.slice(1)];
         let code = `{depth: ${depth}, url: ${id ? `"#" + ${id}` : JSON.stringify(url)}`;
-        if (_step !== undefined) code += `, _step: ${_step}`;
+        if (step) code += `, _step: ${step}`;
         list.push({ code: `${code}, title: _fumadocs${i - 1}}`, when });
       }
       // like in the content, the other components of titles are MDX components: without them, their content
@@ -133,12 +151,13 @@ export function rehypeToc(
       );
       tree.children.push(
         toEsm(
-          `export const ${exportToc.name} = ${listCode(list, isStaticOutput(file.data), declaration)};`,
+          `export const ${exportToc.name} = ${listCode(list, isStatic, (numbers?.declaration ?? '') + declaration)};`,
           titles,
         ),
       );
     } else {
-      file.data.rehypeToc = items.map(({ when: _, ...item }) => item);
+      file.data.rehypeToc = [];
+      for (const { when: _, hidden, ...item } of items) if (!hidden) file.data.rehypeToc.push(item);
     }
   };
 }

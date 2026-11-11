@@ -19,3 +19,9 @@ The table of contents, [heading IDs](/docs/headless/mdx/headings#headings-with-e
   content source asks for [runtime outputs](/docs/headless/source-api/source#runtime-outputs)
   instead.
 </Callout>
+
+## Steps and Tab Groups
+
+A step inside `<show>` is one of the steps around it, and a code block inside `<show>` is a tab of the [tab group](/docs/markdown#tab-groups) around it. Remark Show has to run before [Remark Steps](/docs/headless/mdx/remark-steps) and `remarkCodeTab`.
+
+When every step or tab is inside a `<show>`, each `<show>` has its own steps or tab group.

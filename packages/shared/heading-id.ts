@@ -35,7 +35,7 @@ export function textParts(nodes: readonly CodeNode[], onCode: () => void): strin
 
 /**
  * IDs slugged when rendering, from the first heading that has an authored expression, or is in or around a branch of
- * `<show>`: only the headings that show count for duplicates.
+ * `<show>`. The headings are slugged in document order, so only the ones that show count for duplicates.
  *
  * @param runtime - the module that the code imports `createHeadingIds()` from
  */
@@ -55,14 +55,15 @@ export function headingIdCode(runtime = headingRuntime) {
     next(nodes: readonly CodeNode[], when: string[]): string | undefined {
       const test = and(when);
       if (test) dynamic = true;
-      const parts = `[${textParts(nodes, onCode)}]`;
-      entries.push(`(props) => ${test ? `${test} ? ${parts} : null` : parts}`);
+      const id = `_slug([${textParts(nodes, onCode)}])`;
+      // a hidden heading keeps its place, the IDs are read by index
+      entries.push(test ? `${test} ? ${id} : ""` : id);
       if (dynamic) return `_headingIds(props)[${entries.length - 1}]`;
     },
     /** the ESM code that the IDs from code read */
     get esm(): string | undefined {
       if (dynamic)
-        return `import { createHeadingIds as _createHeadingIds } from ${JSON.stringify(runtime)};\nexport const _headingIds = _createHeadingIds([${entries.join(', ')}]);`;
+        return `import { createHeadingIds as _createHeadingIds } from ${JSON.stringify(runtime)};\nexport const _headingIds = _createHeadingIds((props, _slug) => [${entries.join(', ')}]);`;
     },
   };
 }

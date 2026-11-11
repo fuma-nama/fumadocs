@@ -85,6 +85,12 @@ function fill(node: object, expressions: Expression[]) {
   }
 }
 
+/** the value of a JSX attribute from code */
+export function toAttributeValue(code: string) {
+  const estree = parser.parse(code, { ecmaVersion: 'latest', sourceType: 'module' }) as Program;
+  return { type: 'mdxJsxAttributeValueExpression' as const, value: code, data: { estree } };
+}
+
 /** the shared code output, on the stringifier of mdast: estree expressions of replacements go in by placeholders */
 export function createCodeOutput(
   file: VFile,
