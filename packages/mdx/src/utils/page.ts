@@ -101,16 +101,18 @@ export function track<T>(promise: Promise<T>): Promise<T> & ReactPromise<T> {
 
 /** the methods of an async entry of the macro in the browser, its content renders synchronously once loaded */
 export function browserMethods(load: () => ReactPromise<{ body: MDXContent }>) {
+  function Body(props: MDXProps) {
+    const loaded = load();
+    return createElement(
+      (loaded.status === 'fulfilled' ? loaded.value : use(loaded)).body,
+      props,
+    );
+  }
+
   return {
     async preload() {
       await load();
     },
-    body(props: MDXProps) {
-      const loaded = load();
-      return createElement(
-        (loaded.status === 'fulfilled' ? loaded.value : use(loaded)).body,
-        props,
-      );
-    },
+    body: Body,
   };
 }
