@@ -145,12 +145,8 @@ export function fromJS<M>(options: MarkdownRendererJSOptions): MarkdownRenderer<
     };
   }
 
-  type Exports = {
-    toc?: TOCItemType[] | ((props: Record<string, unknown>) => TOCItemType[]);
-    default: MDXContent;
-  };
-  const tocOf = ({ toc = [] }: Exports) =>
-    typeof toc === 'function' ? toc(options.props ?? {}) : toc;
+  type Exports = { toc?: (props: Record<string, unknown>) => TOCItemType[]; default: MDXContent };
+  const tocOf = ({ toc }: Exports) => toc?.(options.props ?? {}) ?? [];
 
   return {
     structuredData,

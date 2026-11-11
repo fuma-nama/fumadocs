@@ -43,9 +43,9 @@ export interface MarkdownRendererJSOptions {
 const AsyncFunction: new (...args: string[]) => (...args: unknown[]) => Promise<unknown> =
   Object.getPrototypeOf(async function () {}).constructor;
 
-/** the exports of compiled content, its outputs are static or functions of the props */
+/** the outputs of content rendered from code read the props too */
 interface CompiledExports {
-  toc?: TOCItemType[] | ((props: Record<string, unknown>) => TOCItemType[]);
+  toc?: (props: Record<string, unknown>) => TOCItemType[];
   default: MDXContent;
 }
 
@@ -81,9 +81,8 @@ export function fromJS<M>(options: MarkdownRendererJSOptions): MarkdownRenderer<
   }
 
   function toResult(out: CompiledExports & M, components?: MDXComponents) {
-    const { toc = [] } = out;
     return {
-      toc: typeof toc === 'function' ? toc(options.props ?? {}) : toc,
+      toc: out.toc?.(options.props ?? {}) ?? [],
       body: JsxRuntime.jsx(out.default, { ...options.props, components }),
       exports: out,
     };

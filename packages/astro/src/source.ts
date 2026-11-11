@@ -141,7 +141,6 @@ function pageData<Data extends PageEntry['data']>(
     ...data,
     async load() {
       const { Content, outputs } = await compile();
-      const { toc, structuredData } = outputs;
       return {
         body:
           props && Object.keys(props).length > 0
@@ -151,20 +150,17 @@ function pageData<Data extends PageEntry['data']>(
                 Content,
               )
             : Content,
-        toc: typeof toc === 'function' ? toc(props ?? {}) : toc,
+        toc: outputs.toc(props ?? {}),
         // read without rendering, `structuredData()` renders it
         get structuredData() {
-          return typeof structuredData === 'function'
-            ? readStructuredData(recordsOf(structuredData), props ?? {})
-            : structuredData;
+          return readStructuredData(recordsOf(outputs), props ?? {});
         },
       };
     },
     async structuredData() {
-      const { structuredData, components } = (await compile()).outputs;
-      if (typeof structuredData !== 'function') return structuredData;
+      const { outputs } = await compile();
       // with the MDX components of the collection by default
-      return renderStructuredData(recordsOf(structuredData), { components, ...props });
+      return renderStructuredData(recordsOf(outputs), { components: outputs.components, ...props });
     },
     async getText(type, options) {
       if (type === 'raw') return entry.body ?? '';

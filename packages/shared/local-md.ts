@@ -105,9 +105,9 @@ export function createMarkdownSource<
         // Markdown has no code, and rendering it renders the body
         if (!file.path.endsWith('.mdx')) return renderer.structuredData;
         const { structuredData } = (await renderer.render()).exports as {
-          structuredData?: StructuredData | StructuredRecords;
+          structuredData?: StructuredRecords;
         };
-        return typeof structuredData === 'function'
+        return structuredData
           ? renderStructuredData(structuredData, props ?? {})
           : renderer.structuredData;
       },

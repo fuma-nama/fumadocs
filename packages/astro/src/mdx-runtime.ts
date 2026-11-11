@@ -4,7 +4,6 @@ import type { MDXComponents } from 'mdx/types';
 import type { ElementType, ReactNode } from 'react';
 import { Fragment, jsx, jsxs } from 'react/jsx-runtime';
 import type { TOCItemType } from 'fumadocs-core/toc';
-import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
 import type { IslandNode } from './island';
 import type { StructuredRecords } from '../../shared/structured-data';
 
@@ -111,10 +110,10 @@ interface MarkdownProps {
 /** the function output of `remarkLlms()` */
 type Render = (props: MarkdownProps) => Output;
 
-/** the outputs of a compiled page, static or functions of the props of a page */
+/** the outputs of a compiled page, functions of the params of a page */
 export interface PageOutputs {
-  toc: TOCItemType[] | ((props: Record<string, unknown>) => TOCItemType[]);
-  structuredData: StructuredData | StructuredRecords;
+  toc: (props: Record<string, unknown>) => TOCItemType[];
+  structuredData: StructuredRecords;
   /** with `includeProcessedMarkdown`, a string for static output */
   markdown?: string | Render;
   /** the MDX components of the content island */
@@ -133,9 +132,9 @@ export async function renderMarkdown(render: Render, props: MarkdownProps): Prom
 }
 
 /** the records of structured data of a document as React nodes, MDX files compile to the JSX runtime of Astro */
-export function recordsOf(structuredData: StructuredRecords): StructuredRecords {
+export function recordsOf(outputs: PageOutputs): StructuredRecords {
   return (props) => {
-    const records = structuredData(props);
+    const records = outputs.structuredData(props);
     for (const record of records) record.content = toReact(record.content as Output);
     return records;
   };
