@@ -54,13 +54,19 @@ Fumadocs MDX turns it off with `generateToc: false` and exports the table of con
 
 ### Headings with Expressions
 
-Headings with expressions, or inside a [`<show>`](/docs/markdown#show) branch, get their IDs from the rendered text. For `framework: 'astro'`, `## Deploy on {props.framework}` is `deploy-on-astro`. Suffixes of duplicate IDs, like `-1`, only count the headings that show.
+In Fumadocs MDX, the ID of a heading is generated from its rendered text when the heading has an expression, or is inside [`<show>`](/docs/markdown#show):
 
-The IDs are given by `rehypeHeading`, which Fumadocs MDX adds after your rehype plugins. Used on its own, Remark Heading slugs them from the source, like `deploy-on-propsframework`.
+```mdx
+## Deploy on {props.framework}
+```
+
+With `framework: 'astro'`, the ID is `deploy-on-astro`. Duplicate IDs get a suffix like `-1`, and headings that aren't rendered don't count as duplicates.
+
+This needs the `rehypeHeading` plugin, which Fumadocs MDX adds after your rehype plugins. Without it, Remark Heading generates the ID from the source text, like `deploy-on-propsframework`.
 
 ### Custom Slugs
 
-With a custom `slug` function, IDs are slugged from the source too. To slug them from the rendered text, write a module that exports `createHeadingIds()` with your slugger:
+A custom `slug` function generates IDs from the source text, also for headings with expressions. To use the rendered text with your own slugger, export `createHeadingIds()` from a module:
 
 ```ts title="lib/heading.ts"
 import { createHeadingIds as create } from 'fumadocs-core/mdx-plugins/remark-heading.runtime';
@@ -70,7 +76,7 @@ export const createHeadingIds: typeof create = (ids) =>
   create(ids, () => (text) => text.toLowerCase().replaceAll(' ', '_'));
 ```
 
-Then pass it as `slugImportSource`. Compiled pages import the module, like the JSX runtime from `jsxImportSource` of MDX, so use a package name or an import alias:
+Then set `slugImportSource` to the module. Compiled pages import it, like the JSX runtime of `jsxImportSource` in MDX, so use a package name or an import alias:
 
 ```ts tab="unified" title="source.config.ts"
 import { defineConfig } from 'fumadocs-mdx/config';
@@ -102,7 +108,7 @@ export default defineConfig({
 });
 ```
 
-`slug` still gives the IDs of the headings before the first one with an expression, so both should slug the same way.
+The `slug` function is still used for the headings before the first heading with an expression, so keep the two consistent.
 
 ## Rehype TOC
 
@@ -134,4 +140,4 @@ export const toc = [
 ];
 ```
 
-Fumadocs MDX gives `page.data.toc` for the props of each page, with only the headings that show. A custom content source gets the same with [runtime outputs](/docs/headless/source-api/source#runtime-outputs).
+In Fumadocs MDX, `page.data.toc` only lists the headings that are rendered with the page props. A custom content source can do the same with [runtime outputs](/docs/headless/source-api/source#runtime-outputs).

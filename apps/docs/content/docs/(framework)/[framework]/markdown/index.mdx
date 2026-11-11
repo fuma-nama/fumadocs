@@ -431,23 +431,25 @@ See [other usages of include](/docs/mdx/include).
 
 ### Props
 
-MDX content reads the props passed to it as `props`. Pages of [path params](/docs/page-conventions#path-params) receive their params as props:
+The props of a page are available as `props` in MDX. For example, a page in a `[framework]` folder receives `framework` from its [path params](/docs/page-conventions#path-params):
 
 ```mdx title="[framework]/deploy.mdx"
+## Deploy on {props.framework}
+
 Deploy your {props.framework} site.
 ```
+
+An expression is replaced by its value in the table of contents, the search index and the Markdown for LLMs as well. On the Astro page, the heading above gets the ID `deploy-on-astro`.
 
 You can also pass [custom props](/docs/headless/source-api#custom-props) to a page.
 
 ### Show
 
-Show content on a condition, enabled by default with [Remark Show](/docs/headless/mdx/remark-show).
+Render content on a condition. Fumadocs MDX enables it by default with [Remark Show](/docs/headless/mdx/remark-show).
 
-`when` takes a JS expression, checked when the page renders. It can read [props](#props):
+`when` is a JavaScript expression that can read [props](#props):
 
 ```mdx title="[framework]/deploy.mdx"
-Deploy your {props.framework} site.
-
 <show when={props.framework === 'astro'}>
 
 ## Adapters
@@ -457,9 +459,9 @@ Add an adapter to your Astro config.
 </show>
 ```
 
-The table of contents, search index and Markdown for LLMs of the page only include the branches that show. Expressions like `{props.framework}` give their values there, and in heading IDs.
+The section is only rendered on the page where `framework` is `astro`. On the other pages, it is also left out of the table of contents, the search index and the Markdown for LLMs.
 
-`<show>` can wrap a [step](#steps), or a code block of a [tab group](#tab-groups):
+You can use `<show>` around a [step](#steps) too:
 
 ```mdx title="[framework]/deploy.mdx"
 ### Build [step]
@@ -473,7 +475,9 @@ The table of contents, search index and Markdown for LLMs of the page only inclu
 ### Deploy [step]
 ```
 
-For `framework: 'astro'`, the steps are numbered 1 to 3. For other frameworks, Deploy is step 2. A tab group only has the tabs that show.
+Steps that aren't rendered are skipped in the numbering: Deploy is step 3 on the Astro page, and step 2 on the other pages.
+
+It works the same way for a code block of a [tab group](#tab-groups). The tab only appears when its code block is rendered.
 
 ### NPM Commands
 

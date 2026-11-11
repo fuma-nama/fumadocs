@@ -136,7 +136,7 @@ const page = source.getPage(['slug', 'of', 'page'], {
 });
 ```
 
-The page data, like its content and table of contents, follows these props. MDX components are props too. Pass them to render the components in outputs like processed Markdown:
+The page data is generated with these props, including the content and the table of contents. MDX components are props too. Pass them when processed Markdown should render your components:
 
 ```ts
 import { getMDXComponents } from '@/components/mdx';

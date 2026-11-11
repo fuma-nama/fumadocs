@@ -38,7 +38,7 @@ export const docs = defineDocs({
 });
 ```
 
-Read it from your pages. `getText('processed')` renders the Markdown for the props of the page:
+Read it from your pages with `getText('processed')`, which renders the Markdown with the page props:
 
 ```ts
 const markdown = await page.data.getText('processed');
@@ -62,20 +62,20 @@ Images in the public directory keep their address. Vite inlines images smaller t
 
 The `output` option sets the form of `_markdown`:
 
-- `function`: a component, rendered into Markdown with [`renderToMarkdown()`](/docs/headless/utils/markdown). It only includes the [`<show>`](/docs/headless/mdx/remark-show) branches that show. Expressions give their values, and JSX elements render their [Markdown form](#jsx-elements).
-- `string`: the Markdown as a string. Expressions and JSX elements keep their source text, and a document with `<show>` fails to compile.
+- `function`: `_markdown` is a component, which you render with [`renderToMarkdown()`](/docs/headless/utils/markdown). The Markdown is generated with the page props: content inside a [`<show>`](/docs/markdown#show) that isn't rendered is left out, expressions are replaced by their values, and JSX elements by their [Markdown form](#jsx-elements).
+- `string`: `_markdown` is a string. Expressions and JSX elements are kept as source text, and a document with `<show>` fails to compile.
 
-It defaults to `function` in Fumadocs MDX and `@fumadocs/astro`. Used on its own, the plugin defaults to `string`, unless a custom content source asks for [runtime outputs](/docs/headless/source-api/source#runtime-outputs).
+The default is `function` in Fumadocs MDX and `@fumadocs/astro`, and `string` elsewhere. A custom content source gets `function` with [runtime outputs](/docs/headless/source-api/source#runtime-outputs).
 
 ## JSX Elements
 
-With [`output: 'function'`](#output), JSX elements resolve like in MDX: a name that the file imports or declares is that variable, and other names come from the MDX components in the [page props](/docs/headless/source-api#custom-props). Pass MDX components to a page with `getPage()`:
+With [`output: 'function'`](#output), a component is looked up like in MDX: first in the imports and declarations of the file, then in the MDX components of the [page props](/docs/headless/source-api#custom-props). Pass MDX components to a page with `getPage()`:
 
 ```ts
 const page = source.getPage(slugs, { props: { components } });
 ```
 
-A component defines its Markdown form with [`asMarkdown()`](/docs/headless/utils/markdown#asmarkdown). Components that don't are kept as JSX. To remove elements, or replace them with their children, use `filterElement` (unavailable on Sätteri).
+A component defines its Markdown form with [`asMarkdown()`](/docs/headless/utils/markdown#asmarkdown). A component without one is kept as JSX. To remove elements, or replace them with their children, use `filterElement` (unavailable on Sätteri).
 
 ### Placeholders
 

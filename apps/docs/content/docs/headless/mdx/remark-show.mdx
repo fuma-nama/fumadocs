@@ -5,23 +5,24 @@ description: Show content on a condition.
 
 ## Usage
 
-Remark Show is a remark plugin that compiles [`<show>`](/docs/markdown#show) into a component. Fumadocs MDX, `@fumadocs/astro` and [Local Markdown](/docs/integrations/content/local-md) enable it by default.
+Remark Show is a remark plugin for the [`<show>`](/docs/markdown#show) syntax. Fumadocs MDX, `@fumadocs/astro` and [Local Markdown](/docs/integrations/content/local-md) enable it by default.
 
-The component renders its content when `when` holds. The condition is checked when rendering, so it can read the props of the page, like its [path params](/docs/headless/page-conventions#path-params). A `<show>` without `when` fails to compile.
+`<show>` renders its content when the `when` expression is true. The expression is evaluated when the page renders, so it can read the page props, like [path params](/docs/headless/page-conventions#path-params). A `<show>` without `when` fails to compile.
 
-## Outputs
+## Page Data
 
-The table of contents, [heading IDs](/docs/headless/mdx/headings#headings-with-expressions), [structured data](/docs/headless/mdx/structure) and [processed Markdown](/docs/headless/mdx/remark-llms) of a page only include the branches that show for its props.
+Content that isn't rendered is also left out of the page data: the table of contents, [heading IDs](/docs/headless/mdx/headings#headings-with-expressions), [structured data](/docs/headless/mdx/structure) and [processed Markdown](/docs/headless/mdx/remark-llms).
 
 <Callout type="warn">
-  Used on their own, Rehype TOC, Remark Structure and Remark LLMs analyse the source before any
-  condition is checked, so with Remark Show, a document with `<show>` fails to compile. A custom
-  content source asks for [runtime outputs](/docs/headless/source-api/source#runtime-outputs)
-  instead.
+  The data comes from Rehype TOC, Remark Structure and Remark LLMs. Without Fumadocs MDX, they
+  generate it at compile time, before any condition can be evaluated, so a document with `<show>`
+  fails to compile. In a custom content source, enable [runtime
+  outputs](/docs/headless/source-api/source#runtime-outputs).
 </Callout>
 
 ## Steps and Tab Groups
 
-A step inside `<show>` is one of the steps around it, and a code block inside `<show>` is a tab of the [tab group](/docs/markdown#tab-groups) around it. Remark Show has to run before [Remark Steps](/docs/headless/mdx/remark-steps) and `remarkCodeTab`.
+`<show>` can wrap a [step](/docs/headless/mdx/remark-steps), or a code block of a [tab group](/docs/markdown#tab-groups). See the [example](/docs/markdown#show).
 
-When every step or tab is inside a `<show>`, each `<show>` has its own steps or tab group.
+- Add Remark Show before Remark Steps and `remarkCodeTab` in your plugins.
+- Keep at least one step, or one tab, outside `<show>`. Otherwise each `<show>` gets its own steps or tab group.
