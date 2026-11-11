@@ -7,7 +7,6 @@ import { renderStructuredData, type StructuredRecords } from './structured-data'
 import { isDynamicPath, type MetaData, type PageData, type Params } from 'fumadocs-core/source';
 import * as defaultSchemas from 'fumadocs-core/source/schema';
 import { createLocalSource, type SourceFile } from '@fumadocs/local-content';
-import { metaModule } from './frontmatter-code';
 
 export const defaultInclude = ['**/*.{md,mdx,json}', '**/meta{,.*}.{js,ts}'];
 
@@ -160,15 +159,19 @@ export function createMarkdownSource<
             // a new module after the file changes
             const url = pathToFileURL(file.absolutePath);
             url.searchParams.set('t', String(Date.now()));
-            const { data, dataAt } = metaModule<Meta>(
-              await import(/* webpackIgnore: true */ /* @vite-ignore */ url.href),
-            );
-            if (!dataAt)
-              return { type: 'meta', data: await validate<Meta>(metaSchema, file, data) };
+            const { default: data, staticParams } = (await import(
+              /* webpackIgnore: true */ /* @vite-ignore */ url.href
+            )) as { default: Meta | ((params: Params) => Meta); staticParams?: Params[] };
+            if (typeof data !== 'function')
+              return {
+                type: 'meta',
+                data: await validate<Meta>(metaSchema, file, { staticParams, ...data }),
+              };
             return {
               type: 'meta',
-              data,
-              dataAt: (params) => validate<Meta>(metaSchema, file, { ...data, ...dataAt(params) }),
+              data: { staticParams } as Meta,
+              dataAt: (params) =>
+                validate<Meta>(metaSchema, file, { staticParams, ...data(params) }),
             };
           }
           case '.md':
@@ -176,22 +179,14 @@ export function createMarkdownSource<
             const { data, content } = parseFrontmatter(await file.read());
             const code = file.path.endsWith('.mdx') && /^export const frontmatter\b/m.test(content);
             const parsed: ParsedMarkdown = { data, content, code };
-            const base = await page(file, parsed);
             return {
               type: 'page',
-              data: base,
-              // the file is compiled once, the params and custom props only bind its content and outputs
+              data: await page(file, parsed),
+              // the file is compiled once, custom props only bind its content and outputs
               dataAt: (params, custom) =>
                 custom
                   ? { ...custom.data, ...bind(file, parsed, { ...params, ...custom.props }) }
-                  : code
-                    ? page(file, parsed, params)
-                    : // its own frontmatter, like the page of each params with frontmatter in code
-                      {
-                        ...base,
-                        frontmatter: Object.assign({}, base.frontmatter),
-                        ...bind(file, parsed, params),
-                      },
+                  : page(file, parsed, params),
             };
           }
         }
