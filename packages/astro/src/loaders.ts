@@ -88,16 +88,19 @@ async function parsePage<Data extends Record<string, unknown>>(
   return { ...data, _frontmatterAt: at };
 }
 
-/** the data of a meta module at the params of its folder */
-const dataAtKey = Symbol();
+/** the data of a meta module -> its data at the params of its folder */
+const dataAts = new WeakMap<object, (params: Params) => MetaData>();
 
 /** a meta module, like `meta.ts`, runs through Vite */
 const moduleEntryType: DataEntryType = {
   extensions: ['.ts', '.js'],
   async getEntryInfo({ fileUrl }) {
     const file = fileURLToPath(fileUrl).replaceAll(path.sep, '/');
-    const { data, dataAt } = metaModule(await import(/* @vite-ignore */ `${file}${metaQuery}`));
-    return { data: { ...data, [dataAtKey]: dataAt } };
+    const { data, dataAt } = metaModule<MetaData & Record<string, unknown>>(
+      await import(/* @vite-ignore */ `${file}${metaQuery}`),
+    );
+    if (dataAt) dataAts.set(data, dataAt);
+    return { data };
   },
 };
 
@@ -154,14 +157,16 @@ export function metaLoader(collection = 'docs'): Loader & { schema: typeof metaS
       ...context,
       entryTypes: new Map([...entryTypes, ['.ts', moduleEntryType], ['.js', moduleEntryType]]),
       async parseData(props) {
-        const { [dataAtKey]: dataAt, ...data } = props.data as Record<string, unknown> & {
-          [dataAtKey]?: (params: Params) => Record<string, unknown>;
-        };
-        if (!dataAt) return context.parseData({ ...props, data });
+        const { data } = props;
+        const dataAt = dataAts.get(data);
+        if (!dataAt) return context.parseData(props);
         const file = path.relative(base, props.filePath!).replaceAll(path.sep, '/');
         const at: Record<string, unknown> = {};
         for (const params of (await listParams(context, base, file)) ?? [])
-          at[JSON.stringify(params)] = await context.parseData({ ...props, data: dataAt(params) });
+          at[JSON.stringify(params)] = await context.parseData({
+            ...props,
+            data: { ...data, ...dataAt(params) },
+          });
         return { ...data, _dataAt: at } as never;
       },
       // a module reads other files, like its imports and meta files
