@@ -1,3 +1,4 @@
+import type { MarkdownTarget } from '@/server';
 import type { Expression } from 'estree-jsx';
 import type { Nodes } from 'mdast';
 import type { VFile } from 'vfile';
@@ -81,7 +82,7 @@ export function replaceSource(
   file: VFile,
   node: Nodes,
   text: Replacement,
-  namespace?: 'search' | 'markdown' | (string & {}),
+  namespace?: MarkdownTarget | (string & {}),
 ): void {
   getDocument(file).replacements.push({ node, text, namespace });
 }
@@ -151,7 +152,7 @@ export interface Stringifier {
  */
 export function createStringifier(
   file: VFile,
-  namespace?: 'search' | 'markdown' | (string & {}),
+  namespace?: MarkdownTarget | (string & {}),
   expression: Stringifier['expression'] = (_, fallback) => fallback,
 ): Stringifier {
   const doc = documents.get(file);

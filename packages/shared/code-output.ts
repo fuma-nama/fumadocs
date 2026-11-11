@@ -1,3 +1,4 @@
+import type { MarkdownTarget } from 'fumadocs-core/server';
 import { showCondition, type JsxAttributes } from './show';
 
 /**
@@ -42,7 +43,7 @@ export interface CodeStringifier<N> {
 
 export interface CodeOutputOptions<N, S> {
   /** search has the text of links and no images, and the content of the JSX elements it doesn't keep */
-  target: 'markdown' | 'search';
+  target: MarkdownTarget;
   /** whether authored expressions are values, for a content source that renders pages for props */
   runtime: boolean;
   /** whether to keep a JSX element: as an HTML tag for search, as JSX of its component for Markdown */
@@ -162,7 +163,19 @@ export function createCodeOutput<N extends CodeNode, S extends CodeStringifier<N
 
     const kept = keep?.(node);
     if (target === 'search')
-      s.replace(node, kept ? (s) => toHtmlTag(node, s.inner(node)) : (s) => s.inner(node));
+      s.replace(node, (s) => {
+        if (!kept) return s.inner(node);
+        const attributes: Record<string, unknown> = {};
+        for (const attr of node.attributes as JsxAttributes)
+          if (attr.type === 'mdxJsxAttribute')
+            attributes[attr.name] =
+              attr.value == null
+                ? true
+                : typeof attr.value === 'string'
+                  ? attr.value
+                  : attr.value.value;
+        return toHtmlTag(node.name as string, attributes, s.inner(node));
+      });
     else if (kept) {
       const part = component(node);
       if (part)
@@ -250,24 +263,22 @@ export type CodeOutput<N extends CodeNode, S extends CodeStringifier<N>> = Retur
 >;
 
 /**
- * An element as an HTML tag, so search dialogs render it as an element: its attributes with text values, with values
- * and content on one line, values truncated.
+ * An element as an HTML tag, so search dialogs render it as an element: its attributes that are text or `true`, with
+ * values and content on one line, values truncated.
  */
-function toHtmlTag(node: CodeNode, inner: string): string {
-  const name = node.name as string;
+export function toHtmlTag(
+  name: string,
+  attributes: Record<string, unknown>,
+  inner: string,
+): string {
   let open = `<${name}`;
-  for (const attr of node.attributes as JsxAttributes) {
-    if (attr.type === 'mdxJsxExpressionAttribute') continue;
-    if (attr.value == null) {
-      open += ` ${attr.name}`;
-      continue;
-    }
-    let text = (typeof attr.value === 'string' ? attr.value : attr.value.value).replace(
-      /\s+/g,
-      ' ',
-    );
+  for (const key in attributes) {
+    const value = attributes[key];
+    if (value === true) open += ` ${key}`;
+    if (key === 'children' || (typeof value !== 'string' && typeof value !== 'number')) continue;
+    let text = String(value).replace(/\s+/g, ' ');
     if (text.length > 100) text = `${text.slice(0, 100)}…`;
-    open += ` ${attr.name}="${text.replaceAll('&', '&amp;').replaceAll('"', '&quot;')}"`;
+    open += ` ${key}="${text.replaceAll('&', '&amp;').replaceAll('"', '&quot;')}"`;
   }
   const children = inner.replace(/\s+/g, ' ');
   return children ? `${open}>${children}</${name}>` : `${open} />`;

@@ -1,3 +1,4 @@
+import type { MarkdownTarget } from 'fumadocs-core/server';
 import type { HeadingIds } from '../../shared/heading-id';
 import type { MdastVisitorContext } from 'satteri';
 
@@ -77,7 +78,7 @@ export function replaceSource(
   ctx: MdastVisitorContext,
   node: PositionedNode,
   text: Replacement,
-  namespace?: 'search' | 'markdown' | (string & {}),
+  namespace?: MarkdownTarget | (string & {}),
 ): void {
   const range = offsets(node);
   if (range && range.end > range.start)
@@ -165,7 +166,7 @@ export interface Stringifier {
  */
 export function createStringifier(
   ctx: MdastVisitorContext,
-  namespace?: 'search' | 'markdown' | (string & {}),
+  namespace?: MarkdownTarget | (string & {}),
   expression: Stringifier['expression'] = (_, fallback) => fallback,
 ): Stringifier {
   const source = ctx.source + (ctx.data._embeddedSource ?? '');
