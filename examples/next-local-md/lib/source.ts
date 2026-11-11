@@ -1,5 +1,5 @@
 import { lucideIconsPlugin } from 'fumadocs-core/source/lucide-icons';
-import { docsContentRoute, docsImageRoute, docsRoute } from './shared';
+import { docsRoute } from './shared';
 import { localMd } from '@fumadocs/local-md';
 import { dynamicLoader, llms } from 'fumadocs-core/source';
 
