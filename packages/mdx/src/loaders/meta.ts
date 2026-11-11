@@ -114,7 +114,10 @@ export function createMetaLoader(
         readStaticParams: (file) => readStaticParams(dir, file, compiler.addDependency),
       });
       for (const params of list ?? [])
-        out._dataAt[JSON.stringify(params)] = await core.transformMeta(options, dataAt(params));
+        out._dataAt[JSON.stringify(params)] = await core.transformMeta(options, {
+          ...data,
+          ...dataAt(params),
+        });
       return out;
     };
   }

@@ -59,12 +59,12 @@ function collectNames(node: unknown, out: Set<string>) {
  * the params of its folder, and the `staticParams` as a named export or in its data.
  */
 export function metaModule<Meta extends MetaData>({
-  default: data = {} as Meta,
-  staticParams,
+  default: data,
+  staticParams = (data as MetaData | undefined)?.staticParams,
 }: {
   default?: Meta | ((params: Params) => Meta);
   staticParams?: Params[];
 }): { data: Meta; dataAt?: (params: Params) => Meta } {
   if (typeof data === 'function') return { data: { staticParams } as Meta, dataAt: data };
-  return { data: staticParams ? { ...data, staticParams } : data };
+  return { data: { ...data, staticParams } as Meta };
 }

@@ -124,8 +124,8 @@ export const frontmatter = {
   dependencies.length = 0;
   const metaData = await loadMeta(metaFile);
   expect(metaData._dataAt).toEqual({
-    '{"framework":"next"}': { title: 'Next.js' },
-    '{"framework":"waku"}': { title: 'Waku' },
+    '{"framework":"next"}': { staticParams: expect.any(Array), title: 'Next.js' },
+    '{"framework":"waku"}': { staticParams: expect.any(Array), title: 'Waku' },
   });
   expect(dependencies).toContain(path.join(await fs.realpath(dir), 'names.ts'));
   const badFile = path.join(dir, 'bad/meta.ts');
