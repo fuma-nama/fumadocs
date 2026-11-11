@@ -122,7 +122,12 @@ export function TOCPopover({
       {...container}
       className={cn('max-md:layout:[--fd-toc-popover-height:--spacing(10)]', container?.className)}
     >
-      <header ref={ref} className="bg-fd-card">
+      <header
+        ref={ref}
+        // not the page banner
+        role="none"
+        className="bg-fd-card"
+      >
         <CollapsibleTrigger
           {...trigger}
           className={cn(

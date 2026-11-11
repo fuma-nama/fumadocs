@@ -146,6 +146,8 @@ function PageTOCPopoverPhysical({ className, children, ...rest }: ComponentProps
       >
         <header
           ref={ref}
+          // not the page banner
+          role="none"
           className={cn(
             'absolute w-full bottom-0 border rounded-xl transition-colors bg-fd-secondary text-fd-secondary-foreground backdrop-blur-sm',
             open && 'shadow-lg bg-fd-popover/80 text-fd-popover-foreground',
