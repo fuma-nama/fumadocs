@@ -3,7 +3,6 @@ import { defineMdastPlugin } from 'satteri';
 import { offsets, type PositionedNode } from './stringifier';
 import { stringifyHeadingId } from '../../shared/heading-id';
 import { createCodeOutput, esmScope } from './utils';
-import { isStaticOutput } from '../../shared/show';
 
 export interface LLMsOptions {
   /**
@@ -35,7 +34,6 @@ export function remarkLlms({
 }: LLMsOptions = {}): MdastPluginEntry {
   const factory = () => {
     let out: ReturnType<typeof createCodeOutput>;
-    let isStatic = false;
     /** the code of the ESM nodes */
     const esm: string[] = [];
 
@@ -46,8 +44,11 @@ export function remarkLlms({
       name: 'remark-llms',
       options: { position: true },
       before(_root, ctx) {
-        isStatic = isStaticOutput(ctx.data, output && output === 'string');
-        out = createCodeOutput(ctx, { target: 'markdown', isStatic });
+        out = createCodeOutput(ctx, {
+          target: 'markdown',
+          runtime: ctx.data.unstable_runtimeOutputs === true,
+          keep: output === 'function' ? () => true : undefined,
+        });
       },
       mdxjsEsm(node) {
         edit(node);
@@ -57,7 +58,7 @@ export function remarkLlms({
       toml: drop,
       heading(node, ctx) {
         const id = (node.data as { hProperties?: { id?: string } } | undefined)?.hProperties?.id;
-        const code = !isStatic && id !== undefined && ctx.data._headingIds?.[id];
+        const code = id !== undefined && ctx.data._headingIds?.[id];
         stringifyHeadingId(
           out.s,
           node,
@@ -73,13 +74,11 @@ export function remarkLlms({
         const text = out.s.stringify(root).trim();
         const value = text ? `${text}\n` : '';
 
-        if (isStatic) ctx.data.markdown ??= out.toStatic(value);
+        ctx.data.markdown ??= out.toStatic(value);
         if (as)
           ctx.prependChild(root, {
             type: 'mdxjsEsm',
-            value: isStatic
-              ? `export const ${as} = ${out.toConcat(value)};`
-              : out.markdownCode(as, value, esmScope(esm)),
+            value: out.markdownCode(as, value, esmScope(esm), output === 'function'),
           });
       },
     });

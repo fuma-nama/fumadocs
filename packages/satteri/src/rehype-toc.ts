@@ -1,9 +1,9 @@
 import type { HastPluginInput, HastVisitorContext } from 'satteri';
 import type { Element, ElementContent } from 'hast';
 import { esmScope, handleTag, jsxToSource, parse } from '@/utils';
-import { componentsCode, jsxComponents, listCode } from '../../shared/code-output';
+import { componentsCode, hasCode, jsxComponents, listCode } from '../../shared/code-output';
 import { textParts } from '../../shared/heading-id';
-import { isStaticOutput, showConditions } from '../../shared/show';
+import { showConditions } from '../../shared/show';
 import type { ExtraPluginHooks } from './compile';
 
 export interface RehypeTocOptions {
@@ -36,7 +36,7 @@ const HeadingTags = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
 
 declare module 'satteri' {
   interface DataMap {
-    /** the code of the items, exported by `compileMdx`. In data mode, a function of the props with text titles */
+    /** the code of the items, a function of the props when they read props. In data mode, with text titles */
     _rehypeTocCode?: string;
   }
 }
@@ -46,6 +46,9 @@ export function rehypeToc({ exportToc = true }: RehypeTocOptions = {}): HastPlug
   const resolved = exportToc === true ? { as: 'esm' as const, name: 'toc' } : exportToc;
   const plugin: HastPluginInput & ExtraPluginHooks = () => {
     const items: { code: string; when: string[] }[] = [];
+    let runtime = false;
+    /** whether an item reads the props of a page, beside its conditions */
+    let dynamic = false;
     /** the components of titles */
     const components = new Set<string>();
     /** the code of the ESM nodes */
@@ -53,6 +56,7 @@ export function rehypeToc({ exportToc = true }: RehypeTocOptions = {}): HastPlug
     return {
       name: 'rehype-toc',
       before(_root: unknown, ctx: HastVisitorContext) {
+        runtime = ctx.data.unstable_runtimeOutputs === true;
         if (resolved && resolved.as === 'data') ctx.data.rehypeToc ??= [];
       },
       after(_root: unknown, ctx: HastVisitorContext) {
@@ -64,11 +68,7 @@ export function rehypeToc({ exportToc = true }: RehypeTocOptions = {}): HastPlug
           'props.components ?? {}',
           '((props) => props.children)',
         );
-        ctx.data._rehypeTocCode = listCode(
-          items,
-          resolved.as === 'esm' && isStaticOutput(ctx.data),
-          declaration,
-        );
+        ctx.data._rehypeTocCode = listCode(items, dynamic, declaration);
       },
       mdxjsEsm(node: { value: string }) {
         esm.push(node.value);
@@ -106,16 +106,16 @@ export function rehypeToc({ exportToc = true }: RehypeTocOptions = {}): HastPlug
               ? element.properties['data-fd-step']
               : undefined;
           const when = showConditions(element, ctx);
+          const fromCode = runtime && hasCode(element);
+          if (code || fromCode) dynamic = true;
           let titleCode: string;
           if (resolved.as === 'esm') {
             titleCode = jsxToSource({ type: 'root', children });
-            if (/<[A-Z_$]/.test(titleCode)) jsxComponents(parse(titleCode), components);
+            if (runtime && /<[A-Z_$]/.test(titleCode)) jsxComponents(parse(titleCode), components);
           } else {
             // titles in data are text
-            let dynamic = false;
-            const parts = textParts(children, () => (dynamic = true));
-            titleCode = dynamic
-              ? `[${parts}].filter((v) => typeof v === "string" || typeof v === "number").join("")`
+            titleCode = fromCode
+              ? `[${textParts(children, () => undefined)}].filter((v) => typeof v === "string" || typeof v === "number").join("")`
               : JSON.stringify(title);
           }
           let obj = `{title: ${titleCode},`;

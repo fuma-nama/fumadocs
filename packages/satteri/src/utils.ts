@@ -104,7 +104,7 @@ type CodeNode = PositionedNode & {
 /** the shared code output, on the stringifier of Sätteri */
 export function createCodeOutput(
   ctx: MdastVisitorContext,
-  options: Pick<CodeOutputOptions<CodeNode, Stringifier>, 'target' | 'isStatic' | 'keep'>,
+  options: Pick<CodeOutputOptions<CodeNode, Stringifier>, 'target' | 'runtime' | 'keep'>,
 ) {
   return createSharedCodeOutput<CodeNode, Stringifier>({
     ...options,

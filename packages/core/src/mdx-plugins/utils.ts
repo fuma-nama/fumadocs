@@ -88,7 +88,7 @@ function fill(node: object, expressions: Expression[]) {
 /** the shared code output, on the stringifier of mdast: estree expressions of replacements go in by placeholders */
 export function createCodeOutput(
   file: VFile,
-  options: Pick<CodeOutputOptions<Nodes, Stringifier>, 'target' | 'isStatic' | 'keep'>,
+  options: Pick<CodeOutputOptions<Nodes, Stringifier>, 'target' | 'runtime' | 'keep'>,
 ) {
   const expressions: Expression[] = [];
   let stringifier: Stringifier;

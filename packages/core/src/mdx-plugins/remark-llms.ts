@@ -1,5 +1,4 @@
 import type { Transformer } from 'unified';
-import { isStaticOutput } from '../../../shared/show';
 import { createCodeOutput, esmScope, isJsxElement } from './utils';
 import type { Nodes, Root } from 'mdast';
 import type { MdxJsxFlowElement, MdxJsxTextElement } from 'mdast-util-mdx';
@@ -40,12 +39,14 @@ export interface LLMsOptions {
   /**
    * Form of the export:
    *
-   * - `string`: the output Markdown, authored expressions keep their source.
+   * - `string`: the output Markdown, JSX elements keep their source. For a content source that renders pages for
+   *   props, a document that reads props (authored expressions, `<show>`, heading IDs from code) exports a component
+   *   instead, render it like `function`.
    * - `function`: a component, render it with `renderToMarkdown` from `fumadocs-core/server`: JSX elements are kept
    *   as JSX, receiving their original props and resolving like in the content, a component can call `asMarkdown()`
    *   to define its own Markdown form.
    *
-   * @defaultValue `function` for a content source that renders pages for props, otherwise `string`
+   * @defaultValue `string`
    */
   output?: 'string' | 'function';
 
@@ -61,7 +62,8 @@ type JsxElement = MdxJsxFlowElement | MdxJsxTextElement;
  * Generate Markdown for LLMs from the authored source, other plugins can edit it with
  * `replaceSource()` from `fumadocs-core/mdx-plugins/stringifier`.
  *
- * Authored expressions and the branches of `<show>` are rendered from code.
+ * Authored expressions keep their source, unless the content source renders pages for props: they are values, and
+ * only the branches of `<show>` that show are kept.
  */
 export function remarkLLMs({
   as = '_markdown',
@@ -72,8 +74,11 @@ export function remarkLLMs({
   filterElement,
 }: LLMsOptions = {}): Transformer<Root, Root> {
   return (tree, file) => {
-    const isStatic = isStaticOutput(file.data, output && output === 'string');
-    const out = createCodeOutput(file, { target: 'markdown', isStatic });
+    const out = createCodeOutput(file, {
+      target: 'markdown',
+      runtime: file.data.unstable_runtimeOutputs === true,
+      keep: output === 'function' ? () => true : undefined,
+    });
     const { s } = out;
 
     const visit = (nodes: Nodes[]) => {
@@ -89,7 +94,7 @@ export function remarkLLMs({
           s.replace(node, (s) => s.inner(node));
         } else if (node.type === 'heading') {
           const id = node.data?.hProperties?.id ?? undefined;
-          const code = !isStatic && id !== undefined && file.data._headingIds?.[id];
+          const code = id !== undefined && file.data._headingIds?.[id];
           stringifyHeadingId(
             s,
             node,
@@ -107,11 +112,7 @@ export function remarkLLMs({
     const value = text ? `${text}\n` : '';
 
     tree.children.unshift(
-      out.esm(
-        isStatic
-          ? `export const ${as} = ${out.toConcat(value)};`
-          : out.markdownCode(as, value, esmScope(tree)),
-      ),
+      out.esm(out.markdownCode(as, value, esmScope(tree), output === 'function')),
     );
     if (_data) file.data.markdown = out.toStatic(value);
   };

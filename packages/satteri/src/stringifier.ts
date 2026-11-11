@@ -1,4 +1,3 @@
-import type { MarkdownTarget } from 'fumadocs-core/server';
 import type { HeadingIds } from '../../shared/heading-id';
 import type { MdastVisitorContext } from 'satteri';
 
@@ -37,10 +36,9 @@ declare module 'satteri' {
     _embeddedSource?: string;
     _embeds?: Embed[];
     /**
-     * Set by a content source that renders pages for props, like path params: the outputs of the Fumadocs plugins
-     * (the TOC, structured data, processed Markdown) are functions of the props, to call with the props of a page.
-     *
-     * The source decides for all of its documents, so the shape of an export never depends on the content.
+     * Set by a content source that renders pages for props, like path params: authored expressions are values and
+     * `<show>` is allowed. The outputs of the Fumadocs plugins (the TOC, structured data, processed Markdown) that
+     * read props are functions of the props, to call with the props of a page.
      */
     unstable_runtimeOutputs?: boolean;
     /** @internal set by `remarkShow` on a document with branches, which only props tell apart */
@@ -79,7 +77,7 @@ export function replaceSource(
   ctx: MdastVisitorContext,
   node: PositionedNode,
   text: Replacement,
-  namespace?: MarkdownTarget | (string & {}),
+  namespace?: 'search' | 'markdown' | (string & {}),
 ): void {
   const range = offsets(node);
   if (range && range.end > range.start)
@@ -153,8 +151,8 @@ export interface Stringifier {
   /** whether `range` is output inside `outer`, embedded sources are output in place of the node they replace */
   within: (range: Range, outer: Range) => boolean;
   /**
-   * Markdown evaluated where the output is exported, like the URL of an imported file. Code that reads `props` makes
-   * the output a function of the props of the page. `fallback` in outputs that can't evaluate it.
+   * Markdown evaluated where the output is exported, like the URL of an imported file. `fallback` in outputs that
+   * can't evaluate it.
    *
    * @param code - a JS expression
    */
@@ -167,7 +165,7 @@ export interface Stringifier {
  */
 export function createStringifier(
   ctx: MdastVisitorContext,
-  namespace?: MarkdownTarget | (string & {}),
+  namespace?: 'search' | 'markdown' | (string & {}),
   expression: Stringifier['expression'] = (_, fallback) => fallback,
 ): Stringifier {
   const source = ctx.source + (ctx.data._embeddedSource ?? '');

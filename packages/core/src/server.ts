@@ -1,13 +1,9 @@
 import { AsyncLocalStorage } from 'node:async_hooks';
 import { isValidElement, type ElementType, type ReactElement, type ReactNode } from 'react';
 import { markdownTable } from '@/mdx-plugins/stringifier';
-import { toHtmlTag } from '../../shared/code-output';
 
 /**
  * Render React trees (RSC) into Markdown.
- *
- * A tree renders for a target: `markdown` is the document for agents, `search` the text of search records, which has
- * the text of links, no images or code blocks, and components without a Markdown form as HTML tags.
  *
  * Calling `asMarkdown()` is the opt-in: components that never call it during their render are kept as JSX syntax
  * (`<Card title="...">children</Card>`) rather than converted HTML, and so are client components, which never execute
@@ -25,11 +21,7 @@ import { toHtmlTag } from '../../shared/code-output';
 type Props = Record<string, unknown> & { children?: ReactNode };
 type Component = (props: unknown) => ReactNode | Promise<ReactNode>;
 
-/** what a tree renders into Markdown for */
-export type MarkdownTarget = 'markdown' | 'search';
-
 interface State {
-  target: MarkdownTarget;
   /** inside `<pre>`: emit raw text only */
   pre: boolean;
   /** inside inline content (paragraph, heading, table cell) */
@@ -39,7 +31,7 @@ interface State {
   list?: { ordered: boolean; index: number };
 }
 
-const ROOT_STATE: State = { target: 'markdown', pre: false, inline: false, heading: false };
+const ROOT_STATE: State = { pre: false, inline: false, heading: false };
 
 const CLIENT_REFERENCE = Symbol.for('react.client.reference');
 const REACT_LAZY = Symbol.for('react.lazy');
@@ -49,7 +41,6 @@ const REACT_FORWARD_REF = Symbol.for('react.forward_ref');
 /** one frame per component render, so the walker knows which component opted in */
 interface Frame {
   optedIn: boolean;
-  target: MarkdownTarget;
 }
 
 const NOT_OPTED_IN = Symbol();
@@ -58,25 +49,21 @@ const store = new AsyncLocalStorage<Frame>({
 });
 
 /**
- * The target that the current component is being rendered into Markdown for, calling it opts the component in.
+ * Whether the current component is being rendered into Markdown, calling it opts the component in.
  */
-export function asMarkdown(): MarkdownTarget | false {
+export function asMarkdown(): boolean {
   const frame = store.getStore();
   if (!frame) return false;
 
   frame.optedIn = true;
-  return frame.target;
+  return true;
 }
 
 /**
  * Render a React tree into a Markdown document.
  */
-export async function renderToMarkdown(
-  node: ReactNode,
-  { target = 'markdown' }: { target?: MarkdownTarget } = {},
-): Promise<string> {
-  // a search record is inline content, so its elements stay on one line like search dialogs show them
-  return collapse(await walk(node, { ...ROOT_STATE, target, inline: target === 'search' })).trim();
+export async function renderToMarkdown(node: ReactNode): Promise<string> {
+  return collapse(await walk(node, ROOT_STATE)).trim();
 }
 
 /**
@@ -85,7 +72,7 @@ export async function renderToMarkdown(
 export async function renderRoute(element: ReactElement): Promise<string | undefined> {
   if (typeof element.type !== 'function') return;
 
-  const result = await optIn(element.type as Component, element.props, 'markdown');
+  const result = await optIn(element.type as Component, element.props);
   if (result !== NOT_OPTED_IN) return renderToMarkdown(result);
 }
 
@@ -183,10 +170,8 @@ function dedent(strings: readonly string[]): string[] {
   return out.split(PLACEHOLDER);
 }
 
-/** for the target of the component that renders it */
 async function render(node: ReactNode): Promise<string> {
-  const target = store.getStore()?.target ?? 'markdown';
-  return collapse(await walk(node, { ...ROOT_STATE, target }));
+  return collapse(await walk(node, ROOT_STATE));
 }
 
 /**
@@ -210,9 +195,8 @@ function collapse(text: string): string {
 async function optIn(
   component: Component,
   props: unknown,
-  target: MarkdownTarget,
 ): Promise<ReactNode | typeof NOT_OPTED_IN> {
-  const frame: Frame = { optedIn: false, target };
+  const frame: Frame = { optedIn: false };
 
   try {
     const result = await store.run(frame, () => component(props));
@@ -268,7 +252,7 @@ async function element(type: unknown, props: Props, state: State): Promise<strin
 }
 
 async function component(fn: Component, props: Props, state: State): Promise<string> {
-  const result = await optIn(fn, props, state.target);
+  const result = await optIn(fn, props);
   if (result === NOT_OPTED_IN) return jsx(componentName(fn), props, state);
   return walk(result, state);
 }
@@ -322,12 +306,9 @@ const MAX_ATTRIBUTE_LENGTH = 1024;
 const PRESENTATIONAL_PROPS = new Set(['children', 'className', 'style', 'tabIndex']);
 
 /**
- * Serialize a component without a Markdown form: as JSX syntax, or for search as an HTML tag like search dialogs render.
+ * Serialize a component as JSX syntax, for components without a Markdown form.
  */
 async function jsx(name: string, props: Props, state: State): Promise<string> {
-  if (state.target === 'search')
-    return toHtmlTag(name, props, (await walk(props.children, { ...state, inline: true })).trim());
-
   let open = `<${name}`;
   for (const key in props) {
     if (PRESENTATIONAL_PROPS.has(key)) continue;
@@ -405,7 +386,6 @@ const DROP_TAGS = new Set([
 
 async function host(tag: string, props: Props, state: State): Promise<string> {
   if (DROP_TAGS.has(tag)) return '';
-  if (state.target === 'search' && (tag === 'img' || tag === 'pre')) return '';
 
   if (state.pre) {
     if (tag === 'br') return '\n';
@@ -431,8 +411,8 @@ async function host(tag: string, props: Props, state: State): Promise<string> {
     case 'a': {
       const href = typeof props.href === 'string' ? props.href : undefined;
       const c = await children({ inline: true });
-      // anchor links in headings (e.g. fumadocs headings), search has the text of links
-      if (!href || state.target === 'search' || (state.heading && href.startsWith('#'))) return c;
+      // anchor links in headings (e.g. fumadocs headings)
+      if (!href || (state.heading && href.startsWith('#'))) return c;
       const text = c.trim();
       return text.length === 0 ? `<${href}>` : `[${text}](${href})`;
     }

@@ -1,4 +1,3 @@
-import type { MarkdownTarget } from '@/server';
 import type { Expression } from 'estree-jsx';
 import type { Nodes } from 'mdast';
 import type { VFile } from 'vfile';
@@ -13,10 +12,9 @@ export type Replacement = string | ((s: Stringifier) => string);
 declare module 'vfile' {
   interface DataMap {
     /**
-     * Set by a content source that renders pages for props, like path params: the outputs of the Fumadocs plugins
-     * (the TOC, structured data, processed Markdown) are functions of the props, to call with the props of a page.
-     *
-     * The source decides for all of its documents, so the shape of an export never depends on the content.
+     * Set by a content source that renders pages for props, like path params: authored expressions are values and
+     * `<show>` is allowed. The outputs of the Fumadocs plugins (the TOC, structured data, processed Markdown) that
+     * read props are functions of the props, to call with the props of a page.
      */
     unstable_runtimeOutputs?: boolean;
     /** @internal set by `remarkShow` on a document with branches, which only props tell apart */
@@ -83,7 +81,7 @@ export function replaceSource(
   file: VFile,
   node: Nodes,
   text: Replacement,
-  namespace?: MarkdownTarget | (string & {}),
+  namespace?: 'search' | 'markdown' | (string & {}),
 ): void {
   getDocument(file).replacements.push({ node, text, namespace });
 }
@@ -153,7 +151,7 @@ export interface Stringifier {
  */
 export function createStringifier(
   file: VFile,
-  namespace?: MarkdownTarget | (string & {}),
+  namespace?: 'search' | 'markdown' | (string & {}),
   expression: Stringifier['expression'] = (_, fallback) => fallback,
 ): Stringifier {
   const doc = documents.get(file);

@@ -1,5 +1,6 @@
-import { listCode, type CodeNode } from './code-output';
+import { listCode, type CodeNode, type CodeOutput, type CodeStringifier } from './code-output';
 import { headingIdRegex, type HeadingIds } from './heading-id';
+import { toStructuredData } from './structured-data';
 
 interface Range {
   start: number;
@@ -20,19 +21,12 @@ interface StructuredHeading {
   content: string;
 }
 
-/** the code output of a compiler for search, as the records use it */
-interface RecordOutput<N> {
-  s: {
-    source: string;
-    inner(node: N): string;
-    stringify(node: N): string;
-    within(range: Range, outer: Range): boolean;
-  };
-  range(node: N): Range | undefined;
-  edit(node: N): void;
-  toStatic(text: string): string;
-  toCode(text: string): string;
-  componentsCode(scope: () => ReadonlySet<string>, from: string): string;
+type StructuredRecord = (StructuredHeading | StructuredContent) & { when: string[] };
+
+/** the stringifier of a code output for search, as the records use it */
+interface RecordStringifier<N> extends CodeStringifier<N> {
+  stringify(node: N): string;
+  within(range: Range, outer: Range): boolean;
 }
 
 interface StructuredRecordsOptions<N> {
@@ -46,23 +40,25 @@ interface StructuredRecordsOptions<N> {
   headingIds?: HeadingIds;
 }
 
-/**
- * The records of structured data of a document, in document order: slices of its Markdown for search, see the
- * `target` of the code output.
- */
-export function createStructuredRecords<N extends CodeNode>(
-  out: RecordOutput<N>,
+/** The records of structured data of a document, in document order: slices of its Markdown for search. */
+export function createStructuredRecords<N extends CodeNode, S extends RecordStringifier<N>>(
+  out: CodeOutput<N, S>,
   { isType, mdxTypes, tableRow, headingIds }: StructuredRecordsOptions<N>,
 ) {
   const { s } = out;
-  const records: ((StructuredHeading | StructuredContent) & { when: string[] })[] = [];
+  const records: StructuredRecord[] = [];
   /** records are stringified after the edits of every node */
   const pending: (() => void)[] = [];
   let covered: Range | undefined;
   let tables = 0;
+  /** whether a record reads the props of a page */
+  let dynamic = false;
 
-  const push = (item: StructuredHeading | StructuredContent, when: string[] = []) =>
+  const push = (item: StructuredHeading | StructuredContent, when: string[] = []) => {
+    if (when.length > 0 || ('code' in item && item.code) || out.readsProps(item.content))
+      dynamic = true;
     records.push({ ...item, when });
+  };
   const cells = (row: { children: N[] }) => {
     const cells: string[] = [];
     for (const cell of row.children) cells.push(s.inner(cell).trim());
@@ -82,7 +78,6 @@ export function createStructuredRecords<N extends CodeNode>(
      */
     collect(node: N, when: () => string[]): void {
       const { type } = node;
-      const isElement = type === 'mdxJsxFlowElement' || type === 'mdxJsxTextElement';
       out.edit(node);
 
       const { data } = node as {
@@ -107,7 +102,13 @@ export function createStructuredRecords<N extends CodeNode>(
       if (!range || (covered && s.within(range, covered))) return;
       // an element on one line has inline content, recorded like a paragraph
       const line = s.source.indexOf('\n', range.start);
-      if (isElement && line !== -1 && line < range.end && !mdxTypes(node)) return;
+      if (
+        (type === 'mdxJsxFlowElement' || type === 'mdxJsxTextElement') &&
+        line !== -1 &&
+        line < range.end &&
+        !mdxTypes(node)
+      )
+        return;
       covered = range;
       const conditions = when();
 
@@ -146,12 +147,17 @@ export function createStructuredRecords<N extends CodeNode>(
       for (const record of records) contents.push(out.toStatic(record.content));
       return toStructuredData(records, contents);
     },
-    /** the code of the records that show for the props of a page, a function of the props: see `structured-data.ts` */
-    toCode(scope: () => ReadonlySet<string>): string {
+    /**
+     * The code of the records that show for the props of a page, a function of the props: see `structured-data.ts`.
+     * `undefined` when the records don't read props.
+     */
+    toCode(scope: () => ReadonlySet<string>): string | undefined {
       flush();
+      if (!dynamic) return;
+
       const items: { code: string; when: string[] }[] = [];
       for (const record of records) {
-        let code = `{content: ${out.toCode(record.content)}`;
+        let code = `{content: ${out.toText(record.content)}`;
         if ('id' in record) code += `, id: ${record.code ?? JSON.stringify(record.id)}`;
         else {
           if (record.heading !== undefined) code += `, heading: ${JSON.stringify(record.heading)}`;
@@ -159,32 +165,8 @@ export function createStructuredRecords<N extends CodeNode>(
         }
         items.push({ code: `${code}}`, when: record.when });
       }
-      // the MDX components are page props, like in the content
-      return listCode(items, false, out.componentsCode(scope, 'props.components'));
+      // the JSX of authored code refers to MDX components, which are page props like in the content
+      return listCode(items, true, out.componentsCode(scope, 'props.components ?? {}'));
     },
   };
-}
-
-/**
- * Structured data from its records in document order and their content as text: content goes under the last heading
- * before it, records are trimmed and empty ones are left out.
- */
-export function toStructuredData(
-  records: readonly { id?: string; heading?: string; table?: string }[],
-  contents: string[],
-) {
-  const data = {
-    contents: [] as StructuredContent[],
-    headings: [] as { id: string; content: string }[],
-  };
-  let heading: string | undefined;
-  for (let i = 0; i < records.length; i++) {
-    const { id, table, heading: own = heading } = records[i];
-    const content = contents[i].trim();
-    if (id !== undefined) heading = id;
-    if (!content) continue;
-    if (id !== undefined) data.headings.push({ id, content });
-    else data.contents.push(table ? { heading: own, content, table } : { heading: own, content });
-  }
-  return data;
 }

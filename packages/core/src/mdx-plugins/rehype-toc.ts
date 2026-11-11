@@ -3,8 +3,8 @@ import type { Root, Element, Nodes } from 'hast';
 import { toEstree } from 'hast-util-to-estree';
 import type { Expression, JSXElement } from 'estree-jsx';
 import { esmScope, handleTag, toEsm } from './utils';
-import { componentsCode, jsxComponents, listCode } from '../../../shared/code-output';
-import { isStaticOutput, walkBranches } from '../../../shared/show';
+import { componentsCode, hasCode, jsxComponents, listCode } from '../../../shared/code-output';
+import { walkBranches } from '../../../shared/show';
 
 export interface RehypeTocOptions {
   /**
@@ -107,12 +107,15 @@ export function rehypeToc(
 
     if (exportToc === false) return;
     if (exportToc.as === 'esm') {
+      const runtime = file.data.unstable_runtimeOutputs === true;
       const titles: Expression[] = [];
       const list: { code: string; when: string[] }[] = [];
       const components = new Set<string>();
+      /** whether an item reads the props of a page, beside its conditions */
+      let dynamic = false;
       for (const { title, when, url, depth, _step } of items) {
         const { children } = toJsx(title);
-        jsxComponents(children, components);
+        if (runtime) jsxComponents(children, components);
         const i = titles.push({
           type: 'JSXFragment',
           openingFragment: { type: 'JSXOpeningFragment' },
@@ -120,6 +123,7 @@ export function rehypeToc(
           children,
         });
         const id = file.data._headingIds?.[url.slice(1)];
+        if (runtime && (id || hasCode(title))) dynamic = true;
         let code = `{depth: ${depth}, url: ${id ? `"#" + ${id}` : JSON.stringify(url)}`;
         if (_step !== undefined) code += `, _step: ${_step}`;
         list.push({ code: `${code}, title: _fumadocs${i - 1}}`, when });
@@ -132,10 +136,7 @@ export function rehypeToc(
         '((props) => props.children)',
       );
       tree.children.push(
-        toEsm(
-          `export const ${exportToc.name} = ${listCode(list, isStaticOutput(file.data), declaration)};`,
-          titles,
-        ),
+        toEsm(`export const ${exportToc.name} = ${listCode(list, dynamic, declaration)};`, titles),
       );
     } else {
       file.data.rehypeToc = items.map(({ when: _, ...item }) => item);
