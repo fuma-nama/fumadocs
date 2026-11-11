@@ -4,22 +4,30 @@ import type { DataStore } from 'astro/loaders';
 import type { AstroComponentFactory } from 'astro/runtime/server/index.js';
 import type { MDXComponents } from 'mdx/types';
 import { root } from 'virtual:fumadocs/config';
-import type { MetaData, PageData, Params, StaticSource, VirtualFile } from 'fumadocs-core/source';
+import type { MetaData, PageData, StaticSource, VirtualFile } from 'fumadocs-core/source';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
-import { renderMarkdown } from './mdx-runtime';
-import { dataKey, dynamicPageKey, type FumadocsData } from './shared';
+import type { TOCItemType } from 'fumadocs-core/toc';
+import { pageOutputs, recordsOf, renderMarkdown, type PageOutputs } from './mdx-runtime';
+import { readStructuredData, renderStructuredData } from '../../shared/structured-data';
+import { dataKey } from './shared';
 
 /** an entry of Astro content collections */
 type DataEntry = NonNullable<ReturnType<DataStore['get']>>;
 
 /** an entry of `pageLoader()` */
 export interface PageEntry extends Pick<DataEntry, 'id' | 'filePath' | 'body'> {
-  data: PageData;
+  data: PageData & {
+    /** for a dynamic file with frontmatter in code, the data of each listed params, by the params as JSON */
+    _frontmatterAt?: Record<string, PageData>;
+  };
 }
 
 /** an entry of `metaLoader()` */
 export interface MetaEntry extends Pick<DataEntry, 'id'> {
-  data: MetaData;
+  data: MetaData & {
+    /** for a meta module of a dynamic folder, its data in the folder of each listed params, by the params as JSON */
+    _dataAt?: Record<string, MetaData>;
+  };
 }
 
 /** a link in the content of a page */
@@ -27,9 +35,11 @@ export interface ExtractedReference {
   href: string;
 }
 
-export interface DocData extends Pick<FumadocsData, 'toc' | 'structuredData'> {
+export interface DocData {
   /** the MDX content, as an Astro component */
   body: AstroComponentFactory;
+  toc: TOCItemType[];
+  structuredData: StructuredData;
 }
 
 export type AstroPageData<Entry extends PageEntry = PageEntry> = Entry['data'] & {
@@ -50,8 +60,9 @@ export type AstroPageData<Entry extends PageEntry = PageEntry> = Entry['data'] &
 
 export interface GetTextOptions {
   /**
-   * MDX components for JSX elements in the output, only available with `output: 'function'` in `includeProcessedMarkdown`.
+   * MDX components for JSX elements in the output, when processed Markdown is a component.
    *
+   * @deprecated pass them as page props, with the `props` option of `getPage()`
    * @defaultValue the MDX components of the collection
    */
   components?: MDXComponents;
@@ -81,73 +92,87 @@ export function toFumadocsSource<Page extends PageEntry, Meta extends MetaEntry>
   options?: Pick<StaticSource, 'baseDir'>,
 ): StaticSource<AstroSourceConfig<Page, Meta>> {
   const files: VirtualFile<AstroSourceConfig<Page, Meta>>[] = [];
-  /** the ID of a dynamic file -> the entries of its pages, by their params as JSON */
-  const dynamicPages = new Map<string, Map<string, Page>>();
   for (const entry of pages) {
-    const page = (entry.data as Record<string, unknown>)[dynamicPageKey] as
-      | { id: string; params: Params }
-      | undefined;
-    if (page) {
-      let entries = dynamicPages.get(page.id);
-      if (!entries) dynamicPages.set(page.id, (entries = new Map()));
-      entries.set(JSON.stringify(page.params), entry);
-      continue;
-    }
-
+    const { data } = entry;
+    const { _frontmatterAt: at } = data;
     files.push({
       type: 'page',
       path: entry.id,
       // `filePath` is relative to the project root
       absolutePath: entry.filePath && path.resolve(root, entry.filePath),
-      data: pageData(entry),
-      dataAt(params) {
-        const page = dynamicPages.get(entry.id)?.get(JSON.stringify(params));
-        if (!page) throw new Error(`"${entry.id}" isn't compiled for ${JSON.stringify(params)}`);
-        return pageData(page, params);
-      },
+      data: pageData(entry, data),
+      dataAt: (params, custom) =>
+        custom
+          ? pageData(entry, custom.data, { ...params, ...custom.props })
+          : // the frontmatter in code of each params
+            pageData(entry, at ? { ...data, ...at[JSON.stringify(params)] } : data, params),
     });
   }
-  for (const entry of meta) files.push({ type: 'meta', path: entry.id, data: entry.data });
+  for (const { id, data } of meta) {
+    const { _dataAt: at } = data;
+    files.push({
+      type: 'meta',
+      path: id,
+      data,
+      dataAt: at && ((params) => ({ ...data, ...at[JSON.stringify(params)] })),
+    });
+  }
   return { files, baseDir: options?.baseDir };
 }
 
-/** @param params - for a page of a dynamic file, the params its content reads as props when rendering */
-function pageData<Entry extends PageEntry>(entry: Entry, params?: Params): AstroPageData<Entry> {
-  async function compile(): Promise<{ body: AstroComponentFactory; data: FumadocsData }> {
-    // `render()` is typed by `astro sync` of projects
+/** the data of a page with its content, which renders for props: the path params and custom props */
+function pageData<Data extends PageEntry['data']>(
+  entry: PageEntry,
+  data: Data,
+  props?: Record<string, unknown>,
+): Data & AstroPageData {
+  async function compile(): Promise<{ Content: AstroComponentFactory; outputs: PageOutputs }> {
+    // `render()` is typed by `astro sync` of projects, it imports the module that registers the outputs
     const { Content, remarkPluginFrontmatter } = await render(entry);
-    const data: FumadocsData | undefined = remarkPluginFrontmatter[dataKey];
-    if (!data)
+    const outputs = pageOutputs.get(remarkPluginFrontmatter[dataKey]);
+    if (!outputs)
       throw new Error(
         `"${entry.filePath ?? entry.id}" is not processed by Fumadocs, which only processes the MDX files of its \`collections\`.`,
       );
-    const body: AstroComponentFactory = params
-      ? Object.assign(
-          (...[result, props, slots]: Parameters<AstroComponentFactory>) =>
-            Content(result, { ...params, ...props }, slots),
-          Content,
-        )
-      : Content;
-    return { body, data };
+    return { Content, outputs };
   }
 
   return {
-    ...entry.data,
+    ...data,
     async load() {
-      const { body, data } = await compile();
-      return { body, toc: data.toc, structuredData: data.structuredData };
+      const { Content, outputs } = await compile();
+      return {
+        body:
+          props && Object.keys(props).length > 0
+            ? Object.assign(
+                (...[result, own, slots]: Parameters<AstroComponentFactory>) =>
+                  Content(result, { ...props, ...own }, slots),
+                Content,
+              )
+            : Content,
+        toc: outputs.toc(props ?? {}),
+        // read without rendering, `structuredData()` renders it
+        get structuredData() {
+          return readStructuredData(recordsOf(outputs), props ?? {});
+        },
+      };
     },
     async structuredData() {
-      return (await compile()).data.structuredData;
+      const { outputs } = await compile();
+      // with the MDX components of the collection by default
+      return renderStructuredData(recordsOf(outputs), { components: outputs.components, ...props });
     },
     async getText(type, options) {
       if (type === 'raw') return entry.body ?? '';
-      // compiling registers the function output
-      const { markdown, markdownId } = (await compile()).data;
-      if (markdownId !== undefined)
-        return renderMarkdown(markdownId, { ...params, components: options?.components });
+      const { markdown, components } = (await compile()).outputs;
       if (markdown === undefined) throw new NoProcessedMarkdownError();
-      return markdown;
+      if (typeof markdown === 'string') return markdown;
+      // the components of the page props, then those of the collection
+      return renderMarkdown(markdown, {
+        components,
+        ...props,
+        ...(options?.components && { components: options.components }),
+      });
     },
   };
 }

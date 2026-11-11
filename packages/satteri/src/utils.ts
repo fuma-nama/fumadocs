@@ -1,19 +1,19 @@
 import { jsx, toJs } from 'estree-util-to-js';
 import type { Element, Nodes, Root, RootContent } from 'hast';
 import { defaultHandlers, type Handle, toEstree } from 'hast-util-to-estree';
-import { defineHastPlugin, type MdastNode } from 'satteri';
+import { defineHastPlugin, type MdastNode, type MdastVisitorContext } from 'satteri';
+import type { Program } from 'estree-jsx';
+import { parse as parseCode } from 'yuku-parser';
 import type {
   rehypeCodeFromHighlighter,
   RehypeCodeFromHighlighterOptions,
 } from 'fumadocs-core/mdx-plugins/rehype-code.core';
-
-export interface JsxElementNode {
-  name?: string | null;
-  attributes: (
-    | { type: 'mdxJsxAttribute'; name: string; value?: string | { value: string } | null }
-    | { type: 'mdxJsxExpressionAttribute'; value: string }
-  )[];
-}
+import {
+  createCodeOutput as createSharedCodeOutput,
+  moduleScope,
+  type CodeOutputOptions,
+} from '../../shared/code-output';
+import { createStringifier, type PositionedNode } from './stringifier';
 
 /**
  * Flatten a node's text content by walking it in JavaScript.
@@ -44,14 +44,24 @@ export function handleTag(value: string, tag: string): string | false {
 
 type JsxElement = Parameters<typeof defaultHandlers.mdxJsxFlowElement>[0];
 
-/** Sätteri's MDX expressions have no estree, elements using them are skipped */
-const element: Handle = (node: JsxElement, state) => {
-  for (const attr of node.attributes) {
-    const value = attr.type === 'mdxJsxAttribute' ? attr.value : attr;
-    if (typeof value === 'object' && value && !value.data?.estree) return;
-  }
-  return defaultHandlers.mdxJsxFlowElement(node, state);
-};
+/** Sätteri's MDX expressions have no estree, the attributes using them are parsed from their code */
+const element: Handle = (node: JsxElement, state) =>
+  defaultHandlers.mdxJsxFlowElement(
+    {
+      ...node,
+      attributes: node.attributes.map((attr) => {
+        if (attr.type === 'mdxJsxExpressionAttribute')
+          return { ...attr, data: { estree: parse(`({${attr.value}})`) } };
+        if (typeof attr.value !== 'object' || !attr.value) return attr;
+        return { ...attr, value: { ...attr.value, data: { estree: parse(attr.value.value) } } };
+      }),
+    },
+    state,
+  );
+
+/** Sätteri's MDX expressions have no estree, parsed from their code */
+const expression: Handle = (node: { type: 'mdxTextExpression'; value: string }, state) =>
+  defaultHandlers.mdxTextExpression({ ...node, data: { estree: parse(node.value) } }, state);
 
 /** raw HTML of Markdown is kept as text */
 const raw: Handle = (node: { value: string }, state) =>
@@ -60,10 +70,47 @@ const raw: Handle = (node: { value: string }, state) =>
 export function jsxToSource(hast: Nodes): string {
   const estree = toEstree(hast, {
     elementAttributeNameCase: 'react',
-    handlers: { mdxJsxFlowElement: element, mdxJsxTextElement: element, raw },
+    handlers: {
+      mdxJsxFlowElement: element,
+      mdxJsxTextElement: element,
+      mdxTextExpression: expression,
+      raw,
+    },
   });
   const source = toJs(estree, { handlers: jsx }).value.trim();
   return source.endsWith(';') ? source.slice(0, -1) : source;
+}
+
+export function parse(code: string): Program {
+  return parseCode(code, { lang: 'jsx', preserveParens: false }).program as Program;
+}
+
+/** read the names declared by the ESM nodes of a document, from their code */
+export function esmScope(esm: readonly string[]): () => Set<string> {
+  return () => {
+    const scope = new Set<string>();
+    for (const code of esm) moduleScope(parse(code).body, scope);
+    return scope;
+  };
+}
+
+type CodeNode = PositionedNode & {
+  type: string;
+  name?: unknown;
+  attributes?: unknown;
+  value?: unknown;
+};
+
+/** the shared code output, on the stringifier of Sätteri */
+export function createCodeOutput(
+  ctx: MdastVisitorContext,
+  options: Pick<CodeOutputOptions<CodeNode>, 'target' | 'isStatic' | 'keep'>,
+) {
+  return createSharedCodeOutput<CodeNode>({
+    ...options,
+    stringifier: (expression) => createStringifier(ctx, options.target, expression),
+    parse,
+  });
 }
 
 // Shiki writes literal HTML attribute names into hast `properties`. The

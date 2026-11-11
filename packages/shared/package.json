@@ -3,12 +3,16 @@
   "private": true,
   "type": "module",
   "dependencies": {
-    "fuma-cli": "^0.3.3"
+    "fuma-cli": "^0.3.4"
   },
   "devDependencies": {
     "@fumadocs/cli": "workspace:*",
+    "@fumadocs/local-content": "workspace:*",
+    "@standard-schema/spec": "^1.1.0",
     "@types/node": "^26.6.6",
+    "@types/react": "^19.3.0",
     "fuma-translate": "^1.0.2",
+    "fumadocs-core": "workspace:*",
     "tsconfig": "workspace:*",
     "tsdown": "0.23.7",
     "typescript": "^7.0.2"

@@ -12,6 +12,7 @@ import { createNodeEvaluator, MacroCollector } from '@/macro/eval';
 import { createMacroMatcher, MacroModuleId, resolveMacroOptions } from '@/macro/options';
 import { macroFilter } from '@/bun';
 import { docs as macroDocs, docsAsync as macroDocsAsync } from '@/runtime/macro';
+import { loader } from 'fumadocs-core/source';
 import { createMdxLoader } from '@/loaders/mdx';
 import { buildConfig } from '@/config/build';
 import { createCore } from '@/core';
@@ -557,8 +558,8 @@ describe('runtime', () => {
       entries: {
         './index.mdx': {
           default: () => null,
-          toc: [],
-          structuredData: { headings: [], contents: [] },
+          toc: () => [],
+          structuredData: () => [],
           frontmatter: { title: 'Hello' },
         },
       },
@@ -574,6 +575,11 @@ describe('runtime', () => {
 
     // eagerly loaded entries offer `preload()` as a no-op, for compatibility with async collections
     await expect(collection.getPage('index.mdx')!.preload()).resolves.toBeUndefined();
+    // without props, the content is the compiled component
+    expect(collection.getPage('index.mdx', {})!.body).toBe(collection.getPage('index.mdx')!.body);
+    // with props, an element of the compiled component
+    const element = collection.getPage('index.mdx', { version: 'v1' })!.body({}) as ReactElement;
+    expect(element.type).toBe(collection.getPage('index.mdx')!.body);
 
     const source = collection.toFumadocsSource();
     expect(source.files).toHaveLength(2);
@@ -583,18 +589,18 @@ describe('runtime', () => {
     let loads = 0;
     const compiled = {
       default: () => null,
-      toc: [],
-      structuredData: { headings: [], contents: [] },
+      toc: () => [],
+      structuredData: () => [],
       frontmatter: { title: 'Hello' },
     };
 
     const collection = await macroDocsAsync({
       base: 'content/docs',
       head: {
-        './index.mdx': { title: 'Hello' },
+        './[version].mdx': { title: 'Hello', staticParams: [{ version: 'v1' }] },
       },
       body: {
-        './index.mdx': async () => {
+        './[version].mdx': async () => {
           loads++;
           return compiled;
         },
@@ -602,7 +608,7 @@ describe('runtime', () => {
       meta: {},
     });
 
-    const page = collection.getPage('index.mdx')!;
+    const page = collection.getPage('[version].mdx')!;
     expect(page).toMatchObject({ title: 'Hello' });
 
     // memoized, so it can be consumed like `use(page.load())` in render
@@ -615,5 +621,21 @@ describe('runtime', () => {
     const loaded = await page.load();
     expect(loaded.body).toBe(compiled.default);
     expect(loads).toBe(1);
+
+    // the page of some params is created once, so it renders with what was preloaded
+    const v1 = collection.getPage('[version].mdx', { version: 'v1' })!;
+    expect(collection.getPage('[version].mdx', { version: 'v1' })).toBe(v1);
+    const source = loader({ source: collection.toFumadocsSource(), baseUrl: '/' });
+    expect(source.getPage(['v1'])!.data).toBe(v1);
+    await v1.preload();
+    expect(v1.body({})).toBeTruthy();
+    expect(loads).toBe(2);
+
+    // once loaded, it renders without suspending again, with its content loaded once
+    const v2 = collection.getPage('[version].mdx', { version: 'v2' })!;
+    await v2.load();
+    expect(v2.body({})).toBeTruthy();
+    await v2.structuredData();
+    expect(loads).toBe(3);
   });
 });

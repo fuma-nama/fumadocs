@@ -2,7 +2,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { cac } from 'cac';
-import picocolors from 'picocolors';
+import { styleText } from 'node:util';
 import { createOrLoadConfig, initConfig } from '@/config';
 import { type JsonTreeNode, treeToJavaScript, treeToMdx } from '@/commands/file-tree';
 import { runTree } from '@/utils/file-tree/run-tree';
@@ -18,9 +18,9 @@ cli.option('--config <string>', 'path to the config file');
 
 cli.command('', 'init a `cli.json` config file').action(async () => {
   if (await initConfig()) {
-    console.log(picocolors.green('Initialized a `./cli.json` config file.'));
+    console.log(styleText('green', 'Initialized a `./cli.json` config file.'));
   } else {
-    console.log(picocolors.redBright('A config file already exists.'));
+    console.log(styleText('redBright', 'A config file already exists.'));
   }
 });
 
@@ -117,6 +117,6 @@ try {
   cli.parse(process.argv, { run: false });
   await cli.runMatchedCommand();
 } catch (e) {
-  console.error(picocolors.redBright(e instanceof Error ? e.message : String(e)));
+  console.error(styleText('redBright', e instanceof Error ? e.message : String(e)));
   process.exit(1);
 }

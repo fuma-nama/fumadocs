@@ -1,6 +1,6 @@
 import path from 'node:path';
 import type { Code } from 'mdast';
-import { defineMdastPlugin } from 'satteri';
+import { defineMdastPlugin, type MdastVisitorContext, type MdxJsxFlowElement } from 'satteri';
 import {
   addNextRewrites,
   addReactRouterRoute,
@@ -31,11 +31,22 @@ import { sourceRef } from '@fumadocs/cli/features/utils';
 import { component as webmcp } from '@fumadocs/cli/features/webmcp';
 import type {} from '@fumadocs/satteri/remark-show';
 import { type Framework, frameworks } from './framework';
+import { inFramework } from './remark-framework-links';
+
+/** the Markdown of a source range, a function renders code like expressions of `props` */
+type Replacement =
+  | string
+  | ((s: { expression: (code: string, fallback: string) => string }) => string);
 
 declare module 'satteri' {
   interface DataMap {
     /** Markdown source edits read by `remark-llms` */
-    _sourceEdits?: { start: number; end: number; text: string }[];
+    _sourceEdits?: {
+      start: number;
+      end: number;
+      /** a function to render code, an expression of `props` in pages that read them */
+      text: Replacement;
+    }[];
   }
 }
 
@@ -93,13 +104,13 @@ export default defineConfig({
 `;
 
 /** builds the documents of a custom search integration in the `static.json` route */
-const customDocuments = (async: boolean) => `import { source } from '@/lib/source';
+const customDocuments = `import { source } from '@/lib/source';
 
 async function getDocuments() {
   const documents = [];
   for (const page of source.getPages()) {
     documents.push({
-      structured: ${async ? 'await page.data.structuredData()' : 'page.data.structuredData'},
+      structured: await page.data.structuredData(),
       url: page.url,
       title: page.data.title,
       description: page.data.description,
@@ -280,7 +291,7 @@ await sync(client, records);
     ]);
 
     addGroup('search/custom', framework, [
-      [routeFile, staticRoute(framework, customDocuments(source.async), 'getDocuments()')],
+      [routeFile, staticRoute(framework, customDocuments, 'getDocuments()')],
       ...registration,
       [
         'scripts/sync-content.ts',
@@ -318,17 +329,38 @@ export function remarkFeature() {
       if (node.name !== 'feature') return;
       const key = ctx.textContent(node).trim();
       const group = groups[key];
-      const framework = ctx.data.params?.framework;
       const codes: Code[] = [];
+      let nodes: (Code | MdxJsxFlowElement)[] = codes;
+      /** the Markdown of the code blocks */
+      let markdown = '';
 
-      if (group) {
+      if (group && inFramework(ctx)) {
+        // the files of each framework in a branch, the page shows those of its framework
+        const branches = new Map<string, Code[]>();
         for (const file of group) {
-          if (framework && framework !== file.framework) continue;
-          const meta = framework
-            ? `tab="${file.title}"`
-            : `tab="${names.get(file.framework)}" title="${file.title}"`;
-          codes.push(toCode(file.title, meta, file.value));
+          let list = branches.get(file.framework);
+          if (!list) branches.set(file.framework, (list = []));
+          list.push(toCode(file.title, `tab="${file.title}"`, file.value));
         }
+        nodes = [];
+        const byFramework: Record<string, string> = {};
+        for (const [framework, list] of branches) {
+          nodes.push(show(`props.framework === ${JSON.stringify(framework)}`, list));
+          byFramework[framework] = toMarkdown(list);
+          markdown += (markdown ? '\n\n' : '') + byFramework[framework];
+        }
+        const code = `${JSON.stringify(byFramework)}[props.framework] ?? ""`;
+        edit(ctx, node, (s) => s.expression(code, markdown));
+      } else if (group) {
+        for (const file of group)
+          codes.push(
+            toCode(
+              file.title,
+              `tab="${names.get(file.framework)}" title="${file.title}"`,
+              file.value,
+            ),
+          );
+        edit(ctx, node, toMarkdown(codes));
       } else {
         const value = files[key];
         if (value === undefined) throw new Error(`unknown feature file: ${key}`);
@@ -339,19 +371,42 @@ export function remarkFeature() {
             meta.push(`${attr.name}="${attr.value}"`);
         }
         codes.push(toCode(key, meta.join(' '), value));
+        edit(ctx, node, toMarkdown(codes));
       }
 
-      const start = node.position?.start.offset;
-      const end = node.position?.end.offset;
-      if (start !== undefined && end !== undefined) {
-        const blocks: string[] = [];
-        for (const code of codes)
-          blocks.push(`\`\`\`${code.lang} ${code.meta}\n${code.value}\n\`\`\``);
-        (ctx.data._sourceEdits ??= []).push({ start, end, text: blocks.join('\n\n') });
-      }
-      ctx.replaceNode(node, codes);
+      ctx.replaceNode(node, nodes);
     },
   });
+}
+
+/** replace the Markdown of a node, for `remark-llms` */
+function edit(ctx: MdastVisitorContext, node: MdxJsxFlowElement, text: Replacement) {
+  const start = node.position?.start.offset;
+  const end = node.position?.end.offset;
+  if (start !== undefined && end !== undefined)
+    (ctx.data._sourceEdits ??= []).push({ start, end, text });
+}
+
+function toMarkdown(codes: Code[]): string {
+  const blocks: string[] = [];
+  for (const code of codes) blocks.push(`\`\`\`${code.lang} ${code.meta}\n${code.value}\n\`\`\``);
+  return blocks.join('\n\n');
+}
+
+/** a `<show>` branch, Remark Show turns it into a condition checked when rendering */
+function show(when: string, children: Code[]): MdxJsxFlowElement {
+  return {
+    type: 'mdxJsxFlowElement',
+    name: 'show',
+    attributes: [
+      {
+        type: 'mdxJsxAttribute',
+        name: 'when',
+        value: { type: 'mdxJsxAttributeValueExpression', value: when },
+      },
+    ],
+    children,
+  };
 }
 
 function toCode(file: string, meta: string, value: string): Code {

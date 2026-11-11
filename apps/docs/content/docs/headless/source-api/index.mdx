@@ -122,6 +122,37 @@ source.getPage(['slug', 'of', 'page']);
 source.getPage(['slug', 'of', 'page'], 'locale');
 ```
 
+#### Custom Props
+
+Pass props to the content of a page, like a version that the reader picks. The content reads them as `props`, like [path params](/docs/headless/page-conventions#path-params):
+
+```ts
+import { source } from '@/lib/source';
+
+const page = source.getPage(['slug', 'of', 'page'], {
+  props: { version: 'v2' },
+  // with i18n
+  language: 'locale',
+});
+```
+
+The page data is generated with these props, including the content and the table of contents. MDX components are props too. Pass them when processed Markdown should render your components:
+
+```ts
+import { getMDXComponents } from '@/components/mdx';
+
+const page = source.getPage(['slug', 'of', 'page'], {
+  props: { components: getMDXComponents() },
+});
+const markdown = await page.data.getText('processed');
+```
+
+<Callout title="Good to Know">
+
+Search and LLM routes read pages from `getPages()`, which only have their path params. A variant that search or LLMs should see must be a path param.
+
+</Callout>
+
 ### Get Pages
 
 Get a list of page available for locale.

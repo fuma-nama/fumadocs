@@ -1,29 +1,13 @@
-import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
-import type { TOCItemType } from 'fumadocs-core/toc';
-
-/** the key in `remarkPluginFrontmatter` holding {@link FumadocsData} */
+/** the key in `remarkPluginFrontmatter` holding the key of the page in `pageOutputs` of the runtime */
 export const dataKey = '_fumadocs';
 
-export interface FumadocsData {
-  toc: TOCItemType[];
-  structuredData: StructuredData;
-  /** with `includeProcessedMarkdown` */
-  markdown?: string;
-  /** with `output: 'function'`, the key of its function output in `registerMarkdown()` */
-  markdownId?: string;
-}
+/** the query of the module of the frontmatter in code of an MDX file, TypeScript like the ESM of MDX */
+export const frontmatterQuery = '?fumadocs-frontmatter&lang.ts';
 
-export const dynamicPageKey = '_dynamicPage';
+/** the query of a meta module, like `meta.ts`, to find it in the module graph of Vite */
+export const metaQuery = '?fumadocs-meta';
 
-/** a page of a dynamic file is a virtual file next to it, so its relative imports resolve the same */
-export function dynamicPageFile(file: string, params: Record<string, string>): string {
-  return `${file}.${Buffer.from(JSON.stringify(params)).toString('base64url')}.page.mdx`;
-}
-
-export function parseDynamicPageFile(
-  file: string,
-): { file: string; params: Record<string, string> } | undefined {
-  const match = /^(.+\.mdx)\.([\w-]+)\.page\.mdx$/.exec(file);
-  if (match)
-    return { file: match[1], params: JSON.parse(Buffer.from(match[2], 'base64url').toString()) };
+/** whether an MDX file has frontmatter in code, `export const frontmatter = {...}` */
+export function hasFrontmatterCode(source: string): boolean {
+  return /^export const frontmatter\b/m.test(source);
 }

@@ -36,17 +36,19 @@ Run the [command](/docs/cli) below.
 
 Remark Structure is a remark plugin. Fumadocs MDX enables it by default and exports the records as `structuredData`. Pass options with `remarkStructureOptions`.
 
+In Fumadocs MDX, the records are generated with the page props: content inside a [`<show>`](/docs/markdown#show) that isn't rendered is left out, and expressions are replaced by their values. Outside Fumadocs MDX, expressions are kept as source text.
+
 ## Records
 
 Headings, paragraphs, blockquotes, tables and JSX elements are recorded (see `types`):
 
 - Links are replaced by their text, images are removed.
 - A table has a record per row, as a table of its header and that row. The rows share a `table` field.
-- JSX elements are replaced by their content, except those kept as HTML tags by `filterElement`, which search dialogs render as components.
+- JSX elements are replaced by their content, except those that `filterElement` keeps (see [Components](#components)).
 - A JSX element is a record when it has no children (see `mdxTypes`), or fits on one line.
 - Content inside a record isn't recorded again.
 
-By default, `File`, `TypeTable`, `Callout` and `Card` are kept as HTML tags. Change it with `filterElement`:
+In Fumadocs MDX, the plugin keeps the elements of components by default, like `<Callout>` but not `<div>`. Outside Fumadocs MDX, it keeps `File`, `TypeTable`, `Callout` and `Card`. Change it with `filterElement`:
 
 ```ts tab="unified" title="source.config.ts"
 import { defineConfig } from 'fumadocs-mdx/config';
@@ -75,6 +77,30 @@ export default defineConfig({
   },
 });
 ```
+
+## Components
+
+In Fumadocs MDX, a kept JSX element is recorded in one of two forms, depending on how you read the records:
+
+- `page.data.structuredData`: components aren't rendered. The element is kept as an HTML tag, which search dialogs render as a component. With `async` or `dynamic` collections, read it from the loaded page.
+- `await page.data.structuredData()`: components are rendered for the [`search` target](/docs/headless/utils/markdown#targets), and the element is replaced by its Markdown form. Only `async` and `dynamic` collections have this function.
+
+When rendering, a component is looked up like in MDX: first in the imports and declarations of the file, then in the MDX components of the [page props](/docs/headless/source-api#custom-props).
+
+Search reads pages from `getPages()`, which have no custom props. Import or declare a component in the file if search should render it.
+
+A component defines its text for search with [`asMarkdown()`](/docs/headless/utils/markdown#asmarkdown):
+
+```tsx
+import { asMarkdown } from 'fumadocs-core/server';
+
+export function ProductName() {
+  if (asMarkdown()) return 'Fumadocs';
+  return <span className="font-semibold">Fumadocs</span>;
+}
+```
+
+A component without a Markdown form is kept as JSX syntax, like an MDX component that is missing from the page props.
 
 ## Plugins
 

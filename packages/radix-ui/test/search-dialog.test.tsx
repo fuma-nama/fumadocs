@@ -53,3 +53,26 @@ test.each([
     expect(html).toContain('Result of first');
   },
 );
+
+test.each([
+  ['Radix UI', radix.SearchDialog, radix.SearchDialogClose],
+  ['Base UI', BaseSearchDialog, base.SearchDialogClose],
+] as const)(
+  '%s: the close button keeps its visible text in its accessible name',
+  (_, SearchDialog, SearchDialogClose) => {
+    const html = renderToStaticMarkup(
+      <FrameworkProvider
+        usePathname={() => '/'}
+        useParams={() => ({})}
+        useRouter={() => ({ push: vi.fn(), refresh: vi.fn() })}
+      >
+        <SearchDialog open onOpenChange={() => {}} search="" onSearchChange={() => {}}>
+          <SearchDialogClose />
+        </SearchDialog>
+      </FrameworkProvider>,
+    );
+
+    expect(html).toContain('ESC<span class="sr-only">Close Search</span>');
+    expect(html).not.toContain('aria-label="Close Search"');
+  },
+);

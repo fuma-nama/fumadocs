@@ -1,7 +1,7 @@
 import type { CAC, Command } from 'cac';
 import { cancel, confirm, intro, log, note, outro, select, spinner } from '@clack/prompts';
 import { isCancel } from '@/utils/prompt';
-import picocolors from 'picocolors';
+import { styleText } from 'node:util';
 import type { RegistryConnector } from 'fuma-cli/registry/connector';
 import { createOrLoadConfig } from '@/config';
 import { loadProject } from '@/project';
@@ -61,7 +61,7 @@ function register(command: Command, list: AnyFeature[]) {
 }
 
 async function run(feature: AnyFeature, options: CommandOptions, connector: RegistryConnector) {
-  intro(picocolors.bgBlack(picocolors.whiteBright(feature.title)));
+  intro(styleText(['bgBlack', 'whiteBright'], feature.title));
   const config = await createOrLoadConfig(options.config);
   const project = await loadProject(config);
   log.info(`${project.framework}${project.static ? ' (static)' : ''}, ${project.packageManager}`);
@@ -124,5 +124,5 @@ async function run(feature: AnyFeature, options: CommandOptions, connector: Regi
     spin.error(e instanceof Error ? e.message : String(e));
     process.exit(1);
   }
-  outro(picocolors.bold(picocolors.greenBright('Done')));
+  outro(styleText(['bold', 'greenBright'], 'Done'));
 }

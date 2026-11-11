@@ -151,84 +151,11 @@ Fumadocs UI renders a [dropdown](/docs/ui/layouts/docs#tabs-groups) for each roo
 
 </Callout>
 
-## Path Params
-
-A folder or file named `[name]` is a dynamic segment. The meta file of a dynamic folder lists the values in `staticParams`, and Fumadocs generates a page for every value:
-
-```json title="[framework]/meta.json"
-{
-  "title": "Framework",
-  "root": true,
-  "staticParams": [{ "framework": "waku" }, { "framework": "astro" }]
-}
-```
-
-| path (relative to content folder) | slugs                                       |
-| --------------------------------- | ------------------------------------------- |
-| `./[framework]/deploy.mdx`        | `['waku', 'deploy']`, `['astro', 'deploy']` |
-
-Each page is compiled once per param value. The content reads the params as `props.framework` and can branch on them with [`<show>`](/docs/markdown#show). In loader code, the params are in `page.params`.
-
-The meta file of `[framework]` applies to every generated folder (`waku`, `astro`). A `[name]` segment whose meta file has no `staticParams` stays a literal folder name.
-
-### Page Params
-
-A page can also list `staticParams` in its frontmatter. When a page and its folder both list the same param name, the page is generated only for values that appear in both lists.
-
-```mdx title="[framework]/fumadocs-mdx.mdx"
----
-title: Fumadocs MDX
-staticParams:
-  - framework: waku
----
-```
-
-The page only exists for `waku`, at `/docs/waku/fumadocs-mdx`.
-
-### Data in Code
-
-Frontmatter and meta files written in YAML or JSON are the same for every param value. To set a different title or description for each value, like a title that names the framework, write them in code. Fumadocs MDX and [local Markdown](/docs/integrations/content/local-md) sources support it.
-
-A meta file can be a module (`meta.ts` or `meta.js`). In a dynamic folder, the default export is a function that receives the params, and `staticParams` is a named export:
-
-```ts title="[framework]/meta.ts"
-const names = { waku: 'Waku', astro: 'Astro' };
-
-export const staticParams = [{ framework: 'waku' }, { framework: 'astro' }];
-
-export default ({ framework }: { framework: keyof typeof names }) => ({
-  title: names[framework],
-  root: true,
-});
-```
-
-An MDX page can export `frontmatter` in code. The export is merged over the YAML frontmatter, and the page reads its params as `props`:
-
-```mdx title="[framework]/deploy.mdx"
----
-title: Deploy
----
-
-export const frontmatter = {
-  description: props.framework === 'astro' ? 'Deploy with an adapter.' : 'Deploy your docs.',
-};
-```
-
-`staticParams` stays in YAML frontmatter, because the loader reads it before the export runs.
-
-### Static Paths
-
-A file at a literal path overrides the generated page for that value. `astro/deploy.mdx` overrides the `astro` page of `[framework]/deploy.mdx`, and `astro/meta.json` overrides the meta file of the `astro` folder.
-
-With [i18n](#i18n-routing), files of a locale take priority over those of its fallback locale: `astro/deploy.cn.mdx`, then `[framework]/deploy.cn.mdx`, then `astro/deploy.mdx`.
-
-A localized page, like `deploy.cn.mdx`, reads `staticParams` from `meta.cn.json` before `meta.json`. With the `dir` parser, each language folder lists its own `staticParams`.
-
 ## Meta
 
 Customize folders by creating a `meta.json` file in the folder.
 
-```json title="meta.json"
+```json tab="meta.json"
 {
   "title": "Display Name",
   "icon": "MyIcon",
@@ -236,6 +163,17 @@ Customize folders by creating a `meta.json` file in the folder.
   "defaultOpen": true
 }
 ```
+
+```ts tab="meta.ts"
+export default {
+  title: 'Display Name',
+  icon: 'MyIcon',
+  pages: ['index', 'getting-started'],
+  defaultOpen: true,
+};
+```
+
+When your content source supports it, you can write meta files in code (`meta.ts` or `meta.js`), with the data as default export.
 
 | name          | description                                  |
 | ------------- | -------------------------------------------- |
@@ -336,7 +274,7 @@ export const i18n: I18nConfig = {
 
   <Tab>
 
-    Add Markdown/meta files for different languages by attending `.{locale}` to your file name, like:
+    Add Markdown/meta files for different languages by appending `.{locale}` to your file name, like:
 
     <Files>
       <Folder name="content/docs" defaultOpen>
@@ -372,3 +310,74 @@ export const i18n: I18nConfig = {
   </Tab>
 
 </Tabs>
+
+## Path Params
+
+A folder named `[name]` is generated for each value of the param. List the values in `staticParams` of its meta file:
+
+<Files>
+  <Folder name="content/docs" defaultOpen>
+    <Folder name="[framework]" defaultOpen>
+      <File name="meta.json" />
+      <File name="deploy.mdx" />
+    </Folder>
+  </Folder>
+</Files>
+
+```json title="[framework]/meta.json"
+{
+  "title": "Framework",
+  "staticParams": [{ "framework": "waku" }, { "framework": "astro" }]
+}
+```
+
+| path (relative to content folder) | slugs                                       |
+| --------------------------------- | ------------------------------------------- |
+| `./[framework]/deploy.mdx`        | `['waku', 'deploy']`, `['astro', 'deploy']` |
+
+The meta file applies to every generated folder. Pages receive their params as [props](/docs/markdown#props), and as `page.params` from `loader()`.
+
+In `meta.ts`, you can export a function of the params instead, with `staticParams` as a named export:
+
+```ts title="[framework]/meta.ts"
+const names = { waku: 'Waku', astro: 'Astro' };
+
+export const staticParams = [{ framework: 'waku' }, { framework: 'astro' }];
+
+export default ({ framework }: { framework: keyof typeof names }) => ({
+  title: names[framework],
+});
+```
+
+<Callout title='Good to Know'>
+
+A `[name]` folder stays a normal folder when nothing lists its values.
+
+</Callout>
+
+### Page Params
+
+A page can also list `staticParams` in its frontmatter. When its folder lists them too, the page is only generated for the values in both.
+
+```mdx title="[framework]/fumadocs-mdx.mdx"
+---
+title: Fumadocs MDX
+staticParams:
+  - framework: waku
+---
+```
+
+### Static Paths
+
+Files at a literal path take priority over generated ones. For example, `astro/deploy.mdx` replaces the `astro` page of `[framework]/deploy.mdx`. The same applies to meta files.
+
+### Localized Pages
+
+With [i18n](#i18n-routing), the files of a locale take priority over those of its fallback locale. For `/cn/docs/astro/deploy`, the first existing file is used:
+
+1. `astro/deploy.cn.mdx`
+2. `[framework]/deploy.cn.mdx`
+3. `astro/deploy.mdx`
+4. `[framework]/deploy.mdx`
+
+Localized pages read `staticParams` from `meta.cn.json` first. With the `dir` parser, each language folder lists its own values.

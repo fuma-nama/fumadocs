@@ -3,7 +3,9 @@ import { DevalueError, stringify } from 'devalue';
 import type { MDXComponents } from 'mdx/types';
 import type { ElementType, ReactNode } from 'react';
 import { Fragment, jsx, jsxs } from 'react/jsx-runtime';
+import type { TOCItemType } from 'fumadocs-core/toc';
 import type { IslandNode } from './island';
+import type { StructuredRecords } from '../../shared/structured-data';
 
 /*
  * The runtime of compiled MDX files. It never imports the source of pages: MDX modules importing it
@@ -108,28 +110,34 @@ interface MarkdownProps {
 /** the function output of `remarkLlms()` */
 type Render = (props: MarkdownProps) => Output;
 
-/** documents with the function output, by the `markdownId` from the compiler */
-const documents = new Map<string, { render: Render; components?: MDXComponents }>();
-
-/** called by compiled MDX files */
-export function registerMarkdown(id: string, render: Render, components?: MDXComponents) {
-  documents.set(id, { render, components });
+/** the outputs of a compiled page, functions of the params of a page */
+export interface PageOutputs {
+  toc: (props: Record<string, unknown>) => TOCItemType[];
+  structuredData: StructuredRecords;
+  /** with `includeProcessedMarkdown`, a string for static output */
+  markdown?: string | Render;
+  /** the MDX components of the content island */
+  components?: MDXComponents;
 }
+
+/** set by compiled MDX files, by the key in their frontmatter */
+export const pageOutputs = new Map<string, PageOutputs>();
 
 /**
  * Render the function output of a document into Markdown, its components can define their Markdown form with `asMarkdown()`.
  */
-export async function renderMarkdown(id: string, props: MarkdownProps): Promise<string> {
-  const document = documents.get(id);
-  if (!document) throw new Error(`The function output of "${id}" is not registered.`);
-
+export async function renderMarkdown(render: Render, props: MarkdownProps): Promise<string> {
   const { renderToMarkdown } = await import('fumadocs-core/server');
-  return renderToMarkdown(
-    jsx(Markdown, {
-      render: document.render,
-      props: { ...props, components: props.components ?? document.components },
-    }),
-  );
+  return renderToMarkdown(jsx(Markdown, { render, props }));
+}
+
+/** the records of structured data of a document as React nodes, MDX files compile to the JSX runtime of Astro */
+export function recordsOf(outputs: PageOutputs): StructuredRecords {
+  return (props) => {
+    const records = outputs.structuredData(props);
+    for (const record of records) record.content = toReact(record.content as Output);
+    return records;
+  };
 }
 
 function Markdown({ render, props }: { render: Render; props: MarkdownProps }) {

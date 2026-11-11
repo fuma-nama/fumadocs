@@ -6,13 +6,14 @@ import {
   type Source,
   type VirtualFile,
 } from 'fumadocs-core/source';
-import type { MDXProps } from 'mdx/types';
 import type { DocCollection, DocsCollection, MetaCollection } from '@/config';
 import type { StandardSchemaV1 } from '@standard-schema/spec';
 import type { CompiledMDXProperties } from '@/loaders/mdx/build';
+import { bind, browserMethods, defineOutputs, merge, track } from '@/utils/page';
 import type { InternalTypeConfig, DocData, DocMethods, FileInfo, MetaMethods } from './types';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
-import { createElement, use, type FC } from 'react';
+import { renderStructuredData } from '../../../shared/structured-data';
+import { createElement } from 'react';
 
 export type MetaCollectionEntry<Data> = Data & MetaMethods;
 
@@ -33,6 +34,7 @@ export type AsyncDocCollectionEntry<
   TC extends InternalTypeConfig = InternalTypeConfig,
 > = {
   load: () => Promise<DocData & TC['DocData'][Name]>;
+  /** render the structured data, with the MDX components of the page props */
   structuredData: () => Promise<StructuredData>;
 } & DocMethods &
   Frontmatter;
@@ -71,21 +73,8 @@ export type ServerCreate<Config, TC extends InternalTypeConfig = InternalTypeCon
   typeof server<Config, TC>
 >;
 
-function mapDocData(entry: CompiledMDXProperties): DocData {
-  const data: DocData = {
-    body: entry.default,
-    toc: entry.toc,
-    structuredData: entry.structuredData,
-    _exports: entry as unknown as Record<string, unknown>,
-  };
-
-  for (const key of ['lastModified', 'extractedReferences']) {
-    // @ts-expect-error -- handle passthrough properties
-    data[key] = entry[key];
-  }
-
-  return data;
-}
+/** the exports of a lazy entry, loading them doesn't render its outputs */
+type Content = () => Promise<CompiledMDXProperties>;
 
 export function server<Config, TC extends InternalTypeConfig>() {
   function fileInfo(file: string, base: string): FileInfo {
@@ -112,13 +101,13 @@ export function server<Config, TC extends InternalTypeConfig>() {
     > {
       const out = await Promise.all(
         Object.entries(glob).map(async ([k, v]) => {
-          const data: CompiledMDXProperties = typeof v === 'function' ? await v() : v;
-
-          return {
-            ...mapDocData(data),
-            ...(data.frontmatter as object),
-            ...createDocMethods(fileInfo(k, base), () => data),
-          } satisfies DocCollectionEntry;
+          const exports: CompiledMDXProperties = typeof v === 'function' ? await v() : v;
+          // the entry of a file is its page without props
+          return createDocAt<DocCollectionEntry>(
+            { info: fileInfo(k, base), _exports: exports },
+            undefined,
+            exports.frontmatter,
+          );
         }),
       );
 
@@ -137,18 +126,11 @@ export function server<Config, TC extends InternalTypeConfig>() {
       const out = await Promise.all(
         Object.entries(head).map(async ([k, v]) => {
           const data = typeof v === 'function' ? await v() : v;
-          const content = body[k] as () => Promise<CompiledMDXProperties>;
-
-          return {
-            ...data,
-            ...createDocMethods(fileInfo(k, base), content),
-            async load() {
-              return mapDocData(await content());
-            },
-            async structuredData() {
-              return (await content()).structuredData;
-            },
-          } satisfies AsyncDocCollectionEntry;
+          return createDocAt<AsyncDocCollectionEntry>(
+            { info: fileInfo(k, base), _content: body[k] as Content },
+            undefined,
+            data,
+          );
         }),
       );
 
@@ -204,7 +186,7 @@ export function server<Config, TC extends InternalTypeConfig>() {
         toFumadocsSource(options) {
           return toFumadocsSource(this.docs, this.meta, options);
         },
-      } satisfies DocsCollectionEntry;
+      } satisfies DocsCollectionEntry<Name, PageData, MetaData, TC>;
 
       return entry as never;
     },
@@ -264,7 +246,10 @@ export function toFumadocsSource<
       path: baseDir ? PathUtils.joinPath(baseDir, entry.info.path) : entry.info.path,
       absolutePath: entry.info.fullPath,
       data: entry,
-      dataAt: (params) => docAt(entry, params),
+      dataAt: (params, custom) =>
+        custom
+          ? createDocAt(entry, { ...params, ...custom.props }, custom.data)
+          : docAt(entry, params),
     });
   }
 
@@ -274,13 +259,21 @@ export function toFumadocsSource<
       path: baseDir ? PathUtils.joinPath(baseDir, entry.info.path) : entry.info.path,
       absolutePath: entry.info.fullPath,
       data: entry,
-      dataAt: dataAt(entry),
+      dataAt: metaAt(entry),
     });
   }
 
   return {
     files,
   };
+}
+
+/** the data of a meta file in each folder of its params, see the meta loader */
+function metaAt<Meta extends MetaMethods & { _dataAt?: Record<string, MetaData> }>(
+  meta: Meta,
+): ((params: Params) => Meta) | undefined {
+  const { _dataAt: at } = meta;
+  if (at) return (params) => ({ ...meta, ...at[JSON.stringify(params)] });
 }
 
 const docAtCache = new WeakMap<object, Map<string, unknown>>();
@@ -291,68 +284,79 @@ export function docAt<Doc extends DocMethods>(doc: Doc, params: Params): Doc {
   let pages = docAtCache.get(doc);
   if (!pages) docAtCache.set(doc, (pages = new Map()));
   let page = pages.get(key) as Doc | undefined;
-  if (!page) pages.set(key, (page = createDocAt(doc, params, key)));
+  if (!page) {
+    // the frontmatter in code of each params
+    const frontmatter = (doc as { _frontmatterAt?: Record<string, object> })._frontmatterAt?.[key];
+    pages.set(key, (page = createDocAt<Doc>(doc, params, merge(doc, frontmatter))));
+  }
   return page;
 }
 
-/** the data of a meta module in each folder of its params, see the meta loader */
-function dataAt<Meta>(entry: Meta): ((params: Params) => Meta) | undefined {
-  const map = (entry as { _dataAt?: Record<string, Partial<Meta>> })._dataAt;
-  if (map) return (params) => ({ ...entry, ...map[JSON.stringify(params)] });
+type Props = Record<string, unknown>;
+
+/** the data of compiled exports for props, see {@link defineOutputs} */
+function toDocData(
+  exports: CompiledMDXProperties & { lastModified?: Date },
+  props?: Props,
+): DocData {
+  return defineOutputs(
+    {
+      body: bind(exports.default, props),
+      _exports: exports as unknown as Record<string, unknown>,
+      lastModified: exports.lastModified,
+    },
+    exports,
+    props,
+  );
 }
 
-function createDocAt<Doc extends DocMethods>(doc: Doc, params: Params, key: string): Doc {
-  // the content reads the params as props when rendering
-  const bind = (Component: FC<MDXProps>) => (props: MDXProps) =>
-    createElement(Component, { ...params, ...props });
-  function pick(data: { _exports?: Record<string, unknown> }): CompiledMDXProperties {
-    const pages = data._exports?._pages as Record<string, CompiledMDXProperties> | undefined;
-    const page = pages?.[key];
-    if (!page) throw new Error(`"${doc.info.path}" isn't compiled for ${key}`);
-    const { _markdown: markdown } = page;
-    return {
-      ...page,
-      default: bind(page.default),
-      _markdown: typeof markdown === 'function' ? bind(markdown) : markdown,
-    };
+/**
+ * The page of an entry for props, the path params and custom props: its content and outputs render for them.
+ *
+ * @param base - the data of the page, which the content and outputs replace
+ */
+function createDocAt<Doc>(
+  // eager entries have the exports, lazy entries load them
+  doc: Pick<DocMethods, 'info'> & { _exports?: unknown; _content?: Content },
+  props: Props | undefined,
+  base: object,
+): Doc {
+  const { info, _content: content } = doc;
+  if (!content) {
+    const exports = doc._exports as CompiledMDXProperties;
+    return merge(
+      base,
+      toDocData(exports, props),
+      createDocMethods(info, () => exports, props),
+    );
   }
 
-  // the frontmatter in code of each params
-  const frontmatter = (doc as { _frontmatterAt?: Record<string, object> })._frontmatterAt?.[key];
-  // eager entries have the exports, lazy entries load them, the macro has both
-  const { load } = doc as { load?: () => Promise<DocData> };
-  if (!load) {
-    const page = pick(doc as { _exports?: Record<string, unknown> });
-    return {
-      ...doc,
-      ...mapDocData(page),
-      ...frontmatter,
-      ...createDocMethods(doc.info, () => page),
-    };
-  }
-
-  let loaded: CompiledMDXProperties | undefined;
-  let loading: Promise<CompiledMDXProperties> | undefined;
-  let data: Promise<DocData> | undefined;
-  const loadPage = () => (loading ??= load().then((data) => (loaded = pick(data))));
+  let exports: CompiledMDXProperties;
+  let loading: Promise<DocData> | undefined;
+  // memoized and tracked, it can be called in render
+  const load = () => (loading ??= track(content().then((v) => toDocData((exports = v), props))));
   return {
-    ...doc,
-    ...frontmatter,
-    ...createDocMethods(doc.info, loadPage),
-    // memoized like `load()`, it can be called in render
-    load: () => (data ??= loadPage().then(mapDocData)),
-    structuredData: async () => (await loadPage()).structuredData,
-    ...('body' in doc && {
-      preload: () => loadPage().then(() => undefined),
-      // like the body of the macro, it renders synchronously when loaded
-      body: (props: MDXProps) => createElement((loaded ?? use(loadPage())).default, props),
-    }),
-  };
+    ...base,
+    // reading its processed Markdown loads the page too
+    ...createDocMethods(info, () => load().then(() => exports), props),
+    _content: content,
+    load,
+    async structuredData() {
+      await load();
+      const { structuredData } = exports;
+      return typeof structuredData === 'function'
+        ? renderStructuredData(structuredData, props ?? {})
+        : structuredData;
+    },
+    // the entries of the macro render in the browser
+    ...('body' in doc && browserMethods(load)),
+  } as Doc;
 }
 
 function createDocMethods(
   info: FileInfo,
   load: () => CompiledMDXProperties | Promise<CompiledMDXProperties>,
+  props?: Props,
 ): DocMethods {
   return {
     info,
@@ -363,16 +367,17 @@ function createDocMethods(
         return await fs.readFile(info.fullPath, 'utf-8');
       }
 
-      const data = await load();
-      // the dynamic runtime nests extra exports under `_exports`
-      const markdown =
-        data._markdown ??
-        (data as { _exports?: Pick<CompiledMDXProperties, '_markdown'> })._exports?._markdown;
+      const { _markdown: markdown } = await load();
       if (typeof markdown === 'string') return markdown;
       if (markdown) {
-        // a component, generated by `output: 'function'`
         const { renderToMarkdown } = await import('fumadocs-core/server');
-        return renderToMarkdown(createElement(markdown, { components: options?.components }));
+        // the components of the page props, unless passed here
+        return renderToMarkdown(
+          createElement(
+            markdown,
+            options?.components ? { ...props, components: options.components } : props,
+          ),
+        );
       }
 
       throw new Error(
@@ -380,13 +385,13 @@ function createDocMethods(
       );
     },
     async getMDAST() {
-      const data = await load();
+      const { _mdast: mdast } = await load();
 
-      if (!data._mdast)
+      if (!mdast)
         throw new Error(
           'getMDAST() requires `includeMDAST` to be enabled in your collection config.',
         );
-      return JSON.parse(data._mdast);
+      return JSON.parse(mdast);
     },
   };
 }

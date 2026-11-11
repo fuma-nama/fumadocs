@@ -69,21 +69,19 @@ test('buildMDX with importsOnly keeps the imports of includes and plugins', asyn
   });
 
   expect(code).toMatchInlineSnapshot(`
-    "import {Fragment as _Fragment, jsx as _jsx} from "react/jsx-runtime";
-    export let structuredData = {
-      "contents": [{
-        "heading": "title",
-        "content": "> import { Included } from './included';\\n>\\n> Included content."
-      }],
-      "headings": [{
-        "id": "title",
-        "content": "Title"
-      }]
-    };
+    "import {Fragment as _Fragment, jsx as _jsx, jsxs as _jsxs} from "react/jsx-runtime";
+    export const structuredData = props => [{
+      content: "Title",
+      id: "title"
+    }, {
+      content: _jsxs(_Fragment, {
+        children: ["> ", _jsx(Included, {}), "\\n>\\n> Included content."]
+      })
+    }];
     import __img0 from "./image.png";
     import {A} from './a';
     import {Included} from './included';
-    export let toc = [];
+    export const toc = props => [];
     function _createMdxContent(props) {
       return _jsx(_Fragment, {});
     }

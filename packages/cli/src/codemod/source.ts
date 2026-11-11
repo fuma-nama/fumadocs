@@ -1,3 +1,4 @@
+import type { Node } from '@babel/types';
 import { addElements, find, getProperty, type SourceFile } from './shared';
 
 /**
@@ -30,14 +31,15 @@ export function enableProcessedMarkdown(file: SourceFile): boolean {
     return item;
   };
 
-  let options = call.arguments[0];
-  if (!options) {
-    file.s.appendLeft(call.end - 1, `{ ${nest(path)} }`);
+  const first = call.arguments[0];
+  if (!first) {
+    file.s.appendLeft(call.end! - 1, `{ ${nest(path)} }`);
     return true;
   }
+  let options: Node = first;
   for (let i = 0; i < path.length; i++) {
     if (options.type !== 'ObjectExpression') return false;
-    const value = getProperty(options, path[i])?.value;
+    const value: Node | undefined = getProperty(options, path[i])?.value;
     if (!value) {
       addElements(file, options, [nest(path.slice(i))]);
       return true;
@@ -48,7 +50,7 @@ export function enableProcessedMarkdown(file: SourceFile): boolean {
 
   const existing = getProperty(options, 'includeProcessedMarkdown')?.value;
   if (!existing) addElements(file, options, [flag]);
-  else if (existing.type === 'Literal' && existing.value === false)
-    file.s.overwrite(existing.start, existing.end, 'true');
+  else if (existing.type === 'BooleanLiteral' && !existing.value)
+    file.s.overwrite(existing.start!, existing.end!, 'true');
   return true;
 }

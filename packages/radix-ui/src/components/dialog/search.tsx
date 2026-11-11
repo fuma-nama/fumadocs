@@ -286,7 +286,6 @@ export function SearchDialogClose({
   return (
     <button
       type="button"
-      aria-label={t('Close Search', { note: 'aria-label' })}
       onClick={() => onOpenChange(false)}
       className={cn(
         buttonVariants({
@@ -299,6 +298,7 @@ export function SearchDialogClose({
       {...props}
     >
       {children}
+      <span className="sr-only">{t('Close Search', { note: 'aria-label' })}</span>
     </button>
   );
 }

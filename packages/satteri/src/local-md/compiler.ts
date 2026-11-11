@@ -49,7 +49,11 @@ export function createMarkdownCompiler(config: MarkdownCompilerOptions = {}): Ma
         source: input.value,
         filePath: input.path,
         environment: 'runtime',
-        options: { ...options, data: { ...options.data, ...input.data } },
+        // the outputs are rendered for the props of a page
+        options: {
+          ...options,
+          data: { unstable_runtimeOutputs: true, ...options.data, ...input.data },
+        },
       });
 
       return {

@@ -1,3 +1,27 @@
+## @fumadocs/base-ui@16.19.0
+
+### Search Dialog Close Button Name
+
+- `SearchDialogClose` keeps its visible text in its accessible name (e.g. "ESC Close Search"), so voice control users can activate it by the label they see.
+
+### Main Landmark in Spacious and Glass Layouts
+
+- The Spacious and Glass layouts wrap the page content in `<main>`, like the docs, notebook and flux layouts, so pages using them have a main landmark.
+
+### Current Page in the Sidebar
+
+- The active sidebar link has `aria-current="page"`, so screen readers announce which page is the current one. Applies to `SidebarItem`, `SidebarFolderLink` and the Glass layout's sidebar.
+
+### TOC Popover is No Longer a Banner Landmark
+
+- The `<header>` of the mobile TOC popover has `role="none"`, so pages no longer expose a second banner landmark next to the navbar.
+
+## @fumadocs/base-ui@16.18.4
+
+### Links to Tabs and Accordions with Non-ASCII IDs
+
+- `Tabs`, `Accordions` and `TypeTable` decode the URL hash before matching it, so links to an `id` with non-ASCII characters (e.g. `#标签-cpp`) open the tab or accordion.
+
 ## @fumadocs/base-ui@16.18.3
 
 ### GitHub links to bracketed paths

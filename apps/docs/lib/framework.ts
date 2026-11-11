@@ -11,6 +11,11 @@ export type Framework = (typeof frameworks)[number]['value'];
 
 export const defaultFramework: Framework = 'next';
 
+/** the name of a framework, like `Next.js` */
+export function frameworkName(value: string): string | undefined {
+  return frameworks.find((item) => item.value === value)?.name;
+}
+
 export function isFramework(value: unknown): value is Framework {
   return frameworks.some((item) => item.value === value);
 }

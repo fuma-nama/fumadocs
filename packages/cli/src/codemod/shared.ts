@@ -1,4 +1,4 @@
-import { analyze } from 'yuku-analyzer';
+import { parse, type ParserPlugin } from '@babel/parser';
 import type {
   ArrayExpression,
   ExportDefaultDeclaration,
@@ -6,17 +6,13 @@ import type {
   JSXElement,
   JSXOpeningElement,
   Node,
-  NodeOfType,
-  NodeType,
   ObjectExpression,
-  ObjectProperty,
   Program,
-  Span,
-} from '@yuku-toolchain/types';
+} from '@babel/types';
 import MagicString from 'magic-string';
 import fs from 'node:fs/promises';
 
-export type { NodeOfType };
+export type NodeOfType<T extends Node['type']> = Extract<Node, { type: T }>;
 
 export interface SourceFile {
   path: string;
@@ -29,9 +25,18 @@ export interface SourceFile {
 }
 
 export function parseSourceFile(path: string, code: string): SourceFile {
-  const { ast: program, diagnostics } = analyze(code, { path });
-  const error = diagnostics.find((item) => item.severity === 'error');
-  if (error) throw new Error(`Failed to parse ${path}: ${error.message}`);
+  const plugins: ParserPlugin[] = [];
+  if (/\.[cm]?tsx?$/.test(path)) plugins.push('typescript');
+  // `<T>value` is a type assertion in `.ts` files
+  if (!/\.[cm]?ts$/.test(path)) plugins.push('jsx');
+  let program: Program;
+  try {
+    program = parse(code, { sourceType: 'module', plugins }).program;
+  } catch (e) {
+    throw new Error(`Failed to parse ${path}: ${e instanceof Error ? e.message : e}`, {
+      cause: e,
+    });
+  }
   const s = new MagicString(code);
 
   return {
@@ -49,14 +54,15 @@ export async function createSourceFile(path: string): Promise<SourceFile> {
 
 /** the value of a string literal, or a template literal without expressions */
 export function getStringValue(node: Node): string | undefined {
-  if (node.type === 'Literal' && typeof node.value === 'string') return node.value;
+  if (node.type === 'StringLiteral') return node.value;
   if (node.type === 'TemplateLiteral' && node.expressions.length === 0)
     return node.quasis[0].value.cooked ?? undefined;
 }
 
 export function* descendants(node: Node): Generator<Node> {
   for (const key in node) {
-    if (key === 'parent') continue;
+    // positions, parser metadata and attached comments hold no child nodes
+    if (key === 'loc' || key === 'extra' || key.endsWith('Comments')) continue;
     const value = (node as unknown as Record<string, unknown>)[key];
     for (const child of Array.isArray(value) ? value : [value]) {
       if (child && typeof child === 'object' && 'type' in child) {
@@ -67,7 +73,7 @@ export function* descendants(node: Node): Generator<Node> {
   }
 }
 
-export function find<T extends NodeType>(
+export function find<T extends Node['type']>(
   node: Node,
   type: T,
   predicate?: (node: NodeOfType<T>) => boolean,
@@ -91,10 +97,10 @@ export function findJsxElement(file: SourceFile, tagName: string): JSXElement | 
 export function addJsxAttribute(file: SourceFile, element: JSXOpeningElement, attribute: string) {
   const { code, s } = file;
   const anchor = element.attributes.at(-1) ?? element.name;
-  const multiline = code.slice(element.start, element.end).includes('\n');
+  const multiline = code.slice(element.start!, element.end!).includes('\n');
   s.appendLeft(
-    anchor.end,
-    `${multiline ? `\n${lineIndent(code, anchor.start)}` : ' '}${attribute}`,
+    anchor.end!,
+    `${multiline ? `\n${lineIndent(code, anchor.start!)}` : ' '}${attribute}`,
   );
 }
 
@@ -105,10 +111,10 @@ export function prependJsxChildren(file: SourceFile, element: JSXElement, jsx: s
   const { closingElement, openingElement } = element;
   if (!closingElement) return;
   const { code, s } = file;
-  const indent = lineIndent(code, element.start);
-  const prior = dedent(code.slice(openingElement.end, closingElement.start));
+  const indent = lineIndent(code, element.start!);
+  const prior = dedent(code.slice(openingElement.end!, closingElement.start!));
   const body = `${jsx}\n\n${prior}`.replaceAll(/^(?=.)/gm, `${indent}  `);
-  s.overwrite(openingElement.end, closingElement.start, `\n${body}\n${indent}`);
+  s.overwrite(openingElement.end!, closingElement.start!, `\n${body}\n${indent}`);
 }
 
 /**
@@ -118,10 +124,10 @@ export function appendJsxChildren(file: SourceFile, element: JSXElement, jsx: st
   const { closingElement } = element;
   if (!closingElement) return;
   const { code, s } = file;
-  const indent = lineIndent(code, element.start);
+  const indent = lineIndent(code, element.start!);
   const body = jsx.replaceAll(/^(?=.)/gm, `${indent}  `);
   // children end with the indentation of the closing tag
-  s.appendLeft(closingElement.start - indent.length, `${body}\n`);
+  s.appendLeft(closingElement.start! - indent.length, `${body}\n`);
 }
 
 /** trim, and remove the common indentation */
@@ -139,14 +145,21 @@ function dedent(text: string): string {
     .join('\n');
 }
 
-export function getProperty(object: ObjectExpression, name: string): ObjectProperty | undefined {
+/** @param types - `ObjectMethod` for methods like `async rewrites() {}` */
+export function getProperty<T extends 'ObjectProperty' | 'ObjectMethod' = 'ObjectProperty'>(
+  object: ObjectExpression,
+  name: string,
+  types: readonly T[] = ['ObjectProperty' as T],
+): NodeOfType<T> | undefined {
   for (const property of object.properties) {
-    if (property.type !== 'Property') continue;
+    if (property.type === 'SpreadElement' || !types.includes(property.type as T)) continue;
     const { key } = property;
     if (
-      key.type === 'Identifier' ? key.name === name : key.type === 'Literal' && key.value === name
+      key.type === 'Identifier'
+        ? key.name === name
+        : key.type === 'StringLiteral' && key.value === name
     )
-      return property;
+      return property as NodeOfType<T>;
   }
 }
 
@@ -170,7 +183,7 @@ export function addImport(
 
   if (existing && !declaration.default && declaration.named) {
     const imported = new Set<string>();
-    let last: Span | undefined;
+    let last: Node | undefined;
     for (const spec of existing.specifiers) {
       if (spec.type !== 'ImportSpecifier') continue;
       imported.add(spec.local.name);
@@ -178,7 +191,7 @@ export function addImport(
     }
 
     const missing = declaration.named.filter((name) => !imported.has(name));
-    if (last && missing.length > 0) s.appendLeft(last.end, `, ${missing.join(', ')}`);
+    if (last && missing.length > 0) s.appendLeft(last.end!, `, ${missing.join(', ')}`);
     if (last) return;
   }
 
@@ -188,7 +201,7 @@ export function addImport(
   const statement = `import ${parts.join(', ')} from '${declaration.from}';`;
 
   const last = program.body.findLast((node) => node.type === 'ImportDeclaration');
-  if (last) s.appendLeft(last.end, `\n${statement}`);
+  if (last) s.appendLeft(last.end!, `\n${statement}`);
   else s.prepend(`${statement}\n\n`);
 }
 
@@ -209,29 +222,29 @@ export function addElements(file: SourceFile, container: Container, items: strin
   if (items.length === 0) return;
   const { code, s } = file;
   const last = getElements(container).at(-1);
-  const multiline = code.slice(container.start, container.end).includes('\n');
+  const multiline = code.slice(container.start!, container.end!).includes('\n');
 
   if (!last) {
     let inner = items.join(', ');
     // e.g. `defineConfig({})`, properties go on their own lines
     if (container.type === 'ObjectExpression') {
-      const indent = lineIndent(code, container.start);
+      const indent = lineIndent(code, container.start!);
       inner = `${items.map((item) => `\n${indent}  ${item.replaceAll('\n', `\n${indent}  `)},`).join('')}\n${indent}`;
     }
     // `[]` is a zero-length range which cannot be overwritten
-    if (container.end - container.start === 2) s.appendLeft(container.end - 1, inner);
-    else s.overwrite(container.start + 1, container.end - 1, inner);
+    if (container.end! - container.start! === 2) s.appendLeft(container.end! - 1, inner);
+    else s.overwrite(container.start! + 1, container.end! - 1, inner);
     return;
   }
 
   if (!multiline) {
-    s.appendLeft(last.end, items.map((item) => `, ${item}`).join(''));
+    s.appendLeft(last.end!, items.map((item) => `, ${item}`).join(''));
     return;
   }
 
-  const indent = lineIndent(code, last.start);
+  const indent = lineIndent(code, last.start!);
   s.appendLeft(
-    last.end,
+    last.end!,
     items.map((item) => `,\n${indent}${item.replaceAll('\n', `\n${indent}`)}`).join(''),
   );
 }
@@ -251,7 +264,7 @@ export function filterElements<C extends Container>(
   for (const keep of keeps) if (keep) kept++;
   if (kept === elements.length) return;
   if (kept === 0) {
-    s.remove(container.start + 1, container.end - 1);
+    s.remove(container.start! + 1, container.end! - 1);
     return;
   }
 
@@ -264,7 +277,7 @@ export function filterElements<C extends Container>(
     }
     const next = elements[i + 1];
     // remove along with the separator: up to the next item, or from the last kept item
-    if (next) s.remove(element.start, next.start);
-    else s.remove(lastKept!.end, element.end);
+    if (next) s.remove(element.start!, next.start!);
+    else s.remove(lastKept!.end!, element.end!);
   }
 }

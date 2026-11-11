@@ -275,8 +275,8 @@ importers:
         specifier: ^0.8.212
         version: 0.8.212
       fuma-cli:
-        specifier: ^0.3.3
-        version: 0.3.3
+        specifier: ^0.3.4
+        version: 0.3.4
       fumadocs-core:
         specifier: workspace:*
         version: link:../../packages/core
@@ -2253,8 +2253,8 @@ importers:
         specifier: ^7.0.164
         version: 7.0.164(zod@4.6.7)
       fuma-cli:
-        specifier: ^0.3.3
-        version: 0.3.3
+        specifier: ^0.3.4
+        version: 0.3.4
       fumadocs-core:
         specifier: workspace:*
         version: link:../core
@@ -2288,9 +2288,6 @@ importers:
       satteri:
         specifier: ^0.11.7
         version: 0.11.7
-      yaml:
-        specifier: ^2.9.1
-        version: 2.9.1
       yuku-parser:
         specifier: ^0.19.0
         version: 0.19.0
@@ -2420,8 +2417,8 @@ importers:
         specifier: ^19.3.0
         version: 19.3.0(@types/react@19.3.0)
       fuma-cli:
-        specifier: ^0.3.3
-        version: 0.3.3
+        specifier: ^0.3.4
+        version: 0.3.4
       fumadocs-core:
         specifier: workspace:*
         version: link:../core
@@ -2517,8 +2514,8 @@ importers:
         specifier: ^19.3.0
         version: 19.3.0(@types/react@19.3.0)
       fuma-cli:
-        specifier: ^0.3.3
-        version: 0.3.3
+        specifier: ^0.3.4
+        version: 0.3.4
       fumadocs-core:
         specifier: workspace:*
         version: link:../core
@@ -2547,8 +2544,8 @@ importers:
         specifier: 9.6.0
         version: 9.6.0(@babel/runtime@7.29.7)(@types/react@19.3.0)(debug@4.4.3(supports-color@8.1.1))(react@19.3.1)(supports-color@8.1.1)
       fuma-cli:
-        specifier: ^0.3.3
-        version: 0.3.3
+        specifier: ^0.3.4
+        version: 0.3.4
       fumadocs-core:
         specifier: workspace:*
         version: link:../core
@@ -2588,37 +2585,31 @@ importers:
       '@clack/prompts':
         specifier: ^1.8.1
         version: 1.8.1
-      '@yuku-toolchain/types':
-        specifier: ^0.10.2
-        version: 0.10.2
       cac:
         specifier: ^7.1.0
         version: 7.1.0
+      tinyexec:
+        specifier: ^1.3.1
+        version: 1.3.1
+    devDependencies:
+      '@babel/parser':
+        specifier: ^8.1.0
+        version: 8.1.0
+      '@babel/types':
+        specifier: ^8.1.0
+        version: 8.1.0
+      '@types/node':
+        specifier: 26.6.6
+        version: 26.6.6
+      fuma-cli:
+        specifier: ^0.3.4
+        version: 0.3.4
       magic-string:
         specifier: ^1.4.5
         version: 1.4.5
       package-manager-detector:
         specifier: ^1.8.0
         version: 1.9.0
-      picocolors:
-        specifier: ^1.1.1
-        version: 1.1.1
-      tinyexec:
-        specifier: ^1.3.1
-        version: 1.3.1
-      yuku-analyzer:
-        specifier: ^0.10.2
-        version: 0.10.2
-    devDependencies:
-      '@fuma-cli/interactive':
-        specifier: ^0.1.4
-        version: 0.1.4
-      '@types/node':
-        specifier: 26.6.6
-        version: 26.6.6
-      fuma-cli:
-        specifier: ^0.3.3
-        version: 0.3.3
       tsconfig:
         specifier: workspace:*
         version: link:../tsconfig
@@ -2684,6 +2675,12 @@ importers:
       '@fumari/image-size':
         specifier: workspace:^
         version: link:../image-size
+      acorn:
+        specifier: ^8.19.0
+        version: 8.19.0
+      acorn-jsx:
+        specifier: ^5.3.2
+        version: 5.3.2(acorn@8.19.0)
       estree-util-value-to-estree:
         specifier: ^3.5.0
         version: 3.5.0
@@ -2850,9 +2847,6 @@ importers:
       cac:
         specifier: ^7.1.0
         version: 7.1.0
-      picocolors:
-        specifier: ^1.1.1
-        version: 1.1.1
       tinyexec:
         specifier: ^1.3.1
         version: 1.3.1
@@ -2864,8 +2858,8 @@ importers:
         specifier: 26.6.6
         version: 26.6.6
       fuma-cli:
-        specifier: ^0.3.3
-        version: 0.3.3
+        specifier: ^0.3.4
+        version: 0.3.4
       tinyglobby:
         specifier: ^0.2.17
         version: 0.2.17
@@ -3086,8 +3080,8 @@ importers:
         specifier: ^19.3.0
         version: 19.3.0(@types/react@19.3.0)
       fuma-cli:
-        specifier: ^0.3.3
-        version: 0.3.3
+        specifier: ^0.3.4
+        version: 0.3.4
       fumadocs-core:
         specifier: workspace:*
         version: link:../core
@@ -3746,8 +3740,8 @@ importers:
         specifier: ^4.0.1
         version: 4.0.1
       fuma-cli:
-        specifier: ^0.3.3
-        version: 0.3.3
+        specifier: ^0.3.4
+        version: 0.3.4
       fumadocs-core:
         specifier: workspace:*
         version: link:../core
@@ -4161,8 +4155,8 @@ importers:
         specifier: ^19.3.0
         version: 19.3.0(@types/react@19.3.0)
       fuma-cli:
-        specifier: ^0.3.3
-        version: 0.3.3
+        specifier: ^0.3.4
+        version: 0.3.4
       fumadocs-core:
         specifier: workspace:*
         version: link:../core
@@ -4201,8 +4195,8 @@ importers:
         specifier: ^19.3.0
         version: 19.3.0
       fuma-cli:
-        specifier: ^0.3.3
-        version: 0.3.3
+        specifier: ^0.3.4
+        version: 0.3.4
       fumadocs-core:
         specifier: workspace:*
         version: link:../core
@@ -4368,18 +4362,30 @@ importers:
   packages/shared:
     dependencies:
       fuma-cli:
-        specifier: ^0.3.3
-        version: 0.3.3
+        specifier: ^0.3.4
+        version: 0.3.4
     devDependencies:
       '@fumadocs/cli':
         specifier: workspace:*
         version: link:../cli
+      '@fumadocs/local-content':
+        specifier: workspace:*
+        version: link:../local-content
+      '@standard-schema/spec':
+        specifier: ^1.1.0
+        version: 1.1.0
       '@types/node':
         specifier: ^26.6.6
         version: 26.6.6
+      '@types/react':
+        specifier: ^19.3.0
+        version: 19.3.0
       fuma-translate:
         specifier: ^1.0.2
         version: 1.0.2
+      fumadocs-core:
+        specifier: workspace:*
+        version: link:../core
       tsconfig:
         specifier: workspace:*
         version: link:../tsconfig
@@ -4445,8 +4451,8 @@ importers:
         specifier: ^19.3.0
         version: 19.3.0(@types/react@19.3.0)
       fuma-cli:
-        specifier: ^0.3.3
-        version: 0.3.3
+        specifier: ^0.3.4
+        version: 0.3.4
       fumadocs-core:
         specifier: workspace:*
         version: link:../core
@@ -4519,8 +4525,8 @@ importers:
         specifier: ^1.4.0
         version: 1.4.0
       fuma-cli:
-        specifier: ^0.3.3
-        version: 0.3.3
+        specifier: ^0.3.4
+        version: 0.3.4
       fumadocs-core:
         specifier: workspace:*
         version: link:../core
@@ -5106,9 +5112,17 @@ packages:
     resolution: {integrity: sha512-Pb5ijPrZ89GDH8223L4UP8i6QApWxs04RbPQJTeWDV0/keR2E36MeKnyr6LYmUUvqRRI+Iv87SuF1W6ErINzYw==}
     engines: {node: '>=6.9.0'}
 
+  '@babel/helper-string-parser@8.0.8':
+    resolution: {integrity: sha512-fVM+gSuKbdv9cpmyRNh5EvsDHUZCdxQH3FdnFKSkNYHpbsn95bbrxm+ES3MVeQjcqwi2O5ur/DjLfmTQaO60ng==}
+    engines: {node: ^22.18.0 || >=24.11.0}
+
   '@babel/helper-validator-identifier@7.29.7':
     resolution: {integrity: sha512-qehxGkRj55h/ff8EMaJ+cYhyaKlHIxqYDn682wQD7RNp9UujOQsHog2uS0r2vzr4pW+sXf90NeeayjcNaX3fFg==}
     engines: {node: '>=6.9.0'}
+
+  '@babel/helper-validator-identifier@8.0.6':
+    resolution: {integrity: sha512-HYx0YmuchRxRSpnjvcNffnPS8DCauKNmnumIuHG3jnQAVewRA7kfJGwF13ayEpSZs7s4R/oBH4eppuXcAQd5JQ==}
+    engines: {node: ^22.18.0 || >=24.11.0}
 
   '@babel/helper-validator-option@7.29.7':
     resolution: {integrity: sha512-N9ZErrD+yW5geCDtBqnOoxmR8+tNKiGuxKlDpuJxfsqpa2dFcexaziGAE/qoHLiDDreVNMupxGmSoNlyvsA3gw==}
@@ -5130,6 +5144,11 @@ packages:
   '@babel/parser@7.29.9':
     resolution: {integrity: sha512-CjXrNHTnvqBVqHgdBysY3vk2T8tpJHb5/RMeHJBTyVa9xgugCB0CJTx/3oO8RV2QRQP391RWpB7D6hLjm8V9uA==}
     engines: {node: '>=6.0.0'}
+    hasBin: true
+
+  '@babel/parser@8.1.0':
+    resolution: {integrity: sha512-fpqZYAC+Tthr19JbEKxXhCGutvfm/+roMe+ULrgUKI+GVyzkQiTMTSheORcWIAzW8T3Oo3W5UavWSvAWmsp7fA==}
+    engines: {node: ^22.18.0 || >=24.11.0}
     hasBin: true
 
   '@babel/plugin-bugfix-firefox-class-in-computed-class-key@7.29.7':
@@ -5588,6 +5607,10 @@ packages:
   '@babel/types@7.29.8':
     resolution: {integrity: sha512-Vj1jF3cPfxg7OAfoI7QnVKLoILlm2JF9pnVHrX8qx7AHMiYWT+NDAA7jChlNgRS4WTLc/fD1lXLmPixluj+3Gg==}
     engines: {node: '>=6.9.0'}
+
+  '@babel/types@8.1.0':
+    resolution: {integrity: sha512-8V8aSTDx012YPmDQF30vrokyxVFdRAU2YBS2VzrnfLAGkP8floVnjckwgFcD0Jrvf6GWMSRdCrYVsk3tyMwZRg==}
+    engines: {node: ^22.18.0 || >=24.11.0}
 
   '@base-ui/react@1.9.0':
     resolution: {integrity: sha512-S8CSYosASBKtpL8SWUfS78rFElfLijiCgA7oHOK22jCJ95FULsYyKwBNFOgudt0RA+/7yNc7F81bOvQnRgbBiQ==}
@@ -6337,9 +6360,6 @@ packages:
 
   '@formatjs/intl-localematcher@0.10.1':
     resolution: {integrity: sha512-gBqglQK9rXuHsLmM8wzTMBy4Xo4d0jamirIVKuEL8F1rwbskWdpMA1kZarSkny+uvr5q/K6GSzE0Rcq1wZLl3g==}
-
-  '@fuma-cli/interactive@0.1.4':
-    resolution: {integrity: sha512-MutJspf9dc/oT36YR+uw9hrttVp3vffeLwD0JqGlLEzaEN0ATWAOBgq3KnMZPos3voQdLzLE8YD12Ik6+ZVzvg==}
 
   '@fuma-translate/binding-darwin-arm64@1.0.2':
     resolution: {integrity: sha512-SDM90GlvwwFmsj+dVjkTxJVyV3oFucv+Fow4V6lcjqxAeTYNMr3ICWA3nXzfBsMlr2398BH/W0W894SoE7TM6Q==}
@@ -10318,84 +10338,6 @@ packages:
   '@xtuc/long@4.2.2':
     resolution: {integrity: sha512-NuHqBY1PB/D8xU6s/thBgOAiAP7HOYDQ32+BFZILJ8ivkUkAHQnWfn6WhL79Owj1qmUnoN/YPhktdIoucipkAQ==}
 
-  '@yuku-analyzer/binding-android-arm64@0.10.2':
-    resolution: {integrity: sha512-xt4Vy3RTBw1NfszBlf4A0Rr6ZjA/th2Pj9XlWFLQHW9A1qOCtxNCoIWSzn/INtnZLMB4jO2gWdEtSaHUtK73wA==}
-    cpu: [arm64]
-    os: [android]
-    deprecated: yuku-analyzer runs on yuku-core since 0.14
-
-  '@yuku-analyzer/binding-darwin-arm64@0.10.2':
-    resolution: {integrity: sha512-ftokSqvYXZxfmA/bfIbp8c1BJ8QxNax371kUOQNFyvR5hmtKqQyTqSKtMk+WaixHM3w4tKj/JdyY+ud1bGamXA==}
-    cpu: [arm64]
-    os: [darwin]
-    deprecated: yuku-analyzer runs on yuku-core since 0.14
-
-  '@yuku-analyzer/binding-darwin-x64@0.10.2':
-    resolution: {integrity: sha512-yUrmmhmF5R4Xmbfo8gUxJKr3YbvbLcE2JvLhDLzFJkMN29/fGm6K3dZX6YpNecfgBDnQ+VywGp8K9xjRaBFZ3Q==}
-    cpu: [x64]
-    os: [darwin]
-    deprecated: yuku-analyzer runs on yuku-core since 0.14
-
-  '@yuku-analyzer/binding-freebsd-x64@0.10.2':
-    resolution: {integrity: sha512-cy9+KvVoK5Xad3Vs5pLwAeZf3JC/1y0XJElgv1q6g7W7g/n52FRjedpYmQiJeMZdnhJiAshq7Vz/Xj3jC5Ns2Q==}
-    cpu: [x64]
-    os: [freebsd]
-    deprecated: yuku-analyzer runs on yuku-core since 0.14
-
-  '@yuku-analyzer/binding-linux-arm-gnu@0.10.2':
-    resolution: {integrity: sha512-AgVZ6VCV2XP4yHCwyv78KLV76gcu2neiEF2+RBTPQN7sqYY+bLvMxphGPmfG+9qk5Uf1PJAhZYIUnMGVbbRCZw==}
-    cpu: [arm]
-    os: [linux]
-    libc: [glibc]
-    deprecated: yuku-analyzer runs on yuku-core since 0.14
-
-  '@yuku-analyzer/binding-linux-arm-musl@0.10.2':
-    resolution: {integrity: sha512-5qAj2GjoSN6+HuH75+g5r40CFhWmMvH0K8VKWmPfQyOgA/LonoDMr5H5O5feJwzdnfdCytPDAh1RAf7/SSg7dg==}
-    cpu: [arm]
-    os: [linux]
-    libc: [musl]
-    deprecated: yuku-analyzer runs on yuku-core since 0.14
-
-  '@yuku-analyzer/binding-linux-arm64-gnu@0.10.2':
-    resolution: {integrity: sha512-eJvQ4Ja5oPf/HOjmBkCLYyhOHUkL7U+iMAN8sX44x8exBBpPRyqnhEgTsuU73HzxPLrGPdRhybFnAE63Omib/Q==}
-    cpu: [arm64]
-    os: [linux]
-    libc: [glibc]
-    deprecated: yuku-analyzer runs on yuku-core since 0.14
-
-  '@yuku-analyzer/binding-linux-arm64-musl@0.10.2':
-    resolution: {integrity: sha512-TppF2j194mOQ/kBXvNr9u5TYO+eR9r8ieg4lTIEyJIVYHAR9GWeB0oFHLcJiLXVa3qUJGzE4bmzSntCW5ylA7A==}
-    cpu: [arm64]
-    os: [linux]
-    libc: [musl]
-    deprecated: yuku-analyzer runs on yuku-core since 0.14
-
-  '@yuku-analyzer/binding-linux-x64-gnu@0.10.2':
-    resolution: {integrity: sha512-03xu6ocJuwhm1a/JKmrHiaJUO1Oj86rABsm4FAl8AvfewfW/9idIUmPiFxZfb6RfiIONegebsTGJhFx0NbBNpA==}
-    cpu: [x64]
-    os: [linux]
-    libc: [glibc]
-    deprecated: yuku-analyzer runs on yuku-core since 0.14
-
-  '@yuku-analyzer/binding-linux-x64-musl@0.10.2':
-    resolution: {integrity: sha512-f7W2sAWWQN8x8YB0RRxIche7mLImH7lDgzUy9+B69cM2I6VFJ4a5+0pgAuMLROPOqimaxFPdXqLdDE/vpgGltg==}
-    cpu: [x64]
-    os: [linux]
-    libc: [musl]
-    deprecated: yuku-analyzer runs on yuku-core since 0.14
-
-  '@yuku-analyzer/binding-win32-arm64@0.10.2':
-    resolution: {integrity: sha512-f534qNc5YaJI29e1oryxEnxPkp7WCYJ1j7ChSec8pQNlYqTm8Tao7hij7NxRF+9BuxzeZCZ+WsbaAfLlklR0Eg==}
-    cpu: [arm64]
-    os: [win32]
-    deprecated: yuku-analyzer runs on yuku-core since 0.14
-
-  '@yuku-analyzer/binding-win32-x64@0.10.2':
-    resolution: {integrity: sha512-sKHkmLK8BsindMfyIThoN0bWC5uqSJEVNaLRD/ifA99mtb0UDin1ZCg4WYSVQAmM4k2iOTl4UZx/p3zcBiBgYw==}
-    cpu: [x64]
-    os: [win32]
-    deprecated: yuku-analyzer runs on yuku-core since 0.14
-
   '@yuku-core/binding-android-arm64@0.19.0':
     resolution: {integrity: sha512-wdL2XmTiZixAOaHk9Z0JJZ8u9Qm8d333Zjpc6gaxXFX+UR5BlsfxZ7a2+2Rm71pamppsPYGUGFq2oVLbh6DISw==}
     cpu: [arm64]
@@ -10481,9 +10423,6 @@ packages:
     resolution: {integrity: sha512-fe1kN04JPBODrkRZOuI06jIqKyzcyn0ykx+tpiERDwqAh9ALWOtkgfhFjVaOQSu+guhakzY/89xjQdmfY7EJ7w==}
     cpu: [x64]
     os: [linux]
-
-  '@yuku-toolchain/types@0.10.2':
-    resolution: {integrity: sha512-sSeo4SSSToiS+sSD+bwn/s94EEcaLJ7tG5LCp8gFYC1G5VzxzX7fqB6m9RU1yMD8KTpu6zdU/I1NlQf8hVBJ9Q==}
 
   '@yuku-toolchain/types@0.19.0':
     resolution: {integrity: sha512-tFkNbsP4WXX9UMUC5syJGdK9dPMLK0PPaIuXCcCYH75sZ8MrebfBZ2XvCILRTw8AgLivSSCfDa4R67iYBDa4Kg==}
@@ -12069,8 +12008,8 @@ packages:
     engines: {node: ^8.16.0 || ^10.6.0 || >=11.0.0}
     os: [darwin]
 
-  fuma-cli@0.3.3:
-    resolution: {integrity: sha512-lWAFtZFTogW8E6Jh54D/j3uT3E7y4yY4cW48MV9Kzubuz3lakWV4qqJf5eLPaulImhTufO4FUp0TzTCrEwrKfg==}
+  fuma-cli@0.3.4:
+    resolution: {integrity: sha512-ZxFDDy5PSJ50D5oI9/6UgyMEQrzWIX5soVtGZHH1sNhg8LZA1crYyhT0II8/6yqFMlj0MIXB/lb2b90JhkbnvQ==}
 
   fuma-content@1.4.0:
     resolution: {integrity: sha512-f/qi38LowBY7hMNfj5opeIJk1oHnNg0l+buemzJh1BdkuPpcUcuENwtulhMmyR0VCMsXbCdkCOXl+VUSYxvCNA==}
@@ -16013,15 +15952,9 @@ packages:
     resolution: {integrity: sha512-xYqdZFUK/VYazNl/oCDYN+3WloWQwMfZxBoiNt6qNyk+xfOdi598muWE42rNZFp1kNOiqW936q5RhUdnpqElSg==}
     engines: {node: '>=18'}
 
-  yuku-analyzer@0.10.2:
-    resolution: {integrity: sha512-UBRcDcZtIn14g88loZUZ123d6MOkc2hMTawUle5MkuWboowM90KbWHN3Zz+HfuS06sw935ygecBpcJlXHB/pOA==}
-
   yuku-analyzer@0.19.0:
     resolution: {integrity: sha512-Iu7DV5cWOQ3ERSA7oBquz/RT5IEGsUyUeCivYs9lQaZ4nSjM31yD17mH616JKcTyVoVWYivsFZ+twT3UyBosTA==}
     engines: {node: '>=14.18.0'}
-
-  yuku-ast@0.10.2:
-    resolution: {integrity: sha512-UnG9mA6giglCvSErft2/40TVFX750Sj1xgwddPLpG7J7rlr/P1wPADg9G2RK+d/1tNLtRVoLdMMOMVBB9561TQ==}
 
   yuku-ast@0.19.0:
     resolution: {integrity: sha512-PyCsiScaelhxBGzL8dyeJkLqvRZycoh78R31Vrt/WqYrm0hMFoKwIw/X7Dx5mBKLWAMlV9I9HEyBOHnj2gZVyw==}
@@ -16607,7 +16540,11 @@ snapshots:
 
   '@babel/helper-string-parser@7.29.7': {}
 
+  '@babel/helper-string-parser@8.0.8': {}
+
   '@babel/helper-validator-identifier@7.29.7': {}
+
+  '@babel/helper-validator-identifier@8.0.6': {}
 
   '@babel/helper-validator-option@7.29.7': {}
 
@@ -16631,6 +16568,10 @@ snapshots:
   '@babel/parser@7.29.9':
     dependencies:
       '@babel/types': 7.29.8
+
+  '@babel/parser@8.1.0':
+    dependencies:
+      '@babel/types': 8.1.0
 
   '@babel/plugin-bugfix-firefox-class-in-computed-class-key@7.29.7(@babel/core@7.29.7(supports-color@8.1.1))(supports-color@8.1.1)':
     dependencies:
@@ -17223,6 +17164,11 @@ snapshots:
     dependencies:
       '@babel/helper-string-parser': 7.29.7
       '@babel/helper-validator-identifier': 7.29.7
+
+  '@babel/types@8.1.0':
+    dependencies:
+      '@babel/helper-string-parser': 8.0.8
+      '@babel/helper-validator-identifier': 8.0.6
 
   '@base-ui/react@1.9.0(@date-fns/tz@1.5.0)(@types/react@19.3.0)(date-fns@4.4.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)':
     dependencies:
@@ -17892,12 +17838,6 @@ snapshots:
   '@formatjs/intl-localematcher@0.10.1':
     dependencies:
       '@formatjs/fast-memoize': 3.1.7
-
-  '@fuma-cli/interactive@0.1.4':
-    dependencies:
-      '@clack/prompts': 1.8.1
-      fuma-cli: 0.3.3
-      picocolors: 1.1.1
 
   '@fuma-translate/binding-darwin-arm64@1.0.2':
     optional: true
@@ -22336,42 +22276,6 @@ snapshots:
 
   '@xtuc/long@4.2.2': {}
 
-  '@yuku-analyzer/binding-android-arm64@0.10.2':
-    optional: true
-
-  '@yuku-analyzer/binding-darwin-arm64@0.10.2':
-    optional: true
-
-  '@yuku-analyzer/binding-darwin-x64@0.10.2':
-    optional: true
-
-  '@yuku-analyzer/binding-freebsd-x64@0.10.2':
-    optional: true
-
-  '@yuku-analyzer/binding-linux-arm-gnu@0.10.2':
-    optional: true
-
-  '@yuku-analyzer/binding-linux-arm-musl@0.10.2':
-    optional: true
-
-  '@yuku-analyzer/binding-linux-arm64-gnu@0.10.2':
-    optional: true
-
-  '@yuku-analyzer/binding-linux-arm64-musl@0.10.2':
-    optional: true
-
-  '@yuku-analyzer/binding-linux-x64-gnu@0.10.2':
-    optional: true
-
-  '@yuku-analyzer/binding-linux-x64-musl@0.10.2':
-    optional: true
-
-  '@yuku-analyzer/binding-win32-arm64@0.10.2':
-    optional: true
-
-  '@yuku-analyzer/binding-win32-x64@0.10.2':
-    optional: true
-
   '@yuku-core/binding-android-arm64@0.19.0':
     optional: true
 
@@ -22419,8 +22323,6 @@ snapshots:
 
   '@yuku-toolchain/linux-x64@0.27.0':
     optional: true
-
-  '@yuku-toolchain/types@0.10.2': {}
 
   '@yuku-toolchain/types@0.19.0': {}
 
@@ -24125,14 +24027,14 @@ snapshots:
   fsevents@2.3.3:
     optional: true
 
-  fuma-cli@0.3.3:
+  fuma-cli@0.3.4:
     dependencies:
+      '@babel/parser': 8.1.0
       magic-string: 1.4.5
       oxc-resolver: 11.24.2
       package-manager-detector: 1.9.0
       picomatch: 4.0.7
       tinyexec: 1.3.1
-      yuku-analyzer: 0.10.2
 
   fuma-content@1.4.0(@types/mdast@4.0.4)(@types/mdx@2.0.14)(beautiful-mermaid@1.1.3)(katex@0.16.47)(next@16.4.5(@babel/core@7.29.7(supports-color@8.1.1))(@types/node@26.6.6)(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(react@19.3.1)(shiki@4.5.0)(supports-color@8.1.1)(vite@8.3.5(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(yaml@2.9.1))(vue@3.5.45(typescript@7.0.2)):
     dependencies:
@@ -28808,33 +28710,11 @@ snapshots:
 
   yoctocolors@2.2.0: {}
 
-  yuku-analyzer@0.10.2:
-    dependencies:
-      '@yuku-toolchain/types': 0.10.2
-      yuku-ast: 0.10.2
-    optionalDependencies:
-      '@yuku-analyzer/binding-android-arm64': 0.10.2
-      '@yuku-analyzer/binding-darwin-arm64': 0.10.2
-      '@yuku-analyzer/binding-darwin-x64': 0.10.2
-      '@yuku-analyzer/binding-freebsd-x64': 0.10.2
-      '@yuku-analyzer/binding-linux-arm-gnu': 0.10.2
-      '@yuku-analyzer/binding-linux-arm-musl': 0.10.2
-      '@yuku-analyzer/binding-linux-arm64-gnu': 0.10.2
-      '@yuku-analyzer/binding-linux-arm64-musl': 0.10.2
-      '@yuku-analyzer/binding-linux-x64-gnu': 0.10.2
-      '@yuku-analyzer/binding-linux-x64-musl': 0.10.2
-      '@yuku-analyzer/binding-win32-arm64': 0.10.2
-      '@yuku-analyzer/binding-win32-x64': 0.10.2
-
   yuku-analyzer@0.19.0:
     dependencies:
       '@yuku-toolchain/types': 0.19.0
       yuku-ast: 0.19.0
       yuku-core: 0.19.0
-
-  yuku-ast@0.10.2:
-    dependencies:
-      '@yuku-toolchain/types': 0.10.2
 
   yuku-ast@0.19.0:
     dependencies:

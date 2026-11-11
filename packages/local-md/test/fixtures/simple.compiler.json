@@ -436,6 +436,7 @@
     }
   },
   "data": {
+    "unstable_runtimeOutputs": true,
     "structuredData": {
       "contents": [
         {

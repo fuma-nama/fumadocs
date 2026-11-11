@@ -6,7 +6,9 @@ import { glob } from 'tinyglobby';
 import { createFSCache } from '@/utils/fs-cache';
 import { createHash } from 'node:crypto';
 import type { LazyEntry } from '@/runtime/dynamic';
-import { frontmatterCode } from '@/loaders/mdx/code';
+import { frontmatterCode, resolveFrontmatter } from '@/loaders/mdx/code';
+import { readStaticParams } from '@/loaders/meta';
+import { getStaticParams, type PageData } from 'fumadocs-core/source';
 import type { EmitEntry } from '@/core';
 import { frontmatter } from 'fumadocs-core/content/md/frontmatter';
 
@@ -252,17 +254,18 @@ async function generateDynamicIndexFile(ctx: FileGenContext) {
     const fullPath = normalizePath(absolutePath);
     const content = await indexFileCache.read(fullPath).catch(() => '');
     const parsed = frontmatter(content);
-    const data = await core.transformFrontmatter(
-      {
-        collection,
-        filePath: absolutePath,
-        source: content,
-      },
-      {
-        ...(parsed.data as Record<string, unknown>),
-        ...frontmatterCode(absolutePath, parsed.content)?.compile(() => undefined)(),
-      },
-    );
+    const yaml = parsed.data as Record<string, unknown>;
+    const data = await resolveFrontmatter({
+      code: frontmatterCode(absolutePath, parsed.content),
+      yaml,
+      staticParams: getStaticParams(slash(path.relative(collection.dir, absolutePath)), {
+        staticParams: (yaml as PageData).staticParams,
+        readStaticParams: (meta) => readStaticParams(collection.dir, meta, () => undefined),
+      }),
+      validate: (data) =>
+        core.transformFrontmatter({ collection, filePath: absolutePath, source: content }, data),
+      addDependency: () => undefined,
+    });
 
     const hash = createHash('md5').update(content).digest('hex');
     const infoStr: string[] = [

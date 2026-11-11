@@ -67,6 +67,31 @@ test('authorization code flow uses PKCE', async () => {
   expect(requests[0].body.get('code_verifier')).toBe(code_verifier);
 });
 
+test('errors of the provider reject the flow started in this tab', async () => {
+  const data = { state: 'abc', redirect_uri: 'https://docs.example.com/docs/page' };
+
+  await expect(
+    finishOAuthFlow(
+      new URL(
+        'https://docs.example.com/docs/page?error=access_denied&error_description=Denied&state=abc',
+      ),
+      data,
+    ),
+  ).rejects.toThrow('access_denied: Denied');
+  await expect(
+    finishOAuthFlow(
+      new URL('https://docs.example.com/docs/page#error=access_denied&state=abc'),
+      data,
+    ),
+  ).rejects.toThrow('access_denied');
+  expect(
+    finishOAuthFlow(
+      new URL('https://docs.example.com/docs/page?error=access_denied&state=xyz'),
+      data,
+    ),
+  ).toBeUndefined();
+});
+
 test('flows leaving the page without `redirect` are finished by the page', async () => {
   const storage = new Map<string, string>();
   vi.stubGlobal('sessionStorage', {

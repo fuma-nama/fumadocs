@@ -31,22 +31,26 @@ export const toc = [{
 import { asMarkdown as _asMarkdown, jsxComponents as _jsxComponents } from "fumadocs-core/server";
 export function _markdown(props) {
     if (!_asMarkdown()) return null;
-    const _c = _jsxComponents(props.components);
+    const { Badge, Callout, Tabs } = _jsxComponents(props.components);
     return _jsxs(_Fragment, { children: [
         "## Hello World [#hello-world]\n\nContent with ",
-        _jsx("span", { children: _jsx(_c.Badge, {
+        _jsx("span", { children: _jsx(Badge, {
             type: "info",
             children: "inline **bold**"
         }) }),
         " element.\n\n",
-        _jsxs(_c.Callout, {
+        _jsxs(Callout, {
             title: "Note",
             count: 1 + 1,
             open: true,
-            children: ["\nSome *content* here.\n\n", _jsx(_c.Tabs, {
-                items: ["a", "b"],
-                children: "\nnested\n"
-            })]
+            children: [
+                "\nSome *content* here.\n\n",
+                _jsx(Tabs, {
+                    items: ["a", "b"],
+                    children: "\nnested\n"
+                }),
+                "\n"
+            ]
         }),
         "\n\nEnding paragraph.\n"
     ] });

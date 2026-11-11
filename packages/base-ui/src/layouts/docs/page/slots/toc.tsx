@@ -189,6 +189,8 @@ export function TOCPopover({
       >
         <header
           ref={ref}
+          // not the page banner
+          role="none"
           className={cn(
             'border-b backdrop-blur-sm transition-colors',
             (!isNavTransparent || open) && 'bg-fd-background/80',

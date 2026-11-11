@@ -95,7 +95,6 @@ describe('remark-structure', () => {
         {
           "content": "<TypeTable type="{ percentage: { description: 'The percentage of scroll position to display the roll button', type: '…" />",
           "heading": "api",
-          "table": undefined,
         },
       ]
     `);

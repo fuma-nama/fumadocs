@@ -1,6 +1,10 @@
 import type * as PageTree from '@/page-tree/definitions';
 import type { I18nConfig } from '@/i18n';
-import { createContentStorageBuilder, type ContentStorage } from './storage/content';
+import {
+  createContentStorageBuilder,
+  type ContentStorage,
+  type ContentStoragePageFile,
+} from './storage/content';
 import { fillParams } from './static-params';
 import { createPageTreeBuilder, type PageTreeOptions } from '@/source/page-tree/builder';
 import { dirname, joinPath } from './path';
@@ -86,6 +90,16 @@ export interface Page<
   locale?: string | undefined;
 }
 
+export interface GetPageOptions {
+  /** if unspecified, the default language */
+  language?: string;
+  /**
+   * The props you pass to the content of the page, its outputs (like the table of contents) render for them too. The
+   * page is not cached.
+   */
+  props?: Record<string, unknown>;
+}
+
 export interface Meta<
   Type extends string | undefined = string | undefined,
   Data extends MetaData = MetaData,
@@ -156,9 +170,12 @@ export interface LoaderOutput<Config extends LoaderConfig = LoaderConfig> {
   /**
    * Get page with slugs, they can be URI encoded or decoded.
    *
-   * @param language - If unspecified, the default language will be used.
+   * @param options - the language, or the options. If unspecified, the default language will be used.
    */
-  getPage: (slugs: string[] | undefined, language?: string) => Config['page'] | undefined;
+  getPage: (
+    slugs: string[] | undefined,
+    options?: string | GetPageOptions,
+  ) => Config['page'] | undefined;
 
   /**
    * Get page by its URL (pathname).
@@ -214,6 +231,7 @@ interface LocaleIndex {
 function createPageIndexer({ url }: ResolvedLoaderConfig) {
   /** locale (empty without i18n) -> index */
   const indexes = new Map<string, LocaleIndex>();
+  const binders = new WeakMap<Page, NonNullable<ContentStoragePageFile['dataAt']>>();
 
   return {
     scan(storage: ContentStorage, lang?: string) {
@@ -246,6 +264,7 @@ function createPageIndexer({ url }: ResolvedLoaderConfig) {
           params: item.params,
           locale: lang,
         };
+        if (item.dataAt) binders.set(page, item.dataAt);
         index.pathToPage.set(path, page);
         index.pages.set(slugsKey(page.slugs), page);
         index.urlToPage.set(page.url, page);
@@ -262,6 +281,11 @@ function createPageIndexer({ url }: ResolvedLoaderConfig) {
     },
     getPageBySlugs(slugs: string[], lang = '') {
       return indexes.get(lang)?.pages.get(slugsKey(slugs));
+    },
+    /** the page with props passed to its content, not cached */
+    withProps(page: Page, props: Record<string, unknown>): Page {
+      const bind = binders.get(page);
+      return bind ? { ...page, data: bind(page.params ?? {}, { props, data: page.data }) } : page;
     },
     /** do not filter by language if `lang` is not specified */
     getPages(lang?: string) {
@@ -439,8 +463,11 @@ export function loader<I extends ResolvedInput, I18n extends I18nConfig | undefi
 
       return list;
     },
-    getPage(slugs = [], language = i18n?.defaultLanguage) {
-      return indexer.getPageBySlugs(slugs, language);
+    getPage(slugs = [], options) {
+      const { language = i18n?.defaultLanguage, props } =
+        typeof options === 'object' ? options : { language: options };
+      const page = indexer.getPageBySlugs(slugs, language);
+      return page && props ? indexer.withProps(page, props) : page;
     },
     getPageByUrl(url, language) {
       if (language !== undefined || !i18n) return indexer.getPageByUrl(url, language);

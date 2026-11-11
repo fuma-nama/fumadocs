@@ -1,11 +1,11 @@
 import type { HastPluginInput, MdxCompileOptions, MdxOnlyOptions } from 'satteri';
 import type { BuildEnvironment } from '@/index';
-import { remarkHeading, type RemarkHeadingOptions } from '@/remark-heading';
+import { rehypeHeading, remarkHeading, type RemarkHeadingOptions } from '@/remark-heading';
 import { remarkImage, type RemarkImageOptions } from '@/remark-image';
 import { remarkCodeTab, type RemarkCodeTabOptions } from '@/remark-code-tab';
 import { remarkNpm, type RemarkNpmOptions } from '@/remark-npm';
 import { remarkStructure, type StructureOptions } from '@/remark-structure';
-import { remarkShow, type RemarkShowOptions } from '@/remark-show';
+import { remarkShow } from '@/remark-show';
 import { rehypeCode, type RehypeCodeOptions } from '@/rehype-code';
 import { rehypeToc, type RehypeTocOptions } from '@/rehype-toc';
 import { rehypeTable } from '@/rehype-table';
@@ -18,7 +18,6 @@ export type DefaultSatteriOptions = Omit<MdxCompileOptions, 'mdastPlugins' | 'ha
   mdastPlugins?: ResolvePlugins<MdastPluginInput>;
   hastPlugins?: ResolvePlugins<HastPluginInput>;
   valueToExport?: string[];
-  remarkShowOptions?: RemarkShowOptions;
   remarkStructureOptions?: StructureOptions | false;
   remarkHeadingOptions?: RemarkHeadingOptions;
   remarkImageOptions?: RemarkImageOptions | false;
@@ -82,7 +81,6 @@ export function applySatteriPreset(
       remarkStructureOptions,
       remarkCodeTabOptions,
       remarkNpmOptions,
-      remarkShowOptions,
       rehypeKatexOptions,
       rehypeTocOptions,
       mdastPlugins,
@@ -94,7 +92,7 @@ export function applySatteriPreset(
 
     const resolvedMdast = pluginOption<MdastPluginInput>(
       (plugins) => [
-        remarkShow(remarkShowOptions),
+        remarkShow(),
         remarkHeading({
           generateToc: false,
           ...remarkHeadingOptions,
@@ -128,6 +126,7 @@ export function applySatteriPreset(
         ...plugins,
         rehypeTable(),
         rehypeToc(rehypeTocOptions),
+        rehypeHeading(),
       ],
       hastPlugins,
     );

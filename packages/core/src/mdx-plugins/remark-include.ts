@@ -5,7 +5,7 @@ import type { Code, Heading, Nodes, Root, RootContent } from 'mdast';
 import type { Processor, Transformer } from 'unified';
 import type { VFile } from 'vfile';
 import { frontmatter } from '@/content/md/frontmatter';
-import { headingIdRegex } from './heading-id';
+import { headingIdRegex } from '../../../shared/heading-id';
 import { embedSource, replaceSource } from './stringifier';
 import { flattenNode, walk } from './utils';
 

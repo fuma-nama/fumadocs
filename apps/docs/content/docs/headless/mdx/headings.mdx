@@ -5,11 +5,11 @@ description: Process headings from your document
 
 ## Remark Heading
 
-A remark plugin that applies ids to headings. Fumadocs MDX enables it by default. Pass options with `remarkHeadingOptions`.
+A remark plugin that applies IDs to headings. Fumadocs MDX enables it by default. Pass options with `remarkHeadingOptions`.
 
-### Custom Ids [#custom-heading-id]
+### Custom IDs [#custom-heading-id]
 
-You can customize the heading id with `[#slug]`.
+You can customize the heading ID with `[#slug]`.
 
 ```md
 # heading [#slug]
@@ -52,9 +52,67 @@ Fumadocs MDX turns it off with `generateToc: false` and exports the table of con
 
 <auto-type-table path="../props.ts" name="TOCItemType" />
 
+### Headings with Expressions
+
+In Fumadocs MDX, the ID of a heading is generated from its rendered text when the heading has an expression, or is inside [`<show>`](/docs/markdown#show):
+
+```mdx
+## Deploy on {props.framework}
+```
+
+With `framework: 'astro'`, the ID is `deploy-on-astro`. Duplicate IDs get a suffix like `-1`, and headings that aren't rendered don't count as duplicates.
+
+This needs the `rehypeHeading` plugin, which Fumadocs MDX adds after your rehype plugins. Without it, Remark Heading generates the ID from the source text, like `deploy-on-propsframework`.
+
+### Custom Slugs
+
+A custom `slug` function generates IDs from the source text, also for headings with expressions. To use the rendered text with your own slugger, export `createHeadingIds()` from a module:
+
+```ts title="lib/heading.ts"
+import { createHeadingIds as create } from 'fumadocs-core/mdx-plugins/remark-heading.runtime';
+
+export const createHeadingIds: typeof create = (ids) =>
+  // called for each page, so a slugger can count duplicates
+  create(ids, () => (text) => text.toLowerCase().replaceAll(' ', '_'));
+```
+
+Then set `slugImportSource` to the module. Compiled pages import it, like the JSX runtime of `jsxImportSource` in MDX, so use a package name or an import alias:
+
+```ts tab="unified" title="source.config.ts"
+import { defineConfig } from 'fumadocs-mdx/config';
+
+export default defineConfig({
+  mdxOptions: {
+    remarkHeadingOptions: {
+      slug: (_root, _heading, text) => text.toLowerCase().replaceAll(' ', '_'),
+      slugImportSource: '@/lib/heading',
+    },
+  },
+});
+```
+
+```ts tab="Sätteri" title="source.config.ts"
+import { defineConfig, defineDocs } from 'fumadocs-mdx/config';
+
+export const docs = defineDocs({
+  docs: { compiler: 'satteri' },
+});
+
+export default defineConfig({
+  satteriOptions: {
+    remarkHeadingOptions: {
+      slug: (_heading, text) => text.toLowerCase().replaceAll(' ', '_'),
+      slugImportSource: '@/lib/heading',
+    },
+  },
+});
+```
+
+The `slug` function is still used for the headings before the first heading with an expression, so keep the two consistent.
+
 ## Rehype TOC
 
-A rehype plugin that exports the table of contents (an array of `TOCItemType`). Unlike Remark Heading, it keeps JSX nodes in heading titles.
+A rehype plugin that exports the table of contents. Unlike Remark Heading, it keeps JSX nodes in heading titles.
 
 Fumadocs MDX enables it by default. On Sätteri, pass options with `rehypeTocOptions`.
 
@@ -66,7 +124,7 @@ For a Markdown document:
 ## Hello `code`
 ```
 
-An export will be created:
+The plugin exports it as `toc`:
 
 ```jsx
 export const toc = [
@@ -81,3 +139,5 @@ export const toc = [
   },
 ];
 ```
+
+In Fumadocs MDX, `page.data.toc` only lists the headings that are rendered with the page props. A custom content source can do the same with [runtime outputs](/docs/headless/source-api/source#runtime-outputs).

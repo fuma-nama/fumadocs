@@ -15,8 +15,7 @@ export function addProxyMatcher(file: SourceFile, patterns: string[]): boolean {
 
   const existing = new Set<string>();
   for (const element of matcher.elements) {
-    if (element?.type === 'Literal' && typeof element.value === 'string')
-      existing.add(element.value);
+    if (element?.type === 'StringLiteral') existing.add(element.value);
   }
   addElements(
     file,

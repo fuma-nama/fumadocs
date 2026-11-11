@@ -1,6 +1,6 @@
 {
   "name": "@fumadocs/local-md",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "description": "The local Markdown files content source for Fumadocs",
   "keywords": [
     "Docs",

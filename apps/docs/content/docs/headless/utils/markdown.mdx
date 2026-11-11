@@ -26,13 +26,13 @@ const text = await renderToMarkdown(
 Some **rich** content.
 ```
 
-It powers the component exported by [Remark LLMs](/docs/headless/mdx/remark-llms#output) with `output: "function"`, and works on any server-rendered content you want to serve as Markdown.
+It powers the component exported by [Remark LLMs](/docs/headless/mdx/remark-llms#jsx-elements), and works on any server-rendered content you want to serve as Markdown.
 
 > `renderToMarkdown()` is server-only.
 
 ## `asMarkdown`
 
-Components define their own Markdown form. Calling `asMarkdown()` during render is the opt-in: it returns `true` when the component is being rendered into Markdown, and the HTML elements it returns are converted.
+Components define their own Markdown form. Calling `asMarkdown()` during render is the opt-in: it returns the [target](#targets) when the component is being rendered into Markdown, and the HTML elements it returns are converted.
 
 ```tsx
 import { asMarkdown, md } from 'fumadocs-core/server';
@@ -51,6 +51,29 @@ A component that never calls it is kept as JSX syntax with its props, like:
 ```
 
 This includes client components, which don't execute on the server.
+
+### Targets
+
+A tree renders for a target, the `target` option of `renderToMarkdown()`:
+
+- `markdown` (default): the document for agents.
+- `search`: the text of [search records](/docs/headless/mdx/structure#components). It has the text of links, no images or code blocks, and a component without a Markdown form is an HTML tag with its text props.
+
+These rules apply to the elements a component returns, like `<a href>`. A link written as text in an `md` template keeps its target in search, so return the element, or check the target.
+
+`asMarkdown()` returns the target, so a component can give agents more than search indexes:
+
+```tsx
+import { asMarkdown, md } from 'fumadocs-core/server';
+
+function Version({ name, released }) {
+  const target = asMarkdown();
+  if (target === 'search') return name;
+  if (target) return md`${name} (released ${released})`;
+
+  return <span title={released}>{name}</span>;
+}
+```
 
 ## `md`
 

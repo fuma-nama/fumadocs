@@ -206,7 +206,11 @@ for (const { name, config } of cases) {
 
 test('keep collection dir outside the project in file paths', async () => {
   const create = server<{ docs: DocCollection }, InternalTypeConfig>();
-  const entry = { default: () => null, toc: [], structuredData: { headings: [], contents: [] } };
+  const entry = {
+    default: () => null,
+    toc: () => [],
+    structuredData: () => [],
+  };
   const docs = await create.doc('docs', '../content/docs', { './a.mdx': entry, 'b/c.mdx': entry });
   const absolute = await create.doc('docs', '/content/docs', { './a.mdx': entry });
 

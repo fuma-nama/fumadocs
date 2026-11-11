@@ -1,13 +1,15 @@
-import fs from 'node:fs';
+import fs from 'node:fs/promises';
 import path from 'node:path';
-import { parse } from 'yaml';
-import { glob, type Loader, type LoaderContext } from 'astro/loaders';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+import type { DataEntryType } from 'astro';
+import { glob, type Loader, type LoaderContext, type ParseDataOptions } from 'astro/loaders';
 import { mdxToMdast, type MdastNode } from 'satteri';
+import { getStaticParams, type MetaData, type Params } from 'fumadocs-core/source';
 import { metaSchema, pageSchema } from 'fumadocs-core/source/schema';
 import { loaders, root } from 'virtual:fumadocs/config';
-import { getStaticParams, isDynamicPath, type MetaData, type PageData } from 'fumadocs-core/source';
+import { metaModule } from '../../shared/frontmatter-code';
+import { frontmatterQuery, hasFrontmatterCode, metaQuery } from './shared';
 import type { ExtractedReference } from './source';
-import { dynamicPageFile, dynamicPageKey } from './shared';
 
 function getOptions(collection: string) {
   const options = loaders[collection];
@@ -26,137 +28,164 @@ function getOptions(collection: string) {
 export function pageLoader(collection = 'docs'): Loader & { schema: typeof pageSchema } {
   const { dir, extractLinkReferences, lastModified } = getOptions(collection);
   const loader = glob({ base: dir, pattern: '**/*.mdx', generateId: ({ entry }) => entry });
-  if (extractLinkReferences || lastModified) {
-    const load = loader.load;
-    loader.load = async (context) => {
-      const history = lastModified ? await getHistory(path.resolve(root, dir)) : undefined;
-      const { store } = context;
-      // cached entries keep the data they were set with, they load again when it changes
-      const version = `${extractLinkReferences ? 'references' : ''}\0${history?.head ?? ''}`;
-      return load({
-        ...context,
-        store: withSet(store, (entry) => {
-          const data: Record<string, unknown> = { ...entry.data };
-          if (extractLinkReferences)
-            data.extractedReferences = entry.body ? getReferences(entry.body) : [];
-          if (history) data.lastModified = history.dates.get(entry.id);
-          return store.set({ ...entry, data });
-        }),
-        generateDigest: (data) =>
-          context.generateDigest(typeof data === 'string' ? `${data}\0${version}` : data),
-      });
-    };
-  }
   const load = loader.load;
   loader.load = async (context) => {
-    const pages = createDynamicPages(context.store, path.resolve(root, dir));
-    await load({ ...context, store: withSet(context.store, pages.set, pages.delete) });
-    pages.sync();
-    context.watcher?.on('all', (_event, file) => pages.onChange(file));
+    const base = path.resolve(root, dir);
+    const history = lastModified ? await getHistory(base) : undefined;
+    const { store } = context;
+    // cached entries keep the data they were set with, they load again when it changes
+    const version = `${extractLinkReferences ? 'references' : ''}\0${history?.head ?? ''}`;
+    return load({
+      ...context,
+      parseData: (props) => parsePage(context, base, props),
+      store: withSet(store, (entry) => {
+        const data: Record<string, unknown> = { ...entry.data };
+        if (extractLinkReferences)
+          data.extractedReferences = entry.body ? getReferences(entry.body) : [];
+        if (history) data.lastModified = history.dates.get(entry.id);
+        return store.set({ ...entry, data });
+      }),
+      generateDigest: (data) =>
+        context.generateDigest(
+          typeof data === 'string'
+            ? // the frontmatter in code reads other files, like meta files and its imports
+              `${data}\0${version}${hasFrontmatterCode(data) ? `\0${Date.now()}` : ''}`
+            : data,
+        ),
+    });
   };
   return Object.assign(loader, { schema: pageSchema });
 }
 
-type Entry = Parameters<Store['set']>[0];
+/**
+ * Like Fumadocs MDX, the frontmatter in code runs over the frontmatter for the page of a file, or each listed params
+ * of a dynamic file, validated by the schema.
+ */
+async function parsePage<Data extends Record<string, unknown>>(
+  context: LoaderContext,
+  base: string,
+  props: ParseDataOptions<Data>,
+): Promise<Data> {
+  const { filePath, data } = props;
+  // through Vite, which loads the frontmatter in code as a module
+  const { frontmatter: run } =
+    filePath && hasFrontmatterCode(await fs.readFile(filePath, 'utf8'))
+      ? ((await import(
+          /* @vite-ignore */ `${filePath.replaceAll(path.sep, '/')}${frontmatterQuery}`
+        )) as { frontmatter?: (params?: Params) => Record<string, unknown> })
+      : {};
+  if (!run) return context.parseData(props);
+  const file = path.relative(base, filePath!).replaceAll(path.sep, '/');
+  const staticParams = await listParams(context, base, file, data.staticParams as Params[]);
+  if (!staticParams) return context.parseData({ ...props, data: { ...data, ...run() } });
+
+  const at: Record<string, unknown> = {};
+  for (const params of staticParams)
+    at[JSON.stringify(params)] = await context.parseData({
+      ...props,
+      data: { ...data, ...run(params) },
+    });
+  return { ...data, _frontmatterAt: at };
+}
+
+/** the data of a meta module -> its data at the params of its folder */
+const dataAts = new WeakMap<object, (params: Params) => MetaData>();
+
+/** a meta module, like `meta.ts`, runs through Vite */
+const moduleEntryType: DataEntryType = {
+  extensions: ['.ts', '.js'],
+  async getEntryInfo({ fileUrl }) {
+    const file = fileURLToPath(fileUrl).replaceAll(path.sep, '/');
+    const { data, dataAt } = metaModule<MetaData & Record<string, unknown>>(
+      await import(/* @vite-ignore */ `${file}${metaQuery}`),
+    );
+    if (dataAt) dataAts.set(data, dataAt);
+    return { data };
+  },
+};
+
+/** `glob()` parses files with them, they aren't in the type of the context */
+type EntryTypes = Map<string, DataEntryType>;
 
 /**
- * The entries of the pages of dynamic files, one for each of their params, compiled from a virtual file. They are
- * written after the glob loader syncs, which deletes the entries that aren't its files.
+ * The listed params of a dynamic file, with the meta files in its folders parsed like the meta collection. `undefined`
+ * when the file isn't dynamic.
  */
-function createDynamicPages(store: Store, dir: string) {
-  const metaFiles = new Set<string>();
-  /** entry ID of a dynamic file -> the entry IDs of its pages */
-  const pages = new Map<string, string[]>();
-  let synced = false;
-
-  function write(entry: Entry) {
-    if (!synced || !entry.filePath || !isDynamicPath(entry.id) || dynamicPageKey in entry.data)
-      return;
-    remove(entry.id);
-    const staticParams = getStaticParams(entry.id, {
-      staticParams: (entry.data as PageData).staticParams,
-      readStaticParams(file) {
-        for (const ext of ['.json', '.yaml']) {
-          const metaFile = path.join(dir, file + ext);
-          metaFiles.add(metaFile);
-          let content: string;
-          try {
-            content = fs.readFileSync(metaFile, 'utf-8');
-          } catch (error) {
-            if ((error as NodeJS.ErrnoException).code === 'ENOENT') continue;
-            throw error;
-          }
-          return (parse(content) as MetaData | null)?.staticParams;
-        }
-      },
-    });
-
-    const ids: string[] = [];
-    pages.set(entry.id, ids);
-    for (const params of staticParams ?? []) {
-      const id = `${entry.id}#${JSON.stringify(params)}`;
-      ids.push(id);
-      store.set({
-        ...entry,
-        id,
-        filePath: dynamicPageFile(entry.filePath, params),
-        data: { ...entry.data, [dynamicPageKey]: { id: entry.id, params } },
-        deferredRender: true,
-      });
+async function listParams(
+  context: LoaderContext,
+  base: string,
+  file: string,
+  staticParams?: Params[],
+): Promise<Params[] | undefined> {
+  const { entryTypes } = context as LoaderContext & { entryTypes: EntryTypes };
+  const lists = new Map<string, Params[] | undefined>();
+  // the meta files that it reads, without its own list as it can lack the names they list, then their contents
+  getStaticParams(file, { readStaticParams: (meta) => void lists.set(meta, undefined) });
+  for (const meta of lists.keys())
+    for (const ext of ['.json', '.yaml', '.ts', '.js']) {
+      const fileUrl = pathToFileURL(path.join(base, meta + ext));
+      const contents = await fs.readFile(fileUrl, 'utf8').catch(() => undefined);
+      if (contents === undefined) continue;
+      const type = entryTypes.get(ext) ?? moduleEntryType;
+      const { data } = await type.getEntryInfo({ contents, fileUrl });
+      lists.set(meta, (data as MetaData).staticParams);
+      break;
     }
-  }
-
-  function remove(id: string) {
-    for (const page of pages.get(id) ?? []) store.delete(page);
-    pages.delete(id);
-  }
-
-  function sync() {
-    synced = true;
-    for (const entry of store.values()) write(entry as Entry);
-  }
-
-  return {
-    set(entry: Entry) {
-      const out = store.set(entry);
-      write(entry);
-      return out;
-    },
-    delete(id: string) {
-      remove(id);
-      store.delete(id);
-    },
-    sync,
-    onChange(file: string) {
-      if (synced && metaFiles.has(file)) sync();
-    },
-  };
+  return getStaticParams(file, { staticParams, readStaticParams: (meta) => lists.get(meta) });
 }
 
 /**
  * Load the meta files (`meta.json`) of a Fumadocs collection, entry IDs are the file paths.
  *
+ * Like Fumadocs MDX, a meta file can be a module, like `meta.ts`, whose default export can be a function of the params
+ * of its folder: it runs for each listed params.
+ *
  * Their schema is `metaSchema`, unless the content collection defines one.
  */
 export function metaLoader(collection = 'docs'): Loader & { schema: typeof metaSchema } {
-  return Object.assign(
-    glob({
-      base: getOptions(collection).dir,
-      pattern: '**/*.{json,yaml}',
-      generateId: ({ entry }) => entry,
-    }),
-    { schema: metaSchema },
-  );
+  const { dir } = getOptions(collection);
+  const loader = glob({
+    base: dir,
+    pattern: '**/{*.{json,yaml},meta{,.*}.{js,ts}}',
+    generateId: ({ entry }) => entry,
+  });
+  const load = loader.load;
+  loader.load = (context) => {
+    const base = path.resolve(root, dir);
+    const { entryTypes } = context as LoaderContext & { entryTypes: EntryTypes };
+    return load({
+      ...context,
+      entryTypes: new Map([...entryTypes, ['.ts', moduleEntryType], ['.js', moduleEntryType]]),
+      async parseData(props) {
+        const { data } = props;
+        const dataAt = dataAts.get(data);
+        if (!dataAt) return context.parseData(props);
+        const file = path.relative(base, props.filePath!).replaceAll(path.sep, '/');
+        const at: Record<string, unknown> = {};
+        for (const params of (await listParams(context, base, file)) ?? [])
+          at[JSON.stringify(params)] = await context.parseData({
+            ...props,
+            data: { ...data, ...dataAt(params) },
+          });
+        return { ...data, _dataAt: at } as never;
+      },
+      // a module reads other files, like its imports and meta files
+      generateDigest: (data) =>
+        context.generateDigest(
+          typeof data === 'string' && /^export\b/m.test(data) ? `${data}\0${Date.now()}` : data,
+        ),
+    } as LoaderContext);
+  };
+  return Object.assign(loader, { schema: metaSchema });
 }
 
 type Store = LoaderContext['store'];
 
 /** entries get the data of the collection options, like Fumadocs MDX */
-function withSet(store: Store, set: Store['set'], remove?: Store['delete']): Store {
+function withSet(store: Store, set: Store['set']): Store {
   return new Proxy(store, {
     get(target, key) {
       if (key === 'set') return set;
-      if (key === 'delete' && remove) return remove;
       const value: unknown = Reflect.get(target, key, target);
       return typeof value === 'function' ? value.bind(target) : value;
     },

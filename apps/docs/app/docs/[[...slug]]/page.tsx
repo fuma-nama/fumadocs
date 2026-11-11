@@ -33,6 +33,7 @@ import { PathUtils } from 'fumadocs-core/source';
 import { AsyncAPIPageLazy, GraphQLPageLazy, OpenAPIPageLazy } from './lazy';
 import { SponsorsMarquee } from '@fumari/sponsors';
 import { frameworks, isFramework } from '@/lib/framework';
+import { frameworkLink } from '@/lib/remark-framework-links';
 import { redirect } from 'next/navigation';
 
 function PreviewRenderer({ preview }: { preview: string }): ReactNode {
@@ -111,8 +112,11 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
 
   const { body: Mdx, toc, lastModified } = await page.data.load();
 
+  const framework = page.params?.framework;
   function resolveLink(href: string) {
-    const found = source.getPageByHref(href, { dir: PathUtils.dirname(page!.path) });
+    const found = source.getPageByHref((framework && frameworkLink(href, framework)) || href, {
+      dir: PathUtils.dirname(page!.path),
+    });
     if (!found) return;
 
     return {

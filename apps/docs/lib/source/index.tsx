@@ -28,7 +28,6 @@ import catppuccinMocha from '@pierre/highlights/themes/catppuccin-mocha';
 import { transformerTwoslash } from 'fumadocs-twoslash';
 import { createFileSystemTypesCache } from 'fumadocs-twoslash/cache-fs';
 import type { MdastPluginDefinition } from 'satteri';
-import { frameworks } from '@/lib/framework';
 import { remarkFrameworkLinks } from '@/lib/remark-framework-links';
 
 const typeTableGenerator = createGenerator({
@@ -119,13 +118,6 @@ const docs = defineDocs({
             ],
         remarkCodeTabOptions: {
           parseMdx: true,
-        },
-        remarkShowOptions: {
-          // pages of `[framework]` read the name of their framework as `{frameworkName}`
-          define({ params, defaults }) {
-            const framework = frameworks.find((item) => item.value === params?.framework);
-            return framework ? { ...defaults, frameworkName: framework.name } : defaults;
-          },
         },
         remarkStructureOptions: {
           filterElement(node) {

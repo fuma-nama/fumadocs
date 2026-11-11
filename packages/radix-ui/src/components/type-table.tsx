@@ -4,6 +4,7 @@ import { ChevronDown } from 'lucide-react';
 import Link from 'fumadocs-core/link';
 import { cva } from 'class-variance-authority';
 import { cn } from '@/utils/cn';
+import { getHash } from '@/utils/urls';
 import { type ComponentProps, type ReactNode, useEffect, useState } from 'react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { useTranslations } from '@fuma-translate/react';
@@ -101,9 +102,9 @@ function Item({
   const id = parentId ? `${parentId}-${name}` : undefined;
 
   useEffect(() => {
-    const hash = window.location.hash;
+    const hash = getHash();
     if (!id || !hash) return;
-    if (`#${id}` === hash) setOpen(true);
+    if (id === hash) setOpen(true);
   }, [id]);
 
   return (

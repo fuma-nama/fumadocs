@@ -479,3 +479,119 @@ export const OpenAPIPage = createOpenAPIPage({
 The handler sends users back with a script served from its own route. If a Content Security Policy covers the route, it must allow `'self'` scripts. Policies with `'strict-dynamic'` ignore `'self'`, leave the route out of them instead.
 
 </Callout>
+
+### Static Sites
+
+On a static site, the route is prerendered to a file. Pass `inline: true` to put the script in the page, and end the path in `.html` so static hosts serve the file as HTML.
+
+<show when={props.framework === 'next'}>
+
+```ts title="app/api/oauth.html/route.ts"
+import { openapi } from '@/lib/openapi';
+
+export const dynamic = 'force-static';
+
+export const GET = openapi.createOAuthHandler({ inline: true });
+```
+
+</show>
+
+<show when={props.framework === 'react-router'}>
+
+```ts tab="app/routes/oauth.ts"
+import type { Route } from './+types/oauth';
+import { openapi } from '@/lib/openapi';
+
+const handler = openapi.createOAuthHandler({ inline: true });
+
+export const loader = ({ request }: Route.LoaderArgs) => handler(request);
+```
+
+```ts tab="app/routes.ts"
+import { route, type RouteConfig } from '@react-router/dev/routes';
+
+export default [
+  // [!code ++]
+  route('api/oauth.html', 'routes/oauth.ts'),
+  // ...
+] satisfies RouteConfig;
+```
+
+```ts tab="react-router.config.ts"
+import type { Config } from '@react-router/dev/config';
+
+export default {
+  prerender: [
+    '/api/oauth.html', // [!code ++]
+    // ...
+  ],
+} satisfies Config;
+```
+
+</show>
+
+<show when={props.framework === 'tanstack-start'}>
+
+```ts tab="src/routes/api/oauth[.]html.ts"
+import { openapi } from '@/lib/openapi';
+import { createFileRoute } from '@tanstack/react-router';
+
+const handler = openapi.createOAuthHandler({ inline: true });
+
+export const Route = createFileRoute('/api/oauth.html')({
+  server: {
+    handlers: {
+      GET: async ({ request }) => handler(request),
+    },
+  },
+});
+```
+
+```ts tab="vite.config.ts"
+import { tanstackStart } from '@tanstack/react-start/plugin/vite';
+import { defineConfig } from 'vite';
+
+export default defineConfig({
+  plugins: [
+    tanstackStart({
+      prerender: { enabled: true },
+      // no page links to the route, list it next to the default crawl start
+      pages: [{ path: '/' }, { path: '/api/oauth.html' }], // [!code ++]
+    }),
+    // ...
+  ],
+});
+```
+
+</show>
+
+<show when={props.framework === 'waku'}>
+
+```ts title="src/pages/_api/api/oauth.html.ts"
+import { openapi } from '@/lib/openapi';
+
+export const GET = openapi.createOAuthHandler({ inline: true });
+
+export async function getConfig() {
+  return { render: 'static' } as const;
+}
+```
+
+</show>
+
+<show when={props.framework === 'astro'}>
+
+```ts title="src/pages/api/oauth.html.ts"
+import type { APIRoute } from 'astro';
+import { openapi } from '@/lib/openapi';
+
+const handler = openapi.createOAuthHandler({ inline: true });
+
+export const GET: APIRoute = ({ request }) => handler(request);
+```
+
+A static build prerenders the route without an adapter.
+
+</show>
+
+Use the `.html` URL as the redirect URI, like `oauthRedirectUrl: '/api/oauth.html'`. The script is in the page, so a Content Security Policy covering the route must allow inline scripts.

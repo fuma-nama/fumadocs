@@ -59,6 +59,29 @@ function Page() {
 }
 ```
 
+### Path Params
+
+For a page of [path params](/docs/page-conventions#path-params), pass its params after its path:
+
+```tsx
+async function serverLoader() {
+  const page = source.getPage(slugs)!;
+  return { path: page.path, params: page.params };
+}
+
+async function loader() {
+  const { path, params } = await serverLoader();
+  await clientLoader.preload(path, params);
+  return { path, params };
+}
+
+function Page() {
+  const { path, params } = loader();
+
+  return clientLoader.useContent(path, { myProp: 'hello world' }, params);
+}
+```
+
 ## Examples
 
 The examples below are for non-RSC usage on React Router and TanStack Start. On Next.js and Waku, prefer RSC with the [server entry](/docs/mdx/entry/server) for better client performance.

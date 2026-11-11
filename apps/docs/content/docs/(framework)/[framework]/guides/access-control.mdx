@@ -3,6 +3,8 @@ title: Access Control
 description: Limit the access of content.
 ---
 
+import { frameworkName } from '@/lib/framework';
+
 ## Overview
 
 Thanks to the flexible design, it is simple to implement access control with Fumadocs.
@@ -38,7 +40,7 @@ export const source = loader(filteredSource, {
 
 For more complicated setups, you can turn `source` into a factory function.
 
-```ts tab="lib/source.ts"
+```ts title="lib/source.ts"
 import { docs } from 'collections/server';
 import { loader, update } from 'fumadocs-core/source';
 
@@ -91,7 +93,7 @@ export const source = loader(filteredSource, {
 
 For more complicated setups, you can turn `source` into a factory function.
 
-```ts tab="src/lib/source.ts"
+```ts title="src/lib/source.ts"
 import { getCollection } from 'astro:content';
 import { loader, update } from 'fumadocs-core/source';
 import { toFumadocsSource } from '@fumadocs/astro/source';
@@ -119,7 +121,9 @@ export function createSource(permission: 'public' | 'admin') {
 
 </show>
 
-```ts tab="References"
+Then create the source for each user:
+
+```ts
 // [!code --]
 import { source } from '@/lib/source';
 // [!code ++:4]
@@ -139,7 +143,7 @@ This guarantees the protected content is filtered entirely, and without compromi
 
 ## Custom Implementation
 
-Without the Loader API, implement access control in {frameworkName}, such as in routes or middleware.
+Without the Loader API, implement access control in {frameworkName(props.framework)}, such as in routes or middleware.
 
 For example, to limit access to certain pages:
 
@@ -252,4 +256,4 @@ if (!page || page.data.permission !== user.permission) {
 
 Note that it is up to you to manage the page tree (sidebar items), search, Markdown routes and other details.
 
-This approach gives the most flexibility, but Fumadocs does not handle the access control. The setup takes more work, so consult the {frameworkName} docs when implementing it.
+This approach gives the most flexibility, but Fumadocs does not handle the access control. The setup takes more work, so consult the {frameworkName(props.framework)} docs when implementing it.

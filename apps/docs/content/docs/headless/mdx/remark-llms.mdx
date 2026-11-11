@@ -38,7 +38,7 @@ export const docs = defineDocs({
 });
 ```
 
-Read it from your pages:
+Read it from your pages with `getText('processed')`, which renders the Markdown with the page props:
 
 ```ts
 const markdown = await page.data.getText('processed');
@@ -58,21 +58,28 @@ Images beside your pages, imported by [Remark Image](/docs/headless/mdx/remark-i
 
 Images in the public directory keep their address. Vite inlines images smaller than [`build.assetsInlineLimit`](https://vite.dev/config/build-options#build-assetsinlinelimit) as `data:` URLs.
 
+## Output
+
+The `output` option sets the form of `_markdown`:
+
+- `function`: `_markdown` is a component, which you render with [`renderToMarkdown()`](/docs/headless/utils/markdown). The Markdown is generated with the page props: content inside a [`<show>`](/docs/markdown#show) that isn't rendered is left out, expressions are replaced by their values, and JSX elements by their [Markdown form](#jsx-elements).
+- `string`: `_markdown` is a string. Expressions and JSX elements are kept as source text, and a document with `<show>` fails to compile.
+
+The default is `function` in Fumadocs MDX and `@fumadocs/astro`, and `string` elsewhere. A custom content source gets `function` with [runtime outputs](/docs/headless/source-api/source#runtime-outputs).
+
 ## JSX Elements
 
-JSX elements are kept as you wrote them. To change them:
+With [`output: 'function'`](#output), a component is looked up like in MDX: first in the imports and declarations of the file, then in the MDX components of the [page props](/docs/headless/source-api#custom-props). Pass MDX components to a page with `getPage()`:
 
-| Option               | Elements                                      |
-| -------------------- | --------------------------------------------- |
-| `filterElement`      | Removed, or replaced by their children        |
-| `mdxAsPlaceholder`   | Turned into placeholders, rendered at runtime |
-| `output: 'function'` | Rendered by their components, into Markdown   |
+```ts
+const page = source.getPage(slugs, { props: { components } });
+```
 
-On Sätteri, `filterElement` and `mdxAsPlaceholder` are unavailable.
+A component defines its Markdown form with [`asMarkdown()`](/docs/headless/utils/markdown#asmarkdown). A component without one is kept as JSX. To remove elements, or replace them with their children, use `filterElement` (unavailable on Sätteri).
 
 ### Placeholders
 
-List the components to output as placeholders:
+To render JSX elements yourself, list them as placeholders:
 
 ```ts
 import type { LLMsOptions } from 'fumadocs-core/mdx-plugins/remark-llms';
@@ -93,29 +100,7 @@ const markdown = await renderPlaceholder(await page.data.getText('processed'), {
 });
 ```
 
-### Function Output [#output]
-
-With `output: 'function'`, `_markdown` is a component: Markdown stays as you wrote it and JSX elements are rendered by your components.
-
-```ts
-import type { LLMsOptions } from 'fumadocs-core/mdx-plugins/remark-llms';
-
-const llmsOptions: LLMsOptions = {
-  output: 'function',
-};
-```
-
-Render it with your components:
-
-```tsx
-import { getMDXComponents } from '@/components/mdx';
-
-const markdown = await page.data.getText('processed', {
-  components: getMDXComponents(),
-});
-```
-
-Components define their Markdown form with `asMarkdown()`. Others are kept as JSX. See [Markdown Rendering](/docs/headless/utils/markdown).
+On Sätteri, `mdxAsPlaceholder` is unavailable.
 
 ## Options
 

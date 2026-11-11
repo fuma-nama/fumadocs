@@ -3,12 +3,14 @@ title: Static Build
 description: Output static website with Fumadocs.
 ---
 
+import { frameworkName } from '@/lib/framework';
+
 ## Setup
 
 <show when={props.framework !== 'astro'}>
 
 By default, Fumadocs uses a server-first approach, which requires a running server.
-You can output a static build by configuring {frameworkName}.
+You can output a static build by configuring {frameworkName(props.framework)}.
 
 </show>
 
@@ -83,7 +85,7 @@ export default {
   async prerender({ getStaticPaths }) {
     const paths: string[] = [...getStaticPaths()];
 
-    for await (const entry of glob('**/*.mdx', { cwd: 'content/docs' })) {
+    for await (const entry of glob('**/*.{md,mdx}', { cwd: 'content/docs' })) {
       paths.push(getUrl(getSlugs(entry)));
     }
 
