@@ -1,8 +1,8 @@
 import type { HastPluginInput, HastVisitorContext } from 'satteri';
 import type { Element, ElementContent } from 'hast';
 import { esmScope, handleTag, jsxToSource, parse } from '@/utils';
-import { componentsCode, hasCode, jsxComponents, listCode } from '../../shared/code-output';
-import { textParts } from '../../shared/heading-id';
+import { componentsCode, jsxComponents, listCode } from '../../shared/code-output';
+import { hasCode, textParts } from '../../shared/heading-id';
 import { showConditions } from '../../shared/show';
 import type { ExtraPluginHooks } from './compile';
 

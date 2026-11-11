@@ -133,10 +133,6 @@ export function createCodeOutput<N extends CodeNode>({
     return root;
   }
 
-  /** see {@link componentsCode}, of the components of the code */
-  const declare = (scope: () => ReadonlySet<string>, from?: string) =>
-    componentsCode(components, scope, from);
-
   /** whether output text reads the props of a page: it has authored expressions, branches or kept elements */
   function readsProps(text: string): boolean {
     for (const match of text.matchAll(markerRegex)) {
@@ -205,15 +201,10 @@ export function createCodeOutput<N extends CodeNode>({
       else if (type === 'mdxTextExpression' || type === 'mdxFlowExpression') {
         if (!runtime) return;
         const code = node.value as string;
-        const position = s.range(node);
+        const fallback = s.stringify(node);
         s.replace(
           node,
-          mark({
-            code,
-            fallback: position ? s.source.slice(position.start, position.end) : '',
-            props: true,
-            inline: type === 'mdxTextExpression',
-          }),
+          mark({ code, fallback, props: true, inline: type === 'mdxTextExpression' }),
         );
         readJsx(`(${code}\n)`);
       } else if (target === 'search') {
@@ -247,7 +238,7 @@ export function createCodeOutput<N extends CodeNode>({
         return `export const ${as} = ${out || '""'};`;
       }
 
-      const declaration = declare(scope, '_jsxComponents(props.components)');
+      const declaration = componentsCode(components, scope, '_jsxComponents(props.components)');
       return [
         `import { asMarkdown as _asMarkdown${declaration && ', jsxComponents as _jsxComponents'} } from "fumadocs-core/server";`,
         `export function ${as}(props) {`,
@@ -257,7 +248,7 @@ export function createCodeOutput<N extends CodeNode>({
         '}',
       ].join('\n');
     },
-    componentsCode: declare,
+    components,
   };
 }
 
@@ -319,16 +310,6 @@ export function jsxComponents(node: unknown, out: Set<string>): void {
     if (name?.type === 'JSXIdentifier' && !/^[a-z]/.test(name.name)) out.add(name.name);
   }
   for (const key in node) jsxComponents((node as Record<string, unknown>)[key], out);
-}
-
-/** whether a node has authored code: expressions, or JSX attributes with expressions */
-export function hasCode(node: CodeNode): boolean {
-  if (node.type === 'mdxTextExpression' || node.type === 'mdxFlowExpression') return true;
-  if (node.type === 'mdxJsxTextElement' || node.type === 'mdxJsxFlowElement')
-    for (const attr of node.attributes as JsxAttributes)
-      if (attr.type === 'mdxJsxExpressionAttribute' || typeof attr.value === 'object') return true;
-  for (const child of node.children ?? []) if (hasCode(child)) return true;
-  return false;
 }
 
 interface EsmNode {

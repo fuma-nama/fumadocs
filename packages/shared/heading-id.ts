@@ -1,5 +1,5 @@
-import { and, hasCode, type CodeNode, type CodeOutput } from './code-output';
-import { showCondition } from './show';
+import { and, type CodeNode, type CodeOutput } from './code-output';
+import { showCondition, type JsxAttributes } from './show';
 
 /** a custom ID at the end of heading text, like `[#id]` */
 export const headingIdRegex = /\s*\[#(?<slug>[^]+?)]\s*$/;
@@ -9,6 +9,16 @@ export type HeadingIds = Record<string, string | undefined>;
 
 /** the default runtime of ID code, function bodies read it from `arguments[0]` like the JSX runtime */
 export const headingRuntime = 'fumadocs-core/mdx-plugins/remark-heading.runtime';
+
+/** whether a node has authored code: expressions, or JSX attributes with expressions */
+export function hasCode(node: CodeNode): boolean {
+  if (node.type === 'mdxTextExpression' || node.type === 'mdxFlowExpression') return true;
+  if (node.type === 'mdxJsxTextElement' || node.type === 'mdxJsxFlowElement')
+    for (const attr of node.attributes as JsxAttributes)
+      if (attr.type === 'mdxJsxExpressionAttribute' || typeof attr.value === 'object') return true;
+  for (const child of node.children ?? []) if (hasCode(child)) return true;
+  return false;
+}
 
 /**
  * The text of inline content as code, the items of an array of its parts: authored expressions are values, the

@@ -1,4 +1,4 @@
-import { listCode, type CodeNode, type CodeOutput } from './code-output';
+import { componentsCode, listCode, type CodeNode, type CodeOutput } from './code-output';
 import { headingIdRegex, type HeadingIds } from './heading-id';
 import { toStructuredData } from './structured-data';
 import type { tableRowToStructuredData } from 'fumadocs-core/search';
@@ -146,7 +146,7 @@ export function createStructuredRecords<N extends CodeNode>(
         items.push({ code: `${code}}`, when: record.when });
       }
       // the JSX of authored code refers to MDX components, which are page props like in the content
-      return listCode(items, true, out.componentsCode(scope));
+      return listCode(items, true, componentsCode(out.components, scope));
     },
   };
 }

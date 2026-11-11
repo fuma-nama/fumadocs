@@ -3,7 +3,8 @@ import type { Root, Element, Nodes } from 'hast';
 import { toEstree } from 'hast-util-to-estree';
 import type { Expression, JSXElement } from 'estree-jsx';
 import { esmScope, handleTag, toEsm } from './utils';
-import { componentsCode, hasCode, jsxComponents, listCode } from '../../../shared/code-output';
+import { componentsCode, jsxComponents, listCode } from '../../../shared/code-output';
+import { hasCode } from '../../../shared/heading-id';
 import { walkBranches } from '../../../shared/show';
 
 export interface RehypeTocOptions {
