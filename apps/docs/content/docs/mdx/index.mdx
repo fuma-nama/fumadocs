@@ -130,7 +130,9 @@ These properties are exported from MDX files by default.
 
 Use the [`schema`](/docs/mdx/collections#schema-1) option to pass a validation schema to validate frontmatter and define its output properties.
 
-An MDX page can also export `frontmatter` in code. The export is merged over the YAML frontmatter, and the collection schema validates the result:
+### Frontmatter in Code
+
+An MDX page can export `frontmatter`. The export is merged over the YAML frontmatter, and the collection schema validates the result:
 
 ```mdx title="content/docs/index.mdx"
 ---
@@ -144,7 +146,36 @@ export const frontmatter = {
 };
 ```
 
-The export runs at build time. It can use the page's imports and the exports written before it in the same block, but not the content or components of the page. On pages with [dynamic paths](/docs/headless/page-conventions#data-in-code), it reads the path params as `props`.
+The export runs at build time. It can use the page's imports and the exports written before it in the same block, but not the content or components of the page.
+
+On a page of [path params](/docs/headless/path-params), it reads the params as `props`:
+
+```mdx title="content/docs/[framework]/deploy.mdx"
+---
+title: Deploy
+---
+
+export const frontmatter = {
+  description: props.framework === 'astro' ? 'Deploy with an adapter.' : 'Deploy your docs.',
+};
+```
+
+`staticParams` stays in the YAML frontmatter, because the loader reads it before the export runs.
+
+### Meta Files in Code
+
+A meta file can be a module (`meta.ts` or `meta.js`) with the data as its default export. In a folder of path params, the default export can be a function of the params, with `staticParams` as a named export:
+
+```ts title="content/docs/[framework]/meta.ts"
+const names = { waku: 'Waku', astro: 'Astro' };
+
+export const staticParams = [{ framework: 'waku' }, { framework: 'astro' }];
+
+export default ({ framework }: { framework: keyof typeof names }) => ({
+  title: names[framework],
+  root: true,
+});
+```
 
 ### Customize Compiler
 

@@ -1,0 +1,108 @@
+---
+title: Path Params
+description: Generate a page for each value of a dynamic folder.
+---
+
+## Overview
+
+A folder named `[name]` is a dynamic segment. Each file inside becomes a page for every value of the param:
+
+<Files>
+  <Folder name="content/docs" defaultOpen>
+    <Folder name="[framework]" defaultOpen>
+      <File name="meta.json" />
+      <File name="deploy.mdx" />
+    </Folder>
+  </Folder>
+</Files>
+
+| path (relative to content folder) | slugs                                       |
+| --------------------------------- | ------------------------------------------- |
+| `./[framework]/deploy.mdx`        | `['waku', 'deploy']`, `['astro', 'deploy']` |
+
+<Callout title="Content Sources">
+
+Fumadocs MDX, `@fumadocs/astro` and [Local Markdown](/docs/integrations/content/local-md) support path params. To support them in your own source, see [Source](/docs/headless/source-api/source#path-params).
+
+</Callout>
+
+## Values
+
+The meta file of the folder lists the values in `staticParams`:
+
+```json title="[framework]/meta.json"
+{
+  "title": "Framework",
+  "root": true,
+  "staticParams": [{ "framework": "waku" }, { "framework": "astro" }]
+}
+```
+
+It applies to the folder of every value, `waku` and `astro` here.
+
+A `[name]` folder whose meta file lists no `staticParams` stays a literal folder name.
+
+## Reading Params
+
+The file compiles once, and its content reads the params as `props`. Branch on them with [`<show>`](/docs/markdown#show):
+
+```mdx title="[framework]/deploy.mdx"
+Deploy your {props.framework} site.
+
+<show when={props.framework === 'astro'}>
+
+Add an adapter to your Astro config.
+
+</show>
+```
+
+The table of contents, search records and Markdown for LLMs of each page follow its params.
+
+In loader code, the params are in `page.params`. To pass props that aren't in the URL, like a version that the reader picks, see [Custom Props](/docs/headless/source-api#custom-props).
+
+## Data per Value
+
+YAML frontmatter and JSON meta files are the same for every value. To vary them, like a title that names the framework, write them in code. On Fumadocs MDX, see [frontmatter in code](/docs/mdx#frontmatter-in-code) and [meta files in code](/docs/mdx#meta-files-in-code).
+
+## Page Params
+
+A page can list `staticParams` in its frontmatter too. When the page and its folder list the same param, the page is generated only for the values in both lists:
+
+```mdx title="[framework]/fumadocs-mdx.mdx"
+---
+title: Fumadocs MDX
+staticParams:
+  - framework: waku
+---
+```
+
+The page only exists for `waku`, at `/docs/waku/fumadocs-mdx`.
+
+## Static Paths
+
+A file at a literal path replaces the generated page at that path:
+
+<Files>
+  <Folder name="content/docs" defaultOpen>
+    <Folder name="[framework]" defaultOpen>
+      <File name="meta.json" />
+      <File name="deploy.mdx" />
+    </Folder>
+    <Folder name="astro" defaultOpen>
+      <File name="deploy.mdx" className="text-fd-primary! bg-fd-primary/10!" />
+    </Folder>
+  </Folder>
+</Files>
+
+Here, `/docs/astro/deploy` renders `astro/deploy.mdx`. A meta file at a literal path, like `astro/meta.json`, replaces the generated one the same way.
+
+## Localized Pages
+
+With [i18n](/docs/headless/page-conventions#i18n-routing), the files of a locale come before those of its fallback locale. For `/cn/docs/astro/deploy`, the loader takes the first file that exists:
+
+1. `astro/deploy.cn.mdx`
+2. `[framework]/deploy.cn.mdx`
+3. `astro/deploy.mdx`
+4. `[framework]/deploy.mdx`
+
+A localized page reads `staticParams` from `meta.cn.json` before `meta.json`. With the `dir` parser, each language folder lists its own `staticParams`.

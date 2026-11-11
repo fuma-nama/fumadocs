@@ -69,7 +69,7 @@ export default function Page({ path }: { path: string }) {
 }
 ```
 
-For a page of a [dynamic path](/docs/headless/page-conventions#path-params), pass its params from the loader: `docs.getPage(page.path, page.params)`.
+For a page of [path params](/docs/headless/path-params), pass its params from the loader: `docs.getPage(page.path, page.params)`.
 
 <Callout type="warn">
   The browser runs the whole module you import `docs` from. When your `loader()` has server-only
