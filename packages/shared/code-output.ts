@@ -1,10 +1,14 @@
 import type { MarkdownTarget } from 'fumadocs-core/server';
 import { showCondition, type JsxAttributes } from './show';
 
-/** a value from code, like an authored expression: `fallback` is its text in outputs that can't run it */
+/**
+ * A value from code, `fallback` is its text in static outputs. `props` when it may read the props of a page, like an
+ * authored expression, unlike the module-level values of plugins (e.g. the URL of an imported file).
+ */
 interface Value {
   code: string;
   fallback: string;
+  props: boolean;
   inline?: boolean;
 }
 
@@ -21,9 +25,6 @@ interface KeptElement {
   inline: boolean;
 }
 
-/** a part of an output that renders from code */
-type CodePart = Value | Branch | KeptElement;
-
 /** Markdown and its parts from code, branches and elements hold their content */
 type Chunk = string | Value | ((Branch | KeptElement) & { children: Chunk[] });
 
@@ -32,56 +33,57 @@ export interface CodeNode {
   name?: unknown;
   attributes?: unknown;
   value?: unknown;
+  children?: readonly CodeNode[];
 }
 
-interface CodeStringifier<N> {
+interface Range {
+  start: number;
+  end: number;
+}
+
+/** the stringifier of a compiler, see `fumadocs-core/mdx-plugins/stringifier` */
+export interface CodeStringifier<N> {
   source: string;
+  range(node: N): Range | undefined;
   replace(node: N, text: string | ((s: this) => string)): void;
+  edit(start: number, end: number, text: string, node?: N): void;
+  stringify(node: N): string;
   inner(node: N): string;
+  within(range: Range, outer: Range): boolean;
 }
 
-export interface CodeOutputOptions<N, S> {
-  /**
-   * What the output is for, like in `renderToMarkdown()` of `fumadocs-core/server`. Search has the text of links and
-   * no images, and the content of the JSX elements it doesn't keep.
-   */
+export interface CodeOutputOptions<N> {
+  /** search has the text of links and no images, and the content of the JSX elements it doesn't keep */
   target: MarkdownTarget;
-  /** whether the output is static: it has no parts from code, the elements kept for search are HTML tags */
-  isStatic: boolean;
-  /**
-   * Whether to keep a JSX element. By default the elements of components, or for static search, `File`, `TypeTable`,
-   * `Callout` and `Card`.
-   */
+  /** whether authored expressions are values, for a content source that renders pages for props */
+  runtime: boolean;
+  /** whether to keep a JSX element: as an HTML tag for search, as JSX of its component for Markdown */
   keep?: (node: N) => boolean;
   /** create the stringifier of the output, `expression` marks the code of its replacements */
-  stringifier: (expression: (code: string, fallback: string) => string) => S;
-  range: (node: N) => { start: number; end: number } | undefined;
+  stringifier: (expression: (code: string, fallback: string) => string) => CodeStringifier<N>;
   /** parse code with JSX */
   parse: (code: string) => object;
-  /** the code of a string, JSON by default */
-  literal?: (text: string) => string;
 }
 
 const markerRegex = /\0(\/?)(\d+)\0/g;
 const componentNameRegex = /^[A-Z][\w$]*$/;
-/** the elements that static search keeps as HTML tags by default */
+/** the elements that search keeps as HTML tags by default */
 export const staticTagRegex = /^(File|TypeTable|Callout|Card)$/;
 
 /**
- * Markdown stringified from the authored source for a target, with parts that render from code. Replacements mark the
- * parts, so edits apply to their content like to other content (e.g. the prefixes of list items), and the code of the
- * output splits it on the markers. The code runs in a function of the props of the page, in the scope of its module.
+ * Markdown stringified from the authored source for a target, with parts from code. Replacements mark the parts, so
+ * edits apply to their content like to other content (e.g. the prefixes of list items), and the code of the output
+ * splits it on the markers. An output that reads props is code in a function of the props of the page, in the scope of
+ * its module.
  */
-export function createCodeOutput<N extends CodeNode, S extends CodeStringifier<N>>({
+export function createCodeOutput<N extends CodeNode>({
   target,
-  isStatic,
+  runtime,
   keep,
   stringifier,
-  range,
   parse,
-  literal = JSON.stringify,
-}: CodeOutputOptions<N, S>) {
-  const parts: CodePart[] = [];
+}: CodeOutputOptions<N>) {
+  const parts: (Value | Branch | KeptElement)[] = [];
   /** the components that the code refers to in JSX: kept elements, and the JSX in authored code */
   const components = new Set<string>();
   const readJsx = (code: string) => {
@@ -92,8 +94,10 @@ export function createCodeOutput<N extends CodeNode, S extends CodeStringifier<N
     const i = parts.push(part) - 1;
     return `\0${i}\0${content}\0/${i}\0`;
   };
-  const expression = (code: string, fallback: string) => mark({ code, fallback });
-  const s = stringifier(expression);
+  // search has no images, the only module-level values
+  const s = stringifier((code, fallback) =>
+    target === 'search' ? fallback : mark({ code, fallback, props: false }),
+  );
 
   function chunks(text: string): Chunk[] {
     const root: Chunk[] = [];
@@ -129,9 +133,14 @@ export function createCodeOutput<N extends CodeNode, S extends CodeStringifier<N
     return root;
   }
 
-  /** see {@link componentsCode}, of the components of the code */
-  const declare = (scope: () => ReadonlySet<string>, from: string) =>
-    componentsCode(components, scope, from);
+  /** whether output text reads the props of a page: it has authored expressions, branches or kept elements */
+  function readsProps(text: string): boolean {
+    for (const match of text.matchAll(markerRegex)) {
+      const part = parts[Number(match[2])];
+      if (!('code' in part) || part.props) return true;
+    }
+    return false;
+  }
 
   /** the JSX element of a component, with the code of its attributes */
   function component(node: N): KeptElement | undefined {
@@ -158,52 +167,44 @@ export function createCodeOutput<N extends CodeNode, S extends CodeStringifier<N
     const when = showCondition(node);
     if (when) return s.replace(node, (s) => wrap({ when }, s.inner(node)));
 
-    const kept = keep ? keep(node) : !isStatic || staticTagRegex.test(String(node.name));
-    const part = kept && !isStatic ? component(node) : undefined;
-    if (part)
+    const kept = keep?.(node);
+    if (target === 'search')
       s.replace(node, (s) => {
-        const inner = s.inner(node);
-        // in Markdown, block content is on its own lines
-        return wrap(part, target === 'markdown' && inner && !part.inline ? `\n${inner}\n` : inner);
-      });
-    // Markdown has the source of other elements, search their content, as an HTML tag when kept
-    else if (target === 'search')
-      s.replace(node, (s) => {
-        if (!kept || !(keep || isStatic)) return s.inner(node);
+        if (!kept) return s.inner(node);
         const attributes: Record<string, unknown> = {};
         for (const attr of node.attributes as JsxAttributes)
           if (attr.type === 'mdxJsxAttribute')
             attributes[attr.name] =
-              attr.value == null
-                ? true
-                : typeof attr.value === 'string'
-                  ? attr.value
-                  : attr.value.value;
+              (typeof attr.value === 'object' ? attr.value?.value : attr.value) ?? true;
         return toHtmlTag(node.name as string, attributes, s.inner(node));
       });
+    else if (kept) {
+      const part = component(node);
+      if (part)
+        s.replace(node, (s) => {
+          const inner = s.inner(node);
+          // in Markdown, block content is on its own lines
+          return wrap(part, inner && !part.inline ? `\n${inner}\n` : inner);
+        });
+    }
   }
 
   return {
     s,
-    range,
-    /** mark the code of a value */
-    expression,
+    /** mark the code of a value that may read the props of a page */
+    expression: (code: string, fallback: string) => mark({ code, fallback, props: true }),
     /** Edit a node for the target: authored expressions, `<show>` branches, JSX elements, links, images and ESM. */
     edit(node: N): void {
       const { type } = node;
       if (type === 'mdxjsEsm') s.replace(node, '');
       else if (type === 'mdxJsxFlowElement' || type === 'mdxJsxTextElement') element(node);
       else if (type === 'mdxTextExpression' || type === 'mdxFlowExpression') {
-        if (isStatic) return;
+        if (!runtime) return;
         const code = node.value as string;
-        const position = range(node);
+        const fallback = s.stringify(node);
         s.replace(
           node,
-          mark({
-            code,
-            fallback: position ? s.source.slice(position.start, position.end) : '',
-            inline: type === 'mdxTextExpression',
-          }),
+          mark({ code, fallback, props: true, inline: type === 'mdxTextExpression' }),
         );
         readJsx(`(${code}\n)`);
       } else if (target === 'search') {
@@ -211,6 +212,7 @@ export function createCodeOutput<N extends CodeNode, S extends CodeStringifier<N
         else if (type === 'image' || type === 'imageReference') s.replace(node, '');
       }
     },
+    readsProps,
     /** the output without code: values as their fallbacks, the content of every branch and element */
     toStatic(text: string): string {
       return text.replace(markerRegex, (_, close: string, i: string) => {
@@ -218,35 +220,39 @@ export function createCodeOutput<N extends CodeNode, S extends CodeStringifier<N
         return !close && 'fallback' in part ? part.fallback : '';
       });
     },
-    /** the output as a string in code, its values are concatenated: for an output without branches or elements */
-    toConcat(text: string): string {
-      let out = '';
-      for (const chunk of chunks(text))
-        out += `${out ? ' + ' : ''}${typeof chunk === 'string' ? literal(chunk) : `(${(chunk as Value).code})`}`;
-      return out || '""';
+    /** search text as code: a string, or an array of its parts, which are text when strings or numbers */
+    toText(text: string): string {
+      return readsProps(text) ? `[${chunksToParts(chunks(text))}]` : JSON.stringify(text);
     },
-    /** the output as a value in code: a string without parts, a fragment otherwise */
-    toCode(text: string): string {
-      return chunksToCode(chunks(text), literal);
-    },
-    componentsCode: declare,
     /**
-     * The export of processed Markdown: a component, rendered with `renderToMarkdown()` of `fumadocs-core/server`.
-     * Its elements resolve like in the content, a missing MDX component is kept as JSX syntax.
+     * The ESM export of processed Markdown: a string, or when it keeps elements or reads props, a component rendered
+     * with `renderToMarkdown()` of `fumadocs-core/server`. Its elements resolve like in the content, a missing MDX
+     * component is kept as JSX syntax.
      */
     markdownCode(as: string, text: string, scope: () => ReadonlySet<string>): string {
-      const declaration = declare(scope, '_jsxComponents(props.components)');
+      const list = chunks(text);
+      if (!keep && !readsProps(text)) {
+        let out = '';
+        for (const chunk of list)
+          out += `${out ? ' + ' : ''}${typeof chunk === 'string' ? JSON.stringify(chunk) : `(${(chunk as Value).code})`}`;
+        return `export const ${as} = ${out || '""'};`;
+      }
+
+      const declaration = componentsCode(components, scope, '_jsxComponents(props.components)');
       return [
         `import { asMarkdown as _asMarkdown${declaration && ', jsxComponents as _jsxComponents'} } from "fumadocs-core/server";`,
         `export function ${as}(props) {`,
         '  if (!_asMarkdown()) return null;',
         declaration,
-        `  return ${chunksToCode(chunks(text), literal)};`,
+        `  return <>${chunksToJsx(list)}</>;`,
         '}',
       ].join('\n');
     },
+    components,
   };
 }
+
+export type CodeOutput<N extends CodeNode> = ReturnType<typeof createCodeOutput<N>>;
 
 /**
  * An element as an HTML tag, so search dialogs render it as an element: its attributes that are text or `true`, with
@@ -275,22 +281,21 @@ export function toHtmlTag(
  * are MDX components.
  *
  * @param scope - the names that the module declares, read when there are components
- * @param from - the code of the MDX components
- * @param fallback - the code of a component that `from` doesn't have
+ * @param from - the code of the MDX components, by default those of the page props, where a missing one is its content
  */
 export function componentsCode(
   components: ReadonlySet<string>,
   scope: () => ReadonlySet<string>,
-  from: string,
-  fallback?: string,
+  from?: string,
 ): string {
   let names = '';
   if (components.size > 0) {
     const declared = scope();
     for (const name of components)
-      if (!declared.has(name)) names += fallback ? `${name} = ${fallback}, ` : `${name}, `;
+      if (!declared.has(name))
+        names += from ? `${name}, ` : `${name} = (props) => props.children, `;
   }
-  return names && `const { ${names}} = ${from};`;
+  return names && `const { ${names}} = ${from ?? 'props.components ?? {}'};`;
 }
 
 /** the components that a program refers to in JSX, like MDX: the first name of a tag that isn't an HTML element */
@@ -333,47 +338,53 @@ export function and(conditions: string[]): string | undefined {
 }
 
 /**
- * The code of a list output: a function of the props giving the items whose conditions hold, or the list when static.
+ * The code of a list output: the list, or a function of the props giving the items whose conditions hold when an item
+ * has conditions, `dynamic` is set or there is a declaration.
  *
  * @param declaration - the code that declares the names of the items, see {@link componentsCode}
  */
 export function listCode(
   items: { code: string; when: string[] }[],
-  isStatic: boolean,
+  dynamic = false,
   declaration = '',
 ): string {
   let list = '[';
   for (const { code, when } of items) {
     const test = and(when);
+    if (test) dynamic = true;
     list += test ? `...(${test} ? [${code}] : []),` : `${code},`;
   }
   list += ']';
-  if (isStatic) return list;
-  return declaration ? `(props) => {\n${declaration}\nreturn ${list};\n}` : `(props) => ${list}`;
+  if (declaration) return `(props) => {\n${declaration}\nreturn ${list};\n}`;
+  return dynamic ? `(props) => ${list}` : list;
 }
 
-function chunksToCode(chunks: Chunk[], literal: (text: string) => string): string {
-  let text = '';
-  for (const chunk of chunks) {
-    if (typeof chunk !== 'string') return `<>${chunksToJsx(chunks, literal)}</>`;
-    text += chunk;
-  }
-  return literal(text);
-}
-
-function chunksToJsx(chunks: Chunk[], literal: (text: string) => string): string {
+/** the items of an array of the parts of text, the parts of a branch are there when it shows */
+function chunksToParts(chunks: Chunk[]): string {
   let out = '';
   for (const chunk of chunks) {
-    if (typeof chunk === 'string') out += `{${literal(chunk)}}`;
+    if (typeof chunk === 'string') out += `${JSON.stringify(chunk)},`;
+    // in its own array, so an expression of comments is no part
+    else if ('code' in chunk) out += `...[${chunk.code}\n],`;
+    else if ('when' in chunk)
+      out += `...((${chunk.when}) ? [${chunksToParts(chunk.children)}] : []),`;
+  }
+  return out;
+}
+
+function chunksToJsx(chunks: Chunk[]): string {
+  let out = '';
+  for (const chunk of chunks) {
+    if (typeof chunk === 'string') out += `{${JSON.stringify(chunk)}}`;
     // keep inline values in inline context when rendered
     else if ('code' in chunk)
       out += chunk.inline ? `<span>{${chunk.code}}</span>` : `{${chunk.code}}`;
     else if ('when' in chunk)
-      out += `{(${chunk.when}) ? <>${chunksToJsx(chunk.children, literal)}</> : null}`;
+      out += `{(${chunk.when}) ? <>${chunksToJsx(chunk.children)}</> : null}`;
     else {
       const { open, name, inline, children } = chunk;
       const element =
-        children.length > 0 ? `${open}>${chunksToJsx(children, literal)}</${name}>` : `${open} />`;
+        children.length > 0 ? `${open}>${chunksToJsx(children)}</${name}>` : `${open} />`;
       out += inline ? `<span>${element}</span>` : element;
     }
   }

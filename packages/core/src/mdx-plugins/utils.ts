@@ -6,7 +6,7 @@ import { Parser } from 'acorn';
 import acornJsx from 'acorn-jsx';
 import type Hast from 'hast';
 import type { VFile } from 'vfile';
-import { createStringifier, type Stringifier } from './stringifier';
+import { createStringifier } from './stringifier';
 import {
   createCodeOutput as createSharedCodeOutput,
   moduleScope,
@@ -88,20 +88,17 @@ function fill(node: object, expressions: Expression[]) {
 /** the shared code output, on the stringifier of mdast: estree expressions of replacements go in by placeholders */
 export function createCodeOutput(
   file: VFile,
-  options: Pick<CodeOutputOptions<Nodes, Stringifier>, 'target' | 'isStatic' | 'keep'>,
+  options: Pick<CodeOutputOptions<Nodes>, 'target' | 'keep'>,
 ) {
   const expressions: Expression[] = [];
-  let stringifier: Stringifier;
-  const out = createSharedCodeOutput<Nodes, Stringifier>({
+  const out = createSharedCodeOutput<Nodes>({
     ...options,
+    runtime: file.data.unstable_runtimeOutputs === true,
     stringifier: (expression) =>
-      (stringifier = createStringifier(file, options.target, (value, fallback) =>
+      createStringifier(file, options.target, (value, fallback) =>
         expression(`_fumadocs${expressions.push(value) - 1}`, fallback),
-      )),
-    range: (node) => stringifier.range(node),
+      ),
     parse: (code) => parser.parse(code, { ecmaVersion: 'latest', sourceType: 'module' }),
-    // strings skip the parser
-    literal: (value) => `_fumadocs${expressions.push({ type: 'Literal', value }) - 1}`,
   });
   return Object.assign(out, { esm: (code: string) => toEsm(code, expressions) });
 }

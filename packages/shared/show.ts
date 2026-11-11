@@ -1,6 +1,10 @@
 /** the element of a branch of `<show>`, defined in the module by {@link showDeclaration} */
 export const showElement = '_Show';
 
+/** the error of `<show>` in a document whose outputs can't check its conditions */
+export const showRuntimeError =
+  "`<show>` is checked when rendering, but the content source of this document doesn't render its outputs for props: it doesn't set `unstable_runtimeOutputs` in the data of the file.";
+
 /** the ESM code that defines {@link showElement} */
 export const showDeclaration = `export function ${showElement}(props) { return props.when ? props.children : null }`;
 
@@ -55,21 +59,4 @@ export function walkBranches<N extends { type: string; children?: N[] }>(
     walkBranches(child, visitor, when, node);
     if (children[i] !== child) i--;
   }
-}
-
-/**
- * Whether the outputs of a document are static: values analysed from the source, which can't tell the branches that
- * show nor read props. A document with branches has no static outputs.
- *
- * @param isStatic - by default, unless the content source of the document renders its pages for props
- */
-export function isStaticOutput(
-  data: { unstable_runtimeOutputs?: boolean; _show?: boolean },
-  isStatic = !data.unstable_runtimeOutputs,
-): boolean {
-  if (isStatic && data._show)
-    throw new Error(
-      "`<show>` is checked when rendering, but the outputs of this document are static: its content source doesn't set `unstable_runtimeOutputs` in the data of the file, or processed Markdown has `output: 'string'`.",
-    );
-  return isStatic;
 }

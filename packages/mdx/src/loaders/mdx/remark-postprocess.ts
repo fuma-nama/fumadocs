@@ -78,7 +78,7 @@ export function remarkPostprocess({
         type: 'mdxjsEsm',
         value: '',
         data: {
-          estree: Parser.parse(`export const extractedReferences = ${listCode(items, false)};`, {
+          estree: Parser.parse(`export const extractedReferences = ${listCode(items)};`, {
             ecmaVersion: 'latest',
             sourceType: 'module',
           }) as unknown as NonNullable<MdxjsEsm['data']>['estree'],

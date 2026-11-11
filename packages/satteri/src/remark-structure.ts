@@ -4,12 +4,13 @@ import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure'
 import { tableRowToStructuredData } from 'fumadocs-core/search';
 import type { ExtraPluginHooks } from './compile';
 import { createCodeOutput, esmScope } from './utils';
-import { isStaticOutput, showConditions } from '../../shared/show';
+import { showConditions } from '../../shared/show';
+import { staticTagRegex } from '../../shared/code-output';
 import { createStructuredRecords } from '../../shared/structured-records';
 
 declare module 'satteri' {
   interface DataMap {
-    /** the code of structured data rendered from code, exported by `compileMdx` */
+    /** the code of the export of structured data */
     _structuredDataCode?: string;
   }
 }
@@ -18,13 +19,7 @@ export interface StructureOptions {
   types?: string[] | ((node: Nodes) => boolean);
   mdxTypes?: (node: Nodes) => boolean;
 
-  /**
-   * Return `true` to keep a JSX element, other elements are replaced by their content. Kept elements are HTML tags, or
-   * render into Markdown like processed Markdown when the export is a function of the props.
-   *
-   * Default: `File`, `TypeTable`, `Callout` and `Card` elements, or the elements of components when the export is a
-   * function of the props.
-   */
+  /** see `filterElement` of `remarkStructure()` from `fumadocs-core/mdx-plugins/remark-structure` */
   filterElement?: (node: Nodes & { name?: string | null }) => boolean;
 
   /**
@@ -60,13 +55,14 @@ const EDIT_VISITORS = [
  * Extract content into structured data, as Markdown sliced from the authored source. Links and JSX elements are
  * replaced by their content, images are removed.
  *
- * For a content source that renders pages for props, the export is a function of the props giving the records that
- * show. `ctx.data.structuredData` is static: authored expressions as their source, the content of every branch.
+ * For a content source that renders pages for props, a document whose records read props (authored expressions,
+ * `<show>`, heading IDs from code) exports a function of the props giving the records that show, see
+ * `remarkStructure()` of `fumadocs-core/mdx-plugins/remark-structure`. `ctx.data.structuredData` is static.
  */
 export function remarkStructure({
   types = ['heading', 'paragraph', 'blockquote', 'table', 'mdxJsxFlowElement'],
   mdxTypes = (node) => !('children' in node) || node.children.length === 0,
-  filterElement,
+  filterElement = (node) => staticTagRegex.test(node.name ?? ''),
   exportAs = true,
 }: StructureOptions = {}) {
   const matchType =
@@ -75,7 +71,6 @@ export function remarkStructure({
 
   const plugin: ExtraPluginHooks & { (): MdastPluginDefinition } = () => {
     let records: ReturnType<typeof createStructuredRecords<Nodes>>;
-    let isStatic = false;
     /** the code of the ESM nodes */
     const esm: string[] = [];
     const visit = (node: Nodes, ctx: MdastVisitorContext) =>
@@ -86,28 +81,18 @@ export function remarkStructure({
       // positions tell authored nodes from generated ones
       options: { position: true },
       before(_root: unknown, ctx: MdastVisitorContext) {
-        isStatic = isStaticOutput(ctx.data);
-        const out = createCodeOutput(ctx, {
-          target: 'search',
-          isStatic,
-          keep: filterElement as ((node: unknown) => boolean) | undefined,
-        });
-        records = createStructuredRecords<Nodes>(out, {
-          isType: matchType,
-          mdxTypes,
-          tableRow: tableRowToStructuredData,
-          headingIds: ctx.data._headingIds,
-        });
-
-        // Fumadocs OpenAPI Generated Structured Data
-        const openapi = (ctx.data.frontmatter as { _openapi?: { structuredData?: StructuredData } })
-          ?._openapi?.structuredData;
-        for (const item of openapi?.headings ?? []) records.push(item);
-        for (const item of openapi?.contents ?? []) records.push(item);
+        records = createStructuredRecords<Nodes>(
+          createCodeOutput(ctx, {
+            target: 'search',
+            keep: filterElement as (node: unknown) => boolean,
+          }),
+          { isType: matchType, mdxTypes, tableRow: tableRowToStructuredData, data: ctx.data },
+        );
       },
       after(_root, ctx) {
-        ctx.data.structuredData ??= records.toStatic();
-        if (exportAs && !isStatic) ctx.data._structuredDataCode = records.toCode(esmScope(esm));
+        const data = (ctx.data.structuredData ??= records.toStatic());
+        if (exportAs)
+          ctx.data._structuredDataCode = records.toCode(esmScope(esm)) ?? JSON.stringify(data);
       },
       mdxjsEsm(node, ctx) {
         visit(node as Nodes, ctx);
@@ -120,8 +105,7 @@ export function remarkStructure({
     if (exportAs) {
       addExport(
         typeof exportAs === 'string' ? exportAs : 'structuredData',
-        data._structuredDataCode ??
-          JSON.stringify(data.structuredData ?? { headings: [], contents: [] }),
+        data._structuredDataCode!,
       );
     }
   };

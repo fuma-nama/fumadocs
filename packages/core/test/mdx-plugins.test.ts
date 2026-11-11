@@ -39,11 +39,7 @@ import {
   replaceSource,
 } from '@/mdx-plugins/stringifier';
 import { walk } from '@/mdx-plugins/utils';
-import {
-  readStructuredData,
-  renderStructuredData,
-  type StructuredRecords,
-} from '../../shared/structured-data';
+import { readStructuredData, type StructuredRecords } from '../../shared/structured-data';
 
 const cwd = path.dirname(fileURLToPath(import.meta.url));
 
@@ -749,75 +745,35 @@ test('Remark LLMs: placeholder', async () => {
   ).toMatchFileSnapshot(path.resolve(cwd, './fixtures/remark-llms.output.md'));
 });
 
-test('Remark Structure: components render in outputs that read the props', async () => {
+test('Remark Structure: records that read the props', async () => {
   const { compile, run } = await import('@mdx-js/mdx');
   const runtime = await import('react/jsx-runtime');
-  // the module instance that renders records
-  const server = await import('fumadocs-core/server');
-  const code = await compile(
-    {
-      value: `export function Local() {
-  _server.asMarkdown();
-  return 'Fumadocs';
-}
+  const compileRecords = async (value: string) => {
+    const code = await compile(
+      { value, data: { unstable_runtimeOutputs: true } },
+      {
+        outputFormat: 'function-body',
+        remarkPlugins: [remarkHeading, [remarkStructure, { exportAs: true }]],
+      },
+    );
+    return (await run(code, runtime as never)).structuredData as StructuredRecords;
+  };
 
-export function Bold({ children }) {
-  if (_server.asMarkdown()) return _server.md\`**\${children}**\`;
-  return <b>{children}</b>;
-}
-
-export function Linked() {
-  _server.asMarkdown();
-  return <a href="/docs">the docs</a>;
-}
-
-Declared: <Local />, from MDX components: <ProductName />, as a value: {<Local />}.
-
-Made with md: <Bold>text</Bold>.
-
-From MDX components, as a value: {<ProductName />}.
-
-<Card icon={<Icon />} title="Core" data={{ a: 1 }} />
-
-See <Linked /> and [a guide](/guide).
-`,
-      data: { unstable_runtimeOutputs: true },
-    },
-    { outputFormat: 'function-body', remarkPlugins: [[remarkStructure, { exportAs: true }]] },
+  // values of expressions are text when strings or numbers, elements are HTML tags or their content
+  const records = await compileRecords(
+    'For {props.name} {1}{<ProductName />}: <Card title="Core">*body*</Card> <Tabs>tabs</Tabs>.\n\nStatic.\n',
   );
-  const { structuredData } = await run(`const _server = arguments[0]._server;\n${String(code)}`, {
-    ...runtime,
-    _server: server,
-  } as never);
-  const records = structuredData as StructuredRecords;
-  function ProductName() {
-    server.asMarkdown();
-    return 'Fumadocs UI';
-  }
+  expect(typeof records).toBe('function');
+  expect(readStructuredData(records, { name: 'Fuma' }).contents).toEqual([
+    { heading: undefined, content: 'For Fuma 1: <Card title="Core">*body*</Card> tabs.' },
+    { heading: undefined, content: 'Static.' },
+  ]);
 
-  // MDX components are page props, the missing ones are kept as JSX syntax
-  expect((await renderStructuredData(records, {})).contents[0].content).toBe(
-    'Declared: Fumadocs, from MDX components: <ProductName />, as a value: Fumadocs.',
-  );
-  const data = await renderStructuredData(records, { components: { ProductName } });
-  expect(data.contents.map((item) => item.content)).toEqual([
-    'Declared: Fumadocs, from MDX components: Fumadocs UI, as a value: Fumadocs.',
-    // Markdown forms render like in processed Markdown
-    'Made with md: **text**.',
-    // components in authored code resolve like in the content
-    'From MDX components, as a value: Fumadocs UI.',
-    // rendered for search: an HTML tag without the props that aren't text, the text of a rendered link like an authored one
-    '<Card title="Core" />',
-    'See the docs and a guide.',
-  ]);
-  // read without rendering, components are tags
-  expect(readStructuredData(records, {}).contents.map((item) => item.content)).toEqual([
-    'Declared: <Local />, from MDX components: <ProductName />, as a value: <Local />.',
-    'Made with md: <Bold>text</Bold>.',
-    'From MDX components, as a value: <ProductName />.',
-    '<Card title="Core" />',
-    'See <Linked /> and a guide.',
-  ]);
+  // a document that doesn't read props has static records
+  expect(await compileRecords('## Hello\n\n<Card title="Core">body</Card>\n')).toEqual({
+    contents: [{ heading: 'hello', content: '<Card title="Core">body</Card>' }],
+    headings: [{ id: 'hello', content: 'Hello' }],
+  });
 });
 
 test('Remark LLMs: placeholders in outputs that read the props', async () => {
@@ -925,7 +881,7 @@ After the branch.
   const page = mod as unknown as Page;
   const outputs = async (props: Record<string, unknown>) => ({
     toc: page.toc(props).map((item) => item.url),
-    structured: await renderStructuredData(page.structuredData, props),
+    structured: readStructuredData(page.structuredData, props),
     markdown: await renderToMarkdown(runtime.jsx(page._markdown as never, props)),
     html: renderToStaticMarkup(runtime.jsx(mod.default, props)),
   });
@@ -1079,26 +1035,29 @@ test('Remark Show: static outputs analyse the source', async () => {
   expect(file).toContain('id: "deploy-on-propsframework"');
   expect(file).not.toContain('_headingIds');
 
-  // a string of Markdown is static in a source that renders pages for props too, with the ID slugged from the source
+  // in a source that renders pages for props, the outputs that don't read props are static
   const mixed = String(
     await compile(
-      { value: '## Deploy on {props.framework}\n', data: { unstable_runtimeOutputs: true } },
-      { remarkPlugins: [remarkHeading, [remarkLLMs, { output: 'string' }]] },
+      { value: '## Deploy\n\nOn [Next.js](/next).\n', data: { unstable_runtimeOutputs: true } },
+      {
+        remarkPlugins: [
+          remarkShow,
+          remarkHeading,
+          [remarkStructure, { exportAs: true }],
+          remarkLLMs,
+        ],
+        rehypePlugins: [rehypeToc, rehypeHeading],
+      },
     ),
   );
   expect(mixed).toContain(
-    'export const _markdown = "## Deploy on {props.framework} [#deploy-on-propsframework]\\n";',
+    'export const _markdown = "## Deploy [#deploy]\\n\\nOn [Next.js](/next).\\n";',
   );
+  expect(mixed).toContain('export let structuredData = {');
+  expect(mixed).toMatch(/export const toc = \[\{\n\s+depth: 2,\n\s+url: "#deploy"/);
 
-  // the source decides whether outputs read the props, a static output fails on branches that only props tell apart
-  const branch = '<show when={props.a}>\n## Astro\n\n[Astro](/astro).\n</show>\n';
-  for (const plugins of [
-    [],
-    [[remarkStructure, { exportAs: true }]],
-    [remarkLLMs],
-    [[remarkLLMs, { output: 'string' }]],
-  ])
-    await expect(compileStatic(branch, plugins as PluggableList)).rejects.toThrow(
-      'the outputs of this document are static',
-    );
+  // only props tell the branches apart
+  await expect(compileStatic('<show when={props.a}>\n## Astro\n</show>\n')).rejects.toThrow(
+    'unstable_runtimeOutputs',
+  );
 });

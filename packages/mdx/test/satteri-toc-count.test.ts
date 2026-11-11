@@ -120,5 +120,5 @@ test('includeProcessedMarkdown exports _markdown', async () => {
     isDevelopment: false,
   });
 
-  expect(compiled.code).toContain('export function _markdown(props)');
+  expect(compiled.code).toContain('export const _markdown = "# Hello [#hello]\\n\\nWorld\\n";');
 });

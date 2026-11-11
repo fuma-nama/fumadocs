@@ -13,10 +13,9 @@ export type Replacement = string | ((s: Stringifier) => string);
 declare module 'vfile' {
   interface DataMap {
     /**
-     * Set by a content source that renders pages for props, like path params: the outputs of the Fumadocs plugins
-     * (the TOC, structured data, processed Markdown) are functions of the props, to call with the props of a page.
-     *
-     * The source decides for all of its documents, so the shape of an export never depends on the content.
+     * Set by a content source that renders pages for props, like path params: authored expressions are values and
+     * `<show>` is allowed. The outputs of the Fumadocs plugins (the TOC, structured data, processed Markdown) that
+     * read props are functions of the props, to call with the props of a page.
      */
     unstable_runtimeOutputs?: boolean;
     /** @internal set by `remarkShow` on a document with branches, which only props tell apart */
