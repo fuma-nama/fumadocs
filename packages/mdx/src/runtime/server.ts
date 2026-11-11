@@ -9,12 +9,11 @@ import {
 import type { DocCollection, DocsCollection, MetaCollection } from '@/config';
 import type { StandardSchemaV1 } from '@standard-schema/spec';
 import type { CompiledMDXProperties } from '@/loaders/mdx/build';
-import { bind, defineOutputs, merge, pageAt, type PageAt } from '@/utils/page';
+import { bind, browserMethods, defineOutputs, merge, track } from '@/utils/page';
 import type { InternalTypeConfig, DocData, DocMethods, FileInfo, MetaMethods } from './types';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
 import { renderStructuredData } from '../../../shared/structured-data';
-import { createElement, use } from 'react';
-import type { MDXProps } from 'mdx/types';
+import { createElement } from 'react';
 
 export type MetaCollectionEntry<Data> = Data & MetaMethods;
 
@@ -334,27 +333,24 @@ function createDocAt<Doc>(
     );
   }
 
-  let loaded: PageAt<CompiledMDXProperties> | undefined;
-  let loading: Promise<PageAt<CompiledMDXProperties>> | undefined;
-  let data: Promise<DocData> | undefined;
-  const loadPage = () => (loading ??= content().then((v) => (loaded = pageAt(v, props))));
+  let exports: CompiledMDXProperties;
+  let loading: Promise<DocData> | undefined;
+  // memoized and tracked, it can be called in render
+  const load = () => (loading ??= track(content().then((v) => toDocData((exports = v), props))));
   return {
     ...base,
-    ...createDocMethods(info, loadPage),
+    // reading its processed Markdown loads the page too
+    ...createDocMethods(info, () => load().then(() => exports), props),
     _content: content,
-    // memoized, it can be called in render
-    load: () => (data ??= content().then((v) => toDocData(v, props))),
+    load,
     async structuredData() {
       const { structuredData } = await content();
       return typeof structuredData === 'function'
         ? renderStructuredData(structuredData, props ?? {})
         : structuredData;
     },
-    ...('body' in doc && {
-      preload: () => loadPage().then(() => undefined),
-      // like the body of the macro, it renders synchronously when loaded
-      body: (props: MDXProps) => createElement((loaded ?? use(loadPage())).default, props),
-    }),
+    // the entries of the macro render in the browser
+    ...('body' in doc && browserMethods(load)),
   } as Doc;
 }
 

@@ -1,5 +1,5 @@
-import { createElement, type FC } from 'react';
-import type { MDXProps } from 'mdx/types';
+import { createElement, use, type FC, type ReactPromise } from 'react';
+import type { MDXContent, MDXProps } from 'mdx/types';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
 import type { TOCItemType } from 'fumadocs-core/toc';
 import type { CompiledMDXProperties } from '@/loaders/mdx/build';
@@ -88,4 +88,29 @@ export function pageAt<Page extends CompiledMDXProperties<unknown>>(
     page,
     props,
   );
+}
+
+/** a promise that React `use()` reads without suspending once it settles */
+export function track<T>(promise: Promise<T>): Promise<T> & ReactPromise<T> {
+  promise.then(
+    (value) => Object.assign(promise, { status: 'fulfilled', value }),
+    (reason: unknown) => Object.assign(promise, { status: 'rejected', reason }),
+  );
+  return promise;
+}
+
+/** the methods of an async entry of the macro in the browser, its content renders synchronously once loaded */
+export function browserMethods(load: () => ReactPromise<{ body: MDXContent }>) {
+  return {
+    async preload() {
+      await load();
+    },
+    body(props: MDXProps) {
+      const loaded = load();
+      return createElement(
+        (loaded.status === 'fulfilled' ? loaded.value : use(loaded)).body,
+        props,
+      );
+    },
+  };
 }

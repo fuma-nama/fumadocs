@@ -630,5 +630,11 @@ describe('runtime', () => {
     await v1.preload();
     expect(v1.body({})).toBeTruthy();
     expect(loads).toBe(2);
+
+    // once loaded, it renders without suspending again, with its content loaded once
+    const v2 = collection.getPage('[version].mdx', { version: 'v2' })!;
+    await v2.load();
+    expect(v2.body({})).toBeTruthy();
+    expect(loads).toBe(3);
   });
 });
