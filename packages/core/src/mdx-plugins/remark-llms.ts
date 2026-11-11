@@ -76,7 +76,6 @@ export function remarkLLMs({
   return (tree, file) => {
     const out = createCodeOutput(file, {
       target: 'markdown',
-      runtime: file.data.unstable_runtimeOutputs === true,
       keep: output === 'function' ? () => true : undefined,
     });
     const { s } = out;
@@ -93,14 +92,7 @@ export function remarkLLMs({
         if (visibility === 'children-only') {
           s.replace(node, (s) => s.inner(node));
         } else if (node.type === 'heading') {
-          const id = node.data?.hProperties?.id ?? undefined;
-          const code = id !== undefined && file.data._headingIds?.[id];
-          stringifyHeadingId(
-            s,
-            node,
-            (node: Nodes) => s.range(node),
-            headingIds && (code ? out.expression(code, id as string) : id),
-          );
+          stringifyHeadingId(out, node, headingIds && file.data._headingIds);
         } else if (isJsxElement(node) && node.name && mdxAsPlaceholder?.includes(node.name)) {
           s.replace(node, (s) => toPlaceholder(node, out.toStatic(s.inner(node))));
         } else out.edit(node);
@@ -111,9 +103,7 @@ export function remarkLLMs({
     const text = s.stringify(tree).trim();
     const value = text ? `${text}\n` : '';
 
-    tree.children.unshift(
-      out.esm(out.markdownCode(as, value, esmScope(tree), output === 'function')),
-    );
+    tree.children.unshift(out.esm(out.markdownCode(as, value, esmScope(tree))));
     if (_data) file.data.markdown = out.toStatic(value);
   };
 }

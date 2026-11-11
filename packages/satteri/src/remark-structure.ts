@@ -4,7 +4,6 @@ import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure'
 import { tableRowToStructuredData } from 'fumadocs-core/search';
 import type { ExtraPluginHooks } from './compile';
 import { createCodeOutput, esmScope } from './utils';
-import type { Stringifier } from './stringifier';
 import { showConditions } from '../../shared/show';
 import { staticTagRegex } from '../../shared/code-output';
 import { createStructuredRecords } from '../../shared/structured-records';
@@ -71,7 +70,7 @@ export function remarkStructure({
   const visitors = [...(typeof types === 'function' ? RECORD_VISITORS : types), ...EDIT_VISITORS];
 
   const plugin: ExtraPluginHooks & { (): MdastPluginDefinition } = () => {
-    let records: ReturnType<typeof createStructuredRecords<Nodes, Stringifier>>;
+    let records: ReturnType<typeof createStructuredRecords<Nodes>>;
     /** the code of the ESM nodes */
     const esm: string[] = [];
     const visit = (node: Nodes, ctx: MdastVisitorContext) =>
@@ -82,23 +81,13 @@ export function remarkStructure({
       // positions tell authored nodes from generated ones
       options: { position: true },
       before(_root: unknown, ctx: MdastVisitorContext) {
-        const out = createCodeOutput(ctx, {
-          target: 'search',
-          runtime: ctx.data.unstable_runtimeOutputs === true,
-          keep: filterElement as (node: unknown) => boolean,
-        });
-        records = createStructuredRecords<Nodes, Stringifier>(out, {
-          isType: matchType,
-          mdxTypes,
-          tableRow: tableRowToStructuredData,
-          headingIds: ctx.data._headingIds,
-        });
-
-        // Fumadocs OpenAPI Generated Structured Data
-        const openapi = (ctx.data.frontmatter as { _openapi?: { structuredData?: StructuredData } })
-          ?._openapi?.structuredData;
-        for (const item of openapi?.headings ?? []) records.push(item);
-        for (const item of openapi?.contents ?? []) records.push(item);
+        records = createStructuredRecords<Nodes>(
+          createCodeOutput(ctx, {
+            target: 'search',
+            keep: filterElement as (node: unknown) => boolean,
+          }),
+          { isType: matchType, mdxTypes, tableRow: tableRowToStructuredData, data: ctx.data },
+        );
       },
       after(_root, ctx) {
         const data = (ctx.data.structuredData ??= records.toStatic());

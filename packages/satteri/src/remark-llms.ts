@@ -1,6 +1,8 @@
 import type { MdastPluginEntry } from 'satteri';
 import { defineMdastPlugin } from 'satteri';
-import { offsets, type PositionedNode } from './stringifier';
+import type { PositionedNode } from './stringifier';
+
+type Node = PositionedNode & { type: string };
 import { stringifyHeadingId } from '../../shared/heading-id';
 import { createCodeOutput, esmScope } from './utils';
 
@@ -37,8 +39,8 @@ export function remarkLlms({
     /** the code of the ESM nodes */
     const esm: string[] = [];
 
-    const drop = (node: PositionedNode) => out.s.replace(node, '');
-    const edit = (node: PositionedNode & { type: string }) => out.edit(node);
+    const drop = (node: Node) => out.s.replace(node, '');
+    const edit = (node: Node) => out.edit(node);
 
     return defineMdastPlugin({
       name: 'remark-llms',
@@ -46,7 +48,6 @@ export function remarkLlms({
       before(_root, ctx) {
         out = createCodeOutput(ctx, {
           target: 'markdown',
-          runtime: ctx.data.unstable_runtimeOutputs === true,
           keep: output === 'function' ? () => true : undefined,
         });
       },
@@ -57,14 +58,7 @@ export function remarkLlms({
       yaml: drop,
       toml: drop,
       heading(node, ctx) {
-        const id = (node.data as { hProperties?: { id?: string } } | undefined)?.hProperties?.id;
-        const code = id !== undefined && ctx.data._headingIds?.[id];
-        stringifyHeadingId(
-          out.s,
-          node,
-          offsets,
-          headingIds && (code ? out.expression(code, id!) : id),
-        );
+        stringifyHeadingId(out, node, headingIds && ctx.data._headingIds);
       },
       mdxTextExpression: edit,
       mdxFlowExpression: edit,
@@ -78,7 +72,7 @@ export function remarkLlms({
         if (as)
           ctx.prependChild(root, {
             type: 'mdxjsEsm',
-            value: out.markdownCode(as, value, esmScope(esm), output === 'function'),
+            value: out.markdownCode(as, value, esmScope(esm)),
           });
       },
     });

@@ -61,14 +61,11 @@ export function rehypeToc({ exportToc = true }: RehypeTocOptions = {}): HastPlug
       },
       after(_root: unknown, ctx: HastVisitorContext) {
         if (!resolved) return;
-        // like in the content, the other components of titles are MDX components: without them, their content
-        const declaration = componentsCode(
-          components,
-          esmScope(esm),
-          'props.components ?? {}',
-          '((props) => props.children)',
+        ctx.data._rehypeTocCode = listCode(
+          items,
+          dynamic,
+          componentsCode(components, esmScope(esm)),
         );
-        ctx.data._rehypeTocCode = listCode(items, dynamic, declaration);
       },
       mdxjsEsm(node: { value: string }) {
         esm.push(node.value);
@@ -115,7 +112,7 @@ export function rehypeToc({ exportToc = true }: RehypeTocOptions = {}): HastPlug
           } else {
             // titles in data are text
             titleCode = fromCode
-              ? `[${textParts(children, () => undefined)}].filter((v) => typeof v === "string" || typeof v === "number").join("")`
+              ? `[${textParts(children)}].filter((v) => typeof v === "string" || typeof v === "number").join("")`
               : JSON.stringify(title);
           }
           let obj = `{title: ${titleCode},`;

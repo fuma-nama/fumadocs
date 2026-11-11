@@ -128,13 +128,7 @@ export function rehypeToc(
         if (_step !== undefined) code += `, _step: ${_step}`;
         list.push({ code: `${code}, title: _fumadocs${i - 1}}`, when });
       }
-      // like in the content, the other components of titles are MDX components: without them, their content
-      const declaration = componentsCode(
-        components,
-        esmScope(tree as never),
-        'props.components ?? {}',
-        '((props) => props.children)',
-      );
+      const declaration = componentsCode(components, esmScope(tree as never));
       tree.children.push(
         toEsm(`export const ${exportToc.name} = ${listCode(list, dynamic, declaration)};`, titles),
       );

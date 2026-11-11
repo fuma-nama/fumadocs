@@ -38,13 +38,23 @@ export interface CodeNode {
   value?: unknown;
 }
 
-export interface CodeStringifier<N> {
-  source: string;
-  replace(node: N, text: string | ((s: this) => string)): void;
-  inner(node: N): string;
+interface Range {
+  start: number;
+  end: number;
 }
 
-export interface CodeOutputOptions<N, S> {
+/** the stringifier of a compiler, see `fumadocs-core/mdx-plugins/stringifier` */
+export interface CodeStringifier<N> {
+  source: string;
+  range(node: N): Range | undefined;
+  replace(node: N, text: string | ((s: this) => string)): void;
+  edit(start: number, end: number, text: string, node?: N): void;
+  stringify(node: N): string;
+  inner(node: N): string;
+  within(range: Range, outer: Range): boolean;
+}
+
+export interface CodeOutputOptions<N> {
   /** search has the text of links and no images, and the content of the JSX elements it doesn't keep */
   target: MarkdownTarget;
   /** whether authored expressions are values, for a content source that renders pages for props */
@@ -52,12 +62,9 @@ export interface CodeOutputOptions<N, S> {
   /** whether to keep a JSX element: as an HTML tag for search, as JSX of its component for Markdown */
   keep?: (node: N) => boolean;
   /** create the stringifier of the output, `expression` marks the code of its replacements */
-  stringifier: (expression: (code: string, fallback: string) => string) => S;
-  range: (node: N) => { start: number; end: number } | undefined;
+  stringifier: (expression: (code: string, fallback: string) => string) => CodeStringifier<N>;
   /** parse code with JSX */
   parse: (code: string) => object;
-  /** the code of a string, JSON by default */
-  literal?: (text: string) => string;
 }
 
 const markerRegex = /\0(\/?)(\d+)\0/g;
@@ -71,15 +78,13 @@ export const staticTagRegex = /^(File|TypeTable|Callout|Card)$/;
  * splits it on the markers. An output that reads props is code in a function of the props of the page, in the scope of
  * its module.
  */
-export function createCodeOutput<N extends CodeNode, S extends CodeStringifier<N>>({
+export function createCodeOutput<N extends CodeNode>({
   target,
   runtime,
   keep,
   stringifier,
-  range,
   parse,
-  literal = JSON.stringify,
-}: CodeOutputOptions<N, S>) {
+}: CodeOutputOptions<N>) {
   const parts: CodePart[] = [];
   /** the components that the code refers to in JSX: kept elements, and the JSX in authored code */
   const components = new Set<string>();
@@ -131,7 +136,7 @@ export function createCodeOutput<N extends CodeNode, S extends CodeStringifier<N
   }
 
   /** see {@link componentsCode}, of the components of the code */
-  const declare = (scope: () => ReadonlySet<string>, from: string) =>
+  const declare = (scope: () => ReadonlySet<string>, from?: string) =>
     componentsCode(components, scope, from);
 
   /** whether output text reads the props of a page: it has authored expressions, branches or kept elements */
@@ -196,7 +201,6 @@ export function createCodeOutput<N extends CodeNode, S extends CodeStringifier<N
 
   return {
     s,
-    range,
     /** mark the code of a value that may read the props of a page */
     expression: (code: string, fallback: string) => mark({ code, fallback, props: true }),
     /** Edit a node for the target: authored expressions, `<show>` branches, JSX elements, links, images and ESM. */
@@ -207,7 +211,7 @@ export function createCodeOutput<N extends CodeNode, S extends CodeStringifier<N
       else if (type === 'mdxTextExpression' || type === 'mdxFlowExpression') {
         if (!runtime) return;
         const code = node.value as string;
-        const position = range(node);
+        const position = s.range(node);
         s.replace(
           node,
           mark({
@@ -233,19 +237,19 @@ export function createCodeOutput<N extends CodeNode, S extends CodeStringifier<N
     },
     /** search text as code: a string, or an array of its parts, which are text when strings or numbers */
     toText(text: string): string {
-      return readsProps(text) ? `[${chunksToParts(chunks(text), literal)}]` : literal(text);
+      return readsProps(text) ? `[${chunksToParts(chunks(text))}]` : JSON.stringify(text);
     },
     /**
-     * The ESM export of processed Markdown: a string, or when it reads props or `jsx` is set, a component rendered with
-     * `renderToMarkdown()` of `fumadocs-core/server`. Its elements resolve like in the content, a missing MDX component
-     * is kept as JSX syntax.
+     * The ESM export of processed Markdown: a string, or when it keeps elements or reads props, a component rendered
+     * with `renderToMarkdown()` of `fumadocs-core/server`. Its elements resolve like in the content, a missing MDX
+     * component is kept as JSX syntax.
      */
-    markdownCode(as: string, text: string, scope: () => ReadonlySet<string>, jsx: boolean): string {
+    markdownCode(as: string, text: string, scope: () => ReadonlySet<string>): string {
       const list = chunks(text);
-      if (!jsx && !readsProps(text)) {
+      if (!keep && !readsProps(text)) {
         let out = '';
         for (const chunk of list)
-          out += `${out ? ' + ' : ''}${typeof chunk === 'string' ? literal(chunk) : `(${(chunk as Value).code})`}`;
+          out += `${out ? ' + ' : ''}${typeof chunk === 'string' ? JSON.stringify(chunk) : `(${(chunk as Value).code})`}`;
         return `export const ${as} = ${out || '""'};`;
       }
 
@@ -255,7 +259,7 @@ export function createCodeOutput<N extends CodeNode, S extends CodeStringifier<N
         `export function ${as}(props) {`,
         '  if (!_asMarkdown()) return null;',
         declaration,
-        `  return <>${chunksToJsx(list, literal)}</>;`,
+        `  return <>${chunksToJsx(list)}</>;`,
         '}',
       ].join('\n');
     },
@@ -263,9 +267,7 @@ export function createCodeOutput<N extends CodeNode, S extends CodeStringifier<N
   };
 }
 
-export type CodeOutput<N extends CodeNode, S extends CodeStringifier<N>> = ReturnType<
-  typeof createCodeOutput<N, S>
->;
+export type CodeOutput<N extends CodeNode> = ReturnType<typeof createCodeOutput<N>>;
 
 /**
  * An element as an HTML tag, so search dialogs render it as an element: its attributes that are text or `true`, with
@@ -294,22 +296,21 @@ export function toHtmlTag(
  * are MDX components.
  *
  * @param scope - the names that the module declares, read when there are components
- * @param from - the code of the MDX components
- * @param fallback - the code of a component that `from` doesn't have
+ * @param from - the code of the MDX components, by default those of the page props, where a missing one is its content
  */
 export function componentsCode(
   components: ReadonlySet<string>,
   scope: () => ReadonlySet<string>,
-  from: string,
-  fallback?: string,
+  from?: string,
 ): string {
   let names = '';
   if (components.size > 0) {
     const declared = scope();
     for (const name of components)
-      if (!declared.has(name)) names += fallback ? `${name} = ${fallback}, ` : `${name}, `;
+      if (!declared.has(name))
+        names += from ? `${name}, ` : `${name} = (props) => props.children, `;
   }
-  return names && `const { ${names}} = ${from};`;
+  return names && `const { ${names}} = ${from ?? 'props.components ?? {}'};`;
 }
 
 /** the components that a program refers to in JSX, like MDX: the first name of a tag that isn't an HTML element */
@@ -326,7 +327,7 @@ export function jsxComponents(node: unknown, out: Set<string>): void {
   for (const key in node) jsxComponents((node as Record<string, unknown>)[key], out);
 }
 
-/** whether a hast node has authored code: expressions, or JSX attributes with expressions */
+/** whether a node has authored code: expressions, or JSX attributes with expressions */
 export function hasCode(node: CodeNode & { children?: readonly CodeNode[] }): boolean {
   if (node.type === 'mdxTextExpression' || node.type === 'mdxFlowExpression') return true;
   if (node.type === 'mdxJsxTextElement' || node.type === 'mdxJsxFlowElement')
@@ -384,32 +385,31 @@ export function listCode(
 }
 
 /** the items of an array of the parts of text, the parts of a branch are there when it shows */
-function chunksToParts(chunks: Chunk[], literal: (text: string) => string): string {
+function chunksToParts(chunks: Chunk[]): string {
   let out = '';
   for (const chunk of chunks) {
-    if (typeof chunk === 'string') out += `${literal(chunk)},`;
+    if (typeof chunk === 'string') out += `${JSON.stringify(chunk)},`;
     // in its own array, so an expression of comments is no part
     else if ('code' in chunk) out += `...[${chunk.code}\n],`;
     else if ('when' in chunk)
-      out += `...((${chunk.when}) ? [${chunksToParts(chunk.children, literal)}] : []),`;
-    else out += chunksToParts(chunk.children, literal);
+      out += `...((${chunk.when}) ? [${chunksToParts(chunk.children)}] : []),`;
   }
   return out;
 }
 
-function chunksToJsx(chunks: Chunk[], literal: (text: string) => string): string {
+function chunksToJsx(chunks: Chunk[]): string {
   let out = '';
   for (const chunk of chunks) {
-    if (typeof chunk === 'string') out += `{${literal(chunk)}}`;
+    if (typeof chunk === 'string') out += `{${JSON.stringify(chunk)}}`;
     // keep inline values in inline context when rendered
     else if ('code' in chunk)
       out += chunk.inline ? `<span>{${chunk.code}}</span>` : `{${chunk.code}}`;
     else if ('when' in chunk)
-      out += `{(${chunk.when}) ? <>${chunksToJsx(chunk.children, literal)}</> : null}`;
+      out += `{(${chunk.when}) ? <>${chunksToJsx(chunk.children)}</> : null}`;
     else {
       const { open, name, inline, children } = chunk;
       const element =
-        children.length > 0 ? `${open}>${chunksToJsx(children, literal)}</${name}>` : `${open} />`;
+        children.length > 0 ? `${open}>${chunksToJsx(children)}</${name}>` : `${open} />`;
       out += inline ? `<span>${element}</span>` : element;
     }
   }

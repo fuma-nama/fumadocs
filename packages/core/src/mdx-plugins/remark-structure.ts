@@ -4,7 +4,6 @@ import remarkGfm from 'remark-gfm';
 import type { PluggableList, Transformer } from 'unified';
 import { VFile } from 'vfile';
 import { createCodeOutput, esmScope, toMdxExport } from './utils';
-import type { Stringifier } from './stringifier';
 import { walkBranches } from '../../../shared/show';
 import { staticTagRegex } from '../../../shared/code-output';
 import { createStructuredRecords } from '../../../shared/structured-records';
@@ -116,21 +115,14 @@ export function remarkStructure({
   return (tree, file) => {
     const out = createCodeOutput(file, {
       target: 'search',
-      runtime: file.data.unstable_runtimeOutputs === true,
       keep: filterElement as (node: Nodes) => boolean,
     });
-    const records = createStructuredRecords<Nodes, Stringifier>(out, {
+    const records = createStructuredRecords(out, {
       isType,
       mdxTypes: (node) => mdxTypes(node as JsxElement),
       tableRow: tableRowToStructuredData,
-      headingIds: file.data._headingIds,
+      data: file.data,
     });
-
-    // Fumadocs OpenAPI Generated Structured Data
-    const openapi = (file.data.frontmatter as { _openapi?: { structuredData?: StructuredData } })
-      ?._openapi?.structuredData;
-    for (const item of openapi?.headings ?? []) records.push(item);
-    for (const item of openapi?.contents ?? []) records.push(item);
 
     walkBranches<Nodes>(tree, (node, when) => records.collect(node, () => when));
 
