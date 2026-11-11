@@ -135,12 +135,11 @@ function normalize(file: string): string {
 }
 
 function accessor<Entry extends { info: { path: string } }>(entries: Entry[]) {
-  const byPath = new Map<string, Entry>();
-  for (const entry of entries) byPath.set(entry.info.path, entry);
   return {
     entries,
     get(path: string): Entry | undefined {
-      return byPath.get(normalize(path));
+      path = normalize(path);
+      return entries.find((entry) => entry.info.path === path);
     },
   };
 }
