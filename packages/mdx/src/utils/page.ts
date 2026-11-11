@@ -1,5 +1,5 @@
-import { createElement, use, type FC, type ReactPromise } from 'react';
-import type { MDXContent, MDXProps } from 'mdx/types';
+import { createElement, type FC } from 'react';
+import type { MDXProps } from 'mdx/types';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
 import type { TOCItemType } from 'fumadocs-core/toc';
 import type { CompiledMDXProperties } from '@/loaders/mdx/build';
@@ -27,43 +27,45 @@ export function merge<T>(...sources: (object | undefined)[]): T {
   return out as T;
 }
 
-/**
- * a component of a compiled page with props, called in place so that `asMarkdown()` of the component opts in, the
- * component itself without props
- */
+/** the content of a compiled page with props, the compiled component without them */
 export function bind(component: FC<MDXProps>, props?: Props): FC<MDXProps> {
   return props && Object.keys(props).length > 0
-    ? (own) => component({ ...props, ...own })
+    ? (own) => createElement(component, { ...props, ...own })
     : component;
 }
 
 /**
- * Define the outputs of a compiled page for its props on `target`. An output that is a function of the props runs when
- * first read: the entry of a dynamic file has no params to run it with, and most pages are never asked for all.
+ * Define the outputs of a compiled page for its props on `target`, computed when first read: the outputs of a page run
+ * its code, the entry of a dynamic file has no params to run it with, and most pages are never asked for all.
  */
 export function defineOutputs<T extends object>(
   target: T,
-  { toc, structuredData, extractedReferences }: CompiledMDXProperties<unknown>,
+  { toc, structuredData, extractedReferences: refs }: CompiledMDXProperties<unknown>,
   props: Props = {},
 ): T & PageOutputs {
-  const out = target as T & PageOutputs;
-  if (typeof toc === 'function') lazy(out, 'toc', () => toc(props));
-  else out.toc = toc;
-  if (typeof structuredData === 'function')
-    lazy(out, 'structuredData', () => readStructuredData(structuredData, props));
-  else out.structuredData = structuredData;
-  if (typeof extractedReferences === 'function')
-    lazy(out, 'extractedReferences', () => extractedReferences(props));
-  else out.extractedReferences = extractedReferences;
-  return out;
+  lazy(target, 'toc', () => (typeof toc === 'function' ? toc(props) : toc));
+  lazy(target, 'structuredData', () =>
+    typeof structuredData === 'function'
+      ? readStructuredData(structuredData, props)
+      : structuredData,
+  );
+  lazy(target, 'extractedReferences', () => (typeof refs === 'function' ? refs(props) : refs));
+  return target as T & PageOutputs;
 }
 
 function lazy(target: object, key: keyof PageOutputs, get: () => unknown) {
+  let read = false;
   let value: unknown;
   Object.defineProperty(target, key, {
     enumerable: true,
     configurable: true,
-    get: () => (value ??= get()),
+    get() {
+      if (!read) {
+        value = get();
+        read = true;
+      }
+      return value;
+    },
   });
 }
 
@@ -77,34 +79,13 @@ export function pageAt<Page extends CompiledMDXProperties<unknown>>(
     {
       ...page,
       default: bind(page.default, props),
-      _markdown: typeof markdown === 'function' ? bind(markdown, props) : markdown,
+      // called in place, so `asMarkdown()` of the component opts in when rendering into Markdown
+      _markdown:
+        typeof markdown === 'function' && props && Object.keys(props).length > 0
+          ? (own: MDXProps) => markdown({ ...props, ...own })
+          : markdown,
     },
     page,
     props,
   );
-}
-
-/** a promise that React `use()` reads without suspending once it settles */
-export function track<T>(promise: Promise<T>): Promise<T> & ReactPromise<T> {
-  promise.then(
-    (value) => Object.assign(promise, { status: 'fulfilled', value }),
-    (reason: unknown) => Object.assign(promise, { status: 'rejected', reason }),
-  );
-  return promise;
-}
-
-/** the methods of an async entry of the macro in the browser, its content renders synchronously once loaded */
-export function browserMethods(load: () => ReactPromise<{ body: MDXContent }>) {
-  return {
-    async preload() {
-      await load();
-    },
-    body(props: MDXProps) {
-      const loaded = load();
-      return createElement(
-        (loaded.status === 'fulfilled' ? loaded.value : use(loaded)).body,
-        props,
-      );
-    },
-  };
 }

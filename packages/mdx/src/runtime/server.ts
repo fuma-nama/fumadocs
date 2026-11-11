@@ -9,11 +9,12 @@ import {
 import type { DocCollection, DocsCollection, MetaCollection } from '@/config';
 import type { StandardSchemaV1 } from '@standard-schema/spec';
 import type { CompiledMDXProperties } from '@/loaders/mdx/build';
-import { bind, browserMethods, defineOutputs, merge, track } from '@/utils/page';
+import { bind, defineOutputs, merge, pageAt, type PageAt } from '@/utils/page';
 import type { InternalTypeConfig, DocData, DocMethods, FileInfo, MetaMethods } from './types';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
 import { renderStructuredData } from '../../../shared/structured-data';
-import { createElement } from 'react';
+import { createElement, use } from 'react';
+import type { MDXProps } from 'mdx/types';
 
 export type MetaCollectionEntry<Data> = Data & MetaMethods;
 
@@ -278,10 +279,7 @@ function metaAt<Meta extends MetaMethods & { _dataAt?: Record<string, MetaData> 
 
 const docAtCache = new WeakMap<object, Map<string, unknown>>();
 
-/**
- * @internal the page of an entry at the params of a page of its dynamic file, with its frontmatter in code: the same
- * object for the same params in every loader and the macro, so it loads its content once
- */
+/** @internal the page of a dynamic file at some params, the same object for the same params */
 export function docAt<Doc extends DocMethods & { _frontmatterAt?: Record<string, object> }>(
   doc: Doc,
   params: Params,
@@ -336,21 +334,28 @@ function createDocAt<Doc>(
     );
   }
 
-  let loading: Promise<DocData> | undefined;
-  // memoized, it can be called in render
-  const load = () => (loading ??= track(content().then((v) => toDocData(v, props))));
-  return merge(base, createDocMethods(info, content, props), {
+  let loaded: PageAt<CompiledMDXProperties> | undefined;
+  let loading: Promise<PageAt<CompiledMDXProperties>> | undefined;
+  let data: Promise<DocData> | undefined;
+  const loadPage = () => (loading ??= content().then((v) => (loaded = pageAt(v, props))));
+  return {
+    ...base,
+    ...createDocMethods(info, loadPage),
     _content: content,
-    load,
+    // memoized, it can be called in render
+    load: () => (data ??= content().then((v) => toDocData(v, props))),
     async structuredData() {
       const { structuredData } = await content();
       return typeof structuredData === 'function'
         ? renderStructuredData(structuredData, props ?? {})
         : structuredData;
     },
-    // the entries of the macro render in the browser
-    ...('body' in doc && browserMethods(load)),
-  });
+    ...('body' in doc && {
+      preload: () => loadPage().then(() => undefined),
+      // like the body of the macro, it renders synchronously when loaded
+      body: (props: MDXProps) => createElement((loaded ?? use(loadPage())).default, props),
+    }),
+  } as Doc;
 }
 
 function createDocMethods(
