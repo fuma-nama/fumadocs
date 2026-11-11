@@ -147,17 +147,11 @@ function accessor<Entry extends { info: { path: string } }>(entries: Entry[]) {
 
 function docAccessor<Entry extends DocMethods>(entries: Entry[]) {
   const { get } = accessor(entries);
-  // like the entry of a file, the page of some params is created once: it renders and preloads its content once
-  const pages = new Map<string, Entry>();
   return {
     entries,
     get(path: string, params?: Params): Entry | undefined {
       const entry = get(path);
-      if (!entry || !params) return entry;
-      const key = `${entry.info.path}?${JSON.stringify(params)}`;
-      let page = pages.get(key);
-      if (!page) pages.set(key, (page = docAt(entry, params)));
-      return page;
+      return entry && params ? docAt(entry, params) : entry;
     },
   };
 }

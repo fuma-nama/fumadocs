@@ -12,6 +12,7 @@ import { createNodeEvaluator, MacroCollector } from '@/macro/eval';
 import { createMacroMatcher, MacroModuleId, resolveMacroOptions } from '@/macro/options';
 import { macroFilter } from '@/bun';
 import { docs as macroDocs, docsAsync as macroDocsAsync } from '@/runtime/macro';
+import { loader } from 'fumadocs-core/source';
 import { createMdxLoader } from '@/loaders/mdx';
 import { buildConfig } from '@/config/build';
 import { createCore } from '@/core';
@@ -591,10 +592,10 @@ describe('runtime', () => {
     const collection = await macroDocsAsync({
       base: 'content/docs',
       head: {
-        './index.mdx': { title: 'Hello' },
+        './[version].mdx': { title: 'Hello', staticParams: [{ version: 'v1' }] },
       },
       body: {
-        './index.mdx': async () => {
+        './[version].mdx': async () => {
           loads++;
           return compiled;
         },
@@ -602,7 +603,7 @@ describe('runtime', () => {
       meta: {},
     });
 
-    const page = collection.getPage('index.mdx')!;
+    const page = collection.getPage('[version].mdx')!;
     expect(page).toMatchObject({ title: 'Hello' });
 
     // memoized, so it can be consumed like `use(page.load())` in render
@@ -617,8 +618,10 @@ describe('runtime', () => {
     expect(loads).toBe(1);
 
     // the page of some params is created once, so it renders with what was preloaded
-    const v1 = collection.getPage('index.mdx', { version: 'v1' })!;
-    expect(collection.getPage('index.mdx', { version: 'v1' })).toBe(v1);
+    const v1 = collection.getPage('[version].mdx', { version: 'v1' })!;
+    expect(collection.getPage('[version].mdx', { version: 'v1' })).toBe(v1);
+    const source = loader({ source: collection.toFumadocsSource(), baseUrl: '/' });
+    expect(source.getPage(['v1'])!.data).toBe(v1);
     await v1.preload();
     expect(v1.body({})).toBeTruthy();
     expect(loads).toBe(2);

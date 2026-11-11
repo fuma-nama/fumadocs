@@ -276,13 +276,25 @@ function metaAt<Meta extends MetaMethods & { _dataAt?: Record<string, MetaData> 
   if (at) return (params) => ({ ...meta, ...at[JSON.stringify(params)] });
 }
 
-/** @internal the page of an entry at the params of a page of its dynamic file, with its frontmatter in code */
+const docAtCache = new WeakMap<object, Map<string, unknown>>();
+
+/**
+ * @internal the page of an entry at the params of a page of its dynamic file, with its frontmatter in code: the same
+ * object for the same params in every loader and the macro, so it loads its content once
+ */
 export function docAt<Doc extends DocMethods & { _frontmatterAt?: Record<string, object> }>(
   doc: Doc,
   params: Params,
 ): Doc {
-  const { _frontmatterAt: at } = doc;
-  return createDocAt(doc, params, at ? merge(doc, at[JSON.stringify(params)]) : doc);
+  const key = JSON.stringify(params);
+  let pages = docAtCache.get(doc);
+  if (!pages) docAtCache.set(doc, (pages = new Map()));
+  let page = pages.get(key) as Doc | undefined;
+  if (!page) {
+    const { _frontmatterAt: at } = doc;
+    pages.set(key, (page = createDocAt<Doc>(doc, params, at ? merge(doc, at[key]) : doc)));
+  }
+  return page;
 }
 
 type Props = Record<string, unknown>;
