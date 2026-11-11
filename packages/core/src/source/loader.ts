@@ -464,10 +464,10 @@ export function loader<I extends ResolvedInput, I18n extends I18nConfig | undefi
       return list;
     },
     getPage(slugs = [], options) {
-      if (typeof options !== 'object')
-        return indexer.getPageBySlugs(slugs, options ?? i18n?.defaultLanguage);
-      const page = indexer.getPageBySlugs(slugs, options.language ?? i18n?.defaultLanguage);
-      return page && options.props ? indexer.withProps(page, options.props) : page;
+      const { language = i18n?.defaultLanguage, props } =
+        typeof options === 'object' ? options : { language: options };
+      const page = indexer.getPageBySlugs(slugs, language);
+      return page && props ? indexer.withProps(page, props) : page;
     },
     getPageByUrl(url, language) {
       if (language !== undefined || !i18n) return indexer.getPageByUrl(url, language);
