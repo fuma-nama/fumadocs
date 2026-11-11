@@ -1102,3 +1102,53 @@ test('Remark Show: static outputs analyse the source', async () => {
       'the outputs of this document are static',
     );
 });
+
+test('Remark LLMs: outputs without parts from code are static and render the same', async () => {
+  const { compile, run } = await import('@mdx-js/mdx');
+  const runtime = await import('react/jsx-runtime');
+  const server = await import('@/server');
+  const { remarkShow } = await import('@/mdx-plugins/remark-show');
+  const evaluate = async (value: string, output?: 'string' | 'function') => {
+    const code = await compile(
+      { value, data: { unstable_runtimeOutputs: true } },
+      {
+        outputFormat: 'function-body',
+        baseUrl: import.meta.url,
+        remarkPlugins: [
+          remarkShow,
+          remarkHeading,
+          [remarkStructure, { exportAs: true }],
+          [remarkLLMs, { output }],
+        ],
+        rehypePlugins: [rehypeToc, rehypeHeading],
+      },
+    );
+    const body = String(code).replace(
+      /await import\([^)]*"fumadocs-core\/server"\)\)?/g,
+      'arguments[0]._server',
+    );
+    return { code: String(code), mod: await run(body, { ...runtime, _server: server } as never) };
+  };
+  const source =
+    '## Install <span data-color={"blue"} />\n\nRun it.\n\n\n\n```txt\na\n\n\n\nb\n```\n';
+
+  const { code, mod } = await evaluate(source);
+  // attributes add no text, the ID isn't from code
+  expect(code).not.toContain('_headingIds');
+  expect(mod.structuredData).toEqual({
+    contents: [{ heading: 'install-', content: 'Run it.' }],
+    headings: [{ id: 'install-', content: 'Install' }],
+  });
+  // like the component rendered with `renderToMarkdown()`, which an explicit `output: 'function'` keeps
+  const { mod: component } = await evaluate(source, 'function');
+  expect(typeof component._markdown).toBe('function');
+  expect(mod._markdown).toBe(
+    await server.renderToMarkdown(runtime.jsx(component._markdown as never, {})),
+  );
+
+  // an explicit `output: 'string'` keeps the source of expressions, `<show>` fails
+  expect((await evaluate('A {props.name}.\n', 'string')).mod._markdown).toBe('A {props.name}.\n');
+  await expect(evaluate('<show when={props.a}>A</show>\n', 'string')).rejects.toThrow(
+    'the outputs of this document are static',
+  );
+});
