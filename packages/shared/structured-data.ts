@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import type {
   StructuredData,
   StructuredDataContent,
@@ -7,7 +8,7 @@ import type {
 interface StructuredRecord extends Partial<Omit<StructuredDataContent, 'content'>> {
   id?: string;
   /** text, or an array of its parts: like in React, only strings and numbers are text */
-  content: unknown;
+  content: ReactNode;
 }
 
 /** the export of `remarkStructure` for props: the records that show for the props of a page, in document order */
@@ -33,7 +34,7 @@ export async function renderStructuredData(
   return readStructuredData(data, props);
 }
 
-function toText(content: unknown): string {
+function toText(content: ReactNode): string {
   if (typeof content === 'string' || typeof content === 'number') return String(content);
   let out = '';
   if (Array.isArray(content)) for (const part of content) out += toText(part);
