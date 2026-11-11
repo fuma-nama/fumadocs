@@ -4,7 +4,7 @@ import remarkGfm from 'remark-gfm';
 import type { PluggableList, Transformer } from 'unified';
 import { VFile } from 'vfile';
 import { createCodeOutput, esmScope, toMdxExport } from './utils';
-import { walkBranches } from '../../../shared/show';
+import { isStaticOutput, walkBranches } from '../../../shared/show';
 import { staticTagRegex } from '../../../shared/code-output';
 import { createStructuredRecords } from '../../../shared/structured-records';
 import type { MdxJsxFlowElement, MdxJsxTextElement } from 'mdast-util-mdx';
@@ -51,9 +51,11 @@ export interface StructureOptions {
   mdxTypes?: (node: JsxElement) => boolean;
 
   /**
-   * Return `true` to keep a JSX element as an HTML tag, other elements are replaced by their content.
+   * Return `true` to keep a JSX element, other elements are replaced by their content. Kept elements are HTML tags, or
+   * render into Markdown like processed Markdown when the export is a function of the props.
    *
-   * Default: `File`, `TypeTable`, `Callout` and `Card` elements.
+   * Default: `File`, `TypeTable`, `Callout` and `Card` elements, or the elements of components when the export is a
+   * function of the props.
    */
   filterElement?: (node: JsxElement) => boolean;
 
@@ -98,31 +100,38 @@ export const remarkStructureDefaultOptions = {
  * Extract content into structured data, as Markdown sliced from the authored source. Links and JSX elements are
  * replaced by their content, images are removed.
  *
- * For a content source that renders pages for props, a document whose records read props (authored expressions,
- * `<show>`, heading IDs from code) exports a function of the props giving the records that show.
- * `vfile.data.structuredData` is static.
+ * For a content source that renders pages for props, the export is a function of the props giving the records that show, their expressions and
+ * elements render like in processed Markdown. `vfile.data.structuredData` is static.
  *
  * By default, the output is stored into VFile (`vfile.data.structuredData`), you can specify `exportAs` to export it.
  */
 export function remarkStructure({
   types = remarkStructureDefaultOptions.types,
   mdxTypes = remarkStructureDefaultOptions.mdxTypes,
-  filterElement = remarkStructureDefaultOptions.filterElement,
+  filterElement,
   exportAs = remarkStructureDefaultOptions.exportAs,
 }: StructureOptions = {}): Transformer<Root, Root> {
   const isType = Array.isArray(types) ? (node: Nodes) => types.includes(node.type) : types;
 
   return (tree, file) => {
+    const isStatic = isStaticOutput(file.data);
     const out = createCodeOutput(file, {
       target: 'search',
-      keep: filterElement as (node: Nodes) => boolean,
+      isStatic,
+      keep: filterElement as ((node: Nodes) => boolean) | undefined,
     });
-    const records = createStructuredRecords(out, {
+    const records = createStructuredRecords<Nodes>(out, {
       isType,
       mdxTypes: (node) => mdxTypes(node as JsxElement),
       tableRow: tableRowToStructuredData,
-      data: file.data,
+      headingIds: file.data._headingIds,
     });
+
+    // Fumadocs OpenAPI Generated Structured Data
+    const openapi = (file.data.frontmatter as { _openapi?: { structuredData?: StructuredData } })
+      ?._openapi?.structuredData;
+    for (const item of openapi?.headings ?? []) records.push(item);
+    for (const item of openapi?.contents ?? []) records.push(item);
 
     walkBranches<Nodes>(tree, (node, when) => records.collect(node, () => when));
 
@@ -131,7 +140,7 @@ export function remarkStructure({
 
     if (!exportAs) return;
     const name = typeof exportAs === 'string' ? exportAs : 'structuredData';
-    const code = records.toCode(esmScope(tree));
+    const code = isStatic ? undefined : records.toCode(esmScope(tree));
     tree.children.unshift(
       code ? out.esm(`export const ${name} = ${code};`) : toMdxExport(name, data),
     );

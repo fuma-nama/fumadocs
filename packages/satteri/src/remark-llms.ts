@@ -1,10 +1,9 @@
 import type { MdastPluginEntry } from 'satteri';
 import { defineMdastPlugin } from 'satteri';
-import type { PositionedNode } from './stringifier';
-
-type Node = PositionedNode & { type: string };
+import { offsets, type PositionedNode } from './stringifier';
 import { stringifyHeadingId } from '../../shared/heading-id';
 import { createCodeOutput, esmScope } from './utils';
+import { isStaticOutput } from '../../shared/show';
 
 export interface LLMsOptions {
   /**
@@ -36,20 +35,19 @@ export function remarkLlms({
 }: LLMsOptions = {}): MdastPluginEntry {
   const factory = () => {
     let out: ReturnType<typeof createCodeOutput>;
+    let isStatic = false;
     /** the code of the ESM nodes */
     const esm: string[] = [];
 
-    const drop = (node: Node) => out.s.replace(node, '');
-    const edit = (node: Node) => out.edit(node);
+    const drop = (node: PositionedNode) => out.s.replace(node, '');
+    const edit = (node: PositionedNode & { type: string }) => out.edit(node);
 
     return defineMdastPlugin({
       name: 'remark-llms',
       options: { position: true },
       before(_root, ctx) {
-        out = createCodeOutput(ctx, {
-          target: 'markdown',
-          keep: output === 'function' ? () => true : undefined,
-        });
+        isStatic = isStaticOutput(ctx.data, output && output === 'string');
+        out = createCodeOutput(ctx, { target: 'markdown', isStatic });
       },
       mdxjsEsm(node) {
         edit(node);
@@ -58,7 +56,14 @@ export function remarkLlms({
       yaml: drop,
       toml: drop,
       heading(node, ctx) {
-        stringifyHeadingId(out, node, headingIds && ctx.data._headingIds);
+        const id = (node.data as { hProperties?: { id?: string } } | undefined)?.hProperties?.id;
+        const code = !isStatic && id !== undefined && ctx.data._headingIds?.[id];
+        stringifyHeadingId(
+          out.s,
+          node,
+          offsets,
+          headingIds && (code ? out.expression(code, id!) : id),
+        );
       },
       mdxTextExpression: edit,
       mdxFlowExpression: edit,
@@ -68,11 +73,13 @@ export function remarkLlms({
         const text = out.s.stringify(root).trim();
         const value = text ? `${text}\n` : '';
 
-        ctx.data.markdown ??= out.toStatic(value);
+        if (isStatic) ctx.data.markdown ??= out.toStatic(value);
         if (as)
           ctx.prependChild(root, {
             type: 'mdxjsEsm',
-            value: out.markdownCode(as, value, esmScope(esm)),
+            value: isStatic
+              ? `export const ${as} = ${out.toConcat(value)};`
+              : out.markdownCode(as, value, esmScope(esm), output === 'function'),
           });
       },
     });

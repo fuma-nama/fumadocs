@@ -1,63 +1,75 @@
-import type { ReactNode } from 'react';
+import { isValidElement, type ElementType, type ReactNode } from 'react';
 import type {
   StructuredData,
   StructuredDataContent,
 } from 'fumadocs-core/mdx-plugins/remark-structure';
+import { toHtmlTag } from './code-output';
+import { toStructuredData } from './structured-records';
 
 /** a record of structured data that `remarkStructure` exports for props, a heading has an `id` */
 interface StructuredRecord extends Partial<Omit<StructuredDataContent, 'content'>> {
   id?: string;
-  /** text, or an array of its parts: like in React, only strings and numbers are text */
   content: ReactNode;
 }
 
 /** the export of `remarkStructure` for props: the records that show for the props of a page, in document order */
 export type StructuredRecords = (props: Record<string, unknown>) => StructuredRecord[];
 
-/** The structured data of a page for its props, from the export of `remarkStructure`. */
-export function readStructuredData(
-  data: StructuredData | StructuredRecords,
-  props: Record<string, unknown>,
-): StructuredData {
-  if (typeof data !== 'function') return data;
-  const records = data(props);
-  const contents: string[] = [];
-  for (const { content } of records) contents.push(toText(content));
-  return toStructuredData(records, contents);
-}
-
-/** @deprecated same as {@link readStructuredData}, until its callers move to it */
+/** Render the structured data of a page for its props, like its processed Markdown. */
 export async function renderStructuredData(
-  data: StructuredData | StructuredRecords,
+  records: StructuredRecords,
   props: Record<string, unknown>,
 ): Promise<StructuredData> {
-  return readStructuredData(data, props);
+  const { jsxComponents, renderToMarkdown } = await import('fumadocs-core/server');
+  const list = records({
+    ...props,
+    // missing components are kept as JSX syntax
+    components: jsxComponents(props.components as Record<string, ElementType> | undefined),
+  });
+  const rendered = await Promise.all(
+    list.map((record) =>
+      typeof record.content === 'string'
+        ? record.content
+        : renderToMarkdown(record.content, { target: 'search' }),
+    ),
+  );
+  return toStructuredData(list, rendered);
 }
 
-function toText(content: ReactNode): string {
-  if (typeof content === 'string' || typeof content === 'number') return String(content);
-  let out = '';
-  if (Array.isArray(content)) for (const part of content) out += toText(part);
-  return out;
-}
+/** every MDX component is the name of its tag */
+const tags = new Proxy({}, { get: (_, name) => name });
 
 /**
- * Structured data from its records in document order and their content as text: content goes under the last heading
- * before it, records are trimmed and empty ones are left out.
+ * Read the structured data of a page for its props without rendering it: components don't run, they stay as HTML tags
+ * like search dialogs show them.
  */
-export function toStructuredData(
-  records: readonly { id?: string; heading?: string; table?: string }[],
-  contents: string[],
+export function readStructuredData(
+  records: StructuredRecords,
+  props: Record<string, unknown>,
 ): StructuredData {
-  const data: StructuredData = { contents: [], headings: [] };
-  let heading: string | undefined;
-  for (let i = 0; i < records.length; i++) {
-    const { id, table, heading: own = heading } = records[i];
-    const content = contents[i].trim();
-    if (id !== undefined) heading = id;
-    if (!content) continue;
-    if (id !== undefined) data.headings.push({ id, content });
-    else data.contents.push(table ? { heading: own, content, table } : { heading: own, content });
+  const list = records({ ...props, components: tags });
+  return toStructuredData(
+    list,
+    list.map((record) => toText(record.content)),
+  );
+}
+
+/** the text of nodes without rendering them, the elements of components are HTML tags */
+function toText(node: ReactNode): string {
+  if (typeof node === 'string' || typeof node === 'number') return String(node);
+  if (Array.isArray(node)) {
+    let out = '';
+    for (const child of node as ReactNode[]) out += toText(child);
+    return out;
   }
-  return data;
+  if (!isValidElement<Record<string, unknown>>(node)) return '';
+
+  const { props } = node;
+  const inner = toText(props.children as ReactNode);
+  const { type } = node as { type: string | { displayName?: string; name?: string } };
+  const name = typeof type === 'string' ? type : (type.displayName ?? type.name);
+  // fragments and HTML elements are their content
+  if (!name || /^[a-z]/.test(name)) return inner;
+
+  return toHtmlTag(name, props, inner);
 }

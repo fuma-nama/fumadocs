@@ -6,7 +6,7 @@ import type {
   MdxJsxTextElement,
   PluginFactoryContext,
 } from 'satteri';
-import { showCondition, showDeclaration, showElement, showRuntimeError } from '../../shared/show';
+import { showCondition, showDeclaration, showElement } from '../../shared/show';
 
 type Element = MdxJsxFlowElement | MdxJsxTextElement;
 
@@ -23,8 +23,6 @@ export function remarkShow(): (
       if (node.name !== 'show') return;
       if (!showCondition({ ...node, name: showElement }))
         throw new Error(`[remark-show] \`<show>\` needs a \`when\` expression (${ctx.fileURL})`);
-      if (!ctx.data.unstable_runtimeOutputs)
-        throw new Error(`[remark-show] ${showRuntimeError} (${ctx.fileURL})`);
       ctx.data._show = used = true;
       ctx.setProperty<Element, 'name'>(node, 'name', showElement);
     }

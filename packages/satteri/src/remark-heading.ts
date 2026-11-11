@@ -63,7 +63,7 @@ export function remarkHeading({
 
         if (!hProperties.id) {
           hProperties.id = resolveSlug(node, title);
-          const code = fromCode && ids.next(node, showConditions(node, ctx));
+          const code = fromCode && ids.next(node.children, showConditions(node, ctx));
           if (code) (ctx.data._headingIds ??= {})[hProperties.id as string] = code;
         }
 

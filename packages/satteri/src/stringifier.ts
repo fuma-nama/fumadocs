@@ -37,9 +37,10 @@ declare module 'satteri' {
     _embeddedSource?: string;
     _embeds?: Embed[];
     /**
-     * Set by a content source that renders pages for props, like path params: authored expressions are values and
-     * `<show>` is allowed. The outputs of the Fumadocs plugins (the TOC, structured data, processed Markdown) that
-     * read props are functions of the props, to call with the props of a page.
+     * Set by a content source that renders pages for props, like path params: the outputs of the Fumadocs plugins
+     * (the TOC, structured data, processed Markdown) are functions of the props, to call with the props of a page.
+     *
+     * The source decides for all of its documents, so the shape of an export never depends on the content.
      */
     unstable_runtimeOutputs?: boolean;
     /** @internal set by `remarkShow` on a document with branches, which only props tell apart */
@@ -139,8 +140,6 @@ export function embedSource(
 export interface Stringifier {
   /** the document's source, followed by embedded sources */
   readonly source: string;
-  /** the range of a node in `source` */
-  range: (node: PositionedNode) => Range | undefined;
   /** replace a node in this output, after the edits of plugins */
   replace: (node: PositionedNode, text: Replacement) => void;
   /** replace a range of `source` in this output, an empty range inserts text, the edit goes with `node` if given */
@@ -154,8 +153,8 @@ export interface Stringifier {
   /** whether `range` is output inside `outer`, embedded sources are output in place of the node they replace */
   within: (range: Range, outer: Range) => boolean;
   /**
-   * Markdown evaluated where the output is exported, like the URL of an imported file. `fallback` in outputs that
-   * can't evaluate it.
+   * Markdown evaluated where the output is exported, like the URL of an imported file. Code that reads `props` makes
+   * the output a function of the props of the page. `fallback` in outputs that can't evaluate it.
    *
    * @param code - a JS expression
    */
@@ -260,7 +259,6 @@ export function createStringifier(
 
   const s: Stringifier = {
     source,
-    range: offsets,
     replace(node, text) {
       const range = offsets(node);
       if (!range || range.end === range.start) return;

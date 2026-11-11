@@ -91,7 +91,7 @@ export function remarkHeading({
       if (!props.id) {
         text = flattenNode(heading);
         props.id = slug(root, heading, text);
-        const code = fromCode && ids.next(heading, when);
+        const code = fromCode && ids.next(heading.children, when);
         if (code) (file.data._headingIds ??= {})[props.id as string] = code;
       }
 

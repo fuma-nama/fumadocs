@@ -13,7 +13,7 @@ import {
   moduleScope,
   type CodeOutputOptions,
 } from '../../shared/code-output';
-import { createStringifier, type PositionedNode } from './stringifier';
+import { createStringifier, offsets, type PositionedNode, type Stringifier } from './stringifier';
 
 /**
  * Flatten a node's text content by walking it in JavaScript.
@@ -104,12 +104,12 @@ type CodeNode = PositionedNode & {
 /** the shared code output, on the stringifier of Sätteri */
 export function createCodeOutput(
   ctx: MdastVisitorContext,
-  options: Pick<CodeOutputOptions<CodeNode>, 'target' | 'keep'>,
+  options: Pick<CodeOutputOptions<CodeNode, Stringifier>, 'target' | 'isStatic' | 'keep'>,
 ) {
-  return createSharedCodeOutput<CodeNode>({
+  return createSharedCodeOutput<CodeNode, Stringifier>({
     ...options,
-    runtime: ctx.data.unstable_runtimeOutputs === true,
     stringifier: (expression) => createStringifier(ctx, options.target, expression),
+    range: offsets,
     parse,
   });
 }

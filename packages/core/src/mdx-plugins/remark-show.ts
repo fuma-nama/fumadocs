@@ -1,11 +1,6 @@
 import type { Nodes, Root } from 'mdast';
 import type { Transformer } from 'unified';
-import {
-  showCondition,
-  showDeclaration,
-  showElement,
-  showRuntimeError,
-} from '../../../shared/show';
+import { showCondition, showDeclaration, showElement } from '../../../shared/show';
 import { isJsxElement, toEsm, walk } from './utils';
 
 /**
@@ -22,7 +17,6 @@ export function remarkShow(): Transformer<Root, Root> {
       used = true;
     });
     if (!used) return;
-    if (!file.data.unstable_runtimeOutputs) file.fail(showRuntimeError);
     tree.children.unshift(toEsm(showDeclaration));
     file.data._show = true;
   };

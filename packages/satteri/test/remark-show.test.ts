@@ -8,7 +8,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import * as server from 'fumadocs-core/server';
 import * as headingRuntime from 'fumadocs-core/mdx-plugins/remark-heading.runtime';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
-import { readStructuredData, type StructuredRecords } from '../../shared/structured-data';
+import { renderStructuredData, type StructuredRecords } from '../../shared/structured-data';
 import { compileMdx } from '@/compile';
 import { applySatteriPreset } from '@/preset';
 import { remarkInclude } from '@/remark-include';
@@ -84,7 +84,7 @@ test('Remark Show: branches and expressions render from code in every output', a
   const outputs = async (props: Record<string, unknown>) => ({
     toc: page.toc(props).map((item) => item.url),
     titles: page.toc(props).map((item) => renderToStaticMarkup(item.title)),
-    structured: readStructuredData(page.structuredData, props),
+    structured: await renderStructuredData(page.structuredData, props),
     markdown: await server.renderToMarkdown(createElement(page._markdown, props)),
     html: renderToStaticMarkup(createElement(page.default, props)),
   });
@@ -160,30 +160,10 @@ test('Remark Show: static outputs analyse the source', async () => {
   expect(page.structuredData.headings[0].content).toBe('Deploy on {1 + 1}');
   expect(page._markdown).toBe('## Deploy on {1 + 1} [#deploy-on-]\n\nAstro.\n');
 
-  // only props tell the branches apart
+  // the source decides whether outputs read the props, a static output fails on branches that only props tell apart
   await expect(compile('<show when={props.a}>\n## Astro\n</show>\n')).rejects.toThrow(
-    'unstable_runtimeOutputs',
+    'the outputs of this document are static',
   );
-
-  // in a source that renders pages for props, the outputs that don't read props are static
-  const runtime = await applySatteriPreset({
-    data: { unstable_runtimeOutputs: true },
-    mdastPlugins: [remarkLlms()],
-  })('runtime');
-  const mixed = await compileMdx({
-    source: '## Deploy\n\nOn [Next.js](/next).\n',
-    filePath: '/tmp/doc.mdx',
-    environment: 'runtime',
-    options: runtime,
-  });
-  expect(await new AsyncFunction('opts', mixed.code)(scope)).toMatchObject({
-    toc: [{ url: '#deploy', depth: 2 }],
-    structuredData: {
-      headings: [{ id: 'deploy', content: 'Deploy' }],
-      contents: [{ heading: 'deploy', content: 'On Next.js.' }],
-    },
-    _markdown: '## Deploy [#deploy]\n\nOn [Next.js](/next).\n',
-  });
 });
 
 test('components in authored code resolve like in the content', async () => {
@@ -203,14 +183,13 @@ test('components in authored code resolve like in the content', async () => {
     _markdown: FC<object>;
   };
   // components that the module doesn't declare are MDX components, missing ones are kept as JSX syntax
-  await expect(server.renderToMarkdown(createElement(page._markdown))).resolves.toBe(
-    '<Card icon={<Icon />} title="Core" />\n\nA value: <Badge /> and <Local />.',
-  );
-  // search records are text, elements are HTML tags or their content
-  expect(readStructuredData(page.structuredData, {}).contents).toEqual([
-    { heading: undefined, content: '<Card icon="<Icon />" title="Core" />' },
-    { heading: undefined, content: 'A value:  and .' },
+  expect((await renderStructuredData(page.structuredData, {})).contents).toEqual([
+    { heading: undefined, content: '<Card title="Core" />' },
+    { heading: undefined, content: 'A value: <Badge /> and <Local />.' },
   ]);
+  await expect(server.renderToMarkdown(createElement(page._markdown))).resolves.toBe(
+    '<Card title="Core" />\n\nA value: <Badge /> and <Local />.',
+  );
 });
 
 test('Remark Show: branches with included files', async () => {

@@ -1,9 +1,9 @@
 import type { HastPluginInput, HastVisitorContext } from 'satteri';
 import type { Element, ElementContent } from 'hast';
 import { esmScope, handleTag, jsxToSource, parse } from '@/utils';
-import { componentsCode, jsxComponents, listCode } from '../../shared/code-output';
-import { hasCode, textParts } from '../../shared/heading-id';
-import { showConditions } from '../../shared/show';
+import { componentsCode, hasCode, jsxComponents, listCode } from '../../shared/code-output';
+import { textParts } from '../../shared/heading-id';
+import { isStaticOutput, showConditions } from '../../shared/show';
 import type { ExtraPluginHooks } from './compile';
 
 export interface RehypeTocOptions {
@@ -36,7 +36,7 @@ const HeadingTags = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
 
 declare module 'satteri' {
   interface DataMap {
-    /** the code of the items, a function of the props when they read props. In data mode, with text titles */
+    /** the code of the items, exported by `compileMdx`. In data mode, a function of the props with text titles */
     _rehypeTocCode?: string;
   }
 }
@@ -46,7 +46,6 @@ export function rehypeToc({ exportToc = true }: RehypeTocOptions = {}): HastPlug
   const resolved = exportToc === true ? { as: 'esm' as const, name: 'toc' } : exportToc;
   const plugin: HastPluginInput & ExtraPluginHooks = () => {
     const items: { code: string; when: string[] }[] = [];
-    let runtime = false;
     /** whether an item reads the props of a page, beside its conditions */
     let dynamic = false;
     /** the components of titles */
@@ -56,16 +55,21 @@ export function rehypeToc({ exportToc = true }: RehypeTocOptions = {}): HastPlug
     return {
       name: 'rehype-toc',
       before(_root: unknown, ctx: HastVisitorContext) {
-        runtime = ctx.data.unstable_runtimeOutputs === true;
         if (resolved && resolved.as === 'data') ctx.data.rehypeToc ??= [];
       },
       after(_root: unknown, ctx: HastVisitorContext) {
         if (!resolved) return;
-        ctx.data._rehypeTocCode = listCode(
-          items,
-          dynamic,
-          componentsCode(components, esmScope(esm)),
-        );
+        const isStatic = resolved.as === 'esm' && isStaticOutput(ctx.data);
+        // like in the content, the other components of titles are MDX components: without them, their content
+        const declaration = isStatic
+          ? ''
+          : componentsCode(
+              components,
+              esmScope(esm),
+              'props.components ?? {}',
+              '((props) => props.children)',
+            );
+        ctx.data._rehypeTocCode = listCode(items, !isStatic && dynamic, declaration);
       },
       mdxjsEsm(node: { value: string }) {
         esm.push(node.value);
@@ -103,21 +107,26 @@ export function rehypeToc({ exportToc = true }: RehypeTocOptions = {}): HastPlug
               ? element.properties['data-fd-step']
               : undefined;
           const when = showConditions(element, ctx);
-          const fromCode = runtime && hasCode(element);
-          if (code || fromCode) dynamic = true;
+          if (code) dynamic = true;
           let titleCode: string;
           if (resolved.as === 'esm') {
             titleCode = jsxToSource({ type: 'root', children });
-            if (runtime && /<[A-Z_$]/.test(titleCode)) jsxComponents(parse(titleCode), components);
+            if (/<[A-Z_$]/.test(titleCode)) jsxComponents(parse(titleCode), components);
+            if (hasCode(element)) dynamic = true;
           } else {
             // titles in data are text
+            let fromCode = false;
+            const parts = textParts(children, () => (fromCode = dynamic = true));
             titleCode = fromCode
-              ? `[${textParts(children)}].filter((v) => typeof v === "string" || typeof v === "number").join("")`
+              ? `[${parts}].filter((v) => typeof v === "string" || typeof v === "number").join("")`
               : JSON.stringify(title);
           }
-          let obj = `{title: ${titleCode}, url: ${code ? `"#" + ${code}` : JSON.stringify(`#${id}`)}, depth: ${element.tagName[1]}`;
-          if (step !== undefined) obj += `, _step: ${step}`;
-          items.push({ code: `${obj}}`, when });
+          let obj = `{title: ${titleCode},`;
+          obj += `url: ${code ? `"#" + ${code}` : JSON.stringify(`#${id}`)},`;
+          obj += `depth: ${JSON.stringify(Number(element.tagName[1]))},`;
+          if (step !== undefined) obj += `_step: ${JSON.stringify(step)},`;
+          obj += '}';
+          items.push({ code: obj, when });
           if (resolved.as === 'esm') return;
 
           (ctx.data.rehypeToc ??= []).push({

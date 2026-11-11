@@ -118,7 +118,6 @@ test('includeProcessedMarkdown keeps the authored source', async () => {
     >
     > \`\`\`ts
     > console.log('Hello World');
-    > \`\`\`
-    "
+    > \`\`\`"
   `);
 });
