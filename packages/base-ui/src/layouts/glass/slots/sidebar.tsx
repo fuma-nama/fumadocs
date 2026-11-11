@@ -307,6 +307,7 @@ function SidebarLinkItem({
               <Link
                 href={item.url}
                 external={item.external}
+                aria-current={isLinkItemActive(item, pathname) ? 'page' : undefined}
                 className={cn(
                   'inline-flex items-center gap-2 [&_svg]:size-4',
                   isLinkItemActive(item, pathname)
@@ -338,14 +339,17 @@ function SidebarLinkItem({
         </Collapsible>
       );
     }
-    default:
+    default: {
+      const active = isLinkItemActive(item, pathname);
+
       return (
         <Link
           href={item.url}
           external={item.external}
+          aria-current={active ? 'page' : undefined}
           className={cn(
             itemTriggerVariants({
-              active: isLinkItemActive(item, pathname),
+              active,
               className,
             }),
           )}
@@ -357,6 +361,7 @@ function SidebarLinkItem({
           {item.text}
         </Link>
       );
+    }
   }
 }
 
@@ -374,13 +379,14 @@ function renderNode(node: PageTree.Node) {
 
 function SidebarItem({ item }: { item: PageTree.Item }) {
   const path = useTreePath();
+  const active = isNodeInPath(item, path);
+
   return (
     <Link
       href={item.url}
       external={item.external}
-      className={itemTriggerVariants({
-        active: isNodeInPath(item, path),
-      })}
+      aria-current={active ? 'page' : undefined}
+      className={itemTriggerVariants({ active })}
       onClick={() => {
         drawerHandle.close();
       }}
@@ -395,6 +401,7 @@ function SidebarFolder({ folder }: { folder: PageTree.Folder }) {
   const path = useTreePath();
   const shouldOpen = (folder.defaultOpen ?? true) || isNodeInPath(folder, path);
   const [open, setOpen] = useState(shouldOpen);
+  const indexActive = folder.index ? isNodeInPath(folder.index, path) : false;
 
   useOnChange(shouldOpen, () => shouldOpen && setOpen(true));
   if (folder.collapsible === false) {
@@ -404,9 +411,10 @@ function SidebarFolder({ folder }: { folder: PageTree.Folder }) {
           <Link
             href={folder.index.url}
             external={folder.index.external}
+            aria-current={indexActive ? 'page' : undefined}
             className={cn(
               'inline-flex px-2.5 py-1.5 font-medium items-center gap-2 [&_svg]:size-4 mt-4 first:mt-0',
-              isNodeInPath(folder.index, path)
+              indexActive
                 ? 'text-fd-primary'
                 : 'hover:underline hover:decoration-fd-muted-foreground hover:underline-offset-4 hover:decoration-dashed hover:text-fd-accent-foreground',
             )}
@@ -444,9 +452,10 @@ function SidebarFolder({ folder }: { folder: PageTree.Folder }) {
           <Link
             href={folder.index.url}
             external={folder.index.external}
+            aria-current={indexActive ? 'page' : undefined}
             className={cn(
               'inline-flex items-center gap-2 [&_svg]:size-4',
-              isNodeInPath(folder.index, path)
+              indexActive
                 ? 'text-fd-primary'
                 : 'hover:underline hover:decoration-fd-muted-foreground hover:underline-offset-4 hover:decoration-dashed hover:text-fd-accent-foreground',
             )}

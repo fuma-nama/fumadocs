@@ -305,7 +305,13 @@ export function SidebarItem({
   useAutoScroll(active, ref);
 
   return (
-    <Link ref={ref} data-active={active} prefetch={prefetch} {...props}>
+    <Link
+      ref={ref}
+      data-active={active}
+      aria-current={active ? 'page' : undefined}
+      prefetch={prefetch}
+      {...props}
+    >
       {icon ?? (props.external ? <ExternalLink /> : null)}
       {children}
     </Link>
@@ -379,6 +385,7 @@ export function SidebarFolderLink({
     <Link
       ref={ref}
       data-active={active}
+      aria-current={active ? 'page' : undefined}
       onClick={(e) => {
         if (!collapsible) return;
 
