@@ -182,12 +182,16 @@ export function createMarkdownSource<
               data: base,
               // the file is compiled once, the params and custom props only bind its content and outputs
               dataAt: (params, custom) =>
-                code && !custom
-                  ? page(file, parsed, params)
-                  : {
-                      ...(custom?.data ?? base),
-                      ...bind(file, parsed, { ...params, ...custom?.props }),
-                    },
+                custom
+                  ? { ...custom.data, ...bind(file, parsed, { ...params, ...custom.props }) }
+                  : code
+                    ? page(file, parsed, params)
+                    : // its own frontmatter, like the page of each params with frontmatter in code
+                      {
+                        ...base,
+                        frontmatter: Object.assign({}, base.frontmatter),
+                        ...bind(file, parsed, params),
+                      },
             };
           }
         }

@@ -245,6 +245,7 @@ export default ({ framework }: { framework: string }) => ({ title: \`Framework \
       path.join(dir, '[framework]/deploy.mdx'),
       '---\ntitle: Deploy\n---\n\nexport const frontmatter = { description: `Deploy on ${props.framework}` };\n\n## {props.version} on {props.framework}\n',
     );
+    await fs.writeFile(path.join(dir, '[framework]/plain.mdx'), '---\ntitle: Plain\n---\n');
     await fs.writeFile(
       path.join(dir, 'index.mdx'),
       // fields of the schema can be in code only
@@ -263,6 +264,10 @@ export default ({ framework }: { framework: string }) => ({ title: \`Framework \
     expect(source.getPageTree().children.map((node) => node.name)).toContain('Framework waku');
     expect(source.getPage(['waku', 'waku'])?.data.title).toBe('WAKU');
     expect(source.getPage(['next', 'waku'])).toBeUndefined();
+    // the page of each params has its own frontmatter
+    expect(source.getPage(['next', 'plain'])!.data.frontmatter).not.toBe(
+      source.getPage(['waku', 'plain'])!.data.frontmatter,
+    );
 
     // custom props bind the content and outputs of the page, with its params
     const custom = source.getPage(['waku', 'deploy'], { props: { version: 'v2' } })!;
