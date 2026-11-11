@@ -101,7 +101,7 @@ test('includeProcessedMarkdown keeps the authored source', async () => {
     isDevelopment: false,
   });
 
-  expect(JSON.parse(/^export const _markdown = (".+");$/m.exec(code)![1])).toMatchInlineSnapshot(`
+  expect(JSON.parse(/^ {2}return (".+");$/m.exec(code)![1])).toMatchInlineSnapshot(`
     "# Title [#title]
 
     ![Diagram](/images/diagram.png)
@@ -118,6 +118,7 @@ test('includeProcessedMarkdown keeps the authored source', async () => {
     >
     > \`\`\`ts
     > console.log('Hello World');
-    > \`\`\`"
+    > \`\`\`
+    "
   `);
 });

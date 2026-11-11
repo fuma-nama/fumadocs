@@ -79,7 +79,7 @@ export function remarkLlms({
             type: 'mdxjsEsm',
             value: isStatic
               ? `export const ${as} = ${out.toConcat(value)};`
-              : out.markdownCode(as, value, esmScope(esm), output === 'function'),
+              : out.markdownCode(as, value, esmScope(esm)),
           });
       },
     });

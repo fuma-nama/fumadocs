@@ -110,7 +110,7 @@ export function remarkLLMs({
       out.esm(
         isStatic
           ? `export const ${as} = ${out.toConcat(value)};`
-          : out.markdownCode(as, value, esmScope(tree), output === 'function'),
+          : out.markdownCode(as, value, esmScope(tree)),
       ),
     );
     if (_data) file.data.markdown = out.toStatic(value);

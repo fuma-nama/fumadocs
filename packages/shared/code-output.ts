@@ -233,18 +233,8 @@ export function createCodeOutput<N extends CodeNode, S extends CodeStringifier<N
     /**
      * The export of processed Markdown: a component, rendered with `renderToMarkdown()` of `fumadocs-core/server`.
      * Its elements resolve like in the content, a missing MDX component is kept as JSX syntax.
-     *
-     * @param component - always a component, otherwise without parts from code, the text like `renderToMarkdown()` renders
-     * the component
      */
-    markdownCode(
-      as: string,
-      text: string,
-      scope: () => ReadonlySet<string>,
-      component: boolean,
-    ): string {
-      if (!component && !text.includes('\0'))
-        return `export const ${as} = ${literal(text.replace(/\n{3,}/g, '\n\n').trim())};`;
+    markdownCode(as: string, text: string, scope: () => ReadonlySet<string>): string {
       const declaration = declare(scope, '_jsxComponents(props.components)');
       return [
         `import { asMarkdown as _asMarkdown${declaration && ', jsxComponents as _jsxComponents'} } from "fumadocs-core/server";`,
