@@ -103,10 +103,7 @@ export function track<T>(promise: Promise<T>): Promise<T> & ReactPromise<T> {
 export function browserMethods(load: () => ReactPromise<{ body: MDXContent }>) {
   function Body(props: MDXProps) {
     const loaded = load();
-    return createElement(
-      (loaded.status === 'fulfilled' ? loaded.value : use(loaded)).body,
-      props,
-    );
+    return createElement((loaded.status === 'fulfilled' ? loaded.value : use(loaded)).body, props);
   }
 
   return {

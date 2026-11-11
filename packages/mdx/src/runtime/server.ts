@@ -279,17 +279,15 @@ function metaAt<Meta extends MetaMethods & { _dataAt?: Record<string, MetaData> 
 const docAtCache = new WeakMap<object, Map<string, unknown>>();
 
 /** @internal the page of a dynamic file at some params, the same object for the same params */
-export function docAt<Doc extends DocMethods & { _frontmatterAt?: Record<string, object> }>(
-  doc: Doc,
-  params: Params,
-): Doc {
+export function docAt<Doc extends DocMethods>(doc: Doc, params: Params): Doc {
   const key = JSON.stringify(params);
   let pages = docAtCache.get(doc);
   if (!pages) docAtCache.set(doc, (pages = new Map()));
   let page = pages.get(key) as Doc | undefined;
   if (!page) {
-    const { _frontmatterAt: at } = doc;
-    pages.set(key, (page = createDocAt<Doc>(doc, params, at ? merge(doc, at[key]) : doc)));
+    // the frontmatter in code of each params
+    const frontmatter = (doc as { _frontmatterAt?: Record<string, object> })._frontmatterAt?.[key];
+    pages.set(key, (page = createDocAt<Doc>(doc, params, merge(doc, frontmatter))));
   }
   return page;
 }
