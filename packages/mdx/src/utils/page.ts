@@ -27,9 +27,14 @@ export function merge<T>(...sources: (object | undefined)[]): T {
   return out as T;
 }
 
-/** a component of a compiled page with props, called in place so that `asMarkdown()` of the component opts in */
+/**
+ * a component of a compiled page with props, called in place so that `asMarkdown()` of the component opts in, the
+ * component itself without props
+ */
 export function bind(component: FC<MDXProps>, props?: Props): FC<MDXProps> {
-  return props ? (own) => component({ ...props, ...own }) : component;
+  return props && Object.keys(props).length > 0
+    ? (own) => component({ ...props, ...own })
+    : component;
 }
 
 /**

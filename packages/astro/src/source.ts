@@ -143,13 +143,14 @@ function pageData<Data extends PageEntry['data']>(
       const { Content, outputs } = await compile();
       const { toc, structuredData } = outputs;
       return {
-        body: props
-          ? Object.assign(
-              (...[result, own, slots]: Parameters<AstroComponentFactory>) =>
-                Content(result, { ...props, ...own }, slots),
-              Content,
-            )
-          : Content,
+        body:
+          props && Object.keys(props).length > 0
+            ? Object.assign(
+                (...[result, own, slots]: Parameters<AstroComponentFactory>) =>
+                  Content(result, { ...props, ...own }, slots),
+                Content,
+              )
+            : Content,
         toc: typeof toc === 'function' ? toc(props ?? {}) : toc,
         // read without rendering, `structuredData()` renders it
         get structuredData() {

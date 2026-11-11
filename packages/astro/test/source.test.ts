@@ -141,6 +141,14 @@ Run the installer of {props.version}.`,
   expect(new Set(render.mock.calls.map(([item]) => item))).toEqual(new Set([entry]));
 });
 
+it('renders the compiled content without props', async () => {
+  const entry: PageEntry = { id: 'index.mdx', body: 'Hello', data: { title: 'Home' } };
+  await compile(entry);
+  const source = loader({ source: toFumadocsSource([entry]), baseUrl: '/docs' });
+  const { body } = await source.getPage([], { props: {} })!.data.load();
+  expect(body).toBe((rendered.get(entry.id) as { Content: unknown }).Content);
+});
+
 it('runs the frontmatter in code for each params', async () => {
   const content = path.join(root, 'content/docs');
   mkdirSync(path.join(content, '[version]'), { recursive: true });

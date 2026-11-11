@@ -575,6 +575,8 @@ describe('runtime', () => {
 
     // eagerly loaded entries offer `preload()` as a no-op, for compatibility with async collections
     await expect(collection.getPage('index.mdx')!.preload()).resolves.toBeUndefined();
+    // without props, the content is the compiled component
+    expect(collection.getPage('index.mdx', {})!.body).toBe(collection.getPage('index.mdx')!.body);
 
     const source = collection.toFumadocsSource();
     expect(source.files).toHaveLength(2);
