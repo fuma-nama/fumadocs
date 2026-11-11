@@ -155,7 +155,7 @@ Fumadocs UI renders a [dropdown](/docs/ui/layouts/docs#tabs-groups) for each roo
 
 Customize folders by creating a `meta.json` file in the folder.
 
-```json title="meta.json"
+```json tab="meta.json"
 {
   "title": "Display Name",
   "icon": "MyIcon",
@@ -163,6 +163,17 @@ Customize folders by creating a `meta.json` file in the folder.
   "defaultOpen": true
 }
 ```
+
+```ts tab="meta.ts"
+export default {
+  title: 'Display Name',
+  icon: 'MyIcon',
+  pages: ['index', 'getting-started'],
+  defaultOpen: true,
+};
+```
+
+When your content source supports it, you can write meta files in code (`meta.ts` or `meta.js`), with the data as default export.
 
 | name          | description                                  |
 | ------------- | -------------------------------------------- |
@@ -302,10 +313,20 @@ export const i18n: I18nConfig = {
 
 ## Path Params
 
-A folder named `[name]` makes a folder for each value that its meta file lists in `staticParams`:
+A folder named `[name]` is generated for each value of the param. List the values in `staticParams` of its meta file:
+
+<Files>
+  <Folder name="content/docs" defaultOpen>
+    <Folder name="[framework]" defaultOpen>
+      <File name="meta.json" />
+      <File name="deploy.mdx" />
+    </Folder>
+  </Folder>
+</Files>
 
 ```json title="[framework]/meta.json"
 {
+  "title": "Framework",
   "staticParams": [{ "framework": "waku" }, { "framework": "astro" }]
 }
 ```
@@ -314,4 +335,49 @@ A folder named `[name]` makes a folder for each value that its meta file lists i
 | --------------------------------- | ------------------------------------------- |
 | `./[framework]/deploy.mdx`        | `['waku', 'deploy']`, `['astro', 'deploy']` |
 
-The content reads the params as `props`, like `props.framework`. See [Path Params](/docs/headless/path-params) for the details.
+The meta file applies to every generated folder. Pages receive their params as [props](/docs/markdown#props), and as `page.params` from `loader()`.
+
+In `meta.ts`, you can export a function of the params instead, with `staticParams` as a named export:
+
+```ts title="[framework]/meta.ts"
+const names = { waku: 'Waku', astro: 'Astro' };
+
+export const staticParams = [{ framework: 'waku' }, { framework: 'astro' }];
+
+export default ({ framework }: { framework: keyof typeof names }) => ({
+  title: names[framework],
+});
+```
+
+<Callout title='Good to Know'>
+
+A `[name]` folder without `staticParams` is a normal folder.
+
+</Callout>
+
+### Page Params
+
+A page can also list `staticParams` in its frontmatter. It is only generated for the values listed in both.
+
+```mdx title="[framework]/fumadocs-mdx.mdx"
+---
+title: Fumadocs MDX
+staticParams:
+  - framework: waku
+---
+```
+
+### Static Paths
+
+Files at a literal path take priority over generated ones. For example, `astro/deploy.mdx` replaces the `astro` page of `[framework]/deploy.mdx`. The same applies to meta files.
+
+### Localized Pages
+
+With [i18n](#i18n-routing), the files of a locale take priority over those of its fallback locale. For `/cn/docs/astro/deploy`, the first existing file is used:
+
+1. `astro/deploy.cn.mdx`
+2. `[framework]/deploy.cn.mdx`
+3. `astro/deploy.mdx`
+4. `[framework]/deploy.mdx`
+
+Localized pages read `staticParams` from `meta.cn.json` first. With the `dir` parser, each language folder lists its own values.

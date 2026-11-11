@@ -24,7 +24,7 @@ Compared to Astro content collections, it compiles your content at runtime inste
 ### Limitations
 
 - No build-time image optimization.
-- No imports/exports in MDX files, except [frontmatter in code](#data-in-code). Pass components when rendering instead.
+- No imports/exports in MDX files, but you can pass components when rendering.
 
 ## Setup
 
@@ -74,10 +74,6 @@ const docs = localMd({
   }),
 });
 ```
-
-### Data in Code
-
-Like in Fumadocs MDX, an MDX page can export its [frontmatter in code](/docs/mdx#frontmatter-in-code), and a meta file can be a [module](/docs/mdx#meta-files-in-code) like `meta.ts`.
 
 ## Usage
 

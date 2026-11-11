@@ -16,7 +16,6 @@
     "---Sources---",
     "source-api",
     "page-conventions",
-    "path-params",
     "content-collections/index",
     "contentlayer",
     "custom-source"

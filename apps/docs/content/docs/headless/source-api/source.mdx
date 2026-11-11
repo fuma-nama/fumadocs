@@ -123,7 +123,7 @@ Dynamic sources can only be consumed by [`dynamicLoader()`](/docs/headless/sourc
 
 ## Path Params
 
-To support [path params](/docs/headless/path-params) in your source, pass a file of a dynamic path, like `[framework]/deploy.mdx`, as one virtual file. The loader generates a page for each value, with the data from `dataAt()`, or `data` without it. Meta files work the same way:
+To support [path params](/docs/headless/page-conventions#path-params) in your source, pass a file like `[framework]/deploy.mdx` as one virtual file. The loader generates a page for each value, with the data from `dataAt()`, or `data` without it. Meta files work the same way:
 
 ```ts twoslash
 import type { StaticSource } from 'fumadocs-core/source';
