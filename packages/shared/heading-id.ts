@@ -10,17 +10,11 @@ export type HeadingIds = Record<string, string | undefined>;
 /** the default runtime of ID code, function bodies read it from `arguments[0]` like the JSX runtime */
 export const headingRuntime = 'fumadocs-core/mdx-plugins/remark-heading.runtime';
 
-interface TextNode {
-  type: string;
-  value?: unknown;
-  children?: readonly TextNode[];
-}
-
 /**
  * The text of inline content as code, the items of an array of its parts: authored expressions are values, the
  * content of a branch of `<show>` is there when it shows. Like in React, only strings and numbers are text.
  */
-export function textParts(nodes: readonly TextNode[]): string {
+export function textParts(nodes: readonly CodeNode[]): string {
   let parts = '';
   for (const node of nodes) {
     const branch = showCondition(node);
@@ -49,7 +43,7 @@ export function headingIdCode(runtime = headingRuntime) {
      *
      * @param when - the conditions of the branches around the heading
      */
-    next(heading: TextNode & CodeNode, when: string[]): string | undefined {
+    next(heading: CodeNode, when: string[]): string | undefined {
       const test = and(when);
       if (test || hasCode(heading)) dynamic = true;
       const parts = `[${textParts(heading.children!)}]`;
@@ -76,7 +70,7 @@ export function stringifyHeadingId<N extends CodeNode>(
 ): void {
   const start = s.range(node)?.start;
   // the content ends with its last child, before the closing sequence or underline
-  const last = node.children.at(-1);
+  const last: N | undefined = node.children[node.children.length - 1];
   const end = last && s.range(last)?.end;
   if (start === undefined || end === undefined) return;
 

@@ -1,34 +1,21 @@
 import { listCode, type CodeNode, type CodeOutput } from './code-output';
 import { headingIdRegex, type HeadingIds } from './heading-id';
 import { toStructuredData } from './structured-data';
-import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
-
-interface Range {
-  start: number;
-  end: number;
-}
-
-/** a content of structured data, see `fumadocs-core/mdx-plugins/remark-structure` */
-interface StructuredContent {
-  heading: string | undefined;
-  content: string;
-  table?: string;
-}
+import type { tableRowToStructuredData } from 'fumadocs-core/search';
+import type {
+  StructuredData,
+  StructuredDataContent,
+} from 'fumadocs-core/mdx-plugins/remark-structure';
 
 /** a heading of structured data, `code` is its ID as code */
-interface StructuredHeading {
-  id: string;
-  code?: string;
-  content: string;
-}
+type StructuredHeading = StructuredData['headings'][number] & { code?: string };
 
 interface StructuredRecordsOptions<N> {
   /** whether a node is a record */
   isType: (node: N) => boolean;
   /** whether a JSX element with content on several lines is a record as a whole */
   mdxTypes: (node: N) => boolean;
-  /** `tableRowToStructuredData()` of `fumadocs-core/search` */
-  tableRow: (row: { table: string; row: string[]; header: string[] }) => StructuredContent;
+  tableRow: typeof tableRowToStructuredData;
   /** the data of the file: the IDs of headings from code, and the records of Fumadocs OpenAPI in its frontmatter */
   data: { frontmatter?: unknown; _headingIds?: HeadingIds };
 }
@@ -42,15 +29,15 @@ export function createStructuredRecords<N extends CodeNode>(
   { isType, mdxTypes, tableRow, data: file }: StructuredRecordsOptions<N>,
 ) {
   const { s } = out;
-  const records: ((StructuredHeading | StructuredContent) & { when: string[] })[] = [];
+  const records: ((StructuredHeading | StructuredDataContent) & { when: string[] })[] = [];
   /** records are stringified after the edits of every node */
   const pending: (() => void)[] = [];
-  let covered: Range | undefined;
+  let covered: { start: number; end: number } | undefined;
   let tables = 0;
   /** whether a record reads the props of a page */
   let dynamic = false;
 
-  const push = (item: StructuredHeading | StructuredContent, when: string[] = []) => {
+  const push = (item: StructuredHeading | StructuredDataContent, when: string[] = []) => {
     if (when.length > 0 || ('code' in item && item.code) || out.readsProps(item.content))
       dynamic = true;
     records.push({ ...item, when });
@@ -82,7 +69,7 @@ export function createStructuredRecords<N extends CodeNode>(
       const { data } = node as {
         data?: {
           hProperties?: { id?: unknown };
-          structuredData?: { contents: StructuredContent[] };
+          structuredData?: { contents: StructuredDataContent[] };
         } | null;
       };
       if (data?.structuredData) {
