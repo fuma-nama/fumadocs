@@ -1,24 +1,18 @@
 import { listCode, type CodeNode } from './code-output';
 import { headingIdRegex, type HeadingIds } from './heading-id';
+import type { tableRowToStructuredData } from 'fumadocs-core/search';
+import type {
+  StructuredData,
+  StructuredDataContent,
+} from 'fumadocs-core/mdx-plugins/remark-structure';
 
 interface Range {
   start: number;
   end: number;
 }
 
-/** a content of structured data, see `fumadocs-core/mdx-plugins/remark-structure` */
-interface StructuredContent {
-  heading: string | undefined;
-  content: string;
-  table?: string;
-}
-
 /** a heading of structured data, `code` is its ID as code */
-interface StructuredHeading {
-  id: string;
-  code?: string;
-  content: string;
-}
+type StructuredHeading = StructuredData['headings'][number] & { code?: string };
 
 /** the code output of a compiler for search, as the records use it */
 interface RecordOutput<N> {
@@ -40,8 +34,7 @@ interface StructuredRecordsOptions<N> {
   isType: (node: N) => boolean;
   /** whether a JSX element with content on several lines is a record as a whole */
   mdxTypes: (node: N) => boolean;
-  /** `tableRowToStructuredData()` of `fumadocs-core/search` */
-  tableRow: (row: { table: string; row: string[]; header: string[] }) => StructuredContent;
+  tableRow: typeof tableRowToStructuredData;
   /** the IDs of headings from code */
   headingIds?: HeadingIds;
 }
@@ -55,13 +48,13 @@ export function createStructuredRecords<N extends CodeNode>(
   { isType, mdxTypes, tableRow, headingIds }: StructuredRecordsOptions<N>,
 ) {
   const { s } = out;
-  const records: ((StructuredHeading | StructuredContent) & { when: string[] })[] = [];
+  const records: ((StructuredHeading | StructuredDataContent) & { when: string[] })[] = [];
   /** records are stringified after the edits of every node */
   const pending: (() => void)[] = [];
   let covered: Range | undefined;
   let tables = 0;
 
-  const push = (item: StructuredHeading | StructuredContent, when: string[] = []) =>
+  const push = (item: StructuredHeading | StructuredDataContent, when: string[] = []) =>
     records.push({ ...item, when });
   const cells = (row: { children: N[] }) => {
     const cells: string[] = [];
@@ -88,7 +81,7 @@ export function createStructuredRecords<N extends CodeNode>(
       const { data } = node as {
         data?: {
           hProperties?: { id?: unknown };
-          structuredData?: { contents: StructuredContent[] };
+          structuredData?: { contents: StructuredDataContent[] };
         } | null;
       };
       if (data?.structuredData) {
@@ -173,10 +166,7 @@ export function toStructuredData(
   records: readonly { id?: string; heading?: string; table?: string }[],
   contents: string[],
 ) {
-  const data = {
-    contents: [] as StructuredContent[],
-    headings: [] as { id: string; content: string }[],
-  };
+  const data: StructuredData = { contents: [], headings: [] };
   let heading: string | undefined;
   for (let i = 0; i < records.length; i++) {
     const { id, table, heading: own = heading } = records[i];

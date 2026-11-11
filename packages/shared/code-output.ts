@@ -21,9 +21,6 @@ interface KeptElement {
   inline: boolean;
 }
 
-/** a part of an output that renders from code */
-type CodePart = Value | Branch | KeptElement;
-
 /** Markdown and its parts from code, branches and elements hold their content */
 type Chunk = string | Value | ((Branch | KeptElement) & { children: Chunk[] });
 
@@ -32,6 +29,7 @@ export interface CodeNode {
   name?: unknown;
   attributes?: unknown;
   value?: unknown;
+  children?: readonly CodeNode[];
 }
 
 interface CodeStringifier<N> {
@@ -81,7 +79,7 @@ export function createCodeOutput<N extends CodeNode, S extends CodeStringifier<N
   parse,
   literal = JSON.stringify,
 }: CodeOutputOptions<N, S>) {
-  const parts: CodePart[] = [];
+  const parts: (Value | Branch | KeptElement)[] = [];
   /** the components that the code refers to in JSX: kept elements, and the JSX in authored code */
   const components = new Set<string>();
   const readJsx = (code: string) => {
@@ -174,11 +172,7 @@ export function createCodeOutput<N extends CodeNode, S extends CodeStringifier<N
         for (const attr of node.attributes as JsxAttributes)
           if (attr.type === 'mdxJsxAttribute')
             attributes[attr.name] =
-              attr.value == null
-                ? true
-                : typeof attr.value === 'string'
-                  ? attr.value
-                  : attr.value.value;
+              (typeof attr.value === 'object' ? attr.value?.value : attr.value) ?? true;
         return toHtmlTag(node.name as string, attributes, s.inner(node));
       });
   }
