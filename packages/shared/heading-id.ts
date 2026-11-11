@@ -1,4 +1,4 @@
-import { and, type CodeNode, type CodeStringifier } from './code-output';
+import { and, type CodeNode, type CodeOutput } from './code-output';
 import { showCondition } from './show';
 
 /** a custom ID at the end of heading text, like `[#id]` */
@@ -68,14 +68,14 @@ export function headingIdCode(runtime = headingRuntime) {
 }
 
 /**
- * Write the ID of a heading in stringified Markdown.
+ * Write the ID of a heading in stringified Markdown, the one that `remarkHeading` gave it unless it has a custom ID.
  *
- * @param id - the ID to write as Markdown when the heading has no custom ID, `false` removes its custom ID
+ * @param ids - the IDs from code, `false` removes custom IDs
  */
 export function stringifyHeadingId<N extends CodeNode>(
-  s: CodeStringifier<N>,
-  node: N & { children: readonly N[] },
-  id: string | false | undefined,
+  { s, expression }: CodeOutput<N>,
+  node: N & { data?: unknown; children: readonly N[] },
+  ids: HeadingIds | false | undefined,
 ): void {
   const start = s.range(node)?.start;
   // the content ends with its last child, before the closing sequence or underline
@@ -84,7 +84,11 @@ export function stringifyHeadingId<N extends CodeNode>(
   if (start === undefined || end === undefined) return;
 
   const marker = headingIdRegex.exec(s.source.slice(start, end));
-  if (id === false) {
+  const id = (node.data as { hProperties?: { id?: string } } | undefined)?.hProperties?.id;
+  if (ids === false) {
     if (marker) s.edit(start + marker.index, end, '', node);
-  } else if (id !== undefined && !marker) s.edit(end, end, ` [#${id}]`, node);
+  } else if (id != null && !marker) {
+    const code = ids?.[id];
+    s.edit(end, end, ` [#${code ? expression(code, id) : id}]`, node);
+  }
 }

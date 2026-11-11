@@ -56,9 +56,7 @@ export function remarkLlms({
       yaml: drop,
       toml: drop,
       heading(node, ctx) {
-        const id = (node.data as { hProperties?: { id?: string } } | undefined)?.hProperties?.id;
-        const code = !isStatic && id !== undefined && ctx.data._headingIds?.[id];
-        stringifyHeadingId(out.s, node, headingIds && (code ? out.expression(code, id!) : id));
+        stringifyHeadingId(out, node, headingIds && (isStatic ? undefined : ctx.data._headingIds));
       },
       mdxTextExpression: edit,
       mdxFlowExpression: edit,

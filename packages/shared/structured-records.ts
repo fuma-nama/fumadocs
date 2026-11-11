@@ -15,8 +15,8 @@ interface StructuredRecordsOptions<N> {
   /** whether a JSX element with content on several lines is a record as a whole */
   mdxTypes: (node: N) => boolean;
   tableRow: typeof tableRowToStructuredData;
-  /** the IDs of headings from code */
-  headingIds?: HeadingIds;
+  /** the data of the file: the IDs of headings from code, and the records of Fumadocs OpenAPI in its frontmatter */
+  data: { frontmatter?: unknown; _headingIds?: HeadingIds };
 }
 
 /**
@@ -25,7 +25,7 @@ interface StructuredRecordsOptions<N> {
  */
 export function createStructuredRecords<N extends CodeNode>(
   out: CodeOutput<N>,
-  { isType, mdxTypes, tableRow, headingIds }: StructuredRecordsOptions<N>,
+  { isType, mdxTypes, tableRow, data: file }: StructuredRecordsOptions<N>,
 ) {
   const { s } = out;
   const records: ((StructuredHeading | StructuredDataContent) & { when: string[] })[] = [];
@@ -36,6 +36,10 @@ export function createStructuredRecords<N extends CodeNode>(
 
   const push = (item: StructuredHeading | StructuredDataContent, when: string[] = []) =>
     records.push({ ...item, when });
+  const openapi = (file.frontmatter as { _openapi?: { structuredData?: StructuredData } })?._openapi
+    ?.structuredData;
+  for (const item of openapi?.headings ?? []) push(item);
+  for (const item of openapi?.contents ?? []) push(item);
   const cells = (row: { children: N[] }) => {
     const cells: string[] = [];
     for (const cell of row.children) cells.push(s.inner(cell).trim());
@@ -46,8 +50,6 @@ export function createStructuredRecords<N extends CodeNode>(
     pending.length = 0;
   };
   return {
-    /** `when`: the conditions of the branches of `<show>` around it */
-    push,
     /**
      * Edit a node for records, and record it when it is one.
      *
@@ -103,7 +105,7 @@ export function createStructuredRecords<N extends CodeNode>(
 
         pending.push(() => {
           const content = s.inner(node).replace(headingIdRegex, '').trim();
-          push({ id, code: headingIds?.[id], content }, conditions);
+          push({ id, code: file._headingIds?.[id], content }, conditions);
         });
       } else {
         pending.push(() => {

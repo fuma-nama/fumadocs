@@ -1,6 +1,5 @@
 import type { MdastPluginDefinition, MdastVisitorContext } from 'satteri';
 import type { Nodes } from 'mdast';
-import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
 import { tableRowToStructuredData } from 'fumadocs-core/search';
 import type { ExtraPluginHooks } from './compile';
 import { createCodeOutput, esmScope } from './utils';
@@ -96,14 +95,8 @@ export function remarkStructure({
           isType: matchType,
           mdxTypes,
           tableRow: tableRowToStructuredData,
-          headingIds: ctx.data._headingIds,
+          data: ctx.data,
         });
-
-        // Fumadocs OpenAPI Generated Structured Data
-        const openapi = (ctx.data.frontmatter as { _openapi?: { structuredData?: StructuredData } })
-          ?._openapi?.structuredData;
-        for (const item of openapi?.headings ?? []) records.push(item);
-        for (const item of openapi?.contents ?? []) records.push(item);
       },
       after(_root, ctx) {
         ctx.data.structuredData ??= records.toStatic();

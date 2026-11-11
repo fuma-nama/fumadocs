@@ -88,12 +88,10 @@ export function remarkLLMs({
         if (visibility === 'children-only') {
           s.replace(node, (s) => s.inner(node));
         } else if (node.type === 'heading') {
-          const id = node.data?.hProperties?.id ?? undefined;
-          const code = !isStatic && id !== undefined && file.data._headingIds?.[id];
           stringifyHeadingId(
-            s,
+            out,
             node,
-            headingIds && (code ? out.expression(code, id as string) : id),
+            headingIds && (isStatic ? undefined : file.data._headingIds),
           );
         } else if (isJsxElement(node) && node.name && mdxAsPlaceholder?.includes(node.name)) {
           s.replace(node, (s) => toPlaceholder(node, out.toStatic(s.inner(node))));

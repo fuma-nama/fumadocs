@@ -124,14 +124,8 @@ export function remarkStructure({
       isType,
       mdxTypes: (node) => mdxTypes(node as JsxElement),
       tableRow: tableRowToStructuredData,
-      headingIds: file.data._headingIds,
+      data: file.data,
     });
-
-    // Fumadocs OpenAPI Generated Structured Data
-    const openapi = (file.data.frontmatter as { _openapi?: { structuredData?: StructuredData } })
-      ?._openapi?.structuredData;
-    for (const item of openapi?.headings ?? []) records.push(item);
-    for (const item of openapi?.contents ?? []) records.push(item);
 
     walkBranches<Nodes>(tree, (node, when) => records.collect(node, () => when));
 
