@@ -25,6 +25,9 @@ interface KeptElement {
   inline: boolean;
 }
 
+/** a part of an output that renders from code */
+type CodePart = Value | Branch | KeptElement;
+
 /** Markdown and its parts from code, branches and elements hold their content */
 type Chunk = string | Value | ((Branch | KeptElement) & { children: Chunk[] });
 
@@ -77,7 +80,7 @@ export function createCodeOutput<N extends CodeNode, S extends CodeStringifier<N
   parse,
   literal = JSON.stringify,
 }: CodeOutputOptions<N, S>) {
-  const parts: (Value | Branch | KeptElement)[] = [];
+  const parts: CodePart[] = [];
   /** the components that the code refers to in JSX: kept elements, and the JSX in authored code */
   const components = new Set<string>();
   const readJsx = (code: string) => {
@@ -126,6 +129,10 @@ export function createCodeOutput<N extends CodeNode, S extends CodeStringifier<N
     pushText(text.length);
     return root;
   }
+
+  /** see {@link componentsCode}, of the components of the code */
+  const declare = (scope: () => ReadonlySet<string>, from: string) =>
+    componentsCode(components, scope, from);
 
   /** whether output text reads the props of a page: it has authored expressions, branches or kept elements */
   function readsProps(text: string): boolean {
@@ -242,7 +249,7 @@ export function createCodeOutput<N extends CodeNode, S extends CodeStringifier<N
         return `export const ${as} = ${out || '""'};`;
       }
 
-      const declaration = componentsCode(components, scope, '_jsxComponents(props.components)');
+      const declaration = declare(scope, '_jsxComponents(props.components)');
       return [
         `import { asMarkdown as _asMarkdown${declaration && ', jsxComponents as _jsxComponents'} } from "fumadocs-core/server";`,
         `export function ${as}(props) {`,
@@ -252,9 +259,7 @@ export function createCodeOutput<N extends CodeNode, S extends CodeStringifier<N
         '}',
       ].join('\n');
     },
-    /** see {@link componentsCode}, of the components of the code */
-    componentsCode: (scope: () => ReadonlySet<string>, from: string) =>
-      componentsCode(components, scope, from),
+    componentsCode: declare,
   };
 }
 

@@ -21,8 +21,6 @@ interface StructuredHeading {
   content: string;
 }
 
-type StructuredRecord = (StructuredHeading | StructuredContent) & { when: string[] };
-
 /** the stringifier of a code output for search, as the records use it */
 interface RecordStringifier<N> extends CodeStringifier<N> {
   stringify(node: N): string;
@@ -40,13 +38,16 @@ interface StructuredRecordsOptions<N> {
   headingIds?: HeadingIds;
 }
 
-/** The records of structured data of a document, in document order: slices of its Markdown for search. */
+/**
+ * The records of structured data of a document, in document order: slices of its Markdown for search, see the
+ * `target` of the code output.
+ */
 export function createStructuredRecords<N extends CodeNode, S extends RecordStringifier<N>>(
   out: CodeOutput<N, S>,
   { isType, mdxTypes, tableRow, headingIds }: StructuredRecordsOptions<N>,
 ) {
   const { s } = out;
-  const records: StructuredRecord[] = [];
+  const records: ((StructuredHeading | StructuredContent) & { when: string[] })[] = [];
   /** records are stringified after the edits of every node */
   const pending: (() => void)[] = [];
   let covered: Range | undefined;
@@ -78,6 +79,7 @@ export function createStructuredRecords<N extends CodeNode, S extends RecordStri
      */
     collect(node: N, when: () => string[]): void {
       const { type } = node;
+      const isElement = type === 'mdxJsxFlowElement' || type === 'mdxJsxTextElement';
       out.edit(node);
 
       const { data } = node as {
@@ -102,13 +104,7 @@ export function createStructuredRecords<N extends CodeNode, S extends RecordStri
       if (!range || (covered && s.within(range, covered))) return;
       // an element on one line has inline content, recorded like a paragraph
       const line = s.source.indexOf('\n', range.start);
-      if (
-        (type === 'mdxJsxFlowElement' || type === 'mdxJsxTextElement') &&
-        line !== -1 &&
-        line < range.end &&
-        !mdxTypes(node)
-      )
-        return;
+      if (isElement && line !== -1 && line < range.end && !mdxTypes(node)) return;
       covered = range;
       const conditions = when();
 
