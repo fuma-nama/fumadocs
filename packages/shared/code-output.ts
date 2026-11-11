@@ -63,9 +63,6 @@ export interface CodeOutputOptions<N, S> {
 }
 
 const markerRegex = /\0(\/?)(\d+)\0/g;
-
-/** whether output text has parts from code */
-export const hasParts = (text: string) => text.includes('\0');
 const componentNameRegex = /^[A-Z][\w$]*$/;
 /** the elements that static search keeps as HTML tags by default */
 export const staticTagRegex = /^(File|TypeTable|Callout|Card)$/;
@@ -237,7 +234,8 @@ export function createCodeOutput<N extends CodeNode, S extends CodeStringifier<N
      * The export of processed Markdown: a component, rendered with `renderToMarkdown()` of `fumadocs-core/server`.
      * Its elements resolve like in the content, a missing MDX component is kept as JSX syntax.
      *
-     * @param component - always a component, otherwise the text when it has no parts: rendered the same
+     * @param component - always a component, otherwise without parts from code, the text like `renderToMarkdown()` renders
+     * the component
      */
     markdownCode(
       as: string,
@@ -245,7 +243,7 @@ export function createCodeOutput<N extends CodeNode, S extends CodeStringifier<N
       scope: () => ReadonlySet<string>,
       component: boolean,
     ): string {
-      if (!component && !hasParts(text))
+      if (!component && !text.includes('\0'))
         return `export const ${as} = ${literal(text.replace(/\n{3,}/g, '\n\n').trim())};`;
       const declaration = declare(scope, '_jsxComponents(props.components)');
       return [
@@ -345,35 +343,23 @@ export function and(conditions: string[]): string | undefined {
 }
 
 /**
- * The code of a list output: a function of the props giving the items whose conditions hold, or the list when no item
- * has conditions and it isn't `dynamic`.
+ * The code of a list output: a function of the props giving the items whose conditions hold, or the list when static.
  *
  * @param declaration - the code that declares the names of the items, see {@link componentsCode}
  */
 export function listCode(
   items: { code: string; when: string[] }[],
-  dynamic = false,
+  isStatic: boolean,
   declaration = '',
 ): string {
   let list = '[';
   for (const { code, when } of items) {
     const test = and(when);
-    if (test) dynamic = true;
     list += test ? `...(${test} ? [${code}] : []),` : `${code},`;
   }
   list += ']';
-  if (declaration) return `(props) => {\n${declaration}\nreturn ${list};\n}`;
-  return dynamic ? `(props) => ${list}` : list;
-}
-
-/** whether a node has authored code: expressions, or JSX attributes with expressions */
-export function hasCode(node: CodeNode & { children?: readonly CodeNode[] }): boolean {
-  if (node.type === 'mdxTextExpression' || node.type === 'mdxFlowExpression') return true;
-  if (node.type === 'mdxJsxTextElement' || node.type === 'mdxJsxFlowElement')
-    for (const attr of node.attributes as JsxAttributes)
-      if (attr.type === 'mdxJsxExpressionAttribute' || typeof attr.value === 'object') return true;
-  for (const child of node.children ?? []) if (hasCode(child)) return true;
-  return false;
+  if (isStatic) return list;
+  return declaration ? `(props) => {\n${declaration}\nreturn ${list};\n}` : `(props) => ${list}`;
 }
 
 function chunksToCode(chunks: Chunk[], literal: (text: string) => string): string {

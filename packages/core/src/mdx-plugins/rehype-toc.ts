@@ -3,7 +3,7 @@ import type { Root, Element, Nodes } from 'hast';
 import { toEstree } from 'hast-util-to-estree';
 import type { Expression, JSXElement } from 'estree-jsx';
 import { esmScope, handleTag, toEsm } from './utils';
-import { componentsCode, hasCode, jsxComponents, listCode } from '../../../shared/code-output';
+import { componentsCode, jsxComponents, listCode } from '../../../shared/code-output';
 import { isStaticOutput, walkBranches } from '../../../shared/show';
 
 export interface RehypeTocOptions {
@@ -110,8 +110,6 @@ export function rehypeToc(
       const titles: Expression[] = [];
       const list: { code: string; when: string[] }[] = [];
       const components = new Set<string>();
-      /** whether an item reads the props of a page, beside its conditions */
-      let dynamic = false;
       for (const { title, when, url, depth, _step } of items) {
         const { children } = toJsx(title);
         jsxComponents(children, components);
@@ -122,24 +120,20 @@ export function rehypeToc(
           children,
         });
         const id = file.data._headingIds?.[url.slice(1)];
-        if (id || hasCode(title)) dynamic = true;
         let code = `{depth: ${depth}, url: ${id ? `"#" + ${id}` : JSON.stringify(url)}`;
         if (_step !== undefined) code += `, _step: ${_step}`;
         list.push({ code: `${code}, title: _fumadocs${i - 1}}`, when });
       }
-      const isStatic = isStaticOutput(file.data);
       // like in the content, the other components of titles are MDX components: without them, their content
-      const declaration = isStatic
-        ? ''
-        : componentsCode(
-            components,
-            esmScope(tree as never),
-            'props.components ?? {}',
-            '((props) => props.children)',
-          );
+      const declaration = componentsCode(
+        components,
+        esmScope(tree as never),
+        'props.components ?? {}',
+        '((props) => props.children)',
+      );
       tree.children.push(
         toEsm(
-          `export const ${exportToc.name} = ${listCode(list, !isStatic && dynamic, declaration)};`,
+          `export const ${exportToc.name} = ${listCode(list, isStaticOutput(file.data), declaration)};`,
           titles,
         ),
       );

@@ -81,7 +81,7 @@ test('buildMDX with importsOnly keeps the imports of includes and plugins', asyn
     import __img0 from "./image.png";
     import {A} from './a';
     import {Included} from './included';
-    export const toc = [];
+    export const toc = props => [];
     function _createMdxContent(props) {
       return _jsx(_Fragment, {});
     }

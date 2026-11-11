@@ -1,4 +1,4 @@
-import { hasParts, listCode, type CodeNode } from './code-output';
+import { listCode, type CodeNode } from './code-output';
 import { headingIdRegex, type HeadingIds } from './heading-id';
 
 interface Range {
@@ -60,13 +60,9 @@ export function createStructuredRecords<N extends CodeNode>(
   const pending: (() => void)[] = [];
   let covered: Range | undefined;
   let tables = 0;
-  /** whether a record reads the props of a page */
-  let dynamic = false;
 
-  const push = (item: StructuredHeading | StructuredContent, when: string[] = []) => {
-    if (when.length > 0 || ('code' in item && item.code) || hasParts(item.content)) dynamic = true;
+  const push = (item: StructuredHeading | StructuredContent, when: string[] = []) =>
     records.push({ ...item, when });
-  };
   const cells = (row: { children: N[] }) => {
     const cells: string[] = [];
     for (const cell of row.children) cells.push(s.inner(cell).trim());
@@ -150,13 +146,9 @@ export function createStructuredRecords<N extends CodeNode>(
       for (const record of records) contents.push(out.toStatic(record.content));
       return toStructuredData(records, contents);
     },
-    /**
-     * The code of the records that show for the props of a page, a function of the props: see `structured-data.ts`.
-     * `undefined` when they read no props, they are the static records.
-     */
-    toCode(scope: () => ReadonlySet<string>): string | undefined {
+    /** the code of the records that show for the props of a page, a function of the props: see `structured-data.ts` */
+    toCode(scope: () => ReadonlySet<string>): string {
       flush();
-      if (!dynamic) return;
       const items: { code: string; when: string[] }[] = [];
       for (const record of records) {
         let code = `{content: ${out.toCode(record.content)}`;
@@ -168,7 +160,7 @@ export function createStructuredRecords<N extends CodeNode>(
         items.push({ code: `${code}}`, when: record.when });
       }
       // the MDX components are page props, like in the content
-      return listCode(items, true, out.componentsCode(scope, 'props.components'));
+      return listCode(items, false, out.componentsCode(scope, 'props.components'));
     },
   };
 }

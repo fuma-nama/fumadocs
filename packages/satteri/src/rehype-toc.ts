@@ -1,7 +1,7 @@
 import type { HastPluginInput, HastVisitorContext } from 'satteri';
 import type { Element, ElementContent } from 'hast';
 import { esmScope, handleTag, jsxToSource, parse } from '@/utils';
-import { componentsCode, hasCode, jsxComponents, listCode } from '../../shared/code-output';
+import { componentsCode, jsxComponents, listCode } from '../../shared/code-output';
 import { textParts } from '../../shared/heading-id';
 import { isStaticOutput, showConditions } from '../../shared/show';
 import type { ExtraPluginHooks } from './compile';
@@ -46,8 +46,6 @@ export function rehypeToc({ exportToc = true }: RehypeTocOptions = {}): HastPlug
   const resolved = exportToc === true ? { as: 'esm' as const, name: 'toc' } : exportToc;
   const plugin: HastPluginInput & ExtraPluginHooks = () => {
     const items: { code: string; when: string[] }[] = [];
-    /** whether an item reads the props of a page, beside its conditions */
-    let dynamic = false;
     /** the components of titles */
     const components = new Set<string>();
     /** the code of the ESM nodes */
@@ -59,17 +57,18 @@ export function rehypeToc({ exportToc = true }: RehypeTocOptions = {}): HastPlug
       },
       after(_root: unknown, ctx: HastVisitorContext) {
         if (!resolved) return;
-        const isStatic = resolved.as === 'esm' && isStaticOutput(ctx.data);
         // like in the content, the other components of titles are MDX components: without them, their content
-        const declaration = isStatic
-          ? ''
-          : componentsCode(
-              components,
-              esmScope(esm),
-              'props.components ?? {}',
-              '((props) => props.children)',
-            );
-        ctx.data._rehypeTocCode = listCode(items, !isStatic && dynamic, declaration);
+        const declaration = componentsCode(
+          components,
+          esmScope(esm),
+          'props.components ?? {}',
+          '((props) => props.children)',
+        );
+        ctx.data._rehypeTocCode = listCode(
+          items,
+          resolved.as === 'esm' && isStaticOutput(ctx.data),
+          declaration,
+        );
       },
       mdxjsEsm(node: { value: string }) {
         esm.push(node.value);
@@ -107,17 +106,15 @@ export function rehypeToc({ exportToc = true }: RehypeTocOptions = {}): HastPlug
               ? element.properties['data-fd-step']
               : undefined;
           const when = showConditions(element, ctx);
-          if (code) dynamic = true;
           let titleCode: string;
           if (resolved.as === 'esm') {
             titleCode = jsxToSource({ type: 'root', children });
             if (/<[A-Z_$]/.test(titleCode)) jsxComponents(parse(titleCode), components);
-            if (hasCode(element)) dynamic = true;
           } else {
             // titles in data are text
-            let fromCode = false;
-            const parts = textParts(children, () => (fromCode = dynamic = true));
-            titleCode = fromCode
+            let dynamic = false;
+            const parts = textParts(children, () => (dynamic = true));
+            titleCode = dynamic
               ? `[${parts}].filter((v) => typeof v === "string" || typeof v === "number").join("")`
               : JSON.stringify(title);
           }

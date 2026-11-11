@@ -107,9 +107,7 @@ export function remarkStructure({
       },
       after(_root, ctx) {
         ctx.data.structuredData ??= records.toStatic();
-        if (exportAs && !isStatic)
-          ctx.data._structuredDataCode =
-            records.toCode(esmScope(esm)) ?? JSON.stringify(ctx.data.structuredData);
+        if (exportAs && !isStatic) ctx.data._structuredDataCode = records.toCode(esmScope(esm));
       },
       mdxjsEsm(node, ctx) {
         visit(node as Nodes, ctx);

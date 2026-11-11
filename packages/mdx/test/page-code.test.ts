@@ -181,12 +181,10 @@ test('the outputs of a collection with its own options read the props', async ()
       development: false,
       compiler: { addDependency() {} },
     }))!;
-    for (const name of ['toc', 'structuredData'])
+    for (const name of ['toc', 'structuredData', 'extractedReferences'])
       expect(code).toMatch(new RegExp(`(const|let) ${name} = \\(?props\\)? =>`));
     expect(code).toContain('function _markdown(props)');
     expect(code).toContain('_headingIds');
-    // outputs that don't read the props are static
-    expect(code).toMatch(/(const|let) extractedReferences = \[/);
   }
 });
 
@@ -201,14 +199,14 @@ test('page props render the content and outputs of a page', async () => {
     frontmatter,
     default: () => null,
     // like the compiled outputs, with `<ProductName />` from the MDX components
-    // it reads its params, which the entry of the file doesn't have, the content of a record is text or its parts
+    // it reads its params, which the entry of the file doesn't have
     toc: (props: Props) => [
       { title: `${props.framework.toString()} ${props.name}`, url: '#a', depth: 2 },
     ],
     structuredData: (props: Props) => [
       { id: 'a', content: ` ${props.framework} ${props.name} ` },
       { content: ' ' },
-      { content: [props.framework, ' docs', createElement('b')] },
+      { content: createElement(props.components!.ProductName) },
     ],
     _markdown: (props: Props) =>
       asMarkdown()
@@ -238,18 +236,21 @@ test('page props render the content and outputs of a page', async () => {
   const page = source.getPage(['next'], { props })!;
   expect(page.url).toBe('/next');
   expect(page.data.toc[0].title).toBe('next Fuma');
-  // records are trimmed, empty ones are left out, only strings and numbers are text
+  // read without rendering: components stay as tags, records are trimmed, empty ones are left out
   expect(page.data.structuredData).toEqual({
     headings: [{ id: 'a', content: 'next Fuma' }],
-    contents: [{ heading: 'a', content: 'next docs' }],
+    contents: [{ heading: 'a', content: '<ProductName />' }],
   });
   await expect(page.data.getText('processed')).resolves.toBe('next Fuma Fumadocs');
 
-  // loaded asynchronously, the unbound page isn't read for it
+  // loaded asynchronously, components render, the unbound page isn't rendered for it
   const lazyPage = loader({ baseUrl: '/', source: toSource(lazy, []) }).getPage(['next'], {
     props,
   })!;
-  await expect(lazyPage.data.structuredData()).resolves.toEqual(page.data.structuredData);
+  await expect(lazyPage.data.structuredData()).resolves.toEqual({
+    headings: [{ id: 'a', content: 'next Fuma' }],
+    contents: [{ heading: 'a', content: 'Fumadocs' }],
+  });
   // loading a page renders none of its outputs, its structured data is read like in an eager entry
   const lazyData = await lazyPage.data.load();
   expect(lazyData.toc[0].title).toBe('next Fuma');

@@ -1103,7 +1103,7 @@ test('Remark Show: static outputs analyse the source', async () => {
     );
 });
 
-test('Remark LLMs: outputs without parts from code are static and render the same', async () => {
+test('Remark LLMs: Markdown without parts from code is static and renders the same', async () => {
   const { compile, run } = await import('@mdx-js/mdx');
   const runtime = await import('react/jsx-runtime');
   const server = await import('@/server');
@@ -1135,10 +1135,9 @@ test('Remark LLMs: outputs without parts from code are static and render the sam
   const { code, mod } = await evaluate(source);
   // attributes add no text, the ID isn't from code
   expect(code).not.toContain('_headingIds');
-  expect(mod.structuredData).toEqual({
-    contents: [{ heading: 'install-', content: 'Run it.' }],
-    headings: [{ id: 'install-', content: 'Install' }],
-  });
+  expect(readStructuredData(mod.structuredData as StructuredRecords, {}).headings).toEqual([
+    { id: 'install-', content: 'Install' },
+  ]);
   // like the component rendered with `renderToMarkdown()`, which an explicit `output: 'function'` keeps
   const { mod: component } = await evaluate(source, 'function');
   expect(typeof component._markdown).toBe('function');

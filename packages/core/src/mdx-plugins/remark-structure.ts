@@ -140,9 +140,10 @@ export function remarkStructure({
 
     if (!exportAs) return;
     const name = typeof exportAs === 'string' ? exportAs : 'structuredData';
-    const code = isStatic ? undefined : records.toCode(esmScope(tree));
     tree.children.unshift(
-      code ? out.esm(`export const ${name} = ${code};`) : toMdxExport(name, data),
+      isStatic
+        ? toMdxExport(name, data)
+        : out.esm(`export const ${name} = ${records.toCode(esmScope(tree))};`),
     );
   };
 }

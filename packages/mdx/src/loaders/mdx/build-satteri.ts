@@ -100,7 +100,7 @@ function postprocessPlugin(
     },
     collectExports({ data, addExport }) {
       if (extractLinkReferences) {
-        addExport('extractedReferences', listCode(data.extractedReferences!));
+        addExport('extractedReferences', listCode(data.extractedReferences!, false));
       }
 
       if (lastModified) {
