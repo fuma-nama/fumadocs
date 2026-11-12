@@ -12,10 +12,10 @@
     "astro": "astro"
   },
   "dependencies": {
-    "@astrojs/react": "^7.1.4",
+    "@astrojs/react": "^7.1.7",
     "@fumadocs/astro": "workspace:*",
     "@fumadocs/language": "workspace:*",
-    "astro": "^7.4.7",
+    "astro": "^7.4.10",
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:@fumadocs/base-ui@*",
     "react": "^19.3.1",

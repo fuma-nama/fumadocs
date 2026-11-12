@@ -49,7 +49,7 @@
     "@fuma-translate/react": "^1.0.2",
     "@fumari/stf": "workspace:*",
     "cn": "^0.5.2",
-    "lucide-react": "^1.70.0",
+    "lucide-react": "^1.71.0",
     "typescript": "7.1.0-beta"
   },
   "devDependencies": {
@@ -60,14 +60,14 @@
     "fuma-cli": "^0.3.4",
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:@fumadocs/base-ui@*",
-    "next": "^16.4.5",
+    "next": "^16.4.6",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "react-error-boundary": "^6.1.5",
     "tailwindcss": "^4.3.5",
     "tsconfig": "workspace:*",
     "tsdown": "0.23.7",
-    "vite": "^8.3.6",
+    "vite": "^8.3.8",
     "webpack": "^5.112.2"
   },
   "peerDependencies": {

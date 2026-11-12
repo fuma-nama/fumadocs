@@ -455,20 +455,24 @@ test('OAuth handler sends users back to the page that started the flow', async (
   expect(res.headers.get('content-type')).toBe('text/javascript');
   const script = new Function('sessionStorage', 'location', await res.text());
   const run = (page: string | null) => {
+    const stored = new Map<string, string>();
     const location = {
+      href: 'https://docs.example.com/api/oauth?code=abc#x',
       origin: 'https://docs.example.com',
-      search: '?code=abc',
-      hash: '#x',
       replace: vi.fn(),
     };
-    script({ getItem: () => page }, location);
-    return location.replace.mock.calls;
+    script({ getItem: () => page, setItem: stored.set.bind(stored) }, location);
+    return { replaced: location.replace.mock.calls, stored: Object.fromEntries(stored) };
   };
 
-  expect(run('/docs/a')).toEqual([['https://docs.example.com/docs/a?code=abc#x']]);
+  // the answer is handed over in `sessionStorage`, not the address of the page
+  expect(run('/docs/a')).toEqual({
+    replaced: [['https://docs.example.com/docs/a']],
+    stored: { 'fumadocs-openapi-oauth-returned': 'https://docs.example.com/api/oauth?code=abc#x' },
+  });
   // stays on the site, even for a path that looks like a protocol-relative URL
-  expect(run('//evil.example')).toEqual([['https://docs.example.com//evil.example?code=abc#x']]);
-  expect(run(null)).toEqual([]);
+  expect(run('//evil.example').replaced).toEqual([['https://docs.example.com//evil.example']]);
+  expect(run(null)).toEqual({ replaced: [], stored: {} });
 });
 
 test('inline OAuth handler responds without reading the request', async () => {

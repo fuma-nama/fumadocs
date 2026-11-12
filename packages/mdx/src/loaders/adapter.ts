@@ -87,7 +87,7 @@ export function toNode(test: RegExp | undefined, loader: Loader): LoadHook {
 
 export interface ViteLoader {
   transform: (
-    this: TransformPluginContext & { environment?: Environment },
+    this: Pick<TransformPluginContext, 'addWatchFile'> & { environment?: Environment },
     value: string,
     id: string,
   ) => Promise<TransformResult | null>;

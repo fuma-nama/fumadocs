@@ -434,9 +434,15 @@ const subscribeNever = () => () => {};
 function getReturnedFlow(): ReturnedFlow | undefined {
   if (returnedFlow === undefined) {
     const stored = sessionStorage.getItem(pendingFlowKey);
+    // the URL `createOAuthHandler()` returned to, otherwise the flow returned to the page
+    const returnedUrl = sessionStorage.getItem('fumadocs-openapi-oauth-returned');
     sessionStorage.removeItem(pendingFlowKey);
+    sessionStorage.removeItem('fumadocs-openapi-oauth-returned');
     returnedFlow = stored
-      ? { ...(JSON.parse(stored) as PendingFlow), url: new URL(window.location.href) }
+      ? {
+          ...(JSON.parse(stored) as PendingFlow),
+          url: new URL(returnedUrl ?? window.location.href),
+        }
       : null;
   }
   return returnedFlow ?? undefined;

@@ -1,6 +1,10 @@
-// only this origin can set the page, `sessionStorage` is not shared with subdomains
+// only this origin can set the page, `sessionStorage` is not shared with subdomains.
+// The answer of the provider goes through it too, because scripts on the page can read its address.
 const script = `const page = sessionStorage.getItem('fumadocs-openapi-oauth');
-if (page) location.replace(location.origin + page + location.search + location.hash);`;
+if (page) {
+  sessionStorage.setItem('fumadocs-openapi-oauth-returned', location.href);
+  location.replace(location.origin + page);
+}`;
 
 export interface OAuthHandlerOptions {
   /**

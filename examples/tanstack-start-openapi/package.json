@@ -12,14 +12,14 @@
   },
   "dependencies": {
     "@tanstack/react-router": "1.170.46",
-    "@tanstack/react-router-devtools": "1.167.2",
-    "@tanstack/react-start": "1.169.4",
+    "@tanstack/react-router-devtools": "1.167.3",
+    "@tanstack/react-start": "1.169.5",
     "cn": "^0.5.2",
     "fumadocs-core": "workspace:*",
     "fumadocs-mdx": "workspace:*",
     "fumadocs-openapi": "workspace:*",
     "fumadocs-ui": "workspace:@fumadocs/base-ui@*",
-    "lucide-react": "^1.70.0",
+    "lucide-react": "^1.71.0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "shiki": "^4.6.0"
@@ -30,10 +30,10 @@
     "@types/node": "^26.6.6",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
-    "@vitejs/plugin-react": "^6.2.1",
+    "@vitejs/plugin-react": "^6.3.0",
     "nitro": "3.0.261103-rc",
     "tailwindcss": "^4.3.5",
     "typescript": "^7.0.2",
-    "vite": "^8.3.6"
+    "vite": "^8.3.8"
   }
 }
