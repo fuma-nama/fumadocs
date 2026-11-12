@@ -1,52 +1,14 @@
 core:changelogs:
-  - content: "---\npackages:\n  fumadocs-ui:\n    type: patch\n  \"@fumadocs/base-ui\":\n    type: patch\n---\n\n### Search Dialog Close Button Name\n\n- `SearchDialogClose` keeps its visible text in its accessible name (e.g. \"ESC Close Search\"), so voice control users can activate it by the label they see.\n"
-    filename: 2026-11-09-search-close-label.md
-    v: 0.0.0
-  - content: "---\npackages:\n  fumadocs-ui:\n    type: patch\n  \"@fumadocs/base-ui\":\n    type: patch\n---\n\n### Main Landmark in Spacious and Glass Layouts\n\n- The Spacious and Glass layouts wrap the page content in `<main>`, like the docs, notebook and flux layouts, so pages using them have a main landmark.\n"
-    filename: 2026-11-11-main-landmark-spacious-glass.md
-    v: 0.0.0
-  - content: "---\npackages:\n  fumadocs-ui:\n    type: patch\n  \"@fumadocs/base-ui\":\n    type: patch\n---\n\n### Current Page in the Sidebar\n\n- The active sidebar link has `aria-current=\"page\"`, so screen readers announce which page is the current one. Applies to `SidebarItem`, `SidebarFolderLink` and the Glass layout's sidebar.\n"
-    filename: 2026-11-11-sidebar-aria-current.md
-    v: 0.0.0
-  - content: "---\npackages:\n  fumadocs-ui:\n    type: patch\n  \"@fumadocs/base-ui\":\n    type: patch\n---\n\n### TOC Popover is No Longer a Banner Landmark\n\n- The `<header>` of the mobile TOC popover has `role=\"none\"`, so pages no longer expose a second banner landmark next to the navbar.\n"
-    filename: 2026-11-11-toc-popover-banner.md
-    v: 0.0.0
-  - content: "---\npackages:\n  \"@fumadocs/astro\":\n    type: patch\n---\n\n### Code Blocks on Astro\n\n- Code blocks are highlighted again, instead of rendering inside a second code block.\n"
-    filename: 2026-11-09-astro-code-blocks.md
-    v: 0.0.0
-  - content: "---\npackages:\n  fumadocs-core:\n    type: minor\n  fumadocs-mdx:\n    type: minor\n  \"@fumadocs/satteri\":\n    type: minor\n  \"@fumadocs/local-md\":\n    type: minor\n  \"@fumadocs/astro\":\n    type: minor\n  create-fumadocs-app:\n    type: patch\n---\n\n### Path params at runtime\n\n- Refactored path params: each file of a dynamic path compiles once, and its content reads the params as `props` when rendering.\n- Refactored `remarkShow`: conditions are checked when rendering, and the `define` option and `showElement` export are removed.\n- The table of contents, structured data and processed Markdown of a page only include the `<show>` branches that show for its props, and give the values of its expressions.\n- Headings with expressions get their IDs from the rendered text, and duplicate IDs only count the headings that show.\n- Added the `props` option of `getPage()`: the content and outputs of the page follow these props, with its path params.\n- Processed Markdown and search records resolve JSX elements like the page, with the components that it imports or declares and the MDX components of its props.\n- Search records of Fumadocs MDX keep the elements of every component by default, set `filterElement` of `remarkStructure` to choose them.\n- Deprecated the `components` option of `getText()`, pass MDX components as page props.\n- Added `unstable_runtimeOutputs` in file data for custom content sources: the plugins export the outputs of a page as functions of its props. Without it, a document with `<show>` fails to compile.\n- Added `rehypeHeading`, which gives headings their IDs from code. Fumadocs MDX, `@fumadocs/astro` and local Markdown enable it.\n- Added `slugImportSource` of `remarkHeading`: a module that slugs heading IDs from the rendered text, for a custom `slug`.\n- The client loader of Fumadocs MDX takes the params of a page: `preload(path, params)`, `getComponent(path, params)` and `useContent(path, props, params)`.\n- Table of contents titles resolve MDX components from the page props.\n- Loading a page of an async collection or of `@fumadocs/astro` no longer renders its structured data: `structuredData` of the loaded page is read without rendering, `structuredData()` renders it.\n- Added the `search` target of `renderToMarkdown()`, which renders search records: `asMarkdown()` returns the target, so a component can give agents more than search indexes.\n- Added the `markdown` namespace of `replaceSource()`, for edits of processed Markdown only.\n- Search records no longer include the imports of included files.\n- The frontmatter in code of Fumadocs MDX can use imports declared after it, and keeps the other variables declared in its statement.\n- `@fumadocs/astro` supports frontmatter in code and meta files in code, like `meta.ts`.\n- Async pages of Fumadocs MDX load their content once, and render without suspending again once loaded.\n"
-    filename: 2026-11-09-runtime-params.md
-    v: 0.0.0
-  - content: "---\npackages:\n  fumadocs-core:\n    type: patch\n---\n\n### Pierre Highlights Peer Range\n\n- Allow any 0.x version of `@pierre/highlights`.\n"
-    filename: 2026-11-10-pierre-highlights-peer.md
-    v: 0.0.0
-  - content: "---\npackages:\n  fumadocs-core:\n    type: patch\n  \"@fumadocs/satteri\":\n    type: patch\n---\n\n### Steps and tab groups across `<show>`\n\n- Steps inside `<show>` are numbered with the steps around them, in the content and the table of contents.\n- A code block inside `<show>` is a tab of the tab group around it.\n- Fixed a heading like `## 1. Title` not becoming a step after a list of `###` steps.\n- Sätteri `remarkSteps` supports steps inside a step, and is faster on pages without steps.\n"
-    filename: 2026-11-11-show-lists.md
-    v: 0.0.0
-  - content: "---\npackages:\n  create-fumadocs-app:\n    type: patch\n---\n\n### Clean template source imports\n\n- Starter templates no longer trigger unused-import lint warnings.\n"
-    filename: 2026-11-10-clean-template-imports.md
-    v: 0.0.0
-  - content: "---\npackages:\n  fumadocs-openapi:\n    type: patch\n---\n\n### OAuth redirect on static sites\n\n- `createOAuthHandler({ inline: true })` puts its script in the page, so the redirect route can be prerendered on static sites.\n"
-    filename: 2026-11-10-oauth-handler-inline.md
-    v: 0.0.0
-  - content: "---\npackages:\n  fumadocs-openapi:\n    type: patch\n---\n\n### Show OAuth provider errors in the playground\n\n- When the OAuth provider refuses a flow (e.g. `access_denied`), the playground shows its error instead of returning silently.\n"
-    filename: 2026-11-10-oauth-provider-errors.md
+  - content: "---\npackages:\n  fumadocs-openapi:\n    type: patch\n---\n\n### Keep OAuth answers out of the page address\n\n- `createOAuthHandler()` hands the authorization code or token to the playground through `sessionStorage`, so scripts on the docs page no longer see it in the address.\n"
+    filename: 2026-11-12-oauth-answer-handoff.md
     v: 0.0.0
 core:packages:
   - id: npm:@fumadocs/ai-chat
     updated: false
-  - changelogIds:
-      - 2026-11-09-search-close-label.md
-      - 2026-11-11-main-landmark-spacious-glass.md
-      - 2026-11-11-sidebar-aria-current.md
-      - 2026-11-11-toc-popover-banner.md
-    id: npm:@fumadocs/base-ui
-    updated: true
-  - changelogIds:
-      - 2026-11-09-astro-code-blocks.md
-      - 2026-11-09-runtime-params.md
-    id: npm:@fumadocs/astro
-    updated: true
+  - id: npm:@fumadocs/astro
+    updated: false
+  - id: npm:@fumadocs/base-ui
+    updated: false
   - id: npm:@fumadocs/asyncapi
     updated: false
   - id: npm:@fumadocs/basehub
@@ -55,28 +17,19 @@ core:packages:
     updated: false
   - id: npm:@fumadocs/cli
     updated: false
-  - id: npm:@fumadocs/content-collections
-    updated: false
-  - changelogIds:
-      - 2026-11-09-runtime-params.md
-      - 2026-11-10-pierre-highlights-peer.md
-      - 2026-11-11-show-lists.md
-    id: npm:fumadocs-core
-    updated: true
   - id: npm:@fumadocs/content
     updated: false
-  - changelogIds:
-      - 2026-11-09-runtime-params.md
-      - 2026-11-10-clean-template-imports.md
-    id: npm:create-fumadocs-app
-    updated: true
+  - id: npm:@fumadocs/content-collections
+    updated: false
+  - id: npm:fumadocs-core
+    updated: false
+  - id: npm:create-fumadocs-app
+    updated: false
   - id: npm:create-fumadocs-versions
-    updated: true
+    updated: false
   - id: npm:fumadocs-docgen
     updated: false
   - id: npm:@fumadocs/graphql
-    updated: false
-  - id: npm:fumadocs-epub
     updated: false
   - id: npm:@fumari/image-size
     updated: false
@@ -88,45 +41,32 @@ core:packages:
     updated: false
   - id: npm:@fumadocs/local-html
     updated: false
-  - changelogIds:
-      - 2026-11-09-runtime-params.md
-    id: npm:fumadocs-mdx
-    updated: true
-  - changelogIds:
-      - 2026-11-09-runtime-params.md
-    id: npm:@fumadocs/local-md
-    updated: true
-  - id: npm:@fumadocs/notion
-    updated: false
-  - id: npm:fumadocs-obsidian
+  - id: npm:fumadocs-mdx
     updated: false
   - id: npm:@fumadocs/mdx-remote
     updated: false
+  - id: npm:@fumadocs/notion
+    updated: false
+  - id: npm:@fumadocs/local-md
+    updated: false
+  - id: npm:fumadocs-obsidian
+    updated: false
+  - id: npm:@fumadocs/openapi-standalone
+    updated: false
   - changelogIds:
-      - 2026-11-10-oauth-handler-inline.md
-      - 2026-11-10-oauth-provider-errors.md
+      - 2026-11-12-oauth-answer-handoff.md
     id: npm:fumadocs-openapi
     updated: true
   - id: npm:fumadocs-preview
     updated: false
   - id: npm:fumadocs-python
     updated: false
-  - id: npm:@fumadocs/openapi-standalone
+  - id: npm:fumadocs-ui
     updated: false
   - id: npm:@fumadocs/sanity
     updated: false
-  - changelogIds:
-      - 2026-11-09-search-close-label.md
-      - 2026-11-11-main-landmark-spacious-glass.md
-      - 2026-11-11-sidebar-aria-current.md
-      - 2026-11-11-toc-popover-banner.md
-    id: npm:fumadocs-ui
-    updated: true
-  - changelogIds:
-      - 2026-11-09-runtime-params.md
-      - 2026-11-11-show-lists.md
-    id: npm:@fumadocs/satteri
-    updated: true
+  - id: npm:@fumadocs/satteri
+    updated: false
   - id: npm:@fumadocs/shadcn
     updated: false
   - id: npm:shared-api
@@ -137,83 +77,54 @@ core:packages:
     updated: false
   - id: npm:@fumadocs/tailwind
     updated: false
+  - id: npm:fumadocs-twoslash
+    updated: false
   - id: npm:fumadocs-typescript
     updated: false
   - id: npm:@fumadocs/vite
     updated: false
-  - id: npm:fumadocs-twoslash
+  - id: npm:fumadocs-epub
     updated: false
 npm:packages:
   - id: npm:@fumadocs/ai-chat
-  - id: npm:@fumadocs/base-ui
   - id: npm:@fumadocs/astro
+  - id: npm:@fumadocs/base-ui
   - id: npm:@fumadocs/asyncapi
   - id: npm:@fumadocs/basehub
   - id: npm:@fumadocs/changelog
   - id: npm:@fumadocs/cli
+  - id: npm:@fumadocs/content
   - id: npm:@fumadocs/content-collections
   - id: npm:fumadocs-core
-  - id: npm:@fumadocs/content
   - id: npm:create-fumadocs-app
   - id: npm:create-fumadocs-versions
   - id: npm:fumadocs-docgen
   - id: npm:@fumadocs/graphql
-  - id: npm:fumadocs-epub
   - id: npm:@fumari/image-size
   - id: npm:@fumadocs/json-schema
   - id: npm:@fumadocs/local-content
   - id: npm:@fumadocs/language
   - id: npm:@fumadocs/local-html
   - id: npm:fumadocs-mdx
-  - id: npm:@fumadocs/local-md
-  - id: npm:@fumadocs/notion
-  - id: npm:fumadocs-obsidian
   - id: npm:@fumadocs/mdx-remote
+  - id: npm:@fumadocs/notion
+  - id: npm:@fumadocs/local-md
+  - id: npm:fumadocs-obsidian
+  - id: npm:@fumadocs/openapi-standalone
   - id: npm:fumadocs-openapi
   - id: npm:fumadocs-preview
   - id: npm:fumadocs-python
-  - id: npm:@fumadocs/openapi-standalone
-  - id: npm:@fumadocs/sanity
   - id: npm:fumadocs-ui
+  - id: npm:@fumadocs/sanity
   - id: npm:@fumadocs/satteri
   - id: npm:@fumadocs/shadcn
   - id: npm:shared-api
   - id: npm:@fumari/stf
   - id: npm:@fumadocs/story
   - id: npm:@fumadocs/tailwind
+  - id: npm:fumadocs-twoslash
   - id: npm:fumadocs-typescript
   - id: npm:@fumadocs/vite
-  - id: npm:fumadocs-twoslash
-  - id: npm:example-astro
-  - id: npm:example-astro-i18n
-  - id: npm:example-astro-min
-  - id: npm:docs
-  - id: npm:example-asyncapi
-  - id: npm:example-base-ui
-  - id: npm:example-content-collections
-  - id: npm:example-graphql
-  - id: npm:example-i18n
-  - id: npm:example-marble-cms
-  - id: npm:example-next
-  - id: npm:example-next-local-html
-  - id: npm:example-next-local-md
-  - id: npm:example-next-min
-  - id: npm:example-next-shadcn
-  - id: npm:example-next-static
-  - id: npm:example-obsidian
+  - id: npm:fumadocs-epub
   - id: npm:example-openapi
-  - id: npm:example-python
-  - id: npm:example-react-router
-  - id: npm:example-react-router-i18n
-  - id: npm:example-react-router-min
-  - id: npm:example-react-router-spa
-  - id: npm:example-react-router-rsc
-  - id: npm:example-tanstack-start
-  - id: npm:example-tanstack-start-local-md
-  - id: npm:example-tanstack-start-min
-  - id: npm:example-tanstack-start-i18n
   - id: npm:example-tanstack-start-openapi
-  - id: npm:example-tanstack-start-story
-  - id: npm:example-waku
-  - id: npm:example-tanstack-start-spa
-  - id: npm:example-waku-i18n
