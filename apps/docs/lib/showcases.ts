@@ -85,6 +85,11 @@ export const showcases: ShowcaseObject[] = [
     url: 'https://www.turbobulls.com/help',
   },
   {
+    image: '/showcases/hotcodepush.webp',
+    name: 'HotCodePush',
+    url: 'https://hotcodepush.com/docs',
+  },
+  {
     image: '/showcases/comfydeploy.png',
     name: 'ComfyDeploy',
     url: 'https://comfydeploy.com',
