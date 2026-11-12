@@ -15,12 +15,12 @@
     "fumadocs-core": "workspace:*",
     "fumadocs-mdx": "workspace:*",
     "fumadocs-ui": "workspace:@fumadocs/base-ui@*",
-    "isbot": "^5.2.2",
-    "lucide-react": "^1.70.0",
+    "isbot": "^5.2.3",
+    "lucide-react": "^1.71.0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "react-router": "^8.5.1",
-    "takumi-js": "^2.19.0"
+    "takumi-js": "^2.20.0"
   },
   "devDependencies": {
     "@react-router/dev": "^8.5.1",
@@ -32,6 +32,6 @@
     "react-router-devtools": "^6.2.3",
     "tailwindcss": "^4.3.5",
     "typescript": "^7.0.2",
-    "vite": "^8.3.6"
+    "vite": "^8.3.8"
   }
 }

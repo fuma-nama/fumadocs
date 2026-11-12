@@ -12,15 +12,15 @@
     "astro": "astro"
   },
   "dependencies": {
-    "@astrojs/react": "^7.1.4",
+    "@astrojs/react": "^7.1.7",
     "@fumadocs/astro": "workspace:*",
-    "astro": "^7.4.7",
+    "astro": "^7.4.10",
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:@fumadocs/base-ui@*",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "sharp": "^0.35.5",
-    "takumi-js": "^2.19.0"
+    "takumi-js": "^2.20.0"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.5",

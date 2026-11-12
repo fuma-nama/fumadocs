@@ -7,14 +7,14 @@
     "@biomejs/biome": "^2.6.6",
     "@mixedbread/sdk": "^0.80.0",
     "@orama/core": "^1.2.19",
-    "algoliasearch": "^5.61.0",
+    "algoliasearch": "^5.64.0",
     "fumadocs-core": "workspace:*",
     "fumadocs-mdx": "workspace:*",
     "fumadocs-ui": "workspace:*",
-    "meilisearch": "^0.62.0",
-    "oxlint": "^1.92.0",
+    "meilisearch": "^0.63.0",
+    "oxlint": "^1.93.0",
     "react": "^19.3.1",
-    "takumi-js": "^2.19.0",
+    "takumi-js": "^2.20.0",
     "typesense": "^3.2.0",
     "typesense-fumadocs-adapter": "^0.5.0"
   }
