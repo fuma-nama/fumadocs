@@ -162,8 +162,14 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+catalogs:
+  default:
+    rolldown:
+      specifier: ~1.3.1
+      version: 1.3.1
+
 overrides:
-  unrun>rolldown: ~1.2.16
+  unrun>rolldown: ~1.3.1
 
 importers:
 
@@ -3472,7 +3478,7 @@ importers:
         specifier: ^3.1.1
         version: 3.1.1(supports-color@8.1.1)
       rolldown:
-        specifier: ~1.3.1
+        specifier: 'catalog:'
         version: 1.3.1
       satteri:
         specifier: ^0.11.7
@@ -27586,7 +27592,7 @@ snapshots:
 
   unrun@0.3.1:
     dependencies:
-      rolldown: 1.2.18
+      rolldown: 1.3.1
 
   unstorage@1.17.6(db0@0.4.1):
     dependencies:

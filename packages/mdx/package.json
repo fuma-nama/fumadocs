@@ -99,7 +99,7 @@
     "remark": "^15.0.1",
     "remark-directive": "^4.0.0",
     "remark-mdx": "^3.1.1",
-    "rolldown": "~1.3.1",
+    "rolldown": "catalog:",
     "satteri": "^0.11.7",
     "tsconfig": "workspace:*",
     "tsdown": "0.23.7",
