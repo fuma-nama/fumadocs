@@ -1,14 +1,18 @@
 import * as fs from 'node:fs/promises';
 import * as os from 'node:os';
 import * as path from 'node:path';
-import { expect, test } from 'vitest';
+import { expect, expectTypeOf, test } from 'vitest';
 import { createElement, type FC } from 'react';
+import type { MDXProps } from 'mdx/types';
 import { loader } from 'fumadocs-core/source';
+import type { TOCItemType } from 'fumadocs-core/toc';
 import { applyMdxPreset, defineDocs, type DocCollection } from '@/config';
 import { buildConfig } from '@/config/build';
 import { createCore } from '@/core';
 import { createMdxLoader } from '@/loaders/mdx';
+import type { CompiledMDXProperties } from '@/loaders/mdx/build';
 import { createMetaLoader } from '@/loaders/meta';
+import { browser } from '@/runtime/browser';
 import { toFumadocsSource } from '@/runtime/server';
 
 test('the frontmatter and meta files in code', async () => {
@@ -258,7 +262,7 @@ test('page props render the content and outputs of a page', async () => {
 
   // on the client, a page is its file at the params that the server sends, the same page for the same params
   const { createClientLoader } = await import('@/runtime/browser');
-  const client = createClientLoader(
+  const client = createClientLoader<CompiledMDXProperties>(
     { [file]: async () => compiled as never },
     {
       id: 'page-props',
@@ -273,4 +277,19 @@ test('page props render the content and outputs of a page', async () => {
   expect(client.getComponent(file, { framework: 'waku' })).not.toBe(
     client.getComponent(file, { framework: 'next' }),
   );
+});
+
+test('the client loader types the exports of a page', () => {
+  const config = { docs: defineDocs({}) };
+  const create = browser<typeof config, { DocData: { docs: { lastModified?: Date } } }>();
+
+  create.doc('docs', {}).createClientLoader({
+    component({ frontmatter, default: MDX, toc, lastModified }) {
+      expectTypeOf(frontmatter.title).toBeString();
+      expectTypeOf(MDX).toEqualTypeOf<FC<MDXProps>>();
+      expectTypeOf(toc).toEqualTypeOf<TOCItemType[]>();
+      expectTypeOf(lastModified).toEqualTypeOf<Date | undefined>();
+      return null;
+    },
+  });
 });

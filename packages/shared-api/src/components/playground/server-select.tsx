@@ -42,12 +42,12 @@ export function ServerPopover({
     <Popover.Root open={open} onOpenChange={setOpen}>
       <Popover.Trigger
         className={cn(
-          'group flex min-w-0 shrink items-center gap-1 rounded-lg px-1.5 py-1 text-fd-muted-foreground transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fd-ring data-popup-open:bg-fd-accent data-popup-open:text-fd-accent-foreground',
+          'group flex min-w-0 shrink items-center gap-1.5 rounded-lg px-1.5 py-1 text-fd-muted-foreground transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fd-ring data-popup-open:bg-fd-accent data-popup-open:text-fd-accent-foreground',
           className,
         )}
       >
         <span className="truncate">{label}</span>
-        <ChevronDown className="size-3 shrink-0 transition-transform duration-200 group-data-popup-open:rotate-180" />
+        <ChevronDown className="size-3.5 shrink-0 transition-transform duration-200 group-data-popup-open:rotate-180" />
       </Popover.Trigger>
       <Popover.Portal>
         <Popover.Positioner side="bottom" align="start" sideOffset={8} className="z-50">

@@ -272,7 +272,7 @@ function AuthSection({
       actions={
         items.length > 1 ? (
           <Select items={items} value={selected} onValueChange={(v) => v !== null && select(v)}>
-            <SelectTrigger className="h-7 w-auto max-w-60 gap-1.5 @sm:-me-2 border-0 bg-transparent px-2 text-xs hover:bg-fd-accent focus:ring-0 focus-visible:ring-2">
+            <SelectTrigger className="h-7 w-auto max-w-60 -me-3 gap-1.5 border-0 bg-transparent px-2 text-xs hover:bg-fd-accent focus:ring-0 focus-visible:ring-2">
               <SelectValue className="truncate" />
             </SelectTrigger>
             <SelectContent align="end">
@@ -306,11 +306,11 @@ const AuthFieldContext = createContext<{
   onAuthorize: (target: AuthTarget) => void;
 } | null>(null);
 
-const stringSchema: Exclude<JsonSchema, boolean> = { type: 'string' };
+const secretSchema: Exclude<JsonSchema, boolean> = { type: 'string', format: 'password' };
 
 function AuthValue({
   path,
-  schema = stringSchema,
+  schema = secretSchema,
   ...props
 }: ComponentProps<AuthRenderProps['Value']>) {
   const { field } = use(AuthFieldContext)!;
@@ -366,7 +366,7 @@ function BodySection({
             {body.mediaType}
           </code>
           {allowJson && (
-            <Segmented value={mode} onValueChange={setMode} className="@sm:-me-2.5">
+            <Segmented value={mode} onValueChange={setMode}>
               <SegmentedList
                 aria-label={t('Editor')}
                 items={[

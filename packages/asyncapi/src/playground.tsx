@@ -249,6 +249,7 @@ export function usePlayground({
   );
   // values typed for other servers stay in the form, out of the URL
   const queryNames = new Set<string>();
+  const secretNames = new Set<string>();
   if (
     (schema?.protocol === 'ws' || schema?.protocol === 'wss') &&
     typeof wsQuery === 'object' &&
@@ -257,8 +258,10 @@ export function usePlayground({
     for (const name in wsQuery.properties) queryNames.add(name);
   }
   for (const { scheme } of [...security.server, ...security.operation]) {
-    if (scheme.type === 'httpApiKey' && scheme.in === 'query' && scheme.name)
+    if (scheme.type === 'httpApiKey' && scheme.in === 'query' && scheme.name) {
       queryNames.add(scheme.name);
+      secretNames.add(scheme.name);
+    }
   }
   const stf = useStf({
     defaultValues: (): PlaygroundValues => {
@@ -295,16 +298,19 @@ export function usePlayground({
     },
     [engine],
   );
-  const getUrl = () => {
+  /** the URL is displayed with its secrets masked, unless `secret` */
+  const getUrl = (secret = false) => {
     if (!schema || !transport) return;
     const values = engine.getData() as PlaygroundValues;
+    const query = pickQuery(values.query, queryNames);
+    if (!secret) for (const name of secretNames) if (query[name]) query[name] = '********';
 
     return getConnectionUrl(
       schema,
       server!.variables,
       channel.address ?? '',
       values.parameters,
-      pickQuery(values.query, queryNames),
+      query,
     );
   };
   const url = useSyncExternalStore(subscribe, getUrl, getUrl);
@@ -370,7 +376,7 @@ export function usePlayground({
       try {
         session.connection = transport.connect(
           {
-            url,
+            url: getUrl(true)!,
             server: schema,
             address: fillParameters(channel.address ?? '', values.parameters, false),
             query: pickQuery(values.query, queryNames),

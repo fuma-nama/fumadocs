@@ -62,7 +62,7 @@ export function SelectTabTrigger({
     <Select items={items} value={value} onValueChange={setValue}>
       <SelectTrigger
         className={cn(
-          'not-prose h-7 w-auto min-w-0 gap-1 border-0 bg-transparent px-1.5 py-0 text-[0.8125rem] font-medium *:min-w-0 hover:bg-fd-accent hover:text-fd-accent-foreground focus:ring-0 focus-visible:ring-2 focus-visible:ring-inset data-popup-open:bg-fd-accent',
+          'not-prose h-7 w-auto min-w-0 gap-1.5 border-0 bg-transparent px-1.5 py-0 text-[0.8125rem] font-medium *:min-w-0 hover:bg-fd-accent hover:text-fd-accent-foreground focus:ring-0 focus-visible:ring-2 focus-visible:ring-inset data-popup-open:bg-fd-accent',
           className,
         )}
         {...props}

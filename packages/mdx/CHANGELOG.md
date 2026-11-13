@@ -1,3 +1,9 @@
+## fumadocs-mdx@15.6.1
+
+### Client loader types
+
+- `createClientLoader()` of browser collections types the `frontmatter`, `default` and other exports of a page again, instead of `unknown`.
+
 ## fumadocs-mdx@15.6.0
 
 ### Path params at runtime

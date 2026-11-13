@@ -159,7 +159,7 @@ export const OpenAPIPage = createOpenAPIPage({
         on: 'my-auth',
         render: ({ Value, Panel }) => (
           <>
-            <Value name="Authorization" type="header" />
+            <Value name="Authorization" type="header" start="Bearer" />
             <Panel title="Sign in" component={SignIn} />
           </>
         ),
@@ -175,7 +175,7 @@ function SignIn({ field, close }: AuthPanelProps) {
     <button
       onClick={async () => {
         const res = await fetch('/api/token');
-        setValue(`Bearer ${await res.text()}`);
+        setValue(await res.text());
         close();
       }}
     >
@@ -185,15 +185,15 @@ function SignIn({ field, close }: AuthPanelProps) {
 }
 ```
 
-| Option      | Is                                                                   |
-| ----------- | -------------------------------------------------------------------- |
-| `on`        | the security schemes it handles                                      |
-| `render`    | its rows, from `Value` (an input of the value) and `Panel` (a panel) |
-| `onRequest` | write the value into request data, for requests and code usages      |
+| Option      | Is                                                                       |
+| ----------- | ------------------------------------------------------------------------ |
+| `on`        | the security schemes it handles                                          |
+| `render`    | its rows, from `Value` (an input of the value) and `Panel` (a panel)     |
+| `onRequest` | write the value into request data, for requests and code usages (masked) |
 
 Define providers outside of components, the auth fields are created again when they change.
 
-Rows and panels hold their own state, `Custom.useController(field.fieldName)` reads and writes the value. It starts from the default of scheme, like `Bearer `, and is kept per scheme while the tab is open.
+Rows and panels hold their own state, `Custom.useController(field.fieldName)` reads and writes the value. It is kept per scheme while the tab is open. Tokens are sent with their scheme, like `Bearer <token>`.
 
 <Accordions>
   <Accordion title="Sign-ins leaving the page">
@@ -212,12 +212,12 @@ Rows and panels hold their own state, `Custom.useController(field.fieldName)` re
 
       useAuthRedirect(field, (url, state) => {
         if (url.searchParams.get('state') === state)
-          setValue(`Bearer ${url.searchParams.get('token')}`);
+          setValue(url.searchParams.get('token')!);
       });
 
       return (
         <>
-          <Value name="Authorization" type="header" />
+          <Value name="Authorization" type="header" start="Bearer" />
           <Panel title="Sign in" component={SignIn} />
         </>
       );

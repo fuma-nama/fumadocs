@@ -331,7 +331,7 @@ function SiblingSelect({
     >
       <SelectTrigger
         aria-label={t('Switch Field')}
-        className="h-7 w-auto min-w-0 gap-1 border-0 bg-transparent px-1.5 py-0 font-mono text-[0.8125rem] font-medium text-fd-foreground hover:bg-fd-accent focus:ring-0 focus-visible:ring-2 data-popup-open:bg-fd-accent"
+        className="h-7 w-auto min-w-0 gap-1.5 border-0 bg-transparent px-1.5 py-0 font-mono text-[0.8125rem] font-medium text-fd-foreground hover:bg-fd-accent focus:ring-0 focus-visible:ring-2 data-popup-open:bg-fd-accent"
       >
         <SelectValue className="truncate" />
       </SelectTrigger>
@@ -362,7 +362,7 @@ export function Section({
 }) {
   return (
     <section className="border-b last:border-b-0">
-      <div className="sticky top-0 z-10 flex h-10 items-center gap-2 border-b bg-fd-card ps-4 pe-2 @sm:pe-7.5">
+      <div className="sticky top-0 z-10 flex h-10 items-center gap-2 border-b bg-fd-card ps-4 pe-4">
         <Icon className="size-3.5 shrink-0 text-fd-primary" />
         <h3 className="text-[0.8125rem] font-medium">{title}</h3>
         {count !== undefined && (

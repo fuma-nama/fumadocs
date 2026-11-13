@@ -64,9 +64,10 @@ export function useConnectionInputs(): ConnectionInputs {
 }
 
 const stringSchema: JsonSchema = { type: 'string' };
+const secretSchema: JsonSchema = { type: 'string', format: 'password' };
 const credentialsSchema: JsonSchema = {
   type: 'object',
-  properties: { username: stringSchema, password: { type: 'string', format: 'password' } },
+  properties: { username: stringSchema, password: secretSchema },
 };
 
 /** the input of a scheme, `undefined` when the transport can't apply it */
@@ -76,7 +77,7 @@ function getAuthEntry(
 ): FieldEntry | undefined {
   // API keys in the query are a part of URL
   if (scheme.type === 'httpApiKey' && scheme.in === 'query' && scheme.name)
-    return { fieldName: ['query', scheme.name], name: scheme.name, schema: stringSchema };
+    return { fieldName: ['query', scheme.name], name: scheme.name, schema: secretSchema };
   if (!transport?.auth?.(scheme)) return;
   const credentials =
     scheme.type === 'userPassword' ||
@@ -85,7 +86,7 @@ function getAuthEntry(
   return {
     fieldName: ['auth', id],
     name: scheme.name ?? 'token',
-    schema: credentials ? credentialsSchema : stringSchema,
+    schema: credentials ? credentialsSchema : secretSchema,
   };
 }
 
@@ -230,7 +231,7 @@ function AuthSection({
           >
             <SelectTrigger
               aria-label={title}
-              className="h-7 w-auto max-w-60 gap-1.5 border-0 bg-transparent px-2 font-mono text-xs hover:bg-fd-accent focus:ring-0 focus-visible:ring-2 @sm:-me-2"
+              className="h-7 w-auto max-w-60 gap-1.5 border-0 bg-transparent px-2 font-mono text-xs hover:bg-fd-accent focus:ring-0 focus-visible:ring-2 -me-3"
             >
               <SelectValue className="truncate" />
             </SelectTrigger>

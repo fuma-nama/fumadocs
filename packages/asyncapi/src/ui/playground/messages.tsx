@@ -42,7 +42,12 @@ export function MessagesPanel({
         <ClientCodeBlock
           lang="text"
           code={url}
-          codeblock={{ ...panelTopCodeBlock, title: t('Connection URL') }}
+          codeblock={{
+            ...panelTopCodeBlock,
+            title: t('Connection URL'),
+            // one line as tall as a field row, its width changes don't toggle a scrollbar
+            viewportProps: { className: 'flex h-10 items-center py-0 [scrollbar-width:none]' },
+          }}
         />
       )}
       <PanelHeader>
@@ -234,7 +239,8 @@ const Composer = memo(function Composer({
   ];
 
   return (
-    <div className="shrink-0 border-t">
+    // hidden while disconnected, keeping the draft
+    <div hidden={!open} className="shrink-0 border-t">
       {outgoing.length > 0 && (
         <div className="flex h-10 items-center border-b px-1.5">
           <Select
@@ -289,11 +295,7 @@ const Composer = memo(function Composer({
                 : 'text-amber-600 dark:text-amber-400',
           )}
         >
-          {!open
-            ? t('Connect to send messages.')
-            : send
-              ? check?.text
-              : t('This connection only receives messages.')}
+          {send ? check?.text : t('This connection only receives messages.')}
         </p>
         <Select
           items={encodings}

@@ -16,8 +16,10 @@ export interface PageOutputs {
 }
 
 /** the exports of a compiled page for its props, with its outputs for them */
-export type PageAt<Page extends CompiledMDXProperties<unknown>> = Omit<Page, keyof PageOutputs> &
-  PageOutputs;
+export type PageAt<Page extends CompiledMDXProperties<unknown>> = {
+  // mapped, as `Omit` only keeps the index signature of a page that has one
+  [K in keyof Page as Exclude<K, keyof PageOutputs>]: Page[K];
+} & PageOutputs;
 
 /** merge objects like a spread, without reading the outputs of {@link defineOutputs} */
 export function merge<T>(...sources: (object | undefined)[]): T {

@@ -180,15 +180,15 @@ export function usePlayground({
     transform: transformAuthInputs,
   });
 
-  function getRequestData(): RawRequestData {
-    return auth.mapValues({
-      ...(engine.getData() as typeof defaultValues),
-      method,
-      bodyMediaType: body?.mediaType,
-    });
+  function getRequestData(masked?: boolean): RawRequestData {
+    return auth.mapValues(
+      { ...(engine.getData() as typeof defaultValues), method, bodyMediaType: body?.mediaType },
+      masked,
+    );
   }
 
-  const syncExample = useEffectEvent(() => update(getRequestData()));
+  // code usages show the request, without secrets
+  const syncExample = useEffectEvent(() => update(getRequestData(true)));
 
   // select the requirement of the returned flow, also on the first render of client-rendered pages
   const [selectedFor, setSelectedFor] = useState<string>();
