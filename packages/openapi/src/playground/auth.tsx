@@ -577,8 +577,11 @@ export interface AuthRenderProps {
     name: string;
     type?: string;
     description?: string;
+    /** a secret string by default, entered in a password input */
     schema?: Exclude<JsonSchema, boolean>;
     path?: string;
+    /** fixed text before the input, like the scheme of a token */
+    start?: ReactNode;
     /** after the input, like a button filling the value */
     end?: ReactNode;
   }>;
@@ -614,8 +617,9 @@ const builtinProviders: AuthProvider[] = [
           type="basic"
           description={field.scheme.description}
           path="username"
+          schema={{ type: 'string' }}
         />
-        <Value name="password" path="password" schema={{ type: 'string', format: 'password' }} />
+        <Value name="password" path="password" />
       </>
     ),
     onRequest(data, value) {
@@ -640,11 +644,18 @@ const builtinProviders: AuthProvider[] = [
     onRequest() {},
   },
   {
-    render: ({ field, Value }) => (
-      <Value name="Authorization" type="header" description={field.scheme.description} />
+    render: ({ field: { scheme }, Value }) => (
+      <Value
+        name="Authorization"
+        type="header"
+        start={getAuthScheme(scheme)}
+        description={scheme.description}
+      />
     ),
-    onRequest(data, value) {
-      data.header.Authorization = value;
+    onRequest(data, value, { scheme }) {
+      const token = value as string;
+      // readers paste whole header values too, like `Bearer <token>`
+      data.header.Authorization = token.includes(' ') ? token : `${getAuthScheme(scheme)} ${token}`;
     },
   },
 ];
@@ -661,12 +672,16 @@ function findProvider(providers: AuthProvider[] = [], item: AuthRequirement): Au
 }
 
 function getDefaultValue(scheme: SecuritySchemeObject): unknown {
-  if (scheme.type === 'apiKey') return '';
   if (scheme.type === 'mutualTLS') return null;
-  if (scheme.type !== 'http' || !scheme.scheme) return 'Bearer ';
-  if (scheme.scheme.toLowerCase() === 'basic') return { username: '', password: '' };
-  // HTTP schemes are prefixed by their name, like `Token `
-  return `${scheme.scheme[0].toUpperCase()}${scheme.scheme.slice(1)} `;
+  if (scheme.type === 'http' && scheme.scheme?.toLowerCase() === 'basic')
+    return { username: '', password: '' };
+  return '';
+}
+
+/** the scheme of `Authorization` header, like `Bearer` */
+function getAuthScheme(scheme: SecuritySchemeObject): string {
+  if (scheme.type !== 'http' || !scheme.scheme) return 'Bearer';
+  return `${scheme.scheme[0].toUpperCase()}${scheme.scheme.slice(1)}`;
 }
 
 export interface AuthFields {
@@ -677,8 +692,12 @@ export interface AuthFields {
   select: (index: number) => void;
   /** the fields of the selected requirement */
   fields: AuthField[];
-  /** encode the auth values of page into request data, like the form values */
-  mapValues: <T>(values: T) => T;
+  /**
+   * encode the auth values of page into request data, like the form values
+   *
+   * @param masked - replace the values with `********`, for code usages
+   */
+  mapValues: <T>(values: T, masked?: boolean) => T;
   /** restore the persisted values, returns a cleanup */
   init: () => () => void;
 }
@@ -768,8 +787,16 @@ export function useAuthFields(
     select,
     fields,
     mapValues: useCallback(
-      (values) => {
-        const cloned = structuredClone({ ...values, auth: page.get(['auth']) });
+      (values, masked) => {
+        const auth = page.get(['auth']) ?? {};
+        const cloned = structuredClone({
+          ...values,
+          auth: masked
+            ? JSON.parse(JSON.stringify(auth), (_, v) =>
+                typeof v === 'string' && v ? '********' : v,
+              )
+            : auth,
+        });
         const data = cloned as unknown as RawRequestData & { auth?: unknown };
         for (const field of fields)
           field.provider.onRequest!(data, objectGet(data, field.fieldName), field);

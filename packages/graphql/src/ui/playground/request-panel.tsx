@@ -128,7 +128,7 @@ function OperationSection({ query, onQueryChange, onReset }: OperationSectionPro
       icon={Braces}
       title={t('Operation')}
       actions={
-        <div className="flex items-center @sm:-me-1">
+        <div className="flex items-center -me-1.25">
           <button
             type="button"
             title={t('Format')}
@@ -230,7 +230,7 @@ function VariablesSection({ onNavigate }: { onNavigate: NavigateFn }) {
       title={t('Variables')}
       actions={
         entries.length > 0 && (
-          <Segmented value={mode} onValueChange={setMode} className="@sm:-me-2.5">
+          <Segmented value={mode} onValueChange={setMode}>
             <SegmentedList
               aria-label={t('Editor')}
               items={[

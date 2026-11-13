@@ -1,5 +1,6 @@
 'use client';
 import { Fragment, type MouseEventHandler, type ReactNode, useId, useMemo, useState } from 'react';
+import { flushSync } from 'react-dom';
 import { Autocomplete } from '@base-ui/react/autocomplete';
 import { Popover } from '@base-ui/react/popover';
 import { Select as SelectPrimitive } from '@base-ui/react/select';
@@ -9,7 +10,6 @@ import {
   ChevronRight,
   ChevronsUpDown,
   Copy,
-  Info,
   Plus,
   Trash2,
   Upload,
@@ -34,12 +34,13 @@ import {
 } from '@fumadocs/json-schema';
 import {
   anyFields,
+  type FieldInfo,
   useFieldInfo,
   useResolvedSchema,
   useSchemaContext,
   useSchemaUtils,
 } from './schema';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../select';
+import { Select, SelectContent, SelectItem, SelectValue } from '../select';
 import { useTranslations } from '@fuma-translate/react';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { useCopyButton } from 'fumadocs-ui/utils/use-copy-button';
@@ -62,12 +63,38 @@ export interface FieldEntry {
 /** open a nested field, `siblings` are the fields of its parent */
 export type NavigateFn = (entry: FieldEntry, siblings: FieldEntry[]) => void;
 
-/** the type of a field, at the end of its cell like a unit */
-const typeClassName = 'flex shrink-0 items-center pe-1 font-mono text-xs text-fd-muted-foreground';
+/** a segment of the type pill, the type or an action on the field */
+const segmentClassName =
+  'flex items-center transition-colors not-first:border-s hover:bg-fd-accent hover:text-fd-accent-foreground focus-visible:bg-fd-accent focus-visible:outline-none data-popup-open:bg-fd-accent data-popup-open:text-fd-accent-foreground';
 
-/** holds the actions of field, reserved in tables so their types align, an end padding when stacked */
-const slotClassName =
-  'flex w-7 shrink-0 items-center justify-center @max-sm:pe-2 @max-sm:empty:w-2';
+/** the type of a field and the actions on it, like changing its type or unsetting it */
+function TypePill({
+  type,
+  action,
+  quiet = false,
+}: {
+  type?: ReactNode;
+  action?: ReactNode;
+  quiet?: boolean;
+}) {
+  return (
+    <span
+      className={cn(
+        'flex h-6 shrink-0 items-stretch overflow-hidden rounded-md border bg-fd-secondary font-mono text-xs',
+        quiet ? 'text-fd-muted-foreground/70' : 'text-fd-muted-foreground',
+      )}
+    >
+      {typeof type === 'string' ? (
+        <span className="max-w-40 truncate px-1.5 leading-[1.375rem]" title={type}>
+          {type}
+        </span>
+      ) : (
+        type
+      )}
+      {action}
+    </span>
+  );
+}
 
 const rowButtonClassName =
   'flex h-10 w-full items-center gap-2 px-4 text-[0.8125rem] text-fd-muted-foreground transition-colors hover:bg-fd-accent/40 hover:text-fd-accent-foreground focus-visible:bg-fd-secondary focus-visible:text-fd-accent-foreground focus-visible:outline-none';
@@ -100,7 +127,10 @@ function getOptions(field: Schema): { value: unknown; label: string }[] | undefi
       label: item.title ?? valueLabel(item.const),
     }));
 
-  const values = field.const !== undefined ? [field.const] : field.enum;
+  const values =
+    field.const !== undefined
+      ? [field.const]
+      : (field.enum ?? (field.type === 'boolean' ? [true, false] : undefined));
   return values?.map((value) => ({ value, label: valueLabel(value) }));
 }
 
@@ -188,10 +218,7 @@ function SchemaSwitch({
   const { info, updateInfo } = useFieldInfo(fieldName, field, depth);
   const union = info.unionField ? field[info.unionField] : undefined;
   const types = Array.isArray(field.type) ? field.type : undefined;
-  const member = useMemo<JsonSchema | undefined>(() => {
-    if (union && union.length > 0) return union[info.oneOf];
-    if (types) return { ...field, type: info.selectedType ?? types[0] };
-  }, [field, union, types, info.oneOf, info.selectedType]);
+  const member = useMemo(() => getMember(field, info), [field, info]);
 
   // a union of `const` members is one select, not a switch between them
   if (member === undefined || isConstUnion(union) || getSuggestions(field))
@@ -226,6 +253,21 @@ function SchemaSwitch({
   );
 }
 
+/** the member of a union or a multi-type field chosen by `info` */
+function getMember(field: Schema, info: FieldInfo): JsonSchema | undefined {
+  const union = info.unionField ? field[info.unionField] : undefined;
+  if (union && union.length > 0) return union[info.oneOf];
+  if (!Array.isArray(field.type)) return;
+  const type = info.selectedType ?? field.type[0];
+  // the default and examples of other types aren't values of this one
+  return {
+    ...field,
+    type,
+    default: matchesType(field.default, type) ? field.default : undefined,
+    examples: field.examples?.filter((example) => matchesType(example, type)),
+  };
+}
+
 function TypeSelect({
   value,
   options,
@@ -241,7 +283,7 @@ function TypeSelect({
     <Select items={options} value={value} onValueChange={(v) => v !== null && onChange(v)}>
       <SelectPrimitive.Trigger
         aria-label={t('Type')}
-        className="flex h-5 max-w-40 min-w-0 cursor-pointer items-center gap-0.5 rounded-md border bg-fd-secondary ps-1.5 pe-1 font-mono text-xs text-fd-muted-foreground transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fd-ring/50 data-popup-open:bg-fd-accent data-popup-open:text-fd-accent-foreground"
+        className={cn(segmentClassName, 'max-w-40 min-w-0 cursor-pointer gap-0.5 ps-1.5 pe-1')}
       >
         <SelectValue className="truncate" />
         <SelectPrimitive.Icon className="shrink-0">
@@ -262,45 +304,86 @@ function TypeSelect({
 interface RowProps {
   name: string;
   required?: boolean;
-  /** shown after the name, like the description of field */
+  /** a card opened from the name, like the description of field */
   info?: ReactNode;
   /** id of the control labelled by `name` */
   htmlFor?: string;
   /** a cell without input, not highlighted on hover */
   readOnly?: boolean;
+  /** a field out of the request, its name muted */
+  quiet?: boolean;
+  /** after the cell in a column of its own, like the type and actions of field */
+  aside?: ReactNode;
   children: ReactNode;
 }
 
-/** a field in the editor: its name on the left, its input filling the cell on the right */
+/** a field in the editor: its name, its input filling the cell, then its type and actions */
 export function Row({
   name,
   required = false,
   info,
   htmlFor,
   readOnly = false,
+  quiet = false,
+  aside,
   children,
 }: RowProps) {
+  const nameClassName = cn(
+    'truncate font-mono text-[0.8125rem]',
+    quiet ? 'text-fd-muted-foreground' : 'text-fd-foreground',
+  );
+
   return (
-    <div className="group/row grid border-b last:border-b-0 @max-sm:pb-3 @sm:min-h-10 @sm:grid-cols-[minmax(9rem,1fr)_minmax(0,2fr)]">
+    <div
+      className={cn(
+        'group/row grid grid-cols-[minmax(0,1fr)_auto] border-b transition-colors last:border-b-0 @max-sm:pb-3 @sm:min-h-10 @sm:grid-cols-[minmax(9rem,1fr)_minmax(0,2fr)]',
+        // the field is the unit of a table, it highlights as a whole
+        !readOnly && 'hover:bg-fd-accent/40 has-focus-visible:bg-fd-secondary',
+      )}
+    >
       <div className="flex min-w-0 items-center gap-1 py-2 ps-4 pe-3 @max-sm:pb-1.5">
-        <label
-          htmlFor={htmlFor}
-          title={name}
-          className="truncate font-mono text-[0.8125rem] text-fd-foreground"
-        >
-          {name}
-        </label>
-        {required && <span className="-ms-0.5 text-red-400">*</span>}
-        {info}
-      </div>
-      <div
-        className={cn(
-          'flex min-h-9 min-w-0 items-stretch text-[0.8125rem] transition-colors @max-sm:mx-4 @max-sm:overflow-hidden @max-sm:rounded-lg @max-sm:border @max-sm:bg-fd-secondary/50 @sm:min-h-10 @sm:border-s',
-          !readOnly &&
-            'hover:bg-fd-accent/40 has-focus-visible:border-fd-ring has-focus-visible:bg-fd-secondary',
+        {info ? (
+          <Popover.Root>
+            <label htmlFor={htmlFor} className="sr-only">
+              {name}
+            </label>
+            <Popover.Trigger
+              openOnHover
+              delay={200}
+              closeDelay={100}
+              title={name}
+              className={cn(
+                nameClassName,
+                'cursor-help rounded-sm decoration-dotted underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fd-ring data-popup-open:underline',
+              )}
+            >
+              {name}
+            </Popover.Trigger>
+            <Popover.Portal>
+              <Popover.Positioner side="bottom" align="start" sideOffset={6} className="z-50">
+                <Popover.Popup className="w-72 max-w-[calc(100vw-2rem)] origin-(--transform-origin) rounded-xl border bg-fd-popover p-3 text-fd-popover-foreground shadow-lg outline-none transition-[opacity,scale] duration-150 ease-out data-ending-style:scale-95 data-ending-style:opacity-0 data-starting-style:scale-95 data-starting-style:opacity-0 motion-reduce:transition-none">
+                  {info}
+                </Popover.Popup>
+              </Popover.Positioner>
+            </Popover.Portal>
+          </Popover.Root>
+        ) : (
+          <label htmlFor={htmlFor} title={name} className={nameClassName}>
+            {name}
+          </label>
         )}
-      >
-        {children}
+        {required && <span className="-ms-0.5 text-red-400">*</span>}
+      </div>
+      {/* stacked, the aside sits on the line of name above the value */}
+      <div className="contents @sm:flex @sm:min-w-0">
+        <div className="col-span-full row-start-2 flex min-h-9 min-w-0 flex-1 items-stretch text-[0.8125rem] @max-sm:mx-4 @max-sm:overflow-hidden @max-sm:rounded-lg @max-sm:border @max-sm:bg-fd-secondary/50 @sm:min-h-10 @sm:border-s">
+          {children}
+        </div>
+        {aside && (
+          <div className="col-start-2 row-start-1 flex shrink-0 items-center pe-4 @max-sm:pt-2 @max-sm:pb-1.5">
+            {aside}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -322,18 +405,9 @@ function formatRange(
   if (out.length > 1) return out.join(' ');
 }
 
-/** the description and constraints of a field, opened from an info button on hover or click */
-function FieldInfo({
-  name,
-  field,
-  description,
-}: {
-  name: string;
-  field: Schema;
-  description?: string;
-}) {
+/** the card of a field: its description and constraints, `null` without them */
+function useFieldCard(name: string, field: Schema, description?: string): ReactNode {
   const t = useTranslations({ note: 'schema UI' });
-  const tPlayground = useTranslations({ note: 'playground' });
   const constraints: [label: string, value: string][] = [];
 
   if (field.default !== undefined) constraints.push([t('Default'), JSON.stringify(field.default)]);
@@ -357,56 +431,43 @@ function FieldInfo({
   if (!description && constraints.length === 0) return null;
 
   return (
-    <Popover.Root>
-      <Popover.Trigger
-        openOnHover
-        delay={200}
-        closeDelay={100}
-        aria-label={tPlayground('Field Info')}
-        className="inline-flex size-5 shrink-0 ms-auto items-center justify-center rounded text-fd-muted-foreground/70 transition-colors hover:text-fd-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fd-ring data-popup-open:text-fd-foreground"
-      >
-        <Info className="size-3.5" />
-      </Popover.Trigger>
-      <Popover.Portal>
-        <Popover.Positioner side="bottom" align="start" sideOffset={6} className="z-50">
-          <Popover.Popup className="w-72 max-w-[calc(100vw-2rem)] origin-(--transform-origin) rounded-xl border bg-fd-popover p-3 text-fd-popover-foreground shadow-lg outline-none transition-[opacity,scale] duration-150 ease-out data-ending-style:scale-95 data-ending-style:opacity-0 data-starting-style:scale-95 data-starting-style:opacity-0 motion-reduce:transition-none">
-            <p className="flex items-baseline gap-3">
-              <span className="truncate font-mono text-[0.8125rem] font-medium">{name}</span>
-              <span className="ms-auto shrink-0 font-mono text-xs text-fd-muted-foreground">
-                {typeLabel(field)}
-              </span>
-            </p>
-            {description && (
-              <div className="mt-1.5 text-xs leading-relaxed text-fd-muted-foreground prose-no-margin [&_a]:underline [&_code]:font-mono">
-                <FieldMarkdown md={description} />
-              </div>
-            )}
-            {constraints.length > 0 && (
-              <dl className="mt-2.5 grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-1 border-t pt-2.5 text-xs">
-                {constraints.map(([label, value]) => (
-                  <Fragment key={label}>
-                    <dt className="text-fd-muted-foreground">{label}</dt>
-                    <dd className="truncate font-mono" title={value}>
-                      {value}
-                    </dd>
-                  </Fragment>
-                ))}
-              </dl>
-            )}
-          </Popover.Popup>
-        </Popover.Positioner>
-      </Popover.Portal>
-    </Popover.Root>
+    <>
+      <p className="flex items-baseline gap-3">
+        <span className="truncate font-mono text-[0.8125rem] font-medium">{name}</span>
+        <span className="ms-auto shrink-0 font-mono text-xs text-fd-muted-foreground">
+          {typeLabel(field)}
+        </span>
+      </p>
+      {description && (
+        <div className="mt-1.5 text-xs leading-relaxed text-fd-muted-foreground prose-no-margin [&_a]:underline [&_code]:font-mono">
+          <FieldMarkdown md={description} />
+        </div>
+      )}
+      {constraints.length > 0 && (
+        <dl className="mt-2.5 grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-1 border-t pt-2.5 text-xs">
+          {constraints.map(([label, value]) => (
+            <Fragment key={label}>
+              <dt className="text-fd-muted-foreground">{label}</dt>
+              <dd className="truncate font-mono" title={value}>
+                {value}
+              </dd>
+            </Fragment>
+          ))}
+        </dl>
+      )}
+    </>
   );
 }
 
-function SlotButton({
+function ActionButton({
   label,
   onClick,
+  tabIndex,
   children,
 }: {
   label: string;
   onClick: MouseEventHandler;
+  tabIndex?: number;
   children: ReactNode;
 }) {
   return (
@@ -414,26 +475,12 @@ function SlotButton({
       type="button"
       aria-label={label}
       title={label}
+      tabIndex={tabIndex}
       onClick={onClick}
-      className="inline-flex size-5 items-center justify-center rounded text-fd-muted-foreground transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fd-ring [&_svg]:size-3"
+      className={cn(segmentClassName, 'w-6 justify-center [&_svg]:size-3')}
     >
       {children}
     </button>
-  );
-}
-
-function UnsetButton({ fieldName }: { fieldName: FieldKey }) {
-  const engine = useDataEngine();
-  const t = useTranslations({ note: 'playground' });
-  const [isDefined] = useFieldValue(fieldName, {
-    compute: (value) => value !== undefined,
-  });
-  if (!isDefined) return null;
-
-  return (
-    <SlotButton label={t('Unset')} onClick={() => engine.delete(fieldName)}>
-      <X />
-    </SlotButton>
   );
 }
 
@@ -447,9 +494,11 @@ interface FieldProps {
   description?: string;
   fieldName: FieldKey;
   field: Schema;
-  /** in the reserved slot at the end of its cell */
-  slot?: ReactNode;
-  /** before the slot */
+  /** fixed text before its input, like the scheme of a token */
+  start?: ReactNode;
+  /** in the last column, like unsetting the value */
+  action?: ReactNode;
+  /** after its input */
   end?: ReactNode;
 }
 
@@ -457,12 +506,13 @@ export function ValueRow({
   fieldName,
   field,
   type,
+  start,
   end,
   required,
   marked = required,
   name,
   description,
-  slot,
+  action,
 }: FieldProps) {
   const id = stringifyFieldKey(fieldName);
 
@@ -471,43 +521,27 @@ export function ValueRow({
       name={name}
       required={marked}
       htmlFor={id}
-      info={<FieldInfo name={name} field={field} description={description} />}
+      info={useFieldCard(name, field, description)}
+      aside={(type || action) && <TypePill type={type} action={action} />}
     >
-      <FieldValue id={id} fieldName={fieldName} field={field} required={required} />
-      {type && <span className={typeClassName}>{type}</span>}
+      {start && (
+        <label htmlFor={id} className="flex shrink-0 items-center ps-3 text-fd-muted-foreground">
+          {start}
+        </label>
+      )}
+      <FieldValue id={id} fieldName={fieldName} field={field} />
       {end}
-      <span className={slotClassName}>{slot}</span>
     </Row>
   );
 }
 
-/** the type in the cell of a primitive field, its selector when it has multiple */
-function cellType(field: Schema, selector: ReactNode): ReactNode {
-  if (selector) return selector;
-  // the options of selects and `null` tell the type already
-  if (field.type !== 'null' && !getOptions(field) && !getSuggestions(field))
-    return typeLabel(field);
-}
-
 /** the input of a primitive field */
-function FieldValue({
-  id,
-  fieldName,
-  field,
-  required = false,
-}: {
-  id: string;
-  fieldName: FieldKey;
-  field: Schema;
-  required?: boolean;
-}) {
+function FieldValue({ id, fieldName, field }: { id: string; fieldName: FieldKey; field: Schema }) {
   const [value, setValue] = useFieldValue(fieldName);
   const t = useTranslations({ note: 'playground' });
 
   if (field.type === 'null')
-    return (
-      <span className="flex flex-1 items-center px-3 font-mono text-fd-muted-foreground">null</span>
-    );
+    return <span className="flex flex-1 items-center px-3 font-mono text-xs">null</span>;
 
   if (field.type === 'string' && field.format === 'binary') {
     return (
@@ -547,56 +581,35 @@ function FieldValue({
   const options = getOptions(field);
   if (options && options.length > 0) {
     const idx = options.findIndex((option) => option.value === value);
-    const items: { value: string; label: ReactNode }[] = options.map((option, i) => ({
-      value: String(i),
-      label: option.label,
-    }));
-    if (!required)
-      items.push({
-        value: '-1',
-        label: <span className="text-fd-muted-foreground">{t('Unset')}</span>,
-      });
 
     return (
       <CellSelect
         id={id}
-        items={items}
-        value={idx !== -1 ? String(idx) : required ? null : '-1'}
-        onValueChange={(v) => setValue(v === '-1' ? undefined : options[Number(v)].value)}
+        items={options.map((option, i) => ({
+          value: String(i),
+          // literal values, like the cell shows them
+          label: <span className="font-mono text-xs">{option.label}</span>,
+        }))}
+        value={idx !== -1 ? String(idx) : null}
+        onValueChange={(v) => setValue(options[Number(v)].value)}
         placeholder={t('Select')}
       />
     );
   }
 
-  if (field.type === 'boolean') {
-    return (
-      <div className="flex flex-1 items-center gap-0.5 ps-1 pe-2">
-        {[true, false].map((option) => (
-          <button
-            key={String(option)}
-            type="button"
-            aria-pressed={value === option}
-            onClick={() => setValue(option)}
-            className="h-6 rounded px-2 font-mono text-xs text-fd-muted-foreground transition-colors hover:text-fd-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fd-ring aria-pressed:bg-fd-background aria-pressed:text-fd-foreground aria-pressed:shadow-sm aria-pressed:ring-1 aria-pressed:ring-fd-border dark:aria-pressed:bg-fd-accent"
-          >
-            {String(option)}
-          </button>
-        ))}
-      </div>
-    );
-  }
-
   const isNumber = field.type === 'integer' || field.type === 'number';
+  const isSecret = field.format === 'password';
   const hint = field.default ?? field.examples?.[0];
   return (
     <input
       id={id}
-      type={isNumber ? 'number' : field.format === 'password' ? 'password' : 'text'}
+      type={isNumber ? 'number' : isSecret ? 'password' : 'text'}
       step={isNumber ? 'any' : undefined}
       autoComplete="off"
       spellCheck={false}
       placeholder={
-        value === ''
+        // a secret is empty until entered, not an empty string
+        value === '' && !isSecret
           ? '""'
           : hint !== undefined && typeof hint !== 'object'
             ? String(hint)
@@ -621,6 +634,7 @@ function NavRow({
   marked = required,
   name,
   description,
+  action,
   onNavigate,
 }: FieldProps & { onNavigate: () => void }) {
   const t = useTranslations({ note: 'playground' });
@@ -645,47 +659,22 @@ function NavRow({
       name={name}
       required={marked}
       htmlFor={id}
-      info={<FieldInfo name={name} field={field} description={description} />}
+      info={useFieldCard(name, field, description)}
+      aside={<TypePill type={type} action={action} />}
     >
-      <NavButton id={id} type={type} onClick={onNavigate}>
-        <span
-          className={cn(
-            'font-mono text-xs',
-            preview === null ? 'text-fd-muted-foreground/70' : 'text-fd-muted-foreground',
-          )}
-        >
-          {preview ?? t('Not set')}
-        </span>
-      </NavButton>
+      <button
+        id={id}
+        type="button"
+        onClick={onNavigate}
+        className="flex min-w-0 flex-1 items-center px-3 text-start outline-none"
+      >
+        {preview !== null ? (
+          <span className="truncate font-mono text-xs">{preview}</span>
+        ) : (
+          <span className="text-fd-muted-foreground/70">{t('Not set')}</span>
+        )}
+      </button>
     </Row>
-  );
-}
-
-/** fills a cell, opens something else on click */
-function NavButton({
-  id,
-  type,
-  onClick,
-  children,
-}: {
-  id?: string;
-  type?: ReactNode;
-  onClick: () => void;
-  children: ReactNode;
-}) {
-  return (
-    <button
-      id={id}
-      type="button"
-      onClick={onClick}
-      className="group/nav flex min-w-0 flex-1 items-center ps-3 text-start outline-none"
-    >
-      <span className="min-w-0 flex-1 truncate pe-2">{children}</span>
-      {type && <span className={typeClassName}>{type}</span>}
-      <span className={slotClassName}>
-        <ChevronRight className="size-3.5 text-fd-muted-foreground transition-transform duration-200 group-hover/nav:translate-x-0.5 motion-reduce:transition-none" />
-      </span>
-    </button>
   );
 }
 
@@ -712,12 +701,19 @@ export function CellSelect({
 }) {
   return (
     <Select items={items} value={value} onValueChange={(v) => v !== null && onValueChange(v)}>
-      <SelectTrigger
+      {/* the whole cell opens it */}
+      <SelectPrimitive.Trigger
         id={id}
-        className="h-auto min-w-0 flex-1 rounded-none border-0 bg-transparent py-0 ps-3 pe-1 text-[0.8125rem] hover:bg-transparent focus:ring-0 focus-visible:outline-none"
+        className="flex min-w-0 flex-1 cursor-pointer items-center px-3 text-start text-fd-foreground outline-none data-placeholder:text-fd-muted-foreground"
       >
-        <SelectValue className="truncate" placeholder={placeholder} />
-      </SelectTrigger>
+        {/* the arrow ends the cell, so arrows line up across rows */}
+        <span className="flex min-w-0 flex-1 items-center justify-between gap-2 font-mono text-xs">
+          <SelectValue className="truncate" placeholder={placeholder} />
+          <SelectPrimitive.Icon className="shrink-0 text-fd-muted-foreground">
+            <ChevronDown className="size-3.5" />
+          </SelectPrimitive.Icon>
+        </span>
+      </SelectPrimitive.Trigger>
       <SelectContent>
         {items.map((item) => (
           <SelectItem
@@ -756,7 +752,6 @@ function CellAutocomplete({
   onValueChange: (value: string) => void;
   placeholder?: string;
 }) {
-  const t = useTranslations({ note: 'playground' });
   const filled = items.some((item) => item.value === value);
 
   return (
@@ -775,12 +770,6 @@ function CellAutocomplete({
           placeholder={placeholder}
           className="min-w-0 flex-1 self-stretch bg-transparent px-3 text-fd-foreground outline-none placeholder:text-fd-muted-foreground/70"
         />
-        <Autocomplete.Trigger
-          aria-label={t('Suggestions')}
-          className="flex shrink-0 items-center pe-1 text-fd-muted-foreground"
-        >
-          <ChevronDown className="size-3.5" />
-        </Autocomplete.Trigger>
       </Autocomplete.InputGroup>
       <Autocomplete.Portal>
         <Autocomplete.Positioner align="start" sideOffset={4} className="z-50">
@@ -815,7 +804,6 @@ export function SelectRow({
   return (
     <Row name={name} htmlFor={id}>
       <CellSelect id={id} {...props} />
-      <span className={slotClassName} />
     </Row>
   );
 }
@@ -837,12 +825,12 @@ export function TextRow({
     <Row
       name={name}
       readOnly
-      info={<FieldInfo name={name} field={{ type: 'string' }} description={description} />}
+      info={useFieldCard(name, { type: 'string' }, description)}
+      aside={copyable && <TypePill action={<CopyButton text={children} />} />}
     >
       <span className="flex min-w-0 flex-1 items-center px-3 text-fd-muted-foreground">
         <span className="truncate">{children}</span>
       </span>
-      <span className={slotClassName}>{copyable && <CopyButton text={children} />}</span>
     </Row>
   );
 }
@@ -852,12 +840,12 @@ function CopyButton({ text }: { text: string }) {
   const [isChecked, onCopy] = useCopyButton(() => navigator.clipboard.writeText(text));
 
   return (
-    <SlotButton
+    <ActionButton
       label={isChecked ? t('Copied', { note: 'aria-label' }) : t('Copy', { note: 'aria-label' })}
       onClick={onCopy}
     >
       {isChecked ? <Check /> : <Copy />}
-    </SlotButton>
+    </ActionButton>
   );
 }
 
@@ -877,14 +865,16 @@ export function LinkRow({
       onClick={onClick}
       className={cn(rowButtonClassName, 'group/nav border-b last:border-b-0')}
     >
-      <span className="min-w-0 flex-1 truncate text-start">{children}</span>
-      <span className={typeClassName}>{name}</span>
-      <ChevronRight className="size-3.5 transition-transform duration-200 group-hover/nav:translate-x-0.5 motion-reduce:transition-none" />
+      <span className="flex min-w-0 flex-1 items-center gap-1.5 text-start">
+        <span className="truncate">{children}</span>
+        <ChevronRight className="size-3.5 shrink-0 text-fd-muted-foreground transition-transform duration-200 group-hover/nav:translate-x-0.5 motion-reduce:transition-none" />
+      </span>
+      <span className="shrink-0 font-mono text-xs text-fd-muted-foreground">{name}</span>
     </button>
   );
 }
 
-/** a row toggled on click, its check box takes the slot */
+/** a row toggled on click, its check box in the last column */
 export function CheckRow({
   name,
   checked,
@@ -906,10 +896,10 @@ export function CheckRow({
         role="checkbox"
         aria-checked={checked}
         onClick={() => onCheckedChange(!checked)}
-        className="flex min-w-0 flex-1 items-center ps-3 text-start outline-none"
+        className="flex min-w-0 flex-1 items-center gap-2 px-3 text-start outline-none"
       >
-        <span className="min-w-0 flex-1 truncate pe-2 text-fd-muted-foreground">{children}</span>
-        <span className={slotClassName}>
+        <span className="min-w-0 flex-1 truncate text-fd-muted-foreground">{children}</span>
+        <span className="flex shrink-0">
           <span
             className={cn(
               'flex size-4 items-center justify-center rounded-[5px] border transition-colors',
@@ -921,6 +911,91 @@ export function CheckRow({
             {checked && <Check className="size-3" />}
           </span>
         </span>
+      </button>
+    </Row>
+  );
+}
+
+/** an optional field out of the request, clicking it adds the field and moves to its input */
+function QuietRow({
+  name,
+  fieldName,
+  field,
+  description,
+  type,
+  onNavigate,
+}: {
+  name: string;
+  fieldName: FieldKey;
+  field: Schema;
+  description?: string;
+  type?: ReactNode;
+  onNavigate: () => void;
+}) {
+  const engine = useDataEngine();
+  const { generateDefault } = useSchemaUtils();
+  const { info } = useFieldInfo(fieldName, field);
+  const t = useTranslations({ note: 'playground' });
+  const id = stringifyFieldKey(fieldName);
+  const label = t('Add {name}', { variables: { name } });
+  const example = field.const ?? field.default ?? field.examples?.[0];
+  // objects show their preview once added
+  const hint = example !== null && typeof example === 'object' ? undefined : example;
+
+  // the type chosen before stays, the value matches it
+  const member = getMember(field, info) ?? field;
+  function add() {
+    engine.update(fieldName, generateDefault(member));
+  }
+
+  /** add it, then move to its editor */
+  function edit() {
+    flushSync(add);
+    const kind = getType(resolveField(member, engine.get(fieldName)) ?? field);
+    if (kind === 'object' || kind === 'array') return onNavigate();
+
+    const editor = document.getElementById(id);
+    editor?.focus();
+    if (editor instanceof HTMLInputElement) editor.select();
+    else editor?.click();
+  }
+
+  return (
+    <Row
+      name={name}
+      htmlFor={id}
+      quiet
+      info={useFieldCard(name, field, description)}
+      aside={
+        <TypePill
+          quiet
+          type={type ?? typeLabel(field, true)}
+          action={
+            <ActionButton label={label} tabIndex={-1} onClick={add}>
+              <Plus />
+            </ActionButton>
+          }
+        />
+      }
+    >
+      <button
+        id={id}
+        type="button"
+        aria-label={label}
+        onClick={edit}
+        className="flex min-w-0 flex-1 items-center px-3 text-start text-fd-muted-foreground/70 outline-none"
+      >
+        {/* what adding it gives */}
+        {hint !== undefined && (
+          <span
+            className={cn(
+              'truncate',
+              (typeof hint !== 'string' || getOptions(field)) && 'font-mono text-xs',
+            )}
+          >
+            {valueLabel(hint)}
+          </span>
+        )}
       </button>
     </Row>
   );
@@ -949,8 +1024,23 @@ export function FieldRow({
 }) {
   const { readOnly, writeOnly } = useSchemaContext();
   const resolved = useResolvedSchema(schema);
+  const engine = useDataEngine();
   const t = useTranslations({ note: 'playground' });
+  const [isUnset] = useFieldValue(fieldName, { compute: (value) => value === undefined });
   if (schema === false) return null;
+  if (!required && isUnset) {
+    if ((resolved.readOnly && !readOnly) || (resolved.writeOnly && !writeOnly)) return null;
+    return (
+      <QuietRow
+        name={name}
+        fieldName={fieldName}
+        field={resolved}
+        description={description ?? resolved.description}
+        type={label}
+        onNavigate={onNavigate}
+      />
+    );
+  }
 
   return (
     <SchemaSwitch fieldName={fieldName} schema={schema}>
@@ -964,12 +1054,16 @@ export function FieldRow({
           description: description ?? resolved.description ?? field.description,
           fieldName,
           field,
-          slot: onRemove ? (
-            <SlotButton label={t('Remove Item', { note: 'aria-label' })} onClick={onRemove}>
+          action: onRemove ? (
+            <ActionButton label={t('Remove Item', { note: 'aria-label' })} onClick={onRemove}>
               <Trash2 />
-            </SlotButton>
+            </ActionButton>
           ) : (
-            !required && <UnsetButton fieldName={fieldName} />
+            !required && (
+              <ActionButton label={t('Unset')} onClick={() => engine.delete(fieldName)}>
+                <X />
+              </ActionButton>
+            )
           ),
         };
         const type = getType(field);
@@ -979,7 +1073,7 @@ export function FieldRow({
           return (
             <NavRow {...props} type={label ?? typeLabel(field, true)} onNavigate={onNavigate} />
           );
-        return <ValueRow {...props} type={selector ?? label ?? cellType(field, null)} />;
+        return <ValueRow {...props} type={selector ?? label ?? typeLabel(field)} />;
       }}
     </SchemaSwitch>
   );
@@ -1034,15 +1128,17 @@ function ObjectRows({
       ))}
       {hiddenKeys.length > 0 && (
         <Select value={null} onValueChange={(v) => v !== null && onAppend(v)}>
-          <SelectTrigger
-            className={cn(
-              rowButtonClassName,
-              'rounded-none border-0 border-b bg-transparent p-0 ps-4 last:border-b-0 focus:ring-0',
-            )}
+          <SelectPrimitive.Trigger
+            className={cn(rowButtonClassName, 'cursor-pointer border-b last:border-b-0')}
           >
-            <Plus className="size-3.5" />
-            <SelectValue placeholder={t('Show Property')} />
-          </SelectTrigger>
+            <Plus className="size-3.5 shrink-0" />
+            <span className="flex min-w-0 items-center gap-1.5">
+              <SelectValue className="truncate" placeholder={t('Show Property')} />
+              <SelectPrimitive.Icon className="shrink-0">
+                <ChevronDown className="size-3.5" />
+              </SelectPrimitive.Icon>
+            </span>
+          </SelectPrimitive.Trigger>
           <SelectContent>
             {hiddenKeys.map((key) => (
               <SelectItem key={key} value={key} className="font-mono text-[0.8125rem]">
@@ -1066,7 +1162,7 @@ function NewPropertyRow({ onAppend }: { onAppend: (name: string) => void }) {
   }
 
   return (
-    <div className="flex min-h-10 items-center gap-2 border-b ps-4 pe-1.5 last:border-b-0">
+    <div className="flex min-h-10 items-center gap-2 border-b ps-4 pe-4 last:border-b-0">
       <Plus className="size-3.5 shrink-0 text-fd-muted-foreground" />
       <input
         value={name}
@@ -1160,7 +1256,7 @@ export function FieldRows({
           rows = (
             <ValueRow
               name={entry.name}
-              type={cellType(field, null)}
+              type={typeLabel(field)}
               required
               fieldName={entry.fieldName}
               field={field}
@@ -1176,9 +1272,11 @@ export function FieldRows({
               </div>
             )}
             {selector && (
-              <div className="flex min-h-10 items-center gap-2 border-b ps-4 pe-4 text-xs text-fd-muted-foreground @sm:pe-8">
+              <div className="flex min-h-10 items-center gap-2 border-b ps-4 pe-4 text-xs text-fd-muted-foreground">
                 {t('Schema')}
-                <span className="ms-auto">{selector}</span>
+                <span className="ms-auto">
+                  <TypePill type={selector} />
+                </span>
               </div>
             )}
             {rows}
