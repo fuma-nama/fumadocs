@@ -96,7 +96,7 @@ const renderTitle = (page: (typeof guideDocs)['$inferPage']) => `# ${page.data.t
 test('llms: files', async () => {
   const output = llms(guideDocs, { renderPage: renderTitle });
 
-  // `misc` and `guide/deep` have a single page
+  // the root folder `api` is a section
   await expect(output.files()).resolves.toEqual([
     '/llms.txt',
     '/llms-full.txt',
@@ -107,8 +107,6 @@ test('llms: files', async () => {
     '/docs/misc/note.md',
     '/docs/api.md',
     '/docs/api/get.md',
-    '/docs/llms-full.txt',
-    '/docs/guide/llms-full.txt',
     '/docs/api/llms-full.txt',
   ]);
 });
@@ -118,10 +116,8 @@ test('llms: serve', async () => {
   const text = async (path: string) => (await output.serve(path))!.text();
 
   expect(await text('/llms.txt')).toContain('[Setup](/docs/guide/setup.md)');
-  expect(await text('/llms.txt')).toContain(
-    '## Sections\n\n- [/docs](/docs/llms-full.txt)\n- [/docs/guide](/docs/guide/llms-full.txt)',
-  );
-  expect(await text('/docs/guide/llms-full.txt')).toBe('# Guide\n\n# Setup\n\n# Deep');
+  expect(await text('/llms.txt')).toContain('- [Api](/docs/api/llms-full.txt)');
+  expect(await text('/docs/api/llms-full.txt')).toBe('# API\n\n# Get');
   expect(await text('/docs.md')).toBe('# Index');
   // `Accept: text/markdown` on a page URL with a trailing slash
   expect(await text('/docs/guide/.md')).toBe('# Guide');
@@ -134,7 +130,7 @@ test('llms: serve', async () => {
   );
   // a middleware calls the next handler
   expect(await output.serve('/docs/missing.md')).toBeUndefined();
-  expect(await output.serve('/docs/misc/llms-full.txt')).toBeUndefined();
+  expect(await output.serve('/docs/guide/llms-full.txt')).toBeUndefined();
 });
 
 test('llms: renderUrl of files', async () => {
@@ -145,7 +141,7 @@ test('llms: renderUrl of files', async () => {
 
   const text = await (await output.serve('/llms.txt'))!.text();
   expect(text).toContain('[Setup](https://example.com/docs/guide/setup.md)');
-  expect(text).toContain('[/docs/guide](https://example.com/docs/guide/llms-full.txt)');
+  expect(text).toContain('[Api](https://example.com/docs/api/llms-full.txt)');
   expect(output.index()).toContain('[Setup](https://example.com/docs/guide/setup)');
 });
 
@@ -154,12 +150,15 @@ test('llms: filter', async () => {
     renderPage: renderTitle,
     // a draft page
     filter: (page) => page.data.title !== 'Deep',
+    section: () => true,
   });
   const text = async (path: string) => (await output.serve(path))!.text();
 
   expect(await text('/docs/guide/llms-full.txt')).toBe('# Guide\n\n# Setup');
   await expect(output.full()).resolves.not.toContain('# Deep');
   expect(await output.serve('/docs/guide/deep/page.md')).toBeUndefined();
+  // a section without pages has no file
+  expect(await output.serve('/docs/guide/deep/llms-full.txt')).toBeUndefined();
   // keeps its page link
   expect(await text('/llms.txt')).toContain('[Deep](/docs/guide/deep/page)');
 });
@@ -167,52 +166,42 @@ test('llms: filter', async () => {
 test('llms: section', async () => {
   const output = llms(guideDocs, {
     renderPage: renderTitle,
-    // top-level directories with several pages, `/llms-full.txt` has every page
-    section: (dir, pages) => pages.length > 1 && dir.split('/').length === 3,
+    // folders with an index page, and a custom path for the root folder
+    section: (folder) => (folder.root ? '/docs/api.txt' : folder.index !== undefined),
   });
+  const text = async (path: string) => (await output.serve(path))!.text();
 
   await expect(output.files()).resolves.toEqual(
-    expect.arrayContaining(['/docs/guide/llms-full.txt', '/docs/api/llms-full.txt']),
+    expect.arrayContaining(['/docs/guide/llms-full.txt', '/docs/api.txt']),
   );
-  await expect(output.files()).resolves.not.toContain('/docs/llms-full.txt');
-  expect(await (await output.serve('/llms.txt'))!.text()).toContain(
-    '## Sections\n\n- [/docs/guide](/docs/guide/llms-full.txt)\n- [/docs/api](/docs/api/llms-full.txt)',
-  );
-  expect(await output.serve('/docs/llms-full.txt')).toBeUndefined();
+  await expect(output.files()).resolves.not.toContain('/docs/misc/llms-full.txt');
+  expect(await text('/llms.txt')).toContain('- [Api](/docs/api.txt)');
+  expect(await text('/llms.txt')).toContain('- [Guide](/docs/guide/llms-full.txt)');
+  expect(await text('/docs/api.txt')).toBe('# API\n\n# Get');
 });
 
-test('llms: files of groups and pages outside the page tree', async () => {
+test('llms: files without root folders', async () => {
   const output = llms(
     loader({
       baseUrl: '/docs',
       source: {
         files: [
-          { type: 'meta', path: 'meta.json', data: { pages: ['(a)', '(b)'] } },
-          { type: 'page', path: '(a)/one.mdx', data: { title: 'One' } },
-          { type: 'page', path: '(a)/two.mdx', data: { title: 'Two' } },
-          { type: 'page', path: '(b)/three.mdx', data: { title: 'Three' } },
+          { type: 'page', path: 'one.mdx', data: { title: 'One' } },
           // only in the fallback page tree
+          { type: 'meta', path: 'meta.json', data: { pages: ['one'] } },
           { type: 'page', path: 'api/x.mdx', data: { title: 'X' } },
-          { type: 'page', path: 'api/y.mdx', data: { title: 'Y' } },
         ],
       },
     }),
     { renderPage: (page) => `# ${page.data.title}` },
   );
 
-  // groups share `/docs`
   await expect(output.files()).resolves.toEqual([
     '/llms.txt',
     '/llms-full.txt',
     '/docs/one.md',
-    '/docs/two.md',
-    '/docs/three.md',
     '/docs/api/x.md',
-    '/docs/api/y.md',
-    '/docs/llms-full.txt',
-    '/docs/api/llms-full.txt',
   ]);
-  expect(await (await output.serve('/docs/api/llms-full.txt'))!.text()).toBe('# X\n\n# Y');
 });
 
 test('llms: files of i18n & encoded URLs', async () => {
@@ -231,12 +220,13 @@ test('llms: files of i18n & encoded URLs', async () => {
         ],
       },
     }),
-    { renderPage: (page) => `# ${page.data.title}` },
+    { renderPage: (page) => `# ${page.data.title}`, section: () => true },
   );
   const text = async (path: string) => (await output.serve(path))!.text();
 
   // with the fallback of an untranslated page
   expect(await text('/cn/docs/guide/llms-full.txt')).toBe('# 指南\n\n# Start\n\n# 入门');
+  expect(await text('/en/docs/guide/llms-full.txt')).toBe('# Guide\n\n# Start');
   // routers may pass decoded paths
   expect(await text('/cn/docs/guide/入门.md')).toBe('# 入门');
   expect(await text('/cn/docs/guide/%E5%85%A5%E9%97%A8.md')).toBe('# 入门');
@@ -257,7 +247,7 @@ test('llms: languages without the locale in URLs', async () => {
         ],
       },
     }),
-    { renderPage: (page) => `# ${page.data.title}` },
+    { renderPage: (page) => `# ${page.data.title}`, section: () => true },
   );
   const text = async (path: string, lang: string) => (await output.serve(path, lang))!.text();
 

@@ -18,4 +18,3 @@ packages:
 - The CLI and `create-fumadocs-app` print plain lines instead of spinner frames without a terminal.
 - `create-fumadocs-app` names the file to set the site name and GitHub repository, and names the package after the current folder when created in `.`.
 - The `path` that a collection schema function receives is documented as absolute.
-- `llms()` takes a `section` option to choose which directories have their own `llms-full.txt`.

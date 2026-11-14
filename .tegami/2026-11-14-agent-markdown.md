@@ -7,7 +7,7 @@ packages:
 ### Files for agents
 
 - `llms()` adds `files()` and `serve(path)`: `llms.txt`, `llms-full.txt` and `<page>.md` files by their public path, served from one route.
-- URL directories get their own `llms-full.txt`, listed in `llms.txt`, so large docs can be read section by section.
+- Root folders of the page tree get their own `llms-full.txt`, linked from `llms.txt`, so large docs can be read section by section. The `section` option chooses the folders.
 - `llms.txt` from `serve()` links pages to their Markdown.
 - The `filter` option leaves pages out of `full()` and the files.
 - Components without a Markdown form keep their MDX tag name in processed Markdown, also in production builds.
