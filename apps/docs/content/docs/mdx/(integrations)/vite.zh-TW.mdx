@@ -1,0 +1,102 @@
+---
+title: Vite
+description: 在 Vite 中使用 Fumadocs MDX
+---
+
+## 設定 [#setup]
+
+此外掛適用於 React Router、TanStack Start、Waku 及其他 Vite 應用程式。Next.js 有[專屬的設定方式](/docs/mdx/next)。Astro 則是透過 [`@fumadocs/astro`](/docs/astro/manual-installation) 使用其自身的內容集合，而不使用 Fumadocs MDX。
+
+<div className="fd-steps [&_h3]:fd-step">
+  ### 安裝 &#91;#installation&#93;
+
+  ```npm
+  npm i fumadocs-mdx fumadocs-core @types/mdx
+  ```
+
+  加入 Vite 外掛：
+
+  ```ts tab="React Router" title="vite.config.ts"
+  import { defineConfig } from 'vite';
+  import { reactRouter } from '@react-router/dev/vite';
+  import { fumadocsMdx } from 'fumadocs-mdx/vite';
+
+  export default defineConfig({
+    plugins: [
+      fumadocsMdx(), // [!code ++]
+      reactRouter(),
+    ],
+  });
+  ```
+
+  ```ts tab="TanStack Start" title="vite.config.ts"
+  import { defineConfig } from 'vite';
+  import { tanstackStart } from '@tanstack/react-start/plugin/vite';
+  import react from '@vitejs/plugin-react';
+  import { fumadocsMdx } from 'fumadocs-mdx/vite';
+
+  export default defineConfig({
+    plugins: [
+      fumadocsMdx(), // [!code ++]
+      tanstackStart(),
+      react(),
+    ],
+  });
+  ```
+
+  ```ts tab="Waku" title="waku.config.ts"
+  import { type Config, defineConfig } from 'waku/config';
+  import { fumadocsMdx } from 'fumadocs-mdx/vite';
+  import type { UserConfig } from 'vite';
+
+  export default defineConfig({
+    vite: {
+      plugins: [
+        // [!code ++]
+        fumadocsMdx(),
+      ],
+      resolve: {
+        tsconfigPaths: true,
+      },
+    } satisfies UserConfig as Config['vite'],
+  });
+  ```
+
+  ### 與 Fumadocs 整合 &#91;#integrate-with-fumadocs&#93;
+
+  建立 `lib/source.ts` 檔案：
+
+  ```ts title="lib/source.ts"
+  import { defineDocs } from 'fumadocs-mdx/macro';
+  import { loader } from 'fumadocs-core/source';
+
+  const docs = defineDocs({
+    dir: 'content/docs',
+  });
+
+  export const source = loader({
+    baseUrl: '/docs',
+    source: docs.toFumadocsSource(),
+  });
+  ```
+
+  ### 完成 &#91;#done&#93;
+
+  現在您可以在 `content/docs` 資料夾中撰寫內容了。
+</div>
+
+## 接下來呢？ [#what-is-next]
+
+<Cards>
+  <Card title="Macro API" href="/docs/mdx/macro">
+    透過 `fumadocs-mdx/macro` 在應用程式模組中定義集合。
+  </Card>
+
+  <Card title="Config API" href="/docs/mdx/collections">
+    在 `source.config.ts` 中定義集合，並搭配產生的進入點檔案使用。
+  </Card>
+
+  <Card title="延遲載入" href="/docs/mdx/async">
+    遇到效能瓶頸了嗎？不妨試試延遲載入。
+  </Card>
+</Cards>

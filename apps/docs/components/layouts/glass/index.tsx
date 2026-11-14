@@ -2,14 +2,15 @@ import { baseOptions, linkItems, logo } from '@/components/layouts/shared';
 import { source } from '@/lib/source';
 import { AIChat } from '@/components/inkeep/search';
 import { getSection } from '@/lib/source/navigation';
-import type { CSSProperties, ReactNode } from 'react';
+import type { CSSProperties } from 'react';
 import { getLayoutTabs } from 'fumadocs-ui/layouts/shared';
 import { ClientGlassLayout } from './client';
 import 'katex/dist/katex.min.css';
 
-export function Glass({ children }: { children: ReactNode }) {
+export async function Glass({ params, children }: LayoutProps<'/[lang]/docs'>) {
+  const { lang } = await params;
   const base = baseOptions();
-  const tabs = getLayoutTabs(source.getPageTree(), {
+  const tabs = getLayoutTabs(source.getPageTree(lang), {
     transform(option, node) {
       const meta = source.getNodeMeta(node);
       if (!meta || !node.icon) return option;
@@ -38,7 +39,7 @@ export function Glass({ children }: { children: ReactNode }) {
     <AIChat>
       <ClientGlassLayout
         {...base}
-        tree={source.getPageTree()}
+        tree={source.getPageTree(lang)}
         // just icon items
         links={linkItems.filter((item) => item.type === 'icon')}
         nav={{

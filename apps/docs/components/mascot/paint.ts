@@ -1,5 +1,5 @@
-import { BAYER4 } from '@/app/(landing)/lib/dither';
-import { cssRgb, isDark } from '@/app/(landing)/lib/theme';
+import { BAYER4 } from '@/app/[lang]/(landing)/lib/dither';
+import { cssRgb, isDark } from '@/app/[lang]/(landing)/lib/theme';
 import { cellOf, CROWN_CELL, leanOf, MATE_H, MATE_PAD, MATE_W } from './sprite';
 
 /** her moon's ring: its tilt (rad) and half height (cells); the steps her moon takes round it */

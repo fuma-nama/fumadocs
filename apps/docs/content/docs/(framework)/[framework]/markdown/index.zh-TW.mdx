@@ -1,0 +1,524 @@
+---
+title: Markdown
+description: 如何撰寫文件
+---
+
+import { Building, HomeIcon, Rocket } from 'lucide-react';
+
+## 簡介 [#introduction]
+
+Fumadocs 為標記語言 MDX 提供了許多實用的擴充功能。以下簡要介紹 Fumadocs 預設的 MDX 語法。
+
+> MDX 並非 Fumadocs 唯一支援的格式。事實上，您可以使用任何算繪器，例如無頭式 CMS。
+>
+> 詳情請參閱[自訂內容來源](/docs/integrations/content/custom)。
+
+## MDX [#mdx]
+
+我們推薦使用 MDX，它是 Markdown 的超集，並支援 JSX 語法。
+您可以匯入元件並在文件中使用，甚至可以直接撰寫 JavaScript。
+
+請參閱：
+
+* [MDX 語法](https://mdxjs.com/docs/what-is-mdx/#mdx-syntax)。
+* 此外也支援 GFM (GitHub Flavored Markdown) ，請參閱 [GFM 規格](https://github.github.com/gfm)。
+
+```mdx noCopy
+import { Component } from './component';
+
+<Component name="Hello" />
+
+## Heading
+
+### Heading
+
+#### Heading
+
+Hello World, **Bold**, _Italic_, ~~Hidden~~
+
+1. First
+2. Second
+3. Third
+
+- Item 1
+- Item 2
+
+> Quote here
+
+![alt](/image.png)
+
+| Table | Description |
+| ----- | ----------- |
+| Hello | World       |
+```
+
+### Frontmatter [#frontmatter]
+
+Fumadocs 預設支援 YAML 格式的 frontmatter，其中 `title` 代表 Fumadocs UI 中的頁面標題 (`h1`) 。
+
+```mdx
+---
+title: This is a document
+---
+
+...
+```
+
+因此，撰寫 Markdown/MDX 時通常不會使用 h1 標題 (`# Heading`) ，除非您有自訂的頁面標題算繪邏輯。
+
+若您的內容來源支援，也可以在程式碼中匯出 frontmatter。它會合併並覆蓋 YAML frontmatter，且可以讀取 [props](#props)：
+
+```mdx
+---
+title: Deploy
+---
+
+export const frontmatter = {
+  description: `Deploy your ${props.framework} site.`,
+};
+```
+
+<Callout title="在 Fumadocs MDX 中">
+  您可以使用 [`schema`](/docs/mdx/collections#schema-1) 選項新增 frontmatter 屬性，詳情請參閱[自訂 Frontmatter](/docs/mdx#customize-frontmatter)。
+</Callout>
+
+### 自動連結 [#auto-links]
+
+內部連結會使用您 React 框架的 `<Link />` 元件，以支援預先載入 (prefetching) ，並避免整頁重新載入。
+
+基於安全考量，外部連結會自動加上預設的 `rel="noreferrer noopener" target="_blank"` 屬性。
+
+```mdx
+[My Link](https://github.github.com/gfm)
+
+This also works: https://github.github.com/gfm.
+```
+
+### 卡片 [#cards]
+
+適合用來加入連結。
+
+```mdx
+import { HomeIcon } from 'lucide-react';
+
+<Cards>
+  <Card href="/docs" title="Documentation">
+    Browse the full documentation.
+  </Card>
+  <Card title="href is optional">Cards can hold plain content too.</Card>
+  <Card icon={<HomeIcon />} href="/" title="Home">
+    You can include icons too.
+  </Card>
+</Cards>
+```
+
+<Cards>
+  <Card href="/docs" title="說明文件">
+    瀏覽完整的說明文件。
+  </Card>
+
+  <Card title="href 為選填">卡片也可以只放一般內容。</Card>
+
+  <Card icon={<HomeIcon />} href="/" title="首頁">
+    您也可以加上圖示。
+  </Card>
+</Cards>
+
+#### 「延伸閱讀」區塊 [#further-reading-section]
+
+您可以這樣做：
+
+```tsx title="page.tsx"
+import { getPageTreePeers } from 'fumadocs-core/page-tree';
+import { source } from '@/lib/source';
+
+<Cards>
+  {getPageTreePeers(source.getPageTree(), '/docs/my-page').map((peer) => (
+    <Card key={peer.url} title={peer.name} href={peer.url}>
+      {peer.description}
+    </Card>
+  ))}
+</Cards>;
+```
+
+這會以卡片形式顯示同一資料夾中的其他頁面。
+
+<DocsCategory url="/docs/ui/navigation" />
+
+### 提示框 [#callouts]
+
+適合用來加入提示或警告，預設已內建。您可以指定提示框的類型：
+
+* `info` (預設) 
+* `warn`/`warning`
+* `error`
+* `success`
+* `idea`
+
+```mdx
+<Callout>Hello World</Callout>
+
+<Callout title="Title" type="warn">
+  Hello World
+</Callout>
+
+<Callout title="Title" type="error">
+  Hello World
+</Callout>
+
+<Callout title="Title" type="idea">
+  Hello World
+</Callout>
+```
+
+<Callout>Hello World</Callout>
+
+<Callout title="標題" type="warn">
+  Hello World
+</Callout>
+
+<Callout title="標題" type="error">
+  Hello World
+</Callout>
+
+<Callout title="標題" type="idea">
+  Hello World
+</Callout>
+
+### 標題 [#headings]
+
+每個標題都會自動加上錨點，並將空格等無效字元轉換為合法格式 (例如 `Hello World` 會轉為 `hello-world`) 。
+
+```md
+# Hello `World`
+```
+
+#### 目錄設定 [#toc-settings]
+
+目錄 (TOC) 會根據標題自動產生，您也可以自訂標題在目錄中的呈現方式：
+
+```md
+# Heading [!toc]
+
+This heading will be hidden from TOC.
+
+# Another Heading [toc]
+
+This heading will **only** be visible in TOC, you can use it to add additional TOC items.
+Like headings rendered in a React component:
+
+<MyComp />
+```
+
+#### 自訂錨點 [#custom-anchor]
+
+您可以加上 `[#slug]` 來自訂標題的錨點。
+
+```md
+# heading [#my-heading-id]
+```
+
+您也可以搭配目錄設定一起使用，例如：
+
+```md
+# heading [toc] [#my-heading-id]
+```
+
+若要讓讀者直接連到特定標題，請在網址的雜湊片段中加上標題 ID：`/page#my-heading-id`。
+
+### 程式碼區塊 [#codeblock]
+
+預設已透過 [Rehype Code](/docs/headless/mdx/rehype-code) 支援語法突顯。
+
+````mdx
+```js
+console.log('Hello World');
+```
+
+```js title="My Title"
+console.log('Hello World');
+```
+````
+
+#### 行號 [#line-numbers]
+
+顯示行號，此功能也能與 Twoslash 及其他 transformer 搭配使用。
+
+````mdx tab="Input"
+```ts twoslash lineNumbers
+const a = 'Hello World';
+//    ^?
+console.log(a); // [!code highlight]
+```
+````
+
+```ts twoslash lineNumbers tab="Output"
+const a = 'Hello World';
+//    ^?
+console.log(a); // [!code highlight]
+```
+
+您可以設定行號的起始值。
+
+````mdx tab="Input"
+```js lineNumbers=4
+function main() {
+  console.log('starts from 4');
+
+  return 0;
+}
+```
+````
+
+```js lineNumbers=4 tab="Output"
+function main() {
+  console.log('starts from 4');
+
+  return 0;
+}
+```
+
+#### Shiki Transformers [#shiki-transformers]
+
+我們支援部分 [Shiki Transformers](https://shiki.style/packages/transformers)，讓您能針對特定行進行語法突顯或套用樣式。
+
+````md tab="Input"
+```tsx
+// 醒目標示一行
+<div>Hello World</div> // [\!code highlight]
+
+// 醒目標示一個單字
+// [\!code word:Fumadocs]
+<div>Fumadocs</div>
+
+// diff 樣式
+console.log('hewwo'); // [\!code --]
+console.log('hello'); // [\!code ++]
+
+// 聚焦
+return new ResizeObserver(() => {}) // [\!code focus]
+```
+````
+
+```tsx tab="Output"
+// 語法突顯單行
+<div>Hello World</div> // [!code highlight]
+
+// 語法突顯單一字詞
+// [!code word:Fumadocs]
+<div>Fumadocs</div>
+
+// diff 樣式：
+console.log('hewwo'); // [!code --]
+console.log('hello'); // [!code ++]
+
+// 聚焦
+return new ResizeObserver(() => {}) // [!code focus]
+```
+
+#### 頁籤群組 [#tab-groups]
+
+````mdx
+```ts tab="Tab 1"
+console.log('A');
+```
+
+```ts tab="Tab 2"
+console.log('B');
+```
+````
+
+```ts tab="Tab 1"
+console.log('A');
+```
+
+```ts tab="Tab 2"
+console.log('B');
+```
+
+若要新增持久化 ID，請在第一個程式碼區塊中定義 `tab-group`：
+
+````mdx
+```ts tab="Tab 1" tab-group="my-custom-group"
+console.log('A');
+```
+
+```ts tab="Tab 2"
+console.log('B');
+```
+````
+
+```ts tab="Tab 1" tab-group="my-custom-group"
+console.log('A');
+```
+
+```ts tab="Tab 2"
+console.log('B');
+```
+
+另一個群組：
+
+```ts tab="Tab 1" tab-group="my-custom-group"
+console.log('A');
+```
+
+```ts tab="Tab 2"
+console.log('B');
+```
+
+#### 頁籤群組中的 MDX [#mdx-in-tab-groups]
+
+頁籤群組由 `remarkCodeTab` remark 外掛提供，Fumadocs MDX 預設會啟用此外掛。若要在頁籤值中使用 MDX，請啟用它的 `parseMdx` 選項：
+
+```ts tab="unified" title="source.config.ts"
+import { defineConfig } from 'fumadocs-mdx/config';
+
+export default defineConfig({
+  mdxOptions: {
+    remarkCodeTabOptions: {
+      parseMdx: true, // [!code ++]
+    },
+  },
+});
+```
+
+```ts tab="Sätteri" title="source.config.ts"
+import { defineConfig, defineDocs } from 'fumadocs-mdx/config';
+
+export const docs = defineDocs({
+  docs: {
+    compiler: 'satteri',
+  },
+});
+
+export default defineConfig({
+  satteriOptions: {
+    remarkCodeTabOptions: {
+      parseMdx: true, // [!code ++]
+    },
+  },
+});
+```
+
+````mdx
+```ts tab="<Building /> Tab 1"
+console.log('A');
+```
+
+```ts tab="<Rocket /> Tab 2"
+console.log('B');
+```
+````
+
+```ts tab="<Building /> Tab 1"
+console.log('A');
+```
+
+```ts tab="<Rocket /> Tab 2"
+console.log('B');
+```
+
+### 引入 [#include]
+
+引用另一個檔案 (也可以是 Markdown/MDX 文件) 。Fumadocs MDX 透過 [Remark 引入](/docs/headless/mdx/remark-include) 預設啟用此功能。
+請在 `<include>` 標籤中指定目標檔案的路徑 (相對於該 MDX 檔案本身) 。
+
+```mdx title="page.mdx"
+<include>./another.mdx</include>
+```
+
+請參閱[引入的其他用法](/docs/mdx/include)。
+
+### Props [#props]
+
+在 MDX 中，可以透過 `props` 取得頁面的 props。例如，位於 `[framework]` 資料夾中的頁面，會從其[路徑參數](/docs/page-conventions#path-params)接收 `framework`：
+
+```mdx title="[framework]/deploy.mdx"
+## Deploy on {props.framework}
+
+Deploy your {props.framework} site.
+```
+
+在目錄、搜尋索引以及提供給 LLM 的 Markdown 中，運算式同樣會替換成它的值。在 Astro 頁面中，上方標題的 ID 會是 `deploy-on-astro`。
+
+您也可以將[自訂 props](/docs/headless/source-api#custom-props) 傳遞給頁面。
+
+### Show [#show]
+
+依條件算繪內容。Fumadocs MDX 預設已透過 [Remark Show](/docs/headless/mdx/remark-show) 啟用此功能。
+
+`when` 是可讀取 [props](#props) 的 JavaScript 運算式：
+
+```mdx title="[framework]/deploy.mdx"
+<show when={props.framework === 'astro'}>
+
+## Adapters
+
+Add an adapter to your Astro config.
+
+</show>
+```
+
+此區段只會在 `framework` 為 `astro` 的頁面上算繪。在其他頁面上，它也不會出現在目錄、搜尋索引以及提供給 LLM 的 Markdown 中。
+
+您也可以用 `<show>` 包住[步驟](#steps)：
+
+```mdx title="[framework]/deploy.mdx"
+### 建置 [step] [#build]
+
+<show when={props.framework === 'astro'}>
+
+### 新增轉接器 [step] [#add-an-adapter]
+
+</show>
+
+### 部署 [step] [#deploy]
+```
+
+未算繪的步驟不會計入編號：在 Astro 頁面上，Deploy 是第 3 步，在其他頁面上則是第 2 步。
+
+[頁籤群組](#tab-groups)中的程式碼區塊也是如此：只有在程式碼區塊被算繪時，對應的頁籤才會出現。
+
+### NPM 指令 [#npm-commands]
+
+可用來產生以不同套件管理器安裝套件的指令。
+
+````md tab="Input"
+```npm
+npm i next -D
+```
+````
+
+```npm tab="Output"
+npm i next -D
+```
+
+詳情請參閱 [`remark-npm`](/docs/headless/mdx/remark-npm)。
+
+### 步驟 [#steps]
+
+適合用來標示指南中的步驟。啟用與設定方式請參閱 [`remark-steps`](/docs/headless/mdx/remark-steps)。
+
+```md
+### Installation [step]
+
+### Write Code [step]
+
+### Deploy [step]
+```
+
+#### 安裝 [step] [#installation]
+
+#### 撰寫程式碼 [step] [#write-code]
+
+#### 部署 [step] [#deploy]
+
+### 其他元件 [#other-components]
+
+您可以在 MDX 文件中設定並使用[內建元件](/docs/ui/components)，例如頁籤 (Tabs) 、手風琴 (Accordion) 與可縮放圖片 (Zoomable Image) 。
+
+## 其他功能 [#additional-features]
+
+您可能也會感興趣：
+
+<DocsCategory />

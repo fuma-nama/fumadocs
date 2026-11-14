@@ -1,0 +1,593 @@
+---
+title: AI 與 LLM
+description: 在 Fumadocs 中整合 AI 功能。
+---
+
+## 供 LLM 使用的文件 [#docs-for-llm]
+
+以 Markdown 格式將您的文件提供給 LLM 與 AI 代理：
+
+```package-install
+npx @fumadocs/cli feature llms
+```
+
+它會為您的 docs 集合啟用處理後的 Markdown、在 `lib/source.ts` 中加入 `docsLlms`，並提供下方的[檔案](#files)。若您偏好手動設定，以下也列出了所產生的檔案。
+
+### `docsLlms` [#docsllms]
+
+`llms()` 會將您的文件算繪為供 LLM 使用的格式。`renderPage` 會將單一頁面轉換為 Markdown，且依據的是處理後的文件，而非原始檔案內容：
+
+<feature title="lib/source.ts">llms/docs-llms.ts</feature>
+
+| 方法             | 輸出                          |
+| -------------- | --------------------------- |
+| `index(lang?)` | `llms.txt` 索引，依頁面樹建立        |
+| `page(page)`   | 單一頁面，以 `renderPage` 算繪      |
+| `full(lang?)`  | 所有頁面以 `renderPage` 算繪後合併的結果 |
+| `files()`      | [供 AI 代理使用的檔案](#files)路徑    |
+| `serve(path)`  | 指定路徑上檔案的回應                  |
+
+<Callout title="必須提供 renderPage">
+  只有在傳入 `renderPage` 時，才能使用 `page()`、`full()`、`files()` 與 `serve()`，因為
+  Fumadocs 無從得知您的內容來源如何提供 Markdown。
+</Callout>
+
+`renderPage` 會讀取頁面處理後的 Markdown，因此請啟用 `includeProcessedMarkdown`：
+
+<show when={props.framework !== 'astro'}>
+  <feature title="source.config.ts">llms/source.config.ts</feature>
+
+  MDX 元件會以 JSX 語法呈現。若要將其算繪為 [Markdown 形式](/docs/headless/utils/markdown#asmarkdown)，請[將您的 MDX 元件作為頁面 props 傳入](/docs/headless/mdx/remark-llms#jsx-elements)。
+</show>
+
+<show when={props.framework === 'astro'}>
+  ```js title="astro.config.mjs"
+  import { defineConfig } from 'astro/config';
+  import fumadocs from '@fumadocs/astro';
+
+  export default defineConfig({
+    integrations: [
+      fumadocs({
+        includeProcessedMarkdown: true, // [!code ++]
+      }),
+    ],
+  });
+  ```
+
+  除非 MDX 元件定義了自己的 [Markdown 形式](/docs/headless/utils/markdown#asmarkdown)，否則會以 JSX 語法呈現。
+</show>
+
+[`@fumadocs/local-md`](/docs/integrations/content/local-md) 等執行階段內容來源會隨需解析。只要傳入它們的 `getSource`，CLI 就會產生相同的檔案：
+
+```ts
+export const docsLlms = llms(getSource, {
+  renderPage: (page) => `# ${page.data.title} (${page.url})
+
+${page.data.content}`,
+});
+```
+
+使用 `getSource` 時，`index()` 與 `indexNode()` 會回傳 Promise，而非字串。
+
+### 檔案 [#files]
+
+CLI 會為 AI 代理提供以下檔案：
+
+* `/llms.txt`：文件的索引，附有每個頁面 Markdown 版本的連結。
+* `/llms-full.txt`：所有頁面的內容。
+* `<page>.md`：單一頁面的 Markdown，例如 `/docs/ui.md`。位於 `/` 的頁面則為 `/index.md`。
+* `<section>/llms-full.txt`：某個[區段](#sections)的內容，例如 `/docs/ui/llms-full.txt`。
+
+若要將草稿等頁面排除在這些檔案之外，請傳入 `filter`。`llms.txt` 仍會列出這些頁面，但會連結至其 HTML 頁面：
+
+```ts title="lib/source.ts"
+export const docsLlms = llms(source, {
+  filter: (page) => page.slugs[0] !== 'drafts',
+  renderPage: async (page) => `# ${page.data.title}\n\n${await page.data.getText('processed')}`,
+});
+```
+
+在這些檔案中，`renderUrl` 會接收連結所指向檔案的路徑，例如頁面的 `.md` 檔案。
+
+讀取頁面 HTML 的 AI 代理會透過 `<head>` 中的連結找到該頁面的 Markdown：
+
+```html
+<link rel="alternate" type="text/markdown" href="/docs/ui.md" />
+```
+
+### 區段 [#sections]
+
+區段是頁面樹中擁有獨立 `llms-full.txt` 的資料夾，讓 AI 代理能逐一分段閱讀大型文件。預設情況下，每個根資料夾都是一個區段。在 `llms.txt` 中，資料夾對應的那一行會連結到其所屬區段的 `llms-full.txt`。
+
+若要指定哪些資料夾作為區段，請傳入 `section`。它會接收一個資料夾，並回傳該資料夾是否為區段：
+
+```ts title="lib/source.ts"
+export const docsLlms = llms(source, {
+  // 所有含 index 頁面的資料夾
+  section: (folder) => folder.index !== undefined,
+  renderPage: async (page) => `# ${page.data.title}\n\n${await page.data.getText('processed')}`,
+});
+```
+
+在大型網站上，您可以將區段收合，讓 `llms.txt` 保持精簡。收合的區段在 `llms.txt` 中只會列為一個連結，指向該區段專屬的 `<section>/llms.txt`，再由該檔案列出區段內的頁面：
+
+```ts title="lib/source.ts"
+export const docsLlms = llms(source, {
+  section: (folder) => (folder.root ? { collapse: true } : false),
+  renderPage: async (page) => `# ${page.data.title}\n\n${await page.data.getText('processed')}`,
+});
+```
+
+區段的檔案會以其資料夾 index 頁面的 URL 提供。若資料夾沒有 index 頁面，則改用其中頁面所在的 URL 目錄。當兩個資料夾共用同一個 URL 時 (例如資料夾群組) ，請傳入 `asPath`，讓其中一個改由其他路徑提供，例如 `{ asPath: '/docs/guides' }`。
+
+### 路由 [#routes]
+
+`files()` 會列出各檔案的路徑，`serve(path)` 則會回應該路徑上的檔案，因此每個路由只需將請求路徑傳給 `serve()` 即可。
+
+<show when={props.framework === 'next'}>
+  `/llms.txt` 與 `/llms-full.txt` 由路由處理常式提供。其他檔案位於 `app/docs/[[...slug]]` 旁，因此需在 Next.js 設定中將它們的路徑 rewrite 至 `/llms.mdx/[...path]` 路由：
+</show>
+
+<show when={props.framework === 'react-router'}>
+  React Router 無法比對與文件頁面並列的路徑 (例如 `/docs/ui.md`) ，因此改由資源路由在 `/llms.mdx` 下提供這些檔案，並透過 `renderUrl` 讓 `llms.txt` 中的連結指向該處。根路由的中介軟體也會提供 `/docs/ui.md`，以及其他位於已比對路由下的檔案：
+</show>
+
+<show when={props.framework === 'tanstack-start'}>
+  文件頁面 `docs/$` 會比對 `/docs` 下的所有路徑，因此文件底下各檔案的路由必須使用更具體的路徑，例如 `docs/{$}.md`：
+</show>
+
+<show when={props.framework === 'waku'}>
+  API 路由會在 `/llms.mdx` 下提供這些檔案，並透過 `renderUrl` 讓 `llms.txt` 中的連結指向該處。在伺服器上執行時，`src/middleware` 中的 [Hono 中介軟體](https://hono.dev/docs/guides/middleware) 也會在 `/docs/ui.md` 等檔案原本的路徑上提供這些檔案。請將 `hono` 安裝為開發相依套件，以取得其型別：
+</show>
+
+<show when={props.framework === 'astro'}>
+  由單一端點在各檔案的路徑上預先算繪所有檔案：
+</show>
+
+<feature>llms/routes</feature>
+
+若路徑沒有對應的檔案，`serve()` 會回傳 `undefined`，讓中介軟體可以將請求繼續往下傳遞。使用 `hideLocale: 'always'` 時，URL 不會包含語系：請將語言作為 `serve()` 的第二個引數及 `files()` 的第一個引數傳入。
+
+#### 靜態輸出 [#static-output]
+
+<show when={props.framework === 'next'}>
+  使用 `output: 'export'` 時，Next.js 無法使用 rewrites。`/llms.mdx/[...path]` 路由會在加上前綴的路徑提供這些檔案，例如 `/llms.mdx/docs/ui.md`，再由 `renderUrl` 將 `llms.txt` 中的連結指向這些路徑：
+
+  <feature title="lib/source.ts">llms/docs-llms-prefixed.ts</feature>
+</show>
+
+<show when={props.framework === 'react-router'}>
+  在 SPA 模式下，請在 `react-router.config.ts` 中預先算繪這些檔案。React Router 載入設定時不會套用您的 Vite 外掛，因此請使用 Vite 的 `runnerImport` 載入來源：
+
+  ```ts title="react-router.config.ts"
+  import type { Config } from '@react-router/dev/config';
+  import { fumadocsMdx } from 'fumadocs-mdx/vite';
+  import { runnerImport } from 'vite';
+
+  export default {
+    ssr: false,
+    async prerender({ getStaticPaths }) {
+      const paths = getStaticPaths();
+      const { docsLlms } = (
+        await runnerImport<typeof import('./app/lib/source')>('./app/lib/source.ts', {
+          plugins: [fumadocsMdx()],
+          resolve: { tsconfigPaths: true },
+        })
+      ).module;
+
+      for (const path of await docsLlms.files())
+        paths.push(path === '/llms.txt' || path === '/llms-full.txt' ? path : `/llms.mdx${path}`);
+      return paths;
+    },
+  } satisfies Config;
+  ```
+</show>
+
+<show when={props.framework === 'tanstack-start'}>
+  在 SPA 模式下，請使用 Nitro 預先算繪這些檔案。TanStack Start 請求預先算繪的路徑時會在結尾加上斜線，導致檔案的路由無法比對。Vite 載入設定時不會套用您的外掛，因此請使用 `runnerImport` 載入來源：
+
+  ```ts title="vite.config.ts"
+  import { defineConfig, runnerImport } from 'vite';
+  import { fumadocsMdx } from 'fumadocs-mdx/vite';
+  import { nitro } from 'nitro/vite';
+
+  const { docsLlms } = (
+    await runnerImport<typeof import('./src/lib/source')>('./src/lib/source.ts', {
+      plugins: [fumadocsMdx()],
+      resolve: { tsconfigPaths: true },
+    })
+  ).module;
+
+  export default defineConfig({
+    plugins: [
+      // 其他外掛
+      nitro({
+        prerender: { routes: await docsLlms.files() },
+      }),
+    ],
+  });
+  ```
+</show>
+
+<show when={props.framework === 'waku'}>
+  API 路由會預先算繪，因此以靜態檔案部署的 Waku 網站也會在 `/llms.mdx` 下提供這些檔案。不過中介軟體需要伺服器才能運作。
+</show>
+
+<show when={props.framework === 'astro'}>
+  無論是否使用轉接器，該端點都會預先算繪。
+</show>
+
+#### `Accept` [#accept]
+
+<show when={props.framework !== 'astro'}>
+  AI 代理可以透過 `Accept` 標頭要求取得 Markdown。
+</show>
+
+<show when={props.framework === 'next'}>
+  當請求偏好 Markdown 時，改為提供該頁面的 Markdown：
+
+  ```ts title="proxy.ts"
+  import { NextRequest, NextResponse } from 'next/server';
+  import { isMarkdownPreferred, rewritePath } from 'fumadocs-core/negotiation';
+
+  const { rewrite: rewriteDocs } = rewritePath('/docs{/*path}', '/llms.mdx/docs{/*path}.md');
+
+  export default function proxy(request: NextRequest) {
+    const { pathname } = request.nextUrl;
+    // Next.js 設定中的 rewrites 會提供 `/docs/ui.md` 這類檔案
+    const result =
+      isMarkdownPreferred(request) && !/\.(md|txt)$/.test(pathname) && rewriteDocs(pathname);
+
+    if (result) {
+      return NextResponse.rewrite(new URL(result, request.nextUrl), {
+        headers: { Vary: 'Accept' }, // [!code highlight]
+      });
+    }
+
+    return NextResponse.next();
+  }
+  ```
+</show>
+
+<show when={props.framework === 'react-router' || props.framework === 'waku'}>
+  當請求偏好 Markdown 時，上述中介軟體會以文件頁面的 Markdown 作為回應。
+
+  <Callout>
+    預先算繪的頁面會在中介軟體執行前就以靜態檔案的形式提供，因此一律以 HTML 回應。
+  </Callout>
+</show>
+
+<show when={props.framework === 'tanstack-start'}>
+  當請求偏好 Markdown 時，重新導向至該頁面的 Markdown：
+
+  ```ts title="src/start.ts"
+  import { createMiddleware, createStart } from '@tanstack/react-start';
+  import { redirect } from '@tanstack/react-router';
+  import { isMarkdownPreferred } from 'fumadocs-core/negotiation';
+
+  const llmMiddleware = createMiddleware().server(({ next, request }) => {
+    const url = new URL(request.url);
+
+    // 檔案路由會提供 `/docs/ui.md` 這類路徑
+    if (
+      url.pathname.startsWith('/docs') &&
+      !/\.(md|txt)$/.test(url.pathname) &&
+      isMarkdownPreferred(request)
+    ) {
+      url.pathname += '.md';
+      throw redirect({ href: url.href, headers: { Vary: 'Accept' } }); // [!code highlight]
+    }
+
+    return next();
+  });
+
+  export const startInstance = createStart(() => ({
+    requestMiddleware: [llmMiddleware],
+  }));
+  ```
+</show>
+
+<show when={props.framework !== 'astro'}>
+  由於同一個 URL 現在有兩種表示形式，回應必須加上 `Vary: Accept`，以避免快取衝突。
+</show>
+
+<show when={props.framework === 'next'}>
+  <Callout>
+    Next.js 會捨棄 App Router 頁面回應中的 `Vary`，因此文件頁面的 HTML 回應無法帶有此標頭。若您的文件透過共用快取提供，請在 CDN 上設定此標頭。
+  </Callout>
+</show>
+
+<show when={props.framework === 'astro'}>
+  文件頁面無法根據 `Accept` 標頭提供 Markdown。Astro 中介軟體只會在依請求算繪的頁面上執行，而文件頁面是預先算繪的。
+</show>
+
+### 頁面動作 [#page-actions]
+
+頁面動作可讓讀者複製頁面的 Markdown，或在 AI 應用程式中開啟該頁面。這些動作會讀取頁面的 [`.md` 檔案](#files)。
+
+![AI 頁面動作](/docs/ai-page-actions.png)
+
+<show when={props.framework === 'next' || props.framework === 'waku'}>
+  在您的文件頁面中算繪這些動作：
+
+  ```tsx
+  import { MarkdownCopyButton, ViewOptionsPopover } from 'fumadocs-ui/layouts/docs/page';
+
+  const markdownUrl = `${page.url}.md`;
+
+  <div className="flex flex-row gap-2 items-center border-b pt-2 pb-6">
+    <MarkdownCopyButton markdownUrl={markdownUrl} />
+    <ViewOptionsPopover
+      markdownUrl={markdownUrl}
+      githubUrl={`https://github.com/${owner}/${repo}/blob/main/content/docs/${encodeURI(page.path)}`}
+    />
+  </div>;
+  ```
+</show>
+
+<show when={props.framework === 'next'}>
+  使用靜態匯出時，URL 則改為 `` `/llms.mdx${page.url}.md` ``。
+</show>
+
+<show when={props.framework === 'waku'}>
+  請使用 `` `/llms.mdx${page.url}.md` `` 作為 URL，讓靜態部署也能提供該檔案。
+</show>
+
+<show when={props.framework === 'react-router'}>
+  從文件頁面的載入器回傳 Markdown URL，並在頁面中算繪這些動作：
+
+  ```tsx
+  import { MarkdownCopyButton, ViewOptionsPopover } from 'fumadocs-ui/layouts/docs/page';
+
+  // 在您的載入器中
+  return {
+    path: page.path,
+    markdownUrl: `/llms.mdx${page.url}.md`,
+  };
+
+  // 在您的頁面中
+  <div className="flex flex-row gap-2 items-center border-b pt-2 pb-6">
+    <MarkdownCopyButton markdownUrl={markdownUrl} />
+    <ViewOptionsPopover
+      markdownUrl={markdownUrl}
+      githubUrl={`https://github.com/${owner}/${repo}/blob/main/content/docs/${encodeURI(path)}`}
+    />
+  </div>;
+  ```
+</show>
+
+<show when={props.framework === 'tanstack-start'}>
+  從文件頁面的載入器回傳 Markdown URL，並在頁面中算繪這些動作：
+
+  ```tsx
+  import { MarkdownCopyButton, ViewOptionsPopover } from 'fumadocs-ui/layouts/docs/page';
+
+  // 在您的載入器中
+  return {
+    path: page.path,
+    markdownUrl: `${page.url}.md`,
+  };
+
+  // 在您的頁面中
+  <div className="flex flex-row gap-2 items-center border-b pt-2 pb-6">
+    <MarkdownCopyButton markdownUrl={markdownUrl} />
+    <ViewOptionsPopover
+      markdownUrl={markdownUrl}
+      githubUrl={`https://github.com/${owner}/${repo}/blob/main/content/docs/${encodeURI(path)}`}
+    />
+  </div>;
+  ```
+</show>
+
+<show when={props.framework === 'astro'}>
+  將 Markdown URL 從文件頁面傳入其 React island，並在 island 中算繪這些動作：
+
+  ```astro tab="src/pages/docs/[...slug].astro"
+  <Docs
+    client:load
+    markdownUrl={`${page.url}.md`}
+    githubUrl={`https://github.com/${owner}/${repo}/blob/main/content/docs/${encodeURI(page.path)}`}
+  >
+    <Content />
+  </Docs>
+  ```
+
+  ```tsx tab="src/components/docs.tsx"
+  import { MarkdownCopyButton, ViewOptionsPopover } from 'fumadocs-ui/layouts/docs/page';
+
+  <div className="flex flex-row gap-2 items-center border-b pt-2 pb-6">
+    <MarkdownCopyButton markdownUrl={markdownUrl} />
+    <ViewOptionsPopover markdownUrl={markdownUrl} githubUrl={githubUrl} />
+  </div>;
+  ```
+</show>
+
+## MCP 伺服器 [#mcp-server]
+
+透過 [MCP](https://modelcontextprotocol.io) 伺服器將您的文件開放給 AI 代理使用，並提供可列出、搜尋及讀取頁面的工具。
+
+```package-install
+npx @fumadocs/cli feature mcp
+```
+
+除了上述的 [LLM 路由](#docs-for-llm)之外，它還會建立一個採用 streamable HTTP 傳輸層的 `/api/mcp` 路由。
+
+這些工具來自 [`fumadocs-core/mcp`](/docs/headless/utils/mcp)。
+
+<show when={props.framework === 'next'}>
+  <feature title="app/api/mcp/route.ts">mcp/next/app/api/mcp/route.ts</feature>
+</show>
+
+<show when={props.framework === 'react-router'}>
+  <feature title="app/routes/api.mcp.ts">mcp/react-router/routes/api.mcp.ts</feature>
+</show>
+
+<show when={props.framework === 'tanstack-start'}>
+  <feature title="src/routes/api/mcp.ts">mcp/tanstack-start/routes/api/mcp.ts</feature>
+</show>
+
+<show when={props.framework === 'waku'}>
+  <feature title="src/pages/_api/api/mcp.ts">mcp/waku/pages/&#95;api/api/mcp.ts</feature>
+</show>
+
+<show when={props.framework === 'astro'}>
+  <feature title="src/pages/api/mcp.ts">mcp/astro/pages/api/mcp.ts</feature>
+
+  此路由會在收到請求時才進行算繪，因此您的專案需要設定[轉接器](https://docs.astro.build/en/guides/on-demand-rendering/)。
+</show>
+
+您可以透過以下方式將 AI 代理連線至此路由：
+
+```json
+{
+  "mcpServers": {
+    "docs": { "url": "https://your-site.com/api/mcp" }
+  }
+}
+```
+
+## WebMCP [#webmcp]
+
+<Callout type="warn" title="實驗性功能">
+  [WebMCP](https://webmachinelearning.github.io/webmcp/) 是一項仍處於早期階段的網頁標準，目前可在
+  Chrome 149+ 中透過 `#enable-webmcp-testing` 旗標及來源試用 (origin trial) 啟用。此 API 日後仍可能
+  變動。
+</Callout>
+
+上述 MCP 伺服器服務的是連線到您網站的 AI 代理；WebMCP 則是在讀者正在瀏覽的頁面上，將工具開放給瀏覽器的 AI 代理使用。
+
+```package-install
+npx @fumadocs/cli feature webmcp
+```
+
+它會以 [LLM 路由](#docs-for-llm)為基礎，建立一個 `WebMCP` 元件。請在 `<RootProvider />` 內算繪此元件。
+
+* `search_docs` 會查詢搜尋 API 路由。您可以將 `fetchClient` 替換為[其他用戶端](/docs/search)。
+* `read_page` 會從 <show when={props.framework === 'react-router' || props.framework === 'waku'}>`/llms.mdx/docs/page.md`</show><show when={props.framework !== 'react-router' && props.framework !== 'waku'}>`/docs/page.md`</show> 擷取頁面的 Markdown。
+
+## 詢問 AI [#ask-ai]
+
+![AI 搜尋](/docs/ai-search.png)
+
+您可以使用 Fumadocs CLI 安裝 AI 聊天對話方塊。
+
+<Tabs items={['AI SDK', 'LLMGateway', 'Inkeep AI']}>
+  <Tab>
+    ```npm
+    npx @fumadocs/cli add ai/openrouter
+    ```
+
+    此元件已透過 Vercel AI SDK 自動針對 [OpenRouter](https://openrouter.ai) 完成設定，並內建供 AI 使用的 `/search` 工具。
+
+    若要使用其他模型，請修改 `/api/chat` 路由。
+
+    > Fumadocs 不提供 AI 模型，請自行選擇。
+    >
+    > 您的 AI 模型可以使用前面產生的 `llms-full.txt` 檔案；若搭配第三方解決方案，也能運用更多元的資訊來源。
+  </Tab>
+
+  <Tab>
+    ```npm
+    npx @fumadocs/cli add ai/llmgateway
+    ```
+
+    此元件已透過 Vercel AI SDK 自動針對 [LLMGateway](https://llmgateway.io) 完成設定，並內建供 AI 使用的 `/search` 工具。
+
+    LLMGateway 是開源的 API 閘道，可將請求代理至 300 多個語言模型，因此同一個路由處理常式只要更改模型 ID，就能切換不同的供應商。
+
+    將您的 LLMGateway API 金鑰加入環境變數：
+
+    ```dotenv
+    LLM_GATEWAY_API_KEY="..."
+    ```
+
+    此路由預設使用 `anthropic/claude-3.5-sonnet`。若要改用 LLMGateway 支援的其他模型，請設定 `LLM_GATEWAY_MODEL` 環境變數，無須修改任何程式碼：
+
+    ```dotenv
+    # 可使用 https://llmgateway.io/models 中的任何模型 ID
+    LLM_GATEWAY_MODEL="openai/gpt-4o"
+    ```
+  </Tab>
+
+  <Tab>
+    ```npm
+    npx @fumadocs/cli add ai/inkeep
+    ```
+
+    此元件已透過 Vercel AI SDK 自動針對 [Inkeep AI](https://inkeep.com) 完成設定。
+
+    將您的 Inkeep API 金鑰加入環境變數：
+
+    ```dotenv
+    INKEEP_API_KEY="..."
+    ```
+  </Tab>
+</Tabs>
+
+文件版面配置會根據其 `aiChat` 選項算繪聊天介面。由於此選項接收的是用戶端狀態，請為您的版面配置建立一個用戶端元件，並以它取代原本的版面配置：
+
+```tsx tab="components/ai/layout.tsx"
+'use client';
+// 也可使用 Notebook、Glass 或 Spacious 版面配置
+import { DocsLayout as Layout, type DocsLayoutProps } from 'fumadocs-ui/layouts/docs';
+// 已安裝的元件
+import { AIChat, AIChatPanel, useAIChat } from './search';
+
+export function DocsLayout(props: DocsLayoutProps) {
+  return (
+    <AIChat>
+      <ChatLayout {...props} />
+    </AIChat>
+  );
+}
+
+function ChatLayout(props: DocsLayoutProps) {
+  const { open, setOpen } = useAIChat();
+
+  return (
+    <Layout
+      {...props}
+      aiChat={{ open, onOpenChange: setOpen, panel: <AIChatPanel />, trigger: true }}
+    />
+  );
+}
+```
+
+<show when={props.framework === 'next'}>
+  ```tsx tab="app/docs/layout.tsx"
+  import { DocsLayout } from 'fumadocs-ui/layouts/docs'; // [!code --]
+  import { DocsLayout } from '@/components/ai/layout'; // [!code ++]
+  ```
+</show>
+
+<show when={props.framework === 'react-router'}>
+  ```tsx tab="app/routes/docs.tsx"
+  import { DocsLayout } from 'fumadocs-ui/layouts/docs'; // [!code --]
+  import { DocsLayout } from '@/components/ai/layout'; // [!code ++]
+  ```
+</show>
+
+<show when={props.framework === 'tanstack-start'}>
+  ```tsx tab="src/routes/docs/$.tsx"
+  import { DocsLayout } from 'fumadocs-ui/layouts/docs'; // [!code --]
+  import { DocsLayout } from '@/components/ai/layout'; // [!code ++]
+  ```
+</show>
+
+<show when={props.framework === 'waku'}>
+  ```tsx tab="src/pages/docs/_layout.tsx"
+  import { DocsLayout } from 'fumadocs-ui/layouts/docs'; // [!code --]
+  import { DocsLayout } from '@/components/ai/layout'; // [!code ++]
+  ```
+</show>
+
+<show when={props.framework === 'astro'}>
+  ```tsx tab="src/components/docs.tsx"
+  import { DocsLayout } from 'fumadocs-ui/layouts/docs'; // [!code --]
+  import { DocsLayout } from '@/components/ai/layout'; // [!code ++]
+  ```
+</show>
+
+<show when={props.framework === 'next' || props.framework === 'waku'}>
+  版面配置選項會傳入用戶端元件，因此必須可以序列化。
+</show>

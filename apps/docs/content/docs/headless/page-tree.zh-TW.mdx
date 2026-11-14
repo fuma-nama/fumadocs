@@ -1,0 +1,88 @@
+---
+title: 頁面樹
+description: 頁面樹的結構。
+---
+
+頁面樹是一種樹狀結構，描述所有導覽連結，以及分隔符、資料夾等其他項目。
+
+頁面樹會傳送到用戶端，供側邊欄與 Breadcrumb 等導覽元素引用。
+因此，請勿在頁面樹中存放任何敏感資料或大量資料。
+
+<Callout title="注意">
+  在設計上，頁面樹只包含所有頁面與資料夾的必要資訊。
+
+  函式等無法序列化的資料無法傳入頁面樹。
+</Callout>
+
+## 慣例 [#conventions]
+
+您可以匯入頁面樹的型別定義，若您想以寫死的方式定義頁面樹，或透過程式產生頁面樹，這會相當實用。
+
+```ts
+import type * as PageTree from 'fumadocs-core/page-tree';
+
+const tree: PageTree.Root = {
+  // props
+};
+```
+
+部分節點含有 `$ref` 屬性，該屬性僅供內部使用，手動撰寫時不需要用到。
+
+### 根節點 [#root]
+
+頁面樹的初始根節點。
+
+<auto-type-table path="props.ts" name="PageTreeRoot" />
+
+### 頁面 [#page]
+
+代表連結的節點。
+
+```json
+{
+  "type": "page",
+  "name": "Quick Start",
+  "url": "/docs"
+}
+```
+
+> 也支援外部 URL
+
+<auto-type-table path="props.ts" name="PageTreeItem" />
+
+### 資料夾 [#folder]
+
+包含多個子節點的節點。
+
+```json
+{
+    "type": "folder",
+    "name": "Guide",
+    "index": {
+        "type": "page",
+        ...
+    }
+    "children": [
+        ...
+    ]
+}
+```
+
+<auto-type-table path="props.ts" name="PageTreeFolder" />
+
+### 分隔項目 [#separator]
+
+位於項目之間的標籤。
+
+```json
+{
+  "type": "separator",
+  "name": "Components"
+}
+```
+
+<auto-type-table path="props.ts" name="PageTreeSeparator" />
+
+## 圖示 [#icons]
+
+圖示是一個 `ReactElement`，頁面和資料夾都支援。

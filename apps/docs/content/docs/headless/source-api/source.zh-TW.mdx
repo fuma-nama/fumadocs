@@ -1,0 +1,244 @@
+---
+title: 來源
+description: 為載入器 API 設定來源
+---
+
+## 概覽 [#overview]
+
+內容載入器透過 `source` 介面，支援不同的內容來源。
+
+### 多個來源 [#multiple-sources]
+
+改為傳入以來源物件組成的 record
+
+```ts
+import { loader } from 'fumadocs-core/source';
+import { blog, docs } from 'collections/server';
+import { lucideIconsPlugin } from 'fumadocs-core/source/lucide-icons';
+
+export const source = loader(
+  {
+    docs: docs.toFumadocsSource(),
+    openapi: blog.toFumadocsSource(),
+  },
+  {
+    baseUrl: '/docs',
+  },
+);
+```
+
+若要存取各個來源專屬的屬性：
+
+```ts
+const page = source.getPage(['...']);
+
+if (page.type === 'docs') {
+  console.log(page.data);
+} else {
+  console.log(page.data);
+}
+```
+
+### 靜態來源 [#static-source]
+
+若要接入您自己的內容來源，請建立一個 `StaticSource` 物件。
+
+由於載入器 API 不依賴檔案系統，檔案路徑只能使用虛擬路徑，例如 `file.mdx` 和 `content/file.mdx`；不允許使用 `./file.mdx` 或 `D://content/file.mdx` 這類路徑。
+
+```ts twoslash
+import type { StaticSource } from 'fumadocs-core/source';
+
+export function createMySource(): StaticSource<{
+  metaData: { title: string; pages: string[] }; // 您的自訂型別
+  pageData: { title: string; description?: string }; // 您的自訂型別
+}> {
+  return {
+    files: [
+      {
+        type: 'page',
+        path: 'folder/index.mdx',
+        data: {
+          title: 'Hello World',
+          // ...
+        },
+      },
+      {
+        type: 'meta',
+        path: 'meta.json',
+        data: {
+          title: 'Docs',
+          pages: ['folder'],
+          // ...
+        },
+      },
+    ],
+  };
+}
+```
+
+啟用 [i18n](/docs/headless/internationalization/config) 時，除非檔案有指定 `locale`，否則檔案的語言會從其路徑解析而來。
+
+### Dynamic 來源 [#dynamic-source]
+
+若內容來源支援重新驗證 (revalidation) ，請改為回傳 `DynamicSource`：
+
+```ts
+import type { DynamicSource } from 'fumadocs-core/source';
+
+export function createMySource(): DynamicSource<{
+  metaData: { title: string; pages: string[] };
+  pageData: { title: string; description?: string };
+}> {
+  return {
+    async files() {
+      return [
+        {
+          type: 'page',
+          path: 'folder/index.mdx',
+          data: {
+            title: 'Hello World',
+          },
+        },
+        {
+          type: 'meta',
+          path: 'meta.json',
+          data: {
+            title: 'Docs',
+            pages: ['folder'],
+          },
+        },
+      ];
+    },
+    configure(loader) {
+      // 您可以在來源中重新驗證載入器，例如：
+      onMyEvent(() => {
+        void loader.revalidate();
+      });
+    },
+  };
+}
+```
+
+Dynamic 來源只能交由 [`dynamicLoader()`](/docs/headless/source-api#dynamic-loader) 使用。
+
+## 路徑參數 [#path-params]
+
+若要在您的來源中支援[路徑參數](/docs/headless/page-conventions#path-params)，請將 `[framework]/deploy.mdx` 這類檔案當作單一虛擬檔案傳入。載入器會為每個值各產生一個頁面，資料取自 `dataAt()`；若未提供 `dataAt()`，則使用 `data`。Meta 檔案的運作方式也相同：
+
+```ts twoslash
+import type { StaticSource } from 'fumadocs-core/source';
+
+const files: StaticSource['files'] = [
+  {
+    type: 'page',
+    path: '[framework]/deploy.mdx',
+    data: { title: 'Deploy' },
+    dataAt: (params) => ({ title: `Deploy on ${params.framework}` }),
+  },
+  {
+    type: 'meta',
+    path: '[framework]/meta.json',
+    data: { staticParams: [{ framework: 'waku' }, { framework: 'astro' }] },
+    dataAt: (params) => ({ title: params.framework }),
+  },
+];
+```
+
+### 列出參數 [#listing-params]
+
+為了在載入器之前預先解析每個值的資料 (例如程式碼中的 frontmatter) ，`getStaticParams()` 會依照相同的規則列出參數。它會以不含副檔名的路徑，從您的儲存空間讀取各個 meta 檔案的 `staticParams`：
+
+```ts twoslash
+import { getStaticParams, type Params } from 'fumadocs-core/source';
+
+declare const frontmatter: { staticParams?: Params[] };
+declare const metaFiles: Map<string, { staticParams?: Params[] }>;
+// ---cut---
+const params = getStaticParams('[framework]/deploy.mdx', {
+  staticParams: frontmatter.staticParams,
+  readStaticParams: (path) => metaFiles.get(path)?.staticParams,
+});
+```
+
+若沒有任何地方列出這些值，它會回傳 `undefined`，此時該檔案就會以其字面路徑產生單一頁面。
+
+### 自訂 Props [#custom-props]
+
+為了支援[自訂 props](/docs/headless/source-api#custom-props)，`dataAt()` 會以第二個引數接收這些 props，並一併接收經過載入器外掛處理後的頁面資料。請回傳依據 params 與自訂 props 算繪後的資料：
+
+```tsx twoslash
+import type { StaticSource } from 'fumadocs-core/source';
+
+declare function pageAt(props: object): { title: string };
+// ---cut---
+const files: StaticSource['files'] = [
+  {
+    type: 'page',
+    path: '[framework]/deploy.mdx',
+    data: pageAt({}),
+    dataAt: (params, custom) =>
+      custom ? { ...custom.data, ...pageAt({ ...params, ...custom.props }) } : pageAt(params),
+  },
+];
+```
+
+未定義 `dataAt()` 的頁面會忽略自訂 props。
+
+### 執行階段輸出 [#runtime-outputs]
+
+如果您的來源會編譯 MDX，請讓每個檔案只編譯一次，並將頁面 props 傳入其內容。若要使用相同的 props 產生目錄、搜尋紀錄與 Markdown：
+
+* 在您要編譯的檔案資料中設定 `unstable_runtimeOutputs: true`。若使用 Sätteri，請在編譯選項的 `data` 中設定。
+* 將 `rehypeHeading` 加為最後一個 rehype 外掛，以便根據算繪後的文字產生[標題 ID](/docs/headless/mdx/headings#headings-with-expressions)。
+
+```ts
+import { VFile } from 'vfile';
+
+const file = new VFile({
+  path: '[framework]/deploy.mdx',
+  value: source,
+  data: { unstable_runtimeOutputs: true },
+});
+```
+
+此時外掛匯出的會是函式而非值，例如 [Rehype 目錄](/docs/headless/mdx/headings#rehype-toc) 的 `toc`，以及 [Remark LLMs](/docs/headless/mdx/remark-llms) 的 `_markdown` 元件。請傳入各頁面的 props 來呼叫它們：
+
+```tsx twoslash
+import type { StaticSource } from 'fumadocs-core/source';
+import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
+import type { TOCItemType } from 'fumadocs-core/toc';
+import { renderToMarkdown } from 'fumadocs-core/server';
+import type { MDXContent, MDXProps } from 'mdx/types';
+
+declare const compiled: {
+  default: MDXContent;
+  toc: (props: object) => TOCItemType[];
+  _markdown: MDXContent;
+};
+declare const file: { data: { structuredData: StructuredData } };
+// ---cut---
+const { default: Content, toc, _markdown: Markdown } = compiled;
+
+function pageAt(props: object) {
+  return {
+    title: 'Deploy',
+    body: (own: MDXProps) => <Content {...props} {...own} />,
+    toc: toc(props),
+    getMarkdown: () => renderToMarkdown(<Markdown {...props} />),
+    structuredData: file.data.structuredData,
+  };
+}
+
+const files: StaticSource['files'] = [
+  {
+    type: 'page',
+    path: '[framework]/deploy.mdx',
+    data: pageAt({}),
+    dataAt: (params) => pageAt(params),
+  },
+];
+```
+
+若要用於搜尋，請從 `file.data.structuredData` 讀取 [Remark Structure](/docs/headless/mdx/structure) 的紀錄，而非從匯出內容讀取。這些紀錄涵蓋所有 `<show>` 分支，且運算式會保留其原始文字。
+
+`unstable_` 前綴代表此 API 日後可能會變動。若未啟用此旗標，在執行 Rehype 目錄、Remark Structure 或 Remark LLMs 時，含有 [`<show>`](/docs/markdown#show) 的文件會編譯失敗。

@@ -1,0 +1,166 @@
+---
+title: 無頭式
+description: 不含 UI 的 AsyncAPI 頁面狀態與邏輯。
+---
+
+## 概覽 [#overview]
+
+除了 `@fumadocs/asyncapi/ui` 之外，其餘皆為無頭式。
+
+| 路徑                              | 模組                        |
+| ------------------------------- | ------------------------- |
+| `@fumadocs/asyncapi`            | 頁面：文件、文件的伺服器，以及您的元件       |
+| `@fumadocs/asyncapi/operation`  | 單一 operation：其頻道、參數、訊息與回覆 |
+| `@fumadocs/asyncapi/playground` | 在某個 operation 的頻道上進行的工作階段 |
+
+## 頁面 [#page]
+
+`createAsyncAPIRenderer()` 會接收您的元件並回傳 `<AsyncAPIPage />`，此元件可接受產生頁面時所用的 props。
+
+```tsx title="components/api-page.tsx"
+'use client';
+import { type CodeBlockProps, createAsyncAPIRenderer } from '@fumadocs/asyncapi';
+import { Operation } from '@/components/my-operation';
+import { SchemaUI } from '@/components/my-schema';
+
+export const AsyncAPIPage = createAsyncAPIRenderer({
+  components: {
+    Operation,
+    SchemaUI,
+    CodeBlock({ lang, code }: CodeBlockProps) {
+      return (
+        <pre>
+          <code className={`language-${lang}`}>{code}</code>
+        </pre>
+      );
+    },
+  },
+});
+```
+
+| 元件          | 算繪內容                                         |
+| ----------- | -------------------------------------------- |
+| `Operation` | 頁面中的每個 operation，請參閱 [Operation](#operation) |
+| `SchemaUI`  | 參數、標頭與訊息酬載的 JSON schema                      |
+| `Layout`    | 選用，包覆已算繪的 operation                          |
+
+### Hooks [#hooks]
+
+頁面內的元件可透過下列 Hook 讀取頁面狀態。
+
+| Hook                 | 回傳值                   |
+| -------------------- | --------------------- |
+| `useAsyncAPI()`      | 已解參照的文件 (`doc`) 與頁面選項 |
+| `useComponents()`    | 傳入頁面的元件               |
+| `useServer()`        | 伺服器列表、目前選取的伺服器及其變數    |
+| `useRenderContext()` | 頁面的算繪選項，例如 `content`  |
+
+若要自行算繪 operation，請改為掛載 `<AsyncAPIProvider document={bundled} components={...} />`，取代 `createAsyncAPIRenderer()`。
+
+## Operation [#operation]
+
+`<OperationProvider />` 會一次推導出 operation 的詳細資訊：套用 traits，並解析其頻道、參數、訊息與回覆。
+
+```tsx title="components/my-operation.tsx"
+'use client';
+import {
+  OperationProvider,
+  type PageOperationProps,
+  useOperation,
+  useOperationSecurity,
+} from '@fumadocs/asyncapi/operation';
+
+export function Operation(props: PageOperationProps) {
+  return (
+    <OperationProvider {...props}>
+      <Content />
+    </OperationProvider>
+  );
+}
+
+function Content() {
+  const { title, channel, parameters, messages } = useOperation();
+  const security = useOperationSecurity();
+
+  return (
+    <>
+      <h2>{title}</h2>
+      <code>{channel.address}</code>
+      <ul>
+        {parameters.map((param) => (
+          <li key={param.name}>{param.name}</li>
+        ))}
+      </ul>
+      {messages.map((message) => (
+        <section key={message.id}>
+          <h3>{message.name}</h3>
+          {message.examples.map((example) => (
+            <pre key={example.id}>{JSON.stringify(example.payload, null, 2)}</pre>
+          ))}
+        </section>
+      ))}
+      <p>{security.operation.map((item) => item.id).join(', ')}</p>
+    </>
+  );
+}
+```
+
+| Hook                     | 回傳值                               |
+| ------------------------ | --------------------------------- |
+| `useOperation()`         | 已解析詳細資訊的 operation                |
+| `useOperationSecurity()` | 所選伺服器與該 operation 的安全性方案，兩者皆會套用   |
+| `useChannelMessages()`   | 讀者在該頻道上接收與傳送的訊息，涵蓋該頻道所有 operation |
+
+<auto-type-table path="props.ts" name="OperationInfo" />
+
+訊息的範例取自文件本身，或根據其 schema 產生。
+
+<auto-type-table path="props.ts" name="OperationMessage" />
+
+## 互動測試區 [#playground]
+
+`usePlayground()` 會在 `<OperationProvider />` 內，透過傳輸層連線至 operation 的頻道。
+
+```tsx
+'use client';
+import { usePlayground } from '@fumadocs/asyncapi/playground';
+import { mqttTransport } from '@/lib/mqtt-transport';
+
+export function Playground() {
+  const { url, status, connect, disconnect, send, log } = usePlayground({
+    // 附加於頁面的 `playground.transports` 之外
+    transports: { mqtt: mqttTransport },
+  });
+  if (!url) return null; // 該伺服器沒有可用的傳輸層
+
+  return (
+    <>
+      <button onClick={status === 'closed' ? connect : disconnect}>{status}</button>
+      {send && <button onClick={() => send('{"type":"ping"}')}>Ping</button>}
+      {log.map((entry) => (
+        <p key={entry.id}>
+          {entry.type} {entry.message?.name} {entry.data}
+        </p>
+      ))}
+    </>
+  );
+}
+```
+
+* 位址參數、query 與 auth 輸入皆由表單 `stf` 管理，`url` 會隨這些值更新。
+* 連線期間可使用 `send`，但僅能接收的連線除外。
+* 收到的訊息會與頻道上各訊息的酬載進行比對，`entry.message` 即為文件中記載的對應訊息。二進位訊息則存放於 `entry.binary`。
+
+<auto-type-table path="props.ts" name="Playground" />
+
+### 傳輸層 [#transports]
+
+傳輸層負責連線到特定協定的伺服器，請參閱 [MQTT 範例](/docs/integrations/asyncapi/api-page#custom-transports)。系統會依序從 `usePlayground()` 的 `transports`、頁面的 `playground.transports` 中挑選，最後才使用內建的 WebSocket 傳輸層。
+
+`usePlaygroundTransport()` 接受相同的 `transports`，並回傳所選伺服器的傳輸層；若沒有任何傳輸層能連線到該伺服器，則回傳 `undefined`。
+
+<auto-type-table path="props.ts" name="PlaygroundTransport" />
+
+`connect()` 會透過 `events` 回報以下事件：`open()`、帶有文字或 `ArrayBuffer` 的 `message(data)`，以及會結束連線的 `close()` 或 `error()`。
+
+<auto-type-table path="props.ts" name="ConnectTarget" />

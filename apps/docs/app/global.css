@@ -26,7 +26,7 @@
   --color-brand: #fff383;
 }
 
-/* landing page tokens, values live in app/(landing)/landing.css */
+/* landing page tokens, values live in app/[lang]/(landing)/landing.css */
 @theme inline {
   --color-lp-paper: var(--lp-paper);
   --color-lp-paper-2: var(--lp-paper-2);

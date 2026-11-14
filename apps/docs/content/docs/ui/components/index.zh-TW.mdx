@@ -1,0 +1,53 @@
+---
+title: 元件
+description: 用來強化文件的額外元件
+---
+
+## 概覽 [#overview]
+
+您還可以使用以下元件：
+
+<DocsCategory />
+
+### MDX 元件 [#mdx-components]
+
+預設的 MDX 元件包括卡片 (Cards) 、提示框 (Callouts) 、程式碼區塊與標題。
+
+```ts
+import defaultMdxComponents from 'fumadocs-ui/mdx';
+```
+
+### 相對連結 [#relative-link]
+
+<Callout type="warn">僅適用於伺服器元件。</Callout>
+
+若要讓 `href` 支援以相對檔案路徑撰寫的連結，請以下列方式覆寫預設的 `a` 元件：
+
+```tsx title="app/docs/[[...slug]]/page.tsx"
+import { createRelativeLink } from 'fumadocs-ui/mdx';
+import { source } from '@/lib/source';
+import { getMDXComponents } from '@/components/mdx';
+
+const page = source.getPage(['...']);
+
+return (
+  <MdxContent
+    components={getMDXComponents({
+      // 覆寫 `a` 標籤
+      a: createRelativeLink(source, page),
+    })}
+  />
+);
+```
+
+在 Astro 中，請將它傳給 `<Content />`，它會像 Astro MDX 一樣進行算繪：
+
+```astro title="src/pages/docs/[...slug].astro"
+<Content components={{ a: createRelativeLink(source, page) }} />
+```
+
+```mdx
+[My Link](./file.mdx)
+```
+
+範例：[`../../(integrations)/feedback.mdx`](../../\(integrations\)/feedback.mdx)

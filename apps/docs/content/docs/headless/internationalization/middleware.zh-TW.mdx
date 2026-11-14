@@ -1,0 +1,16 @@
+---
+title: 中介軟體
+description: 用於實作 i18n 路由的 Next.js Proxy
+---
+
+## 設定 [#setup]
+
+將使用者重新導向至對應的語系，可在 `i18n.ts` 設定檔中自訂。
+
+這是 Next.js 的 proxy。若要在 React Router、TanStack Start、Waku 與 Astro 上進行設定，請參閱[國際化](/docs/internationalization)。
+
+<include cwd meta="title=&#x22;proxy.ts&#x22;">
+  ../../examples/i18n/proxy.ts
+</include>
+
+> 啟用 `hideLocale` 時，會使用 `NextResponse.rewrite` 來隱藏語系前綴。

@@ -1,0 +1,203 @@
+---
+title: MDX 預設組合
+description: 自訂 MDX 處理器的預設設定。
+---
+
+Fumadocs MDX 提供 MDX 預設組合，簡化**語法突顯**等功能的設定。
+
+它預設使用 unified 編譯。集合也可以改用 [Sätteri](#satteri) 編譯，Sätteri 同樣有包含相同外掛的預設組合。
+
+## 預設組合 [#default-preset]
+
+這是專為文件網站設計的預設組合，在全域 MDX 選項中預設啟用。
+
+若要覆寫預設值，可傳入一個繼承自 [`ProcessorOptions`](https://mdxjs.com/packages/mdx/#processoroptions) 的介面：
+
+### Remark 外掛 [#remark-plugins]
+
+以下外掛會預設套用：
+
+* Remark GFM - [GitHub Flavored Markdown](https://github.github.com/gfm)。
+* [Remark Heading](/docs/headless/mdx/headings) - 擷取目錄。
+* [Remark Image](/docs/headless/mdx/remark-image) - 處理圖片。
+* [Remark Code Tab](/docs/markdown#tab-groups) - 程式碼區塊頁籤群組。
+* [Remark NPM](/docs/headless/mdx/remark-npm) - 套件管理器指令。
+* [Remark Structure](/docs/headless/mdx/structure) - 產生搜尋索引。
+
+[引入](/docs/mdx/include)功能一律啟用，即使不使用此預設組合也一樣。
+
+您可以透過以下方式加入其他 remark 外掛：
+
+```ts tab="Global Config"
+import { defineConfig } from 'fumadocs-mdx/config';
+import { myPlugin } from './remark-plugin';
+
+export default defineConfig({
+  mdxOptions: {
+    remarkPlugins: [myPlugin],
+    // 您也可以傳入一個函式來控制 remark 外掛的順序。
+    remarkPlugins: (v) => [myPlugin, ...v],
+  },
+});
+```
+
+```ts tab="Collection Config"
+import { defineCollections, applyMdxPreset } from 'fumadocs-mdx/config';
+import { myPlugin } from './remark-plugin';
+
+export const blog = defineCollections({
+  type: 'doc',
+  mdxOptions: applyMdxPreset({
+    remarkPlugins: [myPlugin],
+    // 您也可以傳入函式來控制 remark 外掛的執行順序。
+    remarkPlugins: (v) => [myPlugin, ...v],
+  }),
+});
+```
+
+### Rehype 外掛 [#rehype-plugins]
+
+以下外掛會預設套用：
+
+* [Rehype Code](/docs/headless/mdx/rehype-code) - 語法突顯。
+* [Rehype 目錄](/docs/headless/mdx/headings#rehype-toc) - 匯出目錄。
+
+如同 remark 外掛，您可以傳入陣列或函式，以加入其他 rehype 外掛。
+
+```ts tab="Global Config"
+import { defineConfig } from 'fumadocs-mdx/config';
+import { myPlugin } from './rehype-plugin';
+
+export default defineConfig({
+  mdxOptions: {
+    rehypePlugins: (v) => [myPlugin, ...v],
+  },
+});
+```
+
+```ts tab="Collection Config"
+import { defineCollections, applyMdxPreset } from 'fumadocs-mdx/config';
+import { myPlugin } from './rehype-plugin';
+
+export const blog = defineCollections({
+  type: 'doc',
+  mdxOptions: applyMdxPreset({
+    rehypePlugins: (v) => [myPlugin, ...v],
+  }),
+});
+```
+
+### 自訂內建外掛 [#customize-built-in-plugins]
+
+您可以自訂內建外掛的選項，例如：
+
+```ts tab="Global Config"
+import { defineConfig } from 'fumadocs-mdx/config';
+
+export default defineConfig({
+  mdxOptions: {
+    rehypeCodeOptions: {
+      // 選項
+    },
+    remarkImageOptions: {
+      // 將圖片佔位符設為 `blur`（僅適用於 Next.js）
+      placeholder: 'blur',
+    },
+    remarkHeadingOptions: {
+      // 選項
+    },
+  },
+});
+```
+
+```ts tab="Collection Config"
+import { defineCollections, applyMdxPreset } from 'fumadocs-mdx/config';
+
+export const blog = defineCollections({
+  type: 'doc',
+  mdxOptions: applyMdxPreset({
+    rehypeCodeOptions: {
+      // 選項
+    },
+    remarkImageOptions: {
+      // 選項
+    },
+    remarkHeadingOptions: {
+      // 選項
+    },
+  }),
+});
+```
+
+## Sätteri [#satteri]
+
+[Sätteri](https://github.com/bruits/satteri) 是一款編譯器，具有自己的外掛模型。請先安裝：
+
+```package-install
+@fumadocs/satteri satteri
+```
+
+請在[集合](/docs/mdx/collections#compiler)中設定 `compiler: 'satteri'`。此時會改為讀取全域的 `satteriOptions`，而非 `mdxOptions`：
+
+```ts title="source.config.ts"
+import { defineConfig, defineDocs } from 'fumadocs-mdx/config';
+import { remarkSteps } from '@fumadocs/satteri/remark-steps';
+
+export const docs = defineDocs({
+  docs: {
+    compiler: 'satteri',
+  },
+});
+
+export default defineConfig({
+  satteriOptions: {
+    // 用來取代 remark 外掛；`hastPlugins` 則用來取代 rehype 外掛
+    mdastPlugins: [remarkSteps()],
+    // 內建外掛的選項與 `mdxOptions` 中的相同
+    rehypeCodeOptions: {
+      themes: { light: 'github-light', dark: 'github-dark' },
+    },
+  },
+});
+```
+
+remark 與 rehype 外掛無法在 Sätteri 上執行。Fumadocs 已將自家外掛移植至 `@fumadocs/satteri/<name>`，例如 `@fumadocs/satteri/remark-steps`。這兩個外掛選項與 `mdxOptions` 一樣，都可接受陣列或函式。
+
+預設組合會套用與 unified 相同的外掛。GFM 與 directives 是預設啟用的解析器 `features`，而設定 `features: { math: true }` 也會使用 KaTeX 算繪[數學公式](/docs/markdown/math)。
+
+全域 `compiler` 選項只會決定集合以外的 MDX 檔案所使用的編譯器。
+
+## Source Map [#source-map]
+
+unified 預設會停用 source map，因為產生 source map 會拖慢編譯速度。
+
+若要啟用，請安裝 `source-map`，並將其產生器傳入 MDX 選項：
+
+```npm
+npm i -D source-map
+```
+
+```ts tab="Global Config" title="source.config.ts"
+import { defineConfig } from 'fumadocs-mdx/config';
+import { SourceMapGenerator } from 'source-map';
+
+export default defineConfig({
+  mdxOptions: {
+    SourceMapGenerator,
+  },
+});
+```
+
+```ts tab="Collection Config"
+import { defineCollections, applyMdxPreset } from 'fumadocs-mdx/config';
+import { SourceMapGenerator } from 'source-map';
+
+export const blog = defineCollections({
+  type: 'doc',
+  mdxOptions: applyMdxPreset({
+    SourceMapGenerator,
+  }),
+});
+```
+
+編譯後內容所拋出的錯誤，現在可以追溯回原始的 Markdown 檔案。

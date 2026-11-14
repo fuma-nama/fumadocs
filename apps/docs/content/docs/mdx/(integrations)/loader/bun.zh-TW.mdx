@@ -1,0 +1,46 @@
+---
+title: Bun
+description: 在 Bun 中存取內容。
+---
+
+## 設定 [#setup]
+
+在 preload 腳本中註冊此外掛：
+
+```toml tab="bunfig.toml"
+preload = ["./scripts/preload.ts"]
+```
+
+```ts tab="scripts/preload.ts"
+import { createMdxPlugin } from 'fumadocs-mdx/bun';
+
+await Bun.plugin(createMdxPlugin());
+```
+
+此外掛會在執行階段載入 MDX 與 meta 檔案。由於其設定為非同步，請務必加上 `await`。若未加上 `await`，您的指令碼會在外掛就緒前匯入 `lib/source.ts`，導致 [Macro API](/docs/mdx/macro) 擲回錯誤。
+
+完成後，使用 Bun 執行任何指令碼時，都能直接存取內容檔案。
+
+### 重新產生 `.source` 資料夾 [#re-generate-source-folder]
+
+您也可以選擇重新產生 `.source` 資料夾。
+
+這在該資料夾可能不存在，
+或您使用的是 Vite 框架 (React Router、TanStack Start、Waku) 時特別有用，因為這類框架預設會使用 Vite 專用的 API 產生程式碼。
+
+```ts title="scripts/preload.ts" tab="Next.js"
+import { postInstall } from 'fumadocs-mdx/next';
+
+await postInstall({ configPath: 'source.config.ts' });
+```
+
+```ts title="scripts/preload.ts" tab="Vite"
+import { postInstall } from 'fumadocs-mdx/vite';
+
+await postInstall({
+  configPath: 'source.config.ts',
+  index: {
+    target: 'bun',
+  },
+});
+```

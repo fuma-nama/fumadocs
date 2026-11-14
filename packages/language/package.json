@@ -31,6 +31,7 @@
     "types:check": "tsc --noEmit"
   },
   "devDependencies": {
+    "@fumadocs/ai-chat": "workspace:*",
     "@fumadocs/asyncapi": "workspace:*",
     "@fumadocs/graphql": "workspace:*",
     "@fumadocs/story": "workspace:*",
@@ -42,6 +43,7 @@
     "typescript": "^7.0.2"
   },
   "peerDependencies": {
+    "@fumadocs/ai-chat": "*",
     "@fumadocs/asyncapi": "*",
     "@fumadocs/graphql": "*",
     "@fumadocs/story": "*",
@@ -50,6 +52,9 @@
     "fumadocs-ui": "*"
   },
   "peerDependenciesMeta": {
+    "@fumadocs/ai-chat": {
+      "optional": true
+    },
     "@fumadocs/asyncapi": {
       "optional": true
     },

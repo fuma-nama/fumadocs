@@ -1,0 +1,201 @@
+---
+title: 主題
+description: 為 Fumadocs UI 新增主題
+icon: Palette
+---
+
+import { WidthTrigger } from './theme.client';
+
+## 概覽 [#overview]
+
+Fumadocs UI 透過 Tailwind CSS 預設組合 加入專屬的顏色、動畫與工具類別 (utilities) 。
+
+### 設定 [#setup]
+
+僅支援 Tailwind CSS v4，此 預設組合 也會將 Fumadocs UI 本身加入 source：
+
+```css title="Tailwind CSS"
+@import 'tailwindcss';
+@import 'fumadocs-ui/css/neutral.css';
+@import 'fumadocs-ui/css/preset.css';
+```
+
+若您使用 **Shadcn UI**，可以改用 `shadcn` 預設組合。Fumadocs UI 會沿用您 Shadcn UI 主題中的色彩。
+
+```css
+@import 'tailwindcss';
+@import 'fumadocs-ui/css/shadcn.css';
+@import 'fumadocs-ui/css/preset.css';
+```
+
+詳細資訊請參閱[顏色](#colors)。
+
+### Preflight 變更 [#preflight-changes]
+
+使用 Tailwind CSS 外掛或預先建置的樣式表後，預設的邊框、文字與背景
+顏色會隨之改變。
+
+### 淺色／深色模式 [#lightdark-modes]
+
+Fumadocs 透過 [`next-themes`](https://github.com/pacocoursey/next-themes) 支援淺色／深色模式，該套件已內建於 Root Provider 中。
+
+詳情請參閱 [Root Provider](/docs/ui/layouts/root-provider#theme-provider)。
+
+### RTL 版面配置 [#rtl-layout]
+
+支援 RTL (由右至左) 版面配置。
+
+若要啟用 RTL，請在 body 與 root provider 上將 `dir` prop 設為 `rtl`。
+
+```tsx
+import { RootProvider } from 'fumadocs-ui/provider/<framework>';
+import type { ReactNode } from 'react';
+
+export default function RootLayout({ children }: { children: ReactNode }) {
+  return (
+    <html lang="en" suppressHydrationWarning>
+      <body dir="rtl">
+        <RootProvider dir="rtl">{children}</RootProvider>
+      </body>
+    </html>
+  );
+}
+```
+
+### 版面配置寬度 [#layout-width]
+
+您可以透過 CSS 變數自訂文件版面配置的最大寬度。
+
+```css
+:root {
+  --fd-layout-width: 1400px;
+}
+```
+
+<WidthTrigger />
+
+### 色彩 [#colors]
+
+內建多種預設組合，您可以挑選自己喜歡的一種。
+
+```css
+@import 'fumadocs-ui/css/<theme>.css';
+@import 'fumadocs-ui/css/preset.css';
+```
+
+<Tabs items={['neutral', 'black', 'vitepress', 'dusk', 'catppuccin', 'ocean', 'purple', 'solar', 'emerald', 'ruby', 'aspen']}>
+  <Tab value="neutral">
+    ![Neutral](/themes/neutral.png)
+  </Tab>
+
+  <Tab value="black">
+    ![Black](/themes/black.png)
+  </Tab>
+
+  <Tab value="vitepress">
+    ![Vitepress](/themes/vitepress.png)
+  </Tab>
+
+  <Tab value="dusk">
+    ![Dusk](/themes/dusk.png)
+  </Tab>
+
+  <Tab value="Catppuccin">
+    ![Catppuccin](/themes/catppuccin.png)
+  </Tab>
+
+  <Tab value="ocean">
+    ![Ocean](/themes/ocean.png)
+  </Tab>
+
+  <Tab value="purple">
+    ![Purple](/themes/purple.png)
+  </Tab>
+
+  <Tab value="solar">
+    ![Solar](/themes/solar.png)
+  </Tab>
+
+  <Tab value="emerald">
+    ![Emerald](/themes/emerald.png)
+  </Tab>
+
+  <Tab value="ruby">
+    ![Ruby](/themes/ruby.png)
+  </Tab>
+
+  <Tab value="aspen">
+    ![Aspen](/themes/aspen.png)
+  </Tab>
+</Tabs>
+
+此設計系統的靈感源自 [Shadcn UI](https://ui.shadcn.com)，您也可以透過 [CSS／主題變數](https://tailwindcss.com/docs/theme)自訂顏色。
+
+```css title="global.css"
+@theme {
+  --color-fd-background: hsl(0, 0%, 96%);
+  --color-fd-foreground: hsl(0, 0%, 3.9%);
+  --color-fd-muted: hsl(0, 0%, 96.1%);
+  --color-fd-muted-foreground: hsl(0, 0%, 45.1%);
+  --color-fd-popover: hsl(0, 0%, 98%);
+  --color-fd-popover-foreground: hsl(0, 0%, 15.1%);
+  --color-fd-card: hsl(0, 0%, 94.7%);
+  --color-fd-card-foreground: hsl(0, 0%, 3.9%);
+  --color-fd-border: hsla(0, 0%, 80%, 50%);
+  --color-fd-primary: hsl(0, 0%, 9%);
+  --color-fd-primary-foreground: hsl(0, 0%, 98%);
+  --color-fd-secondary: hsl(0, 0%, 93.1%);
+  --color-fd-secondary-foreground: hsl(0, 0%, 9%);
+  --color-fd-accent: hsla(0, 0%, 82%, 50%);
+  --color-fd-accent-foreground: hsl(0, 0%, 9%);
+  --color-fd-ring: hsl(0, 0%, 63.9%);
+}
+
+.dark {
+  --color-fd-background: hsl(0, 0%, 7.04%);
+  --color-fd-foreground: hsl(0, 0%, 92%);
+  --color-fd-muted: hsl(0, 0%, 12.9%);
+  --color-fd-muted-foreground: hsla(0, 0%, 70%, 0.8);
+  --color-fd-popover: hsl(0, 0%, 11.6%);
+  --color-fd-popover-foreground: hsl(0, 0%, 86.9%);
+  --color-fd-card: hsl(0, 0%, 9.8%);
+  --color-fd-card-foreground: hsl(0, 0%, 98%);
+  --color-fd-border: hsla(0, 0%, 40%, 20%);
+  --color-fd-primary: hsl(0, 0%, 98%);
+  --color-fd-primary-foreground: hsl(0, 0%, 9%);
+  --color-fd-secondary: hsl(0, 0%, 12.9%);
+  --color-fd-secondary-foreground: hsl(0, 0%, 92%);
+  --color-fd-accent: hsla(0, 0%, 40.9%, 30%);
+  --color-fd-accent-foreground: hsl(0, 0%, 90%);
+  --color-fd-ring: hsl(0, 0%, 54.9%);
+}
+```
+
+### 排版 [#typography]
+
+我們內建了一個外掛，是從 [Tailwind CSS Typography](https://tailwindcss.com/docs/typography-plugin) fork 而來。
+
+此外掛提供 `prose` class，以及可用來自訂樣式的變體。
+
+```tsx
+<div className="prose">
+  <h1>Good Heading</h1>
+</div>
+```
+
+將 `prose-sm` 或 `prose-xs` 與 `prose` 搭配使用，即可套用 `text-sm` 或 `text-xs` 的字級與行高，並搭配經過視覺校正的字重：
+
+```tsx
+<div className="prose prose-sm">...</div>
+```
+
+> 此外掛是設計來搭配 Fumadocs UI 的 MDX 元件使用的，因此可能會與 `@tailwindcss/typography` 發生衝突。
+>
+> 若您需要改用 `@tailwindcss/typography` 而非預設外掛，請[設定 `className` 選項](https://github.com/tailwindlabs/tailwindcss-typography/blob/main/README.md#changing-the-default-class-name)以避免衝突。
+>
+> ```sass
+> @import 'tailwindcss';
+> @plugin "@tailwindcss/typography" {
+>   className: wysiwyg;
+> }
+> ```

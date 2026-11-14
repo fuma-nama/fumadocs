@@ -1,0 +1,529 @@
+---
+title: AsyncAPI
+description: 根據 AsyncAPI schema 產生文件。
+---
+
+## 設定 [#setup]
+
+請安裝所需的套件。
+
+```npm
+npm i @fumadocs/asyncapi shiki
+```
+
+### 產生樣式 [#generate-styles]
+
+加入以下這行：
+
+```css title="Tailwind CSS"
+@import 'tailwindcss';
+@import 'fumadocs-ui/css/neutral.css';
+@import 'fumadocs-ui/css/preset.css';
+/* [!code ++] */
+@import '@fumadocs/asyncapi/css/preset.css';
+```
+
+### 設定外掛 [#configure-plugin]
+
+建立 AsyncAPI 伺服器實例及 `<AsyncAPIPage />` 元件。
+
+```ts tab="lib/asyncapi.ts"
+import { createAsyncAPI } from '@fumadocs/asyncapi/server';
+
+// 注意：這是伺服器端 API
+export const asyncapi = createAsyncAPI({
+  // AsyncAPI schema，也可以改用外部 URL。
+  input: ['./asyncapi.yaml'],
+});
+```
+
+```tsx tab="components/api-page.tsx"
+'use client';
+import { createAsyncAPIPage } from '@fumadocs/asyncapi/ui';
+
+export const AsyncAPIPage = createAsyncAPIPage();
+```
+
+有關可用選項，請參閱 [`createAsyncAPI()`](/docs/integrations/asyncapi/server) 和 [`createAsyncAPIPage()`](/docs/integrations/asyncapi/api-page)。
+
+### 產生頁面 [#generate-pages]
+
+將 `staticSource()` 傳入您的 [`loader()`](/docs/headless/source-api/source)，即可在不寫入檔案的情況下產生頁面。
+
+<show when={props.framework === 'react-router' || props.framework === 'tanstack-start'}>
+  由於 `staticSource()` 會讀取檔案，`source.ts` 將變成僅限伺服器端使用。請將 `docs` 移至 `collections.ts`，以便用戶端程式碼匯入。
+</show>
+
+<show when={props.framework === 'next'}>
+  ```ts title="lib/source.ts"
+  import { loader } from 'fumadocs-core/source';
+  import { defineDocs } from 'fumadocs-mdx/macro';
+  import { asyncapi } from '@/lib/asyncapi'; // [!code ++]
+
+  const docs = defineDocs({
+    dir: 'content/docs',
+  });
+
+  export const source = loader(
+    // [!code ++:6]
+    {
+      docs: docs.toFumadocsSource(),
+      asyncapi: await asyncapi.staticSource({
+        baseDir: 'asyncapi',
+      }),
+    },
+    {
+      baseUrl: '/docs',
+      // [!code ++:2] 選用：在頁面樹的每個頁面項目中加入訊息的方向
+      plugins: [asyncapi.loaderPlugin()],
+    },
+  );
+  ```
+</show>
+
+<show when={props.framework === 'react-router'}>
+  ```ts tab="app/lib/source.ts"
+  import { loader } from 'fumadocs-core/source';
+  import { defineDocs } from 'fumadocs-mdx/macro'; // [!code --]
+  // [!code ++:2]
+  import { docs } from '@/lib/collections';
+  import { asyncapi } from '@/lib/asyncapi';
+
+  // [!code --:6]
+  export const docs = defineDocs({
+    dir: 'content/docs',
+    docs: {
+      async: true,
+    },
+  });
+
+  // 由於 `staticSource()` 會讀取檔案，現在僅限伺服器端使用 [!code ++]
+  export const source = loader(
+    // [!code ++:6]
+    {
+      docs: docs.toFumadocsSource(),
+      asyncapi: await asyncapi.staticSource({
+        baseDir: 'asyncapi',
+      }),
+    },
+    {
+      baseUrl: '/docs',
+      // [!code ++:2] 選用：在頁面樹的每個頁面項目中加入訊息的方向
+      plugins: [asyncapi.loaderPlugin()],
+    },
+  );
+  ```
+
+  ```ts tab="app/lib/collections.ts"
+  import { defineDocs } from 'fumadocs-mdx/macro';
+
+  export const docs = defineDocs({
+    dir: 'content/docs',
+    docs: {
+      async: true,
+    },
+  });
+  ```
+</show>
+
+<show when={props.framework === 'tanstack-start'}>
+  ```ts tab="src/lib/source.ts"
+  import { loader } from 'fumadocs-core/source';
+  import { defineDocs } from 'fumadocs-mdx/macro'; // [!code --]
+  // [!code ++:2]
+  import { docs } from '@/lib/collections';
+  import { asyncapi } from '@/lib/asyncapi';
+
+  // [!code --:6]
+  export const docs = defineDocs({
+    dir: 'content/docs',
+    docs: {
+      async: true,
+    },
+  });
+
+  // 由於 `staticSource()` 會讀取檔案，現在僅限伺服器端使用 [!code ++]
+  export const source = loader(
+    // [!code ++:6]
+    {
+      docs: docs.toFumadocsSource(),
+      asyncapi: await asyncapi.staticSource({
+        baseDir: 'asyncapi',
+      }),
+    },
+    {
+      baseUrl: '/docs',
+      // [!code ++:2] 選用：在頁面樹的每個頁面項目中加入訊息的方向
+      plugins: [asyncapi.loaderPlugin()],
+    },
+  );
+  ```
+
+  ```ts tab="src/lib/collections.ts"
+  import { defineDocs } from 'fumadocs-mdx/macro';
+
+  export const docs = defineDocs({
+    dir: 'content/docs',
+    docs: {
+      async: true,
+    },
+  });
+  ```
+</show>
+
+<show when={props.framework === 'waku'}>
+  ```ts title="src/lib/source.ts"
+  import { loader } from 'fumadocs-core/source';
+  import { defineDocs } from 'fumadocs-mdx/macro';
+  import { asyncapi } from '@/lib/asyncapi'; // [!code ++]
+
+  const docs = defineDocs({
+    dir: 'content/docs',
+  });
+
+  export const source = loader(
+    // [!code ++:6]
+    {
+      docs: docs.toFumadocsSource(),
+      asyncapi: await asyncapi.staticSource({
+        baseDir: 'asyncapi',
+      }),
+    },
+    {
+      baseUrl: '/docs',
+      // [!code ++:2] 選用：在頁面樹的每個頁面項目中加入訊息的方向
+      plugins: [asyncapi.loaderPlugin()],
+    },
+  );
+  ```
+</show>
+
+<show when={props.framework === 'astro'}>
+  ```ts title="src/lib/source.ts"
+  import { getCollection } from 'astro:content';
+  import { loader } from 'fumadocs-core/source';
+  import { toFumadocsSource } from '@fumadocs/astro/source';
+  import { asyncapi } from '@/lib/asyncapi'; // [!code ++]
+
+  export const source = loader(
+    // [!code ++:6]
+    {
+      docs: toFumadocsSource(await getCollection('docs'), await getCollection('meta')),
+      asyncapi: await asyncapi.staticSource({
+        baseDir: 'asyncapi',
+      }),
+    },
+    {
+      baseUrl: '/docs',
+      // [!code ++:2] 選用：在頁面樹的每個頁面項目中加入訊息的方向
+      plugins: [asyncapi.loaderPlugin()],
+    },
+  );
+  ```
+</show>
+
+`staticSource()` 預設會為每個 operation 產生一個頁面。如需自訂，請參閱[產生頁面](/docs/integrations/asyncapi/generate-files)。
+
+**`source` 的頁面現在分為 `docs` 與 `asyncapi` 兩種類型。** 請更新所有使用 `source` 的地方，例如回傳文字給 LLM 的位置：
+
+```ts
+import { llms } from 'fumadocs-core/source';
+import { source } from '@/lib/source';
+
+export const docsLlms = llms(source, {
+  renderPage: async (page) => {
+    // [!code ++:3]
+    if (page.type === 'asyncapi') {
+      return `# ${page.data.title}\n\n${await page.data.getText('processed')}`;
+    }
+
+    // 以下為您原本的流程……
+  },
+});
+```
+
+<show when={props.framework !== 'astro'}>
+  在您的文件頁面中，使用 `<AsyncAPIPage />` 算繪 AsyncAPI 頁面：
+</show>
+
+<show when={props.framework === 'astro'}>
+  在專屬的 island 中算繪 AsyncAPI 頁面，並在其中以文件版面配置包裹 `<AsyncAPIPage />`：
+</show>
+
+<show when={props.framework === 'next'}>
+  ```tsx title="app/docs/[[...slug]]/page.tsx"
+  import { AsyncAPIPage } from '@/components/api-page'; // [!code ++]
+
+  export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
+    const params = await props.params;
+    const page = source.getPage(params.slug);
+    if (!page) notFound();
+
+    // [!code ++:10]
+    if (page.type === 'asyncapi') {
+      return (
+        <DocsPage full>
+          <DocsTitle>{page.data.title}</DocsTitle>
+          <DocsBody>
+            <AsyncAPIPage {...page.data.getAsyncAPIPageProps()} />
+          </DocsBody>
+        </DocsPage>
+      );
+    }
+
+    // ...
+  }
+  ```
+</show>
+
+<show when={props.framework === 'react-router'}>
+  ```tsx title="app/routes/docs.tsx"
+  import { docs, source } from '@/lib/source'; // [!code --]
+  // [!code ++:3]
+  import { docs } from '@/lib/collections';
+  import { source } from '@/lib/source';
+  import { AsyncAPIPage } from '@/components/api-page';
+
+  export async function loader({ params }: Route.LoaderArgs) {
+    const slugs = params['*'].split('/').filter((v) => v.length > 0);
+    const page = source.getPage(slugs);
+    if (!page) throw new Response('Not found', { status: 404 });
+
+    // [!code ++:9]
+    const pageTree = await source.serializePageTree(source.getPageTree());
+    if (page.type === 'asyncapi') {
+      return {
+        type: 'asyncapi' as const,
+        title: page.data.title,
+        props: page.data.getAsyncAPIPageProps(),
+        pageTree,
+      };
+    }
+
+    return { type: 'docs' as const, path: page.path, pageTree }; // [!code highlight]
+  }
+
+  export default function Page({ loaderData }: Route.ComponentProps) {
+    const data = useFumadocsLoader(loaderData);
+
+    return (
+      <DocsLayout {...baseOptions()} tree={data.pageTree}>
+        {/* [!code ++:8] */}
+        {data.type === 'asyncapi' && (
+          <DocsPage full>
+            <DocsTitle>{data.title}</DocsTitle>
+            <DocsBody>
+              <AsyncAPIPage {...data.props} />
+            </DocsBody>
+          </DocsPage>
+        )}
+        {/* [!code highlight] */}
+        {data.type === 'docs' && <Content path={data.path} />}
+      </DocsLayout>
+    );
+  }
+  ```
+</show>
+
+<show when={props.framework === 'tanstack-start'}>
+  ```tsx title="src/routes/docs/$.tsx"
+  import { docs, source } from '@/lib/source'; // [!code --]
+  // [!code ++:4]
+  import { docs } from '@/lib/collections';
+  import { source } from '@/lib/source';
+  import { AsyncAPIPage } from '@/components/api-page';
+  import type { AsyncAPI } from '@fumadocs/asyncapi';
+
+  // [!code ++:7]
+  // server function 回傳結果的型別層級檢查無法驗證 AsyncAPI 文件，
+  // 因此需將其註冊為可序列化（若無法解析 `@tanstack/router-core`，請先安裝）
+  declare module '@tanstack/router-core' {
+    interface SerializableExtensions {
+      asyncapiDocument: AsyncAPI.AsyncAPIObject;
+    }
+  }
+
+  export const Route = createFileRoute('/docs/$')({
+    component: Page,
+    loader: async ({ params }) => {
+      const slugs = params._splat?.split('/') ?? [];
+      const data = await serverLoader({ data: slugs });
+      if (data.type === 'docs') await docs.getPage(data.path)?.preload(); // [!code highlight]
+      return data;
+    },
+  });
+
+  const serverLoader = createServerFn({
+    method: 'GET',
+  })
+    .validator((slugs: string[]) => slugs)
+    .handler(async ({ data: slugs }) => {
+      const page = source.getPage(slugs);
+      if (!page) throw notFound();
+
+      // [!code ++:9]
+      const pageTree = await source.serializePageTree(source.getPageTree());
+      if (page.type === 'asyncapi') {
+        return {
+          type: 'asyncapi',
+          title: page.data.title,
+          props: page.data.getAsyncAPIPageProps(),
+          pageTree,
+        };
+      }
+
+      return { type: 'docs', path: page.path, pageTree }; // [!code highlight]
+    });
+
+  function Page() {
+    const data = useFumadocsLoader(Route.useLoaderData());
+
+    return (
+      <DocsLayout {...baseOptions()} tree={data.pageTree}>
+        {/* [!code ++:8] */}
+        {data.type === 'asyncapi' && (
+          <DocsPage full>
+            <DocsTitle>{data.title}</DocsTitle>
+            <DocsBody>
+              <AsyncAPIPage {...data.props} />
+            </DocsBody>
+          </DocsPage>
+        )}
+        <Suspense>
+          {/* [!code highlight] */}
+          {data.type === 'docs' && <Content path={data.path} />}
+        </Suspense>
+      </DocsLayout>
+    );
+  }
+  ```
+</show>
+
+<show when={props.framework === 'waku'}>
+  ```tsx title="src/pages/docs/[...slugs].tsx"
+  import { AsyncAPIPage } from '@/components/api-page'; // [!code ++]
+
+  export default function Page({ slugs }: PageProps<'/docs/[...slugs]'>) {
+    const page = source.getPage(slugs);
+    if (!page) unstable_notFound();
+
+    // [!code ++:10]
+    if (page.type === 'asyncapi') {
+      return (
+        <DocsPage full>
+          <DocsTitle>{page.data.title}</DocsTitle>
+          <DocsBody>
+            <AsyncAPIPage {...page.data.getAsyncAPIPageProps()} />
+          </DocsBody>
+        </DocsPage>
+      );
+    }
+
+    // ...
+  }
+  ```
+</show>
+
+<show when={props.framework === 'astro'}>
+  ```astro tab="src/pages/docs/[...slug].astro"
+  ---
+  import type { GetStaticPaths, InferGetStaticPropsType } from 'astro';
+  import Layout from '@/layouts/Layout.astro';
+  import { Docs } from '@/components/docs';
+  import { AsyncAPIDocs } from '@/components/asyncapi-docs'; // [!code ++]
+  import { source } from '@/lib/source';
+
+  export const prerender = true;
+
+  export const getStaticPaths = (() => {
+    return source.getPages().map((page) => ({
+      params: { slug: decodeURI(page.slugs.join('/')) || undefined },
+      props: { page },
+    }));
+  }) satisfies GetStaticPaths;
+
+  type Props = InferGetStaticPropsType<typeof getStaticPaths>;
+
+  const { page } = Astro.props;
+  const pageTree = await source.serializePageTree(source.getPageTree());
+  ---
+
+  {/* [!code ++:13] */}
+  {page.type === 'asyncapi' && (
+    <Layout title={page.data.title ?? 'My App'}>
+      <AsyncAPIDocs
+        client:load
+        pathname={Astro.url.pathname}
+        params={Astro.params}
+        tree={pageTree}
+        title={page.data.title}
+        props={page.data.getAsyncAPIPageProps()}
+      />
+    </Layout>
+  )}
+  ```
+
+  ```tsx tab="src/components/asyncapi-docs.tsx"
+  import { type SerializedPageTree, useFumadocsLoader } from 'fumadocs-core/source/client';
+  import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+  import { DocsBody, DocsPage, DocsTitle } from 'fumadocs-ui/layouts/docs/page';
+  import { AsyncAPIPage } from '@/components/api-page';
+  import { Provider, type ProviderProps } from '@/components/provider';
+  import { baseOptions } from '@/lib/layout.shared';
+  import type { AsyncAPIPageProps } from '@fumadocs/asyncapi/ui';
+
+  export function AsyncAPIDocs({
+    tree,
+    title,
+    props,
+    ...rest
+  }: ProviderProps & { tree: SerializedPageTree; title?: string; props: AsyncAPIPageProps }) {
+    const data = useFumadocsLoader({ tree });
+
+    return (
+      <Provider {...rest}>
+        <DocsLayout {...baseOptions()} tree={data.tree}>
+          <DocsPage full>
+            <DocsTitle>{title}</DocsTitle>
+            <DocsBody>
+              <AsyncAPIPage {...props} />
+            </DocsBody>
+          </DocsPage>
+        </DocsLayout>
+      </Provider>
+    );
+  }
+  ```
+</show>
+
+<Callout type="warn" title="請確認已完成遷移！">
+  繼續之前，請先執行型別檢查：
+
+  ```npm
+  npm run types:check
+  ```
+</Callout>
+
+若想改為將 MDX 檔案寫入內容目錄，請參閱 [MDX 檔案](/docs/integrations/asyncapi/generate-files#mdx-files)。
+
+## 功能 [#features]
+
+官方 AsyncAPI 整合支援 AsyncAPI 3：
+
+* 為讀者標示訊息的傳遞方向，以及 operation 的伺服器與頻道位址
+* 訊息及其酬載與 header 的 schema，包含 Avro、Protobuf 和 RAML schema
+* 訊息範例，可取自文件或由 schema 產生
+* 請求與回覆、correlation ID
+* 安全性方案，包含 OAuth 2.0 流程與 SASL 機制
+* 依所選伺服器顯示 bindings 中的協定細節
+* 支援 WebSocket、Server-Sent Events 與自訂傳輸層的互動測試區，可傳送文字與二進位訊息
+* JavaScript 與 Python 的程式碼範例，涵蓋 WebSocket、MQTT、Kafka、AMQP 和 NATS
+* 酬載與 header 的 TypeScript 型別定義
+* 提供給 LLM 使用的頁面 Markdown
+* Traits
+
+AsyncAPI 2 文件可透過 `npx @asyncapi/cli convert` 轉換。
+
+### 示範 [#demo]
+
+請參閱 [AsyncAPI 範例](/docs/asyncapi)。

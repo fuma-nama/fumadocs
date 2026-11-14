@@ -1,11 +1,12 @@
 import { source } from '@/lib/source';
 import type { Graph } from '@/components/graph-view';
+import { i18n } from '@/lib/i18n';
 
 export async function buildGraph(): Promise<Graph> {
   const graph: Graph = { links: [], nodes: [] };
 
   await Promise.all(
-    source.getPages().map(async (page) => {
+    source.getPages(i18n.defaultLanguage).map(async (page) => {
       if (page.type !== 'docs') return;
 
       graph.nodes.push({

@@ -1,0 +1,432 @@
+---
+title: Obsidian
+description: 使用 Fumadocs 直接算繪 Obsidian vault。
+---
+
+`fumadocs-obsidian` 提供一個執行階段的內容來源。它會直接讀取並編譯 vault，因此不會產生中介的 MDX 檔案，也不需要 Fumadocs MDX 的 remark 外掛。
+
+支援的 Obsidian 語法包括：
+
+* Wikilink 與嵌入。
+* Callout。
+* 區塊 ID。
+* 註解。
+
+名稱有歧義的 wikilink 會比照 Obsidian 的方式解析：筆記優先於附件，其次以最短路徑為準。未知語言 (例如 `dataview`) 的程式碼區塊會以純文字算繪。
+
+## 設定 [#setup]
+
+安裝套件：
+
+```package-install
+fumadocs-obsidian shiki
+```
+
+### 產生樣式 [#generate-styles]
+
+`fumadocs-obsidian/ui` 的元件使用 Tailwind CSS 設定樣式。請加入下列這一行，以產生這些元件所需的 class：
+
+```css title="Tailwind CSS"
+@import 'tailwindcss';
+@import 'fumadocs-ui/css/neutral.css';
+@import 'fumadocs-ui/css/preset.css';
+/* [!code ++] */
+@import 'fumadocs-obsidian/css/preset.css';
+```
+
+### 設定來源 [#configure-source]
+
+建立 Obsidian 來源，並傳入 `dynamicLoader()`：
+
+```ts title="lib/source.ts"
+import { dynamicLoader } from 'fumadocs-core/source';
+import { obsidian } from 'fumadocs-obsidian';
+
+const vault = obsidian({
+  dir: 'public/vault',
+  // 將 vault 附件對應到其公開 URL
+  url: (path) => `/vault/${path}`,
+});
+
+const vaultLoader = dynamicLoader(vault.dynamicSource(), {
+  baseUrl: '/docs',
+});
+
+export function getSource() {
+  return vaultLoader.get();
+}
+```
+
+此範例將 vault 存放在 `public/vault`，讓您的框架能透過 `url` 回傳的 URL 提供附件。若您的應用程式會另行提供或上傳附件，也可以將 vault 放在其他位置。
+
+接著載入並算繪頁面。`page.data.load()` 會回傳已編譯頁面的算繪器。
+
+<show when={props.framework === 'react-router' || props.framework === 'tanstack-start'}>
+  在載入器中將其序列化，再於用戶端算繪：
+</show>
+
+<show when={props.framework === 'astro'}>
+  在頁面中將其序列化，再於 React island 中算繪：
+</show>
+
+<show when={props.framework === 'next'}>
+  ```tsx title="app/docs/[[...slug]]/page.tsx"
+  import { getSource } from '@/lib/source';
+  import { notFound } from 'next/navigation';
+  import defaultMdxComponents, { createRelativeLink } from 'fumadocs-ui/mdx';
+  import * as ObsidianComponents from 'fumadocs-obsidian/ui';
+  import { DocsBody, DocsPage } from 'fumadocs-ui/layouts/docs/page';
+
+  export default async function Page({ params }: PageProps<'/docs/[[...slug]]'>) {
+    const source = await getSource();
+    const page = source.getPage((await params).slug);
+    if (!page) notFound();
+
+    const { body, toc } = await (
+      await page.data.load()
+    ).render({
+      ...defaultMdxComponents,
+      ...ObsidianComponents,
+      a: createRelativeLink(source, page),
+    });
+
+    return (
+      <DocsPage toc={toc}>
+        <DocsBody>{body}</DocsBody>
+      </DocsPage>
+    );
+  }
+  ```
+</show>
+
+<show when={props.framework === 'react-router'}>
+  ```tsx title="app/routes/docs.tsx"
+  import type { Route } from './+types/docs';
+  import { useMemo } from 'react';
+  import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+  import { DocsBody, DocsPage } from 'fumadocs-ui/layouts/docs/page';
+  import defaultMdxComponents from 'fumadocs-ui/mdx';
+  import { useFumadocsLoader } from 'fumadocs-core/source/client';
+  import * as ObsidianComponents from 'fumadocs-obsidian/ui';
+  import { rendererFromSerialized } from 'fumadocs-obsidian/client';
+  import { getSource } from '@/lib/source';
+
+  export async function loader({ params }: Route.LoaderArgs) {
+    const source = await getSource();
+    const page = source.getPage(params['*'].split('/').filter((v) => v.length > 0));
+    if (!page) throw new Response('Not found', { status: 404 });
+
+    return {
+      // 語法樹，於用戶端算繪
+      render: (await page.data.load()).serialize(),
+      pageTree: await source.serializePageTree(source.getPageTree()),
+    };
+  }
+
+  export default function Page({ loaderData }: Route.ComponentProps) {
+    const { render, pageTree } = useFumadocsLoader(loaderData);
+    const renderer = useMemo(() => rendererFromSerialized(render), [render]);
+    const { body, toc } = renderer.renderSync({ ...defaultMdxComponents, ...ObsidianComponents });
+
+    return (
+      <DocsLayout tree={pageTree}>
+        <DocsPage toc={toc}>
+          <DocsBody>{body}</DocsBody>
+        </DocsPage>
+      </DocsLayout>
+    );
+  }
+  ```
+</show>
+
+<show when={props.framework === 'tanstack-start'}>
+  ```tsx title="src/routes/docs/$.tsx"
+  import { createFileRoute, notFound } from '@tanstack/react-router';
+  import { createServerFn } from '@tanstack/react-start';
+  import { useMemo } from 'react';
+  import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+  import { DocsBody, DocsPage } from 'fumadocs-ui/layouts/docs/page';
+  import defaultMdxComponents from 'fumadocs-ui/mdx';
+  import { useFumadocsLoader } from 'fumadocs-core/source/client';
+  import * as ObsidianComponents from 'fumadocs-obsidian/ui';
+  import { rendererFromSerialized, type ObsidianRendererOptions } from 'fumadocs-obsidian/client';
+  import { getSource } from '@/lib/source';
+
+  // server function 回傳結果的型別層級檢查無法驗證語法樹，
+  // 因此需將其註冊為可序列化（若無法解析 `@tanstack/router-core`，請先安裝）
+  declare module '@tanstack/router-core' {
+    interface SerializableExtensions {
+      fumadocsObsidianRenderer: ObsidianRendererOptions;
+    }
+  }
+
+  export const Route = createFileRoute('/docs/$')({
+    component: Page,
+    loader: ({ params }) => serverLoader({ data: params._splat?.split('/') ?? [] }),
+  });
+
+  const serverLoader = createServerFn({
+    method: 'GET',
+  })
+    .validator((slugs: string[]) => slugs)
+    .handler(async ({ data: slugs }) => {
+      const source = await getSource();
+      const page = source.getPage(slugs);
+      if (!page) throw notFound();
+
+      return {
+        // 語法樹，於用戶端算繪
+        render: (await page.data.load()).serialize(),
+        pageTree: await source.serializePageTree(source.getPageTree()),
+      };
+    });
+
+  function Page() {
+    const { render, pageTree } = useFumadocsLoader(Route.useLoaderData());
+    const renderer = useMemo(() => rendererFromSerialized(render), [render]);
+    const { body, toc } = renderer.renderSync({ ...defaultMdxComponents, ...ObsidianComponents });
+
+    return (
+      <DocsLayout tree={pageTree}>
+        <DocsPage toc={toc}>
+          <DocsBody>{body}</DocsBody>
+        </DocsPage>
+      </DocsLayout>
+    );
+  }
+  ```
+</show>
+
+<show when={props.framework === 'waku'}>
+  ```tsx title="src/pages/docs/[...slugs].tsx"
+  import type { PageProps } from 'waku/router';
+  import { unstable_notFound } from 'waku/router/server';
+  import defaultMdxComponents, { createRelativeLink } from 'fumadocs-ui/mdx';
+  import * as ObsidianComponents from 'fumadocs-obsidian/ui';
+  import { DocsBody, DocsPage } from 'fumadocs-ui/layouts/docs/page';
+  import { getSource } from '@/lib/source';
+
+  export default async function Page({ slugs }: PageProps<'/docs/[...slugs]'>) {
+    const source = await getSource();
+    const page = source.getPage(slugs);
+    if (!page) unstable_notFound();
+
+    const { body, toc } = await (
+      await page.data.load()
+    ).render({
+      ...defaultMdxComponents,
+      ...ObsidianComponents,
+      a: createRelativeLink(source, page),
+    });
+
+    return (
+      <DocsPage toc={toc}>
+        <DocsBody>{body}</DocsBody>
+      </DocsPage>
+    );
+  }
+
+  export const getConfig = async () => ({ render: 'dynamic' }) as const;
+  ```
+</show>
+
+<show when={props.framework === 'astro'}>
+  ```astro tab="src/pages/docs/[...slug].astro"
+  ---
+  import type { GetStaticPaths, InferGetStaticPropsType } from 'astro';
+  import Layout from '@/layouts/Layout.astro';
+  import { Docs } from '@/components/docs';
+  import { getSource } from '@/lib/source';
+
+  export const prerender = true;
+
+  export const getStaticPaths = (async () => {
+    const source = await getSource();
+    return source.getPages().map((page) => ({
+      params: { slug: decodeURI(page.slugs.join('/')) || undefined },
+      props: { page },
+    }));
+  }) satisfies GetStaticPaths;
+
+  type Props = InferGetStaticPropsType<typeof getStaticPaths>;
+
+  const { page } = Astro.props;
+  const source = await getSource();
+  const pageTree = await source.serializePageTree(source.getPageTree());
+  const renderer = await page.data.load();
+  ---
+
+  <Layout title={page.data.title}>
+    <Docs
+      client:load
+      pathname={Astro.url.pathname}
+      params={Astro.params}
+      tree={pageTree}
+      render={renderer.serialize()}
+    />
+  </Layout>
+  ```
+
+  ```tsx tab="src/components/docs.tsx"
+  import { useMemo } from 'react';
+  import { type SerializedPageTree, useFumadocsLoader } from 'fumadocs-core/source/client';
+  import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+  import { DocsBody, DocsPage } from 'fumadocs-ui/layouts/docs/page';
+  import defaultMdxComponents from 'fumadocs-ui/mdx';
+  import * as ObsidianComponents from 'fumadocs-obsidian/ui';
+  import { rendererFromSerialized, type ObsidianRendererOptions } from 'fumadocs-obsidian/client';
+  import { Provider, type ProviderProps } from '@/components/provider';
+
+  export interface DocsProps extends ProviderProps {
+    tree: SerializedPageTree;
+    // 語法樹，會在 island 中算繪
+    render: ObsidianRendererOptions;
+  }
+
+  export function Docs({ tree, render, ...props }: DocsProps) {
+    const data = useFumadocsLoader({ tree });
+    const renderer = useMemo(() => rendererFromSerialized(render), [render]);
+    const { body, toc } = renderer.renderSync({ ...defaultMdxComponents, ...ObsidianComponents });
+
+    return (
+      <Provider {...props}>
+        <DocsLayout tree={data.tree}>
+          <DocsPage toc={toc}>
+            <DocsBody>{body}</DocsBody>
+          </DocsPage>
+        </DocsLayout>
+      </Provider>
+    );
+  }
+  ```
+</show>
+
+針對同一個 vault 快照，`page.data.load()` 對每個頁面最多只會編譯一次。Vault 內容一律以純 Markdown 編譯：算繪時只會將其對應為 JSX 並解析元件名稱，因此內容中的 JavaScript 絕不會被執行。媒體檔案透過 URL 參照，不會被讀入記憶體。
+
+## 熱重載 [#hot-reload]
+
+<show when={props.framework === 'next'}>
+  開發期間，請與應用程式同時執行內建的內容監看器：
+
+  ```json title="package.json"
+  {
+    "scripts": {
+      "dev": "fumadocs-obsidian dev -- next dev"
+    }
+  }
+  ```
+
+  將 vault 連接至監看器：
+
+  ```ts title="lib/source.ts"
+  if (process.env.NODE_ENV === 'development') {
+    void vault.devServer();
+  }
+  ```
+</show>
+
+<show when={props.framework !== 'next'}>
+  開發期間，Vite 外掛會透過 Vite 的檔案監看器監看 vault。請將外掛加入設定，並連接 vault：
+
+  <show when={props.framework === 'react-router' || props.framework === 'tanstack-start'}>
+    ```ts tab="vite.config.ts"
+    import { defineConfig } from 'vite';
+    import { localContentPlugin } from 'fumadocs-obsidian/dev/vite';
+
+    export default defineConfig({
+      plugins: [localContentPlugin()],
+    });
+    ```
+  </show>
+
+  <show when={props.framework === 'waku'}>
+    ```ts tab="waku.config.ts"
+    import { defineConfig } from 'waku/config';
+    import { localContentPlugin } from 'fumadocs-obsidian/dev/vite';
+
+    export default defineConfig({
+      vite: {
+        plugins: [localContentPlugin()],
+      },
+    });
+    ```
+  </show>
+
+  <show when={props.framework === 'astro'}>
+    ```js tab="astro.config.mjs"
+    import { defineConfig } from 'astro/config';
+    import { localContentPlugin } from 'fumadocs-obsidian/dev/vite';
+
+    export default defineConfig({
+      vite: {
+        plugins: [localContentPlugin()],
+      },
+    });
+    ```
+  </show>
+
+  ```ts tab="lib/source.ts"
+  import { watchWithVite } from 'fumadocs-obsidian/dev/vite';
+
+  if (import.meta.env.DEV) watchWithVite(vault);
+  ```
+</show>
+
+由於 Wikilink 與別名可能讓檔案之間產生相依關係，因此任何變更都會使整個來源快照失效。
+
+## 靜態來源 [#static-source]
+
+如果 vault 只需要讀取一次，請使用 `staticSource()`：
+
+```ts title="lib/source.ts"
+import { loader } from 'fumadocs-core/source';
+import { obsidian } from 'fumadocs-obsidian';
+
+const vault = obsidian({
+  dir: 'public/vault',
+  url: (path) => `/vault/${path}`,
+});
+
+export const source = loader(await vault.staticSource(), {
+  baseUrl: '/docs',
+});
+```
+
+## Schema [#schema]
+
+使用與 Standard Schema 相容的驗證器，自訂頁面的 frontmatter 與 `meta.json` 檔案：
+
+```ts title="lib/source.ts"
+import { frontmatterSchema, obsidian } from 'fumadocs-obsidian';
+import { metaSchema } from 'fumadocs-core/source/schema';
+import { z } from 'zod';
+
+const vault = obsidian({
+  dir: 'public/vault',
+  frontmatterSchema: frontmatterSchema.extend({
+    tags: z.array(z.string()).optional(),
+  }),
+  metaSchema,
+});
+```
+
+預設的 `frontmatterSchema` 對結構鬆散的 vault 相當寬容：像 `title: 2024` 這類純量標題會自動轉換為字串，而 `aliases` 可以是單一名稱，也可以是清單。未通過驗證的筆記會被回報並略過，不會影響 vault 中的其他筆記。
+
+### 擴充功能 [#additions]
+
+傳入 remark/rehype 外掛，即可個別啟用以下語法功能：
+
+* [Mermaid](/docs/markdown/mermaid)。
+* [數學公式](/docs/markdown/math)。
+
+```ts title="lib/source.ts"
+import { obsidian } from 'fumadocs-obsidian';
+import remarkMath from 'remark-math';
+import rehypeKatex from 'rehype-katex';
+
+const vault = obsidian({
+  dir: 'public/vault',
+  remarkPlugins: [remarkMath],
+  rehypePlugins: [rehypeKatex],
+});
+```

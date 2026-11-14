@@ -29,6 +29,7 @@ import { transformerTwoslash } from 'fumadocs-twoslash';
 import { createFileSystemTypesCache } from 'fumadocs-twoslash/cache-fs';
 import type { MdastPluginDefinition } from 'satteri';
 import { remarkFrameworkLinks } from '@/lib/remark-framework-links';
+import { i18n } from '@/lib/i18n';
 
 const typeTableGenerator = createGenerator({
   cache: createFileSystemGeneratorCache('.next/cache/fumadocs-typescript'),
@@ -234,6 +235,7 @@ export const source = loader(
   },
   {
     baseUrl: '/docs',
+    i18n,
     plugins: [
       pageTreeCodeTitles(),
       lucideIconsPlugin(),

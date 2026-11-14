@@ -4,12 +4,14 @@ import type { Translations as OpenAPITranslations } from 'fumadocs-openapi/i18n'
 import type { Translations as AsyncAPITranslations } from '@fumadocs/asyncapi/i18n';
 import type { Translations as GraphQLTranslations } from '@fumadocs/graphql/i18n';
 import type { Translations as StoryTranslations } from '@fumadocs/story/i18n';
+import type { Translations as AIChatTranslations } from '@fumadocs/ai-chat/i18n';
 
 type Translations = UITranslations &
   OpenAPITranslations &
   AsyncAPITranslations &
   GraphQLTranslations &
-  StoryTranslations;
+  StoryTranslations &
+  AIChatTranslations;
 
 const translations = {
   displayName: '简体中文',
@@ -403,6 +405,35 @@ const translations = {
   'Unset(story arguments form)': '无',
   'Variant(story controls)': '变体',
   '{count} items(story arguments form)': '{count} 项',
+  // @fumadocs/ai-chat
+  '1 result(AI chat)': '1 个结果',
+  'Answers come from the docs, AI can make mistakes.(AI chat)': '回答来自文档，AI 可能会出错。',
+  'Ask AI(AI chat)': '询问 AI',
+  'Ask a follow-up(AI chat)': '继续提问',
+  'Ask a question(AI chat)': '提出问题',
+  'Close(AI chat)': '关闭',
+  'Copied(AI chat)': '已复制',
+  'Copy(AI chat)': '复制',
+  'How do I get started?(AI chat)': '如何开始使用？',
+  'Message(AI chat)(aria-label)': '消息',
+  'New chat(AI chat)': '新对话',
+  'Retry(AI chat)': '重试',
+  'Scroll to latest(AI chat)(aria-label)': '滚动到最新',
+  'Search failed(AI chat)': '搜索失败',
+  'Search stopped(AI chat)': '搜索已停止',
+  'Searched(AI chat)': '已搜索',
+  'Searching(AI chat)': '正在搜索',
+  'Send(AI chat)(aria-label)': '发送',
+  'Something went wrong.(AI chat)': '出错了。',
+  'Sources(AI chat)(aria-label)': '来源',
+  'Stop(AI chat)(aria-label)': '停止',
+  'Suggestions(AI chat)(aria-label)': '建议',
+  'Summarize this page(AI chat)': '总结这个页面',
+  'Thinking(AI chat)': '思考中',
+  'Try again(AI chat)': '再试一次',
+  'What can I customize?(AI chat)': '我可以自定义哪些内容？',
+  'What do you want to know?(AI chat)': '你想了解什么？',
+  '{count} results(AI chat)': '{count} 个结果',
 } satisfies Translations;
 
 /**

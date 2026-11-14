@@ -1,0 +1,145 @@
+### 替換搜尋對話方塊 [#replace-search-dialog]
+
+<show when={props.framework === 'next'}>
+  將您的搜尋對話方塊傳入 [`<RootProvider />`](/docs/ui/layouts/root-provider)。由於根版面配置是伺服器元件，請先用用戶端元件包住 provider：
+
+  ```tsx tab="components/provider.tsx"
+  'use client';
+  import { RootProvider } from 'fumadocs-ui/provider/next';
+  import SearchDialog from '@/components/search';
+  import type { ReactNode } from 'react';
+
+  export function Provider({ children }: { children: ReactNode }) {
+    return <RootProvider search={{ SearchDialog }}>{children}</RootProvider>;
+  }
+  ```
+
+  ```tsx tab="app/layout.tsx"
+  // [!code ++]
+  import { Provider } from '@/components/provider';
+  import type { ReactNode } from 'react';
+
+  export default function Layout({ children }: { children: ReactNode }) {
+    return (
+      <html lang="en" suppressHydrationWarning>
+        <body className="flex flex-col min-h-screen">
+          {/* [!code --] */}
+          <RootProvider>{children}</RootProvider>
+          {/* [!code ++] */}
+          <Provider>{children}</Provider>
+        </body>
+      </html>
+    );
+  }
+  ```
+</show>
+
+<show when={props.framework === 'react-router'}>
+  在根版面配置中，將您的搜尋對話方塊傳入 [`<RootProvider />`](/docs/ui/layouts/root-provider)：
+
+  ```tsx title="app/root.tsx"
+  import { Links, Meta, Scripts, ScrollRestoration } from 'react-router';
+  import { RootProvider } from 'fumadocs-ui/provider/react-router';
+  // [!code ++]
+  import SearchDialog from '@/components/search';
+
+  export function Layout({ children }: { children: React.ReactNode }) {
+    return (
+      <html lang="en" suppressHydrationWarning>
+        <head>
+          <meta charSet="utf-8" />
+          <meta name="viewport" content="width=device-width, initial-scale=1" />
+          <Meta />
+          <Links />
+        </head>
+        <body className="flex flex-col min-h-screen">
+          {/* [!code highlight] */}
+          <RootProvider search={{ SearchDialog }}>{children}</RootProvider>
+          <ScrollRestoration />
+          <Scripts />
+        </body>
+      </html>
+    );
+  }
+  ```
+</show>
+
+<show when={props.framework === 'tanstack-start'}>
+  在根路由中，將您的搜尋對話方塊傳入 [`<RootProvider />`](/docs/ui/layouts/root-provider)：
+
+  ```tsx title="src/routes/__root.tsx"
+  import { createRootRoute, HeadContent, Outlet, Scripts } from '@tanstack/react-router';
+  import { RootProvider } from 'fumadocs-ui/provider/tanstack';
+  // [!code ++]
+  import SearchDialog from '@/components/search';
+
+  export const Route = createRootRoute({
+    component: RootComponent,
+  });
+
+  function RootComponent() {
+    return (
+      <html suppressHydrationWarning>
+        <head>
+          <HeadContent />
+        </head>
+        <body className="flex flex-col min-h-screen">
+          {/* [!code highlight] */}
+          <RootProvider search={{ SearchDialog }}>
+            <Outlet />
+          </RootProvider>
+          <Scripts />
+        </body>
+      </html>
+    );
+  }
+  ```
+</show>
+
+<show when={props.framework === 'waku'}>
+  在您的 provider 元件中，將搜尋對話方塊傳入 [`<RootProvider />`](/docs/ui/layouts/root-provider)：
+
+  ```tsx title="src/components/provider.tsx"
+  'use client';
+  import type { ReactNode } from 'react';
+  import { RootProvider } from 'fumadocs-ui/provider/waku';
+  // [!code ++]
+  import SearchDialog from '@/components/search';
+
+  export function Provider({ children }: { children: ReactNode }) {
+    // [!code highlight]
+    return <RootProvider search={{ SearchDialog }}>{children}</RootProvider>;
+  }
+  ```
+</show>
+
+<show when={props.framework === 'astro'}>
+  您的 provider 元件已將 `src/components/search.tsx` 傳入 [`<RootProvider />`](/docs/ui/layouts/root-provider)，因此只要替換該檔案即可：
+
+  ```tsx title="src/components/provider.tsx"
+  import { navigate } from 'astro:transitions/client';
+  import type { ReactNode } from 'react';
+  import { RootProvider } from 'fumadocs-ui/provider/astro';
+  import SearchDialog from '@/components/search';
+
+  export interface ProviderProps {
+    pathname: string;
+    params: Record<string, string | undefined>;
+    children?: ReactNode;
+  }
+
+  export function Provider({ pathname, params, children }: ProviderProps) {
+    return (
+      <RootProvider
+        pathname={pathname}
+        params={params}
+        navigate={navigate}
+        // [!code highlight]
+        search={{ SearchDialog }}
+      >
+        {children}
+      </RootProvider>
+    );
+  }
+  ```
+</show>

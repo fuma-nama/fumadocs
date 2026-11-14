@@ -1,7 +1,7 @@
 'use client';
 import { Image } from 'fumadocs-core/framework';
 import type { ReactNode } from 'react';
-import Wallpaper from '@/app/(home)/story.png';
+import Wallpaper from '@/app/[lang]/(home)/story.png';
 
 /** a window around the frame of layout stories */
 export function StoryWindow({ children }: { children: ReactNode }) {

@@ -1,0 +1,59 @@
+---
+title: 最後修改時間
+description: 取得 GitHub 儲存庫中檔案的最後編輯時間
+---
+
+## 使用方式 [#usage]
+
+請傳入您的儲存庫名稱及檔案路徑。
+
+```ts
+import { getGithubLastEdit } from 'fumadocs-core/content/github';
+
+const time = await getGithubLastEdit({
+  owner: 'fuma-nama',
+  repo: 'fumadocs',
+  // 範例："content/docs/index.mdx"
+  path: `content/docs/${page.path}`,
+});
+```
+
+### Github Token [#github-token]
+
+請注意，在開發模式下很容易就會達到速率限制。因此，建議您
+傳入 Github token 以提高速率限制。
+
+深入了解
+[Authenticating to the REST API](https://docs.github.com/en/rest/overview/authenticating-to-the-rest-api)。
+
+```ts
+import { getGithubLastEdit } from 'fumadocs-core/content/github'
+
+ const time = await getGithubLastEdit({
+    ...,
+    token: `Bearer ${process.env.GIT_TOKEN}`
+  })
+```
+
+此外，如果您在開發模式下用不到這項功能，也可以略過這個步驟。
+
+```ts
+process.env.NODE_ENV === 'development'? null : getGithubLastEdit(...)
+```
+
+### 自訂 GitHub 基礎 URL [#custom-github-base-url]
+
+若您需要存取的 GitHub 執行個體不在 `https://api.github.com`，可以覆寫基礎 URL：
+
+```ts
+import { getGithubLastEdit } from 'fumadocs-core/content/github';
+
+const time = await getGithubLastEdit({
+  owner: 'your-org',
+  repo: 'your-repo',
+  path: `content/docs/${page.path}`,
+  baseUrl: 'https://api.octocorp.ghe.com', // 您的自訂 GitHub API URL
+});
+```
+
+若未指定 `baseUrl` 參數，其預設值為 `'https://api.github.com'`。

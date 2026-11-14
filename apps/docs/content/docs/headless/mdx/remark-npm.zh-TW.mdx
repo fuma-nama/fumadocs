@@ -1,0 +1,116 @@
+---
+title: Remark NPM
+description: 為各套件管理工具產生程式碼區塊
+---
+
+## 使用方式 [#usage]
+
+Remark NPM 是一個 remark 外掛，Fumadocs MDX 預設會啟用它。您可以透過 `remarkNpmOptions` 傳入選項。
+
+定義所需的元件：
+
+```tsx tab="Custom" title="components/mdx.tsx"
+import { CodeBlockTabs, CodeBlockTab, CodeBlockTabsList, CodeBlockTabsTrigger } from 'my-ui';
+import type { MDXComponents } from 'mdx/types';
+
+export function getMDXComponents(components?: MDXComponents) {
+  return {
+    CodeBlockTabs,
+    CodeBlockTab,
+    CodeBlockTabsList,
+    CodeBlockTabsTrigger,
+    ...components,
+  } satisfies MDXComponents;
+}
+```
+
+```tsx tab="Fumadocs UI" title="components/mdx.tsx"
+import defaultComponents from 'fumadocs-ui/mdx';
+import type { MDXComponents } from 'mdx/types';
+
+export function getMDXComponents(components?: MDXComponents) {
+  return {
+    // `defaultComponents` 預設已包含這些元件
+    ...defaultComponents,
+    ...components,
+  } satisfies MDXComponents;
+}
+```
+
+### 輸入 [#input]
+
+建立語言為 `npm` 的程式碼區塊。
+
+````mdx
+```npm
+npm i my-package
+```
+
+```npm
+npm i my-package -D
+```
+````
+
+`package-install` 程式碼區塊也同樣適用。這類區塊接受套件名稱 (例如 `my-package`) ，並將其轉換為 `npm install` 指令。
+
+### 輸出 [#output]
+
+此外掛應產生以下結構。
+
+```mdx
+<CodeBlockTabs defaultValue="npm">
+  <CodeBlockTabsList>
+    <CodeBlockTabsTrigger value="npm">npm</CodeBlockTabsTrigger>
+    <CodeBlockTabsTrigger value="pnpm">pnpm</CodeBlockTabsTrigger>
+    <CodeBlockTabsTrigger value="yarn">yarn</CodeBlockTabsTrigger>
+    <CodeBlockTabsTrigger value="bun">bun</CodeBlockTabsTrigger>
+  </CodeBlockTabsList>
+
+  <CodeBlockTab value="npm">...</CodeBlockTab>
+  <CodeBlockTab value="pnpm">...</CodeBlockTab>
+  <CodeBlockTab value="yarn">...</CodeBlockTab>
+  <CodeBlockTab value="bun">...</CodeBlockTab>
+</CodeBlockTabs>
+```
+
+```npm
+npm i my-package
+```
+
+### 持久保存 [#persistent]
+
+搭配 Fumadocs UI 使用時，您可以透過 `persist` 選項持久保存所選取的值。
+
+```ts tab="unified" title="source.config.ts"
+import { defineConfig } from 'fumadocs-mdx/config';
+
+export default defineConfig({
+  mdxOptions: {
+    remarkNpmOptions: {
+      persist: {
+        id: 'package-manager',
+      },
+    },
+  },
+});
+```
+
+```ts tab="Sätteri" title="source.config.ts"
+import { defineConfig, defineDocs } from 'fumadocs-mdx/config';
+
+export const docs = defineDocs({
+  docs: { compiler: 'satteri' },
+});
+
+export default defineConfig({
+  satteriOptions: {
+    remarkNpmOptions: {
+      persist: {
+        id: 'package-manager',
+      },
+    },
+  },
+});
+```
+
+這會為 `<CodeBlockTabs />` 產生 [`persist`](/docs/ui/components/tabs#persistent) prop。

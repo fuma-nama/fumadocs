@@ -1,0 +1,81 @@
+---
+title: 設定
+description: 共用的 i18n 設定
+---
+
+<Callout title="僅限核心 API">
+  框架整合指南請參閱[國際化](/docs/internationalization)。
+</Callout>
+
+## 定義設定 [#define-config]
+
+Fumadocs core 提供 i18n 支援所需的中介軟體與工具函式。
+
+您可以定義一份設定，供各個工具函式共用。
+
+<include cwd meta="title=&#x22;lib/i18n.ts&#x22;">
+  ../../examples/i18n/lib/i18n.ts
+</include>
+
+### 隱藏語系前綴 [#hide-locale-prefix]
+
+若要隱藏語系前綴 (例如 `/en/page` -&gt; `/page`) ，請使用 `hideLocale` 選項。
+
+```ts
+import { defineI18n } from 'fumadocs-core/i18n';
+
+export const i18n = defineI18n({
+  defaultLanguage: 'en',
+  languages: ['en', 'cn'],
+  hideLocale: 'default-locale',
+});
+```
+
+| 模式               | 說明                    |
+| ---------------- | --------------------- |
+| `always`         | 一律隱藏前綴，並從 cookie 偵測語系 |
+| `default-locale` | 僅隱藏預設語系               |
+| `never`          | 一律不隱藏前綴 (預設)          |
+
+<Callout type="warn" title={<>使用 <code>always</code></>}>
+  在 `always` 模式下，語系會儲存為 cookie (由中介軟體設定) ，這對靜態網站而言並不理想。
+
+  這可能會造成非預期的快取問題，也需要特別留意 SEO，確保搜尋引擎能正確索引您的頁面。
+</Callout>
+
+### 備用語言 [#fallback-language]
+
+檔案缺少翻譯時所使用的備用語言，預設為您的 `defaultLanguage`。
+
+其值須為 `languages` 陣列中的其中一種語言。
+
+```ts
+import { defineI18n } from 'fumadocs-core/i18n';
+
+export const i18n = defineI18n({
+  languages: ['en', 'cn'],
+  defaultLanguage: 'en',
+  // 若檔案缺少英文版本，則使用中文版本
+  fallbackLanguage: 'cn',
+});
+```
+
+若要停用備用機制，請將其設為 `null`：
+
+```ts
+import { defineI18n } from 'fumadocs-core/i18n';
+
+export const i18n = defineI18n({
+  languages: ['en', 'cn'],
+  defaultLanguage: 'en',
+  fallbackLanguage: null,
+});
+```
+
+停用時，將不會使用任何備用內容 (包括 `meta.json`) 。您仍可透過 `$` 建立所有語系共用的檔案：
+
+<Files>
+  <File name="my-page.$.md" />
+
+  <File name="meta.$.json" />
+</Files>

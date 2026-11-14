@@ -1,0 +1,286 @@
+---
+title: MDX Remote
+description: 隨需編譯 Markdown/MDX 內容。
+---
+
+## 簡介 [#introduction]
+
+Fumadocs 提供 **MDX Remote** 套件，這是用來將 Markdown/MDX 內容來源整合至 Fumadocs 的輔助工具。
+您可以把它想成內建 Fumadocs 外掛的 `next-mdx-remote`。
+
+<Callout type="warn">
+  請勿將不受信任的 MDX 傳入編譯器，因為它會在您的應用程式中以 JavaScript 的形式執行。請改將不受信任的內容編譯為 Markdown，如此一來便無法執行 JavaScript 或原始 HTML：
+
+  ```ts
+  import { createCompiler } from '@fumadocs/mdx-remote';
+
+  const compiler = createCompiler({
+    format: 'md',
+    // 略過為取得圖片尺寸而讀取檔案及擷取 URL
+    remarkImageOptions: false,
+  });
+  ```
+</Callout>
+
+## 設定 [#setup]
+
+```package-install
+@fumadocs/mdx-remote
+```
+
+它的主要功能是 MDX 編譯器，可將 MDX 內容編譯成 JSX 節點。
+由於它不使用打包工具 (bundler) ，因此有以下限制：
+
+* 圖片必須在執行階段進行最佳化。
+* MDX 檔案中不支援匯入與匯出。
+
+### 使用方式 [#usage]
+
+建立編譯器：
+
+```ts title="lib/compiler.ts"
+import { createCompiler } from '@fumadocs/mdx-remote';
+
+export const compiler = createCompiler({
+  // 選項
+});
+```
+
+編譯頁面內容，其中 `@/lib/source` 代表您的內容來源。
+
+<show when={props.framework === 'next' || props.framework === 'waku'}>
+  `compile()` 會以 React 元件的形式回傳編譯後的內容。請在頁面中算繪它：
+</show>
+
+<show when={props.framework === 'react-router' || props.framework === 'tanstack-start'}>
+  `compileFile()` 會在載入器中將內容編譯為 JavaScript，再由 `executeMdxSync()` 在用戶端執行：
+</show>
+
+<show when={props.framework === 'astro'}>
+  `compileFile()` 會在頁面中將內容編譯為 JavaScript，再由 `executeMdxSync()` 在 React island 中執行：
+</show>
+
+<show when={props.framework === 'next'}>
+  ```tsx title="app/docs/[[...slug]]/page.tsx"
+  import { DocsBody, DocsPage } from 'fumadocs-ui/layouts/docs/page';
+  import { compiler } from '@/lib/compiler';
+  import { getPage } from '@/lib/source';
+  import { getMDXComponents } from '@/components/mdx';
+
+  export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
+    const { slug } = await props.params;
+    const page = getPage(slug);
+    const { body: MdxContent, toc } = await compiler.compile({
+      source: page.content,
+    });
+
+    return (
+      <DocsPage toc={toc}>
+        <DocsBody>
+          <MdxContent components={getMDXComponents()} />
+        </DocsBody>
+      </DocsPage>
+    );
+  }
+  ```
+</show>
+
+<show when={props.framework === 'react-router'}>
+  ```tsx title="app/routes/docs.tsx"
+  import type { Route } from './+types/docs';
+  import { useMemo } from 'react';
+  import { executeMdxSync } from '@fumadocs/mdx-remote/client';
+  import { useFumadocsLoader } from 'fumadocs-core/source/client';
+  import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+  import { DocsBody, DocsPage } from 'fumadocs-ui/layouts/docs/page';
+  import { compiler } from '@/lib/compiler';
+  import { getPage, source } from '@/lib/source';
+  import { getMDXComponents } from '@/components/mdx';
+
+  export async function loader({ params }: Route.LoaderArgs) {
+    const page = getPage(params['*'].split('/').filter((v) => v.length > 0));
+
+    return {
+      // 編譯為 JavaScript，並在用戶端執行
+      compiled: String(await compiler.compileFile(page.content)),
+      pageTree: await source.serializePageTree(source.getPageTree()),
+    };
+  }
+
+  export default function Page({ loaderData }: Route.ComponentProps) {
+    const { compiled, pageTree } = useFumadocsLoader(loaderData);
+    const { default: MdxContent, toc } = useMemo(() => executeMdxSync(compiled), [compiled]);
+
+    return (
+      <DocsLayout tree={pageTree}>
+        <DocsPage toc={toc}>
+          <DocsBody>
+            <MdxContent components={getMDXComponents()} />
+          </DocsBody>
+        </DocsPage>
+      </DocsLayout>
+    );
+  }
+  ```
+</show>
+
+<show when={props.framework === 'tanstack-start'}>
+  ```tsx title="src/routes/docs/$.tsx"
+  import { createFileRoute } from '@tanstack/react-router';
+  import { createServerFn } from '@tanstack/react-start';
+  import { useMemo } from 'react';
+  import { executeMdxSync } from '@fumadocs/mdx-remote/client';
+  import { useFumadocsLoader } from 'fumadocs-core/source/client';
+  import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+  import { DocsBody, DocsPage } from 'fumadocs-ui/layouts/docs/page';
+  import { compiler } from '@/lib/compiler';
+  import { getPage, source } from '@/lib/source';
+  import { getMDXComponents } from '@/components/mdx';
+
+  export const Route = createFileRoute('/docs/$')({
+    component: Page,
+    loader: ({ params }) => serverLoader({ data: params._splat?.split('/') ?? [] }),
+  });
+
+  const serverLoader = createServerFn({
+    method: 'GET',
+  })
+    .validator((slugs: string[]) => slugs)
+    .handler(async ({ data: slugs }) => {
+      const page = getPage(slugs);
+
+      return {
+        // 編譯為 JavaScript，在用戶端執行
+        compiled: String(await compiler.compileFile(page.content)),
+        pageTree: await source.serializePageTree(source.getPageTree()),
+      };
+    });
+
+  function Page() {
+    const { compiled, pageTree } = useFumadocsLoader(Route.useLoaderData());
+    const { default: MdxContent, toc } = useMemo(() => executeMdxSync(compiled), [compiled]);
+
+    return (
+      <DocsLayout tree={pageTree}>
+        <DocsPage toc={toc}>
+          <DocsBody>
+            <MdxContent components={getMDXComponents()} />
+          </DocsBody>
+        </DocsPage>
+      </DocsLayout>
+    );
+  }
+  ```
+</show>
+
+<show when={props.framework === 'waku'}>
+  ```tsx title="src/pages/docs/[...slugs].tsx"
+  import type { PageProps } from 'waku/router';
+  import { DocsBody, DocsPage } from 'fumadocs-ui/layouts/docs/page';
+  import { compiler } from '@/lib/compiler';
+  import { getPage } from '@/lib/source';
+  import { getMDXComponents } from '@/components/mdx';
+
+  export default async function Page({ slugs }: PageProps<'/docs/[...slugs]'>) {
+    const page = getPage(slugs);
+    const { body: MdxContent, toc } = await compiler.compile({
+      source: page.content,
+    });
+
+    return (
+      <DocsPage toc={toc}>
+        <DocsBody>
+          <MdxContent components={getMDXComponents()} />
+        </DocsBody>
+      </DocsPage>
+    );
+  }
+
+  export async function getConfig() {
+    return {
+      render: 'static',
+      // 所有頁面的 slug
+      staticPaths: [[], ['getting-started']],
+    } as const;
+  }
+  ```
+</show>
+
+<show when={props.framework === 'astro'}>
+  ```astro tab="src/pages/docs/[...slug].astro"
+  ---
+  import type { GetStaticPaths, InferGetStaticPropsType } from 'astro';
+  import Layout from '@/layouts/Layout.astro';
+  import { Docs } from '@/components/docs';
+  import { compiler } from '@/lib/compiler';
+  import { getPage, source } from '@/lib/source';
+
+  export const prerender = true;
+
+  export const getStaticPaths = (() => {
+    return source.getPages().map((page) => ({
+      params: { slug: decodeURI(page.slugs.join('/')) || undefined },
+      props: { page },
+    }));
+  }) satisfies GetStaticPaths;
+
+  type Props = InferGetStaticPropsType<typeof getStaticPaths>;
+
+  const { page } = Astro.props;
+  const pageTree = await source.serializePageTree(source.getPageTree());
+  // 編譯為 JavaScript，於 island 中執行
+  const compiled = String(await compiler.compileFile(getPage(page.slugs).content));
+  ---
+
+  <Layout title={page.data.title}>
+    <Docs
+      client:load
+      pathname={Astro.url.pathname}
+      params={Astro.params}
+      tree={pageTree}
+      compiled={compiled}
+    />
+  </Layout>
+  ```
+
+  ```tsx tab="src/components/docs.tsx"
+  import { useMemo } from 'react';
+  import { executeMdxSync } from '@fumadocs/mdx-remote/client';
+  import { type SerializedPageTree, useFumadocsLoader } from 'fumadocs-core/source/client';
+  import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+  import { DocsBody, DocsPage } from 'fumadocs-ui/layouts/docs/page';
+  import { Provider, type ProviderProps } from '@/components/provider';
+  import { getMDXComponents } from '@/components/mdx';
+
+  export interface DocsProps extends ProviderProps {
+    tree: SerializedPageTree;
+    compiled: string;
+  }
+
+  export function Docs({ tree, compiled, ...props }: DocsProps) {
+    const data = useFumadocsLoader({ tree });
+    const { default: MdxContent, toc } = useMemo(() => executeMdxSync(compiled), [compiled]);
+
+    return (
+      <Provider {...props}>
+        <DocsLayout tree={data.tree}>
+          <DocsPage toc={toc}>
+            <DocsBody>
+              <MdxContent components={getMDXComponents()} />
+            </DocsBody>
+          </DocsPage>
+        </DocsLayout>
+      </Provider>
+    );
+  }
+  ```
+</show>
+
+> `compile()` 回傳的 `frontmatter` 屬性不會經過驗證，請使用 `zod` 等函式庫自行驗證。
+
+### 圖片 [#images]
+
+在 Vercel 等 serverless 平台上，原本的 `public` 資料夾 (包含圖片等靜態資源) 會在正式環境建置完成後被移除，
+因此 MDX 編譯器可能無法再存取 `public` 中的本機圖片。
+
+引用圖片時，請務必使用 URL。

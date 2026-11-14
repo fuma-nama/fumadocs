@@ -1,0 +1,163 @@
+---
+title: Rehype Code
+description: 程式碼語法突顯器
+---
+
+[`@shikijs/rehype`](https://shiki.style/packages/rehype) 的包裝器，而 `@shikijs/rehype` 正是 Fumadocs 所使用的語法突顯器。
+
+它會將原始的 `<pre />` 程式碼區塊轉換為已套用語法突顯的程式碼區塊：
+
+````md tab="Input"
+```ts
+console.log('Hello World');
+```
+````
+
+```html tab="Output"
+<pre>
+  <code>
+    <span class="line">
+      <span style="--shiki-light: #4C4F69; --shiki-dark: #CDD6F4;">console</span>...
+    </span>
+  </code>
+</pre>
+```
+
+## 使用方式 [#usage]
+
+Rehype Code 是一個 rehype 外掛，Fumadocs MDX 預設會啟用它。您可以透過 `rehypeCodeOptions` 傳入選項：
+
+```ts tab="unified" title="source.config.ts"
+import { defineConfig } from 'fumadocs-mdx/config';
+
+export default defineConfig({
+  mdxOptions: {
+    rehypeCodeOptions: {
+      themes: {
+        light: 'github-light',
+        dark: 'github-dark',
+      },
+    },
+  },
+});
+```
+
+```ts tab="Sätteri" title="source.config.ts"
+import { defineConfig, defineDocs } from 'fumadocs-mdx/config';
+
+export const docs = defineDocs({
+  docs: { compiler: 'satteri' },
+});
+
+export default defineConfig({
+  satteriOptions: {
+    rehypeCodeOptions: {
+      themes: {
+        light: 'github-light',
+        dark: 'github-dark',
+      },
+    },
+  },
+});
+```
+
+### 語法突顯器 [#highlighter]
+
+此外掛使用 Shiki。若要改用其他[語法突顯器](/docs/headless/utils/shiki) (例如 Highlights) ，可使用 `rehypeCodeFromHighlighter`，它接受的是 Shiki 以外的選項。請傳入一個函式，透過此外掛的 transformer 建立語法突顯器。
+
+請停用預設外掛，再加入此外掛：
+
+```ts tab="unified" title="source.config.ts"
+import { defineConfig } from 'fumadocs-mdx/config';
+import { rehypeCodeFromHighlighter } from 'fumadocs-core/mdx-plugins/rehype-code.core';
+import { highlighter } from './lib/highlighter';
+
+export default defineConfig({
+  mdxOptions: {
+    rehypeCodeOptions: false,
+    rehypePlugins: [
+      () =>
+        rehypeCodeFromHighlighter(({ transformers }) =>
+          highlighter.override({ shikiTransformers: transformers }),
+        ),
+    ],
+  },
+});
+```
+
+```ts tab="Sätteri" title="source.config.ts"
+import { defineConfig, defineDocs } from 'fumadocs-mdx/config';
+import { rehypeCodeFromHighlighter } from '@fumadocs/satteri/rehype-code';
+import { highlighter } from './lib/highlighter';
+
+export const docs = defineDocs({
+  docs: { compiler: 'satteri' },
+});
+
+export default defineConfig({
+  satteriOptions: {
+    rehypeCodeOptions: false,
+    hastPlugins: [
+      rehypeCodeFromHighlighter(({ transformers }) =>
+        highlighter.override({ shikiTransformers: transformers }),
+      ),
+    ],
+  },
+});
+```
+
+### Meta [#meta]
+
+它會解析 `title` meta 字串，並將其以屬性形式加到 `pre` 元素上。
+
+````mdx tab="Input"
+```js title="Title"
+console.log('Hello');
+```
+````
+
+```jsx tab="Output"
+<pre title="Title">...</pre>
+```
+
+您可以透過 `filterMetaString` 選項，在處理 meta 字串之前先加以過濾。
+
+### 行內程式碼 [#inline-code]
+
+您可以使用 `inline` 選項來啟用此功能：
+
+```ts
+import { type RehypeCodeOptions } from 'fumadocs-core/mdx-plugins';
+
+const rehypeCodeOptions: RehypeCodeOptions = {
+  // [!code ++]
+  inline: 'tailing-curly-colon',
+};
+```
+
+```md title="Syntax"
+這是經過語法突顯的行內程式碼：`console.log("hello world"){:js}`.
+```
+
+這是一段經過語法突顯的行內程式碼：`console.log("hello world"){:js}`。
+
+### 圖示 [#icon]
+
+此外掛會根據語言的 meta 字串，自動加入 `icon` 屬性。
+該屬性為 HTML 字串，您可以透過 React 的 `dangerouslySetInnerHTML` 將其算繪出來。
+
+````md tab="Input"
+```ts
+console.log('This should shows the logo of TypeScript');
+```
+````
+
+```jsx tab="Output"
+<pre icon="<svg />">...</pre>
+```
+
+您可以透過 `icon` 選項停用或自訂圖示。
+
+### 更多選項 [#more-options]
+
+這些選項繼承自 [Shiki](https://shiki.style)，其他選項請參閱 Shiki 的官方文件。

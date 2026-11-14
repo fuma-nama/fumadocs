@@ -1,0 +1,101 @@
+---
+title: 匯出 PDF
+description: 將文件頁面匯出為 PDF 檔案
+---
+
+## 概覽 [#overview]
+
+一般而言，我們強烈建議您下載整個網站 (HTML 檔案等) 以便離線瀏覽。
+
+若您想將頁面匯出為 PDF，可以參考本指南。
+
+## 設定 [#setup]
+
+使用 Puppeteer 匯出 PDF 檔案。
+
+```ts title="scripts/export-pdf.ts"
+import puppeteer from 'puppeteer';
+import fs from 'node:fs/promises';
+import path from 'node:path';
+
+const browser = await puppeteer.launch();
+const outDir = 'pdfs';
+// 請修改這裡 [!code highlight:2]
+const urls = ['/docs/ui', '/docs/ui/customizations'];
+
+async function exportPdf(pathname: string) {
+  const page = await browser.newPage();
+  await page.goto('http://localhost:3000' + pathname, {
+    waitUntil: 'networkidle2',
+  });
+
+  await page.pdf({
+    path: path.join(outDir, pathname.slice(1).replaceAll('/', '-') + '.pdf'),
+    width: 950,
+    printBackground: true,
+  });
+
+  console.log(`PDF generated successfully for ${pathname}`);
+  await page.close();
+}
+
+await fs.mkdir(outDir, { recursive: true });
+await Promise.all(urls.map(exportPdf));
+await browser.close();
+```
+
+請在您的 Tailwind CSS 檔案中加入以下內容，以在列印時隱藏導覽元素：
+
+```css
+@media print {
+  #nd-docs-layout {
+    --fd-sidebar-width: 0px !important;
+  }
+
+  #nd-sidebar {
+    display: none;
+  }
+}
+```
+
+現在您可以執行這個腳本了：
+
+```bash
+bun ./scripts/export-pdf.ts
+```
+
+### 不可見的內容 [#invisible-contents]
+
+若要處理手風琴或頁籤中不可見的內容，您可能需要暫時覆寫 MDX 元件。例如：
+
+```tsx title="components/mdx.tsx"
+import defaultMdxComponents from 'fumadocs-ui/mdx';
+import type { MDXComponents } from 'mdx/types';
+import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
+
+// 您可以在此使用環境變數 [!code highlight:2]
+const isPrinting = true;
+
+function PrintingAccordion(props: React.ComponentProps<typeof Accordion>) {
+  return (
+    <div>
+      <h3>{props.title}</h3>
+      {props.children}
+    </div>
+  );
+}
+
+function PrintingAccordions(props: React.ComponentProps<typeof Accordions>) {
+  return <div>{props.children}</div>;
+}
+
+export function getMDXComponents(components?: MDXComponents) {
+  return {
+    ...defaultMdxComponents,
+    // 改寫後的手風琴元件：
+    Accordion: isPrinting ? PrintingAccordion : Accordion,
+    Accordions: isPrinting ? PrintingAccordions : Accordions,
+    ...components,
+  } satisfies MDXComponents;
+}
+```

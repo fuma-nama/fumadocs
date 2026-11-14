@@ -1,0 +1,257 @@
+---
+title: 無頭式
+description: 不含 UI 的 API 頁面狀態與邏輯。
+---
+
+## 概覽 [#overview]
+
+除了 `fumadocs-openapi/ui` 之外，其餘部分皆為無頭式。
+
+| 路徑                                     | 模組                                |
+| -------------------------------------- | --------------------------------- |
+| `fumadocs-openapi`                     | 頁面：文件、文件的伺服器以及您的元件                |
+| `fumadocs-openapi/operation`           | operation：詳細資訊、範例請求與程式碼使用範例       |
+| `fumadocs-openapi/playground`          | API 互動測試區：表單、驗證與請求                |
+| `fumadocs-openapi/requests`            | 將範例資料編碼為實際的請求                     |
+| `fumadocs-openapi/requests/generators` | 將該請求轉換為程式碼使用範例                    |
+| `@fumadocs/json-schema/react`          | 結構描述 UI：已扁平化以供 UI 使用的 JSON schema |
+| `@fumadocs/json-schema/react/client`   | 結構描述 UI 的狀態                       |
+
+## 頁面 [#page]
+
+`createOpenAPIRenderer()` 會接收您的元件並回傳 `<OpenAPIPage />`，此元件可接受所產生頁面的 props。
+
+```tsx title="components/api-page.tsx"
+'use client';
+import { type CodeBlockProps, createOpenAPIRenderer } from 'fumadocs-openapi';
+import { Operation } from '@/components/my-operation';
+import { SchemaUI } from '@/components/my-schema';
+
+export const OpenAPIPage = createOpenAPIRenderer({
+  components: {
+    Operation,
+    SchemaUI,
+    CodeBlock({ lang, code }: CodeBlockProps) {
+      return (
+        <pre>
+          <code className={`language-${lang}`}>{code}</code>
+        </pre>
+      );
+    },
+  },
+});
+```
+
+| 元件          | 算繪內容                                               |
+| ----------- | -------------------------------------------------- |
+| `Operation` | 每個 operation 與 webhook，請參閱 [Operation](#operation) |
+| `SchemaUI`  | 參數、body 與回應的 JSON schema，請參閱 [結構描述 UI](#schema-ui)  |
+| `Layout`    | 選用，用來包住已算繪的 operation 與 webhook                    |
+
+### Hooks [#hooks]
+
+頁面內的元件可以讀取頁面的狀態。
+
+| Hook                                        | 回傳值                         |
+| ------------------------------------------- | --------------------------- |
+| `useOpenAPI()`                              | 已解參照的文件 (`doc`) 與請求選項       |
+| `useComponents()`                           | 傳入頁面的元件                     |
+| `useServer()`                               | 選取的伺服器及其變數                  |
+| `useTypeScriptDefinitions(schema, options)` | JSON schema 的 TypeScript 定義 |
+| `useRenderContext()`                        | 頁面的算繪選項，例如 `playground`     |
+
+## Operation [#operation]
+
+`<OperationProvider />` 會推導出 operation 或 webhook 的詳細資訊，並保存目前選取的範例請求。
+
+```tsx title="components/my-operation.tsx"
+'use client';
+import {
+  OperationProvider,
+  type PageOperationProps,
+  useCodeUsage,
+  useOperation,
+  useResponseExamples,
+} from 'fumadocs-openapi/operation';
+
+export function Operation(props: PageOperationProps) {
+  return (
+    <OperationProvider {...props}>
+      <Content />
+    </OperationProvider>
+  );
+}
+
+function Content() {
+  const { title, parameters, codeUsages } = useOperation();
+  const responses = useResponseExamples();
+
+  return (
+    <>
+      <h2>{title}</h2>
+      {parameters.map(({ in: location, items }) => (
+        <section key={location}>{items.map((param) => param.name).join(', ')}</section>
+      ))}
+      {Array.from(codeUsages.map().keys(), (id) => (
+        <CodeUsage key={id} id={id} />
+      ))}
+      {responses.map((tab) => (
+        <pre key={tab.code}>{JSON.stringify(tab.examples?.[0]?.sample)}</pre>
+      ))}
+    </>
+  );
+}
+
+function CodeUsage({ id }: { id: string }) {
+  const code = useCodeUsage(id);
+  return code && <pre>{code}</pre>;
+}
+```
+
+| Hook                    | 回傳值                                             |
+| ----------------------- | ----------------------------------------------- |
+| `useOperation()`        | 已解析詳細資訊的 operation                              |
+| `useExampleRequests()`  | 範例請求、目前選取的請求，以及用來編輯其資料的 `select()` 與 `update()` |
+| `useExampleRequest()`   | 所選範例的資料，會隨範例更新而同步                               |
+| `useCodeUsage(id)`      | 由 `codeUsages` 為所選範例產生的程式碼                      |
+| `useResponseExamples()` | 各個回應，附有其偏好媒體類型的範例值                              |
+
+<auto-type-table path="props.ts" name="OperationInfo" />
+
+## 結構描述 UI [#schema-ui]
+
+`generateSchemaUI()` 會將 JSON schema 扁平化：它遇到的每個 `$ref` 都會成為 `refs` 中的一個項目，因此您的 UI 只需從 `$root` 走訪對應表，而不必遞迴處理。
+
+`<SchemaUIProvider />` 則在此基礎上保存狀態，包括從屬性開啟的 schema、聯集中選取的成員，以及指向屬性的連結。
+
+```tsx title="components/my-schema.tsx"
+'use client';
+import { useMemo } from 'react';
+import { generateSchemaUI } from '@fumadocs/json-schema/react';
+import { SchemaUIProvider, useSchemaUI } from '@fumadocs/json-schema/react/client';
+import type { OpenAPIComponents } from 'fumadocs-openapi';
+
+export const SchemaUI: OpenAPIComponents['SchemaUI'] = ({ client, ...options }) => {
+  const generated = useMemo(() => generateSchemaUI(options), [options.root]);
+
+  return (
+    <SchemaUIProvider id={client.rootId} name={client.name} generated={generated}>
+      <div id={client.rootId}>
+        <Schema />
+      </div>
+    </SchemaUIProvider>
+  );
+};
+
+function Schema() {
+  const { refs, path, open, back } = useSchemaUI();
+  const { schema } = path[path.length - 1];
+
+  return (
+    <>
+      {path.length > 1 && <button onClick={() => back(path.length - 2)}>Back</button>}
+      {schema.type === 'object' && (
+        <ul>
+          {schema.props.map((prop) => (
+            <li key={prop.name}>
+              {prop.name}:{' '}
+              <button onClick={() => open(prop.name, prop.$type)}>
+                {refs[prop.$type].typeName}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </>
+  );
+}
+```
+
+| `useSchemaUI()`                   | 說明                                     |
+| --------------------------------- | -------------------------------------- |
+| `path`                            | 已開啟的 schema，從根層級開始                     |
+| `open(name, $ref)`, `back(index)` | 在 `path` 中導覽                           |
+| `getLink(index, name)`            | 連結至某個路徑項目之屬性的 URL，造訪該 URL 會重新開啟 `path` |
+| `highlighted`                     | URL 所連結的最後一個路徑項目之屬性                    |
+
+`path` 中的每個項目都包含要顯示的 `schema`，以及其 `unions` 與已選取的成員。呼叫聯集的 `select()` 即可顯示另一個成員。
+
+頁面會傳入 `renderMarkdown` 與 `renderCodeblock`，讓描述與範例透過您自己的元件算繪。`client` 帶有根層級的錨點 ID 與名稱，指向屬性的連結會以它為基準解析。
+
+<Callout title="算繪 client 的 slot">
+  Body 與回應會傳入 `client.selector` 以選擇其媒體類型，並傳入 `client.actions` 以
+  複製其 TypeScript 定義。
+</Callout>
+
+<Accordions>
+  <Accordion title="每個項目的結構">
+    `infoTags` 是 API 頁面在欄位旁顯示的附標籤值，例如 `Format` 或 `Default`；帶有 `open` 的標籤會像型別一樣開啟另一個 schema。`type` 則決定要如何進一步開啟它。
+
+    <auto-type-table path="props.ts" name="SchemaData" />
+  </Accordion>
+</Accordions>
+
+## 互動測試區 [#playground]
+
+`usePlayground()` 會在 `<OperationProvider />` 底下保存 API 互動測試區的狀態。表單會以所選的範例請求作為初始值，編輯內容也會同步回該範例，因此程式碼使用範例會隨之更新，並以遮罩隱藏驗證相關的值。
+
+```tsx title="components/my-playground.tsx"
+'use client';
+import { StfProvider, useFieldValue } from '@fumari/stf';
+import { useOperation } from 'fumadocs-openapi/operation';
+import { usePlayground } from 'fumadocs-openapi/playground';
+
+export function MyPlayground() {
+  const { parameters } = useOperation();
+  const { stf, send, isSending, response } = usePlayground();
+
+  return (
+    <StfProvider value={stf}>
+      {parameters.map(({ in: location, items }) =>
+        items.map((param) => (
+          <ParameterInput key={`${location}.${param.name}`} location={location} name={param.name} />
+        )),
+      )}
+      <button disabled={isSending} onClick={send}>
+        Send
+      </button>
+      {response?.result.type === 'response' && <pre>{response.result.text()}</pre>}
+    </StfProvider>
+  );
+}
+
+function ParameterInput({ location, name }: { location: string; name: string }) {
+  const [value, setValue] = useFieldValue([location, name]);
+
+  return (
+    <input
+      aria-label={name}
+      value={String(value ?? '')}
+      onChange={(e) => setValue(e.target.value)}
+    />
+  );
+}
+```
+
+| 欄位                                                   | 說明                                                                                          |
+| ---------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `stf`                                                | 表單 (一個 `@fumari/stf` 資料引擎) ，存放 `path`、`query`、`header`、`cookie` 和 `body`，並在 `auth` 存放頁面的驗證值 |
+| `body`                                               | 在表單中編輯的請求 body，及其偏好的媒體類型                                                                    |
+| `auth`                                               | 所選安全性需求的驗證欄位，可透過 `select()` 切換，`authorize()` 則會取得 OAuth 2.0 權杖並填入欄位                         |
+| `send()`, `isSending`, `response`, `clearResponse()` | 將表單作為請求送出，以及最近一次請求的結果                                                                       |
+
+它接受 `fetchOptions` 以自訂請求 (例如 `onRequestInit()`) 、`authProviders` 以處理安全性方案 (請參閱[授權](/docs/integrations/openapi/api-page#authorization)) ，以及 `transformAuthInputs` 以自訂驗證欄位。
+
+### 請求 [#requests]
+
+`usePlayground()` 底層所使用的各個部分，可讓您不透過它直接傳送請求。
+
+| 匯出                        | 用途                                                                                 |
+| ------------------------- | ---------------------------------------------------------------------------------- |
+| `createBrowserFetcher()`  | 從瀏覽器傳送請求，若已設定 `proxyUrl` 則經由其傳送，回應會帶有 `duration`、`mediaType`、`fileName` 與 `text()` |
+| `encodeRequestData()`     | 將範例的資料轉換為 body、標頭與 query，從 `fumadocs-openapi/requests` 匯出                          |
+| `resolveMediaAdapter()`   | 取得某個媒體類型的轉接器，不支援時為 `undefined`                                                     |
+| `useAuthFields()`         | operation 的驗證欄位，以及這些欄位編碼後的請求資料                                                     |
+| `usePlaygroundAuth()`     | `stf` 中為頁面的驗證值，`returned` 中為返回此頁面的流程                                               |
+| `useOpenIdConnectFlows()` | OpenID Connect 設定中的 OAuth 2.0 流程，或探索流程時發生的 `error`，載入期間會暫停 (suspend)               |
+| `requestOAuthToken()`     | 執行 OAuth 2.0 流程，`onUserCode` 會顯示使用者進行裝置授權時要輸入的代碼                                   |

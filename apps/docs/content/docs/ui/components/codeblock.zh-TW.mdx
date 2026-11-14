@@ -1,0 +1,80 @@
+---
+title: 程式碼區塊
+description: 顯示經 Shiki 語法突顯的程式碼區塊
+---
+
+<Wrapper>
+  <div className="bg-fd-background rounded-lg prose-no-margin">
+    ```js title="config.js"
+    import createMDX from 'fumadocs-mdx/config';
+
+    const withMDX = createMDX();
+
+    // [!code word:config]
+    /** @type {import('next').NextConfig} */
+    const config = {
+      // [!code highlight]
+      reactStrictMode: true, // [!code highlight]
+    }; // [!code highlight]
+
+    export default withMDX(config);
+    ```
+  </div>
+</Wrapper>
+
+<Installation name="codeblock" />
+
+這是一個 **MDX 元件**，需搭配 [Rehype Code](/docs/headless/mdx/rehype-code) 使用，用來顯示經語法突顯的程式碼區塊。
+程式碼區塊的撰寫語法請參考 [Markdown](/docs/markdown#codeblock)。
+
+支援的功能：
+
+* 複製按鈕
+* 自訂標題與圖示
+
+> 若您需要在執行階段進行語法突顯的同類元件，請參閱 [Dynamic Code Block](/docs/ui/components/dynamic-codeblock)。
+
+## 使用方式 [#usage]
+
+將 pre 元素包在 `<CodeBlock />` 中，作為程式碼區塊的外層容器。
+
+```tsx title="components/mdx.tsx"
+import defaultComponents from 'fumadocs-ui/mdx';
+import type { MDXComponents } from 'mdx/types';
+import { CodeBlock, Pre } from 'fumadocs-ui/components/codeblock';
+
+export function getMDXComponents(components?: MDXComponents) {
+  return {
+    ...defaultComponents,
+    // HTML 的 `ref` 屬性會與 `forwardRef` 衝突
+    pre: ({ ref: _ref, ...props }) => (
+      <CodeBlock {...props}>
+        <Pre>{props.children}</Pre> {/* [!code highlight] */}
+      </CodeBlock>
+    ),
+    ...components,
+  } satisfies MDXComponents;
+}
+```
+
+### 保留背景 [#keep-background]
+
+使用 Shiki 產生的背景色。
+
+```tsx
+import { Pre, CodeBlock } from 'fumadocs-ui/components/codeblock';
+
+<CodeBlock keepBackground {...props}>
+  <Pre>{props.children}</Pre>
+</CodeBlock>;
+```
+
+### 圖示 [#icons]
+
+將 `icon` prop 傳入 `CodeBlock` 元件，即可指定自訂圖示。
+
+預設情況下，圖示會由自訂的 Shiki transformer 注入。
+
+```js title="config.js"
+console.log('js');
+```

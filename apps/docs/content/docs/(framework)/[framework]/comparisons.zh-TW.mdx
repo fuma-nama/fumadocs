@@ -1,0 +1,71 @@
+---
+title: 比較
+description: Fumadocs 與其他現有框架有何不同？
+icon: Scale
+---
+
+## Nextra [#nextra]
+
+Fumadocs 深受 Nextra 啟發，例如路由慣例 (Routing Conventions) ，這也是
+Fumadocs 同樣有 `meta.json` 的原因。
+
+Nextra 比 Fumadocs 更具主見 (opinionated) 。相對地，在 Fumadocs 中，您需要手動設定各項內容，
+而不是單純編輯一個設定檔就好。
+
+如果您希望對各方面有更多掌控，例如將它整合到現有的程式碼庫，或實作進階路由，
+Fumadocs 會是很好的選擇。
+
+### 功能比較表 [#feature-table]
+
+| 功能         | Fumadocs    | Nextra             |
+| ---------- | ----------- | ------------------ |
+| 靜態生成       | 是           | 是                  |
+| 快取         | 是           | 是                  |
+| 淺色／深色模式    | 是           | 是                  |
+| 語法突顯       | 是           | 是                  |
+| 目錄         | 是           | 是                  |
+| 全文搜尋       | 是           | 是                  |
+| i18n       | 是           | 是                  |
+| Git 最後編輯時間 | 是           | 是                  |
+| 頁面圖示       | 是           | 是，透過 `_meta.js` 檔案 |
+| RSC        | 是           | 是                  |
+| 遠端來源       | 是           | 是                  |
+| SEO        | 透過 Metadata | 是                  |
+| 內建元件       | 是           | 是                  |
+| RTL 版面配置   | 是           | 是                  |
+
+### 其他功能 [#additional-features]
+
+透過第三方函式庫 (例如 [TypeDoc](https://typedoc.org)) 支援的功能不會列於此處。
+
+| 功能                  | Fumadocs | Nextra |
+| ------------------- | -------- | ------ |
+| OpenAPI 整合          | 是        | 否      |
+| TypeScript 文件生成     | 是        | 否      |
+| TypeScript Twoslash | 是        | 是      |
+
+## Mintlify [#mintlify]
+
+Mintlify 是一項文件服務。與 Fumadocs 相比，它雖然提供免費方案，但並非完全免費，也不是開放原始碼。
+
+Fumadocs 的功能不如 Mintlify 強大，例如 Mintlify 的 OpenAPI 整合。
+身為 Fumadocs 的作者，如果您對目前建置文件的方式感到滿意，我並不建議您從 Mintlify 改用 Fumadocs。
+不過，我相信對所有想打造精美文件的 React.js 開發者而言，Fumadocs 都是合適的工具。
+
+## Docusaurus [#docusaurus]
+
+Docusaurus 是一個以 React.js 為基礎的強大框架，搭配外掛與自訂主題，
+提供許多好用的功能。
+
+### 較低的複雜度 [#lower-complexity]
+
+由於 Fumadocs 是為了與 React 框架整合而設計，您可能需要對 React.js 有更深入的了解才能上手。
+相對地，Fumadocs 也具備更高的自訂彈性。
+
+若您只是要建立簡單的文件網站，且不需要任何框架專屬的功能，Docusaurus 可能是更好的選擇。
+
+### 外掛 [#plugins]
+
+透過外掛，您可以輕鬆實現許多功能，而且它的生態系確實更為龐大，並由眾多貢獻者共同維護。
+
+相較之下，Fumadocs 的彈性讓您能自行實作這些功能，但可能需要花更多時間調整，才能達到您滿意的效果。

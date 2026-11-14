@@ -1,0 +1,416 @@
+---
+title: 元件情境
+description: 透過控制項互動展示元件。
+---
+
+import { story } from './client.story';
+
+<story.WithControl />
+
+## 簡介 [#introduction]
+
+Fumadocs Story 可用來展示元件並為其撰寫文件。
+它是 [Storybook](https://storybook.js.org) 的簡易替代方案，以文件為主，主要為元件庫而設計。
+
+如果您不熟悉元件情境 (Story) 的概念，以下是 **Storybook** 文件中的簡短說明：
+
+<blockquote>
+  元件情境記錄了 UI 元件的已渲染狀態。它是一個帶有註解的物件，
+  用來描述元件在給定一組引數時的行為與外觀。
+</blockquote>
+
+<Callout title="何時該選用它而非 Storybook？">
+  Fumadocs Story 並非用來取代 Storybook。若要進行完整的 UI 測試，我們仍建議使用 Storybook。
+</Callout>
+
+## 安裝 [#installation]
+
+```npm
+npm i @fumadocs/story
+```
+
+加入 Tailwind CSS 預設設定 (preset) ：
+
+```css title="Tailwind CSS"
+/* [!code ++] */
+@import '@fumadocs/story/css/preset.css';
+```
+
+<show when={props.framework === 'next'}>
+  新增 Turbopack 與 Webpack 外掛：
+
+  ```ts title="next.config.mts"
+  import type { NextConfig } from 'next';
+  // [!code ++]
+  import { createNextStory } from '@fumadocs/story/next';
+
+  const config: NextConfig = {
+    // ...
+  };
+
+  // [!code ++]
+  const withStory = createNextStory();
+
+  // 使用 `withStory()` 包裝設定
+  // 若您還有其他外掛（例如 `withMDX()`），請寫成 `withStory(withMDX(config))` [!code highlight:2]
+  export default withStory(config);
+  ```
+</show>
+
+<show when={props.framework === 'react-router' || props.framework === 'tanstack-start'}>
+  新增 Vite 外掛：
+
+  ```ts title="vite.config.ts"
+  import { defineConfig } from 'vite';
+  import story from '@fumadocs/story/vite';
+
+  export default defineConfig({
+    plugins: [story()],
+  });
+  ```
+</show>
+
+<show when={props.framework === 'waku'}>
+  新增 Vite 外掛：
+
+  ```ts title="waku.config.ts"
+  import { defineConfig } from 'waku/config';
+  import story from '@fumadocs/story/vite';
+
+  export default defineConfig({
+    vite: {
+      plugins: [story()],
+    },
+  });
+  ```
+</show>
+
+<show when={props.framework === 'astro'}>
+  新增 Vite 外掛：
+
+  ```js title="astro.config.mjs"
+  import { defineConfig } from 'astro/config';
+  import story from '@fumadocs/story/vite';
+
+  export default defineConfig({
+    vite: {
+      plugins: [story()],
+    },
+  });
+  ```
+</show>
+
+### 建立元件情境 [#create-a-story]
+
+建立一個元件情境工廠，用來存放您的全域設定：
+
+<show when={props.framework === 'next'}>
+  ```ts title="lib/story.ts"
+  import { defineStoryFactory } from '@fumadocs/story/next/client';
+
+  export const { defineStory } = defineStoryFactory();
+  ```
+</show>
+
+<show when={props.framework !== 'next'}>
+  ```ts title="lib/story.ts"
+  import { defineStoryFactory } from '@fumadocs/story/vite/client';
+
+  export const { defineStory } = defineStoryFactory();
+  ```
+</show>
+
+接著建立您的第一個元件情境：
+
+<show when={props.framework === 'next' || props.framework === 'waku'}>
+  ```tsx tab="my-component.story.tsx"
+  import { defineStory } from '@/lib/story';
+  import { MyComponent } from './my-component';
+
+  export const story = defineStory({
+    // 傳入的元件必須是用戶端元件
+    Component: MyComponent,
+    args: {
+      // 預設 props（建議設定）
+      initial: {},
+    },
+  });
+  ```
+
+  ```tsx tab="my-component.tsx"
+  'use client';
+
+  export interface MyComponentProps {
+    title?: string;
+  }
+
+  export function MyComponent({ title }: MyComponentProps) {
+    return <p>{title}</p>;
+  }
+  ```
+</show>
+
+<show when={props.framework !== 'next' && props.framework !== 'waku'}>
+  ```tsx tab="my-component.story.tsx"
+  import { defineStory } from '@/lib/story';
+  import { MyComponent } from './my-component';
+
+  export const story = defineStory({
+    Component: MyComponent,
+    args: {
+      // 預設 props（建議設定）
+      initial: {},
+    },
+  });
+  ```
+
+  ```tsx tab="my-component.tsx"
+  export interface MyComponentProps {
+    title?: string;
+  }
+
+  export function MyComponent({ title }: MyComponentProps) {
+    return <p>{title}</p>;
+  }
+  ```
+</show>
+
+<Callout type="warn" title={<>檔名必須加上 <code>.story</code> 後綴</>}>
+  外掛只會轉換符合 `*.story.{js,jsx,ts,tsx}` 的檔案。如需變更，請使用 <show when={props.framework === 'next'}>`createNextStory()`</show><show when={props.framework !== 'next'}>Vite 外掛</show> 的 `filter` 選項。
+</Callout>
+
+### 算繪元件情境 [#render-a-story]
+
+在您的 MDX 檔案中算繪元件情境：
+
+```mdx title="index.mdx"
+import { story } from '@/components/my-component.story';
+
+<story.WithControl />
+```
+
+## 設定 [#configurations]
+
+### 變體 [#variants]
+
+您可以透過 `args` 為元件提供多個變體：
+
+```ts
+import { defineStory } from '@/lib/story';
+import { Callout } from '@/components/callout';
+
+export const story = defineStory({
+  Component: Callout,
+  args: [
+    {
+      variant: 'Default',
+      initial: {
+        title: 'This is a Callout',
+      },
+    },
+    {
+      variant: 'Warning',
+      initial: {
+        title: 'This is a Callout',
+      },
+      // props 的固定值
+      fixed: {
+        type: 'warning',
+      },
+    },
+  ],
+});
+```
+
+### `controls` [#controls]
+
+控制項會根據元件的 props 自動產生。您可以指定控制項節點來取代它們：
+
+```tsx
+import { defineStory } from '@/lib/story';
+import { GraphView } from '@/components/graph-view';
+
+export const story = defineStory({
+  Component: GraphView,
+  args: {
+    controls: {
+      node: {
+        type: 'object',
+        properties: [],
+      },
+    },
+  },
+});
+```
+
+### `frame` [#frame]
+
+會填滿整個檢視區的元件 (例如版面配置) 可以在 iframe 中算繪。
+元件情境面板會將 frame 等比例縮小以符合面板大小，並提供按鈕讓您以全螢幕開啟。
+
+```tsx title="components/my-layout.story.tsx"
+import { defineStory } from '@/lib/story';
+import { MyLayout } from './my-layout.lazy';
+import { Window } from './window';
+
+export const story = defineStory({
+  Component: MyLayout,
+  frame: {
+    src: '/story/my-layout',
+    // 檢視區大小（選填）
+    width: 1280,
+    height: 800,
+    // 包裝 frame，例如放進視窗中（選填）
+    Container: Window,
+  },
+});
+```
+
+在 `src` 中建立一個頁面來算繪元件，此頁面會接收來自元件情境面板的引數：
+
+<show when={props.framework === 'next'}>
+  ```tsx title="app/story/my-layout/page.tsx"
+  import { story } from '@/components/my-layout.story';
+
+  export default function Page() {
+    return <story.Frame />;
+  }
+  ```
+</show>
+
+<show when={props.framework === 'react-router'}>
+  ```tsx tab="app/routes/story.my-layout.tsx"
+  import { story } from '@/components/my-layout.story';
+
+  export default function Page() {
+    return <story.Frame />;
+  }
+  ```
+
+  ```ts tab="app/routes.ts"
+  import { route, type RouteConfig } from '@react-router/dev/routes';
+
+  export default [
+    // [!code ++]
+    route('story/my-layout', 'routes/story.my-layout.tsx'),
+    // ...
+  ] satisfies RouteConfig;
+  ```
+</show>
+
+<show when={props.framework === 'tanstack-start'}>
+  ```tsx title="src/routes/story/my-layout.tsx"
+  import { createFileRoute } from '@tanstack/react-router';
+  import { story } from '@/components/my-layout.story';
+
+  export const Route = createFileRoute('/story/my-layout')({
+    component: () => <story.Frame />,
+  });
+  ```
+</show>
+
+<show when={props.framework === 'waku'}>
+  ```tsx title="src/pages/story/my-layout.tsx"
+  import { story } from '@/components/my-layout.story';
+
+  export default function Page() {
+    return <story.Frame />;
+  }
+
+  export const getConfig = async () => ({ render: 'static' }) as const;
+  ```
+</show>
+
+<show when={props.framework === 'astro'}>
+  ```astro tab="src/pages/story/my-layout.astro"
+  ---
+  import Layout from '@/layouts/Layout.astro';
+  import { StoryFrame } from '@/components/story-frame';
+
+  export const prerender = true;
+  ---
+
+  <Layout title="Story">
+    <StoryFrame client:load />
+  </Layout>
+  ```
+
+  ```tsx tab="src/components/story-frame.tsx"
+  import { story } from '@/components/my-layout.story';
+
+  export function StoryFrame() {
+    return <story.Frame />;
+  }
+  ```
+</show>
+
+凡是算繪元件情境的頁面，都會載入其元件。建議改為傳入延遲載入的元件，這樣就只有 frame 會載入它：
+
+<show when={props.framework === 'next'}>
+  ```tsx title="components/my-layout.lazy.tsx"
+  'use client';
+  import dynamic from 'next/dynamic';
+
+  export const MyLayout = dynamic(() => import('./my-layout').then((mod) => mod.MyLayout));
+  ```
+</show>
+
+<show when={props.framework === 'waku'}>
+  ```tsx title="components/my-layout.lazy.tsx"
+  'use client';
+  import { lazy } from 'react';
+
+  export const MyLayout = lazy(() =>
+    import('./my-layout').then((mod) => ({ default: mod.MyLayout })),
+  );
+  ```
+</show>
+
+<show when={props.framework !== 'next' && props.framework !== 'waku'}>
+  ```tsx title="components/my-layout.lazy.tsx"
+  import { lazy } from 'react';
+
+  export const MyLayout = lazy(() =>
+    import('./my-layout').then((mod) => ({ default: mod.MyLayout })),
+  );
+  ```
+</show>
+
+<Callout title="小提醒">
+  * 該頁面必須與您的文件位於相同來源 (origin) 。
+  * 引數是透過 `postMessage()` 傳送，因此必須可序列化 (不可包含函式或 JSX) 。
+
+  <show when={props.framework === 'next' || props.framework === 'waku'}>
+    - `Container` 必須是用戶端元件。
+  </show>
+</Callout>
+
+### 國際化 [#internationalization]
+
+假設您已在 UI 層級設定好[國際化](/docs/internationalization)：
+
+```tsx title="layout.shared.tsx"
+import { defineI18n } from 'fumadocs-core/i18n';
+import { uiTranslations } from 'fumadocs-ui/i18n';
+import { storyTranslations } from '@fumadocs/story/i18n';
+
+const i18n = defineI18n({
+  languages: ['en', 'cn'],
+  defaultLanguage: 'en',
+});
+
+export const translations = i18n
+  .translations()
+  .extend(uiTranslations())
+  // [!code ++]
+  .extend(storyTranslations())
+  .add({
+    cn: {
+      displayName: 'Chinese',
+      // [!code ++]
+      'Add Item(story arguments form)': '新增項目',
+    },
+  });
+```
+
+詳情請參閱[翻譯](/docs/ui/translations)。

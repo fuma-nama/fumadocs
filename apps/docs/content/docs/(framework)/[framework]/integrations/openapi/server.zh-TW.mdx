@@ -1,0 +1,539 @@
+---
+title: createOpenAPI()
+description: OpenAPI 伺服器實例。
+---
+
+## OpenAPI 伺服器 [#openapi-server]
+
+Fumadocs OpenAPI 的主要設定。
+
+> 請勿在瀏覽器環境中引用此設定。
+
+### `input` [#input]
+
+要讀取的 OpenAPI schema，可以是：
+
+* 檔案路徑
+* 外部 URL
+* 函式 (見下方說明) 
+
+只有列在這裡的 schema 才能載入；傳給 `getSchema()` 或由頁面預先載入的其他 ID 都會拋出錯誤。
+
+<Callout type="warn">
+  請勿將不受信任的 schema 傳給 `input`，因為其中的 `$ref` 能讀取本機檔案並請求 URL，連私有主機也不例外。
+</Callout>
+
+```ts tab="Basic"
+import { createOpenAPI } from 'fumadocs-openapi/server';
+
+export const openapi = createOpenAPI({
+  input: ['./unkey.json'],
+});
+```
+
+```ts tab="Functions"
+import { createOpenAPI } from 'fumadocs-openapi/server';
+
+export const openapi = createOpenAPI({
+  input: {
+    // [id]：下載而來的 OpenAPI schema
+    my_schema: async () => {
+      const res = await fetch('https://registry.scalar.com/@scalar/apis/galaxy/latest?format=json');
+      return res.json();
+    },
+  },
+});
+```
+
+## 只載入一次文件 [#loading-documents-once]
+
+頁面會透過 props 接收整份文件，因此每次載入頁面、導覽和預先擷取時，都會重新傳送一次。如果文件很大，建議不要傳入：
+
+```ts title="lib/openapi.ts"
+import { createOpenAPI } from 'fumadocs-openapi/server';
+
+export const openapi = createOpenAPI({
+  // ID 最終會出現在 URL 中，請確保其可安全用於 URL
+  input: { museum: './museum.yaml' },
+  includeDocument: false, // [!code ++]
+});
+```
+
+<show when={props.framework !== 'tanstack-start'}>
+  傳入 `loadDocument`，即可讓每份文件在每個瀏覽器工作階段中只載入一次。此函式在伺服器端算繪時也會執行：
+</show>
+
+<show when={props.framework === 'next'}>
+  ```tsx title="components/api-page.tsx"
+  'use client';
+  import { preload } from 'react-dom';
+  import { createOpenAPIPage } from 'fumadocs-openapi/ui';
+
+  export const OpenAPIPage = createOpenAPIPage({
+    async loadDocument(id) {
+      if (typeof window === 'undefined') {
+        // 瀏覽器會在載入頁面時一併開始下載
+        preload(`/api/openapi/${id}`, { as: 'fetch', crossOrigin: 'anonymous' });
+        const { openapi } = await import('@/lib/openapi');
+        return (await openapi.getSchema(id)).bundled;
+      }
+      return (await fetch(`/api/openapi/${id}`)).json();
+    },
+  });
+  ```
+</show>
+
+<show when={props.framework === 'react-router' || props.framework === 'waku' || props.framework === 'astro'}>
+  ```tsx title="components/api-page.tsx"
+  'use client';
+  import { preload } from 'react-dom';
+  import { createOpenAPIPage } from 'fumadocs-openapi/ui';
+
+  export const OpenAPIPage = createOpenAPIPage({
+    async loadDocument(id) {
+      if (import.meta.env.SSR) {
+        // 瀏覽器會在載入頁面時一併開始下載
+        preload(`/api/openapi/${id}`, { as: 'fetch', crossOrigin: 'anonymous' });
+        const { openapi } = await import('@/lib/openapi');
+        return (await openapi.getSchema(id)).bundled;
+      }
+      return (await fetch(`/api/openapi/${id}`)).json();
+    },
+  });
+  ```
+</show>
+
+<show when={props.framework !== 'tanstack-start'}>
+  透過路由將文件提供給瀏覽器：
+</show>
+
+<show when={props.framework === 'next'}>
+  ```ts title="app/api/openapi/[id]/route.ts"
+  import { openapi } from '@/lib/openapi';
+
+  export async function GET(_req: Request, { params }: RouteContext<'/api/openapi/[id]'>) {
+    return Response.json((await openapi.getSchema((await params).id)).bundled);
+  }
+
+  // 用於靜態匯出
+  export async function generateStaticParams() {
+    return Object.keys(await openapi.getSchemas()).map((id) => ({ id }));
+  }
+  ```
+</show>
+
+<show when={props.framework === 'react-router'}>
+  ```ts tab="app/routes/openapi.ts"
+  import type { Route } from './+types/openapi';
+  import { openapi } from '@/lib/openapi';
+
+  export async function loader({ params }: Route.LoaderArgs) {
+    return Response.json((await openapi.getSchema(params.id)).bundled);
+  }
+  ```
+
+  ```ts tab="app/routes.ts"
+  import { route, type RouteConfig } from '@react-router/dev/routes';
+
+  export default [
+    // [!code ++]
+    route('api/openapi/:id', 'routes/openapi.ts'),
+    // ...
+  ] satisfies RouteConfig;
+  ```
+</show>
+
+<show when={props.framework === 'waku'}>
+  ```ts title="src/pages/_api/api/openapi/[id].ts"
+  import type { ApiContext } from 'waku/router';
+  import { openapi } from '@/lib/openapi';
+
+  export async function GET(_: Request, { params }: ApiContext<'/api/openapi/[id]'>) {
+    return Response.json((await openapi.getSchema(params.id)).bundled);
+  }
+  ```
+</show>
+
+<show when={props.framework === 'astro'}>
+  ```ts title="src/pages/api/openapi/[id].ts"
+  import type { APIRoute, GetStaticPaths } from 'astro';
+  import { openapi } from '@/lib/openapi';
+
+  export const prerender = true;
+
+  export const getStaticPaths = (async () => {
+    return Object.keys(await openapi.getSchemas()).map((id) => ({ params: { id } }));
+  }) satisfies GetStaticPaths;
+
+  export const GET: APIRoute = async ({ params }) => {
+    return Response.json((await openapi.getSchema(params.id!)).bundled);
+  };
+  ```
+</show>
+
+<show when={props.framework === 'tanstack-start'}>
+  TanStack Start 的路由載入器會同時在伺服器與瀏覽器上執行，因此您的文件路由不需要 `loadDocument` 即可載入文件。只有在瀏覽器尚未取得該文件時，才需要呼叫 server function：
+
+  ```tsx title="src/routes/docs/$.tsx"
+  import { createServerFn } from '@tanstack/react-start';
+  import type { Document } from 'fumadocs-openapi';
+  import { openapi } from '@/lib/openapi';
+
+  // 瀏覽器已載入的文件
+  const documents = new Map<string, Document>();
+
+  const getDocument = createServerFn({ method: 'GET' })
+    .validator((id: string) => id)
+    .handler(async ({ data: id }) => (await openapi.getSchema(id)).bundled);
+
+  export const Route = createFileRoute('/docs/$')({
+    component: Page,
+    loader: async ({ params }) => {
+      const data = await serverLoader({ data: params._splat?.split('/') ?? [] });
+      if (data.type === 'openapi') {
+        const { document: id, payload } = data.props;
+        payload.bundled = documents.get(id) ?? (await getDocument({ data: id }));
+      }
+      return data;
+    },
+  });
+
+  function Page() {
+    const page = useFumadocsLoader(Route.useLoaderData());
+    // 第一個頁面的文件也一併記錄
+    if (page.type === 'openapi' && typeof window !== 'undefined')
+      documents.set(page.props.document, page.props.payload.bundled!);
+    // ...
+  }
+  ```
+</show>
+
+<show when={props.framework !== 'tanstack-start'}>
+  * `loadDocument` 同樣適用於產生的 MDX 檔案。
+  * 若使用 [Fumadocs CLI 安裝的 UI](/docs/integrations/openapi/api-page#full-ui)，請將 `loadDocument` 傳入 `createOpenAPIRenderer()`。
+  * 瀏覽器會保留每份文件，直到重新載入頁面為止。使用 `disableCache` 時，請保持啟用 `includeDocument`。
+</show>
+
+<show when={props.framework === 'tanstack-start'}>
+  * 若使用產生的 MDX 檔案，請改將文件放在 `preloaded.docs` 中。
+  * 瀏覽器會保留每份文件，直到重新載入頁面為止。使用 `disableCache` 時，請保持啟用 `includeDocument`。
+</show>
+
+## 建立代理伺服器 [#creating-proxy]
+
+代理伺服器傳送 HTTP 請求時，不受瀏覽器的 CORS 限制。API 互動測試區會在以下情況使用它：
+
+* 向未透過 CORS 允許您網站來源的 API 端點發送請求。
+* 機密用戶端 (具有用戶端密鑰) 的 OAuth 請求，以及裝置授權流程 (device flow) 。
+
+<Callout type="warn">
+  代理伺服器是公開的，且不需經過驗證。它會轉發請求的標頭與 body，包括 `Authorization`。請使用 [`allowedOrigins`](#allowed-origins) 與 `filterRequest` 加以限制。
+</Callout>
+
+### 設定 [#setup]
+
+為代理伺服器建立路由處理常式：
+
+<show when={props.framework === 'next'}>
+  ```ts title="app/api/proxy/route.ts"
+  import { openapi } from '@/lib/openapi';
+
+  export const { GET, HEAD, PUT, POST, PATCH, DELETE } = openapi.createProxy();
+  ```
+</show>
+
+<show when={props.framework === 'react-router'}>
+  ```ts tab="app/routes/proxy.ts"
+  import type { Route } from './+types/proxy';
+  import { openapi } from '@/lib/openapi';
+
+  const proxy = openapi.createProxy();
+
+  export const loader = ({ request }: Route.LoaderArgs) => proxy.handle(request);
+  export const action = ({ request }: Route.ActionArgs) => proxy.handle(request);
+  ```
+
+  ```ts tab="app/routes.ts"
+  import { route, type RouteConfig } from '@react-router/dev/routes';
+
+  export default [
+    // [!code ++]
+    route('api/proxy', 'routes/proxy.ts'),
+    // ...
+  ] satisfies RouteConfig;
+  ```
+</show>
+
+<show when={props.framework === 'tanstack-start'}>
+  ```ts title="src/routes/api/proxy.ts"
+  import { openapi } from '@/lib/openapi';
+  import { createFileRoute } from '@tanstack/react-router';
+
+  const proxy = openapi.createProxy();
+
+  export const Route = createFileRoute('/api/proxy')({
+    server: {
+      handlers: {
+        // 預設處理所有方法，也可以指定個別方法（GET、POST 等）
+        ANY: async ({ request }) => {
+          return proxy.handle(request);
+        },
+      },
+    },
+  });
+  ```
+</show>
+
+<show when={props.framework === 'waku'}>
+  ```ts title="src/pages/_api/api/proxy.ts"
+  import { openapi } from '@/lib/openapi';
+
+  export const { GET, HEAD, PUT, POST, PATCH, DELETE } = openapi.createProxy();
+  ```
+</show>
+
+<show when={props.framework === 'astro'}>
+  ```ts title="src/pages/api/proxy.ts"
+  import type { APIRoute } from 'astro';
+  import { openapi } from '@/lib/openapi';
+
+  export const prerender = false;
+
+  const proxy = openapi.createProxy();
+
+  // 處理所有方法
+  export const ALL: APIRoute = ({ request }) => proxy.handle(request);
+  ```
+
+  此路由為隨需執行，因此您的專案需要設定[轉接器](https://docs.astro.build/en/guides/on-demand-rendering/)。
+</show>
+
+接著在 `createOpenAPI()` 中設定它的 URL：
+
+```ts title="lib/openapi.ts"
+import { createOpenAPI } from 'fumadocs-openapi/server';
+
+export const openapi = createOpenAPI({
+  proxyUrl: '/api/proxy', // [!code ++]
+});
+```
+
+### 允許的來源 [#allowed-origins]
+
+預設情況下，代理伺服器會接受任何公開來源、拒絕私有網路上的主機 (例如 `localhost`) ，且不會轉送您網站的 Cookie。
+若要限制存取範圍，或透過代理伺服器存取私有 API，請在代理伺服器路由中列出允許的來源：
+
+```ts
+openapi.createProxy({
+  // 字串或正規表示式
+  allowedOrigins: ['https://api.example.com', 'http://localhost:8080'],
+});
+```
+
+重新導向也會依照相同的規則進行檢查。
+
+<Callout type="warn">
+  拒絕私有網路的請求需要使用 Node.js 或 Deno。在 Bun 等其他執行階段上，請改為指定
+  `allowedOrigins`。
+</Callout>
+
+使用 `filterRequest` 拒絕請求，例如只允許讀取：
+
+```ts
+openapi.createProxy({
+  // 回傳 false 的代理請求會遭到拒絕
+  filterRequest: (request) => request.method === 'GET',
+});
+```
+
+## OAuth 重新導向 [#oauth-redirect]
+
+OAuth 提供者只接受已註冊的重新導向 URI，但 API 互動測試區預設會重新導向至目前頁面。
+請建立一個路由處理常式，作為所有頁面共用的重新導向 URI。它會將使用者導回發起流程的頁面。
+
+<show when={props.framework === 'next'}>
+  ```ts title="app/api/oauth/route.ts"
+  import { openapi } from '@/lib/openapi';
+
+  export const GET = openapi.createOAuthHandler();
+  ```
+</show>
+
+<show when={props.framework === 'react-router'}>
+  ```ts tab="app/routes/oauth.ts"
+  import type { Route } from './+types/oauth';
+  import { openapi } from '@/lib/openapi';
+
+  const handler = openapi.createOAuthHandler();
+
+  export const loader = ({ request }: Route.LoaderArgs) => handler(request);
+  ```
+
+  ```ts tab="app/routes.ts"
+  import { route, type RouteConfig } from '@react-router/dev/routes';
+
+  export default [
+    // [!code ++]
+    route('api/oauth', 'routes/oauth.ts'),
+    // ...
+  ] satisfies RouteConfig;
+  ```
+</show>
+
+<show when={props.framework === 'tanstack-start'}>
+  ```ts title="src/routes/api/oauth.ts"
+  import { openapi } from '@/lib/openapi';
+  import { createFileRoute } from '@tanstack/react-router';
+
+  const handler = openapi.createOAuthHandler();
+
+  export const Route = createFileRoute('/api/oauth')({
+    server: {
+      handlers: {
+        GET: async ({ request }) => handler(request),
+      },
+    },
+  });
+  ```
+</show>
+
+<show when={props.framework === 'waku'}>
+  ```ts title="src/pages/_api/api/oauth.ts"
+  import { openapi } from '@/lib/openapi';
+
+  export const GET = openapi.createOAuthHandler();
+  ```
+</show>
+
+<show when={props.framework === 'astro'}>
+  ```ts title="src/pages/api/oauth.ts"
+  import type { APIRoute } from 'astro';
+  import { openapi } from '@/lib/openapi';
+
+  export const prerender = false;
+
+  const handler = openapi.createOAuthHandler();
+
+  export const GET: APIRoute = ({ request }) => handler(request);
+  ```
+
+  此路由會隨需執行，因此您的專案需要設定[轉接器](https://docs.astro.build/en/guides/on-demand-rendering/)。
+</show>
+
+請將此路由的 URL 傳給 `createOpenAPIPage()`，並在 OAuth 提供者中註冊完整 URL (例如 `https://docs.example.com/api/oauth`) ：
+
+```tsx title="components/api-page.tsx"
+export const OpenAPIPage = createOpenAPIPage({
+  oauthRedirectUrl: '/api/oauth', // [!code ++]
+});
+```
+
+<Callout title="內容安全政策（Content Security Policy）">
+  處理常式會透過自身路由提供的指令碼將使用者導回。若該路由受內容安全政策規範，則必須允許 `'self'` 指令碼。由於使用 `'strict-dynamic'` 的政策會忽略 `'self'`，請改為將該路由排除在這類政策之外。
+</Callout>
+
+### 靜態網站 [#static-sites]
+
+在靜態網站中，路由會預先算繪成檔案。請傳入 `inline: true` 將指令碼直接嵌入頁面，並讓路徑以 `.html` 結尾，讓靜態主機以 HTML 格式提供該檔案。
+
+<show when={props.framework === 'next'}>
+  ```ts title="app/api/oauth.html/route.ts"
+  import { openapi } from '@/lib/openapi';
+
+  export const dynamic = 'force-static';
+
+  export const GET = openapi.createOAuthHandler({ inline: true });
+  ```
+</show>
+
+<show when={props.framework === 'react-router'}>
+  ```ts tab="app/routes/oauth.ts"
+  import type { Route } from './+types/oauth';
+  import { openapi } from '@/lib/openapi';
+
+  const handler = openapi.createOAuthHandler({ inline: true });
+
+  export const loader = ({ request }: Route.LoaderArgs) => handler(request);
+  ```
+
+  ```ts tab="app/routes.ts"
+  import { route, type RouteConfig } from '@react-router/dev/routes';
+
+  export default [
+    // [!code ++]
+    route('api/oauth.html', 'routes/oauth.ts'),
+    // ...
+  ] satisfies RouteConfig;
+  ```
+
+  ```ts tab="react-router.config.ts"
+  import type { Config } from '@react-router/dev/config';
+
+  export default {
+    prerender: [
+      '/api/oauth.html', // [!code ++]
+      // ...
+    ],
+  } satisfies Config;
+  ```
+</show>
+
+<show when={props.framework === 'tanstack-start'}>
+  ```ts tab="src/routes/api/oauth[.]html.ts"
+  import { openapi } from '@/lib/openapi';
+  import { createFileRoute } from '@tanstack/react-router';
+
+  const handler = openapi.createOAuthHandler({ inline: true });
+
+  export const Route = createFileRoute('/api/oauth.html')({
+    server: {
+      handlers: {
+        GET: async ({ request }) => handler(request),
+      },
+    },
+  });
+  ```
+
+  ```ts tab="vite.config.ts"
+  import { tanstackStart } from '@tanstack/react-start/plugin/vite';
+  import { defineConfig } from 'vite';
+
+  export default defineConfig({
+    plugins: [
+      tanstackStart({
+        prerender: { enabled: true },
+        // 沒有任何頁面連結到此路由，因此將它與預設的爬取起點一併列出
+        pages: [{ path: '/' }, { path: '/api/oauth.html' }], // [!code ++]
+      }),
+      // ...
+    ],
+  });
+  ```
+</show>
+
+<show when={props.framework === 'waku'}>
+  ```ts title="src/pages/_api/api/oauth.html.ts"
+  import { openapi } from '@/lib/openapi';
+
+  export const GET = openapi.createOAuthHandler({ inline: true });
+
+  export async function getConfig() {
+    return { render: 'static' } as const;
+  }
+  ```
+</show>
+
+<show when={props.framework === 'astro'}>
+  ```ts title="src/pages/api/oauth.html.ts"
+  import type { APIRoute } from 'astro';
+  import { openapi } from '@/lib/openapi';
+
+  const handler = openapi.createOAuthHandler({ inline: true });
+
+  export const GET: APIRoute = ({ request }) => handler(request);
+  ```
+
+  靜態建置無需轉接器即可預先算繪此路由。
+</show>
+
+請使用 `.html` URL 作為重新導向 URI，例如 `oauthRedirectUrl: '/api/oauth.html'`。由於指令碼直接內嵌於頁面中，套用於此路由的內容安全政策 (Content Security Policy) 必須允許內嵌指令碼。

@@ -1,0 +1,28 @@
+---
+title: 首頁版面配置
+description: 供其他頁面共用的版面配置
+---
+
+import { home } from './layouts.story';
+
+只有導覽列的版面配置。
+
+<home.WithControl />
+
+<Customization />
+
+## 使用方式 [#usage]
+
+為其他頁面加入導覽列與搜尋對話方塊。
+
+```tsx title="/app/(home)/layout.tsx"
+import { HomeLayout } from 'fumadocs-ui/layouts/home';
+import { baseOptions } from '@/lib/layout.shared';
+import type { ReactNode } from 'react';
+
+export default function Layout({ children }: { children: ReactNode }) {
+  return <HomeLayout {...baseOptions()}>{children}</HomeLayout>;
+}
+```
+
+關於 [`links`](/docs/ui/layouts/links) 與 [`nav`](/docs/ui/layouts/nav) 選項的詳細說明，請參閱對應文件。

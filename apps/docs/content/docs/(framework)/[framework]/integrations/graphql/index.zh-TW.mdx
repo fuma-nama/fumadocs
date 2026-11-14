@@ -1,0 +1,513 @@
+---
+title: GraphQL
+description: 為 GraphQL schema 產生文件。
+---
+
+## 設定 [#setup]
+
+請安裝所需的套件。
+
+```npm
+npm i @fumadocs/graphql graphql
+```
+
+### 產生樣式 [#generate-styles]
+
+請加入下面這一行：
+
+```css title="Tailwind CSS"
+@import 'tailwindcss';
+@import 'fumadocs-ui/css/neutral.css';
+@import 'fumadocs-ui/css/preset.css';
+/* [!code ++] */
+@import '@fumadocs/graphql/css/preset.css';
+```
+
+### 設定外掛 [#configure-plugin]
+
+建立 GraphQL 伺服器實例與 `<GraphQLPage />` 元件。
+
+```ts tab="lib/graphql.ts"
+import { createGraphQL } from '@fumadocs/graphql/server';
+
+// 注意：這是伺服器端 API
+export const graphql = createGraphQL({
+  // GraphQL schema，可接受：
+  // SDL 檔案／URL（包含 `extend type`）、SDL 文字、
+  // introspection 查詢結果，以及 `GraphQLSchema` 實例。
+  input: ['./schema.graphql'],
+});
+```
+
+```tsx tab="components/api-page.tsx"
+'use client';
+import { createGraphQLPage } from '@fumadocs/graphql/ui';
+
+export const GraphQLPage = createGraphQLPage({
+  playground: {
+    // 在 operation 頁面上啟用互動測試區（選用）
+    url: 'https://api.example.com/graphql',
+  },
+});
+```
+
+各自的選項請參閱 [`createGraphQL()`](/docs/integrations/graphql/server) 與 [`createGraphQLPage()`](/docs/integrations/graphql/api-page)。
+
+### 產生頁面 [#generate-pages]
+
+將 `staticSource()` 傳入您的 [`loader()`](/docs/headless/source-api/source)，即可在不寫入檔案的情況下產生頁面。
+
+<show when={props.framework === 'react-router' || props.framework === 'tanstack-start'}>
+  由於 `staticSource()` 會讀取檔案，`source.ts` 將變成僅限伺服器端使用。請將 `docs` 移至 `collections.ts`，讓用戶端程式碼可以匯入。
+</show>
+
+<show when={props.framework === 'next'}>
+  ```ts title="lib/source.ts"
+  import { loader } from 'fumadocs-core/source';
+  import { defineDocs } from 'fumadocs-mdx/macro';
+  import { graphql } from '@/lib/graphql'; // [!code ++]
+
+  const docs = defineDocs({
+    dir: 'content/docs',
+  });
+
+  export const source = loader(
+    // [!code ++:6]
+    {
+      docs: docs.toFumadocsSource(),
+      graphql: await graphql.staticSource({
+        baseDir: 'graphql',
+      }),
+    },
+    {
+      baseUrl: '/docs',
+      // [!code ++:2] 選用：為頁面樹中的每個頁面項目加上 query/mutation/subscription 徽章
+      plugins: [graphql.loaderPlugin()],
+    },
+  );
+  ```
+</show>
+
+<show when={props.framework === 'react-router'}>
+  ```ts tab="app/lib/source.ts"
+  import { loader } from 'fumadocs-core/source';
+  import { defineDocs } from 'fumadocs-mdx/macro'; // [!code --]
+  // [!code ++:2]
+  import { docs } from '@/lib/collections';
+  import { graphql } from '@/lib/graphql';
+
+  // [!code --:6]
+  export const docs = defineDocs({
+    dir: 'content/docs',
+    docs: {
+      async: true,
+    },
+  });
+
+  // 由於 `staticSource()` 會讀取檔案，現在僅限伺服器端使用 [!code ++]
+  export const source = loader(
+    // [!code ++:6]
+    {
+      docs: docs.toFumadocsSource(),
+      graphql: await graphql.staticSource({
+        baseDir: 'graphql',
+      }),
+    },
+    {
+      baseUrl: '/docs',
+      // [!code ++:2] 選用：為頁面樹中的每個頁面項目加上 query/mutation/subscription 徽章
+      plugins: [graphql.loaderPlugin()],
+    },
+  );
+  ```
+
+  ```ts tab="app/lib/collections.ts"
+  import { defineDocs } from 'fumadocs-mdx/macro';
+
+  export const docs = defineDocs({
+    dir: 'content/docs',
+    docs: {
+      async: true,
+    },
+  });
+  ```
+</show>
+
+<show when={props.framework === 'tanstack-start'}>
+  ```ts tab="src/lib/source.ts"
+  import { loader } from 'fumadocs-core/source';
+  import { defineDocs } from 'fumadocs-mdx/macro'; // [!code --]
+  // [!code ++:2]
+  import { docs } from '@/lib/collections';
+  import { graphql } from '@/lib/graphql';
+
+  // [!code --:6]
+  export const docs = defineDocs({
+    dir: 'content/docs',
+    docs: {
+      async: true,
+    },
+  });
+
+  // 由於 `staticSource()` 會讀取檔案，現在僅限伺服器端使用 [!code ++]
+  export const source = loader(
+    // [!code ++:6]
+    {
+      docs: docs.toFumadocsSource(),
+      graphql: await graphql.staticSource({
+        baseDir: 'graphql',
+      }),
+    },
+    {
+      baseUrl: '/docs',
+      // [!code ++:2] 選用：為頁面樹中的每個頁面項目加上 query/mutation/subscription 徽章
+      plugins: [graphql.loaderPlugin()],
+    },
+  );
+  ```
+
+  ```ts tab="src/lib/collections.ts"
+  import { defineDocs } from 'fumadocs-mdx/macro';
+
+  export const docs = defineDocs({
+    dir: 'content/docs',
+    docs: {
+      async: true,
+    },
+  });
+  ```
+</show>
+
+<show when={props.framework === 'waku'}>
+  ```ts title="src/lib/source.ts"
+  import { loader } from 'fumadocs-core/source';
+  import { defineDocs } from 'fumadocs-mdx/macro';
+  import { graphql } from '@/lib/graphql'; // [!code ++]
+
+  const docs = defineDocs({
+    dir: 'content/docs',
+  });
+
+  export const source = loader(
+    // [!code ++:6]
+    {
+      docs: docs.toFumadocsSource(),
+      graphql: await graphql.staticSource({
+        baseDir: 'graphql',
+      }),
+    },
+    {
+      baseUrl: '/docs',
+      // [!code ++:2] 選用：為頁面樹中的每個頁面項目加上 query/mutation/subscription 徽章
+      plugins: [graphql.loaderPlugin()],
+    },
+  );
+  ```
+</show>
+
+<show when={props.framework === 'astro'}>
+  ```ts title="src/lib/source.ts"
+  import { getCollection } from 'astro:content';
+  import { loader } from 'fumadocs-core/source';
+  import { toFumadocsSource } from '@fumadocs/astro/source';
+  import { graphql } from '@/lib/graphql'; // [!code ++]
+
+  export const source = loader(
+    // [!code ++:6]
+    {
+      docs: toFumadocsSource(await getCollection('docs'), await getCollection('meta')),
+      graphql: await graphql.staticSource({
+        baseDir: 'graphql',
+      }),
+    },
+    {
+      baseUrl: '/docs',
+      // [!code ++:2] 選用：為頁面樹中的每個頁面項目加上 query/mutation/subscription 徽章
+      plugins: [graphql.loaderPlugin()],
+    },
+  );
+  ```
+</show>
+
+`staticSource()` 會為每個 operation 各產生一個頁面，並依種類分組至資料夾 (例如 `queries/`) 。具名型別的頁面則需[手動啟用](/docs/integrations/graphql/server#includeoperations--includetypes)。
+
+**`source` 的頁面現在有兩種型別：`docs` 與 `graphql`。** 請更新所有使用 `source` 的地方。
+
+<show when={props.framework !== 'astro'}>
+  請在您的文件頁面中使用 `<GraphQLPage />` 算繪 GraphQL 頁面：
+</show>
+
+<show when={props.framework === 'astro'}>
+  請在專屬的 island 中算繪 GraphQL 頁面，並以文件版面配置包裹 `<GraphQLPage />`：
+</show>
+
+<show when={props.framework === 'next'}>
+  ```tsx title="app/docs/[[...slug]]/page.tsx"
+  import { GraphQLPage } from '@/components/api-page'; // [!code ++]
+
+  export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
+    const params = await props.params;
+    const page = source.getPage(params.slug);
+    if (!page) notFound();
+
+    // [!code ++:10]
+    if (page.type === 'graphql') {
+      return (
+        <DocsPage full>
+          <DocsTitle>{page.data.title}</DocsTitle>
+          <DocsBody>
+            <GraphQLPage {...page.data.getGraphQLPageProps()} />
+          </DocsBody>
+        </DocsPage>
+      );
+    }
+
+    // ...
+  }
+  ```
+</show>
+
+<show when={props.framework === 'react-router'}>
+  ```tsx title="app/routes/docs.tsx"
+  import { docs, source } from '@/lib/source'; // [!code --]
+  // [!code ++:3]
+  import { docs } from '@/lib/collections';
+  import { source } from '@/lib/source';
+  import { GraphQLPage } from '@/components/api-page';
+
+  export async function loader({ params }: Route.LoaderArgs) {
+    const slugs = params['*'].split('/').filter((v) => v.length > 0);
+    const page = source.getPage(slugs);
+    if (!page) throw new Response('Not found', { status: 404 });
+
+    // [!code ++:9]
+    const pageTree = await source.serializePageTree(source.getPageTree());
+    if (page.type === 'graphql') {
+      return {
+        type: 'graphql' as const,
+        title: page.data.title,
+        props: page.data.getGraphQLPageProps(),
+        pageTree,
+      };
+    }
+
+    return { type: 'docs' as const, path: page.path, pageTree }; // [!code highlight]
+  }
+
+  export default function Page({ loaderData }: Route.ComponentProps) {
+    const data = useFumadocsLoader(loaderData);
+
+    return (
+      <DocsLayout {...baseOptions()} tree={data.pageTree}>
+        {/* [!code ++:8] */}
+        {data.type === 'graphql' && (
+          <DocsPage full>
+            <DocsTitle>{data.title}</DocsTitle>
+            <DocsBody>
+              <GraphQLPage {...data.props} />
+            </DocsBody>
+          </DocsPage>
+        )}
+        {/* [!code highlight] */}
+        {data.type === 'docs' && <Content path={data.path} />}
+      </DocsLayout>
+    );
+  }
+  ```
+</show>
+
+<show when={props.framework === 'tanstack-start'}>
+  ```tsx title="src/routes/docs/$.tsx"
+  import { docs, source } from '@/lib/source'; // [!code --]
+  // [!code ++:4]
+  import { docs } from '@/lib/collections';
+  import { source } from '@/lib/source';
+  import { GraphQLPage } from '@/components/api-page';
+  import type { OperationExample } from '@fumadocs/graphql';
+
+  // [!code ++:7]
+  // server function 回傳結果的型別層級檢查無法驗證 operation 的範例，
+  // 因此需將其註冊為可序列化（若無法解析 `@tanstack/router-core`，請先安裝）
+  declare module '@tanstack/router-core' {
+    interface SerializableExtensions {
+      graphqlExample: OperationExample;
+    }
+  }
+
+  export const Route = createFileRoute('/docs/$')({
+    component: Page,
+    loader: async ({ params }) => {
+      const slugs = params._splat?.split('/') ?? [];
+      const data = await serverLoader({ data: slugs });
+      if (data.type === 'docs') await docs.getPage(data.path)?.preload(); // [!code highlight]
+      return data;
+    },
+  });
+
+  const serverLoader = createServerFn({
+    method: 'GET',
+  })
+    .validator((slugs: string[]) => slugs)
+    .handler(async ({ data: slugs }) => {
+      const page = source.getPage(slugs);
+      if (!page) throw notFound();
+
+      // [!code ++:9]
+      const pageTree = await source.serializePageTree(source.getPageTree());
+      if (page.type === 'graphql') {
+        return {
+          type: 'graphql',
+          title: page.data.title,
+          props: page.data.getGraphQLPageProps(),
+          pageTree,
+        };
+      }
+
+      return { type: 'docs', path: page.path, pageTree }; // [!code highlight]
+    });
+
+  function Page() {
+    const data = useFumadocsLoader(Route.useLoaderData());
+
+    return (
+      <DocsLayout {...baseOptions()} tree={data.pageTree}>
+        {/* [!code ++:8] */}
+        {data.type === 'graphql' && (
+          <DocsPage full>
+            <DocsTitle>{data.title}</DocsTitle>
+            <DocsBody>
+              <GraphQLPage {...data.props} />
+            </DocsBody>
+          </DocsPage>
+        )}
+        <Suspense>
+          {/* [!code highlight] */}
+          {data.type === 'docs' && <Content path={data.path} />}
+        </Suspense>
+      </DocsLayout>
+    );
+  }
+  ```
+</show>
+
+<show when={props.framework === 'waku'}>
+  ```tsx title="src/pages/docs/[...slugs].tsx"
+  import { GraphQLPage } from '@/components/api-page'; // [!code ++]
+
+  export default function Page({ slugs }: PageProps<'/docs/[...slugs]'>) {
+    const page = source.getPage(slugs);
+    if (!page) unstable_notFound();
+
+    // [!code ++:10]
+    if (page.type === 'graphql') {
+      return (
+        <DocsPage full>
+          <DocsTitle>{page.data.title}</DocsTitle>
+          <DocsBody>
+            <GraphQLPage {...page.data.getGraphQLPageProps()} />
+          </DocsBody>
+        </DocsPage>
+      );
+    }
+
+    // ...
+  }
+  ```
+</show>
+
+<show when={props.framework === 'astro'}>
+  ```astro tab="src/pages/docs/[...slug].astro"
+  ---
+  import type { GetStaticPaths, InferGetStaticPropsType } from 'astro';
+  import Layout from '@/layouts/Layout.astro';
+  import { Docs } from '@/components/docs';
+  import { GraphQLDocs } from '@/components/graphql-docs'; // [!code ++]
+  import { source } from '@/lib/source';
+
+  export const prerender = true;
+
+  export const getStaticPaths = (() => {
+    return source.getPages().map((page) => ({
+      params: { slug: decodeURI(page.slugs.join('/')) || undefined },
+      props: { page },
+    }));
+  }) satisfies GetStaticPaths;
+
+  type Props = InferGetStaticPropsType<typeof getStaticPaths>;
+
+  const { page } = Astro.props;
+  const pageTree = await source.serializePageTree(source.getPageTree());
+  ---
+
+  {/* [!code ++:13] */}
+  {page.type === 'graphql' && (
+    <Layout title={page.data.title ?? 'My App'}>
+      <GraphQLDocs
+        client:load
+        pathname={Astro.url.pathname}
+        params={Astro.params}
+        tree={pageTree}
+        title={page.data.title}
+        props={page.data.getGraphQLPageProps()}
+      />
+    </Layout>
+  )}
+  ```
+
+  ```tsx tab="src/components/graphql-docs.tsx"
+  import { type SerializedPageTree, useFumadocsLoader } from 'fumadocs-core/source/client';
+  import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+  import { DocsBody, DocsPage, DocsTitle } from 'fumadocs-ui/layouts/docs/page';
+  import { GraphQLPage } from '@/components/api-page';
+  import { Provider, type ProviderProps } from '@/components/provider';
+  import { baseOptions } from '@/lib/layout.shared';
+  import type { GraphQLPageProps } from '@fumadocs/graphql/ui';
+
+  export function GraphQLDocs({
+    tree,
+    title,
+    props,
+    ...rest
+  }: ProviderProps & { tree: SerializedPageTree; title?: string; props: GraphQLPageProps }) {
+    const data = useFumadocsLoader({ tree });
+
+    return (
+      <Provider {...rest}>
+        <DocsLayout {...baseOptions()} tree={data.tree}>
+          <DocsPage full>
+            <DocsTitle>{title}</DocsTitle>
+            <DocsBody>
+              <GraphQLPage {...props} />
+            </DocsBody>
+          </DocsPage>
+        </DocsLayout>
+      </Provider>
+    );
+  }
+  ```
+</show>
+
+<Callout type="warn" title="請確認已完成遷移！">
+  繼續之前，請先執行型別檢查：
+
+  ```npm
+  npm run types:check
+  ```
+</Callout>
+
+## 功能 [#features]
+
+官方 GraphQL 整合支援：
+
+* 每個 operation (query/mutation/subscription) 各有獨立頁面，並可直接在頁面中展開檢視其使用的型別
+* 引數、欄位、棄用標記、預設值與 `@oneOf` 輸入物件
+* schema 中套用的指令及其定義
+* 範例請求與回應，可自動產生，也可使用[您自己的 operation](/docs/integrations/graphql/server#examples)
+* cURL、JavaScript、Go、Python、Java、C# 與 Rust 的程式碼範例
+* 附變數表單的互動測試區，也能透過 WebSocket 或 SSE 執行[訂閱](/docs/integrations/graphql/api-page#subscriptions)
+* 供 LLM 使用的[頁面 Markdown](/docs/integrations/graphql/server#markdown-for-llms)
+* 可選的具名型別頁面，並列出該型別在整個 schema 中的使用位置
+
+### 示範 [#demo]
+
+請參閱 [GraphQL 範例](/docs/graphql)。

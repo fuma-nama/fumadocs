@@ -1,0 +1,55 @@
+---
+title: 步驟
+description: 在您的文件中加入步驟
+preview: steps
+---
+
+<Installation name="steps" />
+
+## 使用方式 [#usage]
+
+請將步驟放入 `Steps` 容器中。
+
+```mdx title="content.mdx"
+import { Step, Steps } from 'fumadocs-ui/components/steps';
+
+<Steps>
+<Step>
+
+### Hello World
+
+</Step>
+
+<Step>
+
+### Hello World
+
+</Step>
+</Steps>
+```
+
+### 不使用匯入 [#without-imports]
+
+您不需要匯入，即可直接使用 Tailwind CSS 的工具類別。
+
+```mdx
+<div className="fd-steps">
+  <div className="fd-step" />
+</div>
+```
+
+它也支援透過任意變體 (arbitrary variants) ，只為標題套用步驟樣式。
+
+```mdx
+<div className='fd-steps [&_h3]:fd-step'>
+
+### Hello World
+
+</div>
+```
+
+<div className="fd-steps [&_h3]:fd-step">
+  ### Hello World &#91;#hello-world&#93;
+
+  未使用 `<Step />` 元件算繪。
+</div>

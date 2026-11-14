@@ -1,0 +1,145 @@
+---
+title: 驗證連結
+description: 確保您的連結正確無誤。
+staticParams:
+  - framework: next
+  - framework: react-router
+  - framework: tanstack-start
+  - framework: waku
+---
+
+## 設定 [#setup]
+
+您可以使用 [`next-validate-link`](https://next-validate-link.vercel.app) 驗證內容檔案中的連結。
+
+> 本指南主要針對 **Fumadocs MDX**，其他設定方式請參閱 `next-validate-link` 的文件。
+
+建立一個指令碼來掃描應用程式的路由。`populate` 會列出文件路由的參數：
+
+<show when={props.framework === 'next'}>
+  ```ts title="scripts/lint.ts"
+  import { type FileObject, printErrors, scanURLs, validateFiles } from 'next-validate-link';
+  import { source } from '@/lib/source';
+
+  const scanned = await scanURLs({
+    preset: 'next',
+    populate: {
+      'docs/[[...slug]]': source.getPages().map((page) => ({
+        value: { slug: page.slugs },
+        hashes: getHeadings(page.data),
+      })),
+    },
+  });
+  ```
+</show>
+
+<show when={props.framework === 'react-router'}>
+  ```ts title="scripts/lint.ts"
+  import { type FileObject, printErrors, scanURLs, validateFiles } from 'next-validate-link';
+  import { source } from '@/lib/source';
+  import routes from '../app/routes';
+
+  const scanned = await scanURLs({
+    preset: 'react-router',
+    routerConfig: routes,
+    populate: {
+      // async 集合會連同內容一起載入目錄
+      'docs/[[...splat]]': await Promise.all(
+        source.getPages().map(async (page) => ({
+          value: { splat: page.slugs },
+          hashes: getHeadings(await page.data.load()),
+        })),
+      ),
+    },
+  });
+  ```
+</show>
+
+<show when={props.framework === 'tanstack-start'}>
+  ```ts title="scripts/lint.ts"
+  import { type FileObject, printErrors, scanURLs, validateFiles } from 'next-validate-link';
+  import { source } from '@/lib/source';
+
+  const scanned = await scanURLs({
+    preset: 'tanstack-start',
+    populate: {
+      // async 集合會連同內容一起載入目錄
+      'docs/[[..._splat]]': await Promise.all(
+        source.getPages().map(async (page) => ({
+          value: { _splat: page.slugs },
+          hashes: getHeadings(await page.data.load()),
+        })),
+      ),
+    },
+  });
+  ```
+</show>
+
+<show when={props.framework === 'waku'}>
+  ```ts title="scripts/lint.ts"
+  import { type FileObject, printErrors, scanURLs, validateFiles } from 'next-validate-link';
+  import { source } from '@/lib/source';
+
+  const scanned = await scanURLs({
+    preset: 'waku',
+    populate: {
+      'docs/[[...slugs]]': source.getPages().map((page) => ({
+        value: { slugs: page.slugs },
+        hashes: getHeadings(page.data),
+      })),
+    },
+  });
+  ```
+</show>
+
+接著在同一個指令碼中，以掃描到的 URL 驗證您的內容檔案：
+
+```ts title="scripts/lint.ts"
+import type { TOCItemType } from 'fumadocs-core/toc';
+
+printErrors(
+  await validateFiles(await getFiles(), {
+    scanned,
+    // 檢查各種 MDX 元件中的 `href` 屬性
+    markdown: {
+      components: {
+        Card: { attributes: ['href'] },
+      },
+    },
+    // 檢查相對路徑
+    checkRelativePaths: 'as-url',
+  }),
+  true,
+);
+
+function getHeadings({ toc }: { toc: TOCItemType[] }): string[] {
+  return toc.map((item) => item.url.slice(1));
+}
+
+function getFiles() {
+  const promises = source.getPages().map(async (page): Promise<FileObject> => ({
+    path: page.absolutePath,
+    content: await page.data.getText('raw'),
+    url: page.url,
+    data: page.data,
+  }));
+
+  return Promise.all(promises);
+}
+```
+
+### 執行 Lint [#running-lint]
+
+若要在應用程式執行階段之外存取 `source` 物件，請為 Bun 設定 [Fumadocs MDX 載入器](/docs/mdx/loader/bun)。
+
+接著，執行指令碼來驗證連結：
+
+```bash
+bun ./scripts/lint.ts
+```
+
+<Callout title="Node.js 載入器">
+  您可能需要設定 TypeScript 轉譯 (或改用較新版本的 Node.js) ，並設定 [Fumadocs MDX 載入器](/docs/mdx/loader/node)。
+
+  若無特殊需求，使用 Bun 或 [`tsx`](https://github.com/privatenumber/tsx) 會比較簡單。
+</Callout>

@@ -1,0 +1,182 @@
+---
+title: Tabs
+description: 以 Base UI 建構的 Tabs 元件，另提供持久保存與共用值等功能。
+preview: tabs
+---
+
+import { UrlBar } from './tabs.client';
+
+<Installation name="tabs" />
+
+## 使用方式 [#usage]
+
+加入 MDX 元件。
+
+```tsx title="components/mdx.tsx"
+import defaultMdxComponents from 'fumadocs-ui/mdx';
+import * as TabsComponents from 'fumadocs-ui/components/tabs';
+import type { MDXComponents } from 'mdx/types';
+
+export function getMDXComponents(components?: MDXComponents) {
+  return {
+    ...defaultMdxComponents,
+    ...TabsComponents, // [!code ++]
+    ...components,
+  } satisfies MDXComponents;
+}
+```
+
+接著在您的 MDX 內容中使用它：
+
+```mdx title="content.mdx"
+<Tabs items={['Javascript', 'Rust']}>
+  <Tab value="Javascript">Javascript is weird</Tab>
+  <Tab value="Rust">Rust is fast</Tab>
+</Tabs>
+```
+
+<Tabs items={['Javascript', 'Rust']}>
+  <Tab value="Javascript">Javascript 很奇怪</Tab>
+  <Tab value="Rust">Rust 很快</Tab>
+</Tabs>
+
+### 不使用 `value` [#without-value]
+
+若未提供 `value`，則會依據子元素的索引來判斷。請注意，這可能會在重新算繪時造成錯誤，因此若頁籤可能變動，不建議使用此方式。
+
+```mdx
+import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
+
+<Tabs items={['Javascript', 'Rust']}>
+  <Tab>Javascript is weird</Tab>
+  <Tab>Rust is fast</Tab>
+</Tabs>
+```
+
+<Tabs items={['Javascript', 'Rust']}>
+  <Tab>Javascript 很怪</Tab>
+  <Tab>Rust 很快</Tab>
+</Tabs>
+
+### 共用值 [#shared-value]
+
+傳入 `groupId` 屬性後，所有具有相同
+id 的頁籤即可共用同一個值。
+
+```mdx
+<Tabs groupId="language" items={['Javascript', 'Rust']}>
+  <Tab value="Javascript">Javascript is weird</Tab>
+  <Tab value="Rust">Rust is fast</Tab>
+</Tabs>
+```
+
+### 持久保存 [#persistent]
+
+指定 `groupId` 時，所選的值會暫時儲存在 `sessionStorage` 中。
+
+若要持久保存該值，可以指定 `persist` prop。該值會
+儲存在 `localStorage` 中，並以其群組 ID 作為儲存鍵。
+
+```mdx
+<Tabs groupId="language" items={['Javascript', 'Rust']} persist>
+  <Tab value="Javascript">Javascript is weird</Tab>
+  <Tab value="Rust">Rust is fast</Tab>
+</Tabs>
+```
+
+### 預設值 [#default-value]
+
+傳入 `defaultIndex` 即可設定預設值。
+
+```mdx
+<Tabs items={['Javascript', 'Rust']} defaultIndex={1}>
+  <Tab value="Javascript">Javascript is weird</Tab>
+  <Tab value="Rust">Rust is fast</Tab>
+</Tabs>
+```
+
+### 連結至頁籤 [#link-to-tab]
+
+使用 HTML 的 `id` 屬性即可連結至特定頁籤。
+
+```mdx
+<Tabs items={['Javascript', 'Rust', 'C++']}>
+  <Tab value="Javascript">Javascript is weird</Tab>
+  <Tab value="Rust">Rust is fast</Tab>
+  <Tab id="tab-cpp" value="C++">
+    `Hello World`
+  </Tab>
+</Tabs>
+```
+
+您可以在網址加上雜湊 `#tab-cpp` 並重新載入，C++ 頁籤就會自動啟用。
+
+<Tabs items={['Javascript', 'Rust', 'C++']}>
+  <Tab value="Javascript">Javascript 很古怪</Tab>
+  <Tab value="Rust">Rust 很快</Tab>
+
+  <Tab id="tab-cpp" value="C++">
+    `Hello World`
+  </Tab>
+</Tabs>
+
+此外，您可以將 `Tabs` 元件的 `updateAnchor` 屬性設為 `true`，
+讓每次選取新頁籤時自動更新網址雜湊：
+
+```mdx
+<Tabs items={['Javascript', 'Rust', 'C++']} updateAnchor>
+  <Tab id="tab-js" value="Javascript">
+    Javascript is weird
+  </Tab>
+  <Tab id="tab-rs" value="Rust">
+    Rust is fast
+  </Tab>
+  <Tab id="tab-cpp" value="C++">
+    `Hello World`
+  </Tab>
+</Tabs>
+```
+
+<UrlBar />
+
+<Tabs items={['Hello', 'World']} updateAnchor>
+  <Tab id="tab-hello" value="Hello">
+    Hello！
+  </Tab>
+
+  <Tab id="tab-world" value="World">
+    World！
+  </Tab>
+</Tabs>
+
+## 進階用法 [#advanced-usage]
+
+以底層的原始方式使用：
+
+```mdx
+<Tabs defaultValue="npm">
+  <TabsList>
+    <TabsTrigger value="npm">
+      <NpmIcon />
+      npm
+    </TabsTrigger>
+  </TabsList>
+  <TabsContent value="npm">Hello World</TabsContent>
+</Tabs>
+```
+
+<Tabs defaultValue="npm">
+  <TabsList>
+    <TabsTrigger value="npm">
+      <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <title>npm</title>
+
+        <path fill="currentColor" d="M1.763 0C.786 0 0 .786 0 1.763v20.474C0 23.214.786 24 1.763 24h20.474c.977 0 1.763-.786 1.763-1.763V1.763C24 .786 23.214 0 22.237 0zM5.13 5.323l13.837.019-.009 13.836h-3.464l.01-10.382h-3.456L12.04 19.17H5.113z" />
+      </svg>
+
+      npm
+    </TabsTrigger>
+  </TabsList>
+
+  <TabsContent value="npm">Hello World</TabsContent>
+</Tabs>

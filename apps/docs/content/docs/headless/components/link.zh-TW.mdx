@@ -1,0 +1,33 @@
+---
+title: Link
+description: 可處理外部連結的 Link 元件
+---
+
+此元件包裝了您所用 React 框架的 Link 元件 (例如 `next/link`) ，並會自動處理文件中的外部連結。~
+偵測到外部 URL 時，會改用 `<a>` 取代 Link 元件。
+
+`rel` 屬性會自動產生。
+
+## 使用方式 [#usage]
+
+用法與 `<a>` 相同。
+
+```mdx
+import Link from 'fumadocs-core/link';
+
+<Link href="/docs/components">Click Me</Link>
+```
+
+### 外部連結 [#external]
+
+您可以傳入 `external` prop，強制將 URL 視為外部連結。
+
+### 動態 href [#dynamic-hrefs]
+
+您可以匯入 `dynamic-link` 來啟用動態 href。
+
+```mdx
+import { DynamicLink } from 'fumadocs-core/dynamic-link';
+
+<DynamicLink href="/[lang]/components">Click Me</DynamicLink>
+```

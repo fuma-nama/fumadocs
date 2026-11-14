@@ -1,0 +1,42 @@
+---
+title: 頁面樹工具
+description: 用於操作頁面樹的常用工具函式。
+---
+
+## 使用方式 [#usage]
+
+請參閱[定義](/docs/headless/page-tree)，進一步了解頁面樹。
+
+```ts
+import {
+  findNeighbour,
+  findSiblings,
+  getPageTreeRoots,
+  findParent,
+  findPath,
+  type Root,
+} from 'fumadocs-core/page-tree';
+
+const pageTree: Root = {
+  // ...頁面樹的根節點
+};
+
+// 取得頁面的相鄰頁面
+const neighbours = findNeighbour(pageTree, '/url/to/page');
+
+// 取得根資料夾清單
+const roots = getPageTreeRoots(pageTree);
+
+// 取得頁面的同層節點
+const siblings = findSiblings(pageTree, '/url/to/page');
+
+// 取得頁面的父節點
+const parent = findParent(pageTree, '/url/to/page');
+
+// 尋找第一個符合條件之節點的路徑
+const path = findPath(
+  pageTree.children,
+  // 比對函式
+  (node) => node.type === 'page' && node.url === '/url/to/page',
+);
+```

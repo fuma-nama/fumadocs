@@ -1,0 +1,113 @@
+---
+title: 部署
+description: 部署您的 Fumadocs 應用程式
+---
+
+import { frameworkName } from '@/lib/framework';
+
+## 概覽 [#overview]
+
+Fumadocs 應用程式的部署方式與其他 {frameworkName(props.framework)} 應用程式相同。
+
+<show when={props.framework === 'next'}>
+  請參閱 [Next.js 部署指南](https://nextjs.org/docs/app/getting-started/deploying)。
+</show>
+
+<show when={props.framework === 'react-router'}>
+  請參閱 [React Router 部署指南](https://reactrouter.com/start/framework/deploying)。
+</show>
+
+<show when={props.framework === 'tanstack-start'}>
+  請參閱 [TanStack Start 託管指南](https://tanstack.com/start/latest/docs/framework/react/guide/hosting)。
+</show>
+
+<show when={props.framework === 'waku'}>
+  請參閱 [Waku 部署指南](https://waku.gg/#deployment)。
+</show>
+
+<show when={props.framework === 'astro'}>
+  請參閱 [Astro 部署指南](https://docs.astro.build/en/guides/deploy/)。
+</show>
+
+若要輸出可由 CDN 託管的靜態網站，請參閱[靜態建置](/docs/deploying/static)。
+
+<show when={props.framework === 'next'}>
+  ## Cloudflare &#91;#cloudflare&#93;
+
+  Fumadocs 無法在 Edge 執行階段上運作，請改用 [OpenNext](https://opennext.js.org/cloudflare) 部署。
+
+  ## Docker &#91;#docker&#93;
+
+  此 Dockerfile 改編自官方的 [Next.js Dockerfile 範例](https://github.com/vercel/next.js/blob/canary/examples/with-docker/Dockerfile)，且需要在 Next.js 設定中加入 `output: 'standalone'`：
+
+  ```zsh title="Dockerfile"
+  # syntax=docker.io/docker/dockerfile:1
+
+  FROM node:24-alpine AS base
+
+  # 僅在需要時安裝相依套件
+  FROM base AS deps
+  # 請參閱 https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine 了解為何可能需要 libc6-compat。
+  RUN apk add --no-cache libc6-compat
+  WORKDIR /app
+
+  # 依據偏好的套件管理器安裝相依套件
+  COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* .npmrc* ./
+  RUN \
+    if [ -f yarn.lock ]; then yarn --frozen-lockfile; \
+    elif [ -f package-lock.json ]; then npm ci; \
+    elif [ -f pnpm-lock.yaml ]; then corepack enable pnpm && pnpm i --frozen-lockfile; \
+    else echo "Lockfile not found." && exit 1; \
+    fi
+
+
+  # 僅在需要時重新建置原始碼
+  FROM base AS builder
+  WORKDIR /app
+  COPY --from=deps /app/node_modules ./node_modules
+  COPY . .
+
+  # Next.js 會收集完全匿名的一般使用遙測資料。
+  # 詳細資訊：https://nextjs.org/telemetry
+  # 若想在建置期間停用遙測，請取消註解下一行。
+  # ENV NEXT_TELEMETRY_DISABLED=1
+
+  RUN \
+    if [ -f yarn.lock ]; then yarn run build; \
+    elif [ -f package-lock.json ]; then npm run build; \
+    elif [ -f pnpm-lock.yaml ]; then corepack enable pnpm && pnpm run build; \
+    else echo "Lockfile not found." && exit 1; \
+    fi
+
+  # 正式環境映像檔，複製所有檔案並執行 next
+  FROM base AS runner
+  WORKDIR /app
+
+  ENV NODE_ENV=production
+  # 若想在執行階段停用遙測，請取消註解下一行。
+  # ENV NEXT_TELEMETRY_DISABLED=1
+
+  RUN addgroup --system --gid 1001 nodejs
+  RUN adduser --system --uid 1001 nextjs
+
+  COPY --from=builder /app/public ./public
+
+  # 自動利用輸出追蹤來縮減映像檔大小
+  # https://nextjs.org/docs/advanced-features/output-file-tracing
+  COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+  COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+
+  USER nextjs
+
+  EXPOSE 3000
+
+  ENV PORT=3000
+
+  # server.js 由 next build 從 standalone 輸出產生
+  # https://nextjs.org/docs/pages/api-reference/config/next-config-js/output
+  ENV HOSTNAME="0.0.0.0"
+  CMD ["node", "server.js"]
+  ```
+
+  若 `package.json` 中的 `postinstall` 會執行 `fumadocs-mdx`，請在 `deps` 階段一併複製 `next.config.*`、`source.config.ts` 及其匯入的本機檔案，因為該指令碼會打包設定檔。
+</show>

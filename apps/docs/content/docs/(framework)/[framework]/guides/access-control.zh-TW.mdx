@@ -1,0 +1,245 @@
+---
+title: 存取控制
+description: 限制內容的存取權限。
+---
+
+import { frameworkName } from '@/lib/framework';
+
+## 概覽 [#overview]
+
+Fumadocs 的設計相當彈性，因此您可以輕鬆實作存取控制。
+
+## 載入器 API [#loader-api]
+
+如果您使用 [`loader()`](/docs/headless/source-api) API，可以視需要動態建立載入器，並篩選內容來源中的檔案，藉此限制可存取的內容。
+
+<show when={props.framework !== 'astro'}>
+  例如，以下搭配 Fumadocs MDX 的設定只會顯示 frontmatter 含有 `permission: public` 的 MDX 檔案。
+
+  ```ts title="lib/source.ts"
+  import { docs } from 'collections/server';
+  import { loader, update } from 'fumadocs-core/source';
+
+  const filteredSource = update(docs.toFumadocsSource())
+    .files((files) =>
+      files.filter((file) => {
+        // 保留 meta 檔案（例如 `meta.json`）
+        if (file.type === 'meta') return true;
+
+        // 存取檔案資料（型別安全）
+        return file.data.permission === 'public';
+      }),
+    )
+    .build();
+
+  export const source = loader(filteredSource, {
+    baseUrl: '/docs',
+  });
+  ```
+
+  若需要更複雜的設定，您可以將 `source` 改寫為工廠函式。
+
+  ```ts title="lib/source.ts"
+  import { docs } from 'collections/server';
+  import { loader, update } from 'fumadocs-core/source';
+
+  // 未經快取，實際使用時建議將其快取於記憶體中。
+  export function createSource(permission: 'public' | 'admin') {
+    const filteredSource = update(docs.toFumadocsSource())
+      .files((files) =>
+        files.filter((file) => {
+          if (file.type === 'meta') return true;
+
+          return file.data.permission === permission;
+        }),
+      )
+      .build();
+
+    return loader(filteredSource, {
+      baseUrl: '/docs',
+    });
+  }
+  ```
+</show>
+
+<show when={props.framework === 'astro'}>
+  例如，以下設定只會顯示 frontmatter 含有 `permission: public` 的頁面。
+
+  ```ts title="src/lib/source.ts"
+  import { getCollection } from 'astro:content';
+  import { loader, update } from 'fumadocs-core/source';
+  import { toFumadocsSource } from '@fumadocs/astro/source';
+
+  const filteredSource = update(
+    toFumadocsSource(await getCollection('docs'), await getCollection('meta')),
+  )
+    .files((files) =>
+      files.filter((file) => {
+        // 保留 meta 檔案（例如 `meta.json`）
+        if (file.type === 'meta') return true;
+
+        return file.data.permission === 'public';
+      }),
+    )
+    .build();
+
+  export const source = loader(filteredSource, {
+    baseUrl: '/docs',
+  });
+  ```
+
+  若需要更複雜的設定，您可以將 `source` 改寫為工廠函式。
+
+  ```ts title="src/lib/source.ts"
+  import { getCollection } from 'astro:content';
+  import { loader, update } from 'fumadocs-core/source';
+  import { toFumadocsSource } from '@fumadocs/astro/source';
+
+  const pages = await getCollection('docs');
+  const metas = await getCollection('meta');
+
+  // 未經快取，實際使用時建議將其快取於記憶體中。
+  export function createSource(permission: 'public' | 'admin') {
+    const filteredSource = update(toFumadocsSource(pages, metas))
+      .files((files) =>
+        files.filter((file) => {
+          if (file.type === 'meta') return true;
+
+          return file.data.permission === permission;
+        }),
+      )
+      .build();
+
+    return loader(filteredSource, {
+      baseUrl: '/docs',
+    });
+  }
+  ```
+</show>
+
+接著為每位使用者建立來源：
+
+```ts
+// [!code --]
+import { source } from '@/lib/source';
+// [!code ++:4]
+import { createSource } from '@/lib/source';
+
+const user = await getUser();
+const source = createSource(user.permission);
+
+const page = source.getPage(params.slugs);
+```
+
+### 優點 [#advantages]
+
+這種做法的特別之處在於，**存取權限在輸入層級就已受到限制**，而不是在算繪階段或建置時才處理。
+
+如此便能確保受保護的內容被完整過濾，同時不必犧牲任何彈性。
+
+## 自訂實作 [#custom-implementation]
+
+若不使用載入器 API，請在 {frameworkName(props.framework)} 中自行實作存取控制，例如在路由或中介軟體中處理。
+
+例如，若要限制特定頁面的存取權限：
+
+<show when={props.framework === 'next'}>
+  ```tsx title="app/docs/[[...slug]]/page.tsx"
+  import { notFound } from 'next/navigation';
+  import { source } from '@/lib/source';
+
+  export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
+    const params = await props.params;
+    const user = await getUser();
+    const page = source.getPage(params.slug);
+
+    if (!page) notFound();
+    if (page.data.permission !== user.permission) notFound();
+
+    // 算繪頁面...
+  }
+  ```
+</show>
+
+<show when={props.framework === 'react-router'}>
+  ```tsx title="app/routes/docs.tsx"
+  import type { Route } from './+types/docs';
+  import { source } from '@/lib/source';
+
+  export async function loader({ params, request }: Route.LoaderArgs) {
+    const user = await getUser(request);
+    const page = source.getPage(params['*'].split('/').filter((v) => v.length > 0));
+
+    if (!page) throw new Response('Not found', { status: 404 });
+    if (page.data.permission !== user.permission) throw new Response('Not found', { status: 404 });
+
+    // 回傳頁面資料...
+  }
+  ```
+</show>
+
+<show when={props.framework === 'tanstack-start'}>
+  ```tsx title="src/routes/docs/$.tsx"
+  import { notFound } from '@tanstack/react-router';
+  import { createServerFn } from '@tanstack/react-start';
+  import { source } from '@/lib/source';
+
+  const serverLoader = createServerFn({ method: 'GET' })
+    .validator((slugs: string[]) => slugs)
+    .handler(async ({ data: slugs }) => {
+      const user = await getUser();
+      const page = source.getPage(slugs);
+
+      if (!page) throw notFound();
+      if (page.data.permission !== user.permission) throw notFound();
+
+      // 回傳頁面資料...
+    });
+  ```
+</show>
+
+<show when={props.framework === 'waku'}>
+  ```tsx title="src/pages/docs/[...slugs].tsx"
+  import type { PageProps } from 'waku/router';
+  import { unstable_notFound } from 'waku/router/server';
+  import { source } from '@/lib/source';
+
+  export default async function Page({ slugs }: PageProps<'/docs/[...slugs]'>) {
+    const user = await getUser();
+    const page = source.getPage(slugs);
+
+    if (!page) unstable_notFound();
+    if (page.data.permission !== user.permission) unstable_notFound();
+
+    // 算繪頁面...
+  }
+
+  // 每次請求時算繪，因為靜態頁面建置時沒有使用者
+  export const getConfig = async () => ({ render: 'dynamic' }) as const;
+  ```
+</show>
+
+<show when={props.framework === 'astro'}>
+  ```astro title="src/pages/docs/[...slug].astro"
+  ---
+  import { source } from '@/lib/source';
+
+  // 每次請求時算繪，需要轉接器
+  export const prerender = false;
+
+  const slugs = Astro.params.slug?.split('/').filter((v) => v.length > 0) ?? [];
+  const user = await getUser(Astro.request);
+  const page = source.getPage(slugs);
+
+  if (!page || page.data.permission !== user.permission) {
+    return Astro.rewrite('/404');
+  }
+  ---
+
+  <!-- 算繪頁面... -->
+  ```
+</show>
+
+請注意，頁面樹 (側邊欄項目) 、搜尋、Markdown 路由及其他細節都需由您自行處理。
+
+這種做法的彈性最大，但 Fumadocs 不會替您處理存取控制。由於設定較為繁瑣，實作時請參考 {frameworkName(props.framework)} 的文件。

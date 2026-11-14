@@ -1,0 +1,53 @@
+---
+title: 元件庫
+description: 底層採用的無頭式元件庫。
+icon: Library
+---
+
+## 概覽 [#overview]
+
+Fumadocs UI 同時支援 [Base UI](https://base-ui.com) 與 [Radix UI](https://radix-ui.com/primitives)，並預設使用 Base UI。
+
+若您使用 Fumadocs CLI 自訂元件，設定方式可能會有所不同。
+
+### Base UI [#base-ui]
+
+Base UI 是預設的元件庫。若您選擇手動安裝，請將 `fumadocs-ui` 設為 `@fumadocs/base-ui` 套件的別名：
+
+```json title="package.json"
+{
+  "dependencies": {
+    "fumadocs-ui": "npm:@fumadocs/base-ui@latest",
+    // 請確認已安裝 Base UI
+    "@base-ui/react": "..."
+  }
+}
+```
+
+對 Fumadocs CLI 而言，這是 `uiLibrary` 的預設值：
+
+```json title="cli.json"
+{
+  "uiLibrary": "base-ui"
+}
+```
+
+### Radix UI [#radix-ui]
+
+若要改用 Radix UI，可以直接安裝 `fumadocs-ui` 套件：
+
+```json title="package.json"
+{
+  "dependencies": {
+    "fumadocs-ui": "latest"
+  }
+}
+```
+
+若使用 Fumadocs CLI，請在 `cli.json` 設定檔中進行設定：
+
+```json title="cli.json"
+{
+  "uiLibrary": "radix-ui"
+}
+```

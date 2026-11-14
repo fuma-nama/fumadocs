@@ -1,0 +1,99 @@
+---
+title: Typesense 搜尋
+description: 將 Typesense 搜尋整合至 Fumadocs
+---
+
+> 此整合由社群維護。
+
+## 設定 [#setup]
+
+### 安裝相依套件 [#install-dependencies]
+
+```package-install
+typesense typesense-fumadocs-adapter
+```
+
+### 啟動 Typesense 伺服器 [#start-typesense-server]
+
+您可以自行架設 Typesense 伺服器，或使用其雲端服務。請依照官方的[入門指南](https://typesense.org/docs/guide/install-typesense.html)設定伺服器，並將其認證資訊儲存在 `.env.local` 中 (在 Vite 框架中，`NEXT_PUBLIC_` 需改為 `VITE_`；在 Astro 中則為 `PUBLIC_`) ：
+
+```dotenv
+NEXT_PUBLIC_TYPESENSE_URL="server URL"
+NEXT_PUBLIC_TYPESENSE_SEARCH_KEY="search-only API key"
+TYPESENSE_API_KEY="API key with write access"
+```
+
+### 同步資料集 [#sync-dataset]
+
+使用預先算繪的 `static.json` 路由匯出搜尋索引，並在每次建置後透過指令碼將索引同步至 Typesense：
+
+<feature>search/typesense</feature>
+
+`build` 指令碼會在每次建置時執行同步，請在您的部署平台上設定相同的變數。
+
+### 搜尋 UI [#search-ui]
+
+若要實作搜尋 UI，您可以選擇：
+
+* 使用 [Fumadocs UI 搜尋對話方塊](/docs/search/typesense)。
+* 透過 Typesense 搜尋用戶端 hook 自行打造搜尋 UI。
+
+  ```ts
+  import { Client } from 'typesense';
+  import { useTypesenseSearch } from 'typesense-fumadocs-adapter/client';
+
+  const client = new Client({
+    nodes: [{ url: 'YOUR_TYPESENSE_SERVER_URL' }],
+    apiKey: 'YOUR_TYPESENSE_SEARCH_ONLY_API_KEY',
+  });
+
+  const { search, setSearch, query } = useTypesenseSearch({
+    typesenseCollectionName: 'docs',
+    client,
+  });
+  ```
+
+## 選項 [#options]
+
+### 標籤篩選 [#tag-filter]
+
+若要設定標籤篩選，請在 `static.json` 路由中為各文件加上 `tag` 值：
+
+```ts
+documents.push({
+  // 其他欄位…
+  // [!code ++]
+  tag: '<your value>',
+});
+```
+
+接著更新您的搜尋用戶端：
+
+* **Fumadocs UI**：在搜尋 UI 中啟用[標籤篩選](/docs/search/typesense#tag-filter)。
+* **搜尋用戶端**：您可以用以下方式加入標籤篩選：
+
+  ```ts
+  import { useTypesenseSearch } from 'typesense-fumadocs-adapter/client';
+  const { search, setSearch, query } = useTypesenseSearch({
+    tag: '<your tag value>',
+    // ...
+  });
+  ```
+
+### 國際化 (i18n)  [#internationalization-i18n]
+
+文件中包含所屬頁面的 `locale`，請將 `locale` 傳給搜尋用戶端：
+
+```ts
+import { useI18n } from 'fumadocs-ui/contexts/i18n';
+import { useTypesenseSearch } from 'typesense-fumadocs-adapter/client';
+
+const { locale } = useI18n();
+const { search, setSearch, query } = useTypesenseSearch({
+  // [!code ++]
+  locale,
+  // 其他欄位……
+});
+```
+
+在底層，Typesense 會為每個語系分別建立獨立的集合，並在集合名稱後面加上 `_{locale}` 後綴 (例如 `docs_en`、`docs_fr`) 。

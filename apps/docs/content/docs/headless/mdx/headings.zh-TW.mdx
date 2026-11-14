@@ -1,0 +1,143 @@
+---
+title: 標題
+description: 處理文件中的標題
+---
+
+## Remark Heading [#remark-heading]
+
+為標題加上 ID 的 remark 外掛。Fumadocs MDX 預設會啟用此外掛，您可以透過 `remarkHeadingOptions` 傳入選項。
+
+### 自訂 ID [#custom-heading-id]
+
+您可以使用 `[#slug]` 自訂標題的 ID。
+
+```md
+# heading [#slug]
+```
+
+若要停用此功能：
+
+```ts tab="unified" title="source.config.ts"
+import { defineConfig } from 'fumadocs-mdx/config';
+
+export default defineConfig({
+  mdxOptions: {
+    remarkHeadingOptions: {
+      customId: false,
+    },
+  },
+});
+```
+
+```ts tab="Sätteri" title="source.config.ts"
+import { defineConfig, defineDocs } from 'fumadocs-mdx/config';
+
+export const docs = defineDocs({
+  docs: { compiler: 'satteri' },
+});
+
+export default defineConfig({
+  satteriOptions: {
+    remarkHeadingOptions: {
+      customId: false,
+    },
+  },
+});
+```
+
+### 擷取目錄 [#extract-toc]
+
+預設情況下，它也會擷取文件的標題 (目錄) ，並以 `toc` 存入檔案資料中，其型別為 `TOCItemType` 陣列。
+Fumadocs MDX 則透過 `generateToc: false` 關閉此功能，改用 [Rehype 目錄](#rehype-toc) 匯出目錄。
+
+<auto-type-table path="../props.ts" name="TOCItemType" />
+
+### 含有表達式的標題 [#headings-with-expressions]
+
+在 Fumadocs MDX 中，若標題含有表達式，或位於 [`<show>`](/docs/markdown#show) 內，標題的 ID 會依據其已渲染的文字產生：
+
+```mdx
+## Deploy on {props.framework}
+```
+
+使用 `framework: 'astro'` 時，ID 會是 `deploy-on-astro`。重複的 ID 會加上 `-1` 之類的後綴，而未被渲染的標題不會計入重複。
+
+這需要 `rehypeHeading` 外掛，Fumadocs MDX 會將它加在您的 rehype 外掛之後。若缺少此外掛，Remark Heading 會依原始文字產生 ID，例如 `deploy-on-propsframework`。
+
+### 自訂 Slug [#custom-slugs]
+
+自訂的 `slug` 函式會根據原始文字產生 ID，含有表達式的標題也不例外。若要讓您自己的 slugger 使用已渲染的文字，請從模組匯出 `createHeadingIds()`：
+
+```ts title="lib/heading.ts"
+import { createHeadingIds as create } from 'fumadocs-core/mdx-plugins/remark-heading.runtime';
+
+export const createHeadingIds: typeof create = (ids) =>
+  // 每個頁面都會呼叫一次，讓 slugger 能計算重複項目
+  create(ids, () => (text) => text.toLowerCase().replaceAll(' ', '_'));
+```
+
+接著將 `slugImportSource` 設為該模組。編譯後的頁面會匯入這個模組，就像 MDX 會匯入 `jsxImportSource` 所指定的 JSX runtime 一樣，因此請使用套件名稱或匯入別名：
+
+```ts tab="unified" title="source.config.ts"
+import { defineConfig } from 'fumadocs-mdx/config';
+
+export default defineConfig({
+  mdxOptions: {
+    remarkHeadingOptions: {
+      slug: (_root, _heading, text) => text.toLowerCase().replaceAll(' ', '_'),
+      slugImportSource: '@/lib/heading',
+    },
+  },
+});
+```
+
+```ts tab="Sätteri" title="source.config.ts"
+import { defineConfig, defineDocs } from 'fumadocs-mdx/config';
+
+export const docs = defineDocs({
+  docs: { compiler: 'satteri' },
+});
+
+export default defineConfig({
+  satteriOptions: {
+    remarkHeadingOptions: {
+      slug: (_heading, text) => text.toLowerCase().replaceAll(' ', '_'),
+      slugImportSource: '@/lib/heading',
+    },
+  },
+});
+```
+
+第一個含有表達式的標題之前的標題，仍會使用 `slug` 函式產生 ID，因此請讓兩者保持一致。
+
+## Rehype 目錄 [#rehype-toc]
+
+用來匯出目錄的 rehype 外掛。與 Remark Heading 不同，它會保留標題中的 JSX 節點。
+
+Fumadocs MDX 預設會啟用此外掛。若使用 Sätteri，請透過 `rehypeTocOptions` 傳入選項。
+
+### 輸出 [#output]
+
+以下列 Markdown 文件為例：
+
+```md
+## Hello `code`
+```
+
+此外掛會將其匯出為 `toc`：
+
+```jsx
+export const toc = [
+  {
+    title: (
+      <>
+        Hello <code>code</code>
+      </>
+    ),
+    depth: 2,
+    url: '#hello-code',
+  },
+];
+```
+
+在 Fumadocs MDX 中，`page.data.toc` 只會列出透過頁面 props 已渲染的標題。自訂的內容來源也可以透過[執行階段輸出](/docs/headless/source-api/source#runtime-outputs)達到相同效果。

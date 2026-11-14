@@ -1,0 +1,105 @@
+---
+title: 載入器外掛
+description: 擴充載入器 API
+---
+
+## 概覽 [#overview]
+
+載入器外掛可以擴充 `loader()`，自訂其輸出內容。
+
+內建外掛如下：
+
+* **Lucide Icons**：使用 [Lucide React](https://lucide.dev) 的圖示 (需先安裝 `lucide-react`) 。
+
+  ```ts
+  import { loader } from 'fumadocs-core/source';
+  import { lucideIconsPlugin } from 'fumadocs-core/source/lucide-icons';
+
+  export const source = loader({
+    // ...
+    plugins: [lucideIconsPlugin()],
+  });
+  ```
+
+## 建立外掛 [#creating-plugins]
+
+每個外掛都是一個物件：
+
+```ts tab="Strictly Typed"
+import { loader } from 'fumadocs-core/source';
+
+export const source = loader({
+  plugins: ({ typedPlugin }) => [
+    typedPlugin({
+      // 外掛設定
+    }),
+  ],
+});
+```
+
+```ts tab="Simple"
+import { loader, type LoaderPlugin } from 'fumadocs-core/source';
+
+export const source = loader({
+  plugins: [myPlugin()],
+});
+
+function myPlugin(): LoaderPlugin {
+  return {
+    // 外掛設定
+  };
+}
+```
+
+<Callout title="小提示">
+  `typedPlugin` 會為外掛套用更精確的型別，包括您內容來源中的自訂屬性。
+
+  不過，若要讓外掛能在不同的載入器之間重複使用，請改用 `LoaderPlugin` 型別。
+</Callout>
+
+### 儲存空間 [#storage]
+
+在處理過程中，您輸入的來源檔案會經過解析，並在記憶體中形成虛擬儲存空間。
+
+若要在處理前執行虛擬檔案系統操作，您可以使用 `transformStorage` hook。
+
+```ts
+import { loader } from 'fumadocs-core/source';
+
+export const source = loader({
+  plugins: ({ typedPlugin }) => [
+    typedPlugin({
+      transformStorage({ storage }) {
+        storage.read('my/path');
+      },
+    }),
+  ],
+});
+```
+
+### 頁面樹 [#page-tree]
+
+頁面樹是根據您的檔案系統產生的，其中部分不必要的資訊 (例如未使用的 frontmatter 屬性) 會被過濾掉。
+
+您可以透過 `transformPageTree` 自訂頁面樹，例如在節點上附加自訂屬性，或自訂頁面的顯示名稱。
+
+```tsx
+import { loader } from 'fumadocs-core/source';
+
+export const source = loader({
+  plugins: ({ typedPlugin }) => [
+    typedPlugin({
+      transformPageTree: {
+        file(node, file) {
+          // 存取原始（未經篩選）的檔案資料
+          if (file) console.log(this.storage.read(file));
+
+          // 修改節點
+          node.name = <>Some JSX Nodes here</>;
+          return node;
+        },
+      },
+    }),
+  ],
+});
+```

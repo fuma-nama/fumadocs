@@ -1,0 +1,78 @@
+---
+title: 協商
+description: 內容協商工具函式。
+---
+
+## 概覽 [#overview]
+
+若 React 框架支援中介軟體，您可以使用 Fumadocs 的協商 API 實作基本功能。
+在 Waku 中，請在 `src/middleware` 的 [Hono 中介軟體](https://hono.dev/docs/guides/middleware)中使用。
+在 Astro 中，請在[中介軟體](https://docs.astro.build/en/guides/middleware)中使用；該中介軟體只會在請求時算繪的頁面上執行。
+
+### 接受 Markdown [#accept-markdown]
+
+依據 `Accept` 標頭回傳 Markdown 或 HTML，可提升 AI 代理的使用體驗。
+
+```ts tab="Next.js" title="proxy.ts"
+import { NextRequest, NextResponse } from 'next/server';
+import { isMarkdownPreferred, rewritePath } from 'fumadocs-core/negotiation';
+
+const { rewrite: rewriteLLM } = rewritePath('/docs/*path', '/llms.mdx/*path');
+
+export default function proxy(request: NextRequest) {
+  if (isMarkdownPreferred(request)) {
+    const result = rewriteLLM(request.nextUrl.pathname);
+
+    if (result) {
+      return NextResponse.rewrite(new URL(result, request.nextUrl));
+    }
+  }
+
+  return NextResponse.next();
+}
+```
+
+```tsx tab="React Router" title="app/root.tsx"
+import type { Route } from './+types/root';
+import { isMarkdownPreferred, rewritePath } from 'fumadocs-core/negotiation';
+
+const { rewrite: rewriteLLM } = rewritePath('/docs/*path', '/llms.mdx/*path');
+
+const serverMiddleware: Route.MiddlewareFunction = async ({ request }, next) => {
+  const url = new URL(request.url);
+  const result = isMarkdownPreferred(request) && rewriteLLM(url.pathname);
+
+  // `Response.redirect()` 的標頭無法修改，因此直接建立回應
+  if (result)
+    return new Response(null, {
+      status: 302,
+      headers: { Location: new URL(result, url).toString(), Vary: 'Accept' },
+    });
+
+  return next();
+};
+
+export const middleware = [serverMiddleware];
+```
+
+```ts tab="TanStack Start" title="src/start.ts"
+import { createMiddleware, createStart } from '@tanstack/react-start';
+import { redirect } from '@tanstack/react-router';
+import { isMarkdownPreferred, rewritePath } from 'fumadocs-core/negotiation';
+
+const { rewrite: rewriteLLM } = rewritePath('/docs/*path', '/llms.mdx/*path');
+
+const llmMiddleware = createMiddleware().server(({ next, request }) => {
+  const url = new URL(request.url);
+  const result = isMarkdownPreferred(request) && rewriteLLM(url.pathname);
+
+  // 重新導向至 Markdown URL
+  if (result) throw redirect({ href: new URL(result, url).href, headers: { Vary: 'Accept' } });
+
+  return next();
+});
+
+export const startInstance = createStart(() => ({
+  requestMiddleware: [llmMiddleware],
+}));
+```

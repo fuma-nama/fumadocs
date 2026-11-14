@@ -1,0 +1,250 @@
+---
+title: 無頭式
+description: 不含 UI 的 GraphQL 頁面狀態與邏輯。
+---
+
+## 概覽 [#overview]
+
+除了 `@fumadocs/graphql/ui` 之外，其餘部分皆為無頭式。
+
+| 路徑                             | 模組                              |
+| ------------------------------ | ------------------------------- |
+| `@fumadocs/graphql`            | 頁面：由 SDL 建構的 schema、交叉連結，以及您的元件 |
+| `@fumadocs/graphql/operation`  | 單一 operation：其欄位、標題、指令與範例       |
+| `@fumadocs/graphql/type-docs`  | 具名型別：其種類、指令、關聯與使用位置             |
+| `@fumadocs/graphql/playground` | 互動測試區的狀態，以及 operation 與訂閱的傳送    |
+
+## 頁面 [#page]
+
+`createGraphQLRenderer()` 會接收您的元件並回傳 `<GraphQLPage />`，該元件可接受產生頁面的 props。
+
+```tsx title="components/api-page.tsx"
+'use client';
+import { type CodeBlockProps, createGraphQLRenderer } from '@fumadocs/graphql';
+import { Operation } from '@/components/my-operation';
+import { TypeDocs } from '@/components/my-type';
+
+export const GraphQLPage = createGraphQLRenderer({
+  components: {
+    Operation,
+    TypeDocs,
+    // `root` 是類似欄位的根節點，或是 `Query.orders()` 這類 schema 座標
+    SchemaUI: ({ client, root }) => (
+      <pre>{`${client.name}: ${typeof root === 'string' ? root : root.type}`}</pre>
+    ),
+    CodeBlock({ lang, code }: CodeBlockProps) {
+      return (
+        <pre>
+          <code className={`language-${lang}`}>{code}</code>
+        </pre>
+      );
+    },
+  },
+});
+```
+
+| 元件          | 算繪內容                                         |
+| ----------- | -------------------------------------------- |
+| `Operation` | 頁面中的每個 operation，請參閱 [Operation](#operation) |
+| `TypeDocs`  | 頁面中的每個具名型別，請參閱 [Type](#type)                 |
+| `SchemaUI`  | 型別、引數或欄位的詳細內容                                |
+| `Layout`    | 選用，包裹算繪出的項目                                  |
+
+傳入 `typeLinks` 與 `operationLinks`，即可覆寫預先產生頁面的[交叉連結](/docs/integrations/graphql/api-page#cross-linking)。
+
+### Hooks [#hooks]
+
+頁面內的元件可透過以下 Hook 讀取頁面狀態。
+
+| Hook                           | 回傳值                                    |
+| ------------------------------ | -------------------------------------- |
+| `useGraphQL()`                 | 建構完成的 `schema` 及其 `sdl`，以及頁面連結與範例      |
+| `useComponents()`              | 傳入頁面的元件                                |
+| `useTypeLink(name)`            | 指定名稱型別的頁面 URL，未連結時為 `undefined`        |
+| `useOperationLink(kind, name)` | operation 的頁面 URL                      |
+| `useRenderContext()`           | 頁面的算繪選項，例如 `playground` 與 `codeUsages` |
+
+若要自行算繪 operation，請改為掛載 `<GraphQLProvider sdl={sdl} components={...} />`，以取代 `createGraphQLRenderer()`。
+
+## Operation [#operation]
+
+`<OperationProvider />` 會推導出 operation 的詳細資訊。
+
+```tsx title="components/my-operation.tsx"
+'use client';
+import { useComponents } from '@fumadocs/graphql';
+import {
+  OperationProvider,
+  type PageOperationProps,
+  useOperation,
+} from '@fumadocs/graphql/operation';
+
+export function Operation({ kind, name }: PageOperationProps) {
+  return (
+    <OperationProvider kind={kind} name={name}>
+      <Content />
+    </OperationProvider>
+  );
+}
+
+function Content() {
+  const { title, field, examples, selected, select } = useOperation();
+  const { CodeBlock, SchemaUI } = useComponents();
+  const example = examples.at(selected);
+
+  return (
+    <>
+      <h2>{title}</h2>
+      {field.args.map((arg) => (
+        <SchemaUI
+          key={arg.name}
+          client={{ name: arg.name, rootId: arg.name }}
+          root={{ type: arg.type }}
+        />
+      ))}
+      {examples.map((item, i) => (
+        <button key={i} onClick={() => select(i)}>
+          {item.name ?? 'Example'}
+        </button>
+      ))}
+      {example && <CodeBlock lang="graphql" code={example.query} />}
+    </>
+  );
+}
+```
+
+`examples` 來自 [`examples` 選項](/docs/integrations/graphql/server#examples)，或是自動產生的範例。`selected` 由 provider 底下的所有元件共用，例如範例卡片與互動測試區。
+
+<auto-type-table path="props.ts" name="OperationInfo" />
+
+<auto-type-table path="props.ts" name="OperationExample" />
+
+## 型別 [#type]
+
+`<TypeProvider />` 會推導出具名型別的詳細資訊。
+
+```tsx title="components/my-type.tsx"
+'use client';
+import { useComponents } from '@fumadocs/graphql';
+import { type PageTypeProps, TypeProvider, useNamedType } from '@fumadocs/graphql/type-docs';
+
+export function TypeDocs({ name }: PageTypeProps) {
+  return (
+    <TypeProvider name={name}>
+      <Content />
+    </TypeProvider>
+  );
+}
+
+function Content() {
+  const { name, kind, type, relations } = useNamedType();
+  const { SchemaUI } = useComponents();
+
+  return (
+    <>
+      <h2>
+        {name} ({kind})
+      </h2>
+      {relations.usages.returnedBy.map((op) => (
+        <span key={`${op.kind}:${op.name}`}>{op.name}</span>
+      ))}
+      <SchemaUI client={{ name, rootId: name, as: 'body' }} root={{ type }} />
+    </>
+  );
+}
+```
+
+<auto-type-table path="props.ts" name="NamedTypeInfo" />
+
+`relations` 將該型別與 schema 的其他部分串連起來：
+
+| 關係              | 說明                   |
+| --------------- | -------------------- |
+| `implements`    | 該型別實作的介面             |
+| `unions`        | 包含該型別的聯集 (適用於物件)     |
+| `implementedBy` | 實作該型別的物件 (適用於介面)     |
+| `possibleTypes` | 聯集的成員                |
+| `usages`        | 該型別在整個 schema 中出現的位置 |
+
+<auto-type-table path="props.ts" name="TypeUsages" />
+
+## 互動測試區 [#playground]
+
+`usePlayground()` 會保存 `<OperationProvider />` 底下 operation 的互動測試區，其設定來自頁面的 [`playground` 選項](/docs/integrations/graphql/api-page#playground)。
+
+```tsx title="components/my-playground.tsx"
+'use client';
+import { StfProvider, useFieldValue } from '@fumari/stf';
+import { useOperation } from '@fumadocs/graphql/operation';
+import { usePlayground } from '@fumadocs/graphql/playground';
+
+export function MyPlayground() {
+  const { field } = useOperation();
+  const { stf, open, url, changeUrl, query, setQuery, send, isSending, response } = usePlayground();
+
+  return (
+    // 展開時會還原先前造訪時使用的端點與標頭
+    <details onToggle={(e) => e.currentTarget.open && open()}>
+      <summary>Try it</summary>
+      <input value={url} onChange={(e) => changeUrl(e.target.value)} />
+      <textarea value={query} onChange={(e) => setQuery(e.target.value)} />
+      <StfProvider value={stf}>
+        {field.args.map((arg) => (
+          <Variable key={arg.name} name={arg.name} />
+        ))}
+      </StfProvider>
+      <button disabled={isSending} onClick={send}>
+        Send
+      </button>
+      {response?.result.type === 'response' && <pre>{response.result.body}</pre>}
+    </details>
+  );
+}
+
+function Variable({ name }: { name: string }) {
+  const [value, setValue] = useFieldValue(['variables', name]);
+
+  return (
+    <input
+      aria-label={name}
+      value={String(value ?? '')}
+      onChange={(e) => setValue(e.target.value)}
+    />
+  );
+}
+```
+
+訂閱使用 `subscribe()`、`stop()`、`status` 與 `log`，取代 `send()` 與 `response`。
+
+<auto-type-table path="props.ts" name="Playground" />
+
+| 匯出                                    | 作用                                                             |
+| ------------------------------------- | -------------------------------------------------------------- |
+| `useRequestValues()`                  | `<StfProvider />` 底下的表單所送出的 `variables` 與 `headers`，會隨表單編輯同步更新 |
+| `executeGraphQL(request)`             | 透過 HTTP POST 送出 query 或 mutation，即預設的 `fetcher`                |
+| `subscribeGraphQL(request, handlers)` | 開始訂閱，並回傳用來停止訂閱的函式                                              |
+| `inputTypeToJsonSchema(type)`         | 取得輸入型別的 JSON Schema，供變數表單使用                                    |
+
+`subscribeGraphQL()` 會依 URL scheme 選擇協定，方式與 [`subscriptionUrl`](/docs/integrations/graphql/api-page#subscriptions) 相同。
+
+```ts
+import { subscribeGraphQL } from '@fumadocs/graphql/playground';
+
+const stop = subscribeGraphQL(
+  {
+    url: 'wss://api.example.com/graphql',
+    query: 'subscription { orderUpdated(id: "1") { status } }',
+    headers: {},
+  },
+  {
+    onNext: (result) => console.log(result),
+    onError: (error) => console.error(error.type),
+    onComplete: () => console.log('completed'),
+  },
+);
+
+// 呼叫後不會再觸發任何處理函式
+stop();
+```
+
+<auto-type-table path="props.ts" name="SubscriptionHandlers" />

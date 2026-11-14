@@ -1,0 +1,6 @@
+{
+  "root": true,
+  "title": "Fumadocs CLI",
+  "description": "文件與自動化 CLI 工具",
+  "icon": "Terminal"
+}

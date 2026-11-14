@@ -1,8 +1,7 @@
 'use client';
 
-import { RootProvider } from 'fumadocs-ui/provider/base';
+import { RootProvider, type RootProviderProps } from 'fumadocs-ui/provider/base';
 import dynamic from 'next/dynamic';
-import type { ReactNode } from 'react';
 import { Tooltip } from '@base-ui/react/tooltip';
 
 const SearchDialog = dynamic(() => import('@/components/layouts/search'), {
@@ -24,9 +23,10 @@ if (item === 'true') {
 }
 `;
 
-export function Provider({ children }: { children: ReactNode }) {
+export function Provider({ i18n, children }: Pick<RootProviderProps, 'i18n' | 'children'>) {
   return (
     <RootProvider
+      i18n={i18n}
       search={{
         SearchDialog,
       }}
