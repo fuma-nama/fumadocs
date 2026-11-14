@@ -28,6 +28,5 @@ export const docsLlms = llms(source, {
 
 ${await page.data.getText('processed')}`,
   // link to the files under `/llms.mdx`
-  renderUrl: (item) =>
-    /^\/.*\.(md|txt)$/.test(item.url) ? `/llms.mdx${item.url}` : item.url,
+  renderUrl: (item) => (/^\/.*\.(md|txt)$/.test(item.url) ? `/llms.mdx${item.url}` : item.url),
 });
