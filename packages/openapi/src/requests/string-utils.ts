@@ -21,22 +21,25 @@ export function inputToString(value: unknown, format = 'application/json'): stri
 }
 
 /**
- * A form body, by the rules `multipart/form-data` encodes its fields with.
+ * The fields of a form body, by the rules `multipart/form-data` encodes them with: unset fields are left out, array
+ * items repeat the key and objects are JSON.
  */
-export function toSearchParams(value: unknown): URLSearchParams {
+export function formFields(value: unknown): [key: string, value: string][] {
   if (typeof value !== 'object' || !value)
-    throw new Error(
-      `For url encoded data, \`value\` must be an object, but received: ${typeof value}`,
-    );
+    throw new Error(`A form body must be an object, but received: ${typeof value}`);
 
-  const params = new URLSearchParams();
+  const fields: [key: string, value: string][] = [];
   for (const [key, field] of Object.entries(value)) {
     for (const item of Array.isArray(field) ? field : [field]) {
       if (item == null || Number.isNaN(item)) continue;
-      params.append(key, typeof item === 'object' ? JSON.stringify(item) : String(item));
+      fields.push([key, typeof item === 'object' ? JSON.stringify(item) : String(item)]);
     }
   }
-  return params;
+  return fields;
+}
+
+export function toSearchParams(value: unknown): URLSearchParams {
+  return new URLSearchParams(formFields(value));
 }
 
 /**

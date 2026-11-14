@@ -110,3 +110,47 @@ describe('Code Sample Generators', () => {
     }
   });
 });
+
+test('multipart code usages send one part per array item, like the playground', () => {
+  const upload: RequestData & { url: string } = {
+    method: 'post',
+    url: 'https://api.example.com/upload',
+    path: {},
+    query: {},
+    header: {},
+    cookie: {},
+    body: { name: 'Mars', files: ['@a.jpg', '@b.jpg'], meta: { a: 1 } },
+    bodyMediaType: 'multipart/form-data',
+  };
+  const context = { mediaAdapters: defaultAdapters, custom: null };
+
+  const parts = defaultAdapters['multipart/form-data'].encode({ body: upload.body }) as FormData;
+  expect([...parts.entries()]).toEqual([
+    ['name', 'Mars'],
+    ['files', '@a.jpg'],
+    ['files', '@b.jpg'],
+    ['meta', '{"a":1}'],
+  ]);
+
+  expect(curl.generate(upload, context)).toContain(
+    `-F 'files=@a.jpg' \\\n  -F 'files=@b.jpg' \\\n  -F 'meta={"a":1}'`,
+  );
+  expect(javascript.generate(upload, context)).toContain(
+    'body.append("files", "@a.jpg")\nbody.append("files", "@b.jpg")',
+  );
+  expect(python.generate(upload, context)).toContain(
+    '  ("files", (None, "@a.jpg")),\n  ("files", (None, "@b.jpg")),',
+  );
+  expect(go.generate(upload, context)).toContain(
+    'mp.WriteField("files", "@a.jpg")\n  mp.WriteField("files", "@b.jpg")',
+  );
+  expect(csharp.generate(upload, context)).toContain(
+    'body.Add(new StringContent("@a.jpg"), "files");\nbody.Add(new StringContent("@b.jpg"), "files");',
+  );
+  expect(rust.generate(upload, context)).toContain(
+    '.text("files", "@a.jpg")\n    .text("files", "@b.jpg")',
+  );
+  expect(java.generate(upload, context)).toContain(
+    String.raw`name=\"files\"\r\n\r\n@a.jpg\r\n--form-data-boundary\r\nContent-Disposition: form-data; name=\"files\"\r\n\r\n@b.jpg`,
+  );
+});

@@ -1,4 +1,4 @@
-import { cookieString, doubleQuote, indent, inputToString } from '@/requests/string-utils';
+import { cookieString, doubleQuote, formFields, indent } from '@/requests/string-utils';
 import type { CodeUsageGenerator } from '@/requests/generators';
 import { generateBodyExample } from '@/requests/media/adapter';
 
@@ -66,9 +66,8 @@ function multipartBody(body: unknown): string | undefined {
   if (!body) return;
 
   let text = '';
-  for (const [key, value] of Object.entries(body as object)) {
-    if (value == null) continue;
-    text += `--${boundary}\r\nContent-Disposition: form-data; name=${JSON.stringify(key)}\r\n\r\n${inputToString(value)}\r\n`;
+  for (const [key, value] of formFields(body)) {
+    text += `--${boundary}\r\nContent-Disposition: form-data; name=${JSON.stringify(key)}\r\n\r\n${value}\r\n`;
   }
 
   return `var body = HttpRequest.BodyPublishers.ofString(${JSON.stringify(`${text}--${boundary}--\r\n`)});`;
