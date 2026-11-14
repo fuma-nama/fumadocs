@@ -184,9 +184,11 @@ function typeTableRow(entry: DocEntry, type: string): string[] {
   return [code(`${entry.name}${entry.required ? '' : '?'}`), code(type), description];
 }
 
-/** template literal types have backticks */
+/** template literal types have backticks, the delimiter is longer than any run of them */
 function code(text: string): string {
-  return text.includes('`') ? `\`\` ${text} \`\`` : `\`${text}\``;
+  let fence = '`';
+  while (text.includes(fence)) fence += '`';
+  return fence === '`' ? `\`${text}\`` : `${fence} ${text} ${fence}`;
 }
 
 export interface TypeTableProps extends BaseTypeTableProps {
