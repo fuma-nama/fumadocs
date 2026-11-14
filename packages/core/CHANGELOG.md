@@ -1,3 +1,17 @@
+## fumadocs-core@16.19.3
+
+### Unique heading IDs next to custom IDs
+
+- Headings after a custom `[#id]` no longer reuse it as their ID.
+
+### `usePathname()` During TanStack Router Navigations
+
+- Components that mount or hydrate while TanStack Router loads the next page get the pathname of the current page, like the components that were already mounted, instead of the next page's.
+
+### Flexsearch builds each locale on its first search
+
+- `flexsearchFromSource()` and `flexsearchI18n()` build the index of a locale when it is first searched, instead of every locale on the first request.
+
 ## fumadocs-core@16.19.2
 
 ### Sections of `llms()` from the page tree
