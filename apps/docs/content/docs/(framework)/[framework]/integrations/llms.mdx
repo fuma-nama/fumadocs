@@ -123,7 +123,7 @@ The docs page `docs/$` matches every path under `/docs`, so the routes of the fi
 
 <show when={props.framework === 'waku'}>
 
-A [Hono middleware](https://hono.dev/docs/guides/middleware) in `src/middleware` serves the files. Install `hono` as a dev dependency for its types:
+API routes serve the files under `/llms.mdx`, and `renderUrl` points the links of `llms.txt` there. On a server, a [Hono middleware](https://hono.dev/docs/guides/middleware) in `src/middleware` also serves `/docs/ui.md` and the other files at their paths. Install `hono` as a dev dependency for its types:
 
 </show>
 
@@ -206,7 +206,7 @@ export default defineConfig({
 
 <show when={props.framework === 'waku'}>
 
-The middleware runs on the server, so a Waku site deployed as static files doesn't serve them.
+The API routes are prerendered, so a Waku site deployed as static files serves the files under `/llms.mdx`. The middleware needs a server.
 
 </show>
 
@@ -345,6 +345,12 @@ const markdownUrl = `${page.url}.md`;
 <show when={props.framework === 'next'}>
 
 With static export, the URL is `` `/llms.mdx${page.url}.md` `` instead.
+
+</show>
+
+<show when={props.framework === 'waku'}>
+
+Use `` `/llms.mdx${page.url}.md` `` as the URL, so static deployments serve it too.
 
 </show>
 

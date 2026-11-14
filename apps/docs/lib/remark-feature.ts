@@ -207,6 +207,8 @@ export default config;
           }),
         ],
       );
+    } else if (framework === 'waku') {
+      entries.push(['src/lib/source.ts', files['llms/docs-llms-prefixed.ts']]);
     }
     addGroup('llms/routes', framework, entries);
   }

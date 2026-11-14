@@ -18,7 +18,7 @@ export default function Page({ slugs }: PageProps<'/docs/[...slugs]'>) {
   if (!page) unstable_notFound();
 
   const MDX = page.data.body;
-  const markdownUrl = `${page.url}.md`;
+  const markdownUrl = `/llms.mdx${page.url}.md`;
   return (
     <DocsPage toc={page.data.toc}>
       <meta property="og:image" content={getPageImageUrl(page).url} />

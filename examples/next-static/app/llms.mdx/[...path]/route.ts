@@ -11,9 +11,10 @@ export async function GET(_req: Request, { params }: RouteContext<'/llms.mdx/[..
 
 export async function generateStaticParams() {
   const params: { path: string[] }[] = [];
-  for (const path of await docsLlms.files()) {
-    if (path !== '/llms.txt' && path !== '/llms-full.txt')
-      params.push({ path: path.slice(1).split('/') });
+  for (const file of await docsLlms.files()) {
+    // `/llms.txt` and `/llms-full.txt` have their own routes
+    if (!/^\/llms(-full)?\.txt$/.test(file))
+      params.push({ path: decodeURI(file).slice(1).split('/') });
   }
   return params;
 }

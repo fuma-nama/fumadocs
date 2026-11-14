@@ -13,7 +13,7 @@ export async function GET(_req: Request, { params }: RouteContext<'/llms.mdx/[..
 export async function generateStaticParams() {
   const params: { path: string[] }[] = [];
   for (const path of await docsLlms.files()) {
-    if (path.startsWith('/docs')) params.push({ path: path.slice(1).split('/') });
+    if (path.startsWith('/docs')) params.push({ path: decodeURI(path).slice(1).split('/') });
   }
   return params;
 }

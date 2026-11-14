@@ -23,14 +23,16 @@ import {
 } from './utils';
 
 /**
- * Static Next.js and React Router can't serve files beside the docs pages, like `/docs/page.md`.
- * They serve the files under this prefix instead, e.g. `/llms.mdx/docs/page.md`.
+ * Static Next.js, React Router and Waku can't serve files beside the docs pages, like `/docs/page.md`, without a
+ * server. They serve the files under this prefix instead, e.g. `/llms.mdx/docs/page.md`.
  */
 export const internalPrefix = ({
   framework,
   static: isStatic,
 }: Pick<Project, 'framework' | 'static'>) =>
-  framework === 'react-router' || (framework === 'next' && isStatic) ? '/llms.mdx' : '';
+  framework === 'react-router' || framework === 'waku' || (framework === 'next' && isStatic)
+    ? '/llms.mdx'
+    : '';
 
 /** runtime content sources expose raw Markdown as `page.data.content`, Fumadocs MDX processes it */
 export const docsLlms = ({ dynamic, ref }: SourceRef, prefix = '') => `
@@ -41,7 +43,7 @@ export const docsLlms = llms(${ref}, {
   prefix
     ? `
   // link to the files under \`${prefix}\`
-  renderUrl: (item) => (/\\.md$|\\/llms-full\\.txt$/.test(item.url) ? \`${prefix}\${item.url}\` : item.url),`
+  renderUrl: (item) => (/^\\/.*(\\.md|\\/llms-full\\.txt)$/.test(item.url) ? \`${prefix}\${item.url}\` : item.url),`
     : ''
 }
 });`;
@@ -119,17 +121,35 @@ export async function generateStaticParams() {
     for (const file of await docsLlms.files(lang)) {
       // \`/llms.txt\` and \`/llms-full.txt\` have their own routes
       if (/^\\/llms(-full)?\\.txt$/.test(file)) continue;
-      const path = file.slice(1).split('/');
+      const path = decodeURI(file).slice(1).split('/');
       if (path[0] === lang) path.shift();
       params.push({ lang, path });
     }
   }`
       : `for (const file of await docsLlms.files()) {
     // \`/llms.txt\` and \`/llms-full.txt\` have their own routes
-    if (!/^\\/llms(-full)?\\.txt$/.test(file)) params.push({ path: file.slice(1).split('/') });
+    if (!/^\\/llms(-full)?\\.txt$/.test(file)) params.push({ path: decodeURI(file).slice(1).split('/') });
   }`
   }
   return params;
+}
+`;
+
+/** `/llms.mdx/[...path]` of Waku, prerendered for static deployments */
+const wakuRoute = (route: FormattedRoute) => `import type { ApiContext } from 'waku/router';
+${imports}
+
+export async function GET(_: Request, { params }: ApiContext<'${route.path}'>) {
+  return ${serve("`/${params.path.join('/')}`")} ?? ${orNotFound};
+}
+
+export async function getConfig() {
+  const staticPaths: string[][] = [];
+  for (const file of await docsLlms.files()) {
+    // \`/llms.txt\` and \`/llms-full.txt\` have their own routes
+    if (!/^\\/llms(-full)?\\.txt$/.test(file)) staticPaths.push(decodeURI(file).slice(1).split('/'));
+  }
+  return { render: 'static' as const, staticPaths } as const;
 }
 `;
 
@@ -174,8 +194,6 @@ export function templates(
     return [
       { file: formatRoute({ segments: ['[...path]'] }, framework, i18n).file, content: astroRoute },
     ];
-  if (framework === 'waku') return [{ file: 'middleware/llms.ts', content: wakuMiddleware }];
-
   const out: { file: string; content: string; route?: FormattedRoute }[] = [];
   const add = (descriptor: RouteDescriptor, content: (route: FormattedRoute) => string) => {
     const route = formatRoute(descriptor, framework, i18n);
@@ -206,10 +224,19 @@ export function templates(
 
   for (const file of ['/llms.txt', '/llms-full.txt']) {
     add({ segments: [file] }, (route) =>
-      routeModule(framework, route, { imports, body: `${serve(`'${file}'`)}!`, revalidate: true }),
+      routeModule(framework, route, {
+        imports,
+        body: `${serve(`'${file}'`)}!`,
+        revalidate: true,
+        static: true,
+      }),
     );
   }
-  if (framework === 'next') {
+  if (framework === 'waku') {
+    add({ segments: ['llms.mdx', { param: 'path', catchAll: true }] }, wakuRoute);
+    // serves the files at their paths and negotiates `Accept` on a server
+    out.push({ file: 'middleware/llms.ts', content: wakuMiddleware });
+  } else if (framework === 'next') {
     const withLocale = i18n !== null && !project.static;
     add(
       { segments: ['llms.mdx', { param: 'path', catchAll: true }], locale: withLocale },
@@ -295,7 +322,7 @@ export const llms: Feature = {
     // SPA mode only serves prerendered files
     if (ctx.project.static && (framework === 'react-router' || framework === 'tanstack-start'))
       ctx.note(
-        'Prerender the paths of `docsLlms.files()`, see https://fumadocs.dev/docs/integrations/llms#static-output.',
+        'Prerender the files of `docsLlms`, see https://fumadocs.dev/docs/integrations/llms#static-output.',
       );
     ctx.note(
       `Add page actions to your docs page with \`MarkdownCopyButton\` and \`ViewOptionsPopover\` from 'fumadocs-ui/layouts/docs/page', the Markdown URL of a page is \`${prefix}\${page.url}.md\`.`,
