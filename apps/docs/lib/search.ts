@@ -8,6 +8,7 @@ import { frameworks, isFramework } from '@/lib/framework';
  * filters by one tag, and a page outside `[framework]` has every framework.
  */
 export const search = flexsearchFromSource(source, {
+  localeMap: { 'zh-TW': 'cjk' },
   async buildIndex(page) {
     const section = getSection(page.slugs[0]);
     const framework = page.params?.framework;

@@ -1,0 +1,209 @@
+{
+  "groupId": "cg_v4x88fikw66pzu4sok1maclp",
+  "customPrompts": [
+    {
+      "name": "Taiwan conventions",
+      "locale": "zh-TW",
+      "value": "Write Traditional Chinese as used by developers in Taiwan, with Taiwanese technical terms (程式碼, 檔案, 預設, 設定, 伺服器, 函式, 變數, 物件, 介面) rather than Mainland ones (代码, 文件 for a file, 默认, 配置 for settings, 服务器, 函数, 对象, 接口). Use full-width punctuation in prose, and put a space between Chinese and Latin words or numbers."
+    },
+    {
+      "name": "Code",
+      "locale": null,
+      "value": "Keep code identifiers, file paths, package names, commands, options, props and component names exactly as written, also in prose, except the paths of included pages (see Includes). In code blocks, translate only comments, and keep annotations like `[!code highlight]` and `// @noErrors` unchanged."
+    },
+    {
+      "name": "Includes",
+      "locale": null,
+      "value": "Every `.mdx` file is translated too, the translation of `page.mdx` is `page.<locale>.mdx`, like `page.zh-TW.mdx` for zh-TW. In the content of an `<include>` tag outside code blocks, a path to an `.mdx` file names its translation: `<include>./guide.mdx</include>` becomes `<include>./guide.zh-TW.mdx</include>`, and `<include>.shared.mdx#setup</include>` becomes `<include>.shared.zh-TW.mdx#setup</include>`. Keep includes of other files, like `./code.ts`, as written."
+    },
+    {
+      "name": "Heading IDs",
+      "locale": null,
+      "value": "End every heading of the translation with ` [#id]`, the ID of the heading it translates, so links to it keep working. When the source heading ends with `[#id]`, keep that ID. Otherwise make the ID from the text of the source heading, like GitHub does: leave out a leading step number (`1. `, `2. ` and so on) and the `[step]` marker, and the backticks of code; lowercase it; remove every character except letters, digits, spaces, `-` and `_`; then replace each space with `-`, so `includeOperations / includeTypes` becomes `includeoperations--includetypes`. IDs are unique in a file: when headings of the file make the same ID, the first keeps it, the second gets `-1`, the third `-2`, and so on, even when they are far apart. So a file with two `## Schema` headings has `[#schema]` and then `[#schema-1]`. For example, `## Getting Started` becomes `## 開始使用 [#getting-started]`, `### Install [step]` becomes `### 安裝 [step] [#install]`, and `## `loader()` API` becomes `## `loader()` API [#loader-api]`."
+    }
+  ],
+  "entries": [
+    {
+      "keyword": "Fumadocs",
+      "definition": "The name of the documentation framework, never translated."
+    },
+    {
+      "keyword": "Fumadocs Core",
+      "definition": "The headless library of Fumadocs, a product name."
+    },
+    {
+      "keyword": "Fumadocs MDX",
+      "definition": "The official content source of Fumadocs, a product name."
+    },
+    {
+      "keyword": "Fumadocs CLI",
+      "definition": "The command line tool of Fumadocs, a product name."
+    },
+    {
+      "keyword": "Sätteri",
+      "definition": "A Markdown compiler, a product name."
+    },
+    {
+      "keyword": "props",
+      "definition": "The properties passed to a React component, a technical term kept in English.",
+      "translations": {
+        "zh-TW": {
+          "translation": "props"
+        }
+      }
+    },
+    {
+      "keyword": "schema",
+      "definition": "A definition of the shape of data, like a Zod or JSON schema.",
+      "translations": {
+        "zh-TW": {
+          "translation": "schema"
+        }
+      }
+    },
+    {
+      "keyword": "hook",
+      "definition": "A React hook or a lifecycle function of a plugin.",
+      "translations": {
+        "zh-TW": {
+          "translation": "hook"
+        }
+      }
+    },
+    {
+      "keyword": "frontmatter",
+      "definition": "The YAML metadata at the top of a Markdown file.",
+      "translations": {
+        "zh-TW": {
+          "translation": "frontmatter"
+        }
+      }
+    },
+    {
+      "keyword": "render",
+      "definition": "To produce UI or HTML from components or content.",
+      "translations": {
+        "zh-TW": {
+          "translation": "算繪"
+        }
+      }
+    },
+    {
+      "keyword": "client",
+      "definition": "The browser side of an app, as opposed to the server.",
+      "translations": {
+        "zh-TW": {
+          "translation": "用戶端"
+        }
+      }
+    },
+    {
+      "keyword": "component",
+      "definition": "A React component.",
+      "translations": {
+        "zh-TW": {
+          "translation": "元件"
+        }
+      }
+    },
+    {
+      "keyword": "layout",
+      "definition": "A page structure of the docs UI, like the docs layout.",
+      "translations": {
+        "zh-TW": {
+          "translation": "版面配置"
+        }
+      }
+    },
+    {
+      "keyword": "page tree",
+      "definition": "The tree of pages and folders that navigation is built from.",
+      "translations": {
+        "zh-TW": {
+          "translation": "頁面樹"
+        }
+      }
+    },
+    {
+      "keyword": "sidebar",
+      "definition": "The navigation panel at the side of docs pages.",
+      "translations": {
+        "zh-TW": {
+          "translation": "側邊欄"
+        }
+      }
+    },
+    {
+      "keyword": "table of contents",
+      "definition": "The list of headings on a page.",
+      "translations": {
+        "zh-TW": {
+          "translation": "目錄"
+        }
+      }
+    },
+    {
+      "keyword": "plugin",
+      "definition": "An extension of a tool, like a remark plugin or a loader plugin.",
+      "translations": {
+        "zh-TW": {
+          "translation": "外掛"
+        }
+      }
+    },
+    {
+      "keyword": "content source",
+      "definition": "Where the pages of a docs site come from, like Fumadocs MDX or a CMS.",
+      "translations": {
+        "zh-TW": {
+          "translation": "內容來源"
+        }
+      }
+    },
+    {
+      "keyword": "locale",
+      "definition": "A language code, like en or zh-TW.",
+      "translations": {
+        "zh-TW": {
+          "translation": "語系"
+        }
+      }
+    },
+    {
+      "keyword": "internationalization",
+      "definition": "Supporting several languages, i18n.",
+      "translations": {
+        "zh-TW": {
+          "translation": "國際化"
+        }
+      }
+    },
+    {
+      "keyword": "code block",
+      "definition": "A block of code in Markdown.",
+      "translations": {
+        "zh-TW": {
+          "translation": "程式碼區塊"
+        }
+      }
+    },
+    {
+      "keyword": "static export",
+      "definition": "Building a site as static files that need no server.",
+      "translations": {
+        "zh-TW": {
+          "translation": "靜態匯出"
+        }
+      }
+    },
+    {
+      "keyword": "configuration",
+      "definition": "Settings of a tool or app, like a config file.",
+      "translations": {
+        "zh-TW": {
+          "translation": "設定"
+        }
+      }
+    }
+  ]
+}

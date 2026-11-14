@@ -3,7 +3,12 @@ import {
   createGenerator,
   createProject,
 } from 'fumadocs-typescript';
-import { BEFORE, SOURCE, TYPE_NAME, TYPE_TABLES } from '../app/(landing)/sections/automate/data.ts';
+import {
+  BEFORE,
+  SOURCE,
+  TYPE_NAME,
+  TYPE_TABLES,
+} from '../app/[lang]/(landing)/sections/automate/data.ts';
 import { buildRegistry } from './build-registry.ts';
 
 /** before `next build`, which traces the landing page's files ahead of prerendering it */

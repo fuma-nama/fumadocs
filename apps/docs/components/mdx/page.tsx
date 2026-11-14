@@ -22,14 +22,16 @@ import { frameworkLink } from '@/lib/remark-framework-links';
 export function getPageComponents(page: Page) {
   const framework = page.params?.framework;
   function resolveLink(href: string) {
+    // links are written against the default language
     const found = source.getPageByHref((framework && frameworkLink(href, framework)) || href, {
       dir: PathUtils.dirname(page.path),
     });
     if (!found) return;
+    const target = source.getPage(found.page.slugs, page.locale) ?? found.page;
 
     return {
-      page: found.page,
-      href: found.hash ? `${found.page.url}#${found.hash}` : found.page.url,
+      page: target,
+      href: found.hash ? `${target.url}#${found.hash}` : target.url,
     };
   }
 
@@ -61,7 +63,7 @@ export function getPageComponents(page: Page) {
     blockquote: Callout as unknown as FC<ComponentProps<'blockquote'>>,
     DocsCategory({ url = page.url }: { url?: string }) {
       const items: Item[] = [];
-      for (const item of findSiblings(source.getPageTree(), url)) {
+      for (const item of findSiblings(source.getPageTree(page.locale), url)) {
         if (item.type === 'page') items.push(item);
         else if (item.type === 'folder' && item.index) items.push(item.index);
       }

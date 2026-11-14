@@ -1,18 +1,19 @@
 import { baseOptions, linkItems, logo } from '@/components/layouts/shared';
 import { source } from '@/lib/source';
 import { getSection } from '@/lib/source/navigation';
-import type { CSSProperties, ReactNode } from 'react';
+import type { CSSProperties } from 'react';
 import { LayoutClient } from './client';
 import { getLayoutTabs } from 'fumadocs-ui/layouts/shared';
 import 'katex/dist/katex.min.css';
 
-export function Flux({ children }: { children: ReactNode }) {
+export async function Flux({ params, children }: LayoutProps<'/[lang]/docs'>) {
+  const { lang } = await params;
   const base = baseOptions();
 
   return (
     <LayoutClient
       {...base}
-      tree={source.getPageTree()}
+      tree={source.getPageTree(lang)}
       // just icon items
       links={linkItems.filter((item) => item.type === 'icon')}
       nav={{
@@ -25,7 +26,7 @@ export function Flux({ children }: { children: ReactNode }) {
         ),
       }}
       sidebar={{
-        tabs: getLayoutTabs(source.getPageTree(), {
+        tabs: getLayoutTabs(source.getPageTree(lang), {
           transform(option, node) {
             const meta = source.getNodeMeta(node);
             if (!meta || !node.icon) return option;

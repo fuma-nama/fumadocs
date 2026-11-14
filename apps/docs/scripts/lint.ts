@@ -1,11 +1,16 @@
 import { type FileObject, printErrors, scanURLs, validateFiles } from 'next-validate-link';
+import { glob } from 'node:fs/promises';
 import { blogLoader, source } from '@/lib/source';
 import { isFramework } from '@/lib/framework';
+import { i18n } from '@/lib/i18n';
 
 type AnySource = typeof blogLoader | typeof source;
 
 async function checkLinks() {
+  // the URLs of the default language, which hides the `[lang]` segment
   const scanned = await scanURLs({
+    cwd: 'app/[lang]',
+    pages: await Array.fromAsync(glob('**/page.{tsx,mdx}', { cwd: 'app/[lang]' })),
     populate: {
       '(home)/blog/[slug]': await Promise.all(
         blogLoader.getPages().map(async (page) => ({
@@ -16,7 +21,7 @@ async function checkLinks() {
         })),
       ),
       'docs/[[...slug]]': await Promise.all(
-        source.getPages().map(async (page) => {
+        source.getPages(i18n.defaultLanguage).map(async (page) => {
           return {
             value: {
               slug: page.slugs,
@@ -29,7 +34,7 @@ async function checkLinks() {
   });
 
   // links to pages of `[framework]` omit the framework segment, with the headings of every framework
-  for (const page of source.getPages()) {
+  for (const page of source.getPages(i18n.defaultLanguage)) {
     const framework = page.params?.framework;
     const meta = scanned.urls.get(page.url);
     if (!isFramework(framework) || !meta) continue;
@@ -71,6 +76,8 @@ async function getFiles(source: AnySource) {
   const files: FileObject[] = [];
   const paths = new Set<string>();
   for (const page of source.getPages()) {
+    // translations have the links of their source
+    if (page.locale && page.locale !== i18n.defaultLanguage) continue;
     // a file of `[framework]` is checked once
     if (page.type !== 'docs' || paths.has(page.data.info.fullPath)) continue;
     paths.add(page.data.info.fullPath);

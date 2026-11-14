@@ -14,7 +14,11 @@ export const docsLlms = llms(source, {
     return !folder.children.some((child) => child.type === 'folder' && child.root);
   },
   renderPage: async (page) => {
-    page = source.getPage(page.slugs, { props: { components: getPageComponents(page) } }) ?? page;
+    page =
+      source.getPage(page.slugs, {
+        language: page.locale,
+        props: { components: getPageComponents(page) },
+      }) ?? page;
     if (page.type !== 'docs' || !('getText' in page.data)) return '';
 
     const section = getSection(page.slugs[0]);

@@ -40,7 +40,7 @@ export function getPageImageUrl(page: Page) {
 
   return {
     segments,
-    url: '/' + [page.locale, 'og', ...segments].filter(Boolean).join('/'),
+    url: `/og/${page.locale}/${segments.join('/')}`,
   };
 }
 

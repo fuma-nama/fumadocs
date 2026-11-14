@@ -7,14 +7,15 @@ import type { CSSProperties } from 'react';
 import { ClientDocsLayout } from './client';
 import 'katex/dist/katex.min.css';
 
-export function DefaultLayout({ children }: LayoutProps<'/docs'>) {
+export async function DefaultLayout({ params, children }: LayoutProps<'/[lang]/docs'>) {
+  const { lang } = await params;
   const base = baseOptions();
 
   return (
     <AIChat>
       <ClientDocsLayout
         {...base}
-        tree={source.getPageTree()}
+        tree={source.getPageTree(lang)}
         // just icon items
         links={linkItems.filter((item) => item.type === 'icon')}
         nav={{
@@ -26,7 +27,7 @@ export function DefaultLayout({ children }: LayoutProps<'/docs'>) {
             </>
           ),
         }}
-        tabs={getLayoutTabs(source.getPageTree(), {
+        tabs={getLayoutTabs(source.getPageTree(lang), {
           transform(option, node) {
             const meta = source.getNodeMeta(node);
             if (!meta || !node.icon) return option;

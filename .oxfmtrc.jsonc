@@ -30,5 +30,10 @@
     "packages/core/test/fixtures/page-trees/**/*.json",
 
     "routeTree.gen.ts",
+
+    // written by `pnpm translate` in apps/docs
+    "apps/docs/content/docs/**/*.zh-TW.*",
+    "apps/docs/gt.config.json",
+    "apps/docs/gt-lock.json",
   ],
 }
