@@ -139,10 +139,16 @@ test('multipart code usages send one part per array item, like the playground', 
   expect(python.generate(upload, context)).toContain(
     '  ("files", (None, "@a.jpg")),\n  ("files", (None, "@b.jpg")),',
   );
-  for (const generator of [go, csharp, java, rust]) {
-    const code = generator.generate(upload, context);
-    expect(code).toContain('@a.jpg');
-    // the array is not sent as one JSON value
-    expect(code).not.toMatch(/a\.jpg\*",/);
-  }
+  expect(go.generate(upload, context)).toContain(
+    'mp.WriteField("files", "@a.jpg")\n  mp.WriteField("files", "@b.jpg")',
+  );
+  expect(csharp.generate(upload, context)).toContain(
+    'body.Add(new StringContent("@a.jpg"), "files");\nbody.Add(new StringContent("@b.jpg"), "files");',
+  );
+  expect(rust.generate(upload, context)).toContain(
+    '.text("files", "@a.jpg")\n    .text("files", "@b.jpg")',
+  );
+  expect(java.generate(upload, context)).toContain(
+    String.raw`name=\"files\"\r\n\r\n@a.jpg\r\n--form-data-boundary\r\nContent-Disposition: form-data; name=\"files\"\r\n\r\n@b.jpg`,
+  );
 });
