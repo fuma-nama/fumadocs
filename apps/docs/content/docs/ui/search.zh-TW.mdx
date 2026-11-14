@@ -1,6 +1,6 @@
 ---
 title: 搜尋 UI
-description: 用於文件搜尋的 UI
+description: 用於搜尋文件的 UI
 ---
 
 ## 概覽 [#overview]
@@ -20,7 +20,7 @@ export default function Layout({ children }: { children: ReactNode }) {
           // [!code highlight:4]
           search={{
             enabled: false, // 完全停用搜尋
-            SearchDialog, // 取代搜尋對話方塊
+            SearchDialog, // 替換搜尋對話方塊
           }}
         >
           {children}
@@ -33,7 +33,7 @@ export default function Layout({ children }: { children: ReactNode }) {
 
 ### 快速鍵 [#hot-keys]
 
-自訂開啟搜尋對話方塊的快速鍵，預設為 <kbd>⌘</kbd> <kbd>K</kbd> 或 <kbd>Ctrl</kbd> <kbd>K</kbd>。
+您可以自訂開啟搜尋對話方塊的快速鍵，預設為 <kbd>⌘</kbd> <kbd>K</kbd> 或 <kbd>Ctrl</kbd> <kbd>K</kbd>。
 
 ```tsx
 import { RootProvider } from 'fumadocs-ui/provider/<framework>';
@@ -52,9 +52,9 @@ import { RootProvider } from 'fumadocs-ui/provider/<framework>';
 </RootProvider>;
 ```
 
-### 參考 [#references]
+### 參考資料 [#references]
 
-所有選項的完整清單。
+完整的選項清單。
 
 <auto-type-table cwd path="content/docs/ui/props.ts" name="SearchProps" />
 
@@ -105,7 +105,7 @@ export default function DefaultSearchDialog(props: SharedProps) {
 
 ### 內容算繪器 [#content-renderer]
 
-若想改為自行算繪搜尋項目的 Markdown 內容，請傳入 `renderMarkdown`。
+若想自行算繪搜尋項目的 Markdown 內容，請傳入 `renderMarkdown`。
 
 ```tsx title="components/search.tsx"
 <SearchDialogList
@@ -123,7 +123,7 @@ export default function DefaultSearchDialog(props: SharedProps) {
 
 ### 表格 [#tables]
 
-自訂結果中表格的算繪方式。自訂的 `Table` 會自行算繪各列：
+自訂結果中表格的算繪方式。自訂的 `Table` 會自行算繪各列資料：
 
 ```tsx title="components/search.tsx"
 <SearchDialogList
@@ -136,9 +136,9 @@ export default function DefaultSearchDialog(props: SharedProps) {
 />
 ```
 
-### 語法突顯 [#highlights]
+### 醒目標示 [#highlights]
 
-符合搜尋關鍵字的文字會透過 [CSS Custom Highlight API](https://developer.mozilla.org/en-US/docs/Web/API/CSS_Custom_Highlight_API) 語法突顯，您可以使用 `::highlight(fd-search)` 設定其樣式。
+搜尋關鍵字的符合結果會透過 [CSS Custom Highlight API](https://developer.mozilla.org/en-US/docs/Web/API/CSS_Custom_Highlight_API) 醒目標示，您可以使用 `::highlight(fd-search)` 自訂其樣式。
 
 ```css title="global.css"
 ::highlight(fd-search) {
@@ -147,9 +147,9 @@ export default function DefaultSearchDialog(props: SharedProps) {
 }
 ```
 
-`<SearchDialogList />` 會語法突顯 `<SearchDialog />` 的 `data` 中的查詢字串；若未提供，則語法突顯搜尋輸入框中的內容。
+`<SearchDialogList />` 會突顯 `<SearchDialog />` 的 `data` 中的查詢字詞；若未提供，則改為突顯搜尋輸入框中的內容。
 
-若您自行算繪搜尋結果，請使用 `useHighlightQuery()` 語法突顯查詢字串。
+若您自行算繪搜尋結果，請使用 `useHighlightQuery()` 進行突顯。
 
 ```tsx title="components/search-result.tsx"
 'use client';
@@ -163,4 +163,4 @@ export function SearchResult({ query, children }: { query: string; children: Rea
 }
 ```
 
-帶有 `data-highlight-ignore` 的元素中的文字不會套用語法突顯，例如元件的徽章。
+帶有 `data-highlight-ignore` 屬性的元素，其內部文字不會被突顯，例如元件的徽章。

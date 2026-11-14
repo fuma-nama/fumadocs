@@ -6,7 +6,7 @@
     "build": "pnpm build:pre && next build && pnpm build:post",
     "build:pre": "node ./scripts/pre-build.ts",
     "build:post": "node ./scripts/post-build.ts",
-    "translate": "node ./scripts/sync-gt-context.ts && gt translate",
+    "translate": "node ./scripts/translate.ts",
     "types:check": "next typegen && tsc --noEmit",
     "clean": "rimraf .next",
     "dev": "next dev",

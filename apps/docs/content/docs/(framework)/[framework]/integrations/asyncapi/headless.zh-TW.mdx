@@ -9,13 +9,13 @@ description: 不含 UI 的 AsyncAPI 頁面狀態與邏輯。
 
 | 路徑                              | 模組                        |
 | ------------------------------- | ------------------------- |
-| `@fumadocs/asyncapi`            | 頁面：文件、文件的伺服器，以及您的元件       |
+| `@fumadocs/asyncapi`            | 頁面：文件、其伺服器，以及您的元件         |
 | `@fumadocs/asyncapi/operation`  | 單一 operation：其頻道、參數、訊息與回覆 |
-| `@fumadocs/asyncapi/playground` | 在某個 operation 的頻道上進行的工作階段 |
+| `@fumadocs/asyncapi/playground` | operation 頻道上的工作階段        |
 
 ## 頁面 [#page]
 
-`createAsyncAPIRenderer()` 會接收您的元件並回傳 `<AsyncAPIPage />`，此元件可接受產生頁面時所用的 props。
+`createAsyncAPIRenderer()` 會接收您的元件，並回傳 `<AsyncAPIPage />`，該元件接受所產生頁面的 props。
 
 ```tsx title="components/api-page.tsx"
 'use client';
@@ -41,12 +41,12 @@ export const AsyncAPIPage = createAsyncAPIRenderer({
 | 元件          | 算繪內容                                         |
 | ----------- | -------------------------------------------- |
 | `Operation` | 頁面中的每個 operation，請參閱 [Operation](#operation) |
-| `SchemaUI`  | 參數、標頭與訊息酬載的 JSON schema                      |
-| `Layout`    | 選用，包覆已算繪的 operation                          |
+| `SchemaUI`  | 參數、標頭及訊息酬載的 JSON schema                      |
+| `Layout`    | 選用，用來包覆已渲染的 operation                        |
 
 ### Hooks [#hooks]
 
-頁面內的元件可透過下列 Hook 讀取頁面狀態。
+頁面底下的元件可以讀取頁面的狀態。
 
 | Hook                 | 回傳值                   |
 | -------------------- | --------------------- |
@@ -55,11 +55,11 @@ export const AsyncAPIPage = createAsyncAPIRenderer({
 | `useServer()`        | 伺服器列表、目前選取的伺服器及其變數    |
 | `useRenderContext()` | 頁面的算繪選項，例如 `content`  |
 
-若要自行算繪 operation，請改為掛載 `<AsyncAPIProvider document={bundled} components={...} />`，取代 `createAsyncAPIRenderer()`。
+若要自行算繪 operation，請改為掛載 `<AsyncAPIProvider document={bundled} components={...} />`，以取代 `createAsyncAPIRenderer()`。
 
 ## Operation [#operation]
 
-`<OperationProvider />` 會一次推導出 operation 的詳細資訊：套用 traits，並解析其頻道、參數、訊息與回覆。
+`<OperationProvider />` 只會推導一次 operation 的詳細資訊：套用 traits，並解析其頻道、參數、訊息與回覆。
 
 ```tsx title="components/my-operation.tsx"
 'use client';
@@ -105,21 +105,21 @@ function Content() {
 }
 ```
 
-| Hook                     | 回傳值                               |
-| ------------------------ | --------------------------------- |
-| `useOperation()`         | 已解析詳細資訊的 operation                |
-| `useOperationSecurity()` | 所選伺服器與該 operation 的安全性方案，兩者皆會套用   |
-| `useChannelMessages()`   | 讀者在該頻道上接收與傳送的訊息，涵蓋該頻道所有 operation |
+| Hook                     | 回傳值                                |
+| ------------------------ | ---------------------------------- |
+| `useOperation()`         | 已解析詳細資訊的 operation                 |
+| `useOperationSecurity()` | 所選伺服器與該 operation 的安全性方案 (兩者皆會套用)  |
+| `useChannelMessages()`   | 讀者在該頻道上接收與傳送的訊息，涵蓋該頻道的所有 operation |
 
 <auto-type-table path="props.ts" name="OperationInfo" />
 
-訊息的範例取自文件本身，或根據其 schema 產生。
+訊息範例取自文件本身，或依據其 schema 產生。
 
 <auto-type-table path="props.ts" name="OperationMessage" />
 
 ## 互動測試區 [#playground]
 
-`usePlayground()` 會在 `<OperationProvider />` 內，透過傳輸層連線至 operation 的頻道。
+`usePlayground()` 會在 `<OperationProvider />` 之下，透過傳輸層連線至 operation 的頻道。
 
 ```tsx
 'use client';
@@ -128,10 +128,10 @@ import { mqttTransport } from '@/lib/mqtt-transport';
 
 export function Playground() {
   const { url, status, connect, disconnect, send, log } = usePlayground({
-    // 附加於頁面的 `playground.transports` 之外
+    // 疊加在頁面的 `playground.transports` 之上
     transports: { mqtt: mqttTransport },
   });
-  if (!url) return null; // 該伺服器沒有可用的傳輸層
+  if (!url) return null; // 此伺服器沒有可用的傳輸層
 
   return (
     <>
@@ -147,20 +147,20 @@ export function Playground() {
 }
 ```
 
-* 位址參數、query 與 auth 輸入皆由表單 `stf` 管理，`url` 會隨這些值更新。
-* 連線期間可使用 `send`，但僅能接收的連線除外。
-* 收到的訊息會與頻道上各訊息的酬載進行比對，`entry.message` 即為文件中記載的對應訊息。二進位訊息則存放於 `entry.binary`。
+* 位址參數、query 與驗證輸入都屬於表單 `stf`，`url` 會隨其值更新。
+* 連線期間即可使用 `send`，除非該連線僅能接收訊息。
+* 收到的訊息會與頻道上各訊息的酬載進行比對，`entry.message` 即為對應的文件化訊息；二進位訊息則存放於 `entry.binary`。
 
 <auto-type-table path="props.ts" name="Playground" />
 
 ### 傳輸層 [#transports]
 
-傳輸層負責連線到特定協定的伺服器，請參閱 [MQTT 範例](/docs/integrations/asyncapi/api-page#custom-transports)。系統會依序從 `usePlayground()` 的 `transports`、頁面的 `playground.transports` 中挑選，最後才使用內建的 WebSocket 傳輸層。
+傳輸層負責連線至某個協定的伺服器，範例請參考 [MQTT 範例](/docs/integrations/asyncapi/api-page#custom-transports)。系統會依序從 `usePlayground()` 的 `transports`、頁面的 `playground.transports` 中選取，最後才使用內建的 WebSocket 傳輸層。
 
-`usePlaygroundTransport()` 接受相同的 `transports`，並回傳所選伺服器的傳輸層；若沒有任何傳輸層能連線到該伺服器，則回傳 `undefined`。
+`usePlaygroundTransport()` 接受相同的 `transports`，並回傳所選伺服器對應的傳輸層；若沒有任何傳輸層能連線至該伺服器，則回傳 `undefined`。
 
 <auto-type-table path="props.ts" name="PlaygroundTransport" />
 
-`connect()` 會透過 `events` 回報以下事件：`open()`、帶有文字或 `ArrayBuffer` 的 `message(data)`，以及會結束連線的 `close()` 或 `error()`。
+`connect()` 會透過 `events` 回報：`open()`、`message(data)` (內容為文字或 `ArrayBuffer`) ，以及 `close()` 或 `error()`，後兩者會結束連線。
 
 <auto-type-table path="props.ts" name="ConnectTarget" />

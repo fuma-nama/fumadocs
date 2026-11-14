@@ -7,11 +7,11 @@ import { frameworkName } from '@/lib/framework';
 
 ## 概覽 [#overview]
 
-Fumadocs 的設計相當彈性，因此您可以輕鬆實作存取控制。
+由於 Fumadocs 的設計相當有彈性，實作存取控制十分簡單。
 
 ## 載入器 API [#loader-api]
 
-如果您使用 [`loader()`](/docs/headless/source-api) API，可以視需要動態建立載入器，並篩選內容來源中的檔案，藉此限制可存取的內容。
+如果您使用 [`loader()`](/docs/headless/source-api) API，可以視需要建立載入器，並篩選內容來源中的檔案，藉此限制可存取的內容。
 
 <show when={props.framework !== 'astro'}>
   例如，以下搭配 Fumadocs MDX 的設定只會顯示 frontmatter 含有 `permission: public` 的 MDX 檔案。
@@ -37,13 +37,13 @@ Fumadocs 的設計相當彈性，因此您可以輕鬆實作存取控制。
   });
   ```
 
-  若需要更複雜的設定，您可以將 `source` 改寫為工廠函式。
+  若設定較為複雜，您可以將 `source` 改寫為工廠函式。
 
   ```ts title="lib/source.ts"
   import { docs } from 'collections/server';
   import { loader, update } from 'fumadocs-core/source';
 
-  // 未經快取，實際使用時建議將其快取於記憶體中。
+  // 未快取，實際使用時建議快取在記憶體中。
   export function createSource(permission: 'public' | 'admin') {
     const filteredSource = update(docs.toFumadocsSource())
       .files((files) =>
@@ -88,7 +88,7 @@ Fumadocs 的設計相當彈性，因此您可以輕鬆實作存取控制。
   });
   ```
 
-  若需要更複雜的設定，您可以將 `source` 改寫為工廠函式。
+  若設定較為複雜，您可以將 `source` 改寫為工廠函式。
 
   ```ts title="src/lib/source.ts"
   import { getCollection } from 'astro:content';
@@ -98,7 +98,7 @@ Fumadocs 的設計相當彈性，因此您可以輕鬆實作存取控制。
   const pages = await getCollection('docs');
   const metas = await getCollection('meta');
 
-  // 未經快取，實際使用時建議將其快取於記憶體中。
+  // 未快取，實際使用時建議快取在記憶體中。
   export function createSource(permission: 'public' | 'admin') {
     const filteredSource = update(toFumadocsSource(pages, metas))
       .files((files) =>
@@ -133,13 +133,13 @@ const page = source.getPage(params.slugs);
 
 ### 優點 [#advantages]
 
-這種做法的特別之處在於，**存取權限在輸入層級就已受到限制**，而不是在算繪階段或建置時才處理。
+這種做法的特別之處在於，**存取限制是在輸入層級就套用**，而不是在算繪階段或建置時才進行。
 
-如此便能確保受保護的內容被完整過濾，同時不必犧牲任何彈性。
+如此可確保受保護的內容完全被過濾掉，且絲毫不犧牲彈性。
 
 ## 自訂實作 [#custom-implementation]
 
-若不使用載入器 API，請在 {frameworkName(props.framework)} 中自行實作存取控制，例如在路由或中介軟體中處理。
+若不使用載入器 API，請直接在 {frameworkName(props.framework)} 中實作存取控制，例如在路由或中介軟體中處理。
 
 例如，若要限制特定頁面的存取權限：
 
@@ -214,7 +214,7 @@ const page = source.getPage(params.slugs);
     // 算繪頁面...
   }
 
-  // 每次請求時算繪，因為靜態頁面建置時沒有使用者
+  // 每次請求時算繪；靜態頁面建置時沒有使用者資訊
   export const getConfig = async () => ({ render: 'dynamic' }) as const;
   ```
 </show>
@@ -240,6 +240,6 @@ const page = source.getPage(params.slugs);
   ```
 </show>
 
-請注意，頁面樹 (側邊欄項目) 、搜尋、Markdown 路由及其他細節都需由您自行處理。
+請注意，頁面樹 (側邊欄項目) 、搜尋、Markdown 路由及其他細節都需要由您自行處理。
 
-這種做法的彈性最大，但 Fumadocs 不會替您處理存取控制。由於設定較為繁瑣，實作時請參考 {frameworkName(props.framework)} 的文件。
+這種做法彈性最高，但 Fumadocs 不會替您處理存取控制。設定較為費工，實作時請參閱 {frameworkName(props.framework)} 的文件。

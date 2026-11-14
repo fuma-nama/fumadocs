@@ -5,15 +5,15 @@ description: 在您的文件中使用 TypeScript Twoslash
 
 ## 使用方式 [#usage]
 
-由於預設的程式碼語法突顯器 [Shiki](https://github.com/shikijs/shiki) 提供了 Twoslash 整合，只需加入一個 transformer 即可。
-型別資訊由原生的 TypeScript 7 編譯器解析，並以您專案的工作目錄為基準。
+由於預設的程式碼語法突顯器 [Shiki](https://github.com/shikijs/shiki) 已提供 Twoslash 整合，您只需加入一個 transformer 即可。
+型別資訊由原生 TypeScript 7 編譯器負責解析，並以您專案的工作目錄為基準。
 
 ```package-install
 fumadocs-twoslash
 ```
 
 <show when={props.framework === 'next'}>
-  將 `typescript` 從伺服器 bundle 中排除，改為外部套件：
+  將 `typescript` 從伺服器端 bundle 中排除，改為外部套件：
 
   ```js title="next.config.mjs"
   const config = {
@@ -91,7 +91,7 @@ export function getMDXComponents(components?: MDXComponents) {
 }
 ```
 
-現在您可以在程式碼區塊加上 `twoslash` meta 字串。
+現在您可以在程式碼區塊中加上 `twoslash` meta 字串。
 
 ````md
 ```ts twoslash

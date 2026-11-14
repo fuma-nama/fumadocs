@@ -5,17 +5,17 @@ description: 為您的文件網站實作文件搜尋功能
 
 ## 搜尋 UI [#search-ui]
 
-如需自訂文件搜尋的 UI，請參閱[搜尋 UI](/docs/ui/search)。
+若要了解如何自訂文件搜尋的 UI，請參閱[搜尋 UI](/docs/ui/search)。
 
 ## 搜尋用戶端 [#search-client]
 
-您可以依據所使用的搜尋引擎選擇並設定搜尋用戶端，預設為 ZBSearch。
+您可以依據所使用的搜尋引擎，選擇並設定搜尋用戶端，預設為 ZBSearch。
 
 <DocsCategory />
 
 ### 搜尋 Hook [#search-hooks]
 
-搜尋用戶端提供 React hook (例如 `useFetchSearch()` 和 `useAlgoliaSearch()`) ，可回傳 `<SearchDialog />` 的 props：
+搜尋用戶端提供了 React hook，例如 `useFetchSearch()` 和 `useAlgoliaSearch()`，可回傳 `<SearchDialog />` 所需的 props：
 
 ```tsx
 import { useFetchSearch } from 'fumadocs-core/search/client';
@@ -25,15 +25,15 @@ const search = useFetchSearch();
 <SearchDialog {...search} {...props} />;
 ```
 
-除了供搜尋輸入框使用的 `search` 與 `onSearchChange` 之外，它們還會回傳：
+除了用於搜尋輸入框的 `search` 與 `onSearchChange` 之外，這些 Hook 還會回傳：
 
-* `data`：最後一次成功的搜尋，在重新搜尋期間及發生錯誤後都會保留。
-  * `items`：該次搜尋的結果，其內容也會解析為 [hast](https://github.com/syntax-tree/hast)，並存放於 `hastContent`。表格的各列會歸入同一個 `table` 項目。
+* `data`：最近一次成功的搜尋，在重新搜尋期間以及發生錯誤後都會保留。
+  * `items`：該次搜尋的結果，其內容也會解析為 [hast](https://github.com/syntax-tree/hast)，並以 `hastContent` 提供。表格的各列會歸入同一個 `table` 項目。
   * `query`：該次搜尋所使用的查詢字串。
-* `error`：最後一次搜尋失敗時會設定此值。
+* `error`：最近一次搜尋失敗時會設定此值。
 * `isLoading`：針對 `search` 的搜尋是否仍在進行中。
 
-若要使用其他搜尋引擎，請將經過 memoize 的搜尋函式傳給 `experimental_useSearch()`，函式變更時便會重新搜尋。
+若要使用其他搜尋引擎，請將經過 memoize 的搜尋函式傳入 `experimental_useSearch()`；當該函式變更時，便會重新搜尋。
 
 ```tsx
 'use client';

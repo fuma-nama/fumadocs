@@ -5,19 +5,19 @@ description: 適用於其他搜尋方案。
 
 ## 概覽 [#overview]
 
-您可以將任何搜尋引擎與 Fumadocs 整合。
+您可以將任何搜尋引擎整合到 Fumadocs 中。
 
 ### 搜尋索引 [#search-indexes]
 
 <show when={props.framework !== 'astro'}>
-  Fumadocs MDX 會在執行階段提供頁面的搜尋索引。
+  Fumadocs MDX 會在執行階段提供您頁面的搜尋索引。
 </show>
 
 <show when={props.framework === 'astro'}>
-  `@fumadocs/astro` 會在執行階段提供頁面的搜尋索引。
+  `@fumadocs/astro` 會在執行階段提供您頁面的搜尋索引。
 </show>
 
-若要以靜態方式匯出這些索引，請新增一個預先算繪的 `static.json` 路由，並在每次建置完成後以腳本處理其中的紀錄：
+若要將其靜態匯出，請新增一個預先算繪的 `static.json` 路由，並在每次建置後以指令碼處理其中的紀錄：
 
 <feature>search/custom</feature>
 

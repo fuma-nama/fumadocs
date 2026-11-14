@@ -1,11 +1,11 @@
 ---
 title: 視覺化編輯器
-description: 以視覺化方式撰寫 Markdown 與 MDX，並以您的檔案作為唯一的事實來源。
+description: 以視覺化方式撰寫 Markdown 與 MDX，並以您的檔案作為唯一可信來源。
 ---
 
 ## 簡介 [#introduction]
 
-[Fumadocs Editor](https://editor.fumadocs.dev) 是一款專為 Fumadocs MDX 打造的視覺化編輯器。
+[Fumadocs Editor](https://editor.fumadocs.dev) 是 Fumadocs MDX 的視覺化編輯器。
 
 ### 從 Studio 開始 [#start-with-studio]
 
@@ -23,12 +23,12 @@ Studio 需要 **Node.js 24 或更新版本**。它會尋找 `content/docs`，若
 npx @fumadocs-editor/studio --root ./docs
 ```
 
-編輯內容會自動儲存到磁碟，您在程式碼編輯器中所做的變更也會合併到目前開啟的文件中。
-檔案清單會依照您的 `meta.json` 排序。
+編輯內容會自動儲存至磁碟，您在程式碼編輯器中所做的變更也會合併至目前開啟的文件。
+檔案清單會依照 `meta.json` 中的順序排列。
 
-請在 Git 中檢閱變更，再透過網站平常使用的部署流程發布。
+請在 Git 中檢閱變更，再透過網站平時使用的部署流程發布。
 
-> Studio 僅能編輯既有檔案。如需建立、重新命名或刪除檔案，請改用程式碼編輯器或檔案管理員。
+> Studio 只能編輯現有檔案。若要建立、重新命名或刪除檔案，請改用程式碼編輯器或檔案管理員。
 
 ### 作為函式庫使用 [#use-as-a-library]
 
@@ -44,17 +44,17 @@ npx @fumadocs-editor/studio --root ./docs
   </Card>
 
   <Card title="檔案同步" href="https://editor.fumadocs.dev/sync">
-    透過開發伺服器，將嵌入式編輯器連接至檔案。
+    透過開發伺服器，將內嵌編輯器與檔案連接。
   </Card>
 </Cards>
 
 ### 使用元件撰寫 [#write-with-components]
 
-內建編輯支援涵蓋 Callout、Cards、Steps、Accordions 與 Files 等 Fumadocs 元件。
+內建編輯支援涵蓋 Fumadocs 元件，例如 Callout、Cards、Steps、Accordions 和 Files。
 
-自訂元件可透過[元件規格](https://editor.fumadocs.dev/components)定義各自的可編輯區域。
+自訂元件可透過[元件規格](https://editor.fumadocs.dev/components)定義專屬的可編輯區域。
 
-<Callout title="保留您現有的內容設定">
+<Callout title="沿用您現有的內容設定">
   編輯器直接處理您的 Markdown 與 MDX 檔案。您可以繼續使用 [Fumadocs MDX](/docs/mdx) 載入
-  這些檔案，並以您的 React 框架算繪發布的網站。
+  這些檔案，並透過您的 React 框架算繪發布後的網站。
 </Callout>

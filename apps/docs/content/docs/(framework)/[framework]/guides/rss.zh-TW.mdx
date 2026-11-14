@@ -5,7 +5,7 @@ description: 為您的文件或部落格產生 RSS 摘要。
 
 ## 設定 [#setup]
 
-您可以建立 摘要 物件：
+您可以建立 feed 物件：
 
 ```ts title="lib/rss.ts"
 import { Feed } from 'feed';
@@ -45,7 +45,7 @@ export function getRSS() {
 }
 ```
 
-接著透過路由提供 RSS 摘要：
+接著透過路由提供 RSS：
 
 <show when={props.framework === 'next'}>
   ```ts title="app/rss.xml/route.ts"
@@ -118,9 +118,9 @@ export function getRSS() {
   ```
 </show>
 
-### 連結 摘要 [#link-the-feed]
+### 連結 Feed [#link-the-feed]
 
-請在頁面中加入指向 摘要 的連結，讓 摘要 閱讀器能夠找到它：
+請在您的頁面中加入 Feed 的連結，讓 Feed 閱讀器能夠找到它：
 
 <show when={props.framework === 'next'}>
   ```ts title="app/layout.tsx"

@@ -1,16 +1,16 @@
 ---
-title: Trieve Search
-description: 將 Trieve Search 整合至 Fumadocs
+title: Trieve 搜尋
+description: 將 Trieve 搜尋整合至 Fumadocs
 ---
 
 > 此整合由社群維護。
 
 ## 簡介 [#introduction]
 
-Trieve 整合會自動設定 Trieve Search，作為網站搜尋功能。
+Trieve 整合會自動設定 Trieve Search，用於網站搜尋。
 
-預設情況下，它會為文件中的**每個段落**各建立一個 chunk，這也是 Trieve
-官方建議的做法。
+預設情況下，它會為文件中的**每個段落**各建立一個 chunk，這也是
+Trieve 官方建議的做法。
 
 ## 設定 [#setup]
 
@@ -22,8 +22,8 @@ trieve-ts-sdk trieve-fumadocs-adapter
 
 ### 註冊 Trieve [#sign-up-on-trieve]
 
-請註冊帳號並建立一個資料集 (dataset) ，接著取得 2 組 API 金鑰：一組僅有讀取權限，另一組則具備管理員權限，可建立及刪除 chunk。
-請將資料集 ID 與管理員金鑰儲存在 `.env.local` 中，以供同步使用：
+請先註冊並建立一個資料集 (dataset) ，接著取得 2 組 API 金鑰：一組僅有讀取權限，另一組則具備管理員權限，可用來建立及刪除 chunk。
+請將資料集 ID 與管理員金鑰存放在 `.env.local` 中，以便進行同步：
 
 ```dotenv
 TRIEVE_DATASET_ID="dataset ID"
@@ -31,17 +31,17 @@ TRIEVE_ADMIN_API_KEY="admin API key"
 ```
 
 <Callout title="注意">
-  其中一組 API Key 應僅具備唯讀權限，供公開的搜尋功能使用；另一組則應具備
-  管理員權限，用於建立與刪除 chunk。
+  其中一組 API Key 應僅具備唯讀權限，供對外公開的搜尋使用；另一組則需具備
+  管理員權限，用於建立及刪除 chunk。
 </Callout>
 
 ### 同步資料集 [#sync-dataset]
 
-Trieve 使用的是 [Algolia 整合](/docs/headless/search/algolia)的紀錄。請透過預先算繪的 `static.json` 路由匯出這些紀錄，並在每次建置後以指令稿將其同步至 Trieve：
+Trieve 會沿用 [Algolia 整合](/docs/headless/search/algolia)的紀錄。請透過預先算繪的 `static.json` 路由匯出這些紀錄，並在每次建置後以指令碼將其同步至 Trieve：
 
 <feature>search/trieve</feature>
 
-`build` 指令稿會在每次建置時同步資料，請在您的部署平台上設定相同的環境變數。
+`build` 指令碼會在每次建置時進行同步，因此請在您的部署平台上設定相同的變數。
 
 ### 搜尋 UI [#search-ui]
 
@@ -65,7 +65,7 @@ export default function CustomSearchDialog(props: SharedProps) {
 
 1. 將 `apiKey` 和 `datasetId` 替換為您要使用的值。
 
-2. 將預設的搜尋對話方塊替換為您新建立的搜尋對話方塊。
+2. 將預設的搜尋對話方塊替換為您新建立的版本。
 
 ### 搜尋用戶端 [#search-client]
 
@@ -126,7 +126,7 @@ import SearchDialog from 'trieve-fumadocs-adapter/components/dialog/search';
 
 #### 搜尋用戶端 [#search-client-1]
 
-`tag_set` 欄位是用來篩選的屬性。若要依標籤篩選索引，請在 Trieve 搜尋用戶端中使用篩選器。
+`tag_set` 欄位是用於篩選的屬性。若要依標籤篩選索引，請在 Trieve 搜尋用戶端中使用篩選功能。
 
 ```json
 {
@@ -139,7 +139,7 @@ import SearchDialog from 'trieve-fumadocs-adapter/components/dialog/search';
 }
 ```
 
-或是使用 `useTrieveSearch` hook：
+或使用 `useTrieveSearch` hook：
 
 ```ts
 import { TrieveSDK } from 'trieve-ts-sdk';

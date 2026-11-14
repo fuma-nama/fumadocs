@@ -1,3 +1,3 @@
 # written by `pnpm translate` in apps/docs, collapsed in pull request diffs
 apps/docs/content/docs/**/*.zh-TW.* linguist-generated
-apps/docs/gt-lock.json linguist-generated
+apps/docs/translations.lock.json linguist-generated

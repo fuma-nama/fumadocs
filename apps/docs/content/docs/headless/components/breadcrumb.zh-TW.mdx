@@ -3,13 +3,13 @@ title: Breadcrumb
 description: 位於畫面頂端的導覽元件
 ---
 
-用於在文件中實作 Breadcrumb 的 hook，會根據指定的頁面樹回傳頁面的 Breadcrumb 項目。
+用於在您的文件中實作 Breadcrumb 的 hook。它會根據指定的頁面樹，回傳該頁面的 Breadcrumb 項目。
 
 > 若資料夾有索引頁面，則會以該頁面作為項目。
 
 ## 使用方式 [#usage]
 
-它匯出了 `useBreadcrumb` hook：
+它匯出一個 `useBreadcrumb` hook：
 
 ```ts twoslash
 declare const tree: any;
@@ -25,7 +25,7 @@ const items = useBreadcrumb(pathname, tree);
 
 ### 範例 [#example]
 
-已套用樣式的範例。搭配對應的[框架提供者](/docs/headless#installation)，Fumadocs 的 `usePathname()` 與 `Link` 可在任何框架上運作。
+以下是一個已套用樣式的範例。搭配對應的[框架 provider](/docs/headless#installation)，Fumadocs 的 `usePathname()` 與 `Link` 可在任何框架上運作。
 
 ```tsx
 'use client';

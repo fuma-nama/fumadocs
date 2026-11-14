@@ -5,7 +5,7 @@ description: 用於操作頁面樹的常用工具函式。
 
 ## 使用方式 [#usage]
 
-請參閱[定義](/docs/headless/page-tree)，進一步了解頁面樹。
+如需進一步了解頁面樹，請參閱[定義](/docs/headless/page-tree)。
 
 ```ts
 import {
@@ -33,7 +33,7 @@ const siblings = findSiblings(pageTree, '/url/to/page');
 // 取得頁面的父節點
 const parent = findParent(pageTree, '/url/to/page');
 
-// 尋找第一個符合條件之節點的路徑
+// 尋找通往第一個符合條件節點的路徑
 const path = findPath(
   pageTree.children,
   // 比對函式

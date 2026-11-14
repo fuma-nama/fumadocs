@@ -5,7 +5,7 @@ description: 重複使用其他檔案的內容。
 
 ## 使用方式 [#usage]
 
-無論使用 unified 或 Sätteri，Fumadocs MDX 都會啟用 [Remark 引入](/docs/headless/mdx/remark-include)。
+無論使用 unified 或 Sätteri，Fumadocs MDX 都會預設啟用 [Remark 引入](/docs/headless/mdx/remark-include)。
 
 ### 內容 [#content]
 
@@ -20,12 +20,12 @@ description: 重複使用其他檔案的內容。
 ```
 
 <Callout type="warn">
-  請勿將不受信任的路徑傳給 `<include>`，因為它能嵌入您電腦上的任何檔案，例如 `.env`。
+  請勿將不受信任的路徑傳給 `<include>`，因為它可以嵌入您電腦上的任何檔案，例如 `.env`。
 </Callout>
 
-<Callout title="Markdown 檔案">
-  Markdown (`.md`) 檔案不支援 JSX 語法，請改用 directive 語法。
-  Sätteri 預設會解析 directive；若使用 unified，請加入 `remark-directive` remark 外掛：
+<Callout title="Markdown 的用法">
+  Markdown (`.md`) 檔案不支援 JSX 語法，請改用指令 (directive) 語法。
+  Sätteri 預設會解析指令；若使用 unified，請加入 `remark-directive` 這個 remark 外掛：
 
   ```ts title="source.config.ts"
   import { defineConfig } from 'fumadocs-mdx/config';
@@ -60,7 +60,7 @@ description: 重複使用其他檔案的內容。
 ::include[page.md]{lang=md meta='title="lib.md"'}
 ```
 
-您也可以只引入內容中的特定區塊：
+您也可以只引入內容中的特定區段：
 
 ```ts title="code.ts"
 export function fn() {
@@ -80,7 +80,7 @@ export function fn() {
 
 ### `cwd` [#cwd]
 
-從 cwd 解析相對路徑，而非從目前的檔案：
+以 cwd 為基準解析相對路徑，而非以目前檔案為基準：
 
 ```mdx tab="MDX"
 <include cwd lang="tsx" meta='title="lib.ts"'>
@@ -96,9 +96,9 @@ export function fn() {
 
 引用內容檔案時，您可以只引入文件中的特定部分。
 
-### 區段 [#section]
+### Section [#section]
 
-使用 `<section />` 標籤包住內容：
+以 `<section />` 標籤包覆：
 
 ```mdx tab="a.mdx"
 ## Hello World
@@ -109,7 +109,7 @@ This is not included.
 ```
 
 ```mdx tab="b.mdx"
-Include the content from `a.mdx`:
+引入 `a.mdx` 的內容：
 
 <include>a.mdx#test</include>
 ```
@@ -134,7 +134,7 @@ This is not included.
 
 ### 標題 [#heading]
 
-引入特定標題底下的內容。
+引入特定標題下的內容。
 
 ```mdx tab="a.mdx"
 ## Included Section
@@ -147,7 +147,7 @@ Some random text.
 ```
 
 ```mdx tab="b.mdx"
-Content under the heading:
+該標題下的內容：
 
 <include>a.mdx#included-section</include>
 ```
@@ -165,7 +165,7 @@ Some random text.
 ```
 
 ```md tab="b.md"
-Content under the heading:
+該標題下的內容：
 
 ::include[a.mdx#included-section]
 ```

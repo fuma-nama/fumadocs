@@ -1,19 +1,19 @@
 ---
 title: Privatus Analytics
-description: 不使用 cookie，也能掌握有多少人閱讀您的文件。
+description: 不使用 Cookie，也能掌握有多少人閱讀您的文件。
 staticParams:
   - framework: next
 ---
 
 > 這是由社群維護的整合。
 
-您想知道讀者閱讀了哪些文件頁面，以及他們從哪裡來。許多分析工具會使用 cookie，因此在許多國家，您必須先顯示 cookie 同意彈出視窗。不少訪客會選擇拒絕，而這些訪客永遠不會出現在您的統計數據中。
+您想知道讀者看了哪些文件頁面，以及他們從哪裡來。許多分析工具會使用 Cookie，因此在不少國家/地區，您必須先跳出 Cookie 同意視窗。很多訪客會選擇拒絕，這些人就完全不會出現在您的統計數據中。
 
-[Privatus Analytics](https://privatusanalytics.com) 不使用 cookie 就能統計造訪次數，也不會保留 IP 位址，並會排除已知的機器人流量。[`@privatus-analytics/next`](https://www.npmjs.com/package/@privatus-analytics/next) 套件只需一個標籤，就能將其指令碼加入您的 Fumadocs 網站。另提供免費方案，每月 10,000 個事件，最多可用於 3 個網站，且無需綁定信用卡。
+[Privatus Analytics](https://privatusanalytics.com) 不使用 Cookie 即可計算造訪次數，也不會保留任何 IP 位址，並會排除已知的機器人流量。[`@privatus-analytics/next`](https://www.npmjs.com/package/@privatus-analytics/next) 套件只需一個標籤，就能將其指令碼加入您的 Fumadocs 網站。另有免費方案，每月 10,000 個事件，最多可用於 3 個網站，而且不需綁定信用卡。
 
 ## 設定 [#setup]
 
-您需要一組 Privatus Analytics 網站 ID。此 ID 以 `pa_` 開頭，可在 **Site settings** 的 **Tracking** 中找到。
+您需要 Privatus Analytics 的網站 ID。它以 `pa_` 開頭，可在 **Site settings** 的 **Tracking** 中找到。
 
 ### 1. 安裝套件 [#install-the-package]
 
@@ -21,17 +21,17 @@ staticParams:
 @privatus-analytics/next
 ```
 
-### 2. 設定網站 ID [#set-your-site-id]
+### 2. 設定您的網站 ID [#set-your-site-id]
 
 ```bash title=".env"
 PRIVATUS_SITE_ID=pa_YOURSITEID
 ```
 
-請在執行 `next build` 的環境中設定此值，而非只在網站執行的環境中設定。Next.js 在建置時算繪的頁面會在建置當下讀取此值，因此若它只在執行階段才存在，這些頁面就不會包含追蹤程式。您也可以改用 `siteId` 屬性將它傳給該標籤。
+請在執行 `next build` 的環境中設定此值，而不只是在網站執行的環境中設定。Next.js 在建置時算繪的頁面會於建置當下讀取此值，因此若該值只存在於執行階段，這些頁面就不會載入追蹤程式。您也可以改用 `siteId` 將它傳給該元件標籤。
 
-### 3. 加入標籤 [#add-the-tag]
+### 3. 加入標記 [#add-the-tag]
 
-將 `<PrivatusAnalyticsTag />` 放入根版面配置的 `<head>` 中。它也能在伺服器元件中使用。版面配置的其他部分維持原樣即可。
+請將 `<PrivatusAnalyticsTag />` 放在根版面配置的 `<head>` 中，它也能在伺服器元件中使用。版面配置的其他部分則維持原樣即可。
 
 ```tsx title="app/layout.tsx"
 import { RootProvider } from 'fumadocs-ui/provider/next';
@@ -52,11 +52,11 @@ export default function Layout({ children }: { children: ReactNode }) {
 }
 ```
 
-此標籤只會在正式環境 (`next build` 與 `next start`) 中輸出，在 `next dev` 中則不會輸出任何內容，因此您撰寫內容時自己的瀏覽不會被計入。Fumadocs 切換頁面時不會整頁重新載入，而指令碼會自行偵測每一次的頁面切換。
+此標籤只會在正式環境 (`next build` 與 `next start`) 中輸出，在 `next dev` 中則不會輸出任何內容，因此您撰寫文件期間自己的瀏覽不會被計入。Fumadocs 切換頁面時不會整頁重新載入，指令碼會自行偵測每次的頁面切換。
 
 ## 不使用套件 [#without-the-package]
 
-您也可以改為手動加入指令碼標籤：
+您也可以改為手動加入 script 標籤：
 
 ```tsx title="app/layout.tsx"
 <head>
@@ -71,7 +71,7 @@ export default function Layout({ children }: { children: ReactNode }) {
 
 ## 追蹤事件 [#track-events]
 
-若要統計某個動作 (例如下載) 的次數，請在用戶端元件中呼叫 `usePrivatus()`。這需要安裝以下套件：
+若要統計某個動作 (例如下載) 的次數，請在用戶端元件中呼叫 `usePrivatus()`。此功能需要安裝以下套件：
 
 ```tsx
 'use client';
@@ -85,7 +85,7 @@ export function DownloadButton() {
 }
 ```
 
-如果您是手動加入指令碼標籤，也可以改為加入一個屬性，指令碼會在瀏覽器中讀取這個屬性：
+如果您是手動加入 script 標籤，也可以改為加入屬性，指令碼會在瀏覽器中讀取該屬性：
 
 ```tsx
 <a href="/guide.pdf" data-privatus-event="Download" data-privatus-prop-file="guide.pdf">
@@ -93,4 +93,4 @@ export function DownloadButton() {
 </a>
 ```
 
-完整的設定選項請參閱[套件 README](https://github.com/Privatus-Analytics/js/tree/main/next)，儀表板的使用說明則請參閱 [Privatus Analytics 文件](https://privatusanalytics.com/docs)。
+所有設定請參閱[套件 README](https://github.com/Privatus-Analytics/js/tree/main/next)，儀表板的使用說明則請參閱 [Privatus Analytics 文件](https://privatusanalytics.com/docs)。

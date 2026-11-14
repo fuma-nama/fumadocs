@@ -7,18 +7,18 @@ staticParams:
 ---
 
 <Callout type="warn" title="實驗性功能">
-  Python docgen 目前仍處於實驗階段，請謹慎使用。
+  Python 文件產生 (docgen) 功能仍處於實驗階段，請謹慎使用。
 </Callout>
 
 ## 簡介 [#introduction]
 
-`fumadocs-python` 會根據 Python 套件的原始碼與 docstring 產生文件。透過一個 Python 指令，即可將套件內容收集成 JSON 檔案；您可以直接將它作為執行階段的內容來源提供，也可以轉換成 MDX 檔案。
+`fumadocs-python` 會根據 Python 套件的原始碼與 docstring 產生文件。透過一個 Python 指令將套件內容收集成 JSON 檔案後，您可以直接將它作為執行階段的內容來源提供，或將其轉換為 MDX 檔案。
 
-每個模組與類別都會各自成為一個頁面，其中的函式、屬性與參數則由隨附的元件算繪。
+每個模組與類別都會產生一個頁面，其中的函式、屬性與參數則由內附的元件負責算繪。
 
 ## 設定 [#setup]
 
-安裝套件：
+請安裝套件：
 
 ```package-install
 fumadocs-python shiki
@@ -26,7 +26,7 @@ fumadocs-python shiki
 
 ### 產生 JSON [#generate-json]
 
-請安裝 Python 指令，用來從您的 Python 套件中收集文件：
+請安裝 Python 指令，它會從您的 Python 套件收集文件：
 
 ```bash
 pip install ./node_modules/fumadocs-python
@@ -38,13 +38,13 @@ pip install ./node_modules/fumadocs-python
 fumapy-generate httpx
 ```
 
-此指令會將 `httpx.json` 寫入目前的目錄，若要變更位置，請傳入 `--dir`。
+此指令會將 `httpx.json` 寫入目前目錄，若要變更位置，請傳入 `--dir`。
 
 `Parameters:` 和 `Returns:` 等 docstring 區段會以 Google 風格解析；若要使用其他風格，請傳入 `--docstring-style numpy` 或 `--docstring-style sphinx`。不屬於這些風格的 docstring 則會以 Markdown 算繪。
 
 ### 樣式 [#styles]
 
-這些元件以 Tailwind CSS 撰寫樣式，請加入對應的 preset：
+這些元件以 Tailwind CSS 撰寫樣式，請加入預設集 (preset) ：
 
 ```css title="Tailwind CSS"
 @import 'tailwindcss';
@@ -56,7 +56,7 @@ fumapy-generate httpx
 
 ### 設定來源 [#configure-source]
 
-從 JSON 檔案建立來源，並將它傳給 `loader()`：
+從 JSON 檔案建立來源，並將它傳入 `loader()`：
 
 ```ts title="lib/source.ts"
 import { loader } from 'fumadocs-core/source';
@@ -64,8 +64,8 @@ import { createPython } from 'fumadocs-python';
 
 const python = createPython({
   file: './httpx.json',
-  // 頁面會依根模組分組，放在以其命名的目錄中，例如 `httpx._client.Client` 的路徑為 `/docs/httpx/_client/Client`。
-  // 若設為 "none"，則改為直接放在來源的根層級。
+  // 頁面會依根模組名稱分組到同名目錄中，例如 `httpx._client.Client` 的網址為 `/docs/httpx/_client/Client`。
+  // 設為 "none" 則會改將頁面放在來源的根層級。
   groupBy: 'module',
 });
 
@@ -134,7 +134,7 @@ export const source = loader(await python.staticSource(), {
 
 ### Dynamic 來源 [#dynamic-source]
 
-`staticSource()` 只會讀取 JSON 檔案一次。若要在不重新啟動的情況下載入重新產生的檔案，請改用 `dynamicSource()` 搭配 `dynamicLoader()`：
+`staticSource()` 只會讀取 JSON 檔案一次。若想在不重新啟動的情況下套用重新產生的檔案，請改用 `dynamicSource()` 搭配 `dynamicLoader()`：
 
 ```ts title="lib/source.ts"
 import { dynamicLoader } from 'fumadocs-core/source';
@@ -153,11 +153,11 @@ export function getSource() {
 }
 ```
 
-呼叫 `pythonLoader.invalidate()` 後才會重新讀取檔案；在此之前，`getSource()` 都會回傳同一個[內容載入器](/docs/headless/source-api)實例。
+呼叫 `pythonLoader.invalidate()` 後會重新讀取檔案；在此之前，`getSource()` 都會回傳同一個[內容載入器](/docs/headless/source-api)實例。
 
 ### 編譯器 [#compiler]
 
-原始碼與 docstring 範例會使用 [Shiki](https://shiki.style) 進行語法突顯，可透過 `rehypeCodeOptions` 進行設定。您也可以傳入 remark/rehype 外掛：
+原始碼與 docstring 範例會使用 [Shiki](https://shiki.style) 進行語法突顯，可透過 `rehypeCodeOptions` 調整相關設定。您也可以傳入 remark/rehype 外掛：
 
 ```ts title="lib/source.ts"
 import { createPython } from 'fumadocs-python';
@@ -179,7 +179,7 @@ const python = createPython({
 
 ## 產生 MDX 檔案 [#generate-mdx-files]
 
-您也可以改將 JSON 轉換成 MDX 檔案，與其他內容放在一起。模組與類別之間的連結會直接寫入檔案，因此 `baseUrl` 必須與輸出目錄實際提供服務的位置一致：
+您也可以改為將 JSON 轉換成 MDX 檔案，並與其他內容放在一起。模組與類別之間的連結會直接寫入檔案，因此 `baseUrl` 必須與輸出目錄實際對外提供的路徑一致：
 
 ```js tab="scripts/generate-docs.mjs"
 import { rimraf } from 'rimraf';

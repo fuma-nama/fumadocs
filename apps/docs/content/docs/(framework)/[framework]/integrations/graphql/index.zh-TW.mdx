@@ -34,7 +34,7 @@ import { createGraphQL } from '@fumadocs/graphql/server';
 export const graphql = createGraphQL({
   // GraphQL schema，可接受：
   // SDL 檔案／URL（包含 `extend type`）、SDL 文字、
-  // introspection 查詢結果，以及 `GraphQLSchema` 實例。
+  // 自省（introspection）結果，以及 `GraphQLSchema` 實例。
   input: ['./schema.graphql'],
 });
 ```
@@ -51,7 +51,7 @@ export const GraphQLPage = createGraphQLPage({
 });
 ```
 
-各自的選項請參閱 [`createGraphQL()`](/docs/integrations/graphql/server) 與 [`createGraphQLPage()`](/docs/integrations/graphql/api-page)。
+如需了解可用選項，請參閱 [`createGraphQL()`](/docs/integrations/graphql/server) 與 [`createGraphQLPage()`](/docs/integrations/graphql/api-page)。
 
 ### 產生頁面 [#generate-pages]
 
@@ -229,16 +229,16 @@ export const GraphQLPage = createGraphQLPage({
   ```
 </show>
 
-`staticSource()` 會為每個 operation 各產生一個頁面，並依種類分組至資料夾 (例如 `queries/`) 。具名型別的頁面則需[手動啟用](/docs/integrations/graphql/server#includeoperations--includetypes)。
+`staticSource()` 會為每個 operation 產生一個頁面，並依種類分組到資料夾中 (例如 `queries/`) 。具名型別的頁面則需[另行啟用](/docs/integrations/graphql/server#includeoperations--includetypes)。
 
-**`source` 的頁面現在有兩種型別：`docs` 與 `graphql`。** 請更新所有使用 `source` 的地方。
+**`source` 的頁面現在分為 `docs` 與 `graphql` 兩種類型。**&#x8ACB;更新所有使用 `source` 的地方。
 
 <show when={props.framework !== 'astro'}>
   請在您的文件頁面中使用 `<GraphQLPage />` 算繪 GraphQL 頁面：
 </show>
 
 <show when={props.framework === 'astro'}>
-  請在專屬的 island 中算繪 GraphQL 頁面，並以文件版面配置包裹 `<GraphQLPage />`：
+  請在專屬的 island 中算繪 GraphQL 頁面，並在其中以文件版面配置包裹 `<GraphQLPage />`：
 </show>
 
 <show when={props.framework === 'next'}>
@@ -500,9 +500,9 @@ export const GraphQLPage = createGraphQLPage({
 官方 GraphQL 整合支援：
 
 * 每個 operation (query/mutation/subscription) 各有獨立頁面，並可直接在頁面中展開檢視其使用的型別
-* 引數、欄位、棄用標記、預設值與 `@oneOf` 輸入物件
-* schema 中套用的指令及其定義
-* 範例請求與回應，可自動產生，也可使用[您自己的 operation](/docs/integrations/graphql/server#examples)
+* 引數、欄位、棄用標記、預設值，以及 `@oneOf` 輸入物件
+* schema 中套用的指示詞 (directive) 及其定義
+* 範例請求與回應，可自動產生，或取自[您自己的 operation](/docs/integrations/graphql/server#examples)
 * cURL、JavaScript、Go、Python、Java、C# 與 Rust 的程式碼範例
 * 附變數表單的互動測試區，也能透過 WebSocket 或 SSE 執行[訂閱](/docs/integrations/graphql/api-page#subscriptions)
 * 供 LLM 使用的[頁面 Markdown](/docs/integrations/graphql/server#markdown-for-llms)

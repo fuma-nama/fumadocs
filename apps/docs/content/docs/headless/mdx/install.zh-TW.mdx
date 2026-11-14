@@ -1,6 +1,6 @@
 ---
 title: 套件安裝
-description: 產生用於安裝套件的程式碼區塊
+description: 產生安裝套件用的程式碼區塊
 ---
 
 <Callout type="warn" title="已棄用">
@@ -13,7 +13,7 @@ description: 產生用於安裝套件的程式碼區塊
 fumadocs-docgen
 ```
 
-`remarkInstall` 是 remark 外掛，沒有 Sätteri 版本。請加入此外掛，並停用 Remark NPM，因為它會搶先處理 `package-install` 程式碼區塊：
+`remarkInstall` 是 remark 外掛，目前沒有 Sätteri 版本。請加入此外掛，並停用會搶先處理 `package-install` 程式碼區塊的 Remark NPM：
 
 ```ts title="source.config.ts"
 import { remarkInstall } from 'fumadocs-docgen';
@@ -45,7 +45,7 @@ export function getMDXComponents(components?: MDXComponents) {
 }
 ```
 
-建立語言為 `package-install` 的程式碼區塊。
+建立語言設為 `package-install` 的程式碼區塊。
 
 ````mdx
 ```package-install

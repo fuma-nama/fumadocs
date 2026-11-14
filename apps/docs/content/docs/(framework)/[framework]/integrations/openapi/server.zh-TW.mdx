@@ -11,16 +11,16 @@ Fumadocs OpenAPI 的主要設定。
 
 ### `input` [#input]
 
-要讀取的 OpenAPI schema，可以是：
+要讀取的 OpenAPI schema。
 
 * 檔案路徑
 * 外部 URL
-* 函式 (見下方說明) 
+* 函式 (見下文) 
 
-只有列在這裡的 schema 才能載入；傳給 `getSchema()` 或由頁面預先載入的其他 ID 都會拋出錯誤。
+只有列在此處的 schema 才能載入；若傳入 `getSchema()` 或由頁面預先載入的是其他 ID，則會拋出錯誤。
 
 <Callout type="warn">
-  請勿將不受信任的 schema 傳給 `input`，因為其中的 `$ref` 能讀取本機檔案並請求 URL，連私有主機也不例外。
+  請勿將不受信任的 schema 傳入 `input`，因為其中的 `$ref` 可以讀取本機檔案並擷取 URL，私有主機也包含在內。
 </Callout>
 
 ```ts tab="Basic"
@@ -36,7 +36,7 @@ import { createOpenAPI } from 'fumadocs-openapi/server';
 
 export const openapi = createOpenAPI({
   input: {
-    // [id]：下載而來的 OpenAPI schema
+    // [id]：已下載的 OpenAPI schema
     my_schema: async () => {
       const res = await fetch('https://registry.scalar.com/@scalar/apis/galaxy/latest?format=json');
       return res.json();
@@ -47,20 +47,20 @@ export const openapi = createOpenAPI({
 
 ## 只載入一次文件 [#loading-documents-once]
 
-頁面會透過 props 接收整份文件，因此每次載入頁面、導覽和預先擷取時，都會重新傳送一次。如果文件很大，建議不要傳入：
+頁面會透過 props 接收完整的文件，因此每次載入頁面、切換頁面與預先擷取時，都會重新傳送整份文件。若文件較大，建議將其排除：
 
 ```ts title="lib/openapi.ts"
 import { createOpenAPI } from 'fumadocs-openapi/server';
 
 export const openapi = createOpenAPI({
-  // ID 最終會出現在 URL 中，請確保其可安全用於 URL
+  // ID 最後會出現在 URL 中，請確保可安全用於 URL
   input: { museum: './museum.yaml' },
   includeDocument: false, // [!code ++]
 });
 ```
 
 <show when={props.framework !== 'tanstack-start'}>
-  傳入 `loadDocument`，即可讓每份文件在每個瀏覽器工作階段中只載入一次。此函式在伺服器端算繪時也會執行：
+  傳入 `loadDocument`，即可讓每份文件在每個瀏覽器工作階段中只載入一次。它在伺服器端算繪時也會執行：
 </show>
 
 <show when={props.framework === 'next'}>
@@ -72,7 +72,7 @@ export const openapi = createOpenAPI({
   export const OpenAPIPage = createOpenAPIPage({
     async loadDocument(id) {
       if (typeof window === 'undefined') {
-        // 瀏覽器會在載入頁面時一併開始下載
+        // 瀏覽器會在載入頁面的同時開始下載它
         preload(`/api/openapi/${id}`, { as: 'fetch', crossOrigin: 'anonymous' });
         const { openapi } = await import('@/lib/openapi');
         return (await openapi.getSchema(id)).bundled;
@@ -92,7 +92,7 @@ export const openapi = createOpenAPI({
   export const OpenAPIPage = createOpenAPIPage({
     async loadDocument(id) {
       if (import.meta.env.SSR) {
-        // 瀏覽器會在載入頁面時一併開始下載
+        // 瀏覽器會在載入頁面的同時開始下載它
         preload(`/api/openapi/${id}`, { as: 'fetch', crossOrigin: 'anonymous' });
         const { openapi } = await import('@/lib/openapi');
         return (await openapi.getSchema(id)).bundled;
@@ -172,7 +172,7 @@ export const openapi = createOpenAPI({
 </show>
 
 <show when={props.framework === 'tanstack-start'}>
-  TanStack Start 的路由載入器會同時在伺服器與瀏覽器上執行，因此您的文件路由不需要 `loadDocument` 即可載入文件。只有在瀏覽器尚未取得該文件時，才需要呼叫 server function：
+  TanStack Start 的路由載入器會同時在伺服器與瀏覽器上執行，因此您的文件路由不需要 `loadDocument` 就能載入文件。只有在瀏覽器尚未取得文件時，才需要呼叫 server function：
 
   ```tsx title="src/routes/docs/$.tsx"
   import { createServerFn } from '@tanstack/react-start';
@@ -209,25 +209,25 @@ export const openapi = createOpenAPI({
 </show>
 
 <show when={props.framework !== 'tanstack-start'}>
-  * `loadDocument` 同樣適用於產生的 MDX 檔案。
-  * 若使用 [Fumadocs CLI 安裝的 UI](/docs/integrations/openapi/api-page#full-ui)，請將 `loadDocument` 傳入 `createOpenAPIRenderer()`。
+  * `loadDocument` 也適用於產生的 MDX 檔案。
+  * 若使用[由 Fumadocs CLI 安裝的 UI](/docs/integrations/openapi/api-page#full-ui)，請將 `loadDocument` 傳入 `createOpenAPIRenderer()`。
   * 瀏覽器會保留每份文件，直到重新載入頁面為止。使用 `disableCache` 時，請保持啟用 `includeDocument`。
 </show>
 
 <show when={props.framework === 'tanstack-start'}>
-  * 若使用產生的 MDX 檔案，請改將文件放在 `preloaded.docs` 中。
+  * 若使用產生的 MDX 檔案，請改將文件放入 `preloaded.docs`。
   * 瀏覽器會保留每份文件，直到重新載入頁面為止。使用 `disableCache` 時，請保持啟用 `includeDocument`。
 </show>
 
 ## 建立代理伺服器 [#creating-proxy]
 
-代理伺服器傳送 HTTP 請求時，不受瀏覽器的 CORS 限制。API 互動測試區會在以下情況使用它：
+代理伺服器傳送 HTTP 請求時不受瀏覽器的 CORS 限制。API 互動測試區會在以下情況使用它：
 
-* 向未透過 CORS 允許您網站來源的 API 端點發送請求。
-* 機密用戶端 (具有用戶端密鑰) 的 OAuth 請求，以及裝置授權流程 (device flow) 。
+* 請求未透過 CORS 允許您的來源的 API 端點。
+* 機密用戶端 (具有 client secret) 的 OAuth 請求，以及裝置授權流程。
 
 <Callout type="warn">
-  代理伺服器是公開的，且不需經過驗證。它會轉發請求的標頭與 body，包括 `Authorization`。請使用 [`allowedOrigins`](#allowed-origins) 與 `filterRequest` 加以限制。
+  代理伺服器是公開的，無須驗證即可存取。它會轉送請求的標頭與 body，包括 `Authorization`。請使用 [`allowedOrigins`](#allowed-origins) 與 `filterRequest` 限制其存取。
 </Callout>
 
 ### 設定 [#setup]
@@ -274,7 +274,7 @@ export const openapi = createOpenAPI({
   export const Route = createFileRoute('/api/proxy')({
     server: {
       handlers: {
-        // 預設處理所有方法，也可以指定個別方法（GET、POST 等）
+        // 預設處理所有方法，也可以個別指定方法（GET、POST 等）
         ANY: async ({ request }) => {
           return proxy.handle(request);
         },
@@ -305,10 +305,10 @@ export const openapi = createOpenAPI({
   export const ALL: APIRoute = ({ request }) => proxy.handle(request);
   ```
 
-  此路由為隨需執行，因此您的專案需要設定[轉接器](https://docs.astro.build/en/guides/on-demand-rendering/)。
+  此路由為隨需執行，因此您的專案需要安裝[轉接器](https://docs.astro.build/en/guides/on-demand-rendering/)。
 </show>
 
-接著在 `createOpenAPI()` 中設定它的 URL：
+接著在 `createOpenAPI()` 中設定其 URL：
 
 ```ts title="lib/openapi.ts"
 import { createOpenAPI } from 'fumadocs-openapi/server';
@@ -320,8 +320,8 @@ export const openapi = createOpenAPI({
 
 ### 允許的來源 [#allowed-origins]
 
-預設情況下，代理伺服器會接受任何公開來源、拒絕私有網路上的主機 (例如 `localhost`) ，且不會轉送您網站的 Cookie。
-若要限制存取範圍，或透過代理伺服器存取私有 API，請在代理伺服器路由中列出允許的來源：
+代理伺服器預設會接受任何公開來源，並拒絕私有網路上的主機 (例如 `localhost`) ，也不會轉送您網站的 Cookie。
+若要限制存取範圍，或要代理私有 API，請在代理伺服器路由中列出允許的來源：
 
 ```ts
 openapi.createProxy({
@@ -333,15 +333,15 @@ openapi.createProxy({
 重新導向也會依照相同的規則進行檢查。
 
 <Callout type="warn">
-  拒絕私有網路的請求需要使用 Node.js 或 Deno。在 Bun 等其他執行階段上，請改為指定
+  封鎖私有網路的功能需要 Node.js 或 Deno。若使用其他執行階段 (例如 Bun) ，請指定
   `allowedOrigins`。
 </Callout>
 
-使用 `filterRequest` 拒絕請求，例如只允許讀取：
+您可以使用 `filterRequest` 拒絕請求，例如只允許讀取操作：
 
 ```ts
 openapi.createProxy({
-  // 回傳 false 的代理請求會遭到拒絕
+  // 回傳 false 的代理請求會被拒絕
   filterRequest: (request) => request.method === 'GET',
 });
 ```
@@ -417,10 +417,10 @@ OAuth 提供者只接受已註冊的重新導向 URI，但 API 互動測試區�
   export const GET: APIRoute = ({ request }) => handler(request);
   ```
 
-  此路由會隨需執行，因此您的專案需要設定[轉接器](https://docs.astro.build/en/guides/on-demand-rendering/)。
+  此路由採隨需執行，因此您的專案需要設定[轉接器](https://docs.astro.build/en/guides/on-demand-rendering/)。
 </show>
 
-請將此路由的 URL 傳給 `createOpenAPIPage()`，並在 OAuth 提供者中註冊完整 URL (例如 `https://docs.example.com/api/oauth`) ：
+請將此路由的 URL 傳入 `createOpenAPIPage()`，並在 OAuth 提供者中註冊完整 URL (例如 `https://docs.example.com/api/oauth`) ：
 
 ```tsx title="components/api-page.tsx"
 export const OpenAPIPage = createOpenAPIPage({
@@ -429,12 +429,12 @@ export const OpenAPIPage = createOpenAPIPage({
 ```
 
 <Callout title="內容安全政策（Content Security Policy）">
-  處理常式會透過自身路由提供的指令碼將使用者導回。若該路由受內容安全政策規範，則必須允許 `'self'` 指令碼。由於使用 `'strict-dynamic'` 的政策會忽略 `'self'`，請改為將該路由排除在這類政策之外。
+  處理常式會透過其自身路由提供的指令碼將使用者導回。若該路由受 Content Security Policy 規範，該政策必須允許 `'self'` 指令碼。使用 `'strict-dynamic'` 的政策會忽略 `'self'`，因此請改為將該路由排除在這類政策之外。
 </Callout>
 
 ### 靜態網站 [#static-sites]
 
-在靜態網站中，路由會預先算繪成檔案。請傳入 `inline: true` 將指令碼直接嵌入頁面，並讓路徑以 `.html` 結尾，讓靜態主機以 HTML 格式提供該檔案。
+在靜態網站中，路由會預先算繪為檔案。請傳入 `inline: true` 將指令碼內嵌於頁面中，並讓路徑以 `.html` 結尾，讓靜態主機將該檔案視為 HTML 提供。
 
 <show when={props.framework === 'next'}>
   ```ts title="app/api/oauth.html/route.ts"
@@ -533,7 +533,7 @@ export const OpenAPIPage = createOpenAPIPage({
   export const GET: APIRoute = ({ request }) => handler(request);
   ```
 
-  靜態建置無需轉接器即可預先算繪此路由。
+  靜態建置不需要轉接器即可預先算繪此路由。
 </show>
 
-請使用 `.html` URL 作為重新導向 URI，例如 `oauthRedirectUrl: '/api/oauth.html'`。由於指令碼直接內嵌於頁面中，套用於此路由的內容安全政策 (Content Security Policy) 必須允許內嵌指令碼。
+請使用 `.html` URL 作為重新導向 URI，例如 `oauthRedirectUrl: '/api/oauth.html'`。由於指令碼內嵌於頁面中，套用於此路由的內容安全政策 (Content Security Policy) 必須允許內嵌指令碼。

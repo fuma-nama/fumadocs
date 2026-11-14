@@ -13,7 +13,7 @@ npm i fumadocs-openapi shiki
 
 ### 產生樣式 [#generate-styles]
 
-加入以下這一行：
+請加入下面這一行：
 
 ```css title="Tailwind CSS"
 @import 'tailwindcss';
@@ -25,7 +25,7 @@ npm i fumadocs-openapi shiki
 
 ### 設定外掛 [#configure-plugin]
 
-建立 OpenAPI 伺服器實例，以及 `<OpenAPIPage />` 元件。
+建立 OpenAPI 伺服器實例及 `<OpenAPIPage />` 元件。
 
 ```ts tab="lib/openapi.ts"
 import { createOpenAPI } from 'fumadocs-openapi/server';
@@ -44,14 +44,14 @@ import { createOpenAPIPage } from 'fumadocs-openapi/ui';
 export const OpenAPIPage = createOpenAPIPage();
 ```
 
-如需了解各自的選項，請參閱 [`createOpenAPI()`](/docs/integrations/openapi/server) 與 [`createOpenAPIPage()`](/docs/integrations/openapi/api-page)。
+如需了解可用選項，請參閱 [`createOpenAPI()`](/docs/integrations/openapi/server) 與 [`createOpenAPIPage()`](/docs/integrations/openapi/api-page)。
 
 ### 產生頁面 [#generate-pages]
 
-將 `staticSource()` 傳入您的 [`loader()`](/docs/headless/source-api/source)，即可在不寫入檔案的情況下產生頁面。
+將 `staticSource()` 傳入您的 [`loader()`](/docs/headless/source-api/source)，即可產生頁面，而不必實際寫入檔案。
 
 <show when={props.framework === 'react-router' || props.framework === 'tanstack-start'}>
-  由於 `staticSource()` 會讀取檔案，`source.ts` 將變成僅限伺服器使用。請將 `docs` 移至 `collections.ts`，供用戶端程式碼匯入。
+  由於 `staticSource()` 會讀取檔案，`source.ts` 將變成僅限伺服器端使用。請將 `docs` 移至 `collections.ts`，讓用戶端程式碼可以匯入。
 </show>
 
 <show when={props.framework === 'next'}>
@@ -97,7 +97,7 @@ export const OpenAPIPage = createOpenAPIPage();
     },
   });
 
-  // 由於 `staticSource()` 會讀取檔案，現在僅限伺服器使用 [!code ++]
+  // 由於 `staticSource()` 會讀取檔案，現在僅限伺服器端使用 [!code ++]
   export const source = loader(
     // [!code ++:6]
     {
@@ -142,7 +142,7 @@ export const OpenAPIPage = createOpenAPIPage();
     },
   });
 
-  // 由於 `staticSource()` 會讀取檔案，現在僅限伺服器使用 [!code ++]
+  // 由於 `staticSource()` 會讀取檔案，現在僅限伺服器端使用 [!code ++]
   export const source = loader(
     // [!code ++:6]
     {
@@ -222,9 +222,9 @@ export const OpenAPIPage = createOpenAPIPage();
   ```
 </show>
 
-`staticSource()` 預設會為每個 operation 產生一個頁面。如需自訂頁面，請參閱[產生頁面](/docs/integrations/openapi/generate-files)。
+`staticSource()` 預設會為每個 operation 產生一個頁面。如需自訂，請參閱[產生頁面](/docs/integrations/openapi/generate-files)。
 
-**`source` 的頁面現在分為兩種類型：`docs` 與 `openapi`。** 請更新所有使用 `source` 的地方，例如回傳文字給 LLM 的部分：
+**`source` 的頁面現在有 `docs` 與 `openapi` 兩種類型。** 請更新所有使用到 `source` 的地方，例如為 LLM 回傳文字的程式碼：
 
 ```ts
 import { llms } from 'fumadocs-core/source';
@@ -234,11 +234,11 @@ export const docsLlms = llms(source, {
   renderPage: (page) => {
     // [!code ++:4]
     if (page.type === 'openapi') {
-      // 例如：回傳字串化的 OpenAPI schema
+      // 例如：回傳序列化為字串的 OpenAPI schema
       return JSON.stringify(page.data.getSchema().bundled, null, 2);
     }
 
-    // 以下為您原本的處理流程……
+    // 以下為您原本的流程……
   },
 });
 ```
@@ -248,7 +248,7 @@ export const docsLlms = llms(source, {
 </show>
 
 <show when={props.framework === 'astro'}>
-  在專屬的 island 中算繪 OpenAPI 頁面，並在其中以文件版面配置包裝 `<OpenAPIPage />`：
+  將 OpenAPI 頁面放在獨立的 island 中算繪，並在該 island 中以文件版面配置包裝 `<OpenAPIPage />`：
 </show>
 
 <show when={props.framework === 'next'}>
@@ -501,9 +501,9 @@ export const docsLlms = llms(source, {
 
 官方 OpenAPI 整合支援：
 
-* 基本 API 端點資訊
-* 互動式 API 測試區
-* 發送請求的範例程式碼 (支援多種程式語言) 
+* 基本的 API 端點資訊
+* API 互動測試區
+* 傳送請求的範例程式碼 (支援多種程式語言) 
 * 回應範例與 TypeScript 型別定義
 * 根據 schema 產生的請求參數與 body
 

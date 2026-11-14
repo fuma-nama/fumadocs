@@ -1,6 +1,6 @@
 ---
 title: 部落格
-description: 在您的應用程式中加入部落格。
+description: 為您的應用程式加入部落格。
 ---
 
 ## 安裝 [#installation]
@@ -9,9 +9,9 @@ description: 在您的應用程式中加入部落格。
 npx @fumadocs/cli@latest add blog
 ```
 
-這會將元件安裝至 `components/blog`，並將文章相關的工具函式安裝至 `lib/blog.ts`。
+此指令會將元件安裝至 `components/blog`，並將文章相關的工具函式安裝至 `lib/blog.ts`。
 
-使用 `blogPageSchema` 為您的文章定義集合，並註冊作者：
+請使用 `blogPageSchema` 為您的文章定義一個集合，並註冊作者：
 
 <show when={props.framework !== 'astro'}>
   ```ts title="lib/source.ts"
@@ -94,7 +94,7 @@ npx @fumadocs/cli@latest add blog
   ```
 </show>
 
-將文章撰寫在 `content/blog` 目錄下：
+請將文章撰寫在 `content/blog` 目錄下：
 
 ```mdx title="content/blog/hello-world.mdx"
 ---
@@ -111,18 +111,18 @@ image: /blog/hello-world.png
 | --------- | -------------------------- |
 | `date`    | 發布日期，文章會依此排序               |
 | `tags`    | 每個標籤在 `/blog/tags` 下都有專屬頁面 |
-| `authors` | 作者的鍵，無法對應的鍵會直接視為作者名稱       |
+| `authors` | 作者的鍵，無法識別的鍵會直接視為作者名稱       |
 | `image`   | 封面圖片 URL，會顯示在文章卡片上         |
 
 <show when={props.framework === 'next'}>
   <Callout title="遠端圖片">
-    封面圖片與頭像會透過 `next/image` 算繪。請在 `images.remotePatterns` 中允許其來源主機。
+    封面圖片與頭像會透過 `next/image` 算繪。請在 `images.remotePatterns` 中允許這些圖片的主機。
   </Callout>
 </show>
 
 ## 頁面 [#pages]
 
-`getPosts()` 會解析頁面的作者與標籤，並由新到舊排序。請在[首頁版面配置](/docs/ui/layouts/home-layout)底下的路由中算繪這些頁面。
+`getPosts()` 會解析頁面的作者與標籤，並依日期由新到舊排序。請在[首頁版面配置](/docs/ui/layouts/home-layout)底下的路由中算繪這些頁面。
 
 ### 文章 [#posts]
 
@@ -270,7 +270,7 @@ image: /blog/hello-world.png
 
 ### 文章 [#post]
 
-`findPost()` 會找出指定的文章，以及其前後較新與較舊的文章。傳入 `toc` 後，會顯示一個浮動面板，內含目錄與分享按鈕。
+`findPost()` 會找出指定的文章，以及其前後較新與較舊的文章。若傳入 `toc`，浮動面板會顯示目錄和分享按鈕。
 
 <show when={props.framework === 'next'}>
   ```tsx title="app/(home)/blog/[slug]/page.tsx"
@@ -740,7 +740,7 @@ image: /blog/hello-world.png
   ```
 </show>
 
-接著使用 `getTagPosts()` 取得某個標籤下的文章；若標籤不存在，則會回傳 `undefined`：
+接著使用 `getTagPosts()` 取得特定標籤下的文章；若標籤不存在，則會回傳 `undefined`：
 
 <show when={props.framework === 'next'}>
   ```tsx title="app/(home)/blog/tags/[tag]/page.tsx"
@@ -937,9 +937,9 @@ image: /blog/hello-world.png
 
 ## 國際化 [#internationalization]
 
-請將特定語系的頁面傳入 `getPosts()`，例如 `blogSource.getPages(lang)`。
+將某個語系的頁面傳入 `getPosts()`，例如 `blogSource.getPages(lang)`。
 
-標籤頁面的 URL 由 `lib/blog.ts` 中的 `getBlogUrl` 產生。請將您的 i18n 設定傳給它，讓 URL 與載入器的 URL 保持一致：
+標籤頁面的 URL 由 `lib/blog.ts` 中的 `getBlogUrl` 產生。請將您的 i18n 設定傳給它，使其與載入器的 URL 保持一致：
 
 ```ts title="lib/blog.ts"
 import { i18n } from '@/lib/i18n';
@@ -947,4 +947,4 @@ import { i18n } from '@/lib/i18n';
 export const getBlogUrl = createGetUrl('/blog', i18n);
 ```
 
-若要為您的文章發布訂閱摘要，請參閱 [RSS 摘要](/docs/guides/rss)。
+若要為您的文章發布 RSS 摘要，請參閱 [RSS 摘要](/docs/guides/rss)。

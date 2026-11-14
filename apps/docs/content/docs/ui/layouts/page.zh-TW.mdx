@@ -1,18 +1,18 @@
 ---
 title: 文件頁面
-description: 說明文件中的頁面
+description: 您文件中的一個頁面
 ---
 
 import { TOCStyle, TOCStylePreview } from './page.client';
 
-Page 是文件頁面的基本元素，包含目錄、
-頁尾與 Breadcrumb。
+Page 是文件頁面的基本元素，其中包含目錄、
+頁尾和 Breadcrumb。
 
 <Customization />
 
 ## 使用方式 [#usage]
 
-請依照您使用的版面配置匯入。
+請根據您使用的版面配置匯入。
 
 ```tsx title="page.tsx" tab="Docs Layout"
 import { DocsPage, DocsDescription, DocsTitle, DocsBody } from 'fumadocs-ui/layouts/docs/page';
@@ -41,8 +41,8 @@ import { DocsPage, DocsDescription, DocsTitle, DocsBody } from 'fumadocs-ui/layo
 ```
 
 <Callout type="info" title="小提示">
-  除了在 `page.tsx` 中以 `DocsTitle` 算繪標題，您也可以將標題直接寫在 MDX 檔案中，
-  標題便會在 MDX 內文中算繪。
+  除了在 `page.tsx` 中使用 `DocsTitle` 算繪標題，您也可以直接將標題寫在 MDX 檔案中。
+  如此一來，標題就會在 MDX 內文中算繪。
 </Callout>
 
 ### 頁面操作 [#page-actions]
@@ -74,7 +74,7 @@ const lastModifiedTime: Date | undefined;
 </DocsPage>;
 ```
 
-至於 `lastModifiedTime`，您可以視需求使用不同的版本控制來源，例如 Github 或 CMS。
+至於 `lastModifiedTime`，您可以視情況改用 GitHub 或 CMS 等不同的版本控制來源。
 
 <Tabs items={['Fumadocs MDX', 'GitHub API']}>
   <Tab>
@@ -89,7 +89,7 @@ const lastModifiedTime: Date | undefined;
   </Tab>
 
   <Tab>
-    若文件託管在 Github 上，您可以使用
+    若文件託管於 GitHub，您可以使用
     [`getGithubLastEdit`](/docs/headless/utils/git-last-edit) 工具函式。
 
     ```tsx
@@ -107,10 +107,10 @@ const lastModifiedTime: Date | undefined;
 
 ## 設定 [#configurations]
 
-### 完整模式 [#full-mode]
+### 全寬模式 [#full-mode]
 
-若要讓頁面延展並填滿所有可用空間，請將 `full` 傳入頁面元件。
-這會強制以彈出框 (popover) 的形式顯示目錄。
+若要讓頁面延展並填滿所有可用空間，請將 `full` 傳給頁面元件。
+這會強制以彈出視窗的形式顯示目錄。
 
 ```tsx
 import { DocsPage } from 'fumadocs-ui/layouts/<layout>/page';
@@ -120,10 +120,10 @@ import { DocsPage } from 'fumadocs-ui/layouts/<layout>/page';
 
 ### 目錄 [#table-of-contents]
 
-文章中所有標題的概覽，需傳入一個標題陣列。
+列出文章中所有標題的總覽，需要傳入一個標題陣列。
 
-若是 Markdown 和 MDX 文件，您可以使用
-[目錄工具](/docs/headless/utils/get-toc)取得。像 Fumadocs MDX 這類內容來源已內建此功能，開箱即用。
+對於 Markdown 和 MDX 文件，您可以使用
+[目錄工具](/docs/headless/utils/get-toc)取得。Fumadocs MDX 等內容來源已內建此功能。
 
 ```tsx
 import { DocsPage } from 'fumadocs-ui/layouts/<layout>/page';
@@ -131,7 +131,7 @@ import { DocsPage } from 'fumadocs-ui/layouts/<layout>/page';
 <DocsPage toc={headings}>...</DocsPage>;
 ```
 
-您可以透過 `tableOfContent` 自訂目錄，在較小的裝置上則使用 `tableOfContentPopover`。
+您可以透過 `tableOfContent` 自訂目錄；在較小的裝置上，則可改用 `tableOfContentPopover`。
 
 ```tsx title="page.tsx"
 import { DocsPage } from 'fumadocs-ui/layouts/<layout>/page';
@@ -151,13 +151,13 @@ return (
 
 <Wrapper>
   <TOCStylePreview>
-    <TOCStyle value="normal">一條軌道線，並在作用中的標題上顯示滑塊 (預設) 。</TOCStyle>
+    <TOCStyle value="normal">軌道線搭配滑塊，標示目前所在的標題 (預設) 。</TOCStyle>
 
     <TOCStyle value="clerk">
-      一條隨標題層級變化的軌道線，靈感來自 [Clerk](https://clerk.com)。
+      軌道線隨標題層級轉折，設計靈感來自 [Clerk](https://clerk.com)。
     </TOCStyle>
 
-    <TOCStyle value="block">不顯示軌道線，改由一個區塊在作用中的標題後方滑動。</TOCStyle>
+    <TOCStyle value="block">不顯示軌道線，改以區塊在目前所在的標題後方滑動。</TOCStyle>
   </TOCStylePreview>
 </Wrapper>
 
@@ -234,7 +234,7 @@ npx @fumadocs/cli add slots/flux/page/toc
 
 ### 頁尾 [#footer]
 
-頁尾是一種導覽元素，提供兩個按鈕，可跳至上一頁與下一頁。若未指定，則會顯示從頁面樹找到的相鄰頁面。
+頁尾是一種導覽元素，提供兩個按鈕，可跳至上一頁與下一頁。若未指定，則會顯示從頁面樹中找到的相鄰頁面。
 
 您可以透過 `footer` prop 自訂頁尾：
 
@@ -286,7 +286,7 @@ npx @fumadocs/cli add slots/flux/page/footer
 
 ### Breadcrumb [#breadcrumb]
 
-導覽元素，僅在使用者瀏覽資料夾內的頁面時顯示。
+一種導覽元素，僅在使用者瀏覽資料夾內的頁面時顯示。
 
 您可以透過 `breadcrumb` 選項自訂 Breadcrumb：
 
@@ -338,7 +338,7 @@ npx @fumadocs/cli add slots/flux/page/breadcrumb
 
 ### 容器 [#container]
 
-Container 控制文章的外層容器，其中包覆 Breadcrumb、內文與頁尾。
+容器負責控制包覆 Breadcrumb、內文與頁尾的文章外層元素。
 
 若要替換頁面容器：
 
@@ -361,7 +361,7 @@ export function Container(props: React.ComponentProps<'article'>) {
 }
 ```
 
-您可以使用 Fumadocs CLI，以預設實作為基礎開始修改：
+您可以使用 Fumadocs CLI，以預設實作為基礎開始：
 
 ```bash tab="Docs Layout"
 npx @fumadocs/cli add slots/docs/page/container

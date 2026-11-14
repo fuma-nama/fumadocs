@@ -5,7 +5,7 @@ description: 用於算繪 GraphQL 文件內容的元件
 
 ## 概覽 [#overview]
 
-Fumadocs GraphQL 使用 `<GraphQLPage />` 元件算繪頁面內容，此元件應為用戶端元件。
+Fumadocs GraphQL 使用 `<GraphQLPage />` 元件來算繪頁面內容，此元件應為用戶端元件。
 
 ```tsx title="components/api-page.tsx"
 'use client';
@@ -18,7 +18,7 @@ export const GraphQLPage = createGraphQLPage({
 
 ### 互動測試區 [#playground]
 
-設定端點後，operation 頁面就會提供互動測試區：讀者可以編輯 operation、以表單或 JSON 填寫變數，並附上自己的標頭送出。
+設定端點後，operation 頁面會提供互動測試區：讀者可以編輯 operation、透過表單或 JSON 填入變數，再附上自己的標頭送出。
 
 ```tsx title="components/api-page.tsx"
 'use client';
@@ -38,10 +38,10 @@ export const GraphQLPage = createGraphQLPage({
 ```
 
 <Callout type="warn">
-  請勿將密鑰放入 `headers`，因為這些內容會傳送到瀏覽器、顯示在程式碼範例中，並依端點來源 (origin) 保存在瀏覽器的 local storage。
+  請勿將密鑰等機密資訊放入 `headers`，因為這些內容會傳送至瀏覽器、顯示在程式碼範例中，並依端點來源保存在瀏覽器的本機儲存空間 (local storage) 中。
 </Callout>
 
-Query 與 mutation 會透過 HTTP POST 傳送，您可以替換其 fetcher，例如透過代理伺服器轉送請求：
+查詢 (query) 與變更 (mutation) 會透過 HTTP POST 傳送，您可以替換其 fetcher，例如透過代理伺服器轉送請求：
 
 ```tsx title="components/api-page.tsx"
 'use client';
@@ -63,7 +63,7 @@ export const GraphQLPage = createGraphQLPage({
         time: performance.now() - start,
         body: await res.text(),
         contentType: res.headers.get('Content-Type') ?? '',
-        // 選用，會顯示在 Headers 頁籤中
+        // 選填，會顯示在 Headers 頁籤中
         headers: Array.from(res.headers),
       };
     },
@@ -71,7 +71,7 @@ export const GraphQLPage = createGraphQLPage({
 });
 ```
 
-您也可以使用 `render` 完全取代互動測試區 UI，它會顯示在原本簽章列的位置：
+或者，您也可以使用 `render` 完全替換互動測試區的 UI，它會顯示在原本簽章列的位置：
 
 ```tsx title="components/api-page.tsx"
 'use client';
@@ -90,10 +90,10 @@ export const GraphQLPage = createGraphQLPage({
 
 在訂閱頁面上，互動測試區會訂閱 `subscriptionUrl`，並記錄收到的事件。預設值為將 `url` 的 scheme 改為 `ws(s)://` 後的網址。
 
-| `subscriptionUrl`    | 協定                                          |
-| -------------------- | ------------------------------------------- |
-| `ws://`、`wss://`     | graphql-ws (`graphql-transport-ws`)         |
-| `http://`、`https://` | GraphQL over SSE，採用 distinct connections 模式 |
+| `subscriptionUrl`     | 協定                                          |
+| --------------------- | ------------------------------------------- |
+| `ws://`, `wss://`     | graphql-ws (`graphql-transport-ws`)         |
+| `http://`, `https://` | GraphQL over SSE (distinct connections 模式)  |
 
 ```tsx title="components/api-page.tsx"
 'use client';
@@ -115,7 +115,7 @@ export const GraphQLPage = createGraphQLPage({
 
 ### 程式碼範例 [#code-samples]
 
-範例請求會以 GraphQL 呈現，或以 cURL、JavaScript、Go、Python、Java、C# 和 Rust 程式碼呈現；這些程式碼會帶上 `playground.headers`，將請求送往 `playground.url` (未設定時則使用預留位置) 。互動測試區也會針對目前編輯中的請求顯示相同的程式碼。訂閱頁面的範例僅以 GraphQL 呈現。
+範例請求會以 GraphQL 呈現，或以 cURL、JavaScript、Go、Python、Java、C# 和 Rust 程式碼呈現，這些程式碼會帶上 `playground.headers`，將請求傳送至 `playground.url` (未設定時會使用預留位置) 。互動測試區也會針對正在編輯的請求顯示相同的程式碼。訂閱頁面的範例僅以 GraphQL 呈現。
 
 您可以透過 `codeUsages` 新增產生器，或移除預設的產生器：
 
@@ -127,7 +127,7 @@ import {
   registerDefaultCodeUsages,
 } from '@fumadocs/graphql/ui';
 
-// 若要從頭開始，請省略預設項目
+// 若要從零開始，請省略預設項目
 const codeUsages = registerDefaultCodeUsages(createCodeUsageGeneratorRegistry());
 
 // 預設項目：curl、js、go、python、java、csharp、rust
@@ -147,9 +147,9 @@ export const GraphQLPage = createGraphQLPage({ codeUsages });
 
 <auto-type-table path="props.ts" name="CodeUsageData" />
 
-### 交叉連結 [#cross-linking]
+### 交互連結 [#cross-linking]
 
-[型別頁面](/docs/integrations/graphql/server#includeoperations--includetypes)會自動互相連結，也會連結至 operation。Operation 頁面則會讓讀者留在目前頁面，其中的型別會在結構描述 UI 中開啟。
+[型別頁面](/docs/integrations/graphql/server#includeoperations--includetypes)會自動互相連結，也會連結至 operation。Operation 頁面則會讓讀者留在原頁面，其中的型別會在結構描述 UI 中開啟。
 
 您也可以自行解析這些連結：
 
@@ -173,7 +173,7 @@ export const GraphQLPage = createGraphQLPage({
 
 您可以自訂 operation 頁面與型別頁面的版面配置。
 
-<Tabs items={['Operation', '型別']}>
+<Tabs items={['Operation', 'Type']}>
   <Tab>
     ```tsx title="components/api-page.tsx"
     'use client';
@@ -202,7 +202,7 @@ export const GraphQLPage = createGraphQLPage({
     | ------------- | -------------------------------------------------------- |
     | `header`      | 標題，僅在包含多個項目的頁面上顯示                                        |
     | `playground`  | 簽章 (例如 `QUERY customer(id: ID!): Customer`) 、其指示詞以及互動測試區 |
-    | `description` | operation 的描述                                            |
+    | `description` | operation 的說明                                            |
     | `deprecated`  | 棄用原因                                                     |
     | `arguments`   | 引數                                                       |
     | `returns`     | 回傳型別及其欄位                                                 |
@@ -237,10 +237,10 @@ export const GraphQLPage = createGraphQLPage({
     | ------------- | ----------------------------------------------- |
     | `header`      | 名稱，僅在包含多個項目的頁面上顯示                               |
     | `definition`  | SDL 的開頭 (例如 `type Order implements Node`) 及其指示詞 |
-    | `description` | 型別的描述                                           |
+    | `description` | 型別的說明                                           |
     | `fields`      | 物件、介面與輸入物件的欄位，或聯集的成員                            |
     | `values`      | 列舉的值                                            |
-    | `usages`      | 實作、所屬聯集，以及使用該型別的 operation 與欄位                  |
+    | `usages`      | 實作、所屬聯集，以及使用此型別的 operation 與欄位                  |
     | `sdl`         | 型別的 SDL，在寬版頁面上會顯示於型別旁                           |
   </Tab>
 </Tabs>
@@ -295,7 +295,7 @@ export const translations = i18n
 
 ### 語法突顯 [#syntax-highlighting]
 
-GraphQL 頁面使用 Shiki 為程式碼區塊進行語法突顯，如需自訂，可傳入[語法突顯器](/docs/headless/utils/shiki)。
+GraphQL 頁面會使用 Shiki 為程式碼區塊進行語法突顯，若要自訂，可以傳入[語法突顯器](/docs/headless/utils/shiki)。
 
 ```tsx title="components/api-page.tsx"
 'use client';
@@ -307,7 +307,7 @@ export const GraphQLPage = createGraphQLPage({ highlighter });
 
 ### 自訂元件 [#custom-components]
 
-覆寫預設的標題、程式碼區塊與 Markdown 元件。
+覆寫預設的標題、程式碼區塊及 Markdown 元件。
 
 ```tsx title="components/api-page.tsx"
 'use client';
@@ -328,17 +328,17 @@ export const GraphQLPage = createGraphQLPage({
 
 ## 自訂 UI [#customise-ui]
 
-若需要現有選項以外的自訂，您可以透過 [Fumadocs CLI](/docs/cli) 將 UI 安裝到您的程式碼庫中。
+若現有選項無法滿足您的自訂需求，您可以透過 [Fumadocs CLI](/docs/cli) 將 UI 安裝到您的程式碼庫中。
 
 ### 完整 UI [#full-ui]
 
-GraphQL 頁面的完整 UI，建構於[無頭式層](/docs/integrations/graphql/headless)之上。
+GraphQL 頁面的完整 UI，以[無頭式層](/docs/integrations/graphql/headless)為基礎建構而成。
 
 ```npm
 npx @fumadocs/cli add graphql/page
 ```
 
-它會直接安裝 `<GraphQLPage />`，因此不再需要 `components/api-page.tsx`。請更新 `<GraphQLPage />` 的匯入路徑：
+它會自行安裝 `<GraphQLPage />`，因此不再需要 `components/api-page.tsx`。請更新 `<GraphQLPage />` 的匯入路徑：
 
 ```tsx
 import { GraphQLPage } from '@/components/api-page'; // [!code --]
@@ -347,12 +347,12 @@ import { GraphQLPage } from '@/components/graphql/page'; // [!code ++]
 
 ### 部件 [#parts]
 
-只需安裝您想編輯的部件，再透過 `components` 傳回即可。互動測試區在 `components` 中沒有對應的 slot：它會由已安裝的 `graphql/operation` 算繪，您也可以改從 [`playground.render`](#playground) 回傳 `<OperationPlayground />`。
+只需安裝您想編輯的部件，再透過 `components` 傳回即可。`components` 中沒有互動測試區的 slot：它會由已安裝的 `graphql/operation` 算繪，您也可以從 [`playground.render`](#playground) 回傳 `<OperationPlayground />`。
 
 | 元件                   | 內容                 |
 | -------------------- | ------------------ |
-| `graphql/operation`  | operation，以及其引數與範例 |
-| `graphql/type-docs`  | 具名型別，以及其欄位與使用位置    |
+| `graphql/operation`  | operation，包含其引數與範例 |
+| `graphql/type-docs`  | 具名型別，包含其欄位與使用之處    |
 | `graphql/schema-ui`  | 型別、引數與欄位的詳細資訊      |
 | `graphql/playground` | 互動測試區              |
 

@@ -12,9 +12,9 @@ staticParams:
 
 您可以使用 [`next-validate-link`](https://next-validate-link.vercel.app) 驗證內容檔案中的連結。
 
-> 本指南主要針對 **Fumadocs MDX**，其他設定方式請參閱 `next-validate-link` 的文件。
+> 本指南主要以 **Fumadocs MDX** 為主，其他設定方式請參閱 `next-validate-link` 的文件。
 
-建立一個指令碼來掃描應用程式的路由。`populate` 會列出文件路由的參數：
+建立一個指令碼來掃描應用程式的路由，並透過 `populate` 列出文件路由的參數：
 
 <show when={props.framework === 'next'}>
   ```ts title="scripts/lint.ts"
@@ -43,7 +43,7 @@ staticParams:
     preset: 'react-router',
     routerConfig: routes,
     populate: {
-      // async 集合會連同內容一起載入目錄
+      // async 集合會在載入內容時一併載入目錄
       'docs/[[...splat]]': await Promise.all(
         source.getPages().map(async (page) => ({
           value: { splat: page.slugs },
@@ -63,7 +63,7 @@ staticParams:
   const scanned = await scanURLs({
     preset: 'tanstack-start',
     populate: {
-      // async 集合會連同內容一起載入目錄
+      // async 集合會在載入內容時一併載入目錄
       'docs/[[..._splat]]': await Promise.all(
         source.getPages().map(async (page) => ({
           value: { _splat: page.slugs },
@@ -139,7 +139,7 @@ bun ./scripts/lint.ts
 ```
 
 <Callout title="Node.js 載入器">
-  您可能需要設定 TypeScript 轉譯 (或改用較新版本的 Node.js) ，並設定 [Fumadocs MDX 載入器](/docs/mdx/loader/node)。
+  您可能需要設定 TypeScript 轉譯 (或改用較新版本的 Node.js) ，以及 [Fumadocs MDX 載入器](/docs/mdx/loader/node)。
 
-  若無特殊需求，使用 Bun 或 [`tsx`](https://github.com/privatenumber/tsx) 會比較簡單。
+  若無特殊需求，直接使用 Bun 或 [`tsx`](https://github.com/privatenumber/tsx) 會比較簡單。
 </Callout>

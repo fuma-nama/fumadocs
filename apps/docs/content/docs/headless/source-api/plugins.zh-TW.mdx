@@ -5,11 +5,11 @@ description: 擴充載入器 API
 
 ## 概覽 [#overview]
 
-載入器外掛可以擴充 `loader()`，自訂其輸出內容。
+載入器外掛可以擴充 `loader()`，以自訂其輸出結果。
 
-內建外掛如下：
+內建外掛清單：
 
-* **Lucide Icons**：使用 [Lucide React](https://lucide.dev) 的圖示 (需先安裝 `lucide-react`) 。
+* **Lucide Icons**：使用 [Lucide React](https://lucide.dev) 提供的圖示 (需先安裝 `lucide-react`) 。
 
   ```ts
   import { loader } from 'fumadocs-core/source';
@@ -59,9 +59,9 @@ function myPlugin(): LoaderPlugin {
 
 ### 儲存空間 [#storage]
 
-在處理過程中，您輸入的來源檔案會經過解析，並在記憶體中形成虛擬儲存空間。
+在處理過程中，您輸入的來源檔案會被解析，並在記憶體中形成虛擬儲存空間。
 
-若要在處理前執行虛擬檔案系統操作，您可以使用 `transformStorage` hook。
+若要在處理之前執行虛擬檔案系統操作，您可以使用 `transformStorage` hook。
 
 ```ts
 import { loader } from 'fumadocs-core/source';
@@ -79,9 +79,9 @@ export const source = loader({
 
 ### 頁面樹 [#page-tree]
 
-頁面樹是根據您的檔案系統產生的，其中部分不必要的資訊 (例如未使用的 frontmatter 屬性) 會被過濾掉。
+頁面樹會根據您的檔案系統產生，並過濾掉部分不必要的資訊 (例如未使用的 frontmatter 屬性) 。
 
-您可以透過 `transformPageTree` 自訂頁面樹，例如在節點上附加自訂屬性，或自訂頁面的顯示名稱。
+您可以透過 `transformPageTree` 自訂頁面樹，例如為節點附加自訂屬性，或自訂頁面的顯示名稱。
 
 ```tsx
 import { loader } from 'fumadocs-core/source';
@@ -91,7 +91,7 @@ export const source = loader({
     typedPlugin({
       transformPageTree: {
         file(node, file) {
-          // 存取原始（未經篩選）的檔案資料
+          // 存取原始（未經過濾的）檔案資料
           if (file) console.log(this.storage.read(file));
 
           // 修改節點

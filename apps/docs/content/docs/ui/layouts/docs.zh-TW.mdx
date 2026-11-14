@@ -1,6 +1,6 @@
 ---
 title: 文件版面配置
-description: 文件頁面的版面配置
+description: 文件的版面配置
 ---
 
 import { docs } from './layouts.story';
@@ -13,7 +13,7 @@ import { docs } from './layouts.story';
 
 ## 使用方式 [#usage]
 
-將您的頁面樹傳給元件。
+將您的頁面樹傳給此元件。
 
 ```tsx title="layout.tsx"
 import { DocsLayout } from 'fumadocs-ui/layouts/docs';
@@ -29,9 +29,9 @@ export default function Layout({ children }: { children: ReactNode }) {
 }
 ```
 
-關於 [`links`](/docs/ui/layouts/links) 與 [`nav`](/docs/ui/layouts/nav) 選項的詳細說明，請參閱相關文件。
+有關 [`links`](/docs/ui/layouts/links) 與 [`nav`](/docs/ui/layouts/nav) 選項的詳細說明，請參閱相關文件。
 
-### 參考 [#references]
+### 參考資料 [#references]
 
 <auto-type-table cwd path="content/docs/ui/props.ts" type="Omit<DocsLayoutProps, 'children' | 'disableThemeSwitch'>" />
 
@@ -55,9 +55,9 @@ import { DocsLayout } from 'fumadocs-ui/layouts/docs';
   ![側邊欄](/docs/sidebar.png)
 </div>
 
-側邊欄項目是根據您傳給 `<DocsLayout />` 的頁面樹算繪而成。
+側邊欄項目是根據您傳入 `<DocsLayout />` 的頁面樹算繪而成。
 
-若頁面樹來自 [`loader()`](/docs/headless/source-api)，則會依據您的檔案結構產生，詳情請參閱[可用的模式](/docs/page-conventions)。
+若頁面樹來自 [`loader()`](/docs/headless/source-api)，則會依據您的檔案結構產生，請參閱[可用的模式](/docs/page-conventions)。
 
 ```tsx title="layout.tsx"
 import { DocsLayout } from 'fumadocs-ui/layouts/docs';
@@ -99,15 +99,15 @@ export default function Layout({ children }: { children: ReactNode }) {
 
 ### 版面配置頁籤 (下拉選單)  [#layout-tabs]
 
-版面配置頁籤是具有頁籤行為的資料夾，只會顯示目前開啟頁籤的內容。
+版面配置頁籤是行為類似頁籤的資料夾，只會顯示目前開啟頁籤的內容。
 
 <div className="flex justify-center items-center *:max-w-[360px] bg-linear-to-br from-fd-primary/10 rounded-xl border">
   ![版面配置頁籤](/docs/sidebar-tabs.png)
 </div>
 
-預設情況下，頁籤觸發器會以**下拉選單**元件呈現 (除非其中有項目處於啟用狀態，否則會隱藏) 。
+預設情況下，頁籤觸發器會以**下拉選單**元件呈現 (只有在其中某個項目處於啟用狀態時才會顯示) 。
 
-頁籤是根據頁面樹產生的，您可以在資料夾中建立 `meta.json` 檔案，將資料夾標記為[根資料夾](/docs/page-conventions#root-folder)：
+頁籤是根據頁面樹產生的。您可以在資料夾中建立 `meta.json` 檔案，將該資料夾標記為[根資料夾](/docs/page-conventions#root-folder)：
 
 ```json title="content/docs/my-folder/meta.json"
 {
@@ -117,7 +117,7 @@ export default function Layout({ children }: { children: ReactNode }) {
 }
 ```
 
-或者明確指定：
+或是明確指定：
 
 ```tsx title="/app/docs/layout.tsx"
 import { DocsLayout } from 'fumadocs-ui/layouts/docs';
@@ -127,10 +127,10 @@ import { DocsLayout } from 'fumadocs-ui/layouts/docs';
     {
       title: 'Components',
       description: 'Hello World!',
-      // 位於 `/docs/components` 及其子路由（例如 `/docs/components/button`）時會啟用
+      // 在 `/docs/components` 及其子路由（例如 `/docs/components/button`）下啟用
       url: '/docs/components',
 
-      // 您也可以另外指定一組 URL，符合時即會啟用此項目
+      // 您也可以另外指定一組會啟用此項目的 URL
       // urls: new Set(['/docs/test', '/docs/components']),
     },
   ]}
@@ -145,8 +145,8 @@ import { DocsLayout } from 'fumadocs-ui/layouts/docs';
 <DocsLayout tabs={false} />;
 ```
 
-<Callout title="需要進一步自訂？">
-  您可以為 [文件版面配置](/docs/ui/layouts/docs) 元件指定 `banner`。
+<Callout title="想要進一步自訂嗎？">
+  您可以為[文件版面配置](/docs/ui/layouts/docs)元件指定 `banner`。
 
   ```tsx
   import { DocsLayout, type DocsLayoutProps } from 'fumadocs-ui/layouts/docs';
@@ -190,7 +190,7 @@ import { DocsLayout } from 'fumadocs-ui/layouts/docs';
 
 ### 頁籤群組 [#tabs-groups]
 
-頁籤會依照[根類型](/docs/page-conventions#root-type)分組，目前頁面路徑上的每個根資料夾都會有各自的下拉選單。
+頁籤會依[根類型](/docs/page-conventions#root-type)分組，目前頁面路徑上的每個根資料夾各有一個下拉選單。
 
 <Files>
   <Folder name="v2 (root: version)" defaultOpen>
@@ -210,13 +210,13 @@ import { DocsLayout } from 'fumadocs-ui/layouts/docs';
   </Folder>
 </Files>
 
-在 `v2/framework/quickstart.mdx` 頁面中，側邊欄會顯示兩個下拉選單，分別用來切換版本與章節：
+在 `v2/framework/quickstart.mdx` 頁面上，側邊欄會顯示兩個下拉選單，一個用來切換版本，另一個用來切換區段：
 
 <div className="flex justify-center items-center *:max-w-[360px] bg-linear-to-br from-fd-primary/10 rounded-xl border">
   ![頁籤群組](/docs/sidebar-tabs-groups.png)
 </div>
 
-選取選項後，會前往該根資料夾中的同一頁面；若該頁面不存在，則會改為前往其索引頁面。完整範例請參閱[版本控制](/docs/navigation#versioning)。
+選擇選項後，會前往該根資料夾中的同一頁面；若該頁面不存在，則前往該資料夾的索引頁面。完整範例請參閱[版本控制](/docs/navigation#versioning)。
 
 ### 側邊欄元件 [#sidebar-components]
 
@@ -264,7 +264,7 @@ export function SidebarSeparator({ className, style, children, ...props }: Compo
 
 ## AI 聊天 [#ai-chat]
 
-將您的聊天面板連同其開啟狀態傳入 `aiChat`，版面配置會在寬螢幕上將它顯示於頁面旁，在較小的螢幕上則讓它浮動於頁面上方。
+請將您的聊天面板及其開啟狀態傳入 `aiChat`，版面配置會在寬螢幕上將面板放在頁面旁邊，在較小的螢幕上則讓它浮動於頁面上方。
 
 ```tsx
 <DocsLayout aiChat={{ open, onOpenChange: setOpen, panel: <MyChat />, trigger: true }} />
@@ -276,14 +276,14 @@ export function SidebarSeparator({ className, style, children, ...props }: Compo
 
 ## 進階 [#advanced]
 
-### 預先載入 [#prefetching]
+### 預先載入 (Prefetching)  [#prefetching]
 
-Fumadocs 使用您的 React 框架所提供的 `<Link />` 元件，並沿用其預設的預先載入行為。
+Fumadocs 使用您所用 React 框架的 `<Link />` 元件，並沿用其預設的預先載入行為。
 
-在 Vercel 上，預先載入請求可能會增加 Serverless Functions 與 Data Cache 的用量。
-在其他部分託管平台上，也可能因此觸及用量限制。
+在 Vercel 上，預先載入請求可能會增加 Serverless Functions 與 Data Cache 的用量，
+在其他部分託管平台上也可能觸及用量上限。
 
-您可以停用預先載入以減少預先載入請求的數量，或明確啟用：
+您可以停用預先載入以減少預先載入請求的數量，也可以明確啟用：
 
 ```tsx
 import { DocsLayout } from 'fumadocs-ui/layouts/docs';
@@ -295,11 +295,11 @@ import { DocsLayout } from 'fumadocs-ui/layouts/docs';
 
 處理版面配置並不容易，Fumadocs UI 需要一套具備以下特性的做法：
 
-* **可組合：** 版面配置元件應能輕鬆管理自身的位置與尺寸，最好能直接在原處完成。
+* **可組合：** 版面配置元件應能輕鬆管理自身的位置與大小，最好能就地完成。
 * **彈性：** 系統應避免依賴固定數值或高度，讓外部元件 (例如 AI 聊天介面) 能無縫整合。
-* **連貫：** 元件應能回應其他元件的變化，例如以動畫呈現側邊欄的收合。
-* **可預測：** 版面配置屬性應集中管理，讓您能從原始碼輕易預見最終結果。
-* **相容：** 解決方案應只使用 Baseline Widely Available 的 CSS 功能，以支援舊版瀏覽器。
+* **協調一致：** 元件應能回應其他元件的變化，例如以動畫呈現側邊欄的收合。
+* **可預測：** 版面配置屬性應集中管理，讓您能從原始碼輕易預期最終結果。
+* **相容：** 此解決方案應僅使用 Baseline Widely Available 的 CSS 功能，以便支援舊版瀏覽器。
 
 Fumadocs UI 透過網格系統來達成這些目標：
 
@@ -326,9 +326,9 @@ Fumadocs UI 透過網格系統來達成這些目標：
 }
 ```
 
-* 版面配置容器採用 grid 版面，並設定了 `grid-template` 以確保結果可預期。
-* `--fd-docs-row-*` 定義每一列的頂部偏移量，讓帶有 `position: sticky` 的元素能套用正確的頂部偏移量。
-* `--fd-*-width` 與 `--fd-*-height` 由版面配置元件透過 CSS 設定，是維持 grid 結構及計算 `--fd-docs-row-*` 不可或缺的值。
-* `--fd-*-col` 是動態值，會隨狀態變化而更新 (例如側邊欄收合時，`--fd-sidebar-col` 會變為 `0px`) 。
+* 版面配置容器採用 grid 排版，並設定 `grid-template` 以產生可預期的結果。
+* `--fd-docs-row-*` 定義每一列的頂部偏移量，讓帶有 `position: sticky` 的元素能取得正確的頂部偏移量。
+* `--fd-*-width` 與 `--fd-*-height` 由版面配置元件透過 CSS 設定，對於維持 grid 結構或計算 `--fd-docs-row-*` 而言不可或缺。
+* `--fd-*-col` 為動態值，會隨狀態變化而更新 (例如側邊欄收合時，`--fd-sidebar-col` 會變為 `0px`) 。
 
-預設版面配置與 Notebook 版面配置都採用這套系統。
+預設版面配置與 Notebook 版面配置皆採用此系統。

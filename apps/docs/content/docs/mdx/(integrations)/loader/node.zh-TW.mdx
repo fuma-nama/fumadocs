@@ -1,11 +1,11 @@
 ---
 title: Node.js
-description: 在 Node.js 執行階段存取內容。
+description: 在 Node.js 執行階段中存取內容。
 ---
 
 ## 設定 [#setup]
 
-請使用 [tsx](https://tsx.is) 等 TypeScript 執行器來執行您的指令碼，因為範本中的 `lib/source.ts` 包含無副檔名的匯入與路徑別名，而 Node.js 無法解析這些內容。
+請使用 [tsx](https://tsx.is) 等 TypeScript 執行器來執行您的指令碼，因為範本中的 `lib/source.ts` 使用了省略副檔名的匯入與路徑別名，而 Node.js 無法解析這些寫法。
 
 ```ts title="scripts/example.ts"
 import { register } from 'fumadocs-mdx/node';
@@ -22,9 +22,9 @@ console.log(source.getPages());
 npx tsx scripts/example.ts
 ```
 
-載入器只會轉換 ES 模組。請在 `package.json` 中設定 `"type": "module"`，讓 `lib/source.ts` 以 ES 模組的形式載入。此設定會套用到套件內所有 `.js` 檔案，因此請先將 `next.config.js` 等 CommonJS 檔案轉換為 ESM。
+此載入器只會轉換 ES 模組。請在 `package.json` 中設定 `"type": "module"`，讓 `lib/source.ts` 以 ES 模組的形式載入。此設定會套用到套件內所有的 `.js` 檔案，因此請先將 `next.config.js` 等 CommonJS 檔案轉換為 ESM。
 
-`register()` 函式接受以下選項：
+`register()` 函式可接受以下選項：
 
 ```ts
 register({

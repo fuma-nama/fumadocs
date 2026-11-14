@@ -3,7 +3,7 @@ title: Obsidian
 description: 使用 Fumadocs 直接算繪 Obsidian vault。
 ---
 
-`fumadocs-obsidian` 提供一個執行階段的內容來源。它會直接讀取並編譯 vault，因此不會產生中介的 MDX 檔案，也不需要 Fumadocs MDX 的 remark 外掛。
+`fumadocs-obsidian` 提供執行階段的內容來源。它會直接讀取並編譯 vault，因此不會產生中介的 MDX 檔案，也不需要 Fumadocs MDX 的 remark 外掛。
 
 支援的 Obsidian 語法包括：
 
@@ -12,7 +12,7 @@ description: 使用 Fumadocs 直接算繪 Obsidian vault。
 * 區塊 ID。
 * 註解。
 
-名稱有歧義的 wikilink 會比照 Obsidian 的方式解析：筆記優先於附件，其次以最短路徑為準。未知語言 (例如 `dataview`) 的程式碼區塊會以純文字算繪。
+名稱有歧義的 wikilink 會比照 Obsidian 的方式解析：筆記優先於附件，其次以路徑最短者為準。未知語言 (例如 `dataview`) 的程式碼區塊會以純文字算繪。
 
 ## 設定 [#setup]
 
@@ -24,7 +24,7 @@ fumadocs-obsidian shiki
 
 ### 產生樣式 [#generate-styles]
 
-`fumadocs-obsidian/ui` 的元件使用 Tailwind CSS 設定樣式。請加入下列這一行，以產生這些元件所需的 class：
+`fumadocs-obsidian/ui` 中的元件使用 Tailwind CSS 撰寫樣式。請加入以下這行，以產生這些元件所需的 class：
 
 ```css title="Tailwind CSS"
 @import 'tailwindcss';
@@ -36,7 +36,7 @@ fumadocs-obsidian shiki
 
 ### 設定來源 [#configure-source]
 
-建立 Obsidian 來源，並傳入 `dynamicLoader()`：
+建立 Obsidian 來源，並將它傳入 `dynamicLoader()`：
 
 ```ts title="lib/source.ts"
 import { dynamicLoader } from 'fumadocs-core/source';
@@ -57,7 +57,7 @@ export function getSource() {
 }
 ```
 
-此範例將 vault 存放在 `public/vault`，讓您的框架能透過 `url` 回傳的 URL 提供附件。若您的應用程式會另行提供或上傳附件，也可以將 vault 放在其他位置。
+此範例將 vault 放在 `public/vault`，讓您的框架能透過 `url` 回傳的 URL 提供附件。若您的應用程式會另行提供或上傳附件，也可以將 vault 放在其他位置。
 
 接著載入並算繪頁面。`page.data.load()` 會回傳已編譯頁面的算繪器。
 
@@ -153,7 +153,7 @@ export function getSource() {
   import { getSource } from '@/lib/source';
 
   // server function 回傳結果的型別層級檢查無法驗證語法樹，
-  // 因此需將其註冊為可序列化（若無法解析 `@tanstack/router-core`，請先安裝）
+  // 因此將其註冊為可序列化（若無法解析 `@tanstack/router-core`，請先安裝）
   declare module '@tanstack/router-core' {
     interface SerializableExtensions {
       fumadocsObsidianRenderer: ObsidianRendererOptions;
@@ -175,7 +175,7 @@ export function getSource() {
       if (!page) throw notFound();
 
       return {
-        // 語法樹，於用戶端算繪
+        // 語法樹，在用戶端算繪
         render: (await page.data.load()).serialize(),
         pageTree: await source.serializePageTree(source.getPageTree()),
       };
@@ -279,7 +279,7 @@ export function getSource() {
 
   export interface DocsProps extends ProviderProps {
     tree: SerializedPageTree;
-    // 語法樹，會在 island 中算繪
+    // 語法樹，在 island 中算繪
     render: ObsidianRendererOptions;
   }
 
@@ -301,12 +301,12 @@ export function getSource() {
   ```
 </show>
 
-針對同一個 vault 快照，`page.data.load()` 對每個頁面最多只會編譯一次。Vault 內容一律以純 Markdown 編譯：算繪時只會將其對應為 JSX 並解析元件名稱，因此內容中的 JavaScript 絕不會被執行。媒體檔案透過 URL 參照，不會被讀入記憶體。
+在同一個 vault 快照中，`page.data.load()` 對每個頁面最多只會編譯一次。Vault 內容會以純 Markdown 編譯：算繪時只會將其對應為 JSX 並解析元件名稱，因此內容中的 JavaScript 一律不會執行。媒體檔案透過 URL 參照，不會讀入記憶體。
 
 ## 熱重載 [#hot-reload]
 
 <show when={props.framework === 'next'}>
-  開發期間，請與應用程式同時執行內建的內容監看器：
+  開發期間，請在應用程式旁同時執行內建的內容監看器：
 
   ```json title="package.json"
   {
@@ -326,7 +326,7 @@ export function getSource() {
 </show>
 
 <show when={props.framework !== 'next'}>
-  開發期間，Vite 外掛會透過 Vite 的檔案監看器監看 vault。請將外掛加入設定，並連接 vault：
+  開發期間，Vite 外掛會透過 Vite 的檔案監看器監看 vault。請將外掛加入設定檔，並連接 vault：
 
   <show when={props.framework === 'react-router' || props.framework === 'tanstack-start'}>
     ```ts tab="vite.config.ts"
@@ -372,11 +372,11 @@ export function getSource() {
   ```
 </show>
 
-由於 Wikilink 與別名可能讓檔案之間產生相依關係，因此任何變更都會使整個來源快照失效。
+由於 Wikilink 與別名可能會在檔案之間產生相依關係，因此任何一處變更都會讓整個來源快照失效。
 
 ## 靜態來源 [#static-source]
 
-如果 vault 只需要讀取一次，請使用 `staticSource()`：
+若 vault 只需讀取一次，請使用 `staticSource()`：
 
 ```ts title="lib/source.ts"
 import { loader } from 'fumadocs-core/source';
@@ -394,7 +394,7 @@ export const source = loader(await vault.staticSource(), {
 
 ## Schema [#schema]
 
-使用與 Standard Schema 相容的驗證器，自訂頁面的 frontmatter 與 `meta.json` 檔案：
+您可以使用相容於 Standard Schema 的驗證器，自訂頁面的 frontmatter 與 `meta.json` 檔案：
 
 ```ts title="lib/source.ts"
 import { frontmatterSchema, obsidian } from 'fumadocs-obsidian';
@@ -410,11 +410,11 @@ const vault = obsidian({
 });
 ```
 
-預設的 `frontmatterSchema` 對結構鬆散的 vault 相當寬容：像 `title: 2024` 這類純量標題會自動轉換為字串，而 `aliases` 可以是單一名稱，也可以是清單。未通過驗證的筆記會被回報並略過，不會影響 vault 中的其他筆記。
+預設的 `frontmatterSchema` 能容許結構較鬆散的 vault：像 `title: 2024` 這類純量標題會自動轉換為字串，而 `aliases` 可接受單一名稱，也可接受清單。未通過驗證的筆記會被回報並略過，不會影響 vault 中的其他內容。
 
-### 擴充功能 [#additions]
+### 額外功能 [#additions]
 
-傳入 remark/rehype 外掛，即可個別啟用以下語法功能：
+如需啟用個別語法功能，請另外傳入對應的 remark/rehype 外掛：
 
 * [Mermaid](/docs/markdown/mermaid)。
 * [數學公式](/docs/markdown/math)。

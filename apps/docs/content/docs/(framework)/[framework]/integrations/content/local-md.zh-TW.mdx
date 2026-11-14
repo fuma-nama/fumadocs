@@ -1,11 +1,11 @@
 ---
 title: 本機 Markdown
-description: 用於本機 Markdown 內容的內容來源。
+description: 適用於本機 Markdown 內容的內容來源。
 ---
 
 ## 簡介 [#introduction]
 
-`@fumadocs/local-md` 是用於本機 Markdown/MDX 檔案的內容來源。它在設計上就不需要打包，因此能完全在執行階段運作。
+`@fumadocs/local-md` 是用於本機 Markdown/MDX 檔案的內容來源。它在設計上採用免打包 (bundleless) 架構，因此能完全在執行階段運作。
 
 與 [MDX Remote](/docs/integrations/content/mdx-remote) 相比，它專注於本機檔案，並負責處理流程中更多的環節 (frontmatter、meta 檔案、搜尋索引) 。
 
@@ -14,7 +14,7 @@ description: 用於本機 Markdown 內容的內容來源。
 </show>
 
 <show when={props.framework === 'astro'}>
-  與 Astro 內容集合相比，它會在執行階段編譯您的內容，而不是透過打包工具處理，因此無法使用建置階段的圖片最佳化。
+  與 Astro 內容集合相比，它會在執行階段編譯您的內容，而非透過打包工具處理，因此無法使用建置階段的圖片最佳化。
 </show>
 
 ### 限制 [#limitations]
@@ -30,9 +30,9 @@ description: 用於本機 Markdown 內容的內容來源。
 @fumadocs/local-md shiki
 ```
 
-> 之所以需要安裝 `shiki`，是因為打包工具必須將它設為外部依賴 (externalize) 。
+> 之所以要安裝 `shiki`，是因為打包工具必須將它外部化 (externalize) 。
 
-建立 `localMd` 實例，並將它連接到 Fumadocs：
+建立 `localMd` 實例，並將其連接至 Fumadocs：
 
 ```ts title="lib/source.ts"
 import { dynamicLoader } from 'fumadocs-core/source';
@@ -54,7 +54,7 @@ export async function getSource() {
 
 ### Schema [#schema]
 
-您可以傳入 `frontmatterSchema` 與 `metaSchema`，自訂用於驗證的 schema：
+您可以傳入 `frontmatterSchema` 與 `metaSchema`，以自訂驗證用的 schema：
 
 ```ts title="lib/source.ts"
 import { localMd } from '@fumadocs/local-md';
@@ -73,14 +73,14 @@ const docs = localMd({
 
 ## 使用方式 [#usage]
 
-`getSource()` 會回傳一般的[內容載入器](/docs/headless/source-api)。每個頁面都有 `page.data.load()`，它會編譯頁面並回傳算繪器。
+`getSource()` 會回傳一般的[內容載入器](/docs/headless/source-api)。每個頁面都有 `page.data.load()`，它會編譯該頁面並回傳一個算繪器 (renderer) 。
 
 <show when={props.framework === 'next' || props.framework === 'waku'}>
-  在您的頁面中將其算繪：
+  在您的頁面中算繪：
 </show>
 
 <show when={props.framework === 'react-router' || props.framework === 'tanstack-start'}>
-  在載入器中將其序列化，再於用戶端算繪：
+  在 loader 中將其序列化，再於用戶端算繪：
 </show>
 
 <show when={props.framework === 'astro'}>
@@ -179,7 +179,7 @@ const docs = localMd({
   import { getSource } from '@/lib/source';
   import { useMDXComponents } from '@/components/mdx';
 
-  // server function 回傳結果的型別層級檢查無法驗證語法樹，
+  // server function 結果的型別層級檢查無法驗證語法樹，
   // 因此需將其註冊為可序列化（若無法解析 `@tanstack/router-core`，請先安裝）
   declare module '@tanstack/router-core' {
     interface SerializableExtensions {
@@ -204,7 +204,7 @@ const docs = localMd({
       const { serialize } = await page.data.load();
       return {
         title: page.data.title,
-        // 語法樹，於用戶端算繪
+        // 語法樹，會在用戶端算繪
         render: serialize(),
         pageTree: await source.serializePageTree(source.getPageTree()),
       };
@@ -349,7 +349,7 @@ const docs = localMd({
 
 ### 引入 [#include]
 
-[`<include>`](/docs/mdx/include) 預設已啟用：
+[`<include>`](/docs/mdx/include) 預設為啟用狀態：
 
 ```mdx title="content/docs/page.mdx"
 <include>../shared/note.md</include>
@@ -368,10 +368,10 @@ const docs = localMd({
 
 ### 熱重載 [#hot-reload]
 
-`@fumadocs/local-md` 會在執行階段讀取檔案，因此預設不會監看任何檔案。
+`@fumadocs/local-md` 在執行階段讀取檔案，因此預設不會監看任何檔案。
 
 <show when={props.framework === 'next'}>
-  開發期間，請在執行應用程式的同時，一併執行內建的開發伺服器。開發伺服器會在單一行程中監看檔案，並透過 websocket 廣播變更，因此即使 Next.js 以多個 worker 執行也能正常運作。
+  開發期間，請在執行應用程式的同時，一併執行內建的開發伺服器。開發伺服器會在單一處理程序中監看檔案，並透過 websocket 廣播變更，因此即使 Next.js 以多個 worker 執行也能正常運作。
 
   ```json title="package.json"
   {
@@ -381,7 +381,7 @@ const docs = localMd({
   }
   ```
 
-  將來源連接到開發伺服器：
+  將來源連接至開發伺服器：
 
   ```ts title="lib/source.ts"
   import { watchWithDevServer } from '@fumadocs/local-md/dev/ws';
@@ -391,7 +391,7 @@ const docs = localMd({
   }
   ```
 
-  此命令會透過環境變數提供其 URL，因此不需要任何設定。若您自行執行伺服器，請明確傳入 URL，並使用 `-p` 變更連接埠：
+  此指令會透過環境變數公開其 URL，因此不需要額外設定。若您自行執行伺服器，請明確傳入 URL，並使用 `-p` 變更連接埠：
 
   ```ts
   void watchWithDevServer(docs, { url: 'ws://127.0.0.1:8000/_fumadocs_local_md' });
@@ -415,7 +415,7 @@ const docs = localMd({
 </show>
 
 <show when={props.framework !== 'next'}>
-  開發期間，Vite 外掛會透過 Vite 的檔案監看器讓來源失效，不需要額外的行程或連接埠。請將外掛加入您的設定，並連接來源：
+  開發期間，Vite 外掛會透過 Vite 的檔案監看器讓來源失效，不需要額外的處理程序或連接埠。請將外掛加入您的設定，並連接來源：
 
   <show when={props.framework === 'react-router' || props.framework === 'tanstack-start'}>
     ```ts tab="vite.config.ts"
@@ -462,15 +462,15 @@ const docs = localMd({
   }
   ```
 
-  由於內容檔案位於模組圖之外，外掛會將您的內容目錄加入 Vite 的監看器。由於沒有任何模組會失效，外掛會改為重新載入瀏覽器。若要自行處理重新載入，請傳入 `localContentPlugin({ reload: false })`。
+  由於內容檔案位於模組圖之外，外掛會將您的內容目錄加入 Vite 的監看器。由於沒有任何模組失效，外掛會改為直接重新載入瀏覽器。若要自行處理重新載入，請傳入 `localContentPlugin({ reload: false })`。
 </show>
 
-當 Markdown 或 MDX 檔案 (包括其引入的檔案) 變更時，來源就會重新載入。若要接上您自己的監看器，請監看 `docs.dir` 以及傳給 `docs.onDependency()` 的檔案，並在檔案變更時呼叫 `docs.invalidateFile(path)`。
+當 Markdown 或 MDX 檔案 (包括其引入的檔案) 變更時，來源就會重新載入。若要串接自訂的監看器，請監看 `docs.dir` 以及傳入 `docs.onDependency()` 的檔案，並在檔案變更時呼叫 `docs.invalidateFile(path)`。
 
 <show when={props.framework === 'tanstack-start'}>
-  ### Nitro &#91;#nitro&#93;
+  ### Nitro [#nitro]
 
-  使用 Nitro 部署時，請在 Vite 設定中進行以下兩項變更：
+  使用 Nitro 部署時，請在 Vite 設定中進行兩項變更：
 
   ```ts title="vite.config.ts"
   import { defineConfig } from 'vite';
@@ -483,7 +483,7 @@ const docs = localMd({
     ],
     resolve: {
       alias: [
-        // Nitro 會保留此 shim 的 `require('react')`，導致在執行階段載入第二個 React
+        // Nitro 會保留此 shim 中的 `require('react')`，導致在執行階段載入第二份 React
         { find: /^use-sync-external-store\/shim$/, replacement: 'react' },
       ],
     },
@@ -493,9 +493,9 @@ const docs = localMd({
 
 ### JavaScript 引擎 [#javascript-engine]
 
-MDX 檔案 (`*.mdx`) 會透過 `new Function` 執行，因此無法在禁止使用 `eval()` 的環境中運作 (例如 Cloudflare Workers) 。
+MDX 檔案 (`*.mdx`) 會透過 `new Function` 執行，因此在禁止使用 `eval()` 的環境中 (例如 Cloudflare Workers) 無法運作。
 
-Markdown 檔案 (`*.md`) 會直接從語法樹算繪，不需要 `eval()`。外掛產生的 JSX 則交由內建的虛擬 JavaScript 引擎求值，您可以透過 `rendererOptions.executor` 替換此引擎。
+Markdown 檔案 (`*.md`) 會直接從語法樹算繪，不需要 `eval()`。外掛產生的 JSX 則由內建的虛擬 JavaScript 引擎進行求值，您可以透過 `rendererOptions.executor` 替換此引擎。
 
 <Callout type="warn">
   請勿將不受信任的 MDX 檔案放入 `dir`，因為這些檔案會以 JavaScript 的形式在您的應用程式中執行。
@@ -503,7 +503,7 @@ Markdown 檔案 (`*.md`) 會直接從語法樹算繪，不需要 `eval()`。外�
 
 ### 停用重新驗證 [#disable-revalidation]
 
-`staticSource()` 會回傳一次性的快照，不會重新驗證。請搭配 `loader()` 使用，而非 `dynamicLoader()`：
+`staticSource()` 會回傳一次性的快照，不會重新驗證。它需搭配 `loader()` 使用，而非 `dynamicLoader()`：
 
 ```ts title="lib/source.ts"
 import { loader } from 'fumadocs-core/source';
@@ -519,11 +519,11 @@ export const source = loader(await docs.staticSource(), {
 ```
 
 <show when={props.framework !== 'astro'}>
-  ## 從 Fumadocs MDX 遷移 &#91;#migration-from-fumadocs-mdx&#93;
+  ## 從 Fumadocs MDX 遷移 [#migration-from-fumadocs-mdx]
 
   若要遷移，請將 Fumadocs MDX 的設定替換為 `@fumadocs/local-md` 的設定。
 
-  ### 遷移前 &#91;#before&#93;
+  ### 遷移前 [#before]
 
   <show when={props.framework === 'next'}>
     ```ts tab="source.config.ts"
@@ -563,7 +563,7 @@ export const source = loader(await docs.staticSource(), {
     ```
   </show>
 
-  ### 遷移後 &#91;#after&#93;
+  ### 遷移後 [#after]
 
   ```ts title="lib/source.ts"
   import { dynamicLoader } from 'fumadocs-core/source';
@@ -586,11 +586,11 @@ export const source = loader(await docs.staticSource(), {
 
   <show when={props.framework === 'next'}>
     * 移除 `source.config.ts`。
-    * 從 `next.config.mjs` 中移除 `createMDX()`。
-    * 將 `collections/server` 的匯入改為使用 `localMd()` 建立的載入器。
+    * 從 `next.config.mjs` 移除 `createMDX()`。
+    * 將 `collections/server` 的匯入改為使用由 `localMd()` 建立的載入器。
     * 設定[熱重載](#hot-reload)。
 
-    最後，將所有參照 `source` 物件的地方改用 `getSource()`：
+    最後，將原本參照 `source` 物件的地方改為使用 `getSource()`：
 
     ```tsx title="app/docs/layout.tsx"
     import { getSource } from '@/lib/source';
@@ -612,7 +612,7 @@ export const source = loader(await docs.staticSource(), {
     * 設定[熱重載](#hot-reload)。
 
     <show when={props.framework === 'waku'}>
-      最後，將所有參照 `source` 物件的地方改用 `getSource()`：
+      最後，將原本參照 `source` 物件的地方改為使用 `getSource()`：
 
       ```tsx title="src/pages/docs/_layout.tsx"
       import type { ReactNode } from 'react';
@@ -631,7 +631,7 @@ export const source = loader(await docs.staticSource(), {
     </show>
 
     <show when={props.framework !== 'waku'}>
-      最後，將所有參照 `source` 物件的地方改用 `getSource()`，例如在您的載入器中：
+      最後，將原本參照 `source` 物件的地方 (例如您的載入器中) 改為使用 `getSource()`：
 
       ```ts
       import { getSource } from '@/lib/source';
@@ -645,7 +645,7 @@ export const source = loader(await docs.staticSource(), {
 
   頁面資料 API 也有所變更：
 
-  ```tsx tab="遷移前"
+  ```tsx tab="Before"
   const page = source.getPage(['...']);
 
   // 標題與描述
@@ -667,7 +667,7 @@ export const source = loader(await docs.staticSource(), {
   );
   ```
 
-  ```tsx tab="遷移後"
+  ```tsx tab="After"
   const page = docs.getPage(['...']);
 
   // 標題與描述（不變）

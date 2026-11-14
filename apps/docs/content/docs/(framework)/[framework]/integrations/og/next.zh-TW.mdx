@@ -11,7 +11,7 @@ staticParams:
 
 您可以使用 `next/og` 動態產生中繼資料圖片。
 
-請在載入器下方加入以下程式碼，並為頁面定義圖片中繼資料：
+請在載入器下方加入以下內容，並為頁面定義圖片中繼資料：
 
 ```ts tab="lib/source.ts"
 // [!code ++:8]
@@ -46,7 +46,7 @@ export async function generateMetadata(props: PageProps<'/docs/[[...slug]]'>): P
 }
 ```
 
-> 我們在 slug 的結尾加上 `image.png`，這樣就能透過 `/og/docs/my-page/image.png` 存取圖片。
+> 我們會在 slug 的結尾附加 `image.png`，以便透過 `/og/docs/my-page/image.png` 存取圖片。
 
 最後，建立一個路由處理常式，在建置時產生圖片：
 
@@ -54,14 +54,14 @@ export async function generateMetadata(props: PageProps<'/docs/[[...slug]]'>): P
   ../../examples/next/app/og/docs/&#91;...slug&#93;/route.tsx
 </include>
 
-您可以為 Satori (`next/og` 底層所使用) 指定選項，詳情請參閱 https://github.com/vercel/satori 。
+您可以為 Satori (`next/og` 底層使用的函式庫) 指定選項，詳情請參考 https://github.com/vercel/satori 。
 
-### 其他預設組合 [#other-presets]
+### 其他預設樣式 [#other-presets]
 
-Fumadocs CLI 還提供其他樣式，例如 `mono`：
+Fumadocs CLI 也提供其他可用的樣式，例如 `mono`：
 
 ```npm
 npx @fumadocs/cli@latest add og/mono
 ```
 
-請將原本的 `generate` 替換為剛安裝的版本。
+將原本的 `generate` 替換為您剛安裝的版本。

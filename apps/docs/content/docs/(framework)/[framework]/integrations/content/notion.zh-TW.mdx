@@ -1,6 +1,6 @@
 ---
 title: Notion
-description: 從 Notion 擷取頁面，並透過 Fumadocs 算繪。
+description: 從 Notion 擷取頁面，並以 Fumadocs 算繪。
 staticParams:
   - framework: next
   - framework: waku
@@ -8,9 +8,9 @@ staticParams:
 
 ## 簡介 [#introduction]
 
-`@fumadocs/notion` 可將 Notion 資料庫轉換為 Fumadocs 的內容來源。它提供一個動態[內容來源](/docs/headless/source-api)，透過官方 Notion API 擷取頁面；另外也提供伺服器端算繪器，以 Fumadocs UI 算繪 Notion 區塊。
+`@fumadocs/notion` 可將 Notion 資料庫轉換為 Fumadocs 內容來源。它提供一個動態[內容來源](/docs/headless/source-api)，透過官方 Notion API 擷取頁面；另外也提供伺服器端算繪器，以 Fumadocs UI 算繪 Notion 區塊。
 
-它不提供用戶端算繪器，也不會將內容轉換為 MDX，而是直接在伺服器上算繪區塊，因此不需要打包工具，也沒有型別產生步驟。
+它不包含用戶端算繪器，也不會將內容轉換為 MDX。區塊一律在伺服器端算繪，因此不需要打包工具，也沒有型別產生步驟。
 
 ## 設定 [#setup]
 
@@ -20,7 +20,7 @@ staticParams:
 @fumadocs/notion @notionhq/client
 ```
 
-在 Fumadocs UI 的樣式之後，匯入算繪器的 Tailwind CSS 來源：
+請在 Fumadocs UI 樣式之後，匯入算繪器的 Tailwind CSS 來源：
 
 ```css title="Tailwind CSS"
 @import 'fumadocs-ui/css/neutral.css';
@@ -32,8 +32,8 @@ staticParams:
 ### Notion 資料庫 [step] [#notion-database]
 
 1. [建立 Notion 整合](https://developers.notion.com/docs/getting-started)，並授予讀取內容的權限。
-2. 將存放您頁面的資料庫連結至該整合。
-3. 將整合權杖與資料庫的 **data source ID** 存放在僅限伺服器端使用的環境變數中。
+2. 將存放您頁面的資料庫連接至該整合。
+3. 將整合權杖與資料庫的 **data source ID** 存放在僅限伺服器端存取的環境變數中。
 
 ```ini title=".env.local"
 NOTION_TOKEN=ntn_...
@@ -41,12 +41,13 @@ NOTION_DATA_SOURCE_ID=...
 ```
 
 <Callout type="info">
-  請使用資料來源 (data source) ID，而不是資料庫 URL 中顯示的資料庫 ID。在目前的 Notion API 中，資料庫只是一個容器，每次查詢的對象都是其中的某個資料來源。詳情請參閱 Notion 的[資料來源升級指南](https://developers.notion.com/guides/get-started/upgrade-guide-2025-09-03)。
+  請使用資料來源 (data source) ID，而非資料庫 URL 中顯示的資料庫 ID。在目前的 Notion API 中，資料庫是一個容器，
+  每次查詢的對象都是其中一個資料來源。詳情請參閱 Notion 的[資料來源升級指南](https://developers.notion.com/guides/get-started/upgrade-guide-2025-09-03)。
 </Callout>
 
 ### Notion 整合 [step] [#notion-integration]
 
-整合只需建立一次，即可在內容來源與檔案路由之間共用。
+整合只需建立一次，並由內容來源與檔案路由共用。
 
 ```ts title="lib/notion.ts"
 import { Client } from '@notionhq/client';
@@ -60,7 +61,7 @@ export const notion = createNotion({
 
 ### 內容載入器 [step] [#content-loader]
 
-將 `notion.dynamicSource()` 傳入 `dynamicLoader()`，並透過 `getSource()` 提供載入器：
+將 `notion.dynamicSource()` 傳入 `dynamicLoader()`，並透過 `getSource()` 對外提供該載入器：
 
 ```ts title="lib/source.ts"
 import { dynamicLoader } from 'fumadocs-core/source';
@@ -74,7 +75,7 @@ const source = dynamicLoader(
       slug: 'Slug',
       description: 'Description',
     },
-    // 篩選、排序或以其他方式自訂查詢
+    // 篩選、排序或以其他方式自訂查詢條件
     query: {
       filter: {
         property: 'Published',
@@ -92,11 +93,11 @@ export async function getSource() {
 }
 ```
 
-此來源會逐頁走訪每一筆符合條件的資料來源列，並以延遲載入的方式取得每個頁面的巢狀區塊。在載入器失效之前，對同一頁面內容的重複載入呼叫都會經過去重處理。
+來源會分頁走訪所有符合條件的 data source 資料列，並延遲載入每個頁面的巢狀區塊。在載入器失效之前，重複載入同一頁面內容的呼叫都會經過去重處理。
 
 ### 算繪頁面 [step] [#render-pages]
 
-請在版面配置中使用載入器建立頁面樹。接著載入頁面的區塊，並以 `NotionRenderer` 算繪；目錄則由 `blocksToTableOfContents()` 產生：
+在版面配置中使用載入器建立頁面樹。載入頁面的區塊後，再以 `NotionRenderer` 算繪；目錄則由 `blocksToTableOfContents()` 產生：
 
 <show when={props.framework === 'next'}>
   ```tsx tab="app/docs/layout.tsx"
@@ -199,9 +200,9 @@ export async function getSource() {
 
 ### Notion 檔案 [step] [#notion-files]
 
-Notion 託管的檔案 URL (圖片、影片、PDF) 大約一小時後就會過期，因此無法直接嵌入經過快取或以靜態方式提供的頁面。
+Notion 託管的檔案 URL (圖片、影片、PDF) 大約一小時後就會失效，因此無法直接嵌入經過快取或以靜態方式提供的頁面。
 
-`createNotionFileUrlResolver()` 會將這些內部資源導向檔案處理器，由它隨需取得新的簽署 URL。請使用 `createNotionFileHandler()` 掛載該處理器，它會在重新導向前，先驗證所請求的區塊是否屬於您資料來源中的頁面：
+`createNotionFileUrlResolver()` 會將這些內部資源轉交給檔案處理器，由它隨需取得新的簽署 URL。請使用 `createNotionFileHandler()` 掛載處理器，它會先驗證所請求的區塊是否屬於您資料來源中的頁面，再進行重新導向：
 
 <show when={props.framework === 'next'}>
   ```ts title="app/api/notion/file/route.ts"
@@ -221,24 +222,24 @@ Notion 託管的檔案 URL (圖片、影片、PDF) 大約一小時後就會過�
   ```
 </show>
 
-預設路由為 `/api/notion/file`。若要掛載至其他位置，請將相同的 `path` 傳入這兩個函式：
+預設路由為 `/api/notion/file`。若要掛載到其他位置，請將相同的 `path` 傳入這兩個函式：
 
 ```ts
 createNotionFileUrlResolver({ pageId: page.data.id, path: '/notion/file' });
 ```
 
 <Callout type="info">
-  若要進行靜態匯出，請為您的資源使用長期有效的外部 URL，並省略 `getFileUrl`，算繪器便會直接連結至
-  Notion 的 URL。檔案處理器需要動態的執行階段環境才能運作。
+  若要進行靜態匯出，請為您的資源使用可長期存取的外部 URL，並省略 `getFileUrl`，算繪器便會
+  直接連結 Notion 的 URL。檔案處理器需要在動態執行階段環境中運作。
 </Callout>
 
 ### 完成 [step] [#done]
 
-在資料庫中新增頁面並標記為已發布，這些頁面就會出現在 docs 路由下。
+將頁面新增至資料庫並標記為已發布後，這些頁面就會顯示在 docs 路由下。
 
 ## 重新驗證 [#revalidation]
 
-載入器會持續快取頁面，直到您讓快取失效為止。若要套用 Notion 上的編輯，請從受信任的 webhook 或重新驗證路由呼叫 `revalidate()`：
+載入器會快取頁面，直到您使快取失效為止。若要同步 Notion 上的編輯內容，請在受信任的 webhook 或重新驗證路由中呼叫 `revalidate()`：
 
 ```ts title="lib/source.ts"
 export function revalidateNotion() {
@@ -246,7 +247,7 @@ export function revalidateNotion() {
 }
 ```
 
-若要採用預覽模式的設定，讓每個請求都能反映最新內容，請在讀取前先將快取失效：
+若您需要類似預覽模式的設定，讓每個請求都能反映最新內容，請在讀取前先將快取失效：
 
 ```ts title="lib/source.ts"
 export async function getSource() {
@@ -257,17 +258,17 @@ export async function getSource() {
 
 ## 頁面屬性 [#page-properties]
 
-`properties` 會將 Notion 屬性對應到頁面欄位。若省略此選項，來源會：
+`properties` 會將 Notion 屬性對應到頁面欄位。若省略此設定，來源將會：
 
 * 使用第一個 Notion `title` 屬性作為頁面標題；
-* 使用名為 `Slug` 的屬性作為 URL，若沒有此屬性，則改用從標題產生的 slug；
-* 若有名為 `Description` 的屬性，則將其作為頁面描述。
+* 使用名為 `Slug` 的屬性作為 URL，若沒有此屬性，則改用依標題產生的 slug；
+* 若有名為 `Description` 的屬性，則使用該屬性作為描述。
 
-slug 可以包含 `/` 來建立巢狀路由。若虛擬路徑重複或不安全，系統會拋出清楚說明原因的錯誤，而不會默默取代既有頁面。
+slug 可包含 `/`，以建立巢狀路由。若虛擬路徑重複或不安全，會直接拋出說明明確的錯誤，而不會在未提示的情況下覆蓋既有頁面。
 
 ## 查詢與路徑 [#query-and-paths]
 
-請透過 `query` 傳入 Notion 的篩選與排序條件。您可以使用 `baseDir` 將虛擬頁面置於某個目錄下，或使用 `generatePath` 完全自訂虛擬檔案路徑：
+請透過 `query` 傳入 Notion 的篩選與排序條件。您可以使用 `baseDir` 將虛擬頁面放在指定目錄下，或使用 `generatePath` 完整自訂虛擬檔案路徑：
 
 ```ts
 notion.dynamicSource({
@@ -283,7 +284,7 @@ notion.dynamicSource({
 
 ## 自訂算繪 [#customize-rendering]
 
-`NotionRenderer` 內建常見區塊類型的算繪器。傳入 `components` 即可新增或覆寫算繪器，每個覆寫的型別都會對應到其區塊：
+`NotionRenderer` 內建常見區塊類型的算繪器。您可以傳入 `components` 來新增或覆寫這些算繪器，每個覆寫的型別都會對應到其區塊類型：
 
 ```tsx
 import { NotionRenderer } from '@fumadocs/notion';
@@ -303,14 +304,14 @@ import { NotionRenderer } from '@fumadocs/notion';
 />;
 ```
 
-程式碼區塊預設會在伺服器端以 Shiki 進行語法突顯。傳入 `highlightCode={false}` 可算繪純文字程式碼；若要改用您自己的語法突顯器，則可傳入一個函式。
+程式碼區塊預設會在伺服器端透過 Shiki 進行語法突顯。傳入 `highlightCode={false}` 即可算繪未經語法突顯的程式碼；若要改用您自己的語法突顯器，則可傳入一個函式。
 
 ## 僅匯入來源 [#source-only-import]
 
-若程式碼只需要拉取 Notion 頁面 (例如搜尋索引器或 `llms.txt` 路由) ，可以改從 `@fumadocs/notion/source` 匯入，以略過 React 算繪器的進入點：
+若程式碼只需要擷取 Notion 頁面 (例如搜尋索引器或 `llms.txt` 路由) ，可以改從 `@fumadocs/notion/source` 匯入，以略過 React 算繪器的進入點：
 
 ```ts
 import { createNotion } from '@fumadocs/notion/source';
 ```
 
-此進入點會將 Notion SDK 保留為外部相依套件，且不包含任何 React 匯入。這裡同樣可以使用 `blocksToPlainText()`、`blocksToStructuredData()` 與 `blocksToTableOfContents()`。
+此進入點會將 Notion SDK 保留為外部相依套件，且不含任何 React 匯入。此處同樣提供 `blocksToPlainText()`、`blocksToStructuredData()` 與 `blocksToTableOfContents()`。

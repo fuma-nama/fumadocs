@@ -13,7 +13,7 @@ npm i @fumadocs/asyncapi shiki
 
 ### 產生樣式 [#generate-styles]
 
-加入以下這行：
+請加入下面這一行：
 
 ```css title="Tailwind CSS"
 @import 'tailwindcss';
@@ -32,7 +32,7 @@ import { createAsyncAPI } from '@fumadocs/asyncapi/server';
 
 // 注意：這是伺服器端 API
 export const asyncapi = createAsyncAPI({
-  // AsyncAPI schema，也可以改用外部 URL。
+  // AsyncAPI schema，也可以改為提供外部 URL。
   input: ['./asyncapi.yaml'],
 });
 ```
@@ -44,14 +44,14 @@ import { createAsyncAPIPage } from '@fumadocs/asyncapi/ui';
 export const AsyncAPIPage = createAsyncAPIPage();
 ```
 
-有關可用選項，請參閱 [`createAsyncAPI()`](/docs/integrations/asyncapi/server) 和 [`createAsyncAPIPage()`](/docs/integrations/asyncapi/api-page)。
+可用選項請參閱 [`createAsyncAPI()`](/docs/integrations/asyncapi/server) 與 [`createAsyncAPIPage()`](/docs/integrations/asyncapi/api-page)。
 
 ### 產生頁面 [#generate-pages]
 
-將 `staticSource()` 傳入您的 [`loader()`](/docs/headless/source-api/source)，即可在不寫入檔案的情況下產生頁面。
+將 `staticSource()` 傳入您的 [`loader()`](/docs/headless/source-api/source)，即可產生頁面，而不必實際寫入檔案。
 
 <show when={props.framework === 'react-router' || props.framework === 'tanstack-start'}>
-  由於 `staticSource()` 會讀取檔案，`source.ts` 將變成僅限伺服器端使用。請將 `docs` 移至 `collections.ts`，以便用戶端程式碼匯入。
+  由於 `staticSource()` 會讀取檔案，`source.ts` 將變成僅限伺服器端使用。請將 `docs` 移至 `collections.ts`，讓用戶端程式碼可以匯入。
 </show>
 
 <show when={props.framework === 'next'}>
@@ -215,7 +215,7 @@ export const AsyncAPIPage = createAsyncAPIPage();
     },
     {
       baseUrl: '/docs',
-      // [!code ++:2] 選用：在頁面樹的每個頁面項目中加入訊息的方向
+      // [!code ++:2] 選用：在頁面樹的每個頁面項目中加上訊息的方向
       plugins: [asyncapi.loaderPlugin()],
     },
   );
@@ -224,7 +224,7 @@ export const AsyncAPIPage = createAsyncAPIPage();
 
 `staticSource()` 預設會為每個 operation 產生一個頁面。如需自訂，請參閱[產生頁面](/docs/integrations/asyncapi/generate-files)。
 
-**`source` 的頁面現在分為 `docs` 與 `asyncapi` 兩種類型。** 請更新所有使用 `source` 的地方，例如回傳文字給 LLM 的位置：
+**`source` 的頁面現在分為 `docs` 與 `asyncapi` 兩種類型。** 請更新所有使用 `source` 的地方，例如回傳文字給 LLM 的地方：
 
 ```ts
 import { llms } from 'fumadocs-core/source';
@@ -247,7 +247,7 @@ export const docsLlms = llms(source, {
 </show>
 
 <show when={props.framework === 'astro'}>
-  在專屬的 island 中算繪 AsyncAPI 頁面，並在其中以文件版面配置包裹 `<AsyncAPIPage />`：
+  在專屬的 island 中算繪 AsyncAPI 頁面，由該 island 以文件版面配置包裝 `<AsyncAPIPage />`：
 </show>
 
 <show when={props.framework === 'next'}>
@@ -510,19 +510,19 @@ export const docsLlms = llms(source, {
 
 官方 AsyncAPI 整合支援 AsyncAPI 3：
 
-* 為讀者標示訊息的傳遞方向，以及 operation 的伺服器與頻道位址
-* 訊息及其酬載與 header 的 schema，包含 Avro、Protobuf 和 RAML schema
+* 向讀者標示訊息的方向，以及 operation 的伺服器與頻道位址
+* 訊息及其酬載與標頭 schema，包括 Avro、Protobuf 與 RAML schema
 * 訊息範例，可取自文件或由 schema 產生
-* 請求與回覆、correlation ID
-* 安全性方案，包含 OAuth 2.0 流程與 SASL 機制
-* 依所選伺服器顯示 bindings 中的協定細節
+* 請求與回覆、關聯 ID (correlation ID) 
+* 安全性方案，包括 OAuth 2.0 流程與 SASL 機制
+* 針對所選伺服器，呈現 bindings 中的協定細節
 * 支援 WebSocket、Server-Sent Events 與自訂傳輸層的互動測試區，可傳送文字與二進位訊息
-* JavaScript 與 Python 的程式碼範例，涵蓋 WebSocket、MQTT、Kafka、AMQP 和 NATS
-* 酬載與 header 的 TypeScript 型別定義
-* 提供給 LLM 使用的頁面 Markdown
-* Traits
+* JavaScript 與 Python 的程式碼範例，涵蓋 WebSocket、MQTT、Kafka、AMQP 與 NATS
+* 酬載與標頭的 TypeScript 型別定義
+* 供 LLM 使用的頁面 Markdown
+* 特徵 (traits) 
 
-AsyncAPI 2 文件可透過 `npx @asyncapi/cli convert` 轉換。
+AsyncAPI 2 文件可使用 `npx @asyncapi/cli convert` 進行轉換。
 
 ### 示範 [#demo]
 

@@ -11,7 +11,7 @@ description: 導覽列／頁首設定。
 
 ### 透明模式 [#transparent-mode]
 
-若要讓導覽列背景透明，您可以設定透明模式。
+若要讓導覽列背景呈現透明，可以設定透明模式。
 
 ```tsx tab="All" title="lib/layout.shared.tsx"
 import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
@@ -71,15 +71,15 @@ export default function Layout({ children }: { children: ReactNode }) {
 }
 ```
 
-| 模式       | 說明            |
-| -------- | ------------- |
-| `always` | 一律使用透明背景      |
-| `top`    | 位於頁面頂端時使用透明背景 |
-| `none`   | 停用透明背景 (預設)   |
+| 模式       | 說明              |
+| -------- | --------------- |
+| `always` | 一律使用透明背景        |
+| `top`    | 僅在位於頁面頂端時使用透明背景 |
+| `none`   | 停用透明背景 (預設)     |
 
 ### 替換導覽列 [#replace-navbar]
 
-若要在各個版面配置中替換導覽列，請將 `nav.component` 設定為您自己的元件。
+若要替換各個版面配置中的導覽列，請將 `nav.component` 設定為您自己的元件。
 
 ```tsx tab="All" title="lib/layout.shared.tsx"
 import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
@@ -138,7 +138,7 @@ export default function Layout({ children }: { children: ReactNode }) {
 }
 ```
 
-Fumadocs 使用 **CSS 變數**來共享版面配置元件的尺寸，讓每個版面配置元件都能放在適當的位置。
+Fumadocs 使用 **CSS 變數**來共用版面配置元件的尺寸，讓每個版面配置元件都能放在適當的位置。
 
 您需要將 `--fd-nav-height` 覆寫為自訂導覽列的實際高度，可以透過 CSS 樣式表來設定 (例如在 `global.css` 中) ：
 

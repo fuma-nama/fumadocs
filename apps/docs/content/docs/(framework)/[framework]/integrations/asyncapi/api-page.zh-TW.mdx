@@ -18,7 +18,7 @@ export const AsyncAPIPage = createAsyncAPIPage({
 
 ### 自訂版面配置 [#custom-layout]
 
-您可以自訂 operation 各區塊的版面配置方式。
+您可以自訂 operation 中各個區塊的版面配置方式。
 
 ```tsx title="components/api-page.tsx"
 'use client';
@@ -41,27 +41,27 @@ export const AsyncAPIPage = createAsyncAPIPage({
 });
 ```
 
-| Slot          | 算繪內容                              |
-| ------------- | --------------------------------- |
-| `header`      | 標題，用於含有多個 operation 的頁面           |
-| `connection`  | 訊息的傳遞方向、伺服器與頻道位址，以及互動測試區          |
-| `description` | operation 及其頻道的說明，以及外部文件          |
-| `usage`       | 所選伺服器的程式碼範例，在寬版頁面中顯示於 operation 旁 |
-| `authSchemes` | 伺服器與 operation 的安全性方案             |
-| `parameters`  | 位址參數，以及 WebSocket 連線的查詢參數與標頭      |
-| `messages`    | 訊息本身，以及其酬載、標頭、範例與關聯 ID            |
-| `reply`       | 請求的回覆                             |
-| `bindings`    | 所選伺服器的協定細節                        |
+| Slot          | 算繪內容                                |
+| ------------- | ----------------------------------- |
+| `header`      | 標題，用於包含多個 operation 的頁面             |
+| `connection`  | 訊息的傳遞方向、伺服器與頻道位址，以及互動測試區            |
+| `description` | operation 及其頻道的描述，以及外部文件            |
+| `usage`       | 所選伺服器的程式碼範例，在寬版頁面中會顯示於 operation 旁邊 |
+| `authSchemes` | 伺服器與 operation 的安全性方案               |
+| `parameters`  | 位址參數，以及 WebSocket 連線的查詢參數與標頭        |
+| `messages`    | 訊息，包含其酬載、標頭、範例與 correlation ID      |
+| `reply`       | 請求的回覆                               |
+| `bindings`    | 所選伺服器的協定細節                          |
 
 ### 訊息的方向 [#direction-of-messages]
 
-AsyncAPI 以 `send` 與 `receive` 動作來描述應用程式。由於讀者是與應用程式溝通的一方，頁面會將兩者對調呈現：`send` 顯示為 **Receive**，`receive` 則顯示為 **Send**。側邊欄會以進入或離開手機的箭頭來表示兩者。
+AsyncAPI 以 `send` 與 `receive` 動作來描述應用程式。由於讀者是與該應用程式通訊的一方，頁面會將兩者對調呈現：`send` 顯示為 **Receive**，`receive` 則顯示為 **Send**。側邊欄會以指向手機或從手機向外的箭頭來表示兩者。
 
 ### 互動測試區 [#playground]
 
-各個 operation 都能在互動測試區中試用：讀者可透過位址參數、查詢字串與認證資訊建立連線，以文字、十六進位或 Base64 格式傳送範例中的訊息，並查看收到的訊息。
+您可以在互動測試區中試用各個 operation：讀者可透過位址參數、查詢字串與認證資訊建立連線，將範例中的訊息以文字、十六進位或 Base64 格式送出，並查看接收到的訊息。
 
-每種協定都由傳輸層負責連線至其伺服器，WebSocket (`ws` 與 `wss`) 為內建支援。
+各協定的伺服器皆透過傳輸層連線，並已內建支援 WebSocket (`ws` 與 `wss`) 。
 
 ```tsx title="components/api-page.tsx"
 'use client';
@@ -70,7 +70,7 @@ import { sseTransport } from '@fumadocs/asyncapi/playground';
 
 export const AsyncAPIPage = createAsyncAPIPage({
   playground: {
-    // 依伺服器使用的協定對應傳輸層
+    // 依伺服器的協定對應
     transports: { http: sseTransport, https: sseTransport },
     // 設為 `false` 即可停用互動測試區
     enabled: true,
@@ -79,22 +79,22 @@ export const AsyncAPIPage = createAsyncAPIPage({
 ```
 
 <Callout title="瀏覽器限制">
-  瀏覽器無法在 WebSocket 連線中附帶其他網站的標頭或 Cookie，因此僅支援透過查詢參數傳遞認證資訊。
-  以 HTTPS 提供的頁面只能連線至 `wss` 伺服器。
+  瀏覽器無法在 WebSocket 連線中傳送其他網站的標頭或 Cookie，僅支援透過查詢參數提供的認證資訊。
+  透過 HTTPS 提供的頁面只能連線至 `wss` 伺服器。
 </Callout>
 
 #### Server-Sent Events [#server-sent-events]
 
-`sseTransport` 會使用 `fetch` 接收 `http` 與 `https` 伺服器的事件，但讀者無法透過它傳送訊息。
+`sseTransport` 會透過 `fetch` 接收 `http` 與 `https` 伺服器的事件，但讀者無法透過它傳送訊息。
 
-* API 金鑰會放在 HTTP 標頭或查詢字串中傳送。
-* HTTP bearer 與 basic 認證資訊會放在 `Authorization` 標頭中傳送。
+* API 金鑰會放在標頭或查詢字串中傳送。
+* HTTP bearer 與 basic 認證資訊會透過 `Authorization` 標頭傳送。
 
-由於 webhook 同樣使用 `http` 伺服器，此功能需要手動啟用。
+此功能需要手動啟用，因為 webhook 同樣使用 `http` 伺服器。
 
 #### 自訂傳輸層 [#custom-transports]
 
-傳輸層負責連線至伺服器，並透過 `events` 回報發生的狀況。例如，使用 [MQTT.js](https://github.com/mqttjs/MQTT.js) 實作基於 WebSocket 的 MQTT：
+傳輸層負責連線至伺服器，並透過 `events` 回報連線期間發生的狀況。以下範例使用 [MQTT.js](https://github.com/mqttjs/MQTT.js)，透過 WebSocket 傳送 MQTT：
 
 ```ts title="lib/mqtt-transport.ts"
 import mqtt from 'mqtt';
@@ -105,7 +105,7 @@ export const mqttTransport: PlaygroundTransport = {
   auth: (scheme) => scheme.type === 'userPassword',
   connect({ url, address, auth }, events) {
     const credentials = auth[0]?.value;
-    // 伺服器為 broker 的 WebSocket 監聽端點，例如 `localhost:9001`
+    // 伺服器為 broker 的 WebSocket 監聽器，例如 `localhost:9001`
     const client = mqtt.connect(`ws://${new URL(url).host}`, {
       ...(typeof credentials === 'object' && credentials),
       reconnectPeriod: 0,
@@ -143,7 +143,7 @@ export const AsyncAPIPage = createAsyncAPIPage({
 
 ### 程式碼範例 [#code-samples]
 
-每個 operation 都會以 JavaScript 和 Python 示範如何在所選伺服器上接收或傳送訊息。
+每個 operation 都會以 JavaScript 和 Python 示範如何在所選伺服器上接收或傳送其訊息。
 
 | 協定                             | JavaScript                | Python            |
 | ------------------------------ | ------------------------- | ----------------- |
@@ -153,7 +153,7 @@ export const AsyncAPIPage = createAsyncAPIPage({
 | `amqp`, `amqps`                | `amqplib`                 | `pika`            |
 | `nats`                         | `@nats-io/transport-node` | `nats-py`         |
 
-您可以使用 `codeUsages` 新增產生器，或取代預設的產生器：
+您可以透過 `codeUsages` 新增產生器，或取代預設的產生器：
 
 ```tsx title="components/api-page.tsx"
 'use client';
@@ -163,7 +163,7 @@ import {
   registerDefaultCodeUsages,
 } from '@fumadocs/asyncapi/ui';
 
-// 若要從頭開始，請省略預設產生器
+// 若要從頭開始，請省略預設項目
 const codeUsages = registerDefaultCodeUsages(createCodeUsageGeneratorRegistry());
 
 codeUsages.add('websocat', {
@@ -182,7 +182,7 @@ export const AsyncAPIPage = createAsyncAPIPage({ codeUsages });
 
 <auto-type-table path="props.ts" name="CodeUsageData" />
 
-每個 operation 都可以在 `x-codeSamples` 中定義自己的範例，這些範例會取代相同 `lang` 的自動產生範例；若設定 `source: false`，則會移除該語言的範例。
+每個 operation 都可以在 `x-codeSamples` 中定義自己的範例，這些範例會取代相同 `lang` 的自動產生範例；若設定 `source: false`，則會移除該範例。
 
 ```yaml
 operations:
@@ -216,18 +216,18 @@ export const AsyncAPIPage = createAsyncAPIPage({
 });
 ```
 
-### TypeScript 型別定義 [#typescript-definitions]
+### TypeScript 定義 [#typescript-definitions]
 
-酬載與標頭皆提供按鈕，可複製其 TypeScript 型別定義，這些定義由 [`@fumari/json-schema-ts`](https://npmjs.com/package/@fumari/json-schema-ts) 產生。
+酬載與標頭都附有按鈕，可複製其 TypeScript 定義，這些定義由 [`@fumari/json-schema-ts`](https://npmjs.com/package/@fumari/json-schema-ts) 產生。
 
-與頁面上的 schema 相同，這些定義會略過讀者傳送之訊息中的 `readOnly` 屬性，以及讀者接收之訊息中的 `writeOnly` 屬性。
+與頁面上的 schema 一樣，這些定義會省略讀者所傳送訊息中的 `readOnly` 屬性，以及讀者所接收訊息中的 `writeOnly` 屬性。
 
 ```tsx title="components/api-page.tsx"
 'use client';
 import { createAsyncAPIPage } from '@fumadocs/asyncapi/ui';
 
 export const AsyncAPIPage = createAsyncAPIPage({
-  // 或傳入 `(schema, ctx) => string | undefined` 以自行產生定義
+  // 或使用 `(schema, ctx) => string | undefined` 自行產生定義
   generateTypeScriptDefinitions: false,
 });
 ```
@@ -260,11 +260,11 @@ export const translations = i18n
   });
 ```
 
-詳情請參閱[翻譯](/docs/ui/translations)。
+詳細資訊請參閱[翻譯](/docs/ui/translations)。
 
 ### 語法突顯 [#syntax-highlighting]
 
-AsyncAPI 頁面會使用 Shiki 對程式碼區塊進行語法突顯，如需自訂，請傳入[語法突顯器](/docs/headless/utils/shiki)。
+AsyncAPI 頁面會使用 Shiki 為程式碼區塊進行語法突顯，如需自訂，請傳入[語法突顯器](/docs/headless/utils/shiki)。
 
 ```tsx title="components/api-page.tsx"
 'use client';
@@ -297,11 +297,11 @@ export const AsyncAPIPage = createAsyncAPIPage({
 
 ## 自訂 UI [#customise-ui]
 
-若現有選項無法滿足您的自訂需求，可以使用 [Fumadocs CLI](/docs/cli) 將 UI 安裝到您的程式碼庫中。
+若現有選項無法滿足您的自訂需求，您可以透過 [Fumadocs CLI](/docs/cli) 將 UI 安裝到您的程式碼庫中。
 
 ### 完整 UI [#full-ui]
 
-API 頁面的完整 UI，以[無頭式層](/docs/integrations/asyncapi/headless)為基礎建構而成。
+API 頁面的完整 UI，建構在[無頭式層](/docs/integrations/asyncapi/headless)之上。
 
 ```npm
 npx @fumadocs/cli add asyncapi/page
@@ -316,7 +316,7 @@ import { AsyncAPIPage } from '@/components/asyncapi/page'; // [!code ++]
 
 ### Operation [#operation]
 
-單一 operation 的 UI，包含其頻道、訊息與繫結 (bindings) 。
+單一 operation 的 UI，包括其頻道、訊息與繫結 (bindings) 。
 
 ```npm
 npx @fumadocs/cli add asyncapi/operation
@@ -324,7 +324,7 @@ npx @fumadocs/cli add asyncapi/operation
 
 ### 互動測試區 [#playground-1]
 
-互動測試區，以 [`usePlayground()`](/docs/integrations/asyncapi/headless#playground) 為基礎打造。
+互動測試區，以 [`usePlayground()`](/docs/integrations/asyncapi/headless#playground) 為基礎建構。
 
 ```npm
 npx @fumadocs/cli add asyncapi/playground

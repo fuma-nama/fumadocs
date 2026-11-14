@@ -3,24 +3,24 @@ title: 字串化
 description: Fumadocs 如何將您的文件轉換為 Markdown。
 ---
 
-[Remark LLMs](/docs/headless/mdx/remark-llms) 與 [Remark Structure](/docs/headless/mdx/structure) 會輸出 Markdown，供 LLM 與搜尋使用。它們不會將語法樹字串化，而是直接從您撰寫的原始內容中擷取片段：
+[Remark LLMs](/docs/headless/mdx/remark-llms) 與 [Remark Structure](/docs/headless/mdx/structure) 會輸出 Markdown，供 LLM 與搜尋使用。它們不會將語法樹字串化，而是直接從您撰寫的原始內容中切取片段：
 
-* Markdown 會保留您撰寫時的原樣，不會經過跳脫或重新格式化。
-* remark 外掛只能透過記錄編輯來修改內容。
+* Markdown 會維持您撰寫時的原貌，不會經過跳脫或重新格式化。
+* Remark 外掛只能透過記錄編輯來修改內容。
 * 由於不需要序列化語法樹，處理速度很快。
 
-## 運作方式 [#how-it-works]
+## 運作原理 [#how-it-works]
 
-輸出內容是您文件的原始碼，並套用外掛所做的修改。節點會依據其 `position` 定位：
+輸出內容是您文件的原始碼，並套用了外掛所做的修改。節點會依據其 `position` 定位：
 
 * 具有 `position` 的節點會輸出其原始碼。
 * 沒有 `position` 的節點 (例如由外掛插入的節點) 不會輸出任何內容，其 Markdown 改由對應的外掛定義。
 
-例如，[Remark Image](/docs/headless/mdx/remark-image) 會將 `![alt](/image.png)` 轉換為 `<img>` 元素，而輸出內容仍保留 `![alt](/image.png)`。
+例如，[Remark Image](/docs/headless/mdx/remark-image) 會將 `![alt](/image.png)` 轉換為 `<img>` 元素，但輸出內容仍保留 `![alt](/image.png)`。
 
-## 編輯輸出 [#editing-the-output]
+## 編輯輸出內容 [#editing-the-output]
 
-若外掛會取代作者撰寫的內容，應透過 `replaceSource()` 記錄其節點的 Markdown：
+若外掛會取代作者撰寫的內容，則應使用 `replaceSource()` 記錄其節點對應的 Markdown：
 
 ```ts title="remark-note.ts"
 import type { Root } from 'mdast';
@@ -40,22 +40,22 @@ export function remarkNote() {
 }
 ```
 
-* 字串會取代該節點，連同其內部的編輯一併取代。
-* 函式會在所有外掛執行完畢後才執行。`s.stringify(node)` 與 `s.inner(node)` (其子節點) 會回傳對應的 Markdown，其中已包含內部的編輯。
+* 字串會取代整個節點，節點內部的編輯也會一併被取代。
+* 函式會在所有外掛執行完畢後才執行。`s.stringify(node)` 與 `s.inner(node)` (其子節點) 會回傳對應的 Markdown，其中包含內部的編輯。
 * 同一個節點被編輯多次時，以最後一次編輯為準。
 
 若只想編輯其中一種輸出，請將其命名空間作為最後一個引數傳入：`search` 對應 Remark Structure 的紀錄，`markdown` 對應 Remark LLMs。
 
 ```ts
-// 給 LLM 的 Markdown 會保留該標記，搜尋紀錄則不會
+// 給 LLM 的 Markdown 會保留這個標記，搜尋紀錄則不會
 replaceSource(file, node, (s) => s.stringify(node).replace(' [step]', ''), 'search');
 ```
 
-至於搜尋，外掛會透過 [`data.structuredData`](/docs/headless/mdx/structure#plugins) 加入其節點的紀錄。
+在搜尋方面，外掛會透過 [`data.structuredData`](/docs/headless/mdx/structure#plugins) 加入其節點的紀錄。
 
 ### 執行階段的值 [#runtime-values]
 
-若 Markdown 內容要到執行階段才能得知，請使用 `s.expression()` 輸出 JS 運算式。Remark LLMs 會在匯出 Markdown 的位置對其求值，其他輸出則使用備用內容：
+若 Markdown 內容要到執行階段才能得知，請使用 `s.expression()` 輸出 JS 表達式。Remark LLMs 會在匯出 Markdown 的位置對其求值，其他輸出則會使用備用值：
 
 ```ts
 import type { Expression } from 'estree';
@@ -68,7 +68,7 @@ replaceSource(file, node, (s) => `![alt](${s.expression(url, './image.png')})`);
 
 ## 嵌入內容 [#embedded-content]
 
-從其他來源解析出的節點 (例如[引入的檔案](/docs/mdx/include)) ，其位置資訊對應的是該來源。請使用 `embedSource()` 嵌入這些節點，即可像處理您自己的內容一樣將其字串化：
+從其他來源解析出的節點 (例如[引入的檔案](/docs/mdx/include)) ，其位置資訊對應的是該來源。請使用 `embedSource()` 嵌入這些節點，就能像處理您自己的內容一樣將其字串化：
 
 ```ts
 import { embedSource } from 'fumadocs-core/mdx-plugins/stringifier';
@@ -77,6 +77,6 @@ import { embedSource } from 'fumadocs-core/mdx-plugins/stringifier';
 embedSource(file, node, otherSource, otherTree.children);
 ```
 
-其他從字串解析而來的節點不得保留 `position`，因為它指向的並不是您的文件。
+從字串解析出的其他節點不得保留其 `position`，因為該位置並未指向您的文件。
 
-本頁的輔助函式適用於 unified 外掛。在 Sätteri 上，Remark LLMs 與 Remark Structure 也以相同方式輸出 Markdown，但沒有可用來編輯輸出內容的公開 API。
+本頁的輔助函式適用於 unified 外掛。在 Sätteri 上，Remark LLMs 與 Remark Structure 同樣會輸出 Markdown，但沒有公開 API 可供編輯輸出內容。

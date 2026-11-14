@@ -3,7 +3,7 @@ title: 全域選項
 description: 自訂 Fumadocs MDX
 ---
 
-Fumadocs MDX 的全域選項 (例如所有集合共用的 MDX 外掛) 應放在專案根目錄的 `source.config.ts` 中。此檔案並非必要，也能搭配在 `lib/source.ts` 中以 [Macro API](/docs/mdx/macro) 定義的集合使用。
+Fumadocs MDX 的全域選項 (例如所有集合共用的 MDX 外掛) 應寫在專案根目錄的 `source.config.ts` 中。此檔案並非必要，且可搭配在 `lib/source.ts` 中透過 [Macro API](/docs/mdx/macro) 定義的集合使用。
 
 ## 全域選項 [#global-options]
 
@@ -19,7 +19,7 @@ export default defineConfig({
 
 ### MDX 選項 [#mdx-options]
 
-自訂集合的[預設組合](/docs/mdx/mdx)。`mdxOptions` 適用於以 unified 編譯的集合，`satteriOptions` 則適用於設定了 `compiler: 'satteri'` 的集合。
+自訂集合的[預設組合](/docs/mdx/mdx)。`mdxOptions` 適用於以 unified 編譯的集合，`satteriOptions` 則適用於設定 `compiler: 'satteri'` 的集合。
 
 ```ts tab="unified" title="source.config.ts"
 import { defineConfig } from 'fumadocs-mdx/config';
@@ -45,7 +45,7 @@ export default defineConfig({
 });
 ```
 
-或改用 minimal 預設組合：
+或使用 minimal 預設組合：
 
 ```ts tab="unified" title="source.config.ts"
 import { defineConfig } from 'fumadocs-mdx/config';
@@ -53,7 +53,7 @@ import { defineConfig } from 'fumadocs-mdx/config';
 export default defineConfig({
   mdxOptions: {
     preset: 'minimal',
-    // 此時只接受 MDX 處理器選項
+    // 現在只接受 MDX 處理器選項
   },
 });
 ```
@@ -64,7 +64,7 @@ import { defineConfig } from 'fumadocs-mdx/config';
 export default defineConfig({
   satteriOptions: {
     preset: 'minimal',
-    // 此時只接受 Sätteri 編譯選項
+    // 此時僅接受 Sätteri 編譯選項
   },
 });
 ```

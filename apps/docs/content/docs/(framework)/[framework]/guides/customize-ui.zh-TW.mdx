@@ -5,19 +5,19 @@ description: 自訂 Fumadocs UI 的完整指南。
 
 ## 簡介 [#introduction]
 
-Fumadocs UI 提供預先建置的元件，力求簡單易用，定位介於「將所有 UI 程式碼安裝到您的程式碼庫」與高度主觀 (opinionated) 的套件之間。
+Fumadocs UI 提供預先建置的元件以簡化開發，定位介於「將所有 UI 程式碼安裝到您的程式碼庫」與「具有強烈既定設計取向的套件」之間。
 
-雖然 Fumadocs UI 本身在彈性與向後相容性上做了許多設計，但若使用方式不當，這些機制可能無法發揮作用。
+雖然 Fumadocs UI 本身在彈性與向下相容性方面有許多設計考量，但若使用方式不當，這些機制可能無法發揮作用。
 
-> 如果您的 AI 代理可能會修改您的 UI，也建議將本指南提供給它們參考。
+> 若您的 AI 代理可能會修改您的 UI，也建議將本指南提供給它們參考。
 
 ### 選擇合適的元件 [step] [#pick-the-right-component]
 
-在版面配置 UI 方面，您可以試用多種內建的版面配置元件：
+在版面配置 UI 方面，您可以嘗試多種內建的版面配置元件：
 
 <Cards>
   <Card title="文件版面配置" href="/docs/ui/layouts/docs">
-    用於文件的版面配置
+    文件頁面的版面配置
   </Card>
 
   <Card title="Notebook 版面配置" href="/docs/ui/layouts/notebook">
@@ -29,27 +29,27 @@ Fumadocs UI 提供預先建置的元件，力求簡單易用，定位介於「�
   </Card>
 
   <Card title="Flux 版面配置" href="/docs/ui/layouts/flux">
-    極致簡約的文件版面配置
+    極致精簡的文件版面配置
   </Card>
 
   <Card title="Glass 版面配置" href="/docs/ui/layouts/glass">
-    具有浮動式半透明側邊欄與頁首的文件版面配置
+    側邊欄與頁首呈浮動半透明效果的文件版面配置
   </Card>
 
   <Card title="Spacious 版面配置" href="/docs/ui/layouts/spacious">
-    較為寬鬆的文件版面配置
+    較為寬敞的文件版面配置
   </Card>
 </Cards>
 
 ### Props [step] [#props]
 
-您可以先確認元件現有的選項是否已能滿足需求，例如：
+您可以先確認元件提供的選項是否已能滿足您的需求，例如：
 
 ```tsx
 <DocsLayout sidebar={{ enabled: false }}>{/* 內容 */}</DocsLayout>
 ```
 
-或透過 props 設定容器的樣式：
+或是透過 props 設定容器的樣式：
 
 ```tsx
 <DocsLayout
@@ -61,15 +61,15 @@ Fumadocs UI 提供預先建置的元件，力求簡單易用，定位介於「�
 </DocsLayout>
 ```
 
-各元件的詳細說明文件請見 [Fumadocs UI](/docs/ui) 章節，可供您參考。
+各元件的詳細說明請參閱 [Fumadocs UI](/docs/ui) 章節。
 
-大多數選項都支援傳入 JSX 元素，讓您使用自己的元件。
-這種做法應能滿足大多數使用情境，例如在目錄下方或側邊欄中加入區塊。
+大多數選項都支援傳入 JSX 元素，讓您使用自訂元件。
+這種做法應能滿足大多數使用情境，例如在目錄下方或側邊欄中新增區塊。
 
 ### CSS [step] [#css]
 
-當樣式較為複雜時，Fumadocs UI 的部分元件會加上專屬的 `id` &amp; `data-` 屬性，方便您選取。
-您可以在 CSS 選擇器中鎖定這些屬性：
+當樣式需求較為複雜時，Fumadocs UI 的部分元件會附加專屬的 `id` &amp; `data-` 屬性，方便您選取。
+您可以在 CSS 選擇器中以它們為目標：
 
 ```css
 #nd-docs-layout #nd-subnav {
@@ -81,35 +81,35 @@ Fumadocs UI 提供預先建置的元件，力求簡單易用，定位介於「�
 }
 ```
 
-**請避免使用侵入性的樣式，或任何假設特定 DOM 結構的寫法**，因為這類寫法很難確保向後相容，尤其是面對較新的 UI 功能時。
+**請避免使用侵入性的樣式，或任何預設了特定 DOM 結構的寫法**，因為這類寫法難以保證向後相容，尤其是在推出新的 UI 功能時。
 
 ```css title="Bad Example"
-/* 請避免以這種方式選取元素！ */
+/* 請避免像這樣選取元素！ */
 [data-toc-popover] > div {
   background-color: purple;
 }
 ```
 
-使用 CSS 的做法可能有風險，因為只有 `id` &amp; `data-` 屬性會依各自的生命週期進行版本管理。若情況允許，請優先採用其他做法。
+使用 CSS 的做法有一定風險，因為只有 `id` &amp; `data-` 屬性能依照各自的生命週期進行版本控管，因此請盡可能優先採用其他做法。
 
 ### 透過 CLI 安裝 [step] [#install-via-cli]
 
-如果您的需求超出現有選項的範圍，或是自訂的 CSS 樣式已經過度干擾原有樣式，Fumadocs CLI 會是很強大的工具。
+如果您的需求超出現有選項所能提供的範圍，或是自訂的 CSS 樣式變得過度侵入，Fumadocs CLI 會是很強大的工具。
 
-您可以在相關元件的文件中看到類似的提示，代表該元件可以安裝，例如：
+您可以在相關元件的文件中看到類似的提示，表示該元件可透過 CLI 安裝，例如：
 
 <Installation name="layouts/docs" />
 
-至於**版面配置元件** (通常由多個元件組合而成) ，Fumadocs CLI 提供了專用的 `customize` 指令，讓您能進行更細緻的選擇。
+至於**版面配置元件** (通常由多個元件組成) ，Fumadocs CLI 提供專用的 `customize` 指令，讓您進行更細緻的選擇。
 
 ```npm
 npx @fumadocs/cli@latest customize
 ```
 
 除了安裝整個版面配置元件，您也可以選擇只安裝某個 **slot** (版面配置元件中可替換的部分) 。
-執行上方的指令，即可查看所有選項。
+執行上方的指令即可查看所有選項。
 
-安裝完成後，請務必使用已安裝的型別，而非 Fumadocs UI 匯出的型別。例如，若您已安裝 `layout/docs`，請更新您的匯入：
+安裝完成後，請務必改用已安裝的型別，而非從 Fumadocs UI 匯出的型別。例如，若您已安裝 `layout/docs`，請更新您的匯入：
 
 ```tsx
 // [!code --]
@@ -120,12 +120,12 @@ import type { DocsLayoutProps } from '@/components/layout/docs';
 
 這能確保您的本機元件與 Fumadocs UI 解耦。
 
-雖然 Fumadocs CLI 讓您能完全掌控 UI 程式碼，但仍需注意以下幾點：
+雖然 Fumadocs CLI 讓您能完全掌控 UI 程式碼，但仍有幾點值得注意：
 
 * 已安裝的元件將無法再收到 UI 更新。
 * 您可以使用 Fumadocs CLI 重新安裝元件，但先前的自訂內容將會被清除。 (您可以選擇要覆寫哪些檔案) 
-* Fumadocs CLI 會假設您使用的是最新版的 Fumadocs Core + UI。
+* Fumadocs CLI 會預設您使用最新版本的 Fumadocs Core 與 UI。
 
 ## 其他問題 [#other-questions]
 
-如有任何疑問，或遇到預期外的破壞性問題，歡迎到 [GitHub Discussions](https://github.com/fuma-nama/fumadocs/discussions) 提出。
+如有任何疑問，或遇到非預期的功能異常，歡迎到 [GitHub Discussions](https://github.com/fuma-nama/fumadocs/discussions) 與我們聯繫。

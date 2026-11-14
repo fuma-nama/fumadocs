@@ -98,12 +98,12 @@ export const translations = i18n
 
 ## 媒體轉接器 [#media-adapters]
 
-您可以建立媒體轉接器，讓 API 頁面支援其他媒體類型。媒體轉接器需實作：
+您可以建立媒體轉接器，讓 API 頁面支援其他媒體類型。媒體轉接器需實作以下功能：
 
-* 將值轉換為符合對應媒體類型的 `fetch()` body。
-* 依不同的程式語言／工具產生程式碼範例。
+* 將值轉換為對應媒體類型適用的 `fetch()` body。
+* 針對不同的程式語言／工具產生程式碼範例。
 
-其他媒體類型的請求 body 為唯讀：不會出現在程式碼使用範例中，也無法從互動測試區送出。
+其他媒體類型的請求 body 為唯讀：不會出現在程式碼使用範例中，也無法在互動測試區中送出。
 
 ```tsx title="components/api-page.tsx" twoslash
 'use client';
@@ -143,7 +143,7 @@ export const OpenAPIPage = createOpenAPIPage({
 
 ## 授權 [#authorization]
 
-Auth provider 負責處理互動測試區的安全性方案，包括各個值的輸入欄位，以及這些值的傳送方式。
+驗證提供者 (auth provider) 負責處理互動測試區的安全性方案，包括其值的輸入列，以及這些值的傳送方式。
 
 ```tsx title="components/api-page.tsx"
 'use client';
@@ -155,7 +155,7 @@ export const OpenAPIPage = createOpenAPIPage({
   playground: {
     authProviders: [
       {
-        // scheme ID 或函式；省略時套用至所有 scheme
+        // 可為 scheme ID 或函式；省略時套用至所有 scheme
         on: 'my-auth',
         render: ({ Value, Panel }) => (
           <>
@@ -193,7 +193,7 @@ function SignIn({ field, close }: AuthPanelProps) {
 
 請在元件外部定義 provider，因為 provider 一旦變更，驗證欄位就會重新建立。
 
-各列與面板會各自保有狀態，可透過 `Custom.useController(field.fieldName)` 讀取與寫入值。在頁籤關閉之前，值會依方案分別保存。Token 會連同其方案一起送出，例如 `Bearer <token>`。
+各列與面板各自保有自己的狀態，可透過 `Custom.useController(field.fieldName)` 讀寫該值。在頁籤開啟期間，值會依方案分別保存。權杖會連同其方案一併送出，例如 `Bearer <token>`。
 
 <Accordions>
   <Accordion title="需要離開頁面的登入流程">
@@ -243,7 +243,7 @@ function SignIn({ field, close }: AuthPanelProps) {
 
 ## 自訂 UI [#customise-ui]
 
-若現有選項無法滿足您的自訂需求，您可以透過 [Fumadocs CLI](/docs/cli) 將 UI 安裝到您的程式碼庫中。
+若現有選項無法滿足您的自訂需求，您可以使用 [Fumadocs CLI](/docs/cli) 將 UI 安裝到自己的程式碼庫中。
 
 ### 完整 UI [#full-ui]
 
@@ -253,7 +253,7 @@ API 頁面的完整 UI，建構於[無頭式層](/docs/integrations/openapi/head
 npx @fumadocs/cli add openapi/page
 ```
 
-它會直接安裝 `<OpenAPIPage />`，因此不再需要 `components/api-page.tsx`。請更新 `<OpenAPIPage />` 的匯入：
+它會直接安裝 `<OpenAPIPage />`，因此不再需要 `components/api-page.tsx`。請更新 `<OpenAPIPage />` 的匯入路徑：
 
 ```tsx
 import { OpenAPIPage } from '@/components/api-page'; // [!code --]
@@ -262,7 +262,7 @@ import { OpenAPIPage } from '@/components/openapi/page'; // [!code ++]
 
 ### API 互動測試區 [#api-playground]
 
-互動測試區的 UI，其狀態來自 [`usePlayground()`](/docs/integrations/openapi/headless#playground)。
+互動測試區的 UI，其狀態由 [`usePlayground()`](/docs/integrations/openapi/headless#playground) 提供。
 
 ```npm
 npx @fumadocs/cli add openapi/playground

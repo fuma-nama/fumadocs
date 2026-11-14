@@ -11,14 +11,14 @@ Fumadocs GraphQL 的主要設定。
 
 ### `input` [#input]
 
-要讀取的 GraphQL schema，可以是以下其中一種：
+要讀取的 GraphQL schema，可以是：
 
 * 由 SDL 檔案路徑／URL 組成的陣列。
-* schema ID -&gt; 輸入值的對應物件。
+* schema ID -&gt; 輸入的對應物件 (record) 。
 
 物件形式的輸入可接受 SDL 檔案路徑／URL、SDL 文字、introspection 結果、`GraphQLSchema` 實例，以及回傳上述任一項的函式。
 
-只有在此列出的 schema 才能載入；若傳入其他 ID 給 `getSchema()`，則會拋出錯誤。
+只有在此列出的 schema 才能載入，若傳入其他 ID 給 `getSchema()`，將會拋出錯誤。
 
 ```ts tab="Basic"
 import { createGraphQL } from '@fumadocs/graphql/server';
@@ -33,10 +33,10 @@ import { createGraphQL } from '@fumadocs/graphql/server';
 
 export const graphql = createGraphQL({
   input: {
-    // [id]: schema 輸入
+    // [id]：schema 輸入來源
     store: './store.graphql',
     remote: 'https://example.com/schema.graphql',
-    // 也可以是函式，例如下載 introspection 結果
+    // 也可以傳入函式，例如下載 introspection 結果
     galaxy: async () => {
       const res = await fetch('https://example.com/introspection.json');
       return res.json();
@@ -59,7 +59,7 @@ export const graphql = createGraphQL({
 
 ### `examples` [#examples]
 
-取自 GraphQL 文件的範例 operation，可為檔案路徑、URL 或 GraphQL 文字。
+取自 GraphQL 文件的範例 operation，可以是檔案路徑、URL 或 GraphQL 文字。
 
 ```ts tab="Basic"
 import { createGraphQL } from '@fumadocs/graphql/server';
@@ -79,16 +79,16 @@ export const graphql = createGraphQL({
     admin: './admin.graphql',
   },
   examples: {
-    // [id]：該 schema 的 GraphQL 文件
+    // [id]：對應 schema 的 GraphQL 文件
     store: ['./examples/store.graphql'],
   },
 });
 ```
 
-陣列會套用至所有 schema。每個具名的 operation 都會成為其所選取的根欄位頁面上的範例，並取代自動產生的範例：
+陣列會套用到所有 schema。每個具名 operation 都會成為範例，顯示在它所選取的根欄位頁面上，並取代自動產生的範例：
 
 ```graphql title="examples.graphql"
-# 客戶的公開個人檔案。
+# 客戶的公開個人資料。
 query CustomerProfile($id: ID! = "cus_42") {
   customer(id: $id) {
     id
@@ -97,20 +97,20 @@ query CustomerProfile($id: ID! = "cus_42") {
 }
 ```
 
-| 範例          | 來源                                                          |
-| ----------- | ----------------------------------------------------------- |
-| title       | operation 名稱，例如 `CustomerProfile` 會顯示為 **Customer Profile** |
-| description | operation 的 `"""` 描述，或其正上方的 `#` 註解，以 Markdown 撰寫            |
-| variables   | 變數的預設值 (不會放入查詢中) ；若為必填變數，則會自動產生                             |
-| response    | 根據選取的欄位產生                                                   |
+| 範例          | 來源                                                         |
+| ----------- | ---------------------------------------------------------- |
+| title       | operation 名稱，例如 `CustomerProfile` 會轉為 **Customer Profile** |
+| description | operation 的 `"""` 描述，或其正上方的 `#` 註解，支援 Markdown             |
+| variables   | 變數的預設值 (不寫入查詢中) ，或為必要變數自動產生的值                              |
+| response    | 根據選取集自動產生                                                  |
 
 每個 operation 的名稱都必須唯一，且必須符合 schema，否則建置會失敗。
 
-根欄位的引數必須是同名的變數，例如 `customer(id: $id)`，這樣互動測試區才能編輯這些引數。
+根欄位的引數必須是同名的變數，例如 `customer(id: $id)`，互動測試區才能編輯這些引數。
 
 ### `disableCache` [#disablecache]
 
-停用已載入 schema 與範例的快取。適合在開發期間 schema 與範例經常變動時使用。
+停用已載入之 schema 與範例的快取。適合在開發期間使用，因為這些內容經常變動。
 
 ```ts
 import { createGraphQL } from '@fumadocs/graphql/server';
@@ -123,20 +123,20 @@ export const graphql = createGraphQL({
 
 ## 只載入一次 schema [#loading-schemas-once]
 
-頁面會透過 props 接收完整的 schema，因此每次載入頁面、導覽或預先擷取時，都會再傳送一次。若 schema 較大，建議將其排除：
+頁面會透過 props 接收完整的 schema，因此每次載入頁面、切換頁面及預先擷取時，都會重新傳送一次。若 schema 較大，建議不要將其傳入：
 
 ```ts title="lib/graphql.ts"
 import { createGraphQL } from '@fumadocs/graphql/server';
 
 export const graphql = createGraphQL({
-  // ID 會出現在 URL 中，請確保其可安全用於 URL
+  // ID 最終會出現在 URL 中，請確保只使用 URL 安全字元
   input: { store: './store.graphql' },
   includeSchema: false, // [!code ++]
 });
 ```
 
 <show when={props.framework !== 'tanstack-start'}>
-  傳入 `loadSchema`，即可讓每個 schema 的 SDL 在每個瀏覽器工作階段中只載入一次。它也會在伺服器端算繪時執行：
+  傳入 `loadSchema`，即可讓每個 schema 的 SDL 在每個瀏覽器工作階段中只載入一次。此函式也會在伺服器端算繪時執行：
 </show>
 
 <show when={props.framework === 'next'}>
@@ -148,7 +148,7 @@ export const graphql = createGraphQL({
   export const GraphQLPage = createGraphQLPage({
     async loadSchema(id) {
       if (typeof window === 'undefined') {
-        // 瀏覽器會隨頁面一起開始下載
+        // 瀏覽器會在載入頁面時一併開始下載
         preload(`/api/graphql-schema/${id}`, { as: 'fetch', crossOrigin: 'anonymous' });
         const { graphql } = await import('@/lib/graphql');
         return (await graphql.getSchema(id)).sdl;
@@ -168,7 +168,7 @@ export const graphql = createGraphQL({
   export const GraphQLPage = createGraphQLPage({
     async loadSchema(id) {
       if (import.meta.env.SSR) {
-        // 瀏覽器會隨頁面一起開始下載
+        // 瀏覽器會在載入頁面時一併開始下載
         preload(`/api/graphql-schema/${id}`, { as: 'fetch', crossOrigin: 'anonymous' });
         const { graphql } = await import('@/lib/graphql');
         return (await graphql.getSchema(id)).sdl;
@@ -248,7 +248,7 @@ export const graphql = createGraphQL({
 </show>
 
 <show when={props.framework === 'tanstack-start'}>
-  TanStack Start 的路由載入器會同時在伺服器與瀏覽器上執行，因此您的 docs 路由不需要 `loadSchema` 也能載入 schema。只有在瀏覽器尚未取得 schema 時，才需要呼叫 server function：
+  TanStack Start 的路由載入器會同時在伺服器與瀏覽器上執行，因此您的文件路由不需要 `loadSchema` 也能載入 schema。只有在瀏覽器尚未取得 schema 時，才需要呼叫 server function：
 
   ```tsx title="src/routes/docs/$.tsx"
   import { createServerFn } from '@tanstack/react-start';
@@ -275,7 +275,7 @@ export const graphql = createGraphQL({
 
   function Page() {
     const page = useFumadocsLoader(Route.useLoaderData());
-    // 第一個頁面的 schema 也一併記錄
+    // 第一個頁面的 schema 也要記錄
     if (page.type === 'graphql' && typeof window !== 'undefined')
       schemas.set(page.props.schema, page.props.payload.sdl!);
     // ...
@@ -285,16 +285,16 @@ export const graphql = createGraphQL({
 
 <show when={props.framework !== 'tanstack-start'}>
   * 若使用[由 Fumadocs CLI 安裝的 UI](/docs/integrations/graphql/api-page#full-ui)，請將 `loadSchema` 傳入 `createGraphQLRenderer()`。
-  * 瀏覽器會保留每個 schema，直到重新載入頁面為止。若使用 [`disableCache`](#disablecache)，請保持 `includeSchema` 開啟。
+  * 瀏覽器會保留每個 schema，直到重新載入頁面為止。若啟用 [`disableCache`](#disablecache)，請保持 `includeSchema` 開啟。
 </show>
 
 <show when={props.framework === 'tanstack-start'}>
-  * 瀏覽器會保留每個 schema，直到重新載入頁面為止。若使用 [`disableCache`](#disablecache)，請保持 `includeSchema` 開啟。
+  * 瀏覽器會保留每個 schema，直到重新載入頁面為止。若啟用 [`disableCache`](#disablecache)，請保持 `includeSchema` 開啟。
 </show>
 
 ## 產生頁面 [#generating-pages]
 
-`staticSource()` 與 `dynamicSource()` 會為您的 `loader()` 產生頁面，兩者的選項相同。
+`staticSource()` 和 `dynamicSource()` 會為您的 `loader()` 產生頁面，兩者的選項完全相同。
 
 ```ts title="lib/source.ts"
 export const source = loader(
@@ -310,15 +310,15 @@ export const source = loader(
 
 ### `per` [#per]
 
-自訂每個頁面包含的內容，預設為 `item`。
+自訂每個頁面涵蓋的內容，預設為 `item`。
 
-| 模式     | 內容                                                    | 檔案路徑              |
-| ------ | ----------------------------------------------------- | ----------------- |
-| item   | 每個 operation，以及搭配 `includeTypes` 時的每個具名型別             | `{name}.mdx`      |
-| file   | 一個 schema 中的所有 operation，以及搭配 `includeTypes` 時其所有具名型別 | `{file_name}.mdx` |
-| custom | 請見下方說明                                                | N/A               |
+| 模式     | 內容                                                   | 檔案路徑              |
+| ------ | ---------------------------------------------------- | ----------------- |
+| item   | 每個 operation，以及搭配 `includeTypes` 時的每個具名型別            | `{name}.mdx`      |
+| file   | 單一 schema 的所有 operation，以及搭配 `includeTypes` 時其所有具名型別 | `{file_name}.mdx` |
+| custom | 請參閱下方說明                                              | 不適用               |
 
-設為 `custom` 時，您可以傳入一個函式，完整自訂產生流程：
+設為 `custom` 時，您可以傳入函式來完全自訂產生流程：
 
 ```ts
 import { graphql } from '@/lib/graphql';
@@ -338,14 +338,14 @@ await graphql.staticSource({
 
 ### `groupBy` [#groupby]
 
-使用 `per: 'item'` 時，可自訂產生的頁面要如何分組到資料夾中，預設為 `kind`。
+當 `per: 'item'` 時，可自訂產生的頁面要如何分組至資料夾，預設為 `kind`。
 
-| mode | 資料夾                              |
+| 模式   | 資料夾                              |
 | ---- | -------------------------------- |
 | kind | 依種類分組，例如 `queries/`、`mutations/` |
 | none | 不建立資料夾                           |
 
-您也可以傳入函式，回傳項目所屬的分組名稱：
+您也可以傳入一個函式，用來回傳項目的群組名稱：
 
 ```ts
 import { graphql } from '@/lib/graphql';
@@ -359,10 +359,10 @@ await graphql.staticSource({
 
 篩選要產生文件的 operation (query/mutation/subscription 欄位) 與具名型別。
 
-* `includeOperations`：在 `per: 'item'` 時為每個 operation 產生一個頁面，預設為 `true`。
-* `includeTypes`：具名型別；在 `per: 'item'` 時各自擁有獨立頁面，在 `per: 'file'` 時則併入該檔案的頁面中，預設為 `false`。無論採用哪種設定，operation 頁面都會顯示其使用到的型別。
+* `includeOperations`：在 `per: 'item'` 時為每個 operation 各產生一個頁面，預設為 `true`。
+* `includeTypes`：具名型別。在 `per: 'item'` 時各自擁有獨立頁面，在 `per: 'file'` 時則放在該檔案的頁面中，預設為 `false`。無論採用哪種方式，operation 頁面都會顯示其使用的型別。
 
-型別頁面會顯示該型別的使用位置，並與其他型別頁面及相關的 operation 互相連結。
+型別頁面會顯示該型別的使用位置，並提供連結至其他型別及各個 operation。
 
 ```ts
 import { graphql } from '@/lib/graphql';
@@ -377,9 +377,9 @@ await graphql.staticSource({
 
 ### `name` &amp; `slugify` [#name--slugify]
 
-自訂產生頁面的檔案名稱。
+自訂所產生頁面的檔案名稱。
 
-GraphQL 名稱本身就能安全地用於 URL，因此預設會保留原始名稱 (包括大小寫) 。
+GraphQL 名稱本身就可以安全地用於 URL，因此預設會保留原始名稱 (包含大小寫) 。
 
 ```ts
 import { graphql } from '@/lib/graphql';
@@ -390,16 +390,16 @@ await graphql.staticSource({
 });
 ```
 
-`slugify` 會將群組名稱 (預設也包含項目名稱) 轉換為適合用於 URL 的路徑片段。
+`slugify` 會將群組名稱 (預設也包含項目名稱) 轉換為適用於 URL 的路徑片段。
 
 ### `meta` [#meta]
 
 產生 `meta.json` 檔案以自訂頁面樹，預設為停用。
 
-| `folderStyle` | 頁面樹                   |
-| ------------- | --------------------- |
-| folder        | 每個群組各一個資料夾 (預設)       |
-| separator     | 每個群組各一個分隔符，其下列出該群組的頁面 |
+| `folderStyle` | 頁面樹                  |
+| ------------- | -------------------- |
+| folder        | 每個群組各為一個資料夾 (預設)     |
+| separator     | 每個群組各以一個分隔符區隔，頁面列於其下 |
 
 ```ts
 import { graphql } from '@/lib/graphql';
@@ -411,7 +411,7 @@ await graphql.staticSource({
 
 ## 供 LLM 使用的 Markdown [#markdown-for-llms]
 
-`page.data.getText()` 會以 Markdown 格式回傳頁面中的項目：operation 及其簽章、引數、範例和所用型別的 SDL，以及具名型別及其 SDL 與使用處。例如在 [`docsLlms`](/docs/integrations/llms#docsllms) 中：
+`page.data.getText()` 會以 Markdown 格式回傳頁面中的項目：包括 operation 及其簽章、引數、範例和所用型別的 SDL，以及具名型別及其 SDL 和使用位置。例如在 [`docsLlms`](/docs/integrations/llms#docsllms) 中：
 
 ```ts
 import { llms } from 'fumadocs-core/source';
@@ -424,17 +424,17 @@ export const docsLlms = llms(source, {
       return `# ${page.data.title}\n\n${await page.data.getText('processed')}`;
     }
 
-    // 以下為您原本的流程……
+    // 以下為您原有的處理流程……
   },
 });
 ```
 
 ## 載入器外掛 [#loader-plugin]
 
-`loaderPlugin()` 會為您頁面樹中的 GraphQL 頁面加上以下標示：
+`loaderPlugin()` 會為頁面樹中的 GraphQL 頁面加上以下標示：
 
-* 每個 operation 頁面都會顯示 `query`/`mutation`/`subscription` 徽章。
-* 已棄用的 operation 會加上刪除線。
+* 為每個 operation 頁面加上 `query`/`mutation`/`subscription` 徽章。
+* 為已棄用的 operation 加上刪除線。
 
 ```ts title="lib/source.ts"
 export const source = loader(

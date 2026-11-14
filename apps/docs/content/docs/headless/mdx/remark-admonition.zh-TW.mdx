@@ -8,13 +8,13 @@ Docusaurus 提供了 [Admonition 語法](https://docusaurus.io/docs/markdown-fea
 
 ## 使用方式 [#usage]
 
-此功能需要使用 directive 語法。若使用 unified，請安裝 `remark-directive`：
+此功能需要使用 directive 語法。若您使用 unified，請安裝 `remark-directive`：
 
 ```package-install
 remark-directive
 ```
 
-Sätteri 透過 `directive` 功能解析指令 (directive) ，Fumadocs MDX 預設即會啟用此功能。
+Sätteri 透過其 `directive` 功能解析指令，而 Fumadocs MDX 預設即會啟用此功能。
 
 ```ts tab="unified" title="source.config.ts"
 import remarkDirective from 'remark-directive';
@@ -81,7 +81,7 @@ Hello World
 ### 使用時機 [#when-to-use]
 
 我們強烈建議您改用 MDX 的 JSX 語法。
-它更有彈性，而且部分編輯器在 MDX 檔案中也支援 IntelliSense。
+它更有彈性，而且部分編輯器在 MDX 檔案中支援 IntelliSense。
 
 ```mdx
 <Callout type='warn'>

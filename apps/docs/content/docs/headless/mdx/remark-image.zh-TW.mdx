@@ -3,34 +3,34 @@ title: Remark Image
 description: 為圖片加上尺寸屬性。
 ---
 
-這是一個 remark 外掛，會為您的圖片元素加上 `width` 與 `height` 屬性。在 Next.js 及部分其他框架中，必須具備這些屬性才能進行圖片最佳化 (Image Optimization) 。
+這是一個 remark 外掛，會為您的圖片元素加上 `width` 與 `height` 屬性；在 Next.js 及部分其他框架中，必須具備這兩個屬性才能進行圖片最佳化 (Image Optimization) 。
 
 ## 使用方式 [#usage]
 
-Fumadocs MDX 預設即會啟用此功能。您可以透過 `remarkImageOptions` 傳入選項，且 unified 與 Sätteri 使用相同的選項。
+Fumadocs MDX 預設會啟用此功能。您可以透過 `remarkImageOptions` 傳入選項。無論使用 unified 或 Sätteri，選項皆相同。
 
-支援以下來源：
+支援：
 
 * 本機圖片
 * 外部 URL
 * Next.js 靜態匯入
 
-### 運作方式 [#how-it-works]
+### 運作原理 [#how-it-works]
 
 使用 `useImport` 時，本機圖片會轉換為**靜態匯入**，交由您的打包工具處理。Fumadocs MDX 預設會啟用此功能，但 `dynamic` 集合除外。
 在 Next.js 上，這些圖片會由內建的圖片載入器處理，並支援 Next.js Image 的 `placeholder` 選項。
 
-其他情況下，則會透過檔案系統或 HTTP 請求下載圖片並取得其尺寸。
+其他情況下，則會透過檔案系統或 HTTP 請求下載圖片，以取得圖片尺寸。
 
 <Callout type="warn">
-  請勿傳入不受信任的圖片 URL。這些 URL 會在編譯時被擷取，私有主機也不例外。設定 `external: false` 即可略過外部圖片。
+  請勿傳入不受信任的圖片 URL。這些圖片會在編譯時被擷取，私有主機上的圖片也不例外。設定 `external: false` 即可略過外部圖片。
 </Callout>
 
 ### 選項 [#options]
 
 <auto-type-table path="../props.ts" name="RemarkImageOptions" />
 
-### 範例：搭配匯入 [#example-with-imports]
+### 範例：使用匯入 [#example-with-imports]
 
 ```mdx
 ![Hello](/hello.png)
@@ -94,7 +94,7 @@ export default defineConfig({
 
 ### 範例：相對路徑 [#example-relative-paths]
 
-啟用 `useImport` 後，您可以透過相對路徑引用本機圖片。
+啟用 `useImport` 後，您可以使用相對路徑來引用本機圖片。
 
 ```mdx
 ![Hello](./hello.png)
@@ -102,7 +102,7 @@ export default defineConfig({
 
 請注意，若停用 `useImport`，此用法**將無法運作**。
 除非您已在程式碼中匯入圖片，否則 Next.js 不會將其加入公開資源。
-至於 public 目錄中的圖片，您可以直接引用，不需使用相對路徑。
+至於 public 目錄中的圖片，您可以直接引用，無須使用相對路徑。
 
 ### 範例：public 目錄 [#example-public-directory]
 

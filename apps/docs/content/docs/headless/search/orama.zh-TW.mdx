@@ -3,15 +3,15 @@ title: 內建搜尋
 description: Fumadocs 的內建文件搜尋
 ---
 
-Fumadocs 支援透過 [ZBSearch](https://www.zbsearch.dev) 進行文件搜尋。這不僅是預設選項，也是我們推薦的選項，因為它可以自行託管，而且完全免費。
+Fumadocs 透過 [ZBSearch](https://www.zbsearch.dev) 支援文件搜尋。這不僅是預設選項，也是我們推薦的選項，因為它可以自行託管，而且完全免費。
 
 ## 設定 [#setup]
 
-架設處理搜尋請求的伺服器。
+架設伺服器以處理搜尋請求。
 
 ### 從來源建立 [#from-source]
 
-從 source 物件建立伺服器。
+從來源物件建立伺服器。
 
 <include cwd meta="tab=&#x22;Next.js&#x22; title=&#x22;app/api/search/route.ts&#x22;">
   ../../examples/next/app/api/search/route.ts
@@ -34,7 +34,7 @@ import type { APIRoute } from 'astro';
 import { createFromSource } from 'fumadocs-core/search/server';
 import { source } from '@/lib/source';
 
-// 於每次請求時算繪，需要轉接器
+// 於每次請求時算繪，需要搭配轉接器
 export const prerender = false;
 
 const server = createFromSource(source);
@@ -44,7 +44,7 @@ export const GET: APIRoute = ({ request }) => server.GET(request);
 
 ### 從搜尋索引建立 [#from-search-indexes]
 
-透過搜尋索引建立伺服器，每個索引都需要包含 `structuredData` 欄位。
+從搜尋索引建立伺服器，每個索引都必須包含 `structuredData` 欄位。
 
 此欄位通常由您的內容來源 (例如 Fumadocs MDX) 提供。您也可以使用 [Remark Structure](/docs/headless/mdx/structure) 外掛，從 Markdown/MDX 文件中擷取。
 
@@ -141,7 +141,7 @@ const server = createSearchAPI('advanced', {
     ),
 });
 
-// 於每次請求時算繪，需要轉接器
+// 每次請求時算繪，需搭配轉接器
 export const prerender = false;
 
 export const GET: APIRoute = ({ request }) => server.GET(request);
@@ -166,7 +166,7 @@ const { search, onSearchChange, isLoading, data } = useFetchSearch();
 
 ### 標籤篩選 [#tag-filter]
 
-支援依標籤篩選搜尋結果，適合用來實作類似本文件的多文件架構。
+支援依標籤篩選結果，適合用來實作類似本文件網站的多文件架構。
 
 ```ts
 import { source } from '@/lib/source';
@@ -180,7 +180,7 @@ const server = createFromSource(source, {
       url: page.url,
       id: page.url,
       structuredData: page.data.structuredData,
-      // 填入您需要的值，例如 page.slugs[0] [!code ++:2]
+      // 使用您想要的值，例如 page.slugs[0] [!code ++:2]
       tag: '<value>',
     };
   },
@@ -202,7 +202,7 @@ const { search, onSearchChange, isLoading, data } = useFetchSearch({
 
 ### 靜態模式 [#static-export]
 
-若要在靜態網站中使用，請使用搜尋伺服器提供的 `staticGET`，並將該路由設為靜態或預先算繪。
+若要支援靜態網站，請使用搜尋伺服器提供的 `staticGET`，並將該路由設為靜態或預先算繪。
 
 ```ts tab="Next.js" title="app/api/search/route.ts"
 import { source } from '@/lib/source';
@@ -244,7 +244,7 @@ export default defineConfig({
       prerender: {
         enabled: true,
       },
-      // [!code ++:2] 預先算繪索引檔
+      // [!code ++:2] 預先算繪搜尋索引檔案
       pages: [{ path: '/api/search' }],
     }),
   ],
@@ -271,7 +271,7 @@ import { source } from '@/lib/source';
 
 const server = createFromSource(source);
 
-// 預設會預先算繪 [!code highlight]
+// 預設為預先算繪 [!code highlight]
 export const GET: APIRoute = () => server.staticGET();
 ```
 
@@ -291,16 +291,16 @@ export const GET: APIRoute = () => server.staticGET();
 
   <auto-type-table type="import(&#x22;fumadocs-core/search/client/orama-static&#x22;).StaticOptions" />
 
-<Callout type="warn" title="請留意">
+<Callout type="warn" title="請注意">
   靜態搜尋需要用戶端下載匯出的搜尋索引。
-  對大型文件網站而言，這可能造成相當大的負擔。
+  對大型文件網站而言，成本可能相當高。
 
-  遇到這類情況時，建議您改用 Orama Cloud 或 Algolia 等雲端解決方案。
+  在這種情況下，建議您改用 Orama Cloud 或 Algolia 等雲端解決方案。
 </Callout>
 
 ## 國際化 [#internationalization]
 
-搜尋功能開箱即支援所有語言：預設的 `multilingual` 模式採用 Unicode 斷詞，因此所有語系 (包括中文與日文) 都共用同一個搜尋資料庫，完全不需要額外設定。
+搜尋功能開箱即支援所有語言：預設的 `multilingual` 模式採用 Unicode 斷詞，因此所有語系 (包括中文和日文) 都共用同一個搜尋資料庫，完全不需要任何設定。
 
 ```ts title="app/api/search/route.ts" tab="From Source"
 import { source } from '@/lib/source';
@@ -334,7 +334,7 @@ const server = createI18nSearchAPI('advanced', {
 
 * **Fumadocs UI**：無需任何變更，只要正確設定 i18n，Fumadocs UI 就會自動處理。
 * **搜尋用戶端**：
-  在搜尋用戶端加入 `locale`，讓使用者只能搜尋到指定語系的頁面。
+  在搜尋用戶端加上 `locale`，這樣使用者就只能搜尋到指定語系的頁面。
 
 ```ts
 import { useFetchSearch } from 'fumadocs-core/search/client';
@@ -344,11 +344,11 @@ const { search, onSearchChange, isLoading, data } = useFetchSearch({
 });
 ```
 
-這同樣適用於**靜態模式**，只是改為將 `locale` 傳入 `useStaticSearch()`。
+這同樣適用於**靜態模式**，只需改為將 `locale` 傳入 `useStaticSearch()` 即可。
 
 <Callout title="特定語言的分詞">
   `multilingual` 模式不會套用特定語言的詞幹提取 (stemming) 或停用詞 (stop-words) 。
-  若沒有詞幹提取，像 `recordings` 這樣的複數查詢就無法比對到包含 `recording` 的頁面。
+  若未進行詞幹提取，像 `recordings` 這樣的複數查詢就無法比對到包含 `recording` 的頁面。
 
   若要加入詞幹提取器，同時保留多語言斷詞與單一資料庫，請傳入 `tokenizer`：
 
@@ -387,16 +387,16 @@ const { search, onSearchChange, isLoading, data } = useFetchSearch({
 
 ## 無頭式 [#headless]
 
-您可以將搜尋伺服器架設在其他後端上，例如 Express 或 Elysia。
+您也可以將搜尋伺服器架設在其他後端，例如 Express 或 Elysia。
 
 ```ts
 import { initAdvancedSearch } from 'fumadocs-core/search/server';
 
 const server = initAdvancedSearch({
-  // 仍需傳入索引
+  // 您仍需傳入索引
 });
 
 server.search('query', {
-  // 您可以在此指定 `locale` 和 `tag`
+  // 您可以在此指定 `locale` 與 `tag`
 });
 ```

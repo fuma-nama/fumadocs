@@ -3,7 +3,7 @@ title: Mixedbread
 description: 將 Mixedbread Search 整合至 Fumadocs
 ---
 
-[Mixedbread](https://www.mixedbread.com) 提供語意搜尋功能，讓使用者能以自然語言進行搜尋，依據語意而非關鍵字找到相關內容。
+[Mixedbread](https://www.mixedbread.com) 提供語意搜尋功能，讓使用者能以自然語言搜尋，依照語意而非關鍵字找到內容。
 
 ## 設定 [#setup]
 
@@ -15,7 +15,7 @@ description: 將 Mixedbread Search 整合至 Fumadocs
 
 ### API 金鑰 [#api-key]
 
-請前往 [Mixedbread](https://platform.mixedbread.com) 註冊，為您的文件建立一組 [API 金鑰](https://platform.mixedbread.com/platform?next=api-keys)與一個[儲存區](https://platform.mixedbread.com/platform?next=stores)，然後將它們儲存在 `.env.local` 中：
+請先在 [Mixedbread](https://platform.mixedbread.com) 註冊，並為您的文件建立一組 [API 金鑰](https://platform.mixedbread.com/platform?next=api-keys)和一個[儲存區](https://platform.mixedbread.com/platform?next=stores)，再將兩者存放到 `.env.local` 中：
 
 ```dotenv
 MXBAI_API_KEY="your API key"
@@ -26,15 +26,15 @@ MIXEDBREAD_STORE_ID="your store ID"
 
 ### 同步文件 [#sync-documents]
 
-預先算繪 `static.json` 路由，以便在建置時匯出搜尋文件，並在每次建置後透過腳本將這些文件同步到您的儲存區：
+預先算繪 `static.json` 路由，以便在建置時匯出搜尋文件，並在每次建置後透過指令碼將這些文件同步至您的儲存區：
 
 <feature>search/mixedbread</feature>
 
-`sync()` 會為每個頁面上傳一個檔案，並略過自上次同步後未變更的頁面。已移除頁面的檔案會一併刪除，因此請使用專供文件使用的儲存區。`build` 腳本會在每次建置時進行同步，請在您的部署平台上設定相同的變數。
+`sync()` 會為每個頁面上傳一個檔案，並略過自上次同步後未變更的頁面。已移除頁面的檔案也會一併刪除，因此請使用專供您的文件使用的儲存區。`build` 指令碼會在每次建置時進行同步，請在您的部署平台上設定相同的變數。
 
 ### 搜尋 API [#search-api]
 
-建立一個用來搜尋您儲存區的路由：
+建立用來搜尋您儲存區的路由：
 
 ```ts tab="Next.js" title="app/api/search/route.ts"
 import { createMixedbreadSearchAPI } from 'fumadocs-core/search/mixedbread';
@@ -109,10 +109,10 @@ export const GET: APIRoute = ({ request }) => server.GET(request);
 
 ### 搜尋 UI [#search-ui]
 
-實作 UI 時，您可以考慮以下幾種方式：
+您可以考慮以下幾種實作 UI 的方式：
 
 * 使用 [Fumadocs UI 搜尋對話方塊](/docs/search/mixedbread)。
-* 使用內建的搜尋用戶端 hook 自行打造：
+* 透過內建的搜尋用戶端 hook 自行打造：
 
   ```ts twoslash
   import { useFetchSearch } from 'fumadocs-core/search/client';
@@ -150,7 +150,7 @@ toDocuments(source, { tag: (page) => page.slugs[0] });
 
 ### 國際化 [#internationalization]
 
-文件會包含其所屬頁面的語系，傳入 `locale` 即可搜尋特定語言的內容：
+文件會包含所屬頁面的語系，傳入 `locale` 即可搜尋特定語言的內容：
 
 ```ts
 import { useI18n } from 'fumadocs-ui/contexts/i18n';
@@ -163,9 +163,9 @@ const { search, onSearchChange, isLoading, data } = useFetchSearch({
 });
 ```
 
-## 底層運作原理 [#under-the-hood]
+## 運作原理 [#under-the-hood]
 
-每個頁面都是一個以 URL 為鍵的檔案，並以頁面標題、URL、Breadcrumb、標籤與語系作為中繼資料。頁面的區塊 (chunk) 包括標題、各個小標題與段落，而每個搜尋結果都是一個區塊：
+每個頁面都是一個以 URL 為鍵的檔案，並以頁面標題、URL、Breadcrumb、標籤和語系作為中繼資料。頁面的區塊 (chunk) 包括頁面標題、各個標題與段落，而每筆搜尋結果都是一個區塊：
 
 | 區塊中繼資料    | 說明                        |
 | --------- | ------------------------- |

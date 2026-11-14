@@ -15,13 +15,13 @@ Fumadocs 為標記語言 MDX 提供了許多實用的擴充功能。以下簡要
 
 ## MDX [#mdx]
 
-我們推薦使用 MDX，它是 Markdown 的超集，並支援 JSX 語法。
-您可以匯入元件並在文件中使用，甚至可以直接撰寫 JavaScript。
+我們建議使用 MDX，它是 Markdown 的超集，支援 JSX 語法。
+您可以匯入元件並在文件中使用，甚至能直接撰寫 JavaScript。
 
 請參閱：
 
 * [MDX 語法](https://mdxjs.com/docs/what-is-mdx/#mdx-syntax)。
-* 此外也支援 GFM (GitHub Flavored Markdown) ，請參閱 [GFM 規格](https://github.github.com/gfm)。
+* 同時也支援 GFM (GitHub Flavored Markdown) ，請參閱 [GFM 規格](https://github.github.com/gfm)。
 
 ```mdx noCopy
 import { Component } from './component';
@@ -54,7 +54,7 @@ Hello World, **Bold**, _Italic_, ~~Hidden~~
 
 ### Frontmatter [#frontmatter]
 
-Fumadocs 預設支援 YAML 格式的 frontmatter，其中 `title` 代表 Fumadocs UI 中的頁面標題 (`h1`) 。
+Fumadocs 預設支援 YAML 格式的 frontmatter，其中 `title` 在 Fumadocs UI 中代表頁面標題 (`h1`) 。
 
 ```mdx
 ---
@@ -66,7 +66,7 @@ title: This is a document
 
 因此，撰寫 Markdown/MDX 時通常不會使用 h1 標題 (`# Heading`) ，除非您有自訂的頁面標題算繪邏輯。
 
-若您的內容來源支援，也可以在程式碼中匯出 frontmatter。它會合併並覆蓋 YAML frontmatter，且可以讀取 [props](#props)：
+若您的內容來源支援，也可以在程式碼中匯出 frontmatter。匯出的值會合併並覆蓋 YAML frontmatter，且可以讀取 [props](#props)：
 
 ```mdx
 ---
@@ -79,12 +79,12 @@ export const frontmatter = {
 ```
 
 <Callout title="在 Fumadocs MDX 中">
-  您可以使用 [`schema`](/docs/mdx/collections#schema-1) 選項新增 frontmatter 屬性，詳情請參閱[自訂 Frontmatter](/docs/mdx#customize-frontmatter)。
+  您可以使用 [`schema`](/docs/mdx/collections#schema-1) 選項新增 frontmatter 屬性。詳情請參閱[自訂 frontmatter](/docs/mdx#customize-frontmatter)。
 </Callout>
 
 ### 自動連結 [#auto-links]
 
-內部連結會使用您 React 框架的 `<Link />` 元件，以支援預先載入 (prefetching) ，並避免整頁重新載入。
+內部連結會使用您 React 框架的 `<Link />` 元件，以支援預先載入並避免整頁重新載入。
 
 基於安全考量，外部連結會自動加上預設的 `rel="noreferrer noopener" target="_blank"` 屬性。
 
@@ -113,11 +113,11 @@ import { HomeIcon } from 'lucide-react';
 ```
 
 <Cards>
-  <Card href="/docs" title="說明文件">
-    瀏覽完整的說明文件。
+  <Card href="/docs" title="文件">
+    瀏覽完整文件。
   </Card>
 
-  <Card title="href 為選填">卡片也可以只放一般內容。</Card>
+  <Card title="href 為選用">卡片也可以只放純內容。</Card>
 
   <Card icon={<HomeIcon />} href="/" title="首頁">
     您也可以加上圖示。
@@ -126,7 +126,7 @@ import { HomeIcon } from 'lucide-react';
 
 #### 「延伸閱讀」區塊 [#further-reading-section]
 
-您可以這樣做：
+您可以參考以下寫法：
 
 ```tsx title="page.tsx"
 import { getPageTreePeers } from 'fumadocs-core/page-tree';
@@ -141,13 +141,13 @@ import { source } from '@/lib/source';
 </Cards>;
 ```
 
-這會以卡片形式顯示同一資料夾中的其他頁面。
+這會以卡片形式列出同一資料夾中的其他頁面。
 
 <DocsCategory url="/docs/ui/navigation" />
 
-### 提示框 [#callouts]
+### Callouts [#callouts]
 
-適合用來加入提示或警告，預設已內建。您可以指定提示框的類型：
+適合用來加入提示或警告，預設即已內建。您可以指定 Callout 的類型：
 
 * `info` (預設) 
 * `warn`/`warning`
@@ -171,23 +171,23 @@ import { source } from '@/lib/source';
 </Callout>
 ```
 
-<Callout>Hello World</Callout>
+<Callout>你好，世界</Callout>
 
 <Callout title="標題" type="warn">
-  Hello World
+  你好，世界
 </Callout>
 
 <Callout title="標題" type="error">
-  Hello World
+  你好，世界
 </Callout>
 
 <Callout title="標題" type="idea">
-  Hello World
+  你好，世界
 </Callout>
 
 ### 標題 [#headings]
 
-每個標題都會自動加上錨點，並將空格等無效字元轉換為合法格式 (例如 `Hello World` 會轉為 `hello-world`) 。
+每個標題都會自動加上錨點，並將空格等無效字元轉換為有效格式 (例如 `Hello World` 會轉為 `hello-world`) 。
 
 ```md
 # Hello `World`
@@ -212,7 +212,7 @@ Like headings rendered in a React component:
 
 #### 自訂錨點 [#custom-anchor]
 
-您可以加上 `[#slug]` 來自訂標題的錨點。
+您可以加上 `[#slug]` 來自訂標題錨點。
 
 ```md
 # heading [#my-heading-id]
@@ -224,7 +224,7 @@ Like headings rendered in a React component:
 # heading [toc] [#my-heading-id]
 ```
 
-若要讓讀者直接連到特定標題，請在網址的雜湊片段中加上標題 ID：`/page#my-heading-id`。
+若要讓他人透過連結直接前往特定標題，請將標題 ID 加到雜湊片段 (hash fragment) 中：`/page#my-heading-id`。
 
 ### 程式碼區塊 [#codeblock]
 
@@ -242,7 +242,7 @@ console.log('Hello World');
 
 #### 行號 [#line-numbers]
 
-顯示行號，此功能也能與 Twoslash 及其他 transformer 搭配使用。
+顯示行號，亦可搭配 Twoslash 及其他 transformer 使用。
 
 ````mdx tab="Input"
 ```ts twoslash lineNumbers
@@ -280,14 +280,14 @@ function main() {
 
 #### Shiki Transformers [#shiki-transformers]
 
-我們支援部分 [Shiki Transformers](https://shiki.style/packages/transformers)，讓您能針對特定行進行語法突顯或套用樣式。
+我們支援部分 [Shiki Transformers](https://shiki.style/packages/transformers)，讓您能夠突顯特定行或為其設定樣式。
 
 ````md tab="Input"
 ```tsx
-// 醒目標示一行
+// 突顯單行
 <div>Hello World</div> // [\!code highlight]
 
-// 醒目標示一個單字
+// 突顯特定字詞
 // [\!code word:Fumadocs]
 <div>Fumadocs</div>
 
@@ -301,10 +301,10 @@ return new ResizeObserver(() => {}) // [\!code focus]
 ````
 
 ```tsx tab="Output"
-// 語法突顯單行
+// 突顯單行
 <div>Hello World</div> // [!code highlight]
 
-// 語法突顯單一字詞
+// 突顯單字
 // [!code word:Fumadocs]
 <div>Fumadocs</div>
 
@@ -336,7 +336,7 @@ console.log('A');
 console.log('B');
 ```
 
-若要新增持久化 ID，請在第一個程式碼區塊中定義 `tab-group`：
+若要加入持久化 ID，請在第一個程式碼區塊上定義 `tab-group`：
 
 ````mdx
 ```ts tab="Tab 1" tab-group="my-custom-group"
@@ -366,7 +366,7 @@ console.log('A');
 console.log('B');
 ```
 
-#### 頁籤群組中的 MDX [#mdx-in-tab-groups]
+#### 在頁籤群組中使用 MDX [#mdx-in-tab-groups]
 
 頁籤群組由 `remarkCodeTab` remark 外掛提供，Fumadocs MDX 預設會啟用此外掛。若要在頁籤值中使用 MDX，請啟用它的 `parseMdx` 選項：
 
@@ -421,7 +421,7 @@ console.log('B');
 ### 引入 [#include]
 
 引用另一個檔案 (也可以是 Markdown/MDX 文件) 。Fumadocs MDX 透過 [Remark 引入](/docs/headless/mdx/remark-include) 預設啟用此功能。
-請在 `<include>` 標籤中指定目標檔案的路徑 (相對於該 MDX 檔案本身) 。
+請在 `<include>` 標籤中指定目標檔案路徑 (相對於該 MDX 檔案本身) 。
 
 ```mdx title="page.mdx"
 <include>./another.mdx</include>
@@ -431,7 +431,7 @@ console.log('B');
 
 ### Props [#props]
 
-在 MDX 中，可以透過 `props` 取得頁面的 props。例如，位於 `[framework]` 資料夾中的頁面，會從其[路徑參數](/docs/page-conventions#path-params)接收 `framework`：
+頁面的 props 可在 MDX 中透過 `props` 存取。例如，位於 `[framework]` 資料夾中的頁面，會從其[路徑參數](/docs/page-conventions#path-params)取得 `framework`：
 
 ```mdx title="[framework]/deploy.mdx"
 ## Deploy on {props.framework}
@@ -439,7 +439,7 @@ console.log('B');
 Deploy your {props.framework} site.
 ```
 
-在目錄、搜尋索引以及提供給 LLM 的 Markdown 中，運算式同樣會替換成它的值。在 Astro 頁面中，上方標題的 ID 會是 `deploy-on-astro`。
+表達式在目錄、搜尋索引以及提供給 LLM 的 Markdown 中，同樣會被替換為其計算後的值。在 Astro 頁面上，上方標題的 ID 會是 `deploy-on-astro`。
 
 您也可以將[自訂 props](/docs/headless/source-api#custom-props) 傳遞給頁面。
 
@@ -447,7 +447,7 @@ Deploy your {props.framework} site.
 
 依條件算繪內容。Fumadocs MDX 預設已透過 [Remark Show](/docs/headless/mdx/remark-show) 啟用此功能。
 
-`when` 是可讀取 [props](#props) 的 JavaScript 運算式：
+`when` 是可讀取 [props](#props) 的 JavaScript 表達式：
 
 ```mdx title="[framework]/deploy.mdx"
 <show when={props.framework === 'astro'}>
@@ -459,29 +459,29 @@ Add an adapter to your Astro config.
 </show>
 ```
 
-此區段只會在 `framework` 為 `astro` 的頁面上算繪。在其他頁面上，它也不會出現在目錄、搜尋索引以及提供給 LLM 的 Markdown 中。
+此區段只會在 `framework` 為 `astro` 的頁面上算繪。在其他頁面上，這個區段也不會出現在目錄、搜尋索引，以及提供給 LLM 的 Markdown 中。
 
 您也可以用 `<show>` 包住[步驟](#steps)：
 
 ```mdx title="[framework]/deploy.mdx"
-### 建置 [step] [#build]
+### 建置 [step]
 
 <show when={props.framework === 'astro'}>
 
-### 新增轉接器 [step] [#add-an-adapter]
+### 新增轉接器 [step]
 
 </show>
 
-### 部署 [step] [#deploy]
+### 部署 [step]
 ```
 
-未算繪的步驟不會計入編號：在 Astro 頁面上，Deploy 是第 3 步，在其他頁面上則是第 2 步。
+未算繪的步驟不會計入編號：在 Astro 頁面上，Deploy 是第 3 步；在其他頁面上則是第 2 步。
 
-[頁籤群組](#tab-groups)中的程式碼區塊也是如此：只有在程式碼區塊被算繪時，對應的頁籤才會出現。
+[頁籤群組](#tab-groups)中的程式碼區塊也是如此。只有在對應的程式碼區塊有算繪時，該頁籤才會顯示。
 
 ### NPM 指令 [#npm-commands]
 
-可用來產生以不同套件管理器安裝套件的指令。
+可用來產生各種套件管理器的套件安裝指令。
 
 ````md tab="Input"
 ```npm
@@ -497,7 +497,7 @@ npm i next -D
 
 ### 步驟 [#steps]
 
-適合用來標示指南中的步驟。啟用與設定方式請參閱 [`remark-steps`](/docs/headless/mdx/remark-steps)。
+適合用來標示指南中的步驟，啟用與設定方式請參閱 [`remark-steps`](/docs/headless/mdx/remark-steps)。
 
 ```md
 ### Installation [step]
@@ -515,7 +515,7 @@ npm i next -D
 
 ### 其他元件 [#other-components]
 
-您可以在 MDX 文件中設定並使用[內建元件](/docs/ui/components)，例如頁籤 (Tabs) 、手風琴 (Accordion) 與可縮放圖片 (Zoomable Image) 。
+您可以在 MDX 文件中設定並使用[內建元件](/docs/ui/components)，例如 Tabs、Accordion 和 Zoomable Image。
 
 ## 其他功能 [#additional-features]
 

@@ -1,14 +1,14 @@
 ---
 title: Vite
-description: 在 Vite 中使用 Fumadocs MDX
+description: 搭配 Vite 使用 Fumadocs MDX
 ---
 
 ## 設定 [#setup]
 
-此外掛適用於 React Router、TanStack Start、Waku 及其他 Vite 應用程式。Next.js 有[專屬的設定方式](/docs/mdx/next)。Astro 則是透過 [`@fumadocs/astro`](/docs/astro/manual-installation) 使用其自身的內容集合，而不使用 Fumadocs MDX。
+此外掛適用於 React Router、TanStack Start、Waku 及其他 Vite 應用程式。Next.js 有[專屬的設定方式](/docs/mdx/next)。Astro 則是搭配 [`@fumadocs/astro`](/docs/astro/manual-installation) 使用 Astro 本身的內容集合，而非 Fumadocs MDX。
 
 <div className="fd-steps [&_h3]:fd-step">
-  ### 安裝 &#91;#installation&#93;
+  ### 安裝 [#installation]
 
   ```npm
   npm i fumadocs-mdx fumadocs-core @types/mdx
@@ -62,7 +62,7 @@ description: 在 Vite 中使用 Fumadocs MDX
   });
   ```
 
-  ### 與 Fumadocs 整合 &#91;#integrate-with-fumadocs&#93;
+  ### 與 Fumadocs 整合 [#integrate-with-fumadocs]
 
   建立 `lib/source.ts` 檔案：
 
@@ -80,23 +80,23 @@ description: 在 Vite 中使用 Fumadocs MDX
   });
   ```
 
-  ### 完成 &#91;#done&#93;
+  ### 完成 [#done]
 
   現在您可以在 `content/docs` 資料夾中撰寫內容了。
 </div>
 
-## 接下來呢？ [#what-is-next]
+## 下一步 [#what-is-next]
 
 <Cards>
   <Card title="Macro API" href="/docs/mdx/macro">
-    透過 `fumadocs-mdx/macro` 在應用程式模組中定義集合。
+    使用 `fumadocs-mdx/macro` 在應用程式模組中定義集合。
   </Card>
 
   <Card title="Config API" href="/docs/mdx/collections">
-    在 `source.config.ts` 中定義集合，並搭配產生的進入點檔案使用。
+    在 `source.config.ts` 中定義集合，並透過自動產生的進入點檔案存取內容。
   </Card>
 
   <Card title="延遲載入" href="/docs/mdx/async">
-    遇到效能瓶頸了嗎？不妨試試延遲載入。
+    遇到效能瓶頸了嗎？您可以試試延遲載入。
   </Card>
 </Cards>
