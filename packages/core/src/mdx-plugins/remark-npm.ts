@@ -62,7 +62,8 @@ export function remarkNpm({
         case 'package-install':
           code = node.value;
 
-          if (!code.startsWith('npm') && !code.startsWith('npx')) {
+          // a package name can start with `npm`, like `npm-run-all`
+          if (!/^np[mx]\s/.test(code)) {
             code = `npm install ${code}`;
           }
           break;

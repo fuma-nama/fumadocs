@@ -1281,3 +1281,27 @@ test('Remark Show: static outputs analyse the source', async () => {
       'the outputs of this document are static',
     );
 });
+
+test('Remark Npm: package names that start with npm or npx are installed', async () => {
+  const commands = async (code: string) => {
+    const content = `\`\`\`package-install\n${code}\n\`\`\``;
+    const processor = remark().use(remarkNpm);
+    const tree = await processor.run(processor.parse(content), new VFile(content));
+    const out: string[] = [];
+    walk<Nodes>(tree, (node) => {
+      if (node.type === 'code') out.push(node.value);
+    });
+    return out;
+  };
+
+  expect(await commands('npm-run-all')).toEqual([
+    'npm install npm-run-all',
+    'pnpm add npm-run-all',
+    'yarn add npm-run-all',
+    'bun add npm-run-all',
+  ]);
+  expect((await commands('npx-scope-find'))[0]).toBe('npm install npx-scope-find');
+  // commands are kept as they are
+  expect((await commands('npm i react'))[0]).toBe('npm i react');
+  expect((await commands('npx create-next-app'))[0]).toBe('npx create-next-app');
+});
