@@ -23,7 +23,7 @@ import type { RegistryConnector } from 'fuma-cli/registry/connector';
 import { UIRegistries } from '@/commands/shared';
 import type { LoadedConfig } from '@/config';
 import { formatRoute } from '@/project/route';
-import { isCancel } from '@/utils/prompt';
+import { canPrompt, isCancel } from '@/utils/prompt';
 
 export class FumadocsComponentInstaller extends ComponentInstaller {
   /** the component being installed by `installInteractive()` */
@@ -45,6 +45,11 @@ export class FumadocsComponentInstaller extends ComponentInstaller {
           if (!this.interactive) return true;
           const { name, spin } = this.interactive;
           spin.clear();
+          if (!canPrompt) {
+            log.warn(`Kept ${toRelative(file.output)}, delete it to install the new version.`);
+            spin.start(styleText(['bold', 'cyanBright'], `Installing ${name}`));
+            return false;
+          }
           const value = await confirm({
             message: `Do you want to override ${toRelative(file.output)}?`,
             initialValue: false,
@@ -102,6 +107,8 @@ export class FumadocsComponentInstaller extends ComponentInstaller {
 
     const options = (await Promise.all([scan(), ...subRegistries.map(scan)])).flat();
     spin.stop(styleText(['bold', 'greenBright'], 'registry fetched'));
+    if (!canPrompt)
+      throw new Error('Pass the components to install, no terminal to select them in.');
     const value = await autocompleteMultiselect({
       message: 'Select components to install',
       options,
@@ -131,7 +138,9 @@ export class FumadocsComponentInstaller extends ComponentInstaller {
       log.message();
       box([...deps.dependencies, ...deps.devDependencies].join('\n'), 'New Dependencies');
       const pm = (await detectPackageManager())?.name ?? 'npm';
-      const value = await confirm({ message: `Do you want to install with ${pm}?` });
+      const value = canPrompt
+        ? await confirm({ message: `Do you want to install with ${pm}?` })
+        : true;
       if (isCancel(value)) {
         outro('Installation terminated');
         process.exit(0);

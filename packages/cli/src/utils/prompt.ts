@@ -7,3 +7,6 @@ import { isCancel as isCancelSymbol } from '@clack/prompts';
 export function isCancel<T>(value: T | symbol): value is symbol {
   return isCancelSymbol(value);
 }
+
+/** without a terminal, like in scripts and AI agents, a prompt waits forever */
+export const canPrompt = process.stdin.isTTY === true;
