@@ -6,7 +6,7 @@ packages:
   'fumadocs-mdx': patch
 ---
 
-### Setup without a terminal
+### Setup for AI agents
 
 - CLI prompts don't wait without a terminal: a missing choice fails with the flag and its values, confirmations take their default, and existing files are kept unless `--yes` is passed.
 - The CLI fails with a clear message where it finds no supported framework, instead of setting up Next.js.
