@@ -10,11 +10,8 @@ export const docsLlms = llms(source, {
   section: (folder) => {
     // the frameworks have the same pages, `llms.txt` lists each as one line
     if (folder.root === 'framework') return { collapse: true };
-    // the Framework group has every framework
-    return (
-      Boolean(folder.root) &&
-      !folder.children.some((child) => child.type === 'folder' && child.root)
-    );
+    // every folder, except the Framework group which has every framework
+    return !folder.children.some((child) => child.type === 'folder' && child.root);
   },
   renderPage: async (page) => {
     page = source.getPage(page.slugs, { props: { components: getPageComponents(page) } }) ?? page;
