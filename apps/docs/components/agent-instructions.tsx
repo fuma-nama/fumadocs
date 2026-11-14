@@ -1,9 +1,14 @@
-import fs from 'node:fs/promises';
 import { asMarkdown } from 'fumadocs-core/server';
+import { defaultFramework, type Framework, frameworks } from '@/lib/framework';
+import { agentsLoader } from '@/lib/source';
 import { CopyButton } from './agent-instructions.client';
 
-export async function AgentInstructions() {
-  const instructions = await fs.readFile('./components/agent-instructions.md', 'utf-8');
+export async function AgentInstructions({ framework }: { framework?: Framework }) {
+  const page = agentsLoader.getPage(['setup'], {
+    // a page without a framework has the instructions of the default one, which link those of every framework
+    props: framework ? { framework } : { framework: defaultFramework, frameworks },
+  });
+  const instructions = await page!.data.getText('processed');
   if (asMarkdown()) return instructions;
 
   return (
