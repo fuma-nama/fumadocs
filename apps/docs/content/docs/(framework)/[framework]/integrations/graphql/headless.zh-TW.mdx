@@ -1,18 +1,18 @@
 ---
 title: 無頭式
-description: 不含 UI 的 GraphQL 頁面狀態與邏輯。
+description: 提供 GraphQL 頁面的狀態與邏輯，不含 UI。
 ---
 
 ## 概覽 [#overview]
 
 除了 `@fumadocs/graphql/ui` 之外，其餘部分皆為無頭式。
 
-| 路徑                             | 模組                              |
-| ------------------------------ | ------------------------------- |
-| `@fumadocs/graphql`            | 頁面：由 SDL 建構的 schema、交叉連結，以及您的元件 |
-| `@fumadocs/graphql/operation`  | 單一 operation：其欄位、標題、指令與範例       |
-| `@fumadocs/graphql/type-docs`  | 具名型別：其種類、指令、關聯與使用位置             |
-| `@fumadocs/graphql/playground` | 互動測試區的狀態，以及 operation 與訂閱的傳送    |
+| 路徑                             | 模組                                      |
+| ------------------------------ | --------------------------------------- |
+| `@fumadocs/graphql`            | 頁面：由 SDL 建構的 schema、交叉連結，以及您的元件         |
+| `@fumadocs/graphql/operation`  | 單一 operation：其欄位、標題、指示詞 (directive) 與範例 |
+| `@fumadocs/graphql/type-docs`  | 具名型別：其種類、指示詞 (directive) 、關聯與使用位置       |
+| `@fumadocs/graphql/playground` | 互動測試區的狀態，以及傳送 operation 與訂閱             |
 
 ## 頁面 [#page]
 
@@ -28,7 +28,7 @@ export const GraphQLPage = createGraphQLRenderer({
   components: {
     Operation,
     TypeDocs,
-    // `root` 是類似欄位的根節點，或是 `Query.orders()` 這類 schema 座標
+    // `root` 是類似欄位的根節點，或是像 `Query.orders()` 這樣的 schema 座標
     SchemaUI: ({ client, root }) => (
       <pre>{`${client.name}: ${typeof root === 'string' ? root : root.type}`}</pre>
     ),
@@ -47,24 +47,24 @@ export const GraphQLPage = createGraphQLRenderer({
 | ----------- | -------------------------------------------- |
 | `Operation` | 頁面中的每個 operation，請參閱 [Operation](#operation) |
 | `TypeDocs`  | 頁面中的每個具名型別，請參閱 [Type](#type)                 |
-| `SchemaUI`  | 型別、引數或欄位的詳細內容                                |
-| `Layout`    | 選用，包裹算繪出的項目                                  |
+| `SchemaUI`  | 型別、引數或欄位的詳細資訊                                |
+| `Layout`    | 選用，用來包覆已渲染的項目                                |
 
 傳入 `typeLinks` 與 `operationLinks`，即可覆寫預先產生頁面的[交叉連結](/docs/integrations/graphql/api-page#cross-linking)。
 
 ### Hooks [#hooks]
 
-頁面內的元件可透過以下 Hook 讀取頁面狀態。
+頁面底下的元件可以讀取頁面的狀態。
 
 | Hook                           | 回傳值                                    |
 | ------------------------------ | -------------------------------------- |
-| `useGraphQL()`                 | 建構完成的 `schema` 及其 `sdl`，以及頁面連結與範例      |
+| `useGraphQL()`                 | 建置完成的 `schema`、其 `sdl`，以及頁面連結與範例       |
 | `useComponents()`              | 傳入頁面的元件                                |
 | `useTypeLink(name)`            | 指定名稱型別的頁面 URL，未連結時為 `undefined`        |
 | `useOperationLink(kind, name)` | operation 的頁面 URL                      |
 | `useRenderContext()`           | 頁面的算繪選項，例如 `playground` 與 `codeUsages` |
 
-若要自行算繪 operation，請改為掛載 `<GraphQLProvider sdl={sdl} components={...} />`，以取代 `createGraphQLRenderer()`。
+若要自行算繪 operation，請掛載 `<GraphQLProvider sdl={sdl} components={...} />` 來取代 `createGraphQLRenderer()`。
 
 ## Operation [#operation]
 
@@ -113,7 +113,7 @@ function Content() {
 }
 ```
 
-`examples` 來自 [`examples` 選項](/docs/integrations/graphql/server#examples)，或是自動產生的範例。`selected` 由 provider 底下的所有元件共用，例如範例卡片與互動測試區。
+`examples` 是來自 [`examples` 選項](/docs/integrations/graphql/server#examples)的範例，或是自動產生的範例。`selected` 由 provider 底下的所有元素共用，例如範例卡片與互動測試區。
 
 <auto-type-table path="props.ts" name="OperationInfo" />
 
@@ -156,21 +156,21 @@ function Content() {
 
 <auto-type-table path="props.ts" name="NamedTypeInfo" />
 
-`relations` 將該型別與 schema 的其他部分串連起來：
+`relations` 將此型別與 schema 的其他部分連結起來：
 
 | 關係              | 說明                   |
 | --------------- | -------------------- |
-| `implements`    | 該型別實作的介面             |
-| `unions`        | 包含該型別的聯集 (適用於物件)     |
-| `implementedBy` | 實作該型別的物件 (適用於介面)     |
+| `implements`    | 此型別實作的介面             |
+| `unions`        | 包含此型別的聯集 (適用於物件)     |
+| `implementedBy` | 實作此型別的物件 (適用於介面)     |
 | `possibleTypes` | 聯集的成員                |
-| `usages`        | 該型別在整個 schema 中出現的位置 |
+| `usages`        | 此型別在整個 schema 中出現的位置 |
 
 <auto-type-table path="props.ts" name="TypeUsages" />
 
 ## 互動測試區 [#playground]
 
-`usePlayground()` 會保存 `<OperationProvider />` 底下 operation 的互動測試區，其設定來自頁面的 [`playground` 選項](/docs/integrations/graphql/api-page#playground)。
+`usePlayground()` 會保存 `<OperationProvider />` 底下該 operation 的互動測試區，並依照頁面的 [`playground` 選項](/docs/integrations/graphql/api-page#playground)進行設定。
 
 ```tsx title="components/my-playground.tsx"
 'use client';
@@ -214,18 +214,18 @@ function Variable({ name }: { name: string }) {
 }
 ```
 
-訂閱使用 `subscribe()`、`stop()`、`status` 與 `log`，取代 `send()` 與 `response`。
+訂閱改用 `subscribe()`、`stop()`、`status` 與 `log`，取代 `send()` 與 `response`。
 
 <auto-type-table path="props.ts" name="Playground" />
 
-| 匯出                                    | 作用                                                             |
-| ------------------------------------- | -------------------------------------------------------------- |
-| `useRequestValues()`                  | `<StfProvider />` 底下的表單所送出的 `variables` 與 `headers`，會隨表單編輯同步更新 |
-| `executeGraphQL(request)`             | 透過 HTTP POST 送出 query 或 mutation，即預設的 `fetcher`                |
-| `subscribeGraphQL(request, handlers)` | 開始訂閱，並回傳用來停止訂閱的函式                                              |
-| `inputTypeToJsonSchema(type)`         | 取得輸入型別的 JSON Schema，供變數表單使用                                    |
+| 匯出                                    | 用途                                                              |
+| ------------------------------------- | --------------------------------------------------------------- |
+| `useRequestValues()`                  | `<StfProvider />` 底下的表單所送出的 `variables` 與 `headers`，會隨表單的編輯同步更新 |
+| `executeGraphQL(request)`             | 透過 HTTP POST 傳送 query 或 mutation，即預設的 `fetcher`                 |
+| `subscribeGraphQL(request, handlers)` | 開始訂閱，並回傳用來停止訂閱的函式                                               |
+| `inputTypeToJsonSchema(type)`         | 輸入型別的 JSON Schema，用於產生變數表單                                      |
 
-`subscribeGraphQL()` 會依 URL scheme 選擇協定，方式與 [`subscriptionUrl`](/docs/integrations/graphql/api-page#subscriptions) 相同。
+`subscribeGraphQL()` 會依 URL scheme 選擇通訊協定，與 [`subscriptionUrl`](/docs/integrations/graphql/api-page#subscriptions) 的規則相同。
 
 ```ts
 import { subscribeGraphQL } from '@fumadocs/graphql/playground';
@@ -243,7 +243,7 @@ const stop = subscribeGraphQL(
   },
 );
 
-// 呼叫後不會再觸發任何處理函式
+// 呼叫後不會再觸發任何處理常式
 stop();
 ```
 

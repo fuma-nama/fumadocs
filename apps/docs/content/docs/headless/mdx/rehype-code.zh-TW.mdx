@@ -3,9 +3,9 @@ title: Rehype Code
 description: 程式碼語法突顯器
 ---
 
-[`@shikijs/rehype`](https://shiki.style/packages/rehype) 的包裝器，而 `@shikijs/rehype` 正是 Fumadocs 所使用的語法突顯器。
+Fumadocs 所使用的語法突顯器，為 [`@shikijs/rehype`](https://shiki.style/packages/rehype) 的包裝。
 
-它會將原始的 `<pre />` 程式碼區塊轉換為已套用語法突顯的程式碼區塊：
+它會將原始的 `<pre />` 程式碼區塊轉換成已語法突顯的程式碼區塊：
 
 ````md tab="Input"
 ```ts
@@ -63,7 +63,7 @@ export default defineConfig({
 
 ### 語法突顯器 [#highlighter]
 
-此外掛使用 Shiki。若要改用其他[語法突顯器](/docs/headless/utils/shiki) (例如 Highlights) ，可使用 `rehypeCodeFromHighlighter`，它接受的是 Shiki 以外的選項。請傳入一個函式，透過此外掛的 transformer 建立語法突顯器。
+此外掛使用 Shiki。`rehypeCodeFromHighlighter` 則可改用其他[語法突顯器](/docs/headless/utils/shiki) (例如 Highlights) ，並接受 Shiki 以外的選項。請傳入一個函式，搭配此外掛的 transformer 建立語法突顯器。
 
 請停用預設外掛，再加入此外掛：
 
@@ -108,7 +108,7 @@ export default defineConfig({
 
 ### Meta [#meta]
 
-它會解析 `title` meta 字串，並將其以屬性形式加到 `pre` 元素上。
+它會解析 `title` meta 字串，並以屬性的形式加到 `pre` 元素上。
 
 ````mdx tab="Input"
 ```js title="Title"
@@ -120,11 +120,11 @@ console.log('Hello');
 <pre title="Title">...</pre>
 ```
 
-您可以透過 `filterMetaString` 選項，在處理 meta 字串之前先加以過濾。
+您可以透過 `filterMetaString` 選項，在處理 meta 字串之前先進行過濾。
 
 ### 行內程式碼 [#inline-code]
 
-您可以使用 `inline` 選項來啟用此功能：
+您可以透過 `inline` 選項啟用此功能：
 
 ```ts
 import { type RehypeCodeOptions } from 'fumadocs-core/mdx-plugins';
@@ -136,7 +136,7 @@ const rehypeCodeOptions: RehypeCodeOptions = {
 ```
 
 ```md title="Syntax"
-這是經過語法突顯的行內程式碼：`console.log("hello world"){:js}`.
+這是經過語法突顯的行內程式碼： `console.log("hello world"){:js}`.
 ```
 
 這是一段經過語法突顯的行內程式碼：`console.log("hello world"){:js}`。
@@ -144,7 +144,7 @@ const rehypeCodeOptions: RehypeCodeOptions = {
 ### 圖示 [#icon]
 
 此外掛會根據語言的 meta 字串，自動加入 `icon` 屬性。
-該屬性為 HTML 字串，您可以透過 React 的 `dangerouslySetInnerHTML` 將其算繪出來。
+其值為 HTML 字串，您可以透過 React 的 `dangerouslySetInnerHTML` 加以算繪。
 
 ````md tab="Input"
 ```ts
@@ -160,4 +160,4 @@ console.log('This should shows the logo of TypeScript');
 
 ### 更多選項 [#more-options]
 
-這些選項繼承自 [Shiki](https://shiki.style)，其他選項請參閱 Shiki 的官方文件。
+這些選項繼承自 [Shiki](https://shiki.style)，其他選項請參閱 Shiki 的說明文件。

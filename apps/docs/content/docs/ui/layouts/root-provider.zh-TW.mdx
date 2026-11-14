@@ -1,13 +1,13 @@
 ---
 title: Root Provider
-description: Fumadocs UI 的 context provider。
+description: Fumadocs UI 的 Context Provider。
 ---
 
-所有元件的 context provider，其中包含 `next-themes` 與 [`<FrameworkProvider />`](/docs/headless#installation)。請將它放在根版面配置中。
+為所有元件提供 Context 的 Provider，其中包含 `next-themes` 與 [`<FrameworkProvider />`](/docs/headless#installation)。請將它放在根版面配置中。
 
 ## 使用方式 [#usage]
 
-請依照您使用的 React.js 框架匯入：
+請依您使用的 React.js 框架匯入：
 
 ```jsx tab="Next.js"
 import { RootProvider } from 'fumadocs-ui/provider/next';
@@ -90,7 +90,7 @@ export function Provider({ pathname, params, children }) {
 
 ### 搜尋對話方塊 [#search-dialog]
 
-透過 `search` 選項自訂或停用搜尋對話方塊。
+您可以透過 `search` 選項自訂或停用搜尋對話方塊。
 
 ```jsx
 <RootProvider
@@ -104,7 +104,7 @@ export function Provider({ pathname, params, children }) {
 
 詳情請參閱[搜尋](/docs/ui/search)。
 
-### 主題提供者 [#theme-provider]
+### 主題 Provider [#theme-provider]
 
 Fumadocs 透過 [`next-themes`](https://github.com/pacocoursey/next-themes) 支援淺色／深色模式。
 您可以透過 `theme` 選項自訂或停用此功能。
@@ -119,14 +119,14 @@ Fumadocs 透過 [`next-themes`](https://github.com/pacocoursey/next-themes) 支�
 </RootProvider>
 ```
 
-您也可以安裝 `next-themes`，並在程式碼中引用它來管理主題。
+您也可以自行安裝 `next-themes`，並在程式碼中引用它來管理主題。
 
-#### 快速鍵 [#hotkey]
+#### 快捷鍵 [#hotkey]
 
 按下 <kbd>D</kbd> 即可切換淺色與深色模式。
-當您正在可編輯元素 (例如 `<input />`) 中輸入文字，或已開啟對話方塊 (例如搜尋對話方塊) 時，此快速鍵不會有作用。
+當您正在可編輯的元素 (例如 `<input />`) 中輸入內容，或已開啟對話方塊 (例如搜尋對話方塊) 時，此快捷鍵不會生效。
 
-您可以將其他按鍵傳入 `theme.hotKey`，或傳入 `false` 停用此快速鍵。
+您可以將其他按鍵傳入 `theme.hotKey`，或傳入 `false` 來停用此快捷鍵。
 
 ```jsx
 <RootProvider
@@ -138,7 +138,7 @@ Fumadocs 透過 [`next-themes`](https://github.com/pacocoursey/next-themes) 支�
 </RootProvider>
 ```
 
-也可以傳入函式，完全自訂要比對的按鍵組合。
+也可以傳入函式，以完全掌控要比對的按鍵組合。
 
 ```jsx
 <RootProvider

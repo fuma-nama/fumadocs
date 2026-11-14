@@ -6,17 +6,17 @@ description: 收集使用者的意見回饋
 ## 概覽 [#overview]
 
 透過意見回饋，您可以了解讀者對文件的看法，以及哪些頁面需要改進。
-Fumadocs 提供了相關元件，可針對頁面及內容區塊收集意見回饋。
+Fumadocs 提供多種元件，可針對頁面及內容區塊收集意見回饋。
 
 ## 安裝 [#installation]
 
-請使用 **Fumadocs CLI** 安裝。若偵測到您的文件頁面，它也會自動將此元件加入該頁面：
+請使用 **Fumadocs CLI** 安裝。若偵測到您的文件頁面，CLI 也會自動將此元件加入該頁面：
 
 ```npm
 npx @fumadocs/cli feature feedback
 ```
 
-或者只安裝元件：
+或者，您也可以只安裝此元件：
 
 ```npm
 npx @fumadocs/cli@latest add feedback
@@ -24,10 +24,10 @@ npx @fumadocs/cli@latest add feedback
 
 ### 頁面意見回饋 [#page-feedback]
 
-將 `<Feedback />` 加到文件頁面的底部。讀者送出意見回饋時，便會執行 `onSendAction` 回呼函式。
+在文件頁面底部加入 `<Feedback />`。讀者送出意見回饋時，會執行 `onSendAction` 回呼函式。
 
 <show when={props.framework === 'next' || props.framework === 'waku'}>
-  在 server action 中處理意見回饋。例如，以 `on_rate_docs` 事件將其回報至 PostHog：
+  請在 server action 中處理意見回饋。例如，以 `on_rate_docs` 事件回報至 PostHog：
 
   ```tsx
   import { DocsPage } from 'fumadocs-ui/layouts/docs/page';
@@ -36,7 +36,7 @@ npx @fumadocs/cli@latest add feedback
   export default async function Page() {
     return (
       <DocsPage>
-        {/* 位於頁面底部 */}
+        {/* 放在頁面底部 */}
         <Feedback
           onSendAction={async (feedback) => {
             'use server';
@@ -52,7 +52,7 @@ npx @fumadocs/cli@latest add feedback
 </show>
 
 <show when={props.framework === 'tanstack-start'}>
-  在 server function 中處理意見回饋。例如，以 `on_rate_docs` 事件將其回報至 PostHog：
+  請在 server function 中處理意見回饋。例如，以 `on_rate_docs` 事件回報至 PostHog：
 
   ```tsx
   import { createServerFn } from '@tanstack/react-start';
@@ -70,7 +70,7 @@ npx @fumadocs/cli@latest add feedback
   function Content() {
     return (
       <DocsPage>
-        {/* 位於頁面底部 */}
+        {/* 放在頁面底部 */}
         <Feedback onSendAction={(feedback) => sendFeedback({ data: feedback })} />
       </DocsPage>
     );
@@ -88,7 +88,7 @@ npx @fumadocs/cli@latest add feedback
   function Content() {
     return (
       <DocsPage>
-        {/* 位於頁面底部 */}
+        {/* 放在頁面底部 */}
         <Feedback
           onSendAction={async (feedback) => {
             const res = await fetch('/api/feedback', {
@@ -106,7 +106,7 @@ npx @fumadocs/cli@latest add feedback
 </show>
 
 <show when={props.framework === 'react-router'}>
-  在 [resource route](https://reactrouter.com/how-to/resource-routes) 中處理意見回饋。例如，以 `on_rate_docs` 事件將其回報至 PostHog：
+  請在 [resource route](https://reactrouter.com/how-to/resource-routes) 中處理意見回饋。例如，以 `on_rate_docs` 事件回報至 PostHog：
 
   ```ts tab="app/routes/api.feedback.ts"
   import type { Route } from './+types/api.feedback';
@@ -131,7 +131,7 @@ npx @fumadocs/cli@latest add feedback
 </show>
 
 <show when={props.framework === 'astro'}>
-  在端點中處理意見回饋。例如，以 `on_rate_docs` 事件將其回報至 PostHog。此端點會在收到請求時才算繪，因此您的專案需要設定[轉接器](https://docs.astro.build/en/guides/on-demand-rendering/)。
+  請在端點中處理意見回饋。例如，以 `on_rate_docs` 事件回報至 PostHog。此端點會在收到請求時才算繪，因此您的專案需要設定[轉接器](https://docs.astro.build/en/guides/on-demand-rendering/)。
 
   ```ts title="src/pages/api/feedback.ts"
   import type { APIRoute } from 'astro';
@@ -150,15 +150,15 @@ npx @fumadocs/cli@latest add feedback
 
 <show when={props.framework === 'next' || props.framework === 'waku'}>
   <Callout type="warn">
-    任何人都能以任意輸入呼叫 server action，因此請在儲存或傳送意見回饋之前先進行驗證。
+    任何人都能以任意輸入呼叫 server action，因此請在儲存或傳送意見回饋前先進行驗證。
   </Callout>
 </show>
 
 ### 區塊意見回饋 [#feedback-block]
 
-區塊意見回饋讓讀者能針對特定內容區塊提出意見：選取文字時，會開啟一個彈出視窗。
+區塊意見回饋可讓讀者針對特定內容區塊提供意見：讀者選取文字時，會開啟一個彈出視窗。
 
-加入 `remarkBlockId`，這個 remark 外掛會為每個區塊加上 ID：
+加入 `remarkBlockId`，這是一個為每個區塊指定 ID 的 remark 外掛：
 
 <show when={props.framework !== 'astro'}>
   ```ts tab="unified" title="source.config.ts"
@@ -220,7 +220,7 @@ npx @fumadocs/cli@latest add feedback
   ```
 </show>
 
-接著用 `<FeedbackText />` 包住您的頁面內容。讀者對某個區塊送出意見回饋時，就會執行 `onSendAction` 回呼函式。
+接著用 `<FeedbackText />` 包住您的頁面內容。讀者針對某個區塊送出意見回饋時，便會執行 `onSendAction` 回呼函式。
 
 <show when={props.framework === 'next' || props.framework === 'waku'}>
   ```tsx
@@ -297,16 +297,16 @@ npx @fumadocs/cli@latest add feedback
   }
   ```
 
-  請比照頁面意見回饋的做法，另外建立一個端點來處理，但改用 `blockFeedback` 解析請求 body。
+  請比照頁面意見回饋，另建一個端點來處理，並改用 `blockFeedback` 解析請求 body。
 </show>
 
 <Callout type="info" title="小提示">
   `remark-block-id` 會根據區塊的內容及其在頁面中的順序產生區塊 ID，因此第三方服務也能追蹤這些區塊。
 </Callout>
 
-### 整合 GitHub Discussion [#integrating-with-github-discussion]
+### 與 GitHub Discussion 整合 [#integrating-with-github-discussion]
 
-若要將意見回饋回報至 GitHub Discussion，您可以先複製此檔案作為基礎：
+若要將意見回饋回報至 GitHub Discussion，您可以複製此檔案作為起點：
 
 <include cwd meta="title='lib/github.ts'">
   ./lib/github.ts

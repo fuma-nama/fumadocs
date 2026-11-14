@@ -1,19 +1,19 @@
 ---
 title: Asyntai AI 聊天機器人
-description: 讓讀者提出問題，並直接從您的文件中取得解答。
+description: 讓讀者提出問題，並從您的文件中取得解答。
 staticParams:
   - framework: next
 ---
 
 > 這是由社群維護的整合。
 
-讀者常常找不到需要的頁面，或是有些問題用搜尋框也找不到答案。結果他們不是直接離開，就是開立支援工單。
+讀者經常找不到所需的頁面，或是遇到搜尋框無法解答的問題。結果他們不是直接離開，就是提交支援請求。
 
-[Asyntai](https://asyntai.com/documentation/integrations/nextjs/) 能為您的 Fumadocs 網站加入 AI 聊天助理。它會讀取您已發布的頁面，並根據這些內容回答讀者的問題，支援超過 80 種語言。[`nextjs-ai-chatbot`](https://www.npmjs.com/package/nextjs-ai-chatbot) 套件只需一個元件就能加入聊天小工具。Asyntai 也提供免費方案。
+[Asyntai](https://asyntai.com/documentation/integrations/nextjs/) 能為您的 Fumadocs 網站加入 AI 聊天助理。它會讀取您已發布的頁面，並根據這些內容以超過 80 種語言回答讀者的問題。只要使用一個元件，[`nextjs-ai-chatbot`](https://www.npmjs.com/package/nextjs-ai-chatbot) 套件就能加入聊天小工具。Asyntai 另有提供免費方案。
 
 ## 設定 [#setup]
 
-您需要一組 Asyntai widget ID。此 ID 以 `asyntai_` 開頭，可在 Asyntai 控制台的 **Install** 頁面中找到。
+您需要一組 Asyntai 小工具 ID。此 ID 以 `asyntai_` 開頭，可在 Asyntai 控制台的 **Install** 頁面找到。
 
 ### 1. 安裝套件 [#install-the-package]
 
@@ -21,9 +21,9 @@ staticParams:
 nextjs-ai-chatbot
 ```
 
-### 2. 新增元件 [#add-the-component]
+### 2. 加入元件 [#add-the-component]
 
-將 `<AsyntaiChatbot />` 放在根版面配置中 `<body>` 的最後面。此元件可在伺服器元件中使用。版面配置的其他部分請保持不變。
+請將 `<AsyntaiChatbot />` 放在根版面配置中 `<body>` 的最後面。此元件可在伺服器元件中使用。版面配置的其餘部分維持原樣即可。
 
 ```tsx title="app/layout.tsx"
 import { RootProvider } from 'fumadocs-ui/provider/next';
@@ -42,11 +42,11 @@ export default function Layout({ children }: { children: ReactNode }) {
 }
 ```
 
-此小工具會在頁面的 `load` 事件觸發後才載入，因此您的文件一定會先完成算繪。Fumadocs 切換頁面時不會重新載入整個頁面，讀者瀏覽您的文件時，聊天視窗會持續顯示在畫面上。
+此小工具會在頁面的 `load` 事件觸發後才載入，因此您的文件一定會先完成算繪。Fumadocs 切換頁面時不會整頁重新載入，讀者瀏覽您的文件時，聊天視窗會一直保留在畫面上。
 
-### 3. 在控制台中新增您的文件 [#add-your-docs-in-the-dashboard]
+### 3. 在控制台中加入您的文件 [#add-your-docs-in-the-dashboard]
 
-請在 Asyntai 控制台中新增您文件網站的 URL。之後，助理便會根據嵌入小工具的那些頁面內容來回答問題。
+請在 Asyntai 控制台中加入您文件網站的 URL。這樣一來，助理就會根據嵌入小工具的那些頁面內容來回答問題。
 
 ## 從環境變數取得 Widget ID [#widget-id-from-an-environment-variable]
 
@@ -60,7 +60,7 @@ NEXT_PUBLIC_ASYNTAI_WIDGET_ID=asyntai_YOURWIDGETID
 
 ## 不使用套件 [#without-the-package]
 
-您也可以使用 `next/script` 手動加入小工具：
+您也可以透過 `next/script` 手動加入小工具：
 
 ```tsx title="app/layout.tsx"
 import Script from 'next/script';
@@ -73,4 +73,4 @@ import Script from 'next/script';
 />;
 ```
 
-所有選項請參閱 [套件 README](https://github.com/asyntai/nextjs-ai-chatbot)，控制台的相關說明則請參閱 [Asyntai 文件](https://asyntai.com/documentation/integrations/nextjs/)。
+所有選項請參閱[套件 README](https://github.com/asyntai/nextjs-ai-chatbot)，儀表板相關說明則請參閱 [Asyntai 文件](https://asyntai.com/documentation/integrations/nextjs/)。

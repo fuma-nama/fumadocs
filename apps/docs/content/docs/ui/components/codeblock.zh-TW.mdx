@@ -32,11 +32,11 @@ description: 顯示經 Shiki 語法突顯的程式碼區塊
 * 複製按鈕
 * 自訂標題與圖示
 
-> 若您需要在執行階段進行語法突顯的同類元件，請參閱 [Dynamic Code Block](/docs/ui/components/dynamic-codeblock)。
+> 如果您需要可在執行階段進行語法突顯的對應元件，請參閱 [Dynamic Code Block](/docs/ui/components/dynamic-codeblock)。
 
 ## 使用方式 [#usage]
 
-將 pre 元素包在 `<CodeBlock />` 中，作為程式碼區塊的外層容器。
+請將 pre 元素包在 `<CodeBlock />` 中，作為程式碼區塊的外層容器。
 
 ```tsx title="components/mdx.tsx"
 import defaultComponents from 'fumadocs-ui/mdx';
@@ -71,7 +71,7 @@ import { Pre, CodeBlock } from 'fumadocs-ui/components/codeblock';
 
 ### 圖示 [#icons]
 
-將 `icon` prop 傳入 `CodeBlock` 元件，即可指定自訂圖示。
+若要指定自訂圖示，請將 `icon` prop 傳入 `CodeBlock` 元件。
 
 預設情況下，圖示會由自訂的 Shiki transformer 注入。
 

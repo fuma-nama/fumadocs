@@ -1,6 +1,6 @@
 ---
 title: 可縮放圖片
-description: 讓文件中的圖片支援點擊放大
+description: 讓文件中的圖片支援點擊放大檢視
 preview: zoomImage
 ---
 
@@ -10,7 +10,7 @@ import { ImageZoom, Lightbox } from 'fumadocs-ui/components/image-zoom';
 
 ## 使用方式 [#usage]
 
-在您的 MDX 元件中，將 `img` 替換為 `ImageZoom`。
+請在您的 MDX 元件中，將 `img` 替換為 `ImageZoom`。
 
 ```tsx title="components/mdx.tsx"
 import { ImageZoom } from 'fumadocs-ui/components/image-zoom';
@@ -27,7 +27,7 @@ export function getMDXComponents(components?: MDXComponents) {
 }
 ```
 
-現在所有圖片都會自動啟用圖片縮放功能。
+現在，所有圖片都會自動啟用圖片縮放功能。
 
 ```mdx
 ![Test](/banner.png)
@@ -35,11 +35,11 @@ export function getMDXComponents(components?: MDXComponents) {
 
 ### 圖片最佳化 [#image-optimization]
 
-在 Next.js 中，若未指定 `<Image />` 元件的 [`sizes` 屬性](https://nextjs.org/docs/app/api-reference/components/image#sizes)，系統會自動為其設定預設值。
+在 Next.js 中，若 `<Image />` 元件未指定 [`sizes` 屬性](https://nextjs.org/docs/app/api-reference/components/image#sizes)，系統會自動為其設定預設值。
 
 ## Lightbox [#lightbox]
 
-`<Lightbox />` 內的可縮放圖片會在同一個檢視器中開啟，您可以使用方向鍵、滑動手勢或側邊按鈕瀏覽這些圖片。
+`<Lightbox />` 內的可縮放圖片會在同一個檢視器中開啟，您可以使用方向鍵、滑動手勢或側邊按鈕瀏覽圖片。
 
 <Wrapper>
   <Lightbox>
@@ -53,7 +53,7 @@ export function getMDXComponents(components?: MDXComponents) {
         alt="Notebook 版面配置"
         caption={
       <>
-        導覽模式：頂部，請參閱 <a href="/docs/ui/layouts/notebook#nav-mode">Notebook 版面配置</a>
+        Nav 模式：頂部，請參閱 <a href="/docs/ui/layouts/notebook#nav-mode">Notebook 版面配置</a>
       </>
     }
       />
@@ -61,7 +61,7 @@ export function getMDXComponents(components?: MDXComponents) {
   </Lightbox>
 </Wrapper>
 
-用它包住頁面內容，即可瀏覽該頁面的所有圖片：
+用它包覆頁面內容，即可瀏覽整個頁面中的所有圖片：
 
 ```tsx title="app/docs/[[...slug]]/page.tsx"
 import { Lightbox } from 'fumadocs-ui/components/image-zoom';
@@ -75,9 +75,9 @@ import { Lightbox } from 'fumadocs-ui/components/image-zoom';
 </DocsBody>;
 ```
 
-### 說明文字 [#caption]
+### 圖說 [#caption]
 
-圖片的標題會顯示為說明文字。
+圖片的標題 (title) 會顯示為圖說。
 
 ```mdx
 ![Notebook Layout](/notebook.png 'Tab mode: navbar')
@@ -99,7 +99,7 @@ import { Lightbox } from 'fumadocs-ui/components/image-zoom';
 
 ### 圖庫 [#gallery]
 
-若要讓一組圖片獨立瀏覽，請將它們包在另一個 `<Lightbox />` 中，例如排列成網格：
+若要讓一組圖片可單獨瀏覽，請將它們包在另一個 `<Lightbox />` 中，例如以網格排列：
 
 ```mdx
 <Lightbox>

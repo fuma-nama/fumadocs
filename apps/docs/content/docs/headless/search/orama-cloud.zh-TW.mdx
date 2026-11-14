@@ -3,15 +3,15 @@ title: Orama Cloud
 description: 整合 Orama Cloud
 ---
 
-首先，請在 Orama Cloud 上註冊帳號。
+首先，請在 Orama Cloud 上建立帳號。
 
 ## REST API [#rest-api]
 
-使用 REST API 整合時，需要由您的文件網站上傳索引。
+使用 REST API 整合時，您的文件網站需要自行上傳索引。
 
-1. 在 Orama Cloud 儀表板上，建立一個以 **REST API** 作為資料來源的新專案。
+1. 在 Orama Cloud 主控台建立一個以 **REST API** 作為資料來源的新專案。
 
-   將您的認證資訊存放在 `.env.local` 中，例如 (在 Vite 框架中，`NEXT_PUBLIC_` 改為 `VITE_`；在 Astro 中則改為 `PUBLIC_`) ：
+   將您的認證資訊儲存在 `.env.local` 中，例如 (在 Vite 框架上 `NEXT_PUBLIC_` 改為 `VITE_`，在 Astro 上則為 `PUBLIC_`) ：
 
    ```dotenv
    NEXT_PUBLIC_ORAMA_DATASOURCE_ID="Rest API data source ID"
@@ -21,11 +21,11 @@ description: 整合 Orama Cloud
    ORAMA_PRIVATE_API_KEY="private API key"
    ```
 
-2. 預先算繪 `static.json` 路由，在建置時匯出搜尋索引，並於每次建置後透過腳本將索引同步至 Orama Cloud：
+2. 預先算繪 `static.json` 路由，以便在建置時匯出搜尋索引，並在每次建置後透過指令碼將索引同步至 Orama Cloud：
 
    <feature>search/orama-cloud</feature>
 
-   `build` 腳本會在每次建置時進行同步，因此請在您的部署平台上設定相同的變數。
+   `build` 指令碼會在每次建置時進行同步，因此請在您的部署平台上設定相同的變數。
 
 ### 搜尋用戶端 [#search-client]
 
@@ -33,7 +33,7 @@ description: 整合 Orama Cloud
 
 * 使用 [Fumadocs UI 搜尋對話方塊](/docs/search/orama-cloud)。
 
-* 透過 Fumadocs 內建的 hook 自訂搜尋 UI：
+* 使用 Fumadocs 內建的 hook 自訂搜尋 UI：
 
   ```ts
   import { useOramaCloudSearch } from 'fumadocs-core/search/client';
@@ -58,8 +58,8 @@ description: 整合 Orama Cloud
 
 ## 網路爬蟲 [#web-crawler]
 
-1. 在儀表板中建立 Crawler 資料來源，並套用「Documentation」預設範本進行正確設定。
-2. 從儀表板複製認證資訊。
+1. 在主控台中建立 Crawler 資料來源，並套用「Documentation」預設範本，完成正確設定。
+2. 從主控台複製認證資訊。
 
 ### 搜尋用戶端 [#search-client-1]
 
@@ -75,7 +75,7 @@ const orama = new OramaCloud({
 });
 
 const params = {
-  // 選填的搜尋參數
+  // 選用的搜尋參數
 };
 
 const { search, onSearchChange, isLoading, data } = useOramaCloudSearch({

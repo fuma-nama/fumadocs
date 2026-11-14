@@ -5,7 +5,7 @@ description: 展示您專案的版本發布紀錄。
 
 ## 安裝 [#installation]
 
-請安裝時間軸元件，這會將 `@fumadocs/changelog` 加入您的相依套件中：
+請安裝時間軸 (timeline) 元件，這會將 `@fumadocs/changelog` 加入您的相依套件：
 
 ```npm
 npx @fumadocs/cli@latest add changelog
@@ -13,7 +13,7 @@ npx @fumadocs/cli@latest add changelog
 
 ## 使用方式 [#usage]
 
-在您的[首頁版面配置](/docs/ui/layouts/home-layout)下建立頁面。先擷取一頁的項目，再以 `ChangelogTimeline` 算繪，並透過 `ChangelogPagination` 連結至其他頁面：
+請在您的[首頁版面配置](/docs/ui/layouts/home-layout)下建立一個頁面。先取得一頁的條目，再以 `ChangelogTimeline` 算繪，並透過 `ChangelogPagination` 連結至其他頁面：
 
 <show when={props.framework === 'next'}>
   ```tsx title="app/(home)/changelog/[[...page]]/page.tsx"
@@ -188,7 +188,7 @@ npx @fumadocs/cli@latest add changelog
   import Layout from '@/layouts/Layout.astro';
   import { Changelog } from '@/components/changelog-page';
 
-  // 每次請求時算繪，需要轉接器
+  // 於每次請求時算繪，需要轉接器
   export const prerender = false;
 
   const page = Number(Astro.params.page ?? 1);
@@ -248,10 +248,10 @@ npx @fumadocs/cli@latest add changelog
 
 ### GitHub Releases [#github-releases]
 
-`githubReleases()` 會回傳儲存庫已發布版本中的一頁；若還有較舊的版本，則會一併提供 `nextPage`。
+`githubReleases()` 會回傳儲存庫已發布版本中的一頁，若還有較舊的版本，則會附上 `nextPage`。
 
-* 版本號會從 `fumadocs-ui@16.17.0` 這類發布名稱或其標籤中讀取。
-* 預發布版本的項目會帶有 `prerelease` 屬性。
+* 版本號會從發布名稱 (例如 `fumadocs-ui@16.17.0`) 或其標籤中讀取。
+* 預先發布版本的項目會帶有 `prerelease` 屬性。
 * GitHub 將未經驗證的請求限制為每小時 60 次。請傳入 `token` 並快取該頁面<show when={props.framework === 'next'}>，例如 `export const revalidate = 3600`</show>。
 * GitHub 只會列出前 1000 個發布版本，使用 token 時則為 10000 個。超出範圍的頁面不會有任何項目。
 
@@ -259,12 +259,12 @@ npx @fumadocs/cli@latest add changelog
 
 ### 自訂項目 [#custom-entries]
 
-項目就是一般物件，可以從任何來源建立：
+項目是純物件，您可以從任何來源建立：
 
 <auto-type-table type="import('@fumadocs/changelog').ChangelogEntry" />
 
 <show when={props.framework === 'next' || props.framework === 'waku'}>
-  例如由 MDX 檔案組成的集合。傳入 `body` 即可自行算繪內容：
+  例如從一組 MDX 檔案建立。傳入 `body` 即可自行算繪內容：
 </show>
 
 <show when={props.framework === 'next'}>
@@ -324,9 +324,9 @@ npx @fumadocs/cli@latest add changelog
 </show>
 
 <show when={props.framework === 'react-router' || props.framework === 'tanstack-start'}>
-  項目會以資料的形式從載入器傳到頁面，因此請在 `content` 中以 Markdown 撰寫內容，而不要在 `body` 中使用 React 節點。
+  項目會以資料形式從載入器傳到頁面，因此請在 `content` 中以 Markdown 撰寫內容，而不要在 `body` 中使用 React 節點。
 </show>
 
 <show when={props.framework === 'astro'}>
-  項目會以 props 的形式從頁面傳到 React island，因此請在 `content` 中以 Markdown 撰寫內容，而不要在 `body` 中使用 React 節點。
+  項目會以 props 形式從頁面傳到 React island，因此請在 `content` 中以 Markdown 撰寫內容，而不要在 `body` 中使用 React 節點。
 </show>

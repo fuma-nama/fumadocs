@@ -5,11 +5,11 @@ description: 隨需編譯 Markdown/MDX 內容。
 
 ## 簡介 [#introduction]
 
-Fumadocs 提供 **MDX Remote** 套件，這是用來將 Markdown/MDX 內容來源整合至 Fumadocs 的輔助工具。
+Fumadocs 提供 **MDX Remote** 套件，可協助您將 Markdown/MDX 內容來源整合至 Fumadocs。
 您可以把它想成內建 Fumadocs 外掛的 `next-mdx-remote`。
 
 <Callout type="warn">
-  請勿將不受信任的 MDX 傳入編譯器，因為它會在您的應用程式中以 JavaScript 的形式執行。請改將不受信任的內容編譯為 Markdown，如此一來便無法執行 JavaScript 或原始 HTML：
+  請勿將不受信任的 MDX 傳給編譯器，因為它會在您的應用程式中以 JavaScript 執行。請改將不受信任的內容以 Markdown 格式編譯，這樣它就無法執行 JavaScript 或原始 HTML：
 
   ```ts
   import { createCompiler } from '@fumadocs/mdx-remote';
@@ -28,11 +28,11 @@ Fumadocs 提供 **MDX Remote** 套件，這是用來將 Markdown/MDX 內容來�
 @fumadocs/mdx-remote
 ```
 
-它的主要功能是 MDX 編譯器，可將 MDX 內容編譯成 JSX 節點。
-由於它不使用打包工具 (bundler) ，因此有以下限制：
+它的主要功能是 MDX 編譯器，可將 MDX 內容編譯為 JSX 節點。
+由於它不使用打包工具，因此有以下限制：
 
 * 圖片必須在執行階段進行最佳化。
-* MDX 檔案中不支援匯入與匯出。
+* MDX 檔案中無法使用匯入 (import) 與匯出 (export) 。
 
 ### 使用方式 [#usage]
 
@@ -49,11 +49,11 @@ export const compiler = createCompiler({
 編譯頁面內容，其中 `@/lib/source` 代表您的內容來源。
 
 <show when={props.framework === 'next' || props.framework === 'waku'}>
-  `compile()` 會以 React 元件的形式回傳編譯後的內容。請在頁面中算繪它：
+  `compile()` 會以 React 元件的形式傳回編譯後的內容，請在頁面中將其算繪：
 </show>
 
 <show when={props.framework === 'react-router' || props.framework === 'tanstack-start'}>
-  `compileFile()` 會在載入器中將內容編譯為 JavaScript，再由 `executeMdxSync()` 在用戶端執行：
+  `compileFile()` 會在 loader 中將內容編譯為 JavaScript，再由 `executeMdxSync()` 在用戶端執行：
 </show>
 
 <show when={props.framework === 'astro'}>
@@ -150,7 +150,7 @@ export const compiler = createCompiler({
       const page = getPage(slugs);
 
       return {
-        // 編譯為 JavaScript，在用戶端執行
+        // 編譯成 JavaScript，於用戶端執行
         compiled: String(await compiler.compileFile(page.content)),
         pageTree: await source.serializePageTree(source.getPageTree()),
       };
@@ -280,7 +280,7 @@ export const compiler = createCompiler({
 
 ### 圖片 [#images]
 
-在 Vercel 等 serverless 平台上，原本的 `public` 資料夾 (包含圖片等靜態資源) 會在正式環境建置完成後被移除，
+在 Vercel 等無伺服器平台上，原本的 `public` 資料夾 (包含圖片等靜態資源) 會在正式環境建置完成後被移除，
 因此 MDX 編譯器可能無法再存取 `public` 中的本機圖片。
 
 引用圖片時，請務必使用 URL。

@@ -14,17 +14,17 @@ export const frontmatter = {
 
 ## 概覽 [#overview]
 
-同時在 {frameworkName(props.framework)} 與 Fumadocs 中設定 i18n 路由。
+請在 {frameworkName(props.framework)} 與 Fumadocs 兩端設定 i18n 路由。
 
-Fumadocs 會處理文件內容與側邊欄的 i18n，應用程式的其他部分則請使用您自己的 i18n 設定進行國際化。
+Fumadocs 會負責文件內容與側邊欄的 i18n。應用程式的其他部分，請透過您自己的 i18n 設定來進行國際化。
 
 <show when={props.framework === 'next'}>
-  您也可以搭配 Fumadocs 使用 [next-intl](https://github.com/amannn/next-intl) 等函式庫。若要了解基本概念，請參閱 [Next.js 中的 i18n](https://nextjs.org/docs/app/building-your-application/routing/internationalization)。
+  您也可以搭配 Fumadocs 使用 [next-intl](https://github.com/amannn/next-intl) 等函式庫。如需了解基本概念，請參閱 [Next.js 的 i18n](https://nextjs.org/docs/app/building-your-application/routing/internationalization)。
 </show>
 
 ## 設定 [#setup]
 
-請在一個檔案中定義 i18n 設定。本指南會以 `@/lib/i18n` 匯入它。
+請在一個檔案中定義 i18n 設定。本指南會以 `@/lib/i18n` 匯入該設定。
 
 <show when={props.framework === 'next'}>
   <include cwd meta="title=&#x22;lib/i18n.ts&#x22;">
@@ -57,7 +57,7 @@ Fumadocs 會處理文件內容與側邊欄的 i18n，應用程式的其他部分
 > i18n 設定的可用選項請參閱[這裡](/docs/headless/internationalization/config)。
 
 <show when={props.framework === 'next'}>
-  ### 中介軟體 &#91;#middleware&#93;
+  ### 中介軟體 [#middleware]
 
   建立一個中介軟體，將使用者重新導向至對應的語系。
 
@@ -68,14 +68,14 @@ Fumadocs 會處理文件內容與側邊欄的 i18n，應用程式的其他部分
   <Callout title="想使用自己的中介軟體？">
     預設的中介軟體並非必要。您也可以使用自己的中介軟體，或 i18n 函式庫提供的中介軟體。
 
-    請確認其行為與您在 i18n 設定中的 [`hideLocale`](/docs/headless/internationalization/config#hide-locale-prefix) 選項一致。
+    請確認其行為與您在 i18n 設定中指定的 [`hideLocale`](/docs/headless/internationalization/config#hide-locale-prefix) 選項一致。
   </Callout>
 </show>
 
 ### 路由 [#routing]
 
 <show when={props.framework === 'next'}>
-  建立 `/app/[lang]` 資料夾，並將路由處理常式以外的頁面與版面配置都移入其中。
+  建立 `/app/[lang]` 資料夾，並將路由處理常式以外的頁面與版面配置全部移入其中。
 
   <Files>
     <Folder name="app" defaultOpen>
@@ -114,7 +114,7 @@ Fumadocs 會處理文件內容與側邊欄的 i18n，應用程式的其他部分
   ] satisfies RouteConfig;
   ```
 
-  若要讓預設語言的網址不帶前綴 (例如 `/docs`) ，請將參數設為選用，並啟用 `hideLocale`：
+  若要讓預設語言不帶前綴 (例如 `/docs`) ，請將參數設為選用，並啟用 `hideLocale`：
 
   ```ts tab="app/routes.ts"
   export default [
@@ -175,7 +175,7 @@ Fumadocs 會處理文件內容與側邊欄的 i18n，應用程式的其他部分
 </show>
 
 <show when={props.framework === 'astro'}>
-  為您的頁面加上 `[...lang]` 前綴。透過其餘參數 (rest parameter) ，預設語言的網址可以不帶前綴 (例如 `/docs`) 。
+  為您的頁面加上 `[...lang]` 前綴。透過 rest 參數，預設語言可以不帶前綴 (例如 `/docs`) 。
 
   <Files>
     <Folder name="src/pages" defaultOpen>
@@ -193,7 +193,7 @@ Fumadocs 會處理文件內容與側邊欄的 i18n，應用程式的其他部分
     </Folder>
   </Files>
 
-  請啟用 `hideLocale`，讓 Fumadocs 產生的 URL 與這些路由相符：
+  啟用 `hideLocale`，讓 Fumadocs 產生的 URL 與這些路由一致：
 
   ```ts title="src/lib/i18n.ts"
   export const i18n = defineI18n({
@@ -206,9 +206,9 @@ Fumadocs 會處理文件內容與側邊欄的 i18n，應用程式的其他部分
 
 ### 翻譯 [#translations]
 
-請在 `lib/layout.shared.tsx` 中定義您的翻譯。詳情 (包括官方語言包) 請參閱[翻譯](/docs/ui/translations)。
+請在 `lib/layout.shared.tsx` 中定義您的翻譯。詳細資訊 (包括官方語言包) 請參閱[翻譯](/docs/ui/translations)。
 
-您也可以為 `baseOptions()` 加上 `locale` 參數，以提供在地化的版面配置選項：
+您也可以為 `baseOptions()` 加上 `locale` 參數，以提供依語系調整的版面配置選項：
 
 <show when={props.framework === 'next'}>
   ```tsx title="lib/layout.shared.tsx"
@@ -233,7 +233,7 @@ Fumadocs 會處理文件內容與側邊欄的 i18n，應用程式的其他部分
   export function baseOptions(): BaseLayoutProps { // [!code --]
   export function baseOptions(locale: string): BaseLayoutProps { // [!code ++]
     return {
-      // 依據 `locale` 提供不同的 props
+      // 根據 `locale` 提供不同的 props
     };
   }
   ```
@@ -291,7 +291,7 @@ Fumadocs 會處理文件內容與側邊欄的 i18n，應用程式的其他部分
   export function baseOptions(): BaseLayoutProps { // [!code --]
   export function baseOptions(locale: string = i18n.defaultLanguage): BaseLayoutProps { // [!code ++]
     return {
-      // 依據 `locale` 提供不同的 props
+      // 根據 `locale` 提供不同的 props
     };
   }
   ```
@@ -360,12 +360,12 @@ Fumadocs 會處理文件內容與側邊欄的 i18n，應用程式的其他部分
   export function baseOptions(): BaseLayoutProps { // [!code --]
   export function baseOptions(locale: string): BaseLayoutProps { // [!code ++]
     return {
-      // 依 `locale` 傳回不同的 props
+      // 根據 `locale` 回傳不同的 props
     };
   }
   ```
 
-  將翻譯傳給 `<RootProvider />`：
+  將翻譯傳入 `<RootProvider />`：
 
   ```tsx title="src/routes/__root.tsx"
   import { createRootRoute, HeadContent, Outlet, Scripts } from '@tanstack/react-router'; // [!code --]
@@ -433,7 +433,7 @@ Fumadocs 會處理文件內容與側邊欄的 i18n，應用程式的其他部分
   }
   ```
 
-  將翻譯傳給 `<RootProvider />`：
+  將翻譯傳入 `<RootProvider />`：
 
   ```tsx title="src/components/provider.tsx"
   'use client';
@@ -446,7 +446,7 @@ Fumadocs 會處理文件內容與側邊欄的 i18n，應用程式的其他部分
   import { translations } from '@/lib/layout.shared';
 
   export function Provider({ children }: { children: ReactNode }) {
-    // 路徑的第一段 [!code ++:2]
+    // 路徑的第一個區段 [!code ++:2]
     const lang = useRouter().path.split('/')[1] || i18n.defaultLanguage;
 
     return <RootProvider>{children}</RootProvider>; // [!code --]
@@ -478,7 +478,7 @@ Fumadocs 會處理文件內容與側邊欄的 i18n，應用程式的其他部分
   }
   ```
 
-  將翻譯傳入 `<Provider />`。MDX 內容本身是獨立的 island，因此同樣需要 provider：
+  將翻譯傳入 `<Provider />`。由於 MDX 內容自成一個獨立的 island，因此也需要提供 provider：
 
   ```tsx tab="src/components/provider.tsx"
   import { navigate } from 'astro:transitions/client';
@@ -513,7 +513,7 @@ Fumadocs 會處理文件內容與側邊欄的 i18n，應用程式的其他部分
 
   // [!code ++:16]
   /**
-   * 供 MDX 內容使用，MDX 內容本身是獨立的 island。
+   * 供 MDX 內容使用，因為它自成一個獨立的 island。
    */
   export function ContentProvider({ lang, pathname, params, children }: ProviderProps) {
     return (
@@ -560,15 +560,15 @@ Fumadocs 會處理文件內容與側邊欄的 i18n，應用程式的其他部分
 ### 傳入語系 [#pass-locale]
 
 <show when={props.framework !== 'waku' && props.framework !== 'astro'}>
-  在您的頁面與版面配置中，將語系傳入 Fumadocs。
+  請在頁面與版面配置中將語系傳給 Fumadocs。
 </show>
 
 <show when={props.framework === 'waku'}>
-  在您的頁面與版面配置中，將語系傳入 Fumadocs。`[lang]` 底下的版面配置與頁面會以 prop 的形式取得語系。
+  請在頁面與版面配置中將語系傳給 Fumadocs。位於 `[lang]` 底下的版面配置與頁面會以 prop 的形式取得語系。
 </show>
 
 <show when={props.framework === 'astro'}>
-  在您的來源、版面配置與頁面中，將語系傳入 Fumadocs。
+  請在來源、版面配置與頁面中將語系傳給 Fumadocs。
 </show>
 
 <show when={props.framework === 'next'}>
@@ -620,7 +620,7 @@ Fumadocs 會處理文件內容與側邊欄的 i18n，應用程式的其他部分
   ```
 
   <Callout title={<><code>lang</code> 動態區段使用了其他名稱？</>}>
-    若您使用其他名稱 (例如 `app/[locale]`) ，也需要更新文件頁面中的 `generateStaticParams()`：
+    若您使用其他名稱 (例如 `app/[locale]`) ，也需要一併更新文件頁面中的 `generateStaticParams()`：
 
     ```tsx
     export function generateStaticParams() {
@@ -938,10 +938,10 @@ Fumadocs 會處理文件內容與側邊欄的 i18n，應用程式的其他部分
 
 ### 搜尋 [#search]
 
-請為您的搜尋方案設定 i18n。
+請在您使用的搜尋方案中設定 i18n。
 
 * **內建搜尋：** 請參閱[國際化](/docs/headless/search/orama#internationalization)。
-* **雲端方案 (例如 Algolia) ：** 這類方案通常都有官方的多語系支援。
+* **雲端方案 (例如 Algolia) ：** 這類方案通常有官方的多語系支援。
 
 ## 撰寫文件 [#writing-documents]
 
@@ -949,10 +949,10 @@ Fumadocs 會處理文件內容與側邊欄的 i18n，應用程式的其他部分
 
 ### 導覽 [#navigation]
 
-Fumadocs 只會處理自身版面配置 (例如側邊欄) 中的導覽。
+Fumadocs 只會處理其自身版面配置 (例如側邊欄) 中的導覽。
 
 <show when={props.framework === 'next'}>
-  其他地方請使用 `useParams` hook 從 URL 取得語系，再將它加在 `href` 前面。
+  至於其他地方，請使用 `useParams` hook 從 URL 取得語系，並將其加在 `href` 的開頭。
 
   ```tsx
   import Link from 'next/link';
@@ -965,7 +965,7 @@ Fumadocs 只會處理自身版面配置 (例如側邊欄) 中的導覽。
 </show>
 
 <show when={props.framework === 'react-router'}>
-  其他地方請使用 `useParams` hook 從 URL 取得語系。
+  至於其他地方，請使用 `useParams` hook 從 URL 取得語系。
 
   ```tsx
   import { Link, useParams } from 'react-router';
@@ -977,7 +977,7 @@ Fumadocs 只會處理自身版面配置 (例如側邊欄) 中的導覽。
 </show>
 
 <show when={props.framework === 'tanstack-start'}>
-  其他地方請使用 `useParams` hook 從 URL 取得語系。
+  至於其他地方，請使用 `useParams` hook 從 URL 取得語系。
 
   ```tsx
   import { Link, useParams } from '@tanstack/react-router';
@@ -997,7 +997,7 @@ Fumadocs 只會處理自身版面配置 (例如側邊欄) 中的導覽。
 </show>
 
 <show when={props.framework === 'waku'}>
-  其他地方請從路徑中擷取語系，再將它加在連結前面。
+  至於其他地方，請從路徑中擷取語系，並將其加在連結的開頭。
 
   ```tsx
   import { Link, useRouter } from 'waku/router/client';
@@ -1010,7 +1010,7 @@ Fumadocs 只會處理自身版面配置 (例如側邊欄) 中的導覽。
 </show>
 
 <show when={props.framework === 'astro'}>
-  其他地方請從 `Astro.params` 或路徑中擷取語系，再將它加在連結前面。
+  至於其他地方，請從 `Astro.params` 或路徑中擷取語系，並將其加在連結的開頭。
 
   ```astro
   ---
@@ -1021,7 +1021,7 @@ Fumadocs 只會處理自身版面配置 (例如側邊欄) 中的導覽。
   ```
 </show>
 
-[`fumadocs-core/dynamic-link`](/docs/headless/components/link#dynamic-hrefs) 元件支援動態 href，因此您可以用它在 Markdown/MDX 內容中加上語系前綴。
+[`fumadocs-core/dynamic-link`](/docs/headless/components/link#dynamic-hrefs) 元件支援動態 href，因此您可以在 Markdown/MDX 內容中用它加上語系前綴。
 
 <show when={props.framework !== 'astro'}>
   ```mdx title="content.mdx"
@@ -1032,7 +1032,7 @@ Fumadocs 只會處理自身版面配置 (例如側邊欄) 中的導覽。
 </show>
 
 <show when={props.framework === 'astro'}>
-  請將它加入您的 MDX 元件，因為 MDX 內容會在自己的 island 中算繪這些元件：
+  由於 MDX 內容會在其自身的 island 中算繪這些元件，請將它加入您的 MDX 元件：
 
   ```tsx title="src/components/mdx.tsx"
   import { DynamicLink } from 'fumadocs-core/dynamic-link'; // [!code ++]

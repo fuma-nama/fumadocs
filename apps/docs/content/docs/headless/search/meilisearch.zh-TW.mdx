@@ -1,9 +1,9 @@
 ---
 title: Meilisearch
-description: 將 Meilisearch 整合至 Fumadocs
+description: 將 Meilisearch 與 Fumadocs 整合
 ---
 
-[Meilisearch](https://www.meilisearch.com) 是一款開源搜尋引擎，提供錯字容忍度與篩選功能。您可以自行架設，也可以使用 Meilisearch Cloud。
+[Meilisearch](https://www.meilisearch.com) 是一款開源搜尋引擎，支援錯字容忍度與篩選功能。您可以自行架設，也可以使用 Meilisearch Cloud。
 
 ## 設定 [#setup]
 
@@ -15,7 +15,7 @@ meilisearch
 
 ### API 金鑰 [#api-keys]
 
-請透過[自行架設](https://www.meilisearch.com/docs/learn/self_hosted/getting_started_with_self_hosted_meilisearch)或使用 [Meilisearch Cloud](https://www.meilisearch.com/cloud) 啟動 Meilisearch 執行個體，並將其認證資訊存放在 `.env.local` 中 (若使用 Vite 框架，請將 `NEXT_PUBLIC_` 改為 `VITE_`；若使用 Astro，則改為 `PUBLIC_`) ：
+請透過[自行架設](https://www.meilisearch.com/docs/learn/self_hosted/getting_started_with_self_hosted_meilisearch)或使用 [Meilisearch Cloud](https://www.meilisearch.com/cloud) 啟動 Meilisearch 執行個體，並將其認證資訊儲存在 `.env.local` 中 (在 Vite 框架中請將 `NEXT_PUBLIC_` 改為 `VITE_`，在 Astro 中則改為 `PUBLIC_`) ：
 
 ```dotenv
 NEXT_PUBLIC_MEILISEARCH_HOST="URL of your instance"
@@ -23,23 +23,23 @@ NEXT_PUBLIC_MEILISEARCH_SEARCH_KEY="search API key"
 MEILISEARCH_ADMIN_KEY="Default Admin API Key"
 ```
 
-搜尋金鑰會公開給瀏覽器，因此請[建立一組](https://www.meilisearch.com/docs/learn/security/basic_security)只能搜尋 `docs` 索引的金鑰。管理員 (admin) 金鑰則務必妥善保管，切勿外流。
+搜尋金鑰會暴露在瀏覽器中，因此請[建立一組](https://www.meilisearch.com/docs/learn/security/basic_security)只能搜尋 `docs` 索引的金鑰。管理員金鑰則請妥善保管，切勿公開。
 
 ### 同步文件 [#sync-documents]
 
-預先算繪 `static.json` 路由，在建置時匯出搜尋文件，並於每次建置後透過指令碼將文件同步到 Meilisearch：
+預先算繪 `static.json` 路由，在建置時匯出搜尋文件，並於每次建置後透過指令碼將其同步至 Meilisearch：
 
 <feature>search/meilisearch</feature>
 
-`sync()` 會設定索引並取代其中的文件，在新文件完成索引前，舊文件仍可供搜尋。`build` 指令碼會在每次建置時執行同步，請在您的部署平台上設定相同的變數。
+`sync()` 會設定索引並取代其中的文件；在新文件完成索引前，舊文件仍可供搜尋。`build` 指令碼會在每次建置時同步，請在您的部署平台上設定相同的變數。
 
 ### 搜尋 UI [#search-ui]
 
-實作 UI 時，您可以考慮以下幾種做法：
+實作 UI 時，您可以考慮以下幾種方式：
 
 * 使用 [Fumadocs UI 搜尋對話方塊](/docs/search/meilisearch)。
 
-* 使用內建的搜尋用戶端 hook 自行建構：
+* 使用內建的搜尋用戶端 hook 自行打造：
 
   ```ts twoslash
   import { Meilisearch } from 'meilisearch';
@@ -64,7 +64,7 @@ MEILISEARCH_ADMIN_KEY="Default Admin API Key"
 
 ### 標籤篩選 [#tag-filter]
 
-若要設定標籤篩選，請在 `static.json` 路由中將 `tag` 傳給 `toDocuments()`：
+若要設定標籤篩選，請在 `static.json` 路由中將 `tag` 傳入 `toDocuments()`：
 
 ```ts
 toDocuments(source, { tag: (page) => page.slugs[0] });
@@ -86,7 +86,7 @@ toDocuments(source, { tag: (page) => page.slugs[0] });
 
 ### 國際化 [#internationalization]
 
-文件會包含所屬頁面的語系，傳入 `locale` 即可搜尋特定語言的內容：
+文件會包含所屬頁面的語系，傳入 `locale` 即可搜尋特定語言：
 
 ```ts
 import { useI18n } from 'fumadocs-ui/contexts/i18n';
@@ -101,16 +101,16 @@ const { search, onSearchChange, isLoading, data } = useMeilisearch({
 
 ### 索引設定 [#index-settings]
 
-`sync()` 只會設定 `searchableAttributes` 與 `filterableAttributes`，同義詞、錯字容忍度等其他設定則會維持不變。您可以透過 Meilisearch 控制台或 `meilisearch` 用戶端調整這些設定。
+`sync()` 只會設定 `searchableAttributes` 和 `filterableAttributes`，其他設定 (例如同義詞與錯字容忍度) 則會維持不變。您可以透過 Meilisearch 儀表板或 `meilisearch` 用戶端調整這些設定。
 
 ## 運作原理 [#under-the-hood]
 
-每個標題與段落都是一筆文件，並附帶頁面標題、URL 與 Breadcrumb。只有 `content` 可供搜尋，搜尋用戶端會依頁面將結果分組。
+每個標題與段落都是一份文件，並附帶頁面標題、URL 與 Breadcrumb。只有 `content` 可供搜尋，搜尋用戶端會依頁面將結果分組。
 
 | 屬性        | 說明                        |
 | --------- | ------------------------- |
 | `type`    | `page`、`heading` 或 `text` |
 | `content` | 頁面標題、標題或段落                |
-| `heading` | 所屬標題的 ID (選填)             |
-| `tag`     | 用於篩選結果的標籤 (選填)            |
-| `locale`  | 頁面的語系 (選填)                |
+| `heading` | 所屬標題的 ID (選用)             |
+| `tag`     | 用於篩選結果的標籤 (選用)            |
+| `locale`  | 頁面的語系 (選用)                |

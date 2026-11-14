@@ -1,34 +1,34 @@
 ---
 title: 本機 Markdown（Sätteri）
-description: 適用於本機 Markdown 內容的內容來源，使用 Sätteri 編譯。
+description: 適用於本機 Markdown 內容的內容來源，以 Sätteri 編譯。
 ---
 
 ## 簡介 [#introduction]
 
-`@fumadocs/satteri/local-md` 是用於本機 Markdown/MDX 檔案的內容來源，改用 [Sätteri](https://github.com/bruits/satteri) 編譯，而非透過 unified/remark 管線。
+`@fumadocs/satteri/local-md` 是適用於本機 Markdown/MDX 檔案的內容來源，改用 [Sätteri](https://github.com/bruits/satteri) 編譯，而非 unified/remark 管線。
 
-它的 API 與 [`@fumadocs/local-md`](/docs/integrations/content/local-md) 相同，同樣不需要打包，因此可直接在執行階段運作，不必經過型別產生或打包步驟。
+它與 [`@fumadocs/local-md`](/docs/integrations/content/local-md) 的 API 相同，同樣無需打包，因此可直接在執行階段運作，不需要型別產生或打包步驟。
 
-如果您想使用 Sätteri 編譯器及其外掛模型，以及 Fumadocs Sätteri 預設組合，就可以選擇它。
+若您想使用 Sätteri 編譯器、它的外掛模型，以及 Fumadocs Sätteri 預設組合，請選用此內容來源。
 
 ### 差異 [#differences]
 
-* 編譯結果一律是 JavaScript，因此沒有虛擬 JavaScript 引擎選項，算繪時會使用原生引擎。
-* 外掛使用的是 Sätteri 外掛，透過 `satteriOptions` 設定，而非 remark/rehype 外掛。
+* 編譯結果一律為 JavaScript，因此不提供虛擬 JavaScript 引擎選項，算繪時會使用原生引擎。
+* 外掛為 Sätteri 外掛，需透過 `satteriOptions` 設定，而非 remark/rehype 外掛。
 
 <Callout type="warn">
-  請勿將不受信任的 Markdown/MDX 檔案放在 `dir` 中，因為這些檔案可能會以 JavaScript 執行，或引用伺服器端的檔案。
+  請勿將不受信任的 Markdown/MDX 檔案放在 `dir` 中，因為這些檔案可能會以 JavaScript 形式執行，或參照伺服器端的檔案。
 </Callout>
 
-## 設定 [#setup]
+## 安裝設定 [#setup]
 
 ```package-install
 @fumadocs/satteri shiki
 ```
 
-> 之所以需要安裝 `shiki`，是因為打包工具必須將它設為外部依賴 (externalize) 。
+> 之所以需要安裝 `shiki`，是因為打包工具必須將它外部化 (externalize) 。
 
-建立 `localMd` 實例，並將它接上 Fumadocs：
+建立 `localMd` 實例，並將它連接到 Fumadocs：
 
 ```ts title="lib/source.ts"
 import { dynamicLoader } from 'fumadocs-core/source';
@@ -68,7 +68,7 @@ const docs = localMd({
 
 ### 編譯器選項 [#compiler-options]
 
-`satteriOptions` 會經由 Fumadocs Sätteri 預設組合傳入，因此外掛及其選項的設定方式與 Fumadocs MDX 相同：
+`satteriOptions` 會經由 Fumadocs Sätteri 預設集傳入，因此外掛及其選項的設定方式與 Fumadocs MDX 相同：
 
 ```ts title="lib/source.ts"
 const docs = localMd({
@@ -82,32 +82,32 @@ const docs = localMd({
 });
 ```
 
-傳入函式，即可延遲建立選項。
+傳入函式即可延遲建立選項。
 
 ## 使用方式 [#usage]
 
-`getSource()` 會回傳[內容載入器](/docs/headless/source-api)。算繪頁面的方式與 [`@fumadocs/local-md`](/docs/integrations/content/local-md#usage) 相同，只是改從 `@fumadocs/satteri/local-md` 匯入。
+`getSource()` 會回傳一個[內容載入器](/docs/headless/source-api)。算繪頁面的方式與 [`@fumadocs/local-md`](/docs/integrations/content/local-md#usage) 相同，只是改從 `@fumadocs/satteri/local-md` 匯入。
 
-每個頁面都有 `load()`，會編譯該頁面並回傳算繪器：
+每個頁面都有 `load()`，可編譯該頁面並回傳算繪器：
 
 ```tsx
 const page = source.getPage(slugs);
 const { body, toc } = await (await page.data.load()).render();
 ```
 
-算繪器也提供 `structuredData` 與 `exports`，內含文件或其外掛所匯出的值。
+算繪器也提供 `structuredData` 與 `exports`，可用來取得文件或其外掛所匯出的值。
 
 <show when={props.framework !== 'next' && props.framework !== 'waku'}>
-  ### 用戶端算繪 &#91;#client-rendering&#93;
+  ### 用戶端算繪 [#client-rendering]
 
-  `serialize()` 會回傳已編譯頁面的酬載，可安全序列化為 JSON。
+  `serialize()` 會回傳已編譯頁面的酬載，且可安全序列化為 JSON。
 
   <show when={props.framework !== 'astro'}>
-    請從您的載入器回傳此酬載，並在用戶端算繪：
+    請從您的 loader 回傳它，並在用戶端進行算繪：
   </show>
 
   <show when={props.framework === 'astro'}>
-    請從您的頁面將此酬載傳給 React island，並在其中算繪：
+    請從頁面將它傳給 React island，並在其中進行算繪：
   </show>
 
   ```tsx
@@ -137,10 +137,10 @@ const { body, toc } = await (await page.data.load()).render();
 
 ### 熱重載 [#hot-reload]
 
-來源是在執行階段讀取檔案，因此預設不會有任何機制監看這些檔案。
+來源會在執行階段讀取檔案，因此預設不會監看這些檔案。
 
 <show when={props.framework === 'next'}>
-  開發期間，請在執行應用程式的同時，一併執行 `@fumadocs/local-md` 的開發伺服器：
+  在開發期間，請在執行應用程式的同時，執行 `@fumadocs/local-md` 的開發伺服器：
 
   ```json title="package.json"
   {
@@ -150,7 +150,7 @@ const { body, toc } = await (await page.data.load()).render();
   }
   ```
 
-  將來源連接到該伺服器：
+  將來源連接至該伺服器：
 
   ```ts title="lib/source.ts"
   import { watchWithDevServer } from '@fumadocs/satteri/local-md/dev/ws';
@@ -160,7 +160,7 @@ const { body, toc } = await (await page.data.load()).render();
   }
   ```
 
-  這會讓伺服器端的來源失效，但 Next.js 仍會在瀏覽器中保留已算繪的頁面。請在根版面配置中算繪 `<DevClient />`，讓頁面也一併重新整理：
+  這會讓伺服器上的來源失效，但 Next.js 仍會在瀏覽器中保留已算繪的頁面。請在根版面配置中算繪 `<DevClient />`，讓頁面也一併重新整理：
 
   ```tsx title="app/layout.tsx"
   import { DevClient } from '@fumadocs/satteri/local-md/dev/react-client';
@@ -178,7 +178,7 @@ const { body, toc } = await (await page.data.load()).render();
 </show>
 
 <show when={props.framework !== 'next'}>
-  開發期間，Vite 外掛會透過 Vite 的檔案監看器讓來源失效。請將外掛加入設定，並連接來源：
+  在開發期間，Vite 外掛會透過 Vite 的檔案監看器讓來源失效。請將外掛加入設定，並連接來源：
 
   <show when={props.framework === 'react-router' || props.framework === 'tanstack-start'}>
     ```ts tab="vite.config.ts"
@@ -226,7 +226,7 @@ const { body, toc } = await (await page.data.load()).render();
   ```
 </show>
 
-被引入的檔案同樣會受到監看。若要自行串接監看器，請監看 `docs.dir` 以及傳給 `docs.onDependency()` 的檔案，並在檔案變更時呼叫 `docs.invalidateFile(path)`。
+引入的檔案也會受到監看。若要自行串接監看器，請監看 `docs.dir` 以及傳入 `docs.onDependency()` 的檔案，並在檔案變更時呼叫 `docs.invalidateFile(path)`。
 
 ### 停用重新驗證 [#disable-revalidation]
 

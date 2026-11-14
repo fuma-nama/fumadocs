@@ -1,13 +1,13 @@
 ---
 title: Dynamic 進入點
-description: 透過隨需編譯存取您的集合。
+description: 以隨需編譯的方式存取您的集合。
 ---
 
 ## 使用方式 [#usage]
 
-在 docs/doc 集合上啟用 [Dynamic 模式](/docs/mdx/async#dynamic-mode)，並改從 `dynamic` 進入點匯入，而非 `server`。
+請在 docs/doc 集合上啟用 [Dynamic 模式](/docs/mdx/async#dynamic-mode)，並改從 `dynamic` 進入點匯入，而非 `server`。
 
-它的輸出與 `server` 進入點相同，但編譯後的屬性必須透過 `load()` 方法載入。
+其輸出與 `server` 進入點相同，但編譯後的屬性必須透過 `load()` 方法載入。
 
 ```ts tab="Docs (Meta + Doc)"
 // [!code highlight]

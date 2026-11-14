@@ -1,20 +1,20 @@
 ---
 title: 無頭式
-description: 替換元件情境的 UI，或在無頭式層上自行打造 UI。
+description: 替換 stories 的 UI，或基於無頭式層自行建構 UI。
 ---
 
 ## 概覽 [#overview]
 
-`@fumadocs/story` 匯出 `<StoryProvider />`、`useStory()` 與 `useStoryArgs()`，提供不含 UI 的元件情境狀態：
+`@fumadocs/story` 匯出了 `<StoryProvider />`、`useStory()` 與 `useStoryArgs()`，可在不含 UI 的情況下提供元件情境的狀態：
 
 * 所選的變體，以及其對應的預設組合
-* 已渲染元件的引數，並經過防抖 (debounce) 處理，輸入時不會每按一次鍵就重新算繪元件
+* 已渲染元件的引數，並經過防抖 (debounce) 處理，因此輸入時不會每按一個鍵就重新算繪元件
 
-內建面板就是以這些 API 打造而成，您也可以改用自己的面板。
+內建面板就是以這些 API 建構而成，您也可以改用自己實作的面板。
 
 ## 自訂面板 [#your-own-panel]
 
-`defineStoryFactory()` 可接受一個 `WithControl` 元件，已渲染時會用它取代內建面板。
+`defineStoryFactory()` 可接受一個 `WithControl` 元件，並以它取代內建面板進行算繪。
 
 <show when={props.framework === 'next'}>
   ```tsx title="lib/story.tsx"
@@ -68,17 +68,17 @@ function Content() {
 }
 ```
 
-| Hook              | 說明                                                                       |
-| ----------------- | ------------------------------------------------------------------------ |
-| `useStory()`      | 預設組合、目前選取的 `variant` 與 `setVariant`、`Component` 以及 `frame`。              |
-| `useStoryArgs()`  | 已渲染元件的引數，會隨控制項變動。                                                        |
-| `useStoryFrame()` | [`frame`](/docs/integrations/story#frame) iframe 的 ref，負責將引數傳送給該 iframe。 |
+| Hook              | 說明                                                                           |
+| ----------------- | ---------------------------------------------------------------------------- |
+| `useStory()`      | 預設組合、目前選取的 `variant` 與 `setVariant`，以及 `Component` 和 `frame`。                |
+| `useStoryArgs()`  | 已渲染元件的引數，會隨控制項同步更新。                                                          |
+| `useStoryFrame()` | [`frame`](/docs/integrations/story#frame) 的 iframe 所用的 ref，負責將引數傳送給該 iframe。 |
 
 控制項透過 [`@fumari/stf`](https://github.com/fuma-nama/fumadocs/tree/dev/packages/stf) 編輯，也就是 `<StoryProvider />` 所設定的表單引擎。`preset.controls` 是元件 props 的[型別樹](/docs/integrations/story#controls)。
 
-<Callout title="從內建面板著手">
-  要從頭撰寫完整的控制面板，就必須處理型別樹中的每一種節點類型。建議您安裝下方的內建面板，
-  再依需求修改。
+<Callout title="從內建面板開始">
+  要撰寫完整的控制面板，就必須處理型別樹中的每一種節點。建議您安裝下方的內建
+  面板，再加以修改。
 </Callout>
 
 ## 安裝 UI [#install-the-ui]

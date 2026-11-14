@@ -5,12 +5,12 @@ description: 適用於所有版面配置的導覽設定。
 
 ## 概覽 [#overview]
 
-Fumadocs 可讓您透過 `links` prop 在版面配置中加入導覽連結，例如連結到您的「作品展示」頁面。
+Fumadocs 可讓您透過 `links` prop 在版面配置中加入導覽連結，例如連結到您的「展示」頁面。
 
 <div className="not-prose grid gap-2 *:border max-sm:*:last:hidden sm:grid-cols-[2fr_1fr]">
-  <>![Nav](/docs/nav-layout-home.png)</>
+  <>![導覽](/docs/nav-layout-home.png)</>
 
-  <>![Nav](/docs/nav-layout-docs.png)</>
+  <>![導覽](/docs/nav-layout-docs.png)</>
 </div>
 
 ```tsx tab="All" title="lib/layout.shared.tsx"
@@ -63,7 +63,7 @@ export default function Layout({ children }: { children: ReactNode }) {
 
 ### 連結項目 [#link-item]
 
-導覽至某個 URL/href 的連結，也可以是外部連結。
+用於前往某個 URL/href 的連結，也可以是外部連結。
 
 ```tsx title="lib/layout.shared.tsx"
 import { BookIcon } from 'lucide-react';
@@ -86,7 +86,7 @@ export function baseOptions(): BaseLayoutProps {
 
 #### 啟用模式 [#active-mode]
 
-項目被標記為啟用狀態的條件。
+連結項目被標示為啟用狀態的條件。
 
 | 模式           | 說明                                |
 | ------------ | --------------------------------- |
@@ -156,7 +156,7 @@ export function baseOptions(): BaseLayoutProps {
 
 ### GitHub URL [#github-url]
 
-另外也提供了快捷方式，可用來新增 GitHub 儲存庫的連結項目。
+此外，也提供了快速新增 GitHub 儲存庫連結項目的捷徑。
 
 ```tsx twoslash title="lib/layout.shared.tsx"
 import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
@@ -196,7 +196,7 @@ export function baseOptions(): BaseLayoutProps {
 
 ### 導覽選單 [#navigation-menu]
 
-在首頁版面配置中，您可以在導覽列加入導覽選單 (具備完整動畫效果) 。
+在首頁版面配置中，您可以在導覽列加入導覽選單 (附完整動畫效果) 。
 
 ![Nav](/docs/nav-layout-menu.png)
 
@@ -218,7 +218,7 @@ export default function Layout({ children }: { children: ReactNode }) {
       links={[
         {
           type: 'custom',
-          // 只會顯示在導覽列，不會顯示在行動版選單
+          // 僅顯示於導覽列，不會出現在行動版選單
           on: 'nav',
           children: (
             <NavbarMenu>

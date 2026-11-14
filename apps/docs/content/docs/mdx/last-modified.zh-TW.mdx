@@ -8,7 +8,8 @@ description: 輸出文件的最後修改時間
 您可以在設定檔中加入此外掛。
 
 <Callout type="warning" title="預設使用 Git">
-  此功能依賴您本機的 Git 歷史記錄，請確認您的電腦已安裝 Git，且**儲存庫不是以淺層複製 (shallow clone) 方式取得**。
+  請確認您的電腦已安裝 Git，且**儲存庫並非透過淺層複製 (shallow
+  clone) 取得**，因為此功能需要讀取您本機的 Git 歷史紀錄。
 </Callout>
 
 ```ts title="source.config.ts"
@@ -23,7 +24,7 @@ export default defineConfig({
 
 ### 存取屬性 [#access-the-property]
 
-完成上述設定後，每份文件都會匯出 `lastModified` 屬性 (型別為 `Date`) 。
+完成後，每份文件都會匯出 `lastModified` 屬性 (型別為 `Date`) 。
 
 ```ts
 import { source } from '@/lib/source';
@@ -36,4 +37,4 @@ const { lastModified } = await page.data.load();
 console.log(lastModified);
 ```
 
-您可以透過 [`<DocsPage />`](/docs/ui/layouts/page#last-updated-time) 等 UI 元件來顯示它
+您可以透過 [`<DocsPage />`](/docs/ui/layouts/page#last-updated-time) 等 UI 元件來顯示此資訊

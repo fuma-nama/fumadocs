@@ -11,11 +11,11 @@ fumadocs-typescript
 
 ### UI 整合 [#ui-integration]
 
-它內建 `AutoTypeTable` 元件。進一步了解 [Auto Type Table](/docs/ui/components/auto-type-table)。
+此功能內建 `AutoTypeTable` 元件。若想了解更多，請參閱 [Auto Type Table](/docs/ui/components/auto-type-table)。
 
 ### MDX 整合 [#mdx-integration]
 
-`remarkAutoTypeTable` 是一個 remark 外掛，請將它加入您的設定：
+`remarkAutoTypeTable` 是一個 remark 外掛，請將它加入您的設定檔：
 
 ```ts title="source.config.ts" tab="unified"
 import {
@@ -79,10 +79,10 @@ export interface MyInterface {
 ```
 
 <Callout type="warn">
-  請勿將不受信任的值傳入 `path`，因為它能讀取您電腦上的任何 TypeScript 檔案。
+  請勿將不受信任的值傳給 `path`，因為它能讀取您電腦上的任何 TypeScript 檔案。
 </Callout>
 
-## 註解 [#annotations]
+## 註解標記 [#annotations]
 
 ### 隱藏 [#hide]
 
@@ -99,7 +99,7 @@ interface MyInterface {
 
 ### 簡化型別 [#simplified-type]
 
-您可以透過 TSDoc 的 `@remarks` 標籤，為型別指定簡化後的名稱。
+您可以使用 TSDoc 的 `@remarks` 標記來指定型別的簡化名稱。
 
 ```ts
 interface MyInterface {
@@ -129,7 +129,7 @@ interface MyInterface {
 
 搭配型別表格使用時，可將屬性連結至其他位置。
 
-型別表格會自動產生錨點 ID，您可以利用它連結到另一個型別表格。
+型別表格會自動產生錨點 ID，您可以利用它連結到其他型別表格。
 
 ```ts
 interface MyInterface {

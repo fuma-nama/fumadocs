@@ -64,7 +64,7 @@ import type { APIRoute } from 'astro';
 import { flexsearchFromSource } from 'fumadocs-core/search/flexsearch';
 import { source } from '@/lib/source';
 
-// 於每次請求時算繪，需要轉接器
+// 每次請求時算繪，需要轉接器
 export const prerender = false;
 
 const server = flexsearchFromSource(source);
@@ -74,11 +74,11 @@ export const GET: APIRoute = ({ request }) => server.GET(request);
 
 ### 從搜尋索引建立 [#from-search-indexes]
 
-從搜尋索引建立伺服器，每個索引都需要包含 `structuredData` 欄位。
+從搜尋索引建立伺服器，每個索引都需要一個 `structuredData` 欄位。
 
 這個欄位通常由您的內容來源 (例如 Fumadocs MDX) 提供。您也可以使用 [Remark Structure](/docs/headless/mdx/structure) 外掛，從 Markdown/MDX 文件中擷取。
 
-接著在搜尋路由中改用此伺服器，取代 `flexsearchFromSource()`：
+在您的搜尋路由中改用此伺服器，取代 `flexsearchFromSource()`：
 
 ```ts
 import { source } from '@/lib/source';
@@ -114,7 +114,7 @@ const { search, onSearchChange, isLoading, data } = useFetchSearch();
 
 ### 標籤篩選 [#tag-filter]
 
-支援依標籤篩選搜尋結果，適合用來實作類似本文件的多文件架構。
+支援依標籤篩選結果，適合用來實作類似本文件網站的多文件架構。
 
 ```ts
 import { source } from '@/lib/source';
@@ -138,7 +138,7 @@ const server = flexsearchFromSource(source, {
 並更新您的搜尋用戶端：
 
 * **Fumadocs UI**：在搜尋 UI 中設定[標籤篩選](/docs/search/flexsearch#tag-filter)。
-* **搜尋用戶端**：將標籤傳給 `useFetchSearch()`。
+* **搜尋用戶端**：將標籤傳入 `useFetchSearch()`。
 
 ```ts
 import { useFetchSearch } from 'fumadocs-core/search/client';
@@ -150,7 +150,7 @@ const { search, onSearchChange, isLoading, data } = useFetchSearch({
 
 ### 靜態模式 [#static-export]
 
-若要在靜態網站中使用，請改用搜尋伺服器提供的 `staticGET`，並將該路由設為靜態或預先算繪。
+若要在靜態網站中使用，請使用搜尋伺服器提供的 `staticGET`，並將路由設為靜態或預先算繪。
 
 ```ts tab="Next.js" title="app/api/search/route.ts"
 import { source } from '@/lib/source';
@@ -192,7 +192,7 @@ export default defineConfig({
       prerender: {
         enabled: true,
       },
-      // [!code ++:2] 預先算繪索引檔
+      // [!code ++:2] 預先算繪索引檔案
       pages: [{ path: '/api/search' }],
     }),
   ],
@@ -235,7 +235,7 @@ export const GET: APIRoute = () => server.staticGET();
   import { useFlexsearchStatic } from 'fumadocs-core/search/client/flexsearch-static';
 
   const { search, onSearchChange, isLoading, data } = useFlexsearchStatic({
-    // 選用：傳入 tag 與 locale
+    // 選用：傳入標籤與語系
     tag,
   });
   ```
@@ -243,15 +243,15 @@ export const GET: APIRoute = () => server.staticGET();
   <auto-type-table type="import(&#x22;fumadocs-core/search/client/flexsearch-static&#x22;).FlexsearchStaticOptions" />
 
 <Callout type="warn" title="請注意">
-  靜態搜尋需要用戶端下載匯出的搜尋索引，
-  對大型文件網站而言，成本可能相當高。
+  靜態搜尋需要用戶端下載匯出的搜尋索引。
+  對於大型文件網站而言，這可能會耗費大量資源。
 
-  遇到這類情況，建議您改用 Orama Cloud 或 Algolia 等雲端方案。
+  遇到這類情況，建議您改用 Orama Cloud 或 Algolia 等雲端解決方案。
 </Callout>
 
 ## 國際化 [#internationalization]
 
-Flexsearch 不需要額外設定就能支援其他語言，但您可以為每個語系指定 Flexsearch 選項，以提升搜尋結果的品質。
+Flexsearch 不需要額外設定即可支援其他語言，但您可以為每個語系指定 Flexsearch 選項，讓搜尋結果更準確。
 
 ```ts tab="From Source"
 import { source } from '@/lib/source';
@@ -260,7 +260,7 @@ import { Charset } from 'flexsearch';
 
 const server = flexsearchFromSource(source, {
   localeMap: {
-    // [locale]: Flexsearch 選項 [!code ++:2]
+    // [locale]：Flexsearch 選項 [!code ++:2]
     jp: { encoder: Charset.CJK },
   },
 });

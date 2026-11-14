@@ -3,7 +3,7 @@ title: Remark Structure
 description: 從您的文件中擷取搜尋紀錄。
 ---
 
-`remarkStructure` 外掛會將文件的標題與內容擷取為紀錄，供[搜尋](/docs/headless/search)使用。紀錄會保留您撰寫的 Markdown 原文。關於紀錄的產生方式，請參閱[字串化](/docs/headless/mdx/stringification)。
+`remarkStructure` 外掛會將文件的標題與內容擷取為紀錄，供[搜尋](/docs/headless/search)使用。紀錄會保留您原本撰寫的 Markdown。產生方式請參閱[字串化](/docs/headless/mdx/stringification)。
 
 ```mdx tab="Input"
 ## Installation
@@ -36,19 +36,19 @@ Run the [command](/docs/cli) below.
 
 Remark Structure 是一個 remark 外掛。Fumadocs MDX 預設會啟用它，並將紀錄匯出為 `structuredData`。您可以透過 `remarkStructureOptions` 傳入選項。
 
-在 Fumadocs MDX 中，紀錄會依據頁面 props 產生：[`<show>`](/docs/markdown#show) 中未算繪的內容會被排除，運算式則會替換為其值。在 Fumadocs MDX 以外，運算式會保留為原始文字。
+在 Fumadocs MDX 中，紀錄會依據頁面的 props 產生：[`<show>`](/docs/markdown#show) 中未被算繪的內容會被排除，表達式則會替換為其求值結果。在 Fumadocs MDX 以外，表達式會保留為原始碼文字。
 
 ## 紀錄 [#records]
 
-標題、段落、引言區塊、表格和 JSX 元素都會被記錄 (請參閱 `types`) ：
+標題、段落、引用區塊、表格與 JSX 元素都會被記錄 (請參閱 `types`) ：
 
 * 連結會替換為其文字，圖片則會移除。
-* 表格的每一列各有一筆紀錄，內容是由表頭與該列組成的表格。這些列共用同一個 `table` 欄位。
+* 表格的每一列各為一筆紀錄，內容是由表頭與該列組成的表格。這些列共用同一個 `table` 欄位。
 * JSX 元素會替換為其內容，但 `filterElement` 保留的元素除外 (請參閱[元件](#components)) 。
-* JSX 元素若沒有子元素 (請參閱 `mdxTypes`) ，或能放在單行內，就會成為一筆紀錄。
+* JSX 元素若沒有子元素 (請參閱 `mdxTypes`) ，或可以寫在一行內，即為一筆紀錄。
 * 紀錄內的內容不會重複記錄。
 
-在 Fumadocs MDX 中，此外掛預設會保留元件的元素，例如 `<Callout>`，但不包括 `<div>`。在 Fumadocs MDX 之外，則會保留 `File`、`TypeTable`、`Callout` 和 `Card`。您可以透過 `filterElement` 變更此行為：
+在 Fumadocs MDX 中，此外掛預設會保留元件的元素，例如 `<Callout>`，但不包含 `<div>`。在 Fumadocs MDX 之外，則會保留 `File`、`TypeTable`、`Callout` 與 `Card`。您可以透過 `filterElement` 變更此行為：
 
 ```ts tab="unified" title="source.config.ts"
 import { defineConfig } from 'fumadocs-mdx/config';
@@ -80,14 +80,14 @@ export default defineConfig({
 
 ## 元件 [#components]
 
-在 Fumadocs MDX 中，保留下來的 JSX 元素會依您讀取紀錄的方式，以下列其中一種形式記錄：
+在 Fumadocs MDX 中，保留下來的 JSX 元素會依您讀取紀錄的方式，以下列兩種形式之一記錄：
 
-* `page.data.structuredData`：不會算繪元件。該元素會保留為 HTML 標籤，再由搜尋對話方塊將其算繪為元件。若使用 `async` 或 `dynamic` 集合，請從已載入的頁面讀取。
-* `await page.data.structuredData()`：會針對 [`search` 目標](/docs/headless/utils/markdown#targets)算繪元件，並將該元素替換為其 Markdown 形式。只有 `async` 與 `dynamic` 集合提供此函式。
+* `page.data.structuredData`：不會算繪元件。該元素會保留為 HTML 標籤，再由搜尋對話方塊將其作為元件算繪。若使用 `async` 或 `dynamic` 集合，請從已載入的頁面讀取。
+* `await page.data.structuredData()`：會針對 [`search` 目標](/docs/headless/utils/markdown#targets)算繪元件，並將該元素替換為對應的 Markdown 形式。只有 `async` 與 `dynamic` 集合提供此函式。
 
-算繪時，元件的查找方式與 MDX 相同：先在檔案的匯入與宣告中尋找，再到[頁面 props](/docs/headless/source-api#custom-props) 的 MDX 元件中尋找。
+算繪時，元件的查找方式與 MDX 相同：先查找檔案中的匯入與宣告，再查找[頁面 props](/docs/headless/source-api#custom-props) 中的 MDX 元件。
 
-搜尋會從 `getPages()` 讀取頁面，而這些頁面沒有自訂 props。若希望搜尋時算繪某個元件，請在檔案中匯入或宣告該元件。
+搜尋會從 `getPages()` 讀取頁面，而這些頁面不含自訂 props。若希望搜尋時能算繪某個元件，請在檔案中匯入或宣告該元件。
 
 元件可透過 [`asMarkdown()`](/docs/headless/utils/markdown#asmarkdown) 定義供搜尋使用的文字：
 
@@ -100,11 +100,11 @@ export function ProductName() {
 }
 ```
 
-沒有對應 Markdown 形式的元件會以 JSX 語法保留，就像頁面 props 中缺少的 MDX 元件一樣。
+沒有對應 Markdown 形式的元件會保留為 JSX 語法，與頁面 props 中缺少的 MDX 元件處理方式相同。
 
 ## 外掛 [#plugins]
 
-由外掛插入的節點不會被記錄。外掛需透過 `data.structuredData` 自行加入其節點的紀錄：
+外掛插入的節點不會被記錄。外掛需透過 `data.structuredData` 自行加入其節點的紀錄：
 
 ```ts
 node.data = {
@@ -116,17 +116,17 @@ node.data = {
 };
 ```
 
-若只想變更紀錄中所撰寫內容的 Markdown，請透過 [`replaceSource()`](/docs/headless/mdx/stringification#editing-the-output) 編輯 `search` 命名空間。
+若只想變更紀錄中所撰寫內容的 Markdown，請使用 [`replaceSource()`](/docs/headless/mdx/stringification#editing-the-output) 編輯 `search` 命名空間。
 
 ## 作為函式使用 [#as-a-function]
 
-在 unified 中，`structure()` 會從字串中擷取紀錄：
+在 unified 中，`structure()` 會從字串擷取紀錄：
 
 ```ts
 import { structure } from 'fumadocs-core/mdx-plugins';
 import remarkMath from 'remark-math';
 
-// 搭配內容所需的 remark 外掛
+// 傳入您的內容所需的 remark 外掛
 const data = structure(content, [remarkMath], options);
 ```
 

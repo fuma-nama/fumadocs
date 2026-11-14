@@ -37,10 +37,10 @@ options?: Partial<{ a: unknown }>;
 </Wrapper>
 
 <Callout title="僅限伺服器元件" type="warn">
-  此元件無法在用戶端元件中使用，請改用[建置時期 MDX 整合](/docs/markdown/typescript#mdx-integration)。
+  此元件無法在用戶端元件中使用，請改用[建置時期的 MDX 整合](/docs/markdown/typescript#mdx-integration)。
 </Callout>
 
-此元件會根據 TypeScript 定義，為您的文件產生型別表格。
+此元件會根據 TypeScript 定義，為您的文件產生表格。
 
 ## 使用方式 [#usage]
 
@@ -57,7 +57,7 @@ import { createGenerator, createFileSystemGeneratorCache } from 'fumadocs-typesc
 import { AutoTypeTable, type AutoTypeTableProps } from 'fumadocs-typescript/ui';
 
 const generator = createGenerator({
-  // 設定快取，在 Vercel 等無伺服器平台上必須設定
+  // 設定快取，在 Vercel 等無伺服器（serverless）平台上必須設定
   cache: createFileSystemGeneratorCache('.next/fumadocs-typescript'),
 });
 
@@ -73,13 +73,13 @@ export function getMDXComponents(components?: MDXComponents) {
 }
 ```
 
-您現在可以在 MDX 內容中使用 `<AutoTypeTable />`。
+現在您可以在 MDX 內容中使用 `<AutoTypeTable />`。
 
 更多用法請參閱 [TypeScript DocGen](/docs/markdown/typescript)。
 
-### 從檔案讀取 [#from-file]
+### 從檔案 [#from-file]
 
-它接受指向 TypeScript 檔案的 `path` prop，以及用來指定匯出型別名稱的 `name`。
+此元件接受 `path` prop，用來指向 TypeScript 檔案，並以 `name` 指定要使用的匯出型別名稱。
 
 ```ts title="path/to/file.ts"
 export interface MyInterface {
@@ -91,7 +91,7 @@ export interface MyInterface {
 <AutoTypeTable path="./path/to/file.ts" name="MyInterface" />
 ```
 
-此路徑是相對於您的專案目錄 (`cwd`) 。由於 `AutoTypeTable` 是 React 伺服器元件，無法存取 MDX 檔案路徑這類建置時期的資訊。
+此路徑是相對於您的專案目錄 (`cwd`) 。由於 `AutoTypeTable` 是 React 伺服器元件，因此無法存取 MDX 檔案路徑等建置時期的資訊。
 
 ### 從型別產生 [#from-type]
 
@@ -111,7 +111,7 @@ export type A = { hello: string };
 <AutoTypeTable path="file.ts" type="A & { world: string }" />
 ```
 
-當 `type` 包含多行時，必須加上 export 陳述式並提供 `name` prop。
+當 `type` 有多行時，必須加上 export 陳述式並提供 `name` prop。
 
 ```mdx title="content.mdx"
 <AutoTypeTable
@@ -126,7 +126,7 @@ export type B = ReactNode | { world: string }
 
 ### 函式 [#functions]
 
-請注意，這裡只接受物件型別。若要傳入函式，請改將其包裝在物件中。
+請注意，這裡僅允許物件型別。若要傳入函式，請改為將其包裝在物件中。
 
 ```ts
 export interface MyInterface {
@@ -136,7 +136,7 @@ export interface MyInterface {
 
 ## TypeScript 編譯器 [#typescript-compiler]
 
-它在底層使用 [Typescript Compiler API](https://github.com/microsoft/TypeScript/wiki/Using-the-Compiler-API) 擷取型別資訊，並會載入目前工作目錄中的 `tsconfig.json` 檔案。
+其底層使用 [Typescript Compiler API](https://github.com/microsoft/TypeScript/wiki/Using-the-Compiler-API) 擷取型別資訊，並會載入目前工作目錄中的 `tsconfig.json` 檔案。
 
 您可以透過 [`createGenerator()`](/docs/markdown/typescript) 變更編譯器設定。
 
@@ -145,15 +145,15 @@ import { createGenerator, createFileSystemGeneratorCache } from 'fumadocs-typesc
 
 const generator = createGenerator({
   tsconfigPath: './tsconfig.json',
-  // 解析相對路徑時所用的基準目錄（通常為 cwd）
+  // 解析相對路徑時的基準目錄（通常為 cwd）
   basePath: './',
-  // 其他選項…
+  // 其他選項……
 });
 ```
 
 ### 檔案系統 [#file-system]
 
-此元件依賴檔案系統，因此引用它的頁面必須在**建置時**產生。若在 無伺服器 執行階段算繪此元件，可能會發生問題。
+由於它依賴檔案系統，引用此元件的頁面必須在**建置階段**產生。在 serverless 執行階段算繪此元件可能會發生問題。
 
 ## 參考資料 [#references]
 

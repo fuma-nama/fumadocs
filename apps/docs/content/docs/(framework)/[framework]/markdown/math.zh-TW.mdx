@@ -1,6 +1,6 @@
 ---
 title: 數學公式
-description: 在 Markdown/MDX 中撰寫數學方程式。
+description: 在 Markdown/MDX 中撰寫數學公式。
 ---
 
 ## 開始使用 [#getting-started]
@@ -17,8 +17,8 @@ katex
 
 ### 新增外掛 [#add-plugins]
 
-在 unified 中，`remark-math` 是負責解析數學語法的 remark 外掛，`rehype-katex` 則是使用 KaTeX 算繪數學式的 rehype 外掛。
-在 Sätteri 中，數學語法屬於解析器功能。只要啟用它，預設組合就會使用 KaTeX 進行算繪。
+在 unified 中，`remark-math` 是負責解析數學語法的 remark 外掛，而 `rehype-katex` 則是透過 KaTeX 算繪數學式的 rehype 外掛。
+在 Sätteri 中，數學語法是由解析器直接支援的功能。只要啟用此功能，預設組合就會使用 KaTeX 進行算繪。
 
 ```ts tab="unified" title="source.config.ts"
 import rehypeKatex from 'rehype-katex';
@@ -28,7 +28,7 @@ import { defineConfig } from 'fumadocs-mdx/config';
 export default defineConfig({
   mdxOptions: {
     remarkPlugins: [remarkMath],
-    // 請放在最前面，它必須在語法突顯器之前執行
+    // 請放在第一個，因為它必須在語法突顯器之前執行
     rehypePlugins: (v) => [rehypeKatex, ...v],
   },
 });
@@ -50,7 +50,7 @@ export default defineConfig({
 });
 ```
 
-### 新增樣式表 [#add-stylesheet]
+### 加入樣式表 [#add-stylesheet]
 
 請在根版面配置中加入 KaTeX 樣式表：
 
@@ -60,10 +60,10 @@ import 'katex/dist/katex.css';
 
 ### 完成 [#done]
 
-現在您可以在文件中撰寫 TeX 數學式，例如畢氏定理：
+在您的文件中輸入 TeX 數學式，例如畢氏定理：
 
 ````mdx
-行內：$$c = \pm\sqrt{a^2 + b^2}$$
+Inline: $$c = \pm\sqrt{a^2 + b^2}$$
 
 ```math
 c = \pm\sqrt{a^2 + b^2}
@@ -76,14 +76,14 @@ c = \pm\sqrt{a^2 + b^2}
 c = \pm\sqrt{a^2 + b^2}
 ```
 
-泰勒展開式 (將全純函數 $$f(x)$$ 表示為冪級數) ：
+泰勒展開式 (以冪級數表示全純函數 $$f(x)$$) ：
 
 ```math
 \displaystyle {\begin{aligned}T_{f}(z)&=\sum _{k=0}^{\infty }{\frac {(z-c)^{k}}{2\pi i}}\int _{\gamma }{\frac {f(w)}{(w-c)^{k+1}}}\,dw\\&={\frac {1}{2\pi i}}\int _{\gamma }{\frac {f(w)}{w-c}}\sum _{k=0}^{\infty }\left({\frac {z-c}{w-c}}\right)^{k}\,dw\\&={\frac {1}{2\pi i}}\int _{\gamma }{\frac {f(w)}{w-c}}\left({\frac {1}{1-{\frac {z-c}{w-c}}}}\right)\,dw\\&={\frac {1}{2\pi i}}\int _{\gamma }{\frac {f(w)}{w-z}}\,dw=f(z),\end{aligned}}
 ```
 
 <Callout title="提示">
-  您其實可以直接從維基百科複製方程式，貼上時會自動轉換為 KaTeX 字串。
+  您其實可以直接複製維基百科上的方程式，貼上時會自動轉換為 KaTeX 字串。
 
   ```math
   \displaystyle S[{\boldsymbol {q}}]=\int _{a}^{b}L(t,{\boldsymbol {q}}(t),{\dot {\boldsymbol {q}}}(t))\,dt.

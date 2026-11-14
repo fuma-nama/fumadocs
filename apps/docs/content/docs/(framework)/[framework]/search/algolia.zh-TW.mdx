@@ -7,8 +7,8 @@ description: 在 Fumadocs UI 中使用 Algolia。
 
 設定指南請參閱[整合 Algolia 搜尋](/docs/headless/search/algolia)。
 
-雖然我們一般建議您使用 Algolia 的用戶端
-SDK 自行建構搜尋功能，但您也可以直接套用內建的搜尋對話方塊。
+雖然我們一般建議您使用 Algolia 的用戶端 SDK 自行建構搜尋功能，
+但您也可以直接套用內建的搜尋對話方塊介面。
 
 ## 設定 [#setup]
 
@@ -20,13 +20,13 @@ npx @fumadocs/cli feature search --provider algolia
 
 或手動設定：
 
-建立搜尋對話方塊，並將 `appId`、`apiKey` 和 `indexName` 替換為您要使用的值。
+建立搜尋對話方塊，並將 `appId`、`apiKey` 和 `indexName` 替換為您需要的值。
 
 <include meta="title=&#x22;components/search.tsx&#x22;">./algolia.tsx</include>
 
 <Callout title="注意" className="mt-4">
-  `useAlgoliaSearch()` 並未使用 instant search (Algolia 官方的
-  JavaScript 用戶端) 。
+  `useAlgoliaSearch()` 並未使用 Algolia 官方的
+  JavaScript 用戶端 instant search。
 </Callout>
 
 <include>.shared.zh-TW.mdx</include>

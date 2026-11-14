@@ -15,11 +15,11 @@ Fumadocs 提供官方整合，可簡化 Sanity CMS 的設定流程。
 
 ## 設定 [#setup]
 
-本指南假設您已依照 [Sanity](https://sanity.io/docs/getting-started) 的官方文件完成設定。
+本指南假設您已依照 [Sanity](https://sanity.io/docs/getting-started) 官方文件完成設定。
 
 ### 資料型別 [step] [#data-types]
 
-請執行以下指令，初始化內容型別。
+請執行以下指令來初始化內容型別。
 
 ```npm
 npx @fumadocs/cli add sanity/base
@@ -74,7 +74,7 @@ npm i @fumadocs/sanity
 ```
 
 <show when={props.framework === 'next'}>
-  若要支援即時預覽，請使用 `next-sanity/live` 的 `sanityFetch` 建立來源；也可以改用 Sanity 用戶端建立：
+  若要即時預覽，請使用 `next-sanity/live` 的 `sanityFetch` 建立來源，也可以改用 Sanity 用戶端建立：
 
   ```ts title="lib/source.ts" tab="Live Preview"
   import { dynamicLoader } from 'fumadocs-core/source';
@@ -122,9 +122,9 @@ npm i @fumadocs/sanity
   }
   ```
 
-  使用 `sanityFetch` 時，`<SanityLive />` 會在內容變更時重新驗證查詢，因此不必呼叫 `invalidate()`，即時更新與草稿模式也能正常運作。
+  使用 `sanityFetch` 時，`<SanityLive />` 會在內容變更時重新驗證查詢，因此無須呼叫 `invalidate()`，即時更新與草稿模式即可正常運作。
 
-  若您啟用了 [Cache Components](https://nextjs.org/docs/app/api-reference/config/next-config-js/cacheComponents)，由於 `sanityFetch` 必須在 `'use cache'` 範圍內執行，請在該範圍內 (例如已快取的頁面) 呼叫 `getSource()`。
+  若您已啟用 [Cache Components](https://nextjs.org/docs/app/api-reference/config/next-config-js/cacheComponents)，請在 `'use cache'` 範圍內 (例如經過快取的頁面) 呼叫 `getSource()`，因為 `sanityFetch` 必須在此範圍內執行。
 </show>
 
 <show when={props.framework !== 'next'}>
@@ -239,8 +239,8 @@ npm i @fumadocs/sanity
   import { CustomPortableText } from '@/components/sanity';
   import type { PortableTextBlock } from '@portabletext/react';
 
-  // server function 回傳結果的型別層級檢查無法驗證 Portable Text，
-  // 因此需將其註冊為可序列化（若無法解析 `@tanstack/router-core`，請先安裝）
+  // server function 回傳結果的型別檢查無法驗證 Portable Text，
+  // 因此需將其註冊為可序列化型別（若無法解析 `@tanstack/router-core`，請先安裝該套件）
   declare module '@tanstack/router-core' {
     interface SerializableExtensions {
       portableTextBlock: PortableTextBlock;
@@ -404,4 +404,4 @@ npm i @fumadocs/sanity
 
 ### 完成 [step] [#done]
 
-在 Studio 編輯器中建立 `docs` 類型的文件，這些文件就會出現在 docs 路由中。
+在 Studio 編輯器中建立 `docs` 類型的文件後，這些文件就會出現在 docs 路由中。

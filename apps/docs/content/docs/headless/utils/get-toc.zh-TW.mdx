@@ -1,15 +1,15 @@
 ---
 title: 取得目錄
-description: 從 Markdown／MDX 內容解析目錄
+description: 從 Markdown/MDX 內容中解析目錄
 ---
 
-從 Markdown／MDX 內容解析目錄。
+從 Markdown/MDX 內容中解析目錄。
 
 > [您也可以直接使用 remark 外掛](/docs/headless/mdx/headings)
 
 ## 使用方式 [#usage]
 
-注意：如果您使用的是 CMS，請改用該 CMS 提供的 API。
+注意：如果您使用的是 CMS，應改用該 CMS 提供的 API。
 
 ```ts
 import { getTableOfContents } from 'fumadocs-core/content/toc';
@@ -19,4 +19,4 @@ const toc = getTableOfContents('## markdown content');
 
 ### 輸出 [#output]
 
-此函式會回傳一個 [`TOCItemType`](/docs/headless/mdx/headings#output) 陣列。
+回傳一個由 [`TOCItemType`](/docs/headless/mdx/headings#output) 組成的陣列。

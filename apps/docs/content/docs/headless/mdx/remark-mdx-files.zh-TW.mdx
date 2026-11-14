@@ -5,7 +5,7 @@ description: 從程式碼區塊產生檔案。
 
 ## 簡介 [#introduction]
 
-此外掛會將類似下方的程式碼區塊：
+此外掛會將像這樣的程式碼區塊：
 
 ````md
 ```files
@@ -36,7 +36,7 @@ project
 
 ## 設定 [#setup]
 
-Remark Files 是一個 remark 外掛，請將它加入您的設定檔：
+Remark Files 是一個 remark 外掛，請將它加入您的設定檔中：
 
 ```ts tab="unified" title="source.config.ts"
 import { remarkMdxFiles } from 'fumadocs-core/mdx-plugins';
@@ -64,4 +64,4 @@ export default defineConfig({
 });
 ```
 
-另外，請確認您已定義 `<Files />`、`<Folder />`、`<File />` 這幾個 MDX 元件。
+另外，請確認您已定義 `<Files />`、`<Folder />` 和 `<File />` 這幾個 MDX 元件。

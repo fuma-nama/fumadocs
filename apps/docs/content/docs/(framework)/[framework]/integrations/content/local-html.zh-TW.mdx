@@ -5,27 +5,27 @@ description: 適用於本機 HTML 檔案的內容來源。
 
 ## 簡介 [#introduction]
 
-`@fumadocs/local-html` 是用於本機 HTML 檔案的內容來源。它在設計上不經過打包，因此能完全在執行階段運作。
+`@fumadocs/local-html` 是用於本機 HTML 檔案的內容來源。它在設計上就不需要打包，因此能完全在執行階段運作。
 
-它適用於您以 HTML 形式取得、而非自行撰寫的頁面，例如匯出的簡報、報告，以及其他工具產生的輸出。每個檔案都會依照您的文件主題進行調整，而不是照原樣算繪。
+它專為以 HTML 形式取得、而非由您自行撰寫的頁面而設計，例如匯出的簡報、報告，以及其他工具產生的輸出。每個檔案都會依照您的文件主題進行調整，而不是照原樣算繪。
 
-與[本機 Markdown](/docs/integrations/content/local-md) 不同，這裡的 HTML 是需要調整的資料，而不是用來撰寫內容的文件格式。
+與[本機 Markdown](/docs/integrations/content/local-md) 不同，HTML 在這裡被視為需要調整的資料，而非用來撰寫內容的文件格式。
 
 ### 限制 [#limitations]
 
 * 指令碼會被移除，原始頁面的互動行為不會保留。
 * 內容中無法使用 MDX 元件，但您可以在算繪階段將 HTML 標籤對應到元件。
-* 這項處理是轉換，而非淨化 (sanitization) 。所有可執行的內容都會被移除，但其餘標記會原樣算繪，而其引用的資源 (尤其是圖片) 會由每位開啟該頁面的使用者載入。請確保內容目錄中只放您信任的檔案，例如您自己的 Markdown 內容。
+* 處理過程只是轉換，而非淨化 (sanitization) 。所有可執行的內容都會被移除，但其餘標記會原封不動地算繪，而其中引用的資源 (尤其是圖片) 會在每位使用者開啟頁面時被載入。請確保內容目錄中只放您信任的檔案，例如您自己的 Markdown 內容。
 
 ## 設定 [#setup]
 
-安裝套件：
+請安裝此套件：
 
 ```package-install
 @fumadocs/local-html
 ```
 
-建立 `localHtml` 實例，並將它接上 Fumadocs：
+建立 `localHtml` 實例，並將它串接到 Fumadocs：
 
 ```ts title="lib/source.ts"
 import { dynamicLoader } from 'fumadocs-core/source';
@@ -49,10 +49,10 @@ export async function getSource() {
 
 ## 使用方式 [#usage]
 
-`page.data.load()` 會回傳處理後內容的算繪器。
+`page.data.load()` 會回傳已處理內容的算繪器。
 
 <show when={props.framework === 'next' || props.framework === 'waku'}>
-  在您的頁面中算繪：
+  在頁面中算繪：
 </show>
 
 <show when={props.framework === 'react-router' || props.framework === 'tanstack-start'}>
@@ -119,7 +119,7 @@ export async function getSource() {
     return {
       title: page.data.title,
       description: page.data.description,
-      // 語法樹，會在用戶端算繪
+      // 語法樹，於用戶端算繪
       render: renderer.serialize(),
       pageTree: await source.serializePageTree(source.getPageTree()),
     };
@@ -155,8 +155,8 @@ export async function getSource() {
   import type { HtmlRendererOptions } from '@fumadocs/local-html';
   import { getSource } from '@/lib/source';
 
-  // server function 回傳結果的型別層級檢查無法驗證語法樹，
-  // 因此將其註冊為可序列化（若無法解析 `@tanstack/router-core`，請先安裝）
+  // server function 結果的型別層級檢查無法驗證語法樹，
+  // 因此需將其註冊為可序列化（若無法解析 `@tanstack/router-core`，請先安裝）
   declare module '@tanstack/router-core' {
     interface SerializableExtensions {
       fumadocsHtmlRenderer: HtmlRendererOptions;
@@ -181,7 +181,7 @@ export async function getSource() {
       return {
         title: page.data.title,
         description: page.data.description,
-        // 語法樹，於用戶端算繪
+        // 語法樹，會在用戶端算繪
         render: renderer.serialize(),
         pageTree: await source.serializePageTree(source.getPageTree()),
       };
@@ -322,7 +322,7 @@ export async function getSource() {
 </show>
 
 <show when={props.framework === 'next' || props.framework === 'waku'}>
-  將元件傳入 `render()`，即可把 HTML 標籤對應到您自己的元件，例如附帶錨點的標題：
+  將元件傳入 `render()`，即可將 HTML 標籤對應到您自訂的元件，例如帶有錨點的標題：
 
   ```tsx
   import { getMDXComponents } from '@/components/mdx';
@@ -332,7 +332,7 @@ export async function getSource() {
 </show>
 
 <show when={props.framework !== 'next' && props.framework !== 'waku'}>
-  將元件傳入 `renderSync()`，即可把 HTML 標籤對應到您自己的元件，例如附帶錨點的標題：
+  將元件傳入 `renderSync()`，即可將 HTML 標籤對應到您自訂的元件，例如帶有錨點的標題：
 
   ```tsx
   import { getMDXComponents } from '@/components/mdx';
@@ -343,12 +343,12 @@ export async function getSource() {
 
 ### 頁面中繼資料 [#page-metadata]
 
-每個頁面的標題與描述皆從其 `<head>` 讀取：
+每個頁面的標題與描述會從該頁面的 `<head>` 讀取：
 
 * `<title>` 會作為頁面標題。
-* `<meta name="description">` 會作為描述。
+* `<meta name="description">` 會作為頁面描述。
 
-您可以使用 `fumadocs:` meta 標籤覆寫這些值 (並設定圖示) ，而無須更動頁面上可見的內容：
+您可以使用 `fumadocs:` meta 標籤覆寫這些值 (也可以設定圖示) ，而無須更動頁面上顯示的內容：
 
 ```html
 <meta name="fumadocs:title" content="My Page" />
@@ -356,26 +356,26 @@ export async function getSource() {
 <meta name="fumadocs:icon" content="SquareBookmark" />
 ```
 
-文件中每一組 `<meta name>`/`content` 也都能透過 `page.data.metadata` 取得。
+文件中每一組 `<meta name>`/`content` 也都可以透過 `page.data.metadata` 取得。
 
-與其他本機來源一樣，`meta.json` 檔案可用來自訂頁面樹，並以 `metaSchema` 進行驗證。
+與其他本機來源一樣，`meta.json` 檔案可用來自訂頁面樹，並透過 `metaSchema` 進行驗證。
 
 ### 內容選項 [#content-options]
 
-頁面只會保留其內容元素：優先使用唯一的 `<main>`，其次是唯一的 `<article>`，都沒有時則改用 `<body>`，並移除 `<header>` 與 `<nav>` 等頁面外框元素。該元素的 `class` 與 `style` 屬性會被移除，改由您主題的文章排版樣式接手；其中的標題也會加上 id，供目錄與搜尋功能使用。
+頁面只會保留其內容元素：優先使用唯一的 `<main>`，其次是唯一的 `<article>`，若都沒有則退回使用 `<body>`，並移除 `<header>` 與 `<nav>` 等頁面外框元素。該元素的 `class` 與 `style` 屬性會被移除，改由您主題的 prose 樣式接手；其中的標題則會加上 id，供目錄與搜尋功能使用。
 
-上述每個環節都可以自行設定：
+以上每個部分都可以設定：
 
 ```ts
 import { localHtml } from '@fumadocs/local-html';
 
 const pages = localHtml({
   dir: 'content/pages',
-  // 保留原本的 class/style 屬性，而不配合您的主題調整
+  // 保留原始的 class/style 屬性，不配合您的主題調整樣式
   adaptStyles: false,
   // 從內容中額外移除指定的標籤
   exclude: ['aside'],
-  // 自訂選取頁面內容所在元素的邏輯
+  // 自訂挑選頁面內容所在元素的邏輯
   selectContent: (root) => {
     // 回傳 hast 元素，或回傳 undefined 以使用預設行為
   },
@@ -398,20 +398,20 @@ const pages = localHtml({
 });
 ```
 
-語言會從程式碼區塊的 `language-*` class 讀取，這個 class 可以位於 `<code>` 或包覆它的 `<pre>` 上：
+語言會從程式碼區塊的 `language-*` class 讀取，該 class 可位於 `<code>` 或其外層的 `<pre>` 上：
 
 ```html
 <pre><code class="language-ts">const answer: number = 42;</code></pre>
 ```
 
-未指定語言的程式碼區塊會改以純文字顯示。傳入 `rehypeCodeOptions: false` 即可停用語法突顯。
+未指定語言的區塊會以純文字呈現。若要停用語法突顯，請傳入 `rehypeCodeOptions: false`。
 
 ### 熱重載 [#hot-reload]
 
 `@fumadocs/local-html` 會在執行階段讀取檔案，因此預設不會監看這些檔案。
 
 <show when={props.framework === 'next'}>
-  開發期間，請在應用程式旁一併執行內建的開發伺服器。它會在單一程序中監看您的檔案，並透過 websocket 廣播變更，因此即使 Next.js 執行多個 worker 也能正常運作。
+  開發期間，請與您的應用程式同時執行內建的開發伺服器。它會在單一行程中監看您的檔案，並透過 websocket 廣播變更，因此即使 Next.js 以多個 worker 執行，也能正常運作。
 
   ```json title="package.json"
   {
@@ -421,7 +421,7 @@ const pages = localHtml({
   }
   ```
 
-  將來源連接至開發伺服器：
+  將來源連接到開發伺服器：
 
   ```ts title="lib/source.ts"
   import { watchWithDevServer } from '@fumadocs/local-html/dev/ws';
@@ -431,13 +431,13 @@ const pages = localHtml({
   }
   ```
 
-  此指令會透過環境變數公開其 URL，因此不需要額外設定。若您自行執行伺服器，請明確傳入 URL，並使用 `-p` 變更連接埠：
+  此指令會透過環境變數提供其 URL，因此不需要任何設定。若您自行執行伺服器，請明確傳入 URL，並使用 `-p` 變更連接埠：
 
   ```ts
   void watchWithDevServer(pages, { url: 'ws://127.0.0.1:8000/_fumadocs_local_md' });
   ```
 
-  這只會讓伺服器上的來源失效，Next.js 仍會在瀏覽器中保留已算繪的頁面。請在根版面配置中算繪 `<DevClient />`，讓頁面也一併重新整理：
+  這只會讓伺服器上的來源失效，Next.js 仍會在瀏覽器中保留已算繪的頁面。請在根版面配置中算繪 `<DevClient />`，讓頁面也跟著重新整理：
 
   ```tsx title="app/layout.tsx"
   import { DevClient } from '@fumadocs/local-html/dev/react-client';
@@ -455,7 +455,7 @@ const pages = localHtml({
 </show>
 
 <show when={props.framework !== 'next'}>
-  開發期間，Vite 外掛會透過 Vite 的檔案監看器讓來源失效，不需要額外的程序或連接埠。請將外掛加入您的設定，並連接來源：
+  開發期間，Vite 外掛會透過 Vite 的檔案監看器讓來源失效，不需要額外的行程或連接埠。請將外掛加入您的設定，並連接來源：
 
   <show when={props.framework === 'react-router' || props.framework === 'tanstack-start'}>
     ```ts tab="vite.config.ts"
@@ -509,7 +509,7 @@ const pages = localHtml({
 
 若您只需要一次性的快照，不需要重新驗證，可以使用 `staticSource()`。
 
-它可以搭配一般的 `loader()` 使用，不限於 `dynamicLoader()`：
+它可搭配一般的 `loader()` 使用，不必侷限於 `dynamicLoader()`：
 
 ```ts title="lib/source.ts"
 import { loader } from 'fumadocs-core/source';

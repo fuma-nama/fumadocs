@@ -5,7 +5,7 @@ description: 將 React 元素算繪為 Markdown。
 
 ## 概覽 [#overview]
 
-`fumadocs-core/server` 會將 React 伺服器元件算繪成 Markdown 文件：
+`fumadocs-core/server` 會將 React 伺服器元件算繪為 Markdown 文件：
 
 ```tsx tab="Input"
 import { renderToMarkdown } from 'fumadocs-core/server';
@@ -26,13 +26,13 @@ const text = await renderToMarkdown(
 Some **rich** content.
 ```
 
-[Remark LLMs](/docs/headless/mdx/remark-llms#jsx-elements) 所匯出的元件即以它為基礎，它也適用於任何您想以 Markdown 形式提供的伺服器端算繪內容。
+[Remark LLMs](/docs/headless/mdx/remark-llms#jsx-elements) 所匯出的元件即以它為基礎運作；凡是您想以 Markdown 形式提供的伺服器端算繪內容，也都能使用它。
 
 > `renderToMarkdown()` 僅能在伺服器端使用。
 
 ## `asMarkdown` [#asmarkdown]
 
-元件會自行定義其 Markdown 形式。在算繪期間呼叫 `asMarkdown()` 即代表選擇啟用此功能：當元件正被算繪為 Markdown 時，它會回傳[目標](#targets)，且元件所回傳的 HTML 元素會被轉換。
+元件會自行定義其 Markdown 形式。在算繪期間呼叫 `asMarkdown()` 即代表選擇啟用此功能：當元件正被算繪為 Markdown 時，它會回傳對應的[目標](#targets)，且元件回傳的 HTML 元素會一併轉換。
 
 ```tsx
 import { asMarkdown, md } from 'fumadocs-core/server';
@@ -44,24 +44,24 @@ function Callout({ title, children }) {
 }
 ```
 
-從未呼叫它的元件，會連同其 props 一併保留為 JSX 語法，例如：
+未呼叫它的元件會以 JSX 語法連同其 props 一併保留，例如：
 
 ```mdx
 <Tabs items={['a', 'b']}>...</Tabs>
 ```
 
-這包括不會在伺服器上執行的用戶端元件。
+這也包括不會在伺服器上執行的用戶端元件。
 
 ### 目標 [#targets]
 
-樹狀結構會依目標進行算繪，目標由 `renderToMarkdown()` 的 `target` 選項指定：
+樹會針對某個目標進行算繪，也就是 `renderToMarkdown()` 的 `target` 選項：
 
 * `markdown` (預設) ：提供給 AI 代理的文件。
-* `search`：[搜尋紀錄](/docs/headless/mdx/structure#components)的文字。內容包含連結的文字，但不含圖片或程式碼區塊；沒有 Markdown 形式的元件則會輸出為 HTML 標籤，並帶有其文字 props。
+* `search`：[搜尋紀錄](/docs/headless/mdx/structure#components)的文字。其中保留連結的文字，但不含圖片與程式碼區塊；沒有 Markdown 形式的元件會輸出為 HTML 標籤，並附上其文字 props。
 
-這些規則適用於元件回傳的元素，例如 `<a href>`。若在 `md` 範本中以純文字撰寫連結，搜尋結果中仍會保留其連結目標，因此請直接回傳元素，或自行檢查目標。
+這些規則適用於元件回傳的元素，例如 `<a href>`。若在 `md` 範本中以純文字撰寫連結，搜尋結果仍會保留其連結目標，因此請回傳元素，或自行檢查目標。
 
-`asMarkdown()` 會回傳目前的目標，讓元件能提供給 AI 代理比搜尋索引更多的內容：
+`asMarkdown()` 會回傳目前的目標，因此元件可以提供給 AI 代理比搜尋索引更多的內容：
 
 ```tsx
 import { asMarkdown, md } from 'fumadocs-core/server';
@@ -77,11 +77,11 @@ function Version({ name, released }) {
 
 ## `md` [#md]
 
-用於產生 Markdown 輸出的標籤範本 (tagged template) ，插值可以是字串、React 節點、Promise，或由它們組成的陣列。您可以先用它將 `children` 轉為字串，再進行處理。
+用於輸出 Markdown 的標籤樣板 (tagged template) ，插值可以是字串、React 節點、Promise，或由它們組成的陣列。您可以先用它將 `children` 轉為字串，再進行處理。
 
-以下兩種變體會將內容以區塊形式回傳：
+以下兩種變體會以區塊形式回傳內容：
 
-* `md.linePrefix(prefix)`：為每一行加上前綴，例如引言區塊使用 `'> '`。
+* `md.linePrefix(prefix)`：為每一行加上前綴，例如以 `'> '` 建立引用區塊。
 * `md.indent(size)`：將每一行縮排。
 
 ## `renderRoute` [#renderroute]
@@ -94,4 +94,4 @@ import { renderRoute } from 'fumadocs-core/server';
 const text = await renderRoute(<Page params={params} />);
 ```
 
-適合用來提供路由的 Markdown 版本：有啟用此功能的頁面會產生 Markdown，其他頁面則回傳 `undefined`，讓您能改為回傳 404 或改用其他來源。
+適合用來提供路由的 Markdown 版本：有選擇啟用的頁面會產生 Markdown，其他頁面則回傳 `undefined`，讓您可以改為回傳 404 或改用其他來源。

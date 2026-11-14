@@ -3,15 +3,15 @@ title: 頁面歷史紀錄
 description: 在文件頁面上顯示貢獻者與 Git 歷史紀錄。
 ---
 
-> 這是由社群維護的整合。
+> 此為社群維護的整合。
 
-[fumadocs-page-history](https://github.com/shenxianovo/fumadocs-page-history) 會在文件頁面上顯示貢獻者，以及可收合的變更歷史紀錄。它會在建置時讀取 Git 歷史紀錄，並支援 Fumadocs MDX 與 Sätteri。
+[fumadocs-page-history](https://github.com/shenxianovo/fumadocs-page-history) 可在文件頁面上顯示貢獻者，以及可摺疊的變更歷史紀錄。它會在建置時讀取 Git 歷史紀錄，並支援 Fumadocs MDX 與 Sätteri。
 
-[查看線上展示](https://fumadocs-page-history.vercel.app)。
+[查看線上示範](https://fumadocs-page-history.vercel.app)。
 
 ## 設定 [#setup]
 
-需要 Node.js 24.14 以上版本，以及 16.x 版本系列中 16.17 以上版本的 Fumadocs。
+需要 Node.js 24.14 以上版本，以及 16.x 版本系列中 16.17 以上的 Fumadocs。
 
 ### 1. 安裝套件 [#install-the-package]
 
@@ -21,7 +21,7 @@ fumadocs-page-history
 
 ### 2. 匯入樣式 [#import-the-styles]
 
-請在 Fumadocs 的樣式之後加入以下匯入：
+請在 Fumadocs 樣式之後加入以下匯入陳述式：
 
 ```css title="app/global.css"
 @import 'fumadocs-page-history/css/preset.css';
@@ -29,7 +29,7 @@ fumadocs-page-history
 
 ### 3. 註冊外掛 [#register-the-plugin]
 
-將 `remarkGitChangelog` 加入您的 docs 集合，並將 `repoURL` 設為您的儲存庫 URL。既有的 schema 與編譯器選項請維持不變。
+將 `remarkGitChangelog` 加入您的 docs 集合，並將 `repoURL` 設為您的儲存庫 URL。既有的 schema 與編譯器選項請保持不變。
 
 ```ts title="source.config.ts"
 import { applyMdxPreset, defineDocs } from 'fumadocs-mdx/config';
@@ -45,7 +45,7 @@ export const docs = defineDocs({
 });
 ```
 
-現在，此集合中每份文件的結尾都會顯示貢獻者與頁面歷史紀錄，不需要修改頁面範本。
+現在，此集合中每份文件的結尾都會顯示貢獻者與頁面歷史紀錄。無需修改頁面範本。
 
 ## Git 歷史紀錄 [#git-history]
 
@@ -57,8 +57,8 @@ export const docs = defineDocs({
     fetch-depth: 0
 ```
 
-* 請在建置前先提交新檔案，才能納入其歷史紀錄。
-* 有新的提交後請重新建置。開發期間，請重新啟動伺服器，以載入僅存在於 Git 中的變更。
+* 請在建置前先 commit 新檔案，才能納入其歷史紀錄。
+* 有新的 commit 後請重新建置。開發期間，請重新啟動伺服器，才能讀取僅存在於 Git 中的變更。
 
 ## 設定 [#configuration]
 

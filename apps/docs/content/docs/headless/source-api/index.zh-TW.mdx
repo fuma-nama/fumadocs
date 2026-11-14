@@ -3,7 +3,7 @@ title: 載入器 API
 description: 將內容來源轉換為統一的介面
 ---
 
-## 功能概述 [#what-it-does]
+## 它的用途是什麼？ [#what-it-does]
 
 `loader()` 提供一個介面，讓 Fumadocs 能與各種內容來源整合。
 
@@ -12,8 +12,8 @@ description: 將內容來源轉換為統一的介面
 * 提供實用的工具函式，方便您操作內容。
 
 <Callout type="warn" title="重要須知">
-  - `loader()` 是伺服器端 API，並非建置時期的魔法，也不是可在瀏覽器中使用的 API。
-  - 它使用記憶體內儲存，檔案由您的內容來源傳入。
+  - `loader()` 是伺服器端 API，既不是建置時期的魔法，也不是可在瀏覽器中使用的 API。
+  - 它採用記憶體內儲存，檔案由您的內容來源傳入。
 </Callout>
 
 ## 使用方式 [#usage]
@@ -32,7 +32,7 @@ export const source = loader({
 
 ### URL [#url]
 
-您可以覆寫基礎 URL，或指定一個函式，為每個頁面產生 URL。
+您可以覆寫基礎 URL，或指定一個函式來產生每個頁面的 URL。
 
 ```ts
 import { loader } from 'fumadocs-core/source';
@@ -49,7 +49,7 @@ loader({
 
 ### Slugs [#slugs]
 
-定義自訂函式，用來從頁面檔案產生 slug。
+定義自訂函式，用來根據頁面檔案產生 slug。
 
 ```ts
 import { loader } from 'fumadocs-core/source';
@@ -57,7 +57,7 @@ import { loader } from 'fumadocs-core/source';
 loader({
   slugs(file, next) {
     console.log(file.path, file.data);
-    // 您可以透過 `next()`，以預設的 slug 為基礎進行擴充
+    // 您可以透過 `next()` 在預設 slug 的基礎上擴充
     if (file.path.startsWith('blog/')) return ['blog', ...next()];
     // 或回傳 `undefined` 以改用預設值
     return ['my', 'slug'];
@@ -88,7 +88,7 @@ loader({
 
 ### I18n [#i18n]
 
-將 `i18n` 設定傳入載入器。
+請將 `i18n` 設定傳入載入器。
 
 ```ts title="lib/source.ts"
 import { i18n } from '@/lib/i18n';
@@ -101,15 +101,15 @@ export const source = loader({
 
 啟用 i18n 後，載入器會為每個語系產生一個頁面樹。
 
-若某個頁面缺少翻譯，則會改用 [`fallbackLanguage`](/docs/headless/internationalization/config#fallback-language) 所指定的備用語系。
+若某個頁面缺少翻譯，則會改用 [`fallbackLanguage`](/docs/headless/internationalization/config#fallback-language) 作為備用語系。
 
 ## 輸出 [#output]
 
-會輸出一個內容載入器實例。
+它會輸出一個內容載入器實例。
 
 ### 取得頁面 [#get-page]
 
-根據 slugs 取得頁面。
+依據 slugs 取得頁面。
 
 ```ts
 import { source } from '@/lib/source';
@@ -134,7 +134,7 @@ const page = source.getPage(['slug', 'of', 'page'], {
 });
 ```
 
-頁面資料會依據這些 props 產生，包括內容與目錄。MDX 元件同樣屬於 props。若希望處理後的 Markdown 能算繪出您的元件，請將它們傳入：
+頁面資料 (包括內容與目錄) 是根據這些 props 產生的。MDX 元件也屬於 props；若希望處理後的 Markdown 能算繪出您的元件，請將它們傳入：
 
 ```ts
 import { getMDXComponents } from '@/components/mdx';
@@ -146,7 +146,7 @@ const markdown = await page.data.getText('processed');
 ```
 
 <Callout title="小提醒">
-  搜尋與 LLM 路由會透過 `getPages()` 讀取頁面，而這些頁面只帶有路徑參數。若希望搜尋或 LLM 能看到某個變體，該變體就必須是路徑參數。
+  搜尋與 LLM 路由是透過 `getPages()` 讀取頁面，而這些頁面只帶有路徑參數。若要讓搜尋或 LLM 看到某個變體，該變體就必須是路徑參數。
 </Callout>
 
 ### 取得頁面 [#get-pages]
@@ -168,7 +168,7 @@ source.getPages('locale');
 ```ts
 import { source } from '@/lib/source';
 
-// 不使用 i18n
+// 未使用 i18n
 source.getPageTree();
 
 // 使用 i18n
@@ -177,8 +177,8 @@ source.getPageTree('locale');
 
 ### 從節點取得 [#get-from-node]
 
-頁面樹節點會保留其原始檔案路徑的參照。
-您可以從樹節點找到對應的原始頁面或 meta 檔案。
+頁面樹的節點會保留指向其原始檔案路徑的參照。
+您可以透過樹狀節點找到對應的原始頁面或 meta 檔案。
 
 ```ts
 import { source } from '@/lib/source';
@@ -189,7 +189,7 @@ source.getNodeMeta(folderNode);
 
 ### 參數 [#params]
 
-產生每個頁面的路徑參數，用於預先算繪頁面。
+產生每個頁面的路徑參數，以便預先算繪頁面。
 產生的參數名稱為 `slug: string[]` 與 `lang: string` (僅限 i18n) 。
 
 ```ts tab="Next.js" title="app/docs/[[...slug]]/page.tsx"
@@ -246,9 +246,9 @@ const entries = source.getLanguages();
 
 ## 用戶端 API [#client-api]
 
-載入器 API 最適合在 RSC 環境中使用，因為 RSC 能跨越伺服器與用戶端的邊界傳遞 JSX 節點。
+載入器 API 最適合在 RSC 環境中使用，因為 RSC 允許跨越伺服器與用戶端的邊界傳遞 JSX 節點。
 
-在非 RSC 環境中，它則提供一層輕量的序列化機制。
+在非 RSC 環境中，載入器 API 則提供一個輕量的序列化層。
 
 ```ts tab="Server"
 import { source } from '@/lib/source';
@@ -267,10 +267,10 @@ async function loader() {
 import { useFumadocsLoader } from 'fumadocs-core/source/client';
 
 function MyComponent() {
-  // `useLoaderData()` 會接收載入器資料（由您的 React 框架提供）
+  // `useLoaderData()` 會取得 loader 資料（由您的 React 框架提供）
   const { pageTree, ...data } = useFumadocsLoader(useLoaderData());
 
-  // 接著將其算繪出來（例如透過 Fumadocs UI）
+  // 接著進行算繪（例如透過 Fumadocs UI）
   return <DocsLayout tree={pageTree}>...</DocsLayout>;
 }
 ```
@@ -292,7 +292,7 @@ export async function getSource() {
 }
 ```
 
-呼叫 `await source.get()` 時，會回傳一般的內容載入器物件：
+呼叫 `await source.get()` 時，會回傳一個一般的內容載入器物件：
 
 ```ts
 const docs = await getSource();
@@ -302,7 +302,7 @@ const page = docs.getPage(['...']);
 
 ### 重新驗證 [#revalidation]
 
-Dynamic 來源會由載入器進行快取。
+載入器會快取 Dynamic 來源。
 
 如果您的來源會隨時間變動，請呼叫 `invalidate()` 清除快取，或呼叫 `revalidate()` 更新快取：
 
@@ -312,7 +312,7 @@ source.invalidate();
 await source.revalidate();
 ```
 
-若採用[多來源](/docs/headless/source-api/source#multiple-sources)設定，您可以針對特定來源使其失效或重新驗證：
+若採用[多來源](/docs/headless/source-api/source#multiple-sources)的設定，您可以針對特定來源進行失效 (invalidate) 或重新驗證 (revalidate) ：
 
 ```ts
 source.invalidate('docs');

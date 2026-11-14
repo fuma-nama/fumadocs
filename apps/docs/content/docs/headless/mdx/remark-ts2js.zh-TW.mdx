@@ -1,6 +1,6 @@
 ---
 title: Remark TS 轉 JS
-description: 一個 remark 外掛，可將 TypeScript 程式碼區塊轉換為分別呈現 TypeScript 與 JavaScript 版本的兩個頁籤。
+description: 一個 remark 外掛，可將 TypeScript 程式碼區塊轉換為兩個頁籤，分別呈現 TypeScript 與對應的 JavaScript 版本。
 ---
 
 ## 使用方式 [#usage]
@@ -15,7 +15,7 @@ fumadocs-docgen
 @fumadocs/satteri
 ```
 
-Remark TS 轉 JS 是一個 remark 外掛，請將它加入您的設定檔：
+Remark TS 轉 JS 是一個 remark 外掛，請將它加入您的設定中：
 
 ```ts tab="unified" title="source.config.ts"
 import { remarkTypeScriptToJavaScript } from 'fumadocs-docgen/remark-ts2js';
@@ -43,7 +43,7 @@ export default defineConfig({
 });
 ```
 
-它會產生與 [Remark NPM](/docs/headless/mdx/remark-npm#usage) 相同的 `CodeBlockTabs` 元件，Fumadocs UI 預設已內建這些元件。
+它會產生與 [Remark NPM](/docs/headless/mdx/remark-npm#usage) 相同的 `CodeBlockTabs` 元件，Fumadocs UI 已預設內建這些元件。
 
 現在您可以在 TypeScript/TSX 程式碼區塊上啟用它，例如：
 

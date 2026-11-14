@@ -1,11 +1,11 @@
 ---
 title: Meilisearch
-description: 在 Fumadocs UI 中使用 Meilisearch。
+description: 搭配 Fumadocs UI 使用 Meilisearch。
 ---
 
 ## 設定 [#setup]
 
-Fumadocs CLI 可以幫您自動完成設定，包括建立搜尋對話方塊、`static.json` 路由，以及在每次建置後同步搜尋索引的指令碼：
+Fumadocs CLI 可以幫您完成設定，包括建立搜尋對話方塊、`static.json` 路由，以及在每次建置後同步搜尋索引的指令碼：
 
 ```package-install
 npx @fumadocs/cli feature search --provider meilisearch
@@ -23,7 +23,7 @@ npx @fumadocs/cli feature search --provider meilisearch
 
 ### 標籤篩選 [#tag-filter]
 
-您也可以視需要加入依標籤篩選結果的 UI。請先為文件設定[標籤篩選](/docs/headless/search/meilisearch#tag-filter)，再加入以下內容：
+您也可以視需要加入依標籤篩選結果的 UI。請先在文件上設定[標籤篩選](/docs/headless/search/meilisearch#tag-filter)，再加入以下內容：
 
 ```tsx
 'use client';
@@ -45,7 +45,7 @@ export default function CustomSearchDialog(props: SharedProps) {
   const [tag, setTag] = useState<string | undefined>();
   const search = useMeilisearch({
     tag, // [!code ++]
-    // 其他選項...
+    // 其他選項……
   });
 
   return (

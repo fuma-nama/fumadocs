@@ -13,7 +13,7 @@ preview: accordion
 
 > 若使用 Radix UI 套件，則改以 [Radix UI Accordion](https://www.radix-ui.com/primitives/docs/components/accordion) 為基礎。
 
-您可以在 MDX 檔案中使用，也可以當作一般的 React 元件使用。
+您可以在 MDX 檔案中使用，也可以將其當作一般的 React 元件使用。
 
 ```mdx tab="MDX"
 ---
@@ -49,7 +49,7 @@ export default function Page() {
 
 ### 連結至手風琴 [#linking-to-accordion]
 
-您可以為手風琴指定 `id`。當使用者開啟的頁面網址 hash 參數帶有指定的 `id` 時，該手風琴會自動展開。
+您可以為手風琴指定 `id`。當使用者前往該頁面，且網址 hash 參數帶有指定的 `id` 時，手風琴會自動展開。
 
 ```mdx
 <Accordions>
@@ -61,4 +61,4 @@ My Content
 </Accordions>
 ```
 
-> 手風琴的值預設與標題相同。若有指定 id，則會改用 id 作為值。
+> 手風琴的值預設與標題相同。若有指定 id，則會改以 id 作為值。

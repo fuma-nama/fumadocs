@@ -16,14 +16,14 @@ export function MyComp() {
     <GithubInfo
       owner="fuma-nama"
       repo="fumadocs"
-      // 您自己的 GitHub 存取權杖（選填）
+      // 您自己的 GitHub 存取權杖（選用）
       token={process.env.GITHUB_TOKEN}
     />
   );
 }
 ```
 
-建議透過 `links` 選項，將它加入您的文件版面配置：
+建議透過 `links` 選項，將其加入您的文件版面配置：
 
 ```tsx title="app/docs/layout.tsx"
 import { DocsLayout, type DocsLayoutProps } from 'fumadocs-ui/layouts/notebook';

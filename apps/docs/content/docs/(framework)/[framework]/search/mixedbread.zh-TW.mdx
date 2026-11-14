@@ -5,15 +5,15 @@ description: 在 Fumadocs UI 中使用 Mixedbread。
 
 ## 設定 [#setup]
 
-Mixedbread 搜尋會在請求時於您的伺服器上執行，因此無法用於靜態網站。
+Mixedbread 搜尋會在請求時於您的伺服器上執行，因此不適用於靜態網站。
 
-Fumadocs CLI 可以替您完成設定，它會建立搜尋對話方塊、搜尋路由、`static.json` 路由，以及一支在每次建置後同步儲存區的指令碼：
+Fumadocs CLI 可以幫您完成設定，它會建立搜尋對話方塊、搜尋路由、`static.json` 路由，以及一個在每次建置後同步儲存區的指令碼：
 
 ```package-install
 npx @fumadocs/cli feature search --provider mixedbread
 ```
 
-或者手動設定：
+或手動設定：
 
 1. 整合 [Mixedbread Search](/docs/headless/search/mixedbread)。
 

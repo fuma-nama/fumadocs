@@ -11,16 +11,16 @@ Fumadocs AsyncAPI 的主要設定。
 
 ### `input` [#input]
 
-要讀取的 AsyncAPI schema，可以是：
+要讀取的 AsyncAPI schema。
 
 * 檔案路徑
 * 外部 URL
-* 函式 (見下文) 
+* 函式 (詳見下文) 
 
-只有列在這裡的 schema 才能載入；若傳給 `getSchema()` 或由頁面預先載入的是其他 ID，則會拋出錯誤。
+只有列於此處的 schema 才能載入，若將其他 ID 傳入 `getSchema()`，或由頁面預先載入其他 ID，都會拋出錯誤。
 
 <Callout type="warn">
-  請勿將不受信任的 schema 傳給 `input`，因為其中的 `$ref` 可以讀取本機檔案並擷取 URL，連私有主機也不例外。
+  請勿將不受信任的 schema 傳給 `input`，因為其中的 `$ref` 能讀取本機檔案並擷取任意 URL，連私有主機也不例外。
 </Callout>
 
 ```ts tab="Basic"
@@ -36,7 +36,7 @@ import { createAsyncAPI } from '@fumadocs/asyncapi/server';
 
 export const asyncapi = createAsyncAPI({
   input: {
-    // [id]：下載而來的 AsyncAPI schema
+    // [id]：下載後的 AsyncAPI schema
     galaxy: async () => {
       const res = await fetch('https://example.com/asyncapi.yaml');
       return res.text();
@@ -47,7 +47,7 @@ export const asyncapi = createAsyncAPI({
 
 ### `disableCache` [#disablecache]
 
-停用已載入 schema 的快取。適合在開發期間 schema 頻繁變動時使用。
+停用已載入 schema 的快取。適合在開發階段 schema 頻繁變動時使用。
 
 ```ts
 import { createAsyncAPI } from '@fumadocs/asyncapi/server';
@@ -60,20 +60,20 @@ export const asyncapi = createAsyncAPI({
 
 ## 只載入一次文件 [#loading-documents-once]
 
-頁面會透過 props 接收整份文件，因此每次載入頁面、導覽或預先擷取時，都會重新傳送一次。如果文件很大，建議不要傳入：
+頁面會透過 props 接收完整的文件，因此每次載入頁面、導覽或預先擷取時，都會再傳送一次文件。若文件較大，建議不要透過 props 傳遞：
 
 ```ts title="lib/asyncapi.ts"
 import { createAsyncAPI } from '@fumadocs/asyncapi/server';
 
 export const asyncapi = createAsyncAPI({
-  // ID 會成為 URL 的一部分，請確保其可安全用於 URL
+  // ID 最終會出現在 URL 中，請確保可安全用於 URL
   input: { streetlights: './streetlights.yaml' },
   includeDocument: false, // [!code ++]
 });
 ```
 
 <show when={props.framework !== 'tanstack-start'}>
-  傳入 `loadDocument`，即可讓每份文件在每個瀏覽器工作階段中只載入一次。它在伺服器端算繪時也會執行：
+  傳入 `loadDocument`，即可讓每份文件在每個瀏覽器工作階段中只載入一次。此函式也會在伺服器端算繪期間執行：
 </show>
 
 <show when={props.framework === 'next'}>
@@ -185,7 +185,7 @@ export const asyncapi = createAsyncAPI({
 </show>
 
 <show when={props.framework === 'tanstack-start'}>
-  TanStack Start 的路由載入器會同時在伺服器與瀏覽器上執行，因此您的文件路由不需要 `loadDocument` 就能載入文件。只有在瀏覽器尚未取得該文件時，才需要呼叫 server function：
+  TanStack Start 的路由載入器會同時在伺服器與瀏覽器上執行，因此您的文件路由不需要 `loadDocument` 也能載入文件。只有在瀏覽器尚未取得文件時，才需要呼叫 server function：
 
   ```tsx title="src/routes/docs/$.tsx"
   import { createServerFn } from '@tanstack/react-start';
@@ -213,7 +213,7 @@ export const asyncapi = createAsyncAPI({
 
   function Page() {
     const page = useFumadocsLoader(Route.useLoaderData());
-    // 第一個頁面的文件也一併記錄
+    // 第一個頁面的文件也要記錄
     if (page.type === 'asyncapi' && typeof window !== 'undefined')
       documents.set(page.props.document, page.props.payload.bundled!);
     // ...
@@ -224,10 +224,10 @@ export const asyncapi = createAsyncAPI({
 <show when={props.framework !== 'tanstack-start'}>
   * `loadDocument` 同樣適用於產生的 MDX 檔案。
   * 若使用[由 Fumadocs CLI 安裝的 UI](/docs/integrations/asyncapi/api-page#full-ui)，請將 `loadDocument` 傳入 `createAsyncAPIRenderer()`。
-  * 瀏覽器會保留每份文件，直到重新載入頁面為止。若使用 [`disableCache`](#disablecache)，請保持啟用 `includeDocument`。
+  * 瀏覽器會保留每份文件，直到頁面重新載入為止。使用 [`disableCache`](#disablecache) 時，請保持開啟 `includeDocument`。
 </show>
 
 <show when={props.framework === 'tanstack-start'}>
   * 若使用產生的 MDX 檔案，請改將文件放入 `preloaded.docs`。
-  * 瀏覽器會保留每份文件，直到重新載入頁面為止。若使用 [`disableCache`](#disablecache)，請保持啟用 `includeDocument`。
+  * 瀏覽器會保留每份文件，直到頁面重新載入為止。使用 [`disableCache`](#disablecache) 時，請保持開啟 `includeDocument`。
 </show>

@@ -8,7 +8,7 @@ preview: inlineTOC
 
 ## 使用方式 [#usage]
 
-您可以在 MDX 內容中使用它。在 Fumadocs MDX 的 MDX 檔案中，匯出的 `toc` 是一個接收頁面 props 的函式：
+您可以在 MDX 內容中使用它。在 Fumadocs MDX 的 MDX 檔案中，匯出的 `toc` 是一個以頁面 props 為參數的函式：
 
 ```mdx title="content.mdx"
 import { InlineTOC } from 'fumadocs-ui/components/inline-toc';
@@ -16,7 +16,7 @@ import { InlineTOC } from 'fumadocs-ui/components/inline-toc';
 <InlineTOC items={toc(props)}>Table of Contents</InlineTOC>
 ```
 
-或是將它加到每個頁面中。
+或是將它加入每個頁面。
 
 ```tsx title="page.tsx"
 import { DocsPage } from 'fumadocs-ui/layouts/docs/page';

@@ -1,18 +1,18 @@
 ---
-title: 開始使用
+title: 快速入門
 description: 認識 Fumadocs 的官方內容來源 Fumadocs MDX。
 icon: SquareBookmark
 ---
 
 ## 簡介 [#introduction]
 
-Fumadocs MDX 是一套將內容轉換為型別安全資料的工具，類似於 Content Collections。
+Fumadocs MDX 是一個將內容轉換為型別安全資料的工具，類似於 Content Collections。
 
-它並非完整的 CMS，而是專為 React 框架打造的內容處理層，您可以用它來處理部落格文章等各類內容。
+它並非完整的 CMS，而是專為 React 框架設計的內容處理層，可用來處理部落格文章及其他各類內容。
 
 ### 什麼是集合？ [#what-is-a-collection]
 
-**集合** (Collection) 是指由特定類型檔案所組成的集合。您可以在應用程式中使用 [Macro API](/docs/mdx/macro) 來定義集合：
+**集合 (Collection)&#x20;**&#x662F;指由特定類型檔案所組成的集合。您可以在應用程式中使用 [Macro API](/docs/mdx/macro) 定義集合：
 
 ```ts title="lib/source.ts"
 import { defineDocs } from 'fumadocs-mdx/macro';
@@ -58,7 +58,7 @@ export const source = loader({
   </Tab>
 
   <Tab value="docs">
-    結合 `meta` 與 `doc` 集合，是 Fumadocs 必備的集合。
+    結合 `meta` 與 `doc` 兩種集合，是 Fumadocs 必備的集合。
 
     ```ts
     import { defineDocs } from 'fumadocs-mdx/macro';
@@ -90,7 +90,7 @@ export const source = loader({
   <File name="meta.json" className="opacity-50 cursor-not-allowed" aria-disabled />
 </Files>
 
-您也可以透過 [Config API](/docs/mdx/collections) 在 `source.config.ts` 中定義集合，並在 `.source` 下產生進入點檔案。
+您也可以透過 [Config API](/docs/mdx/collections) 在 `source.config.ts` 中定義集合，這種方式會在 `.source` 底下產生進入點檔案。
 
 ## 安裝 [#installation]
 
@@ -98,11 +98,11 @@ export const source = loader({
 
 <Cards>
   <Card title="Next.js" href="/docs/mdx/next">
-    在 Next.js 中使用 Fumadocs MDX。
+    搭配 Next.js 使用 Fumadocs MDX。
   </Card>
 
   <Card title="Vite" href="/docs/mdx/vite">
-    在 Vite 中使用 Fumadocs MDX。
+    搭配 Vite 使用 Fumadocs MDX。
   </Card>
 
   <Card title="執行階段載入器" href="/docs/mdx/loader">
@@ -114,20 +114,20 @@ export const source = loader({
 
 ### 內建屬性 [#built-in-properties]
 
-MDX 檔案預設會匯出這些屬性。
+MDX 檔案預設會匯出以下屬性。
 
 | 屬性                    | 說明              |
 | --------------------- | --------------- |
-| `frontmatter`         | Frontmatter     |
+| `frontmatter`         | frontmatter     |
 | `toc`                 | 目錄              |
 | `structuredData`      | 結構化資料，可用於實作搜尋功能 |
 | `extractedReferences` | 用於分析 `hrefs` 參照 |
 
 ### 自訂 Frontmatter [#customize-frontmatter]
 
-使用 [`schema`](/docs/mdx/collections#schema-1) 選項傳入用於驗證 frontmatter 的 schema，並定義其輸出屬性。
+使用 [`schema`](/docs/mdx/collections#schema-1) 選項傳入驗證用的 schema，藉此驗證 frontmatter 並定義其輸出屬性。
 
-MDX 頁面也可以[在程式碼中匯出 frontmatter](/docs/markdown#frontmatter)。匯出的內容會合併至 YAML frontmatter 並覆蓋其中的值，接著由集合的 schema 驗證合併後的結果：
+MDX 頁面也可以[在程式碼中匯出 frontmatter](/docs/markdown#frontmatter)。匯出的內容會合併至 YAML frontmatter 並覆蓋其值，再由集合的 schema 驗證合併後的結果：
 
 ```mdx title="content/docs/index.mdx"
 ---
@@ -141,12 +141,12 @@ export const frontmatter = {
 };
 ```
 
-此 export 會在建置時執行。它可以使用頁面的匯入項目，以及同一區塊中位於它之前的 export，但無法使用頁面的內容或元件。`staticParams` 仍須保留在 YAML frontmatter 中，因為載入器會在 export 執行之前讀取它。
+這個 export 會在建置時執行。它可以使用頁面的匯入，以及同一區塊中位於它之前的 export，但無法使用頁面的內容或元件。`staticParams` 仍須保留在 YAML frontmatter 中，因為載入器會在 export 執行之前就讀取它。
 
 ### 自訂編譯器 [#customize-compiler]
 
 Fumadocs MDX 透過 [MDX Compiler](https://mdxjs.com/packages/mdx)，以 unified 將 MDX 檔案編譯為 JavaScript 檔案。
 
-集合也可以改用 [Sätteri](/docs/mdx/mdx#satteri) 進行編譯。兩者都內建一組預設組合，包含預設的外掛與設定。
+集合也可以改用 [Sätteri](/docs/mdx/mdx#satteri) 進行編譯。兩者都內建一套由外掛與設定組成的預設組合。
 
 您可以在[全域設定](/docs/mdx/global#mdx-options)或[集合設定](/docs/mdx/collections#mdxoptions)中自訂編譯器。

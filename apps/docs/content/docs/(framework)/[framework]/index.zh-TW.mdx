@@ -12,9 +12,9 @@ import { frameworkName } from '@/lib/framework';
 
 **Markdown/MDX：** Markdown 是一種用來撰寫格式化文字的標記語言。Fumadocs 原生支援 Markdown 與 MDX (Markdown 的超集) 。
 
-**[Bun](https://bun.sh)：** 一種 JavaScript 執行環境，本指南會用它來執行指令碼。若您偏好 Node.js，可以改用 [unrun](https://gugustinette.github.io/unrun/guide/getting-started.html#cli)。
+**[Bun](https://bun.sh)：** 一種 JavaScript 執行階段，本指南會使用它來執行指令碼。如果您偏好 Node.js，可以改用 [unrun](https://gugustinette.github.io/unrun/guide/getting-started.html#cli)。
 
-若要進一步自訂，具備一些 React.js 的基礎知識會很有幫助。
+若想進一步自訂，具備一些 React.js 基礎知識會很有幫助。
 
 ## 自動安裝 [#automatic-installation]
 
@@ -24,23 +24,23 @@ import { frameworkName } from '@/lib/framework';
 npm create fumadocs-app
 ```
 
-接著會詢問您要使用哪個內建範本：
+系統會詢問您要使用哪一個內建範本：
 
 * **框架**：Next.js、React Router、TanStack Start、Waku 和 Astro。
-* **內容來源**：Fumadocs MDX 或 Astro content collections。
+* **內容來源**：Fumadocs MDX 或 Astro 內容集合。
 
-完成後會初始化一個新的 Fumadocs 應用程式，並預設設定好以下功能：
+接著會初始化一個新的 Fumadocs 應用程式，並預設設定好以下功能：
 
 * [LLM 整合](/docs/integrations/llms)。
-* [動態 metadata 圖片](/docs/integrations/og)。
+* [動態中繼資料圖片](/docs/integrations/og)。
 
 <Callout title="要從現有的程式碼庫開始？">
-  您可以參考[手動安裝](/docs/manual-installation)指南開始使用。
+  您可以參考[手動安裝](/docs/manual-installation)指南來開始使用。
 </Callout>
 
-### 盡情享受吧！ [#enjoy]
+### 開始享受吧！ [#enjoy]
 
-在 docs 資料夾中建立您的第一個 MDX 檔案。
+請在 docs 資料夾中建立您的第一個 MDX 檔案。
 
 ```mdx title="content/docs/index.mdx"
 ---
@@ -70,15 +70,15 @@ npm run dev
 
 ## 常見問題 [#faq]
 
-以下整理了一些您可能會遇到的常見問題。
+以下整理了您可能會遇到的一些常見問題。
 
 <Accordions>
-  <Accordion id="upgrade-fumadocs" title="遇到 API 缺失或程式錯誤的問題嗎？">
-    您需要的 API 或修正可能只有較新的版本才有。請[升級 Fumadocs](/docs/upgrade) 後再試一次。
+  <Accordion id="upgrade-fumadocs" title="遇到 API 缺失或程式錯誤的問題？">
+    該 API 或修正可能只在較新的版本中提供。請[升級 Fumadocs](/docs/upgrade) 後再試一次。
   </Accordion>
 
-  <Accordion id="change-base-url" title="如何變更文件的基礎路由？">
-    路由由 {frameworkName(props.framework)} 負責處理。請先移動文件路由 (`/docs/*` -&gt; `/info/*`) 。
+  <Accordion id="change-base-url" title="如何變更文件的基底路由？">
+    路由由 {frameworkName(props.framework)} 處理。請先移動文件路由 (`/docs/*` -&gt; `/info/*`) 。
 
     <show when={props.framework === 'next'}>
       重新命名路由：
@@ -93,7 +93,7 @@ npm run dev
         </Folder>
       </Files>
 
-      或者使用路由群組，將 `/docs/*` 改為 `/*`：
+      或使用路由群組，將 `/docs/*` 改為 `/*`：
 
       <Files>
         <Folder name="app/(docs)" defaultOpen>
@@ -121,21 +121,21 @@ npm run dev
       將 `src/pages/docs` 移至 `src/pages/info`。
     </show>
 
-    最後，更新 `source.ts` 中頁面的 base URL：
+    最後，請在 `source.ts` 中更新頁面的基礎 URL：
 
     ```ts title="lib/source.ts"
     import { loader } from 'fumadocs-core/source';
 
     export const source = loader({
-      baseUrl: '/info', // 改為新值 [!code highlight]
+      baseUrl: '/info', // 改成新的路徑 [!code highlight]
     });
     ```
 
-    範本在 `lib/shared.ts` 中將此值定義為 `docsRoute`，請在該處修改，Markdown 連結就會隨之更新。
+    範本在 `lib/shared.ts` 中將此值定義為 `docsRoute`，請在該處修改，Markdown 連結便會隨之更新。
   </Accordion>
 
-  <Accordion id="multi-docs" title="如何實作多組文件？">
-    建議您使用[版面配置頁籤](/docs/ui/layouts/docs#layout-tabs)。
+  <Accordion id="multi-docs" title="如何實作多份文件？">
+    建議使用[版面配置頁籤](/docs/ui/layouts/docs#layout-tabs)。
   </Accordion>
 
   <show when={props.framework === 'next' || props.framework === 'astro'}>
@@ -144,9 +144,9 @@ npm run dev
         做法與在 Next.js App Router 中管理版面配置相同：請先從內容目錄 (`/content/docs`) 中移除原本的 MDX 檔案，
         以免重複的頁面造成錯誤。
 
-        接著，您可以將頁面放到另一個不屬於文件版面配置之下的路由群組中。
+        接著，您可以將該頁面放到另一個路由群組中，且該群組不能位於文件版面配置之下。
 
-        例如，要取代 `/docs/test`：
+        例如，若要取代 `/docs/test`：
 
         <Files>
           <File name="(home)/docs/test/page.tsx" />
@@ -158,7 +158,7 @@ npm run dev
           </Folder>
         </Files>
 
-        若要取代 `/docs`，則需將 catch-all 路由改為非選用：
+        若是 `/docs`，您需要將 catch-all 路由改為非選用：
 
         <Files>
           <File name="(home)/docs/page.tsx" />
@@ -172,14 +172,14 @@ npm run dev
       </show>
 
       <show when={props.framework === 'astro'}>
-        請在 `src/pages/docs/` 中建立一個不使用 `Docs` island 的獨立 `.astro` 頁面，並從 `content/docs` 中移除對應的 MDX 檔案，以免同一個 URL 重複出現。
+        請在 `src/pages/docs/` 中建立一個不使用 `Docs` island 的獨立 `.astro` 頁面，並從 `content/docs` 中移除對應的 MDX 檔案，以免同一個 URL 出現兩次。
       </show>
     </Accordion>
   </show>
 
   <show when={props.framework === 'react-router' || props.framework === 'tanstack-start' || props.framework === 'waku'}>
-    <Accordion id="vite-context-error" title="使用 React context 時發生錯誤？">
-      Vite 的預先打包 (pre-bundling) 機制有一些奇怪的問題：[#3910](https://github.com/vitejs/vite/issues/3910)。
+    <Accordion id="vite-context-error" title="使用 React Context 時發生錯誤？">
+      Vite 的預先打包 (pre-bundling) 有一些奇怪的問題：[#3910](https://github.com/vitejs/vite/issues/3910)。
       請務必將 Fumadocs 排除在預先打包之外，並將其加入 `noExternal`：
 
       ```ts title="vite.config.ts"
@@ -205,7 +205,7 @@ npm run dev
 
       這通常是因為不支援 `require(esm)` ([#3312](https://github.com/fuma-nama/fumadocs/issues/3312)) ，請升級至 Node.js 22 以上版本。
 
-      在 Node.js 23.1 上，如果您在正式環境建置時遇到此錯誤：
+      若您在 Node.js 23.1 上進行正式環境建置時遇到以下錯誤：
 
       ```
       Could not find a production build in the '.next' directory.
@@ -215,18 +215,19 @@ npm run dev
     </Accordion>
 
     <Accordion id="dynamic-route" title="使用動態路由會不會影響效能？">
-      設定 `generateStaticParams` 後，Next.js 會將動態路由轉換為靜態路由，因此速度與靜態頁面一樣快。
+      只要設定了 `generateStaticParams`，Next.js 就會將動態路由轉換為靜態路由。
+      因此，其速度與靜態頁面一樣快。
 
-      您可以[啟用靜態匯出](/docs/deploying/static)，以產生靜態建置輸出。
+      您可以[啟用靜態匯出](/docs/deploying/static)，以產生靜態的建置輸出。
     </Accordion>
   </show>
 </Accordions>
 
 ## 深入了解 [#learn-more]
 
-初次接觸嗎？別擔心，我們非常歡迎您提出問題。
+剛開始接觸嗎？別擔心，我們非常歡迎您提出任何問題。
 
-如果有任何不清楚的地方，歡迎到 [Github Discussion](https://github.com/fuma-nama/fumadocs/discussions) 提供您的意見回饋！
+如果有任何令您困惑的地方，歡迎到 [Github Discussion](https://github.com/fuma-nama/fumadocs/discussions) 提供您的意見回饋！
 
 ### 撰寫內容 [#writing-content]
 
@@ -245,7 +246,7 @@ npm run dev
     了解如何組織內容。
   </Card>
 
-  <Card href="/docs/ui/components" title="元件" description="瀏覽所有可用的元件，讓您的文件更加豐富" />
+  <Card href="/docs/ui/components" title="元件" description="瀏覽所有可用元件，讓您的文件更豐富" />
 </Cards>
 
 ### 特殊需求 [#special-needs]

@@ -1,6 +1,6 @@
 ---
 title: 檔案
-description: 在您的文件中顯示檔案結構
+description: 在您的文件中呈現檔案結構
 preview: 'files'
 ---
 
@@ -8,7 +8,7 @@ preview: 'files'
 
 ## 使用方式 [#usage]
 
-請以 `Files` 包住檔案元件。您可以在 MDX 內容中使用它，也可以將它當作一般的 React.js 元件使用。
+請用 `Files` 包裹檔案元件。您可以在 MDX 內容中使用它，也可以把它當成一般的 React.js 元件使用。
 
 ```mdx title="content.mdx"
 import { File, Folder, Files } from 'fumadocs-ui/components/files';
@@ -28,7 +28,7 @@ import { File, Folder, Files } from 'fumadocs-ui/components/files';
 </Files>
 ```
 
-### 檔案 [#file]
+### File [#file]
 
 <auto-type-table cwd path="content/docs/ui/props.ts" name="FileProps" />
 
@@ -70,7 +70,7 @@ export default defineConfig({
 });
 ```
 
-### CodeBlock 語法 [#codeblock-syntax]
+### 程式碼區塊語法 [#codeblock-syntax]
 
 它會將 `files` 程式碼區塊轉換為 `<Files />` 元件，例如：
 

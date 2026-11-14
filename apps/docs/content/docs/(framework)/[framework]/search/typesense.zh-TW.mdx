@@ -1,6 +1,6 @@
 ---
 title: Typesense
-description: 在 Fumadocs UI 中使用 Typesense。
+description: 搭配 Fumadocs UI 使用 Typesense。
 ---
 
 > 此整合由社群維護。
@@ -83,7 +83,7 @@ npx @fumadocs/cli feature search --provider typesense
 
 ### 標籤篩選 [#tag-filter]
 
-您也可以視需要加入依標籤篩選結果的 UI。請先在搜尋伺服器上設定[標籤篩選](/docs/headless/search/typesense#tag-filter)，再加入以下內容：
+您也可以視需要加入依標籤篩選結果的 UI。請在搜尋伺服器上設定[標籤篩選](/docs/headless/search/typesense#tag-filter)，並加入以下內容：
 
 ```tsx
 'use client';
@@ -105,7 +105,7 @@ export default function TypesenseSearchDialog(props: SharedProps) {
   const [tag, setTag] = useState<string | undefined>();
   const { search, setSearch, query } = useTypesenseSearch({
     tag, // [!code ++]
-    // 其他選項...
+    // 其他選項……
   });
 
   return (

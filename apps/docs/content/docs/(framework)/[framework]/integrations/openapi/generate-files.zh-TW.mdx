@@ -3,9 +3,9 @@ title: 產生頁面
 description: 從 OpenAPI schema 產生頁面。
 ---
 
-`staticSource()` 與 `dynamicSource()` 會為您的 [`loader()`](/docs/integrations/openapi#generate-pages) 產生頁面，而 `generateFiles()` 則會將頁面以 MDX 檔案的形式寫入您的內容目錄。這些函式都接受相同的選項。
+`staticSource()` 與 `dynamicSource()` 會為您的 [`loader()`](/docs/integrations/openapi#generate-pages) 產生頁面，而 `generateFiles()` 則會將頁面以 MDX 檔案的形式寫入您的內容目錄。這幾個函式接受相同的選項。
 
-頁面內容仍由 `<OpenAPIPage />` 負責算繪，產生器只負責編排每個頁面的端點與 webhook。
+頁面內容仍由 `<OpenAPIPage />` 負責算繪，產生器只負責編排每個頁面中的端點與 webhook。
 
 ## 選項 [#options]
 
@@ -15,12 +15,12 @@ description: 從 OpenAPI schema 產生頁面。
 
 <Callout>Operation 指的是具有特定 HTTP 方法的 API 端點，例如 `/api/weather:GET`。</Callout>
 
-| 模式        | 內容                          | 檔案路徑                                 |
-| --------- | --------------------------- | ------------------------------------ |
-| tag       | 標籤相同的 operation             | `{tag_name}.mdx`                     |
-| file      | 位於同一個 schema 檔案中的 operation | `{file_name}.mdx`                    |
-| operation | 每個 operation 各一頁            | `{operationId ?? endpoint_path}.mdx` |
-| custom    | 請見下文                        | 不適用                                  |
+| 模式        | 內容                        | 檔案路徑                                 |
+| --------- | ------------------------- | ------------------------------------ |
+| tag       | 具有相同標籤的 operation         | `{tag_name}.mdx`                     |
+| file      | 同一個 schema 檔案中的 operation | `{file_name}.mdx`                    |
+| operation | 每個 operation 各自一頁         | `{operationId ?? endpoint_path}.mdx` |
+| custom    | 請參閱下文                     | 不適用                                  |
 
 ```ts
 import { openapi } from '@/lib/openapi';
@@ -30,7 +30,7 @@ await openapi.staticSource({
 });
 ```
 
-設為 `custom` 時，您可以傳入函式來完全自訂產生流程：
+設為 `custom` 時，您可以傳入一個函式，完全自訂產生流程：
 
 ```ts title="Example"
 import type { OperationOutput } from 'fumadocs-openapi';
@@ -70,7 +70,7 @@ tags:
     x-displayName: My Test Name
 ```
 
-頁面會依照 OpenAPI 3.2 的標籤階層產生，方式與 [`groupBy`](#groupby) 相同；沒有任何 operation 的標籤則不會產生頁面。
+頁面會與 [`groupBy`](#groupby) 相同，依循 OpenAPI 3.2 的標籤階層產生；不含任何 operation 的標籤則不會產生頁面。
 
 ```yaml title="openapi.yaml"
 tags:
@@ -83,7 +83,7 @@ tags:
 
 ### `groupBy` [#groupby]
 
-在 `operation` 模式下，您可以透過資料夾將輸出檔案分組。
+在 `operation` 模式下，您可以用資料夾將輸出檔案分組。
 
 | 值          | 輸出                                              |
 | ---------- | ----------------------------------------------- |
@@ -100,7 +100,7 @@ await openapi.staticSource({
 });
 ```
 
-依 `tag` 分組時，會遵循 OpenAPI 3.2 的標籤階層：每個標籤會巢狀放在其 `parent` 標籤的資料夾內，而 `kind` 不是 `nav` 的標籤則會被忽略。
+依 `tag` 分組時，會遵循 OpenAPI 3.2 的標籤階層：標籤會巢狀置於其 `parent` 標籤的資料夾內，而 `kind` 不是 `nav` 的標籤則會被忽略。
 
 ```yaml title="openapi.yaml"
 tags:
@@ -118,7 +118,7 @@ paths:
       tags: [products]
 ```
 
-沒有標籤的 operation 會歸入 `unknown` 資料夾。
+未設定標籤的 operation 會歸入 `unknown` 資料夾。
 
 ### `name` [#name]
 
@@ -150,7 +150,7 @@ await openapi.staticSource({
 
 自動產生 [`meta.json`](/docs/page-conventions#meta) 檔案。
 
-若需要最大的彈性，您也隨時可以手動定義 `meta.json` 檔案。
+您隨時都可以手動定義 `meta.json` 檔案，以獲得最大的彈性。
 
 ```ts
 import { openapi } from '@/lib/openapi';
@@ -160,7 +160,7 @@ await openapi.staticSource({
 });
 ```
 
-或者，您也可以自訂資料夾的呈現方式：
+或者自訂資料夾的呈現方式：
 
 ```ts
 import { openapi } from '@/lib/openapi';
@@ -174,7 +174,7 @@ await openapi.staticSource({
 
 ## MDX 檔案 [#mdx-files]
 
-若要以 MDX 檔案撰寫頁面，請建立一個指令碼：
+若要將頁面輸出為 MDX 檔案，請建立一個指令碼：
 
 ```ts title="scripts/generate-docs.ts"
 import { generateFiles } from 'fumadocs-openapi';
@@ -189,7 +189,7 @@ void generateFiles({
 });
 ```
 
-使用以下指令碼產生文件：
+使用指令碼產生文件：
 
 ```bash
 bun ./scripts/generate-docs.ts
@@ -353,14 +353,14 @@ export const source = loader({
 
 ### `index` [#index]
 
-產生索引檔案，並以卡片連結至產生的各個頁面。
+產生索引檔案，以卡片連結至各個產生的頁面。
 
 ```ts
 import { generateFiles } from 'fumadocs-openapi';
 
 void generateFiles({
   index: {
-    // 用於產生 `href`
+    // 用來產生 `href`
     url: {
       baseUrl: '/docs',
       contentDir: './content/docs',
@@ -369,7 +369,7 @@ void generateFiles({
       {
         // 輸出路徑
         path: 'index.mdx',
-        // 選用：限制輸入檔案（等同於 server 中的 `input` 欄位）
+        // 選用：限制輸入檔案（與 server 中的 `input` 欄位相同）
         only: ['petstore.yaml'],
         // 選用：設定 frontmatter
         description: 'All available pages',
@@ -381,7 +381,7 @@ void generateFiles({
 
 ### `imports` [#imports]
 
-在產生的 MDX 檔案中加入自訂匯入。若您需要在產生的文件中引入元件、工具函式或其他相依套件，這項設定會很實用。
+在產生的 MDX 檔案中加入自訂匯入，方便您在產生的文件中引入元件、工具函式或其他相依套件。
 
 ```ts
 import { generateFiles } from 'fumadocs-openapi';
@@ -411,7 +411,7 @@ import { API_BASE_URL } from '@/constants';
 | 屬性            | 說明                        |
 | ------------- | ------------------------- |
 | `title`       | 頁面標題                      |
-| `description` | 頁面說明                      |
+| `description` | 頁面描述                      |
 | `full`        | 一律為 true，供 Fumadocs UI 使用 |
 | `_openapi`    | 內部屬性                      |
 

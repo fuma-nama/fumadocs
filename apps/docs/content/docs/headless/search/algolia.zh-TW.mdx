@@ -1,5 +1,5 @@
 ---
-title: Algolia Search
+title: Algolia 搜尋
 description: 將 Algolia Search 整合至 Fumadocs
 ---
 
@@ -17,7 +17,7 @@ algoliasearch
 
 ### 註冊 Algolia [#sign-up-on-algolia]
 
-請註冊帳號並取得搜尋用的 App ID 與 API 金鑰，然後將它們儲存在 `.env.local` 中 (在 Vite 框架中，`NEXT_PUBLIC_` 應改為 `VITE_`；在 Astro 中則為 `PUBLIC_`) ：
+請註冊帳號並取得搜尋用的應用程式 ID 與 API 金鑰，然後將它們存放在 `.env.local` 中 (在 Vite 框架中，`NEXT_PUBLIC_` 應改為 `VITE_`；在 Astro 中則改為 `PUBLIC_`) ：
 
 ```dotenv
 NEXT_PUBLIC_ALGOLIA_APP_ID="app ID"
@@ -31,15 +31,15 @@ ALGOLIA_WRITE_KEY="write API key"
 
 <feature>search/algolia</feature>
 
-`sync()` 會更新索引設定並取代所有紀錄。`build` 指令碼會在每次建置時進行同步，因此請在您的部署平台上設定相同的變數。
+`sync()` 會更新索引設定並取代所有紀錄。`build` 指令碼會在每次建置時執行同步，因此請在您的部署平台上設定相同的變數。
 
 ### 搜尋 UI [#search-ui]
 
-實作 UI 時，您可以考慮以下幾種做法：
+您可以考慮以下幾種實作 UI 的方式：
 
 * 使用 [Fumadocs UI 搜尋對話方塊](/docs/search/algolia)。
 
-* 透過內建的搜尋用戶端 hook 自行打造：
+* 透過內建的搜尋用戶端 hook 自行建構：
 
   ```ts twoslash
   import { liteClient } from 'algoliasearch/lite';
@@ -59,7 +59,7 @@ ALGOLIA_WRITE_KEY="write API key"
 
 ### 標籤篩選 [#tag-filter]
 
-若要設定標籤篩選，請在 `static.json` 路由中將 `tag` 傳給 `toDocuments()`：
+若要設定標籤篩選，請在 `static.json` 路由中將 `tag` 傳入 `toDocuments()`：
 
 ```ts
 toDocuments(source, { tag: (page) => page.slugs[0] });
@@ -68,7 +68,7 @@ toDocuments(source, { tag: (page) => page.slugs[0] });
 接著更新您的搜尋用戶端：
 
 * **Fumadocs UI**：在搜尋 UI 中啟用[標籤篩選](/docs/search/algolia#tag-filter)。
-* **搜尋用戶端**：您可以像這樣加入標籤篩選：
+* **搜尋用戶端**：您可以用以下方式加入標籤篩選：
 
   ```ts
   import { useAlgoliaSearch } from 'fumadocs-core/search/client';
@@ -79,9 +79,9 @@ toDocuments(source, { tag: (page) => page.slugs[0] });
   });
   ```
 
-`tag` 欄位是用於分面 (faceting) 的屬性。您也可以在 Algolia 搜尋用戶端中使用 `tag:value` 篩選條件。
+`tag` 欄位是用於分面搜尋 (faceting) 的屬性。您也可以在 Algolia 搜尋用戶端中使用 `tag:value` 篩選條件。
 
-### 運作原理 [#under-the-hood]
+### 底層運作原理 [#under-the-hood]
 
 Algolia 整合會自動設定 Algolia Search，用於文件搜尋。
 
@@ -95,7 +95,7 @@ Algolia 整合會自動設定 Algolia Search，用於文件搜尋。
 | `section` | 標題 ID (可為 null)  |
 | `content` | 段落內容             |
 
-只有位於標題底下的段落才會有 `section` 欄位。標題與
+只有位於標題下方的段落才會有 `section` 欄位。標題與
 段落會分別索引為獨立的紀錄，並依頁面 ID 分組。
 
 請注意，頁面的 `url` 屬性必須是唯一的，請勿讓兩個頁面使用相同的

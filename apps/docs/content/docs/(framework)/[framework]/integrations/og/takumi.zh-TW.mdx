@@ -1,6 +1,6 @@
 ---
 title: Takumi
-description: 整合 Takumi，以不受框架限制的方式快速產生中繼資料圖片。
+description: 整合 Takumi，快速產生中繼資料圖片，且不受框架限制。
 ---
 
 ## 安裝 [#installation]
@@ -77,13 +77,13 @@ npm install takumi-js
   // [!code ++]
   import { getPageImagePath } from '@/lib/shared';
 
-  // 在您的載入器中
+  // 在您的 loader 中的某處
   return {
     // [!code ++]
     imagePath: getPageImagePath(page.slugs, page.locale),
   };
 
-  // 在您的元件或用戶端載入器中
+  // 在您的元件或用戶端 loader 中的某處
   return (
     <>
       {/* [!code ++] */}
@@ -120,7 +120,7 @@ npm install takumi-js
     }),
   });
 
-  // 在您的 server function 中
+  // 在您的 server function 中的某處
   return {
     // [!code ++]
     imageUrl: getPageImageUrl(page).url,
@@ -133,7 +133,7 @@ npm install takumi-js
   // [!code ++]
   import { getPageImageUrl } from '@/lib/shared';
 
-  // 在您的頁面元件中
+  // 在您的頁面元件中的某處
   return (
     <DocsPage toc={page.data.toc}>
       {/* [!code ++] */}
@@ -303,7 +303,7 @@ npm install takumi-js
   ```
 
   ```ts tab="vite.config.ts"
-  // 僅限 SPA 模式：TanStack Start 會將回應以文字形式預先算繪，導致圖片損壞
+  // 僅限 SPA 模式：TanStack Start 會將回應以文字形式預先算繪，導致圖片無法正常顯示
   import { defineConfig } from 'vite';
   import { nitro } from 'nitro/vite';
   // [!code ++:3]
@@ -367,10 +367,10 @@ npm install takumi-js
   </include>
 </show>
 
-> Takumi 已內建完整字重 (100-900) 的 [`Geist`](https://vercel.com/font) 與 `Geist Mono` 字型，無需另行設定字型。
+> Takumi 已內建完整字重軸 (100-900) 的 [`Geist`](https://vercel.com/font) 與 `Geist Mono` 字型，無須另外設定字型。
 
-進階用法請參閱 [Takumi 文件](https://takumi.kane.tw/docs)。
+進階用法請參閱 [Takumi 官方文件](https://takumi.kane.tw/docs)。
 
 ### 其他範本 [#other-templates]
 
-可用的範本請參閱 [Takumi Templates](https://takumi.kane.tw/docs/templates)。
+可用的範本請參閱 [Takumi 範本](https://takumi.kane.tw/docs/templates)。

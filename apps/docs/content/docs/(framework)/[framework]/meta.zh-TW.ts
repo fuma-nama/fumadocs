@@ -1,5 +1,7 @@
 import { type Framework, frameworks } from '@/lib/framework';
+
 export const staticParams = frameworks.map((item) => ({ framework: item.value }));
+
 export default ({ framework }: { framework: Framework }) => ({
   title: frameworks.find((item) => item.value === framework)?.name,
   root: 'framework',

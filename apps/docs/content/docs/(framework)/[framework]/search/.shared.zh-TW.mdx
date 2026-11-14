@@ -1,7 +1,7 @@
 ### 替換搜尋對話方塊 [#replace-search-dialog]
 
 <show when={props.framework === 'next'}>
-  將您的搜尋對話方塊傳入 [`<RootProvider />`](/docs/ui/layouts/root-provider)。由於根版面配置是伺服器元件，請先用用戶端元件包住 provider：
+  請將您的搜尋對話方塊傳入 [`<RootProvider />`](/docs/ui/layouts/root-provider)。由於根版面配置是伺服器元件，請先用用戶端元件包裝 provider：
 
   ```tsx tab="components/provider.tsx"
   'use client';
@@ -35,7 +35,7 @@
 </show>
 
 <show when={props.framework === 'react-router'}>
-  在根版面配置中，將您的搜尋對話方塊傳入 [`<RootProvider />`](/docs/ui/layouts/root-provider)：
+  請在根版面配置中，將您的搜尋對話方塊傳入 [`<RootProvider />`](/docs/ui/layouts/root-provider)：
 
   ```tsx title="app/root.tsx"
   import { Links, Meta, Scripts, ScrollRestoration } from 'react-router';
@@ -65,7 +65,7 @@
 </show>
 
 <show when={props.framework === 'tanstack-start'}>
-  在根路由中，將您的搜尋對話方塊傳入 [`<RootProvider />`](/docs/ui/layouts/root-provider)：
+  請在根路由中，將您的搜尋對話方塊傳入 [`<RootProvider />`](/docs/ui/layouts/root-provider)：
 
   ```tsx title="src/routes/__root.tsx"
   import { createRootRoute, HeadContent, Outlet, Scripts } from '@tanstack/react-router';
@@ -97,7 +97,7 @@
 </show>
 
 <show when={props.framework === 'waku'}>
-  在您的 provider 元件中，將搜尋對話方塊傳入 [`<RootProvider />`](/docs/ui/layouts/root-provider)：
+  請在您的 provider 元件中，將搜尋對話方塊傳入 [`<RootProvider />`](/docs/ui/layouts/root-provider)：
 
   ```tsx title="src/components/provider.tsx"
   'use client';
@@ -114,7 +114,7 @@
 </show>
 
 <show when={props.framework === 'astro'}>
-  您的 provider 元件已將 `src/components/search.tsx` 傳入 [`<RootProvider />`](/docs/ui/layouts/root-provider)，因此只要替換該檔案即可：
+  您的 provider 元件已會將 `src/components/search.tsx` 傳入 [`<RootProvider />`](/docs/ui/layouts/root-provider)，因此只要替換該檔案即可：
 
   ```tsx title="src/components/provider.tsx"
   import { navigate } from 'astro:transitions/client';

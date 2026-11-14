@@ -1,13 +1,13 @@
 ---
 title: Remark NPM
-description: 為各套件管理工具產生程式碼區塊
+description: 為各個套件管理工具產生程式碼區塊
 ---
 
 ## 使用方式 [#usage]
 
-Remark NPM 是一個 remark 外掛，Fumadocs MDX 預設會啟用它。您可以透過 `remarkNpmOptions` 傳入選項。
+Remark NPM 是一個 remark 外掛，Fumadocs MDX 預設已啟用。您可以透過 `remarkNpmOptions` 傳入選項。
 
-定義所需的元件：
+請定義所需的元件：
 
 ```tsx tab="Custom" title="components/mdx.tsx"
 import { CodeBlockTabs, CodeBlockTab, CodeBlockTabsList, CodeBlockTabsTrigger } from 'my-ui';
@@ -30,7 +30,7 @@ import type { MDXComponents } from 'mdx/types';
 
 export function getMDXComponents(components?: MDXComponents) {
   return {
-    // `defaultComponents` 預設已包含這些元件
+    // `defaultComponents` 中已預設包含這些元件
     ...defaultComponents,
     ...components,
   } satisfies MDXComponents;
@@ -39,7 +39,7 @@ export function getMDXComponents(components?: MDXComponents) {
 
 ### 輸入 [#input]
 
-建立語言為 `npm` 的程式碼區塊。
+建立語言指定為 `npm` 的程式碼區塊。
 
 ````mdx
 ```npm
@@ -51,11 +51,11 @@ npm i my-package -D
 ```
 ````
 
-`package-install` 程式碼區塊也同樣適用。這類區塊接受套件名稱 (例如 `my-package`) ，並將其轉換為 `npm install` 指令。
+`package-install` 程式碼區塊也同樣適用。您只需提供套件名稱 (例如 `my-package`) ，它就會將其轉換為 `npm install` 指令。
 
 ### 輸出 [#output]
 
-此外掛應產生以下結構。
+此外掛應會產生以下結構。
 
 ```mdx
 <CodeBlockTabs defaultValue="npm">

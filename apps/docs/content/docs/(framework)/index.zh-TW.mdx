@@ -9,24 +9,24 @@ import { FrameworkLogo } from '@/components/framework-logo';
 
 <AgentInstructions />
 
-Fumadocs <span className="text-fd-muted-foreground text-sm">(Foo-ma docs)</span> 是一套**文件框架**，以快速、靈活為設計目標，
-並能無縫融入您的 React 框架。它由多個層級組成：
+Fumadocs <span className="text-fd-muted-foreground text-sm">(Foo-ma docs)</span> 是一個**文件框架**，設計上追求快速與彈性，
+並能無縫整合至您的 React 框架中。它由多個層次組成：
 
 <Cards>
   <Card icon={<CpuIcon className="text-purple-300" />} title="Fumadocs Core" href="/docs/headless">
-    負責處理大部分邏輯，包括文件搜尋、內容來源轉接器，以及 Markdown 擴充功能。
+    負責大部分的邏輯，包括文件搜尋、內容來源轉接器，以及 Markdown 擴充功能。
   </Card>
 
   <Card icon={<PanelsTopLeftIcon className="text-blue-300" />} title="Fumadocs UI" href="/docs/ui">
-    Fumadocs 的預設主題，為文件網站提供美觀的外觀與互動式元件。
+    Fumadocs 的預設主題，為文件網站與互動式元件打造美觀的外觀。
   </Card>
 
   <Card icon={<DatabaseIcon />} title="內容來源">
-    您的內容來源，可以是 CMS，也可以是 [Fumadocs MDX](/docs/mdx) (官方內容來源) 這類本機資料層。
+    內容的出處，可以是 CMS，也可以是像 [Fumadocs MDX](/docs/mdx) (官方內容來源) 這類本機資料層。
   </Card>
 
   <Card icon={<TerminalIcon />} title="Fumadocs CLI" href="/docs/cli">
-    用來安裝 UI 元件及自動化各項作業的命令列工具，方便您自訂版面配置。
+    用來安裝 UI 元件及自動化各項作業的命令列工具，在自訂版面配置時特別實用。
   </Card>
 </Cards>
 
@@ -36,7 +36,7 @@ Fumadocs <span className="text-fd-muted-foreground text-sm">(Foo-ma docs)</span>
 
 ## 選擇框架 [#choosing-a-framework]
 
-本指南依框架分別撰寫。請選擇您的應用程式所使用的框架；若是新專案，請選擇 Next.js：
+本指南依框架分別撰寫。請選擇您的應用程式所使用的框架；若是新專案，建議選擇 Next.js：
 
 <Cards>
   <Card icon={<FrameworkLogo framework="next" />} title="Next.js（推薦）" href="/docs/next">
@@ -52,19 +52,19 @@ Fumadocs <span className="text-fd-muted-foreground text-sm">(Foo-ma docs)</span>
   </Card>
 
   <Card icon={<FrameworkLogo framework="waku" />} title="Waku" href="/docs/waku">
-    快速又簡潔，是建構於 Vite 之上、支援伺服器元件的 React 框架。
+    快速又簡單，是建構於 Vite 之上、支援伺服器元件的 React 框架。
   </Card>
 
   <Card icon={<FrameworkLogo framework="astro" />} title="Astro" href="/docs/astro">
-    適用於 Astro 網站，支援內容集合，並將 MDX 算繪為 React islands。
+    適用於 Astro 網站，支援內容集合，並以 React islands 的形式算繪 MDX。
   </Card>
 </Cards>
 
 <Callout title="以更簡便的開發者體驗試用 Fumadocs">
-  [Fumapress](https://press.fumadocs.dev) 是一款網站產生器，在 Fumadocs 之上替您處理更多功能。
+  [Fumapress](https://press.fumadocs.dev) 是一個網站產生器，在 Fumadocs 的基礎上替您管理更多功能。
 
   * 自動路由、`llms.txt`、MCP 等基本功能。
   * 基於 Vite ([Waku](https://waku.gg)) 。
 
-  它強制採用自家的 React 框架，但換來更好的開發者體驗。
+  它會強制使用自有的 React 框架，但也因此能提供更好的開發者體驗。
 </Callout>

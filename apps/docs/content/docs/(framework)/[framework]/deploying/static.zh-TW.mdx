@@ -13,17 +13,17 @@ import { frameworkName } from '@/lib/framework';
 </show>
 
 <show when={props.framework === 'astro'}>
-  Astro 預設會輸出靜態網站 (`output: 'static'`) 。文件路由設定了 `export const prerender = true`，因此即使您為伺服器輸出加入轉接器，這些路由仍會維持靜態。
+  Astro 預設會輸出靜態網站 (`output: 'static'`) 。文件路由設定了 `export const prerender = true`，因此即使您加入轉接器來輸出伺服器版本，這些路由仍會維持靜態。
 </show>
 
-靜態建置沒有伺服器，因此以下功能無法運作：
+靜態建置沒有伺服器，因此下列功能無法運作：
 
 * 搜尋伺服器。請改用[靜態搜尋](#search)。
 * [詢問 AI](/docs/integrations/llms#ask-ai)，因為其聊天路由需要呼叫 AI 模型。
 * [MCP 伺服器](/docs/integrations/llms#mcp-server)。
 
 <show when={props.framework === 'next'}>
-  `proxy.ts` 也不會執行，因此不會有導向至對應語系的 [i18n 重新導向](/docs/internationalization#middleware)，頁面也無法[依 `Accept` 標頭提供 Markdown](/docs/integrations/llms#accept)。
+  `proxy.ts` 也不會執行，因此不會有導向至語系的 [i18n 重新導向](/docs/internationalization#middleware)，頁面也無法[依 `Accept` 標頭提供 Markdown](/docs/integrations/llms#accept)。
 </show>
 
 <show when={props.framework === 'react-router' || props.framework === 'tanstack-start' || props.framework === 'waku'}>
@@ -37,11 +37,11 @@ import { frameworkName } from '@/lib/framework';
 1. [設定搜尋伺服器](/docs/headless/search/orama#static-export)。
 2. [設定搜尋 UI／用戶端](/docs/search/orama#static)。
 
-完成設定後，您的應用程式會以靜態方式儲存搜尋索引，搜尋運算則改在瀏覽器端進行。
+完成設定後，您的應用程式會以靜態方式儲存搜尋索引，並改在瀏覽器端執行搜尋運算。
 
 #### 雲端解決方案 [#cloud-solutions]
 
-由於搜尋功能是由遠端伺服器提供，靜態匯出無需額外設定即可運作。
+由於搜尋功能由遠端伺服器提供，靜態匯出無需額外設定即可運作。
 
 ### 部署 [step] [#deployment]
 
@@ -55,10 +55,10 @@ import { frameworkName } from '@/lib/framework';
   const nextConfig = {
     output: 'export',
 
-    // 選用：將連結 `/me` 改為 `/me/`，並將輸出 `/me.html` 改為 `/me/index.html`
+    // 選用：將連結 `/me` 改為 `/me/`，並將輸出的 `/me.html` 改為 `/me/index.html`
     // trailingSlash: true,
 
-    // 選用：避免自動將 `/me` 重新導向至 `/me/`，改為保留 `href`
+    // 選用：避免自動將 `/me` 導向 `/me/`，改為保留原本的 `href`
     // skipTrailingSlashRedirect: true,
   };
   ```
@@ -101,7 +101,7 @@ import { frameworkName } from '@/lib/framework';
 </show>
 
 <show when={props.framework === 'tanstack-start'}>
-  設定 SPA 模式與預先算繪。詳細資訊請參閱 [SPA 模式](https://tanstack.com/start/latest/docs/framework/react/guide/spa-mode)。
+  設定 SPA 模式與預先算繪。詳細資訊請參閱 [SPA Mode](https://tanstack.com/start/latest/docs/framework/react/guide/spa-mode)。
 
   ```ts title="vite.config.ts"
   import { tanstackStart } from '@tanstack/react-start/plugin/vite';
@@ -117,7 +117,7 @@ import { frameworkName } from '@/lib/framework';
           prerender: {
             enabled: true,
           },
-          // 若有未顯示在 UI 上的隱藏路徑，可以在此明確加入。 [!code highlight:6]
+          // 若有未顯示在 UI 上的隱藏路徑，可以手動明確加入。 [!code highlight:6]
           pages: [
             {
               path: '/docs/test',
@@ -131,13 +131,13 @@ import { frameworkName } from '@/lib/framework';
 </show>
 
 <show when={props.framework === 'waku'}>
-  當所有頁面都設定為 `static` 算繪模式時，Waku 即可將您的網站以靜態方式提供。
+  當所有頁面都設定為 `static` 算繪模式時，Waku 即可以靜態方式提供您的網站。
 
-  詳細資訊請參閱 [部署](https://waku.gg/#deployment)。
+  詳細資訊請參閱 [Deployment](https://waku.gg/#deployment)。
 </show>
 
 <show when={props.framework === 'astro'}>
-  搜尋 API 使用 `staticGET()`，因此會一併包含在靜態輸出中。
+  搜尋 API 使用 `staticGET()`，因此會包含在靜態輸出中。
 
   詳細資訊請參閱 [Astro 部署](https://docs.astro.build/en/guides/deploy/)。
 </show>

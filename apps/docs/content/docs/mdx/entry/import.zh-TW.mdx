@@ -5,17 +5,17 @@ description: 直接匯入 MDX 檔案。
 
 ## 簡介 [#introduction]
 
-MDX 檔案會被編譯成 JavaScript，並包含以下匯出：
+MDX 檔案會編譯成 JavaScript，並包含以下匯出：
 
 * `default`：主要元件。
 * `frontmatter`：frontmatter 資料。
 * 由 remark/rehype 外掛產生的其他屬性。
 
-因此，它們既可以作為頁面使用，也可以作為元件匯入。
+因此，您可以將它們當作頁面使用，也可以當作元件匯入。
 
 ### 作為元件使用 [#using-as-component]
 
-您可以將它們當作元件匯入：
+您可以將它們作為元件匯入：
 
 ```tsx title="app/my-page.tsx"
 import MyPage from '@/content/page.mdx';
@@ -33,7 +33,7 @@ export default function Page() {
 
 ### 作為頁面使用 [#using-as-page]
 
-在 Next.js 中，您可以在 app 目錄下使用 `page.mdx` 取代 `page.tsx` 來建立新頁面。
+在 Next.js 中，您可以使用 `page.mdx` 取代 `page.tsx`，在 app 目錄下建立新頁面。
 
 ```mdx tab="app/my-page/page.mdx"
 ---
@@ -81,7 +81,7 @@ import { defineConfig } from 'fumadocs-mdx/config';
 
 export default defineConfig({
   mdxOptions: {
-    // 匯入上方 `components/mdx.tsx` 所用的路徑。[!code ++:2]
+    // 用來匯入上方 `components/mdx.tsx` 的路徑 [!code ++:2]
     providerImportSource: '@/components/mdx',
   },
 });

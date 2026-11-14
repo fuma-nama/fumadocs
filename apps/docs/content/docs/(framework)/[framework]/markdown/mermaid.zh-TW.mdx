@@ -7,7 +7,7 @@ description: 在文件中算繪圖表
 
 Fumadocs 並未內建 Mermaid 包裝元件，建議您直接使用 `mermaid`。
 
-您可以選擇要設定的 Mermaid 算繪器：
+您可以自行選擇要設定的 Mermaid 算繪器：
 
 ### 官方算繪器 [#official-renderer]
 
@@ -23,7 +23,7 @@ npm install mermaid
 import { use, useId, useSyncExternalStore } from 'react';
 
 export function Mermaid({ chart }: { chart: string }) {
-  // 在伺服器端與 hydration 期間為 `false`
+  // 在伺服器端及 hydration 期間為 `false`
   const isClient = useSyncExternalStore(
     () => () => {},
     () => true,
@@ -85,7 +85,7 @@ function MermaidContent({ chart }: { chart: string }) {
 
 ### Pele [#pele]
 
-[Pele](https://pele.run) 是一款輕量的 Mermaid 算繪器，可輸出可套用主題的 SVG。
+[Pele](https://pele.run) 是一款輕量的 Mermaid 算繪器，可輸出能套用主題的 SVG。
 
 ```npm
 npm install pele
@@ -95,7 +95,7 @@ npm install pele
   ./components/mdx/mermaid.tsx
 </include>
 
-將它的字型與色彩對應至 Fumadocs，讓圖表隨淺色／深色模式切換：
+將它的字型與顏色對應至 Fumadocs，讓圖表隨淺色／深色模式切換：
 
 <include cwd meta="title=&#x22;global.css&#x22;">
   ./app/global.css#pele
@@ -183,12 +183,12 @@ Z --> G;"
       chart="
 
 graph TD;
-subgraph AA [使用端]
-A[行動應用程式];
-B[網頁應用程式];
-C[Node.js 用戶端];
+subgraph AA [Consumers]
+A[Mobile app];
+B[Web app];
+C[Node.js client];
 end
-subgraph BB [服務]
+subgraph BB [Services]
 E[REST API];
 F[GraphQL API];
 G[SOAP API];
@@ -208,22 +208,22 @@ Z --> G;"
       chart="
 
 journey
-title 我的工作日
-section 上班
-泡茶: 5: 我
-上樓: 3: 我
-工作: 1: 我, 貓
-section 回家
-下樓: 5: 我
-坐下來: 5: 我
+title My working day
+section Go to work
+Make tea: 5: Me
+Go upstairs: 3: Me
+Do work: 1: Me, Cat
+section Go home
+Go downstairs: 5: Me
+Sit down: 5: Me
 "
     />
   </Tab>
 </Tabs>
 
-### 以程式碼區塊撰寫 [#as-codeblock]
+### 以程式碼區塊使用 [#as-codeblock]
 
-您可以使用 remark 外掛 `remarkMdxMermaid`，將 `mermaid` 程式碼區塊轉換為 MDX 的寫法。
+您可以使用 remark 外掛 `remarkMdxMermaid`，將 `mermaid` 程式碼區塊轉換為 MDX 的用法。
 
 ```ts tab="unified" title="source.config.ts"
 import { remarkMdxMermaid } from 'fumadocs-core/mdx-plugins';

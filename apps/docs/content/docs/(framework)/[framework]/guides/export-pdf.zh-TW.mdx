@@ -20,7 +20,7 @@ import path from 'node:path';
 
 const browser = await puppeteer.launch();
 const outDir = 'pdfs';
-// 請修改這裡 [!code highlight:2]
+// 請更新此處 [!code highlight:2]
 const urls = ['/docs/ui', '/docs/ui/customizations'];
 
 async function exportPdf(pathname: string) {
@@ -44,7 +44,7 @@ await Promise.all(urls.map(exportPdf));
 await browser.close();
 ```
 
-請在您的 Tailwind CSS 檔案中加入以下內容，以在列印時隱藏導覽元素：
+請將以下內容加入您的 Tailwind CSS 檔案，以便在列印時隱藏導覽元素：
 
 ```css
 @media print {
@@ -58,15 +58,15 @@ await browser.close();
 }
 ```
 
-現在您可以執行這個腳本了：
+現在您可以執行指令碼：
 
 ```bash
 bun ./scripts/export-pdf.ts
 ```
 
-### 不可見的內容 [#invisible-contents]
+### 隱藏的內容 [#invisible-contents]
 
-若要處理手風琴或頁籤中不可見的內容，您可能需要暫時覆寫 MDX 元件。例如：
+若手風琴／頁籤中有隱藏的內容，您可能需要暫時覆寫 MDX 元件。例如：
 
 ```tsx title="components/mdx.tsx"
 import defaultMdxComponents from 'fumadocs-ui/mdx';
@@ -92,7 +92,7 @@ function PrintingAccordions(props: React.ComponentProps<typeof Accordions>) {
 export function getMDXComponents(components?: MDXComponents) {
   return {
     ...defaultMdxComponents,
-    // 改寫後的手風琴元件：
+    // 更新後的手風琴元件：
     Accordion: isPrinting ? PrintingAccordion : Accordion,
     Accordions: isPrinting ? PrintingAccordions : Accordions,
     ...components,

@@ -20,11 +20,10 @@ const time = await getGithubLastEdit({
 
 ### Github Token [#github-token]
 
-請注意，在開發模式下很容易就會達到速率限制。因此，建議您
-傳入 Github token 以提高速率限制。
+請注意，在開發模式下很容易就會達到速率限制，因此建議您傳入 Github token，以取得較高的速率限制。
 
-深入了解
-[Authenticating to the REST API](https://docs.github.com/en/rest/overview/authenticating-to-the-rest-api)。
+進一步了解
+[向 REST API 進行驗證](https://docs.github.com/en/rest/overview/authenticating-to-the-rest-api)。
 
 ```ts
 import { getGithubLastEdit } from 'fumadocs-core/content/github'
@@ -35,7 +34,7 @@ import { getGithubLastEdit } from 'fumadocs-core/content/github'
   })
 ```
 
-此外，如果您在開發模式下用不到這項功能，也可以略過這個步驟。
+此外，若您在開發模式下不需要此功能，也可以略過這個步驟。
 
 ```ts
 process.env.NODE_ENV === 'development'? null : getGithubLastEdit(...)
@@ -43,7 +42,7 @@ process.env.NODE_ENV === 'development'? null : getGithubLastEdit(...)
 
 ### 自訂 GitHub 基礎 URL [#custom-github-base-url]
 
-若您需要存取的 GitHub 執行個體不在 `https://api.github.com`，可以覆寫基礎 URL：
+如果您需要存取的 GitHub 執行個體位於 `https://api.github.com` 以外的 URL，可以覆寫基礎 URL：
 
 ```ts
 import { getGithubLastEdit } from 'fumadocs-core/content/github';
@@ -56,4 +55,4 @@ const time = await getGithubLastEdit({
 });
 ```
 
-若未指定 `baseUrl` 參數，其預設值為 `'https://api.github.com'`。
+若未指定，`baseUrl` 參數的預設值為 `'https://api.github.com'`。
