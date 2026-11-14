@@ -501,7 +501,7 @@ npx @fumadocs/cli feature webmcp
 It creates a `WebMCP` component on top of the [LLM routes](#docs-for-llm). Render it inside `<RootProvider />`.
 
 - `search_docs` queries the search API route. You can replace `fetchClient` with [other clients](/docs/search).
-- `read_page` fetches the Markdown of a page, from <show when={props.framework === 'react-router'}>`/llms.mdx/docs/page.md`</show><show when={props.framework !== 'react-router'}>`/docs/page.md`</show>.
+- `read_page` fetches the Markdown of a page, from <show when={props.framework === 'react-router' || props.framework === 'waku'}>`/llms.mdx/docs/page.md`</show><show when={props.framework !== 'react-router' && props.framework !== 'waku'}>`/docs/page.md`</show>.
 
 ## Ask AI
 

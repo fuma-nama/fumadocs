@@ -12,6 +12,7 @@ import {
 } from '@fumadocs/cli/codemod';
 import {
   docsLlms,
+  internalPrefix,
   nextRewrites,
   reactRouterMiddleware,
   templates,
@@ -26,7 +27,6 @@ import {
   templates as searchTemplates,
 } from '@fumadocs/cli/features/search';
 import { sourceRef } from '@fumadocs/cli/features/utils';
-import { component as webmcp } from '@fumadocs/cli/features/webmcp';
 import type {} from '@fumadocs/satteri/remark-show';
 import { type Framework, frameworks } from './framework';
 import { inFramework } from './remark-framework-links';
@@ -156,25 +156,25 @@ export const docs = defineDocs({
 `,
       enableProcessedMarkdown,
     ),
-    // static Next.js and React Router serve the files under `/llms.mdx`
     'llms/docs-llms-prefixed.ts': `import { llms } from 'fumadocs-core/source';\n${docsLlms(src, '/llms.mdx')}\n`,
   };
   for (const { value: framework } of frameworks) {
     const baseDir = baseDirs[framework];
-    files[`webmcp/${framework}/components/webmcp.tsx`] = webmcp({
-      static: false,
-      i18n: false,
-      prefix: framework === 'react-router' ? '/llms.mdx' : '',
-    });
     const mcp = mcpRoute(framework);
     files[`mcp/${framework}/${mcp.file}`] = mcpTemplates(framework, mcp, src);
 
     const entries: [string, string][] = [];
     const routes: { path: string; entry: string }[] = [];
-    for (const { file, content, route } of templates({ framework, static: false }, null, '/docs')) {
+    const project = { framework, static: false };
+    for (const { file, content, route } of templates(project, null, '/docs')) {
       entries.push([path.posix.join(baseDir, file), content]);
       if (route) routes.push({ path: route.path, entry: route.file });
     }
+    if (internalPrefix(project))
+      entries.push([
+        path.posix.join(baseDir, 'lib/source.ts'),
+        files['llms/docs-llms-prefixed.ts'],
+      ]);
     if (framework === 'next') {
       entries.push([
         'next.config.ts',
@@ -193,7 +193,6 @@ export default config;
       ]);
     } else if (framework === 'react-router') {
       entries.push(
-        ['app/lib/source.ts', files['llms/docs-llms-prefixed.ts']],
         [
           'app/routes.ts',
           codemod('routes.ts', routesConfig, (file) => addReactRouterRoute(file, routes)),
@@ -207,8 +206,6 @@ export default config;
           }),
         ],
       );
-    } else if (framework === 'waku') {
-      entries.push(['src/lib/source.ts', files['llms/docs-llms-prefixed.ts']]);
     }
     addGroup('llms/routes', framework, entries);
   }
