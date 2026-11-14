@@ -123,6 +123,8 @@ test('llms: serve', async () => {
   );
   expect(await text('/docs/guide/llms-full.txt')).toBe('# Guide\n\n# Setup\n\n# Deep');
   expect(await text('/docs.md')).toBe('# Index');
+  // `Accept: text/markdown` on a page URL with a trailing slash
+  expect(await text('/docs/guide/.md')).toBe('# Guide');
 
   expect((await output.serve('/docs.md'))!.headers.get('Content-Type')).toBe(
     'text/markdown; charset=utf-8',

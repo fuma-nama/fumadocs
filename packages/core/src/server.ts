@@ -90,14 +90,14 @@ export async function renderRoute(element: ReactElement): Promise<string | undef
 }
 
 /**
- * The MDX tags of components resolved by `jsxComponents()`, a component kept as JSX is named after its tag: function
- * names are minified in production builds, and differ from the tag for aliased components.
+ * The element types of `jsxComponents()`, each stands for a component under its MDX tag: a component kept as JSX is
+ * named after its tag, as function names are minified in production builds and a component can have several tags.
  */
-const tags = new WeakMap<WeakKey, string>();
+const tagged = new WeakMap<WeakKey, { tag: string; type: unknown }>();
 
 /**
  * Resolve the MDX components of a generated Markdown component (`remarkLLMs` with `output: 'function'`):
- * a missing component becomes a stub that `renderToMarkdown` serializes as JSX syntax.
+ * a missing component is serialized as JSX syntax by `renderToMarkdown`.
  */
 export function jsxComponents(
   components: Record<string, ElementType> | undefined,
@@ -106,9 +106,11 @@ export function jsxComponents(
     get(target, key) {
       if (typeof key !== 'string') return Reflect.get(target, key);
 
-      const value = target[key] ?? (() => null);
-      if (typeof value !== 'string') tags.set(value, key);
-      return value;
+      const type: unknown = target[key] ?? (() => null);
+      if (typeof type === 'string') return type;
+      const element = () => null;
+      tagged.set(element, { tag: key, type });
+      return element;
     },
   });
 }
@@ -242,12 +244,9 @@ async function walk(node: ReactNode, state: State): Promise<string> {
   return '';
 }
 
-async function element(
-  type: unknown,
-  props: Props,
-  state: State,
-  tag = tags.get(type as WeakKey),
-): Promise<string> {
+async function element(type: unknown, props: Props, state: State, tag?: string): Promise<string> {
+  const entry = tagged.get(type as WeakKey);
+  if (entry) return element(entry.type, props, state, entry.tag);
   if (typeof type === 'string') return host(type, props, state);
   // client references can be callable proxies (Vite RSC) that throw when called, check them first
   if (isClientReference(type)) return jsx(tag ?? clientReferenceName(type.$$id), props, state);

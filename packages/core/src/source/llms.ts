@@ -241,7 +241,9 @@ export function llms<C extends LoaderConfig = LoaderConfig>(
       return dirPages && renderPages(dirPages);
     }
     if (path.endsWith('.md')) {
-      const url = path === '/index.md' ? '/' : path.slice(0, -'.md'.length);
+      // `/docs/.md` and `/.md` from page URLs with a trailing slash
+      let url = path.slice(0, -'.md'.length).replace(/(.)\/$/, '$1');
+      if (url === '/index') url = '/';
       const page = loader.getPageByUrl(url, lang) ?? loader.getPageByUrl(`${url}/`, lang);
       if (page && filter(page)) return renderPage(page);
     }

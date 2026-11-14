@@ -415,8 +415,12 @@ describe('jsxComponents', () => {
       return <div>{children}</div>;
     }
 
-    // minified, like production builds
-    const _c = jsxComponents({ Card: (() => (props: object) => <div {...props} />)(), Note: Box });
+    // minified, like production builds, and a component under two tags
+    const _c = jsxComponents({
+      Card: (() => (props: object) => <div {...props} />)(),
+      Note: Box,
+      Aside: Box,
+    });
 
     expect(
       await renderToMarkdown(
@@ -424,9 +428,11 @@ describe('jsxComponents', () => {
           <_c.Card title="A" />
           {'\n\n'}
           <_c.Note>{'hello'}</_c.Note>
+          {'\n\n'}
+          <_c.Aside>{'world'}</_c.Aside>
         </>,
       ),
-    ).toBe('<Card title="A" />\n\n<Note>\nhello\n</Note>');
+    ).toBe('<Card title="A" />\n\n<Note>\nhello\n</Note>\n\n<Aside>\nworld\n</Aside>');
   });
 });
 
