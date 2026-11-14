@@ -205,18 +205,12 @@ export function llms<C extends LoaderConfig = LoaderConfig>(
     return (await Promise.all(pages.map(renderPage))).join('\n\n');
   }
 
-  function getPages(loader: LoaderOutput<C>, lang?: string): Page[] {
-    const out: Page[] = [];
-    for (const page of loader.getPages(lang)) if (filter(page)) out.push(page);
-    return out;
-  }
+  const getPages = (loader: LoaderOutput<C>, lang?: string) => loader.getPages(lang).filter(filter);
 
-  function withLoader(render: (loader: LoaderOutput<C>) => string): Awaitable<string> {
+  function withLoader<T>(render: (loader: LoaderOutput<C>) => T): Awaitable<T> {
     if (typeof input === 'function') return Promise.resolve(input()).then(render);
     return render(input);
   }
-
-  const resolveLoader = async () => (typeof input === 'function' ? await input() : input);
 
   async function renderFile(
     loader: LoaderOutput<C>,
@@ -256,28 +250,34 @@ export function llms<C extends LoaderConfig = LoaderConfig>(
       return renderPage(page);
     },
     async full(lang) {
-      return renderPages(getPages(await resolveLoader(), lang));
+      return withLoader((loader) => renderPages(getPages(loader, lang)));
     },
     async files(lang) {
-      const pages = getPages(await resolveLoader(), lang);
-      const out = new Set(['/llms.txt', '/llms-full.txt']);
-      for (const page of pages) out.add(markdownPath(page.url));
-      for (const dir of sections(pages).keys()) out.add(`${dir}/llms-full.txt`);
-      return Array.from(out);
+      return withLoader((loader) => {
+        const pages = getPages(loader, lang);
+        const out = new Set(['/llms.txt', '/llms-full.txt']);
+        for (const page of pages) out.add(markdownPath(page.url));
+        for (const dir of sections(pages).keys()) out.add(`${dir}/llms-full.txt`);
+        return Array.from(out);
+      });
     },
     async serve(path, lang) {
-      const loader = await resolveLoader();
-      // generated URLs are URI encoded, routers may pass paths decoded
-      const encoded = encodeURI(path);
-      const text =
-        (await renderFile(loader, path, lang)) ??
-        (encoded === path ? undefined : await renderFile(loader, encoded, lang));
-      if (text === undefined) return;
+      // middleware calls it on every request, and other paths have no file
+      if (!/\.(md|txt)$/.test(path)) return;
 
-      return new Response(text, {
-        headers: {
-          'Content-Type': `${path.endsWith('.md') ? 'text/markdown' : 'text/plain'}; charset=utf-8`,
-        },
+      return withLoader(async (loader) => {
+        // generated URLs are URI encoded, routers may pass paths decoded
+        const encoded = encodeURI(path);
+        const text =
+          (await renderFile(loader, path, lang)) ??
+          (encoded === path ? undefined : await renderFile(loader, encoded, lang));
+        if (text === undefined) return;
+
+        return new Response(text, {
+          headers: {
+            'Content-Type': `${path.endsWith('.md') ? 'text/markdown' : 'text/plain'}; charset=utf-8`,
+          },
+        });
       });
     },
   };
