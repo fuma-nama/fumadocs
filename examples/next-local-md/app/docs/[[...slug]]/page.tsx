@@ -13,7 +13,7 @@ import type { Metadata } from 'next';
 import { createRelativeLink } from 'fumadocs-ui/mdx';
 import { Card, Cards } from 'fumadocs-ui/components/card';
 import { findSiblings } from 'fumadocs-core/page-tree';
-import { getPageImageUrl, getPageMarkdownUrl, gitConfig } from '@/lib/shared';
+import { getPageImageUrl, gitConfig } from '@/lib/shared';
 
 export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
   const params = await props.params;
@@ -47,7 +47,7 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
       },
     }),
   );
-  const markdownUrl = getPageMarkdownUrl(page).url;
+  const markdownUrl = `${page.url}.md`;
 
   return (
     <DocsPage toc={toc} full={page.data.frontmatter.full}>

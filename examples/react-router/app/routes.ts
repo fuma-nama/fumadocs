@@ -6,10 +6,8 @@ export default [
   route('api/search', 'routes/search.ts'),
   route('og/docs/*', 'routes/og.docs.tsx'),
 
-  // LLM integration:
-  route('llms.txt', 'llms/index.ts'),
-  route('llms-full.txt', 'llms/full.ts'),
-  route('llms.mdx/docs/*', 'llms/mdx.ts'),
-
   route('*', 'routes/not-found.tsx'),
+  route('llms.txt', 'routes/llms.txt.ts'),
+  route('llms-full.txt', 'routes/llms-full.txt.ts'),
+  route('llms.mdx/*', 'routes/llms.mdx.ts'),
 ] satisfies RouteConfig;

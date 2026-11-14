@@ -3,7 +3,14 @@ import path from 'node:path';
 import type { Project } from '@/project';
 import type { FormattedRoute } from '@/project/route';
 import type { FeatureContext, PackageJson } from '@/features';
-import { addImport, addReactRouterRoute, enableProcessedMarkdown } from '@/codemod';
+import {
+  addImport,
+  addProxyMatcher,
+  addReactRouterRoute,
+  enableProcessedMarkdown,
+} from '@/codemod';
+import { exists } from '@/utils/fs';
+import type { SourceFile } from '@/codemod';
 
 /** the shallowest `.ts`/`.tsx` file under `dir` whose content includes `needle`, relative to `cwd` */
 export async function findSource(
@@ -127,4 +134,41 @@ export function sourceRef(dynamic: boolean): SourceRef {
   return dynamic
     ? { dynamic: true, ref: 'getSource', resolved: '(await getSource())' }
     : { dynamic: false, ref: 'source', resolved: 'source' };
+}
+
+/** the Next.js proxy (middleware) file of the project, relative to cwd */
+export async function findNextProxy({ cwd, baseDir }: Project) {
+  for (const file of ['proxy.ts', 'middleware.ts']) {
+    for (const dir of new Set([baseDir, ''])) {
+      const target = path.join(dir, file);
+      if (await exists(path.join(cwd, target))) return target;
+    }
+  }
+}
+
+/** edit a file with codemods, otherwise tell the user: the file is missing or `edit` returns `false` */
+export async function editOrNote(
+  ctx: FeatureContext,
+  file: string | undefined,
+  edit: (file: SourceFile) => boolean | void,
+  note: string,
+) {
+  const edited =
+    file !== undefined &&
+    (await ctx
+      .source(file, (source) => {
+        if (edit(source) === false) throw new Error(note);
+      })
+      .catch(() => false));
+  if (!edited) ctx.note(note);
+}
+
+/** add paths to the matcher of the Next.js i18n middleware */
+export async function extendNextProxy(ctx: FeatureContext, patterns: string[]) {
+  await editOrNote(
+    ctx,
+    await findNextProxy(ctx.project),
+    (file) => addProxyMatcher(file, patterns),
+    `Add ${patterns.map((p) => `\`${p}\``).join(', ')} to the matcher of your i18n middleware.`,
+  );
 }

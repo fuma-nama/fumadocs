@@ -9,9 +9,9 @@ import {
 import { RootProvider } from 'fumadocs-ui/provider/react-router';
 import type { Route } from './+types/root';
 import './app.css';
-import { isMarkdownPreferred, rewritePath } from 'fumadocs-core/negotiation';
 import NotFound from './routes/not-found';
-import { docsContentRoute, docsRoute } from '@/lib/shared';
+import { isMarkdownPreferred } from 'fumadocs-core/negotiation';
+import { docsLlms } from '@/lib/source';
 
 export const links: Route.LinksFunction = () => [
   { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
@@ -75,33 +75,18 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   );
 }
 
-const { rewrite: rewriteDocs } = rewritePath(
-  `${docsRoute}{/*path}`,
-  `${docsContentRoute}{/*path}/content.md`,
-);
-const { rewrite: rewriteSuffix } = rewritePath(
-  `${docsRoute}{/*path}.md`,
-  `${docsContentRoute}{/*path}/content.md`,
-);
-const serverMiddleware: Route.MiddlewareFunction = async ({ request }, next) => {
-  const url = new URL(request.url);
-  const suffixPath = rewriteSuffix(url.pathname);
-  if (suffixPath) return Response.redirect(new URL(suffixPath, url));
+/** serve the files of `docsLlms` at their paths, and docs pages as Markdown to clients that prefer it */
+const llmsMiddleware: Route.MiddlewareFunction = async ({ request }) => {
+  const { pathname } = new URL(request.url);
+  const file = await docsLlms.serve(pathname);
+  if (file) return file;
 
-  if (isMarkdownPreferred(request)) {
-    const docsPath = rewriteDocs(url.pathname);
-    // this URL has two representations selected by `Accept`, and the headers of
-    // `Response.redirect()` are immutable, so build the response directly
-    if (docsPath)
-      return new Response(null, {
-        status: 302,
-        headers: {
-          Location: new URL(docsPath, url).toString(),
-          Vary: 'Accept',
-        },
-      });
+  const markdown = isMarkdownPreferred(request) && (await docsLlms.serve(`${pathname}.md`));
+  if (markdown) {
+    // this URL has two representations, selected by `Accept`
+    markdown.headers.set('Vary', 'Accept');
+    return markdown;
   }
-
-  return next();
 };
-export const middleware = [serverMiddleware];
+
+export const middleware = [llmsMiddleware];

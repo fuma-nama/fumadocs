@@ -11,7 +11,7 @@ import {
   ViewOptionsPopover,
 } from 'fumadocs-ui/layouts/docs/page';
 import { baseOptions } from '@/lib/layout.shared';
-import { getPageMarkdownUrl, gitConfig } from '@/lib/shared';
+import { gitConfig } from '@/lib/shared';
 import { useFumadocsLoader } from 'fumadocs-core/source/client';
 import { useMemo } from 'react';
 import { useMDXComponents } from '@/components/mdx';
@@ -49,7 +49,7 @@ const serverLoader = createServerFn({
       path: page.path,
       frontmatter: page.data.frontmatter,
       render: serialize(),
-      markdownUrl: getPageMarkdownUrl(page).url,
+      markdownUrl: `${page.url}.md`,
       pageTree: await source.serializePageTree(source.getPageTree()),
     };
   });
