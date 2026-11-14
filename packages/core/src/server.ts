@@ -90,6 +90,12 @@ export async function renderRoute(element: ReactElement): Promise<string | undef
 }
 
 /**
+ * The MDX tags of components resolved by `jsxComponents()`, a component kept as JSX is named after its tag: function
+ * names are minified in production builds, and differ from the tag for aliased components.
+ */
+const tags = new WeakMap<WeakKey, string>();
+
+/**
  * Resolve the MDX components of a generated Markdown component (`remarkLLMs` with `output: 'function'`):
  * a missing component becomes a stub that `renderToMarkdown` serializes as JSX syntax.
  */
@@ -98,12 +104,11 @@ export function jsxComponents(
 ): Record<string, ElementType> {
   return new Proxy(components ?? {}, {
     get(target, key) {
-      const value = target[key as string];
-      if (value !== undefined || typeof key !== 'string') return value;
+      if (typeof key !== 'string') return Reflect.get(target, key);
 
-      const stub = () => null;
-      stub.displayName = key;
-      return stub;
+      const value = target[key] ?? (() => null);
+      if (typeof value !== 'string') tags.set(value, key);
+      return value;
     },
   });
 }
@@ -237,11 +242,16 @@ async function walk(node: ReactNode, state: State): Promise<string> {
   return '';
 }
 
-async function element(type: unknown, props: Props, state: State): Promise<string> {
+async function element(
+  type: unknown,
+  props: Props,
+  state: State,
+  tag = tags.get(type as WeakKey),
+): Promise<string> {
   if (typeof type === 'string') return host(type, props, state);
   // client references can be callable proxies (Vite RSC) that throw when called, check them first
-  if (isClientReference(type)) return jsx(clientReferenceName(type.$$id), props, state);
-  if (typeof type === 'function') return component(type as Component, props, state);
+  if (isClientReference(type)) return jsx(tag ?? clientReferenceName(type.$$id), props, state);
+  if (typeof type === 'function') return component(type as Component, props, state, tag);
   // Fragment, Suspense, StrictMode, Profiler, Activity
   if (typeof type === 'symbol') return walk(props.children, state);
 
@@ -256,20 +266,25 @@ async function element(type: unknown, props: Props, state: State): Promise<strin
 
     switch (special.$$typeof) {
       case REACT_LAZY:
-        return element(await resolveLazy(special), props, state);
+        return element(await resolveLazy(special), props, state, tag);
       case REACT_MEMO:
-        return element(special.type, props, state);
+        return element(special.type, props, state, tag);
       case REACT_FORWARD_REF:
-        return component(special.render!, props, state);
+        return component(special.render!, props, state, tag);
     }
   }
 
   return '';
 }
 
-async function component(fn: Component, props: Props, state: State): Promise<string> {
+async function component(
+  fn: Component,
+  props: Props,
+  state: State,
+  tag: string | undefined,
+): Promise<string> {
   const result = await optIn(fn, props, state.target);
-  if (result === NOT_OPTED_IN) return jsx(componentName(fn), props, state);
+  if (result === NOT_OPTED_IN) return jsx(tag ?? componentName(fn), props, state);
   return walk(result, state);
 }
 

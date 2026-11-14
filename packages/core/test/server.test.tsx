@@ -409,6 +409,25 @@ describe('jsxComponents', () => {
       ),
     ).toBe('> **Note**\n> hello\n\n<Tabs items={["a"]}>\ncontent\n</Tabs>');
   });
+
+  it('names components without a Markdown form after their tag', async () => {
+    function Box({ children }: { children?: ReactNode }) {
+      return <div>{children}</div>;
+    }
+
+    // minified, like production builds
+    const _c = jsxComponents({ Card: (() => (props: object) => <div {...props} />)(), Note: Box });
+
+    expect(
+      await renderToMarkdown(
+        <>
+          <_c.Card title="A" />
+          {'\n\n'}
+          <_c.Note>{'hello'}</_c.Note>
+        </>,
+      ),
+    ).toBe('<Card title="A" />\n\n<Note>\nhello\n</Note>');
+  });
 });
 
 describe('host elements', () => {
