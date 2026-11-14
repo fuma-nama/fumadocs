@@ -42,13 +42,14 @@ export function encodeRequestData(
       const encoder = getMediaEncoder(field, adapters);
       if (encoder) {
         if (type === 'query') result[type][key] = { values: [encoder(value)] };
+        else if (type === 'path') result[type][key] = { value: encodeURIComponent(encoder(value)) };
         else result[type][key] = { value: encoder(value) };
         continue;
       }
 
       switch (type) {
         case 'path':
-          serializePathParameter(field, value, result.path);
+          serializePathParameter(field, encodePathMembers(value), result.path);
           break;
         case 'query':
           serializeQueryParameter(field, value, result.query);
@@ -92,6 +93,18 @@ function serializeSimple(value: NonNullable<unknown>, explode: boolean): string 
       : Object.entries(value).flat().join(',');
   }
   return String(value);
+}
+
+/** the delimiters a style adds stay literal, so only the members are encoded (RFC 6570) */
+function encodePathMembers(value: NonNullable<unknown>): NonNullable<unknown> {
+  if (Array.isArray(value)) return value.map((item) => encodeURIComponent(String(item)));
+  if (typeof value === 'object') {
+    const out: Record<string, string> = {};
+    for (const [k, v] of Object.entries(value))
+      out[encodeURIComponent(k)] = encodeURIComponent(String(v));
+    return out;
+  }
+  return encodeURIComponent(String(value));
 }
 
 function serializePathParameter(
