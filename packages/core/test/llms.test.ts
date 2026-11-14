@@ -107,6 +107,7 @@ test('llms: files', async () => {
     '/docs/misc/note.md',
     '/docs/api.md',
     '/docs/api/get.md',
+    '/docs/api/llms.txt',
     '/docs/api/llms-full.txt',
   ]);
 });
@@ -166,18 +167,31 @@ test('llms: filter', async () => {
 test('llms: section', async () => {
   const output = llms(guideDocs, {
     renderPage: renderTitle,
-    // folders with an index page, and a custom path for the root folder
-    section: (folder) => (folder.root ? '/docs/api.txt' : folder.index !== undefined),
+    // folders with an index page, and the root folder at another URL, collapsed
+    section: (folder) =>
+      folder.root ? { url: '/docs/reference', collapse: true } : folder.index !== undefined,
   });
   const text = async (path: string) => (await output.serve(path))!.text();
 
   await expect(output.files()).resolves.toEqual(
-    expect.arrayContaining(['/docs/guide/llms-full.txt', '/docs/api.txt']),
+    expect.arrayContaining([
+      '/docs/guide/llms.txt',
+      '/docs/guide/llms-full.txt',
+      '/docs/reference/llms.txt',
+      '/docs/reference/llms-full.txt',
+    ]),
   );
   await expect(output.files()).resolves.not.toContain('/docs/misc/llms-full.txt');
-  expect(await text('/llms.txt')).toContain('- [Api](/docs/api.txt)');
-  expect(await text('/llms.txt')).toContain('- [Guide](/docs/guide/llms-full.txt)');
-  expect(await text('/docs/api.txt')).toBe('# API\n\n# Get');
+
+  const index = await text('/llms.txt');
+  expect(index).toContain('- [Guide](/docs/guide/llms-full.txt)\n  - [Guide](/docs/guide.md)');
+  // a collapsed section is one line
+  expect(index).toContain('- [Api](/docs/reference/llms.txt)\n- [Guide]');
+
+  expect(await text('/docs/reference/llms.txt')).toBe(
+    '# Api\n\n[All pages](/docs/reference/llms-full.txt)\n\n- [API](/docs/api.md)\n- [Get](/docs/api/get.md)',
+  );
+  expect(await text('/docs/reference/llms-full.txt')).toBe('# API\n\n# Get');
 });
 
 test('llms: files without root folders', async () => {
