@@ -8,6 +8,7 @@ import { frontmatter } from 'fumadocs-core/content/md/frontmatter';
 import { extractCodeRegion } from 'fumadocs-core/mdx-plugins/remark-include';
 import { embedSource, replaceSource } from '@/stringifier';
 import { flattenNode } from '@/utils';
+import { headingIdRegex } from '../../shared/heading-id';
 import type { Code, Heading, RootContent } from 'mdast';
 
 export interface RemarkIncludeOptions {
@@ -295,16 +296,14 @@ function sliceByPosition(source: string, start?: number, end?: number) {
   return source.slice(start, end);
 }
 
-const customIdRegex = /\s*\[#(?<slug>[^]+?)]\s*$/;
-
-function headingId(node: Heading, slugger: Slugger): string | undefined {
-  const dataId = (node.data as { hProperties?: { id?: string } } | undefined)?.hProperties?.id;
-  if (dataId) return dataId;
-
+/** the ID `remarkHeading` gives a heading */
+function headingId(node: Heading, slugger: Slugger): string {
   const text = flattenNode(node);
-  const match = customIdRegex.exec(text);
-  if (match?.[1]) return match[1];
-  return slugger.slug(text);
+  const custom =
+    (node.data as { hProperties?: { id?: string } } | undefined)?.hProperties?.id ||
+    headingIdRegex.exec(text)?.[1];
+  const id = slugger.slug(custom || text);
+  return custom || id;
 }
 
 function findSectionElement(nodes: IncludeNode[], section: string): IncludeNode | undefined {

@@ -29,6 +29,21 @@ describe('remark-heading', () => {
     expect((data!.toc as TOCItemType[]).map((item) => item.url)).toEqual(['#setup', '#setup-1']);
   });
 
+  it('counts custom ids as duplicates', async () => {
+    const { data } = await compile(
+      '## Intro [#setup]\n\n## Setup\n\n## Setup\n\n## API\n\n## API [#api-1]\n\n## API',
+    );
+
+    expect((data!.toc as TOCItemType[]).map((item) => item.url)).toEqual([
+      '#setup',
+      '#setup-1',
+      '#setup-2',
+      '#api',
+      '#api-1',
+      '#api-2',
+    ]);
+  });
+
   it('strips custom id markers from toc titles', async () => {
     const { data, code } = await compile('## Hello World [#custom-id]');
 

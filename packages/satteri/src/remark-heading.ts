@@ -65,6 +65,11 @@ export function remarkHeading({
           hProperties.id = resolveSlug(node, title);
           const code = fromCode && ids.next(node.children, showConditions(node, ctx));
           if (code) (ctx.data._headingIds ??= {})[hProperties.id as string] = code;
+        } else {
+          // slug a custom ID too, so that later headings don't reuse it
+          resolveSlug(node, hProperties.id as string);
+          if (fromCode)
+            ids.next([{ type: 'text', value: hProperties.id }], showConditions(node, ctx));
         }
 
         ctx.setProperty(node, 'data', data);

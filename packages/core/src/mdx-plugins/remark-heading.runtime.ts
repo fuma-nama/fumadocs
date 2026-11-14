@@ -9,9 +9,9 @@ function createSlugger(): (text: string) => string {
  * The IDs of the headings of a page for its props.
  *
  * @param ids - list the ID of each heading in document order: `slug` takes the parts of the text of a heading that
- * shows, a hidden heading has an empty ID
- * @param slugger - create the slug function of a page, called with the text of each heading that shows in document
- * order, so it can count duplicates
+ * shows, or its custom ID, a hidden heading has an empty ID
+ * @param slugger - create the slug function of a page, called with the text or custom ID of each heading that shows in
+ * document order, so it can count duplicates
  */
 export function createHeadingIds(
   ids: (props: object, slug: (parts: unknown[]) => string) => string[],

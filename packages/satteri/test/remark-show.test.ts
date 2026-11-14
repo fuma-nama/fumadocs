@@ -353,3 +353,21 @@ test('Remark Heading: headings with IDs from code stay headings for other plugin
   // without the MDX components, a component of a title is its content
   expect(titles({ name: 'X' })[1][2]).toBe('Use X new');
 });
+
+test('Remark Heading: custom IDs count as duplicates of IDs from code', async () => {
+  const options = await applySatteriPreset({ data: { unstable_runtimeOutputs: true } })('runtime');
+  const { code } = await compileMdx({
+    source: '## Intro [#setup]\n\n## Setup\n\n## Setup {props.n}\n',
+    filePath: '/tmp/doc.mdx',
+    environment: 'runtime',
+    options,
+  });
+  const page = (await new AsyncFunction('opts', code)(scope)) as { default: FC<object> };
+  const html = renderToStaticMarkup(createElement(page.default, {}));
+
+  expect(Array.from(html.matchAll(/id="(.+?)"/g), (match) => match[1])).toEqual([
+    'setup',
+    'setup-1',
+    'setup-2',
+  ]);
+});

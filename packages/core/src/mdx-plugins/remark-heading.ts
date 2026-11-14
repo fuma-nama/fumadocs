@@ -10,7 +10,10 @@ import { walkBranches } from '../../../shared/show';
 import { headingIdCode, headingIdRegex } from '../../../shared/heading-id';
 
 export interface RemarkHeadingOptions {
-  /** slug the IDs of headings, the IDs slugged when rendering come from `slugImportSource` */
+  /**
+   * slug the IDs of headings, the IDs slugged when rendering come from `slugImportSource`. Custom IDs are slugged too,
+   * so a slugger can count them as duplicates.
+   */
   slug?: (root: Root, heading: Heading, text: string) => string;
 
   /**
@@ -93,6 +96,10 @@ export function remarkHeading({
         props.id = slug(root, heading, text);
         const code = fromCode && ids.next(heading.children, when);
         if (code) (file.data._headingIds ??= {})[props.id as string] = code;
+      } else {
+        // slug a custom ID too, so that later headings don't reuse it
+        slug(root, heading, props.id as string);
+        if (fromCode) ids.next([{ type: 'text', value: props.id }], when);
       }
 
       if (generateToc) {

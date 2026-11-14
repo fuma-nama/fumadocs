@@ -59,6 +59,45 @@ test('Remark Heading', async () => {
   );
 });
 
+test('Remark Heading: custom IDs count as duplicates', async () => {
+  const { compile, run } = await import('@mdx-js/mdx');
+  const runtime = await import('react/jsx-runtime');
+  const { renderToStaticMarkup } = await import('react-dom/server');
+  const file = await remark()
+    .use(remarkHeading)
+    .process('## Intro [#setup]\n\n## Setup\n\n## Setup\n\n## API\n\n## API [#api-1]\n\n## API\n');
+  expect(file.data.toc!.map((item) => item.url)).toEqual([
+    '#setup',
+    '#setup-1',
+    '#setup-2',
+    '#api',
+    '#api-1',
+    '#api-2',
+  ]);
+
+  // also when slugging the headings with expressions
+  const code = await compile(
+    {
+      value: '## Intro [#setup]\n\n## Setup\n\n## Setup {props.n}\n',
+      data: { unstable_runtimeOutputs: true },
+    },
+    {
+      outputFormat: 'function-body',
+      baseUrl: import.meta.url,
+      remarkPlugins: [remarkHeading],
+      rehypePlugins: [rehypeHeading],
+    },
+  );
+  const html = renderToStaticMarkup(
+    runtime.jsx((await run(String(code), runtime as never)).default, {}),
+  );
+  expect(Array.from(html.matchAll(/id="(.+?)"/g), (match) => match[1])).toEqual([
+    'setup',
+    'setup-1',
+    'setup-2',
+  ]);
+});
+
 test('Remark Structure: Markdown of headings', () => {
   expect(structure('## The `code` Title [#title]\n\ntext').headings).toEqual([
     { id: 'title', content: 'The `code` Title' },

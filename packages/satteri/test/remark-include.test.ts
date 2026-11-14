@@ -46,7 +46,7 @@ describe('remark-include', () => {
     expect(code).toContain('usage-marker');
     expect(code).toContain('more-usage-marker');
     expect(code).not.toContain('setup-marker');
-    expect(code).not.toContain('other-marker');
+    expect(code).not.toContain('setup-1-marker');
   });
 
   it('extracts a section by custom heading id', async () => {
@@ -54,6 +54,10 @@ describe('remark-include', () => {
 
     expect(code).toContain('setup-marker');
     expect(code).not.toContain('usage-marker');
+    // a custom ID counts as a duplicate
+    expect((await compile('<include>./sections.mdx#setup-1</include>')).code).toContain(
+      'setup-1-marker',
+    );
   });
 
   it('extracts a section wrapped in a <section> tag', async () => {

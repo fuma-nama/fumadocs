@@ -24,7 +24,8 @@ test('includes content, sections & code regions', async () => {
 });
 
 test('extracts a section by its heading ID', async () => {
-  const out = await include('<include>./sections.md#usage-1</include>');
+  // a custom ID counts as a duplicate
+  const out = await include('<include>./sections.md#usage-2</include>');
 
   expect(out).toContain('second-usage-marker');
   expect(out).not.toContain('first-usage-marker');

@@ -235,7 +235,8 @@ function extractSection(tree: Root, section: string): RootContent[] | undefined 
 function headingId(heading: Heading, slugger: Slugger): string {
   const last = heading.children.at(-1);
   const custom = last?.type === 'text' ? headingIdRegex.exec(last.value)?.[1] : undefined;
-  return custom ?? slugger.slug(flattenNode(heading));
+  const id = slugger.slug(custom ?? flattenNode(heading));
+  return custom ?? id;
 }
 
 // VS Code-style regions, adapted from VitePress:
