@@ -108,3 +108,41 @@ describe('Code Sample Generators', () => {
     }
   });
 });
+
+test('multipart code usages send one part per array item, like the playground', () => {
+  const upload: RequestData & { url: string } = {
+    method: 'post',
+    url: 'https://api.example.com/upload',
+    path: {},
+    query: {},
+    header: {},
+    cookie: {},
+    body: { name: 'Mars', files: ['@a.jpg', '@b.jpg'], meta: { a: 1 } },
+    bodyMediaType: 'multipart/form-data',
+  };
+  const context = { mediaAdapters: defaultAdapters, custom: null };
+
+  const parts = defaultAdapters['multipart/form-data'].encode({ body: upload.body }) as FormData;
+  expect([...parts.entries()]).toEqual([
+    ['name', 'Mars'],
+    ['files', '@a.jpg'],
+    ['files', '@b.jpg'],
+    ['meta', '{"a":1}'],
+  ]);
+
+  expect(curl.generate(upload, context)).toContain(
+    `-F 'files=@a.jpg' \\\n  -F 'files=@b.jpg' \\\n  -F 'meta={"a":1}'`,
+  );
+  expect(javascript.generate(upload, context)).toContain(
+    'body.append("files", "@a.jpg")\nbody.append("files", "@b.jpg")',
+  );
+  expect(python.generate(upload, context)).toContain(
+    '  ("files", (None, "@a.jpg")),\n  ("files", (None, "@b.jpg")),',
+  );
+  for (const generator of [go, csharp, java, rust]) {
+    const code = generator.generate(upload, context);
+    expect(code).toContain('@a.jpg');
+    // the array is not sent as one JSON value
+    expect(code).not.toMatch(/a\.jpg\*",/);
+  }
+});
