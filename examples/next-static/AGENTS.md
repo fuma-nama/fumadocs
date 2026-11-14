@@ -1,3 +1,8 @@
 # Fumadocs
 
-This docs site is built with [Fumadocs](https://fumadocs.dev) on Next.js. Before you write content, change the setup or upgrade packages, read https://fumadocs.dev/agents.md with `next` as `<framework>`. The project is already set up, so skip its first step.
+This site is built with [Fumadocs](https://fumadocs.dev) on Next.js. The APIs and conventions of Fumadocs may differ from your training data, so check its docs for the task at hand:
+
+- Writing pages: https://fumadocs.dev/docs/next/markdown.md
+- Organizing pages and folders: https://fumadocs.dev/docs/next/page-conventions.md
+- Upgrading Fumadocs: https://fumadocs.dev/docs/next/upgrade.md
+- Other tasks: https://fumadocs.dev/llms.txt lists every docs page.

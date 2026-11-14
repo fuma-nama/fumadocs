@@ -1,3 +1,8 @@
 # Fumadocs
 
-This docs site is built with [Fumadocs](https://fumadocs.dev) on TanStack Start. Before you write content, change the setup or upgrade packages, read https://fumadocs.dev/agents.md with `tanstack-start` as `<framework>`. The project is already set up, so skip its first step.
+This site is built with [Fumadocs](https://fumadocs.dev) on TanStack Start. The APIs and conventions of Fumadocs may differ from your training data, so check its docs for the task at hand:
+
+- Writing pages: https://fumadocs.dev/docs/tanstack-start/markdown.md
+- Organizing pages and folders: https://fumadocs.dev/docs/tanstack-start/page-conventions.md
+- Upgrading Fumadocs: https://fumadocs.dev/docs/tanstack-start/upgrade.md
+- Other tasks: https://fumadocs.dev/llms.txt lists every docs page.

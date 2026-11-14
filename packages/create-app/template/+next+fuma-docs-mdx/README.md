@@ -32,10 +32,6 @@ Collections are defined with the [Macro API](https://fumadocs.dev/docs/mdx/macro
 
 Read the [Introduction](https://fumadocs.dev/docs/mdx) for further details.
 
-## AI Agents
-
-`AGENTS.md` points coding agents (Claude Code, Cursor, Codex, etc.) to the [Fumadocs instructions](https://fumadocs.dev/agents.md) for writing content and upgrading.
-
 ## Learn More
 
 To learn more about Next.js and Fumadocs, take a look at the following

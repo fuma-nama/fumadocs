@@ -137,7 +137,7 @@ export const docs: Feature<{ i18n: boolean }> = {
     ctx.note(
       `Start the dev server and open ${i18n && !i18n.optionalLocale ? '/en/docs' : '/docs'} to see your docs.`,
     );
-    ctx.note('Using an AI agent? Point it to https://fumadocs.dev/agents.md.');
+    ctx.note('Using an AI agent? https://fumadocs.dev/llms.txt lists every docs page as Markdown.');
   },
 };
 
