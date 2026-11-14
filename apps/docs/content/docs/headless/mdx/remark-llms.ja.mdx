@@ -1,0 +1,107 @@
+---
+title: Remark LLMs
+description: LLM向けにドキュメントのMarkdownをエクスポートします。
+---
+
+`remarkLLMs` プラグインは、ドキュメントのMarkdownをLLM向けに `_markdown` としてエクスポートします。記述したMarkdownはそのまま保持されます。生成の仕組みについては[文字列化](/docs/headless/mdx/stringification)を参照してください。
+
+```mdx tab="Input"
+import { Callout } from 'fumadocs-ui/components/callout';
+
+## Getting Started
+
+<Callout>Hello **world**.</Callout>
+```
+
+```md tab="Output"
+## Getting Started [#getting-started]
+
+<Callout>Hello **world**.</Callout>
+```
+
+Fumadocs MDX では、ESM が削除され、見出しに ID が付与され (`headingIds` を参照) 、インクルードされたコンテンツが展開されます。
+
+## 使い方 [#usage]
+
+`remarkLLMs` は remark プラグインです。Fumadocs MDX では、`includeProcessedMarkdown` を使って有効にします。unified と Sätteri のどちらにも対応しています。
+
+```ts title="source.config.ts"
+import { defineDocs } from 'fumadocs-mdx/config';
+
+export const docs = defineDocs({
+  docs: {
+    postprocess: {
+      // `true`、または `remarkLLMs` のオプション
+      includeProcessedMarkdown: true,
+    },
+  },
+});
+```
+
+ページからは `getText('processed')` で読み取ります。このメソッドは、ページの props を使って Markdown をレンダリングします。
+
+```ts
+const markdown = await page.data.getText('processed');
+```
+
+## 画像 [#images]
+
+ページと同じ場所に置かれ、[Remark Image](/docs/headless/mdx/remark-image) によってインポートされた画像には、バンドラーが配信する際のURLが割り当てられます。
+
+```md tab="Input"
+![How a calculation flows](./flow.png)
+```
+
+```md tab="Output"
+![How a calculation flows](/assets/flow-Dxg6sAyC.png)
+```
+
+public ディレクトリ内の画像は、元のアドレスがそのまま維持されます。Vite は、[`build.assetsInlineLimit`](https://vite.dev/config/build-options#build-assetsinlinelimit) より小さい画像を `data:` URL としてインライン化します。
+
+## 出力 [#output]
+
+`output` オプションでは、`_markdown` の形式を設定します。
+
+* `function`: `_markdown` はコンポーネントになり、[`renderToMarkdown()`](/docs/headless/utils/markdown) でレンダリングします。Markdown はページの props を使って生成されます。[`<show>`](/docs/markdown#show) 内でレンダリングされないコンテンツは除外され、式はその値に、JSX 要素は [Markdown 形式](#jsx-elements)に置き換えられます。
+* `string`: `_markdown` は文字列になります。式と JSX 要素はソースのテキストのまま残り、`<show>` を含むドキュメントはコンパイルに失敗します。
+
+デフォルトは、Fumadocs MDX と `@fumadocs/astro` では `function`、それ以外では `string` です。カスタムのコンテンツソースでは、[ランタイム出力](/docs/headless/source-api/source#runtime-outputs)を使う場合に `function` になります。
+
+## JSX 要素 [#jsx-elements]
+
+[`output: 'function'`](#output) を指定すると、コンポーネントは MDX と同じ方法で解決されます。まずファイル内のインポートと宣言から探し、見つからなければ[ページの props](/docs/headless/source-api#custom-props) に含まれる MDX コンポーネントから探します。MDX コンポーネントは `getPage()` でページに渡します。
+
+```ts
+const page = source.getPage(slugs, { props: { components } });
+```
+
+コンポーネントは [`asMarkdown()`](/docs/headless/utils/markdown#asmarkdown) で自身の Markdown 形式を定義します。定義されていないコンポーネントは JSX のまま残ります。要素を削除したり、その子要素に置き換えたりするには、`filterElement` を使用してください (Sätteri では使用できません) 。
+
+### プレースホルダー [#placeholders]
+
+JSX 要素を自前でレンダリングするには、プレースホルダーとして列挙します。
+
+```ts
+import type { LLMsOptions } from 'fumadocs-core/mdx-plugins/remark-llms';
+
+const llmsOptions: LLMsOptions = {
+  mdxAsPlaceholder: ['Callout'],
+};
+```
+
+次に、必要に応じて実行時のデータを使い、それらをレンダリングします。
+
+```ts
+import { renderPlaceholder } from 'fumadocs-core/mdx-plugins/remark-llms.runtime';
+
+const markdown = await renderPlaceholder(await page.data.getText('processed'), {
+  // `children` は要素の中身を Markdown にしたものです
+  Callout: ({ attributes, children }) => `> **${attributes.title}**\n>\n> ${children}`,
+});
+```
+
+Sätteri では `mdxAsPlaceholder` を使用できません。
+
+## オプション [#options]
+
+<auto-type-table type="import('fumadocs-core/mdx-plugins/remark-llms').LLMsOptions" />

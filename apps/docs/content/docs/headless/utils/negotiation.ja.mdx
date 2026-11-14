@@ -1,0 +1,78 @@
+---
+title: Negotiation
+description: コンテンツネゴシエーションのためのユーティリティです。
+---
+
+## 概要 [#overview]
+
+ミドルウェアをサポートする React フレームワークでは、Fumadocs の Negotiation API を使って基本的な機能を実装できます。
+Waku では、`src/middleware` 内の [Hono ミドルウェア](https://hono.dev/docs/guides/middleware)で使用します。
+Astro では、[ミドルウェア](https://docs.astro.build/en/guides/middleware)で使用します。なお、Astro のミドルウェアはリクエスト時にレンダリングされるページでのみ実行されます。
+
+### Markdown の Accept 対応 [#accept-markdown]
+
+`Accept` ヘッダーに応じて Markdown または HTML を返します。これにより、AIエージェントにとっての利便性を高められます。
+
+```ts tab="Next.js" title="proxy.ts"
+import { NextRequest, NextResponse } from 'next/server';
+import { isMarkdownPreferred, rewritePath } from 'fumadocs-core/negotiation';
+
+const { rewrite: rewriteLLM } = rewritePath('/docs/*path', '/llms.mdx/*path');
+
+export default function proxy(request: NextRequest) {
+  if (isMarkdownPreferred(request)) {
+    const result = rewriteLLM(request.nextUrl.pathname);
+
+    if (result) {
+      return NextResponse.rewrite(new URL(result, request.nextUrl));
+    }
+  }
+
+  return NextResponse.next();
+}
+```
+
+```tsx tab="React Router" title="app/root.tsx"
+import type { Route } from './+types/root';
+import { isMarkdownPreferred, rewritePath } from 'fumadocs-core/negotiation';
+
+const { rewrite: rewriteLLM } = rewritePath('/docs/*path', '/llms.mdx/*path');
+
+const serverMiddleware: Route.MiddlewareFunction = async ({ request }, next) => {
+  const url = new URL(request.url);
+  const result = isMarkdownPreferred(request) && rewriteLLM(url.pathname);
+
+  // `Response.redirect()` のヘッダーは変更できないため、レスポンスを直接構築します
+  if (result)
+    return new Response(null, {
+      status: 302,
+      headers: { Location: new URL(result, url).toString(), Vary: 'Accept' },
+    });
+
+  return next();
+};
+
+export const middleware = [serverMiddleware];
+```
+
+```ts tab="TanStack Start" title="src/start.ts"
+import { createMiddleware, createStart } from '@tanstack/react-start';
+import { redirect } from '@tanstack/react-router';
+import { isMarkdownPreferred, rewritePath } from 'fumadocs-core/negotiation';
+
+const { rewrite: rewriteLLM } = rewritePath('/docs/*path', '/llms.mdx/*path');
+
+const llmMiddleware = createMiddleware().server(({ next, request }) => {
+  const url = new URL(request.url);
+  const result = isMarkdownPreferred(request) && rewriteLLM(url.pathname);
+
+  // Markdown の URL にリダイレクトする
+  if (result) throw redirect({ href: new URL(result, url).href, headers: { Vary: 'Accept' } });
+
+  return next();
+});
+
+export const startInstance = createStart(() => ({
+  requestMiddleware: [llmMiddleware],
+}));
+```

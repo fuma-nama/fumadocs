@@ -1,0 +1,22 @@
+---
+title: 目次の取得
+description: Markdown/MDX コンテンツから目次を解析します
+---
+
+Markdown/MDX コンテンツから目次を解析します。
+
+> [remark プラグインを直接使用することもできます](/docs/headless/mdx/headings)
+
+## 使い方 [#usage]
+
+注: CMS を使用している場合は、CMS が提供する API を代わりに使用してください。
+
+```ts
+import { getTableOfContents } from 'fumadocs-core/content/toc';
+
+const toc = getTableOfContents('## markdown content');
+```
+
+### 出力 [#output]
+
+[`TOCItemType`](/docs/headless/mdx/headings#output) の配列を返します。

@@ -1,0 +1,239 @@
+---
+title: レイアウトのリンク
+description: すべてのレイアウトで共通のナビゲーション設定です。
+---
+
+## 概要 [#overview]
+
+Fumadocs では、`links` prop を使ってレイアウトにナビゲーションリンクを追加できます。たとえば、「ショーケース」ページへのリンクを設置できます。
+
+<div className="not-prose grid gap-2 *:border max-sm:*:last:hidden sm:grid-cols-[2fr_1fr]">
+  <>![Nav](/docs/nav-layout-home.png)</>
+
+  <>![Nav](/docs/nav-layout-docs.png)</>
+</div>
+
+```tsx tab="All" title="lib/layout.shared.tsx"
+import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
+
+export function baseOptions(): BaseLayoutProps {
+  return {
+    links: [], // [!code ++]
+  };
+}
+```
+
+```tsx tab="Docs Layout" title="app/docs/layout.tsx"
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+import { baseOptions } from '@/lib/layout.shared';
+import { source } from '@/lib/source';
+import type { ReactNode } from 'react';
+
+export default function Layout({ children }: { children: ReactNode }) {
+  return (
+    <DocsLayout
+      {...baseOptions()}
+      tree={source.getPageTree()}
+      links={[]} // [!code highlight]
+    >
+      {children}
+    </DocsLayout>
+  );
+}
+```
+
+```tsx tab="Home Layout" title="app/(home)/layout.tsx"
+import { HomeLayout } from 'fumadocs-ui/layouts/home';
+import { baseOptions } from '@/lib/layout.shared';
+import type { ReactNode } from 'react';
+
+export default function Layout({ children }: { children: ReactNode }) {
+  return (
+    <HomeLayout
+      {...baseOptions()}
+      links={[]} // [!code highlight]
+    >
+      {children}
+    </HomeLayout>
+  );
+}
+```
+
+サポートされている項目の一覧は以下のとおりです。
+
+### リンク項目 [#link-item]
+
+URL/href へ移動するためのリンクです。外部リンクにすることもできます。
+
+```tsx title="lib/layout.shared.tsx"
+import { BookIcon } from 'lucide-react';
+import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
+
+export function baseOptions(): BaseLayoutProps {
+  return {
+    links: [
+      {
+        icon: <BookIcon />,
+        text: 'Blog',
+        url: '/blog',
+        // secondary のアイテムはナビゲーションバー上で異なる表示になります
+        secondary: false,
+      },
+    ],
+  };
+}
+```
+
+#### アクティブモード [#active-mode]
+
+リンクをアクティブとしてマークする条件です。
+
+| モード          | 説明                                           |
+| ------------ | -------------------------------------------- |
+| `url`        | 指定した URL を閲覧しているとき                           |
+| `nested-url` | 指定した URL とその子ページ (`/blog/post` など) を閲覧しているとき |
+| `none`       | アクティブにしない                                    |
+
+```tsx title="lib/layout.shared.tsx"
+import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
+
+export function baseOptions(): BaseLayoutProps {
+  return {
+    links: [
+      {
+        text: 'Blog',
+        url: '/blog',
+        active: 'nested-url',
+      },
+    ],
+  };
+}
+```
+
+### アイコン項目 [#icon-item]
+
+リンク項目と同じですが、アイコンボタンとして表示されます。
+アイコン項目はデフォルトでセカンダリになります。
+
+```tsx title="lib/layout.shared.tsx"
+import { BookIcon } from 'lucide-react';
+import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
+
+export function baseOptions(): BaseLayoutProps {
+  return {
+    links: [
+      {
+        type: 'icon',
+        label: 'Visit Blog', // `aria-label`
+        icon: <BookIcon />,
+        text: 'Blog',
+        url: '/blog',
+      },
+    ],
+  };
+}
+```
+
+### カスタムアイテム [#custom-item]
+
+カスタムコンポーネントを表示します。
+
+```tsx title="lib/layout.shared.tsx"
+import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
+
+export function baseOptions(): BaseLayoutProps {
+  return {
+    links: [
+      {
+        type: 'custom',
+        children: <Button variant="primary">Login</Button>,
+        secondary: true,
+      },
+    ],
+  };
+}
+```
+
+### GitHub URL [#github-url]
+
+GitHub リポジトリへのリンク項目を追加するためのショートカットも用意されています。
+
+```tsx twoslash title="lib/layout.shared.tsx"
+import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
+
+export function baseOptions(): BaseLayoutProps {
+  return {
+    githubUrl: 'https://github.com',
+  };
+}
+```
+
+### 通常のメニュー [#normal-menu]
+
+複数のリンク項目を含むメニューです。
+
+```tsx title="lib/layout.shared.tsx"
+import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
+
+export function baseOptions(): BaseLayoutProps {
+  return {
+    links: [
+      {
+        type: 'menu',
+        text: 'Guide',
+        items: [
+          {
+            text: 'Getting Started',
+            description: 'Learn to use Fumadocs',
+            url: '/docs',
+          },
+        ],
+      },
+    ],
+  };
+}
+```
+
+### ナビゲーションメニュー [#navigation-menu]
+
+Home Layout では、ナビゲーションバーにナビゲーションメニュー (フルアニメーション対応) を追加できます。
+
+![Nav](/docs/nav-layout-menu.png)
+
+```tsx title="app/(home)/layout.tsx"
+import { baseOptions } from '@/lib/layout.shared';
+import type { ReactNode } from 'react';
+import { HomeLayout } from 'fumadocs-ui/layouts/home';
+import {
+  NavbarMenu,
+  NavbarMenuContent,
+  NavbarMenuLink,
+  NavbarMenuTrigger,
+} from 'fumadocs-ui/layouts/home/navbar';
+
+export default function Layout({ children }: { children: ReactNode }) {
+  return (
+    <HomeLayout
+      {...baseOptions()}
+      links={[
+        {
+          type: 'custom',
+          // ナビゲーションバーにのみ表示（モバイルメニューには表示されません）
+          on: 'nav',
+          children: (
+            <NavbarMenu>
+              <NavbarMenuTrigger>Documentation</NavbarMenuTrigger>
+              <NavbarMenuContent>
+                <NavbarMenuLink href="/docs">Hello World</NavbarMenuLink>
+              </NavbarMenuContent>
+            </NavbarMenu>
+          ),
+        },
+        // その他の項目
+      ]}
+    >
+      {children}
+    </HomeLayout>
+  );
+}
+```

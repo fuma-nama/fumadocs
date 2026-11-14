@@ -22,7 +22,7 @@ import { cn } from '@/lib/cn';
 import { useTreeContext } from 'fumadocs-ui/contexts/tree';
 import type { Item, Node } from 'fumadocs-core/page-tree';
 import { useParams, useRouter } from 'next/navigation';
-import { defaultFramework, isFramework } from '@/lib/framework';
+import { defaultFramework, frameworkName, isFramework } from '@/lib/framework';
 
 const items = [
   {
@@ -74,7 +74,7 @@ export default function CustomSearchDialog(props: SharedProps) {
         map.set(node.name.toLowerCase(), node);
       } else if (node.type === 'folder') {
         // the folders of other frameworks
-        if (node.root === 'framework' && node.$id !== `(framework)/${framework}`) return;
+        if (node.root === 'framework' && node.name !== frameworkName(framework)) return;
         if (node.index) onNode(node.index);
         for (const item of node.children) onNode(item);
       }

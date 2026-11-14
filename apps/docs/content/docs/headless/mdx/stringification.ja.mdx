@@ -1,0 +1,82 @@
+---
+title: 文字列化
+description: Fumadocs がドキュメントを Markdown に変換する仕組みについて説明します。
+---
+
+[Remark LLMs](/docs/headless/mdx/remark-llms) と [Remark Structure](/docs/headless/mdx/structure) は、LLM や検索向けに Markdown を出力します。これらは構文木を文字列化するのではなく、あなたが記述したソースをそのまま切り出します。
+
+* Markdown は記述したとおりに保持され、エスケープや再フォーマットは一切行われません。
+* remark プラグインは、編集内容を記録することによってのみ Markdown を変更します。
+* 構文木をシリアライズしないため、高速です。
+
+## 仕組み [#how-it-works]
+
+出力されるのは、プラグインによる編集を反映したドキュメントのソースです。各ノードは `position` によって特定されます。
+
+* `position` を持つノードは、そのソースを出力します。
+* プラグインが挿入したノードなど、`position` を持たないノードは何も出力しません。この場合、ノードの Markdown はそのプラグインが定義します。
+
+たとえば、[Remark Image](/docs/headless/mdx/remark-image) は `![alt](/image.png)` を `<img>` 要素に変換しますが、出力には `![alt](/image.png)` がそのまま残ります。
+
+## 出力の編集 [#editing-the-output]
+
+作成者が記述したコンテンツを置き換えるプラグインは、`replaceSource()` を使ってそのノードの Markdown を記録します。
+
+```ts title="remark-note.ts"
+import type { Root } from 'mdast';
+import type { VFile } from 'vfile';
+import { visit } from 'unist-util-visit';
+import { replaceSource } from 'fumadocs-core/mdx-plugins/stringifier';
+
+export function remarkNote() {
+  return (tree: Root, file: VFile) => {
+    visit(tree, 'mdxJsxFlowElement', (node) => {
+      if (node.name !== 'Note') return;
+
+      replaceSource(file, node, (s) => `**Note:**\n\n${s.inner(node)}`);
+      // レンダリング用にノードを変換する...
+    });
+  };
+}
+```
+
+* 文字列を渡すと、そのノードは内部の編集内容ごと置き換えられます。
+* 関数はすべてのプラグインの実行後に呼び出されます。`s.stringify(node)` と `s.inner(node)`(その子要素)は、内部の編集内容を反映した Markdown を返します。
+* 同じノードが複数回編集された場合は、最後の編集が優先されます。
+
+特定の出力だけを編集するには、最後の引数にその名前空間を渡します。Remark Structure のレコードには `search`、Remark LLMs には `markdown` を指定します。
+
+```ts
+// LLM 向けの Markdown ではタグを残し、検索レコードからは削除します
+replaceSource(file, node, (s) => s.stringify(node).replace(' [step]', ''), 'search');
+```
+
+検索用には、プラグインが [`data.structuredData`](/docs/headless/mdx/structure#plugins) を通じて、自身が扱うノードのレコードを追加します。
+
+### ランタイムの値 [#runtime-values]
+
+ランタイムになるまで内容が確定しない Markdown には、`s.expression()` で JS の式を出力します。Remark LLMs は、Markdown をエクスポートする箇所でこの式を評価します。それ以外の出力では、フォールバックが使用されます。
+
+```ts
+import type { Expression } from 'estree';
+
+// コンパイル済みドキュメント内の `import image from './image.png'` の URL
+const url: Expression = { type: 'Identifier', name: 'image' };
+
+replaceSource(file, node, (s) => `![alt](${s.expression(url, './image.png')})`);
+```
+
+## 埋め込みコンテンツ [#embedded-content]
+
+[インクルードしたファイル](/docs/mdx/include)など、別のソースからパースされたノードは、そのソース内での位置情報を持っています。自身のコンテンツと同じように文字列化するには、`embedSource()` で埋め込んでください:
+
+```ts
+import { embedSource } from 'fumadocs-core/mdx-plugins/stringifier';
+
+// `node` を `otherSource` からパースされたノードで置き換えます
+embedSource(file, node, otherSource, otherTree.children);
+```
+
+文字列からパースしたその他のノードには、`position` を残さないでください。その位置はドキュメント内を指していないためです。
+
+このページのヘルパーは unified プラグイン向けです。Sätteri でも Remark LLMs と Remark Structure は同じ方法で Markdown を出力しますが、出力を編集するための公開 API はありません。

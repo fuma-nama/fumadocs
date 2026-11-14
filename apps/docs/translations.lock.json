@@ -55,7 +55,7 @@
   "content/docs/(framework)/[framework]/markdown/twoslash.mdx": "9f380f3070a7d7e99487cf773e8d65a3c474e36b013e10caa2db2adcedfdb5e8",
   "content/docs/(framework)/[framework]/markdown/typescript.mdx": "e365a95da7f508edffcba6f79d7bed87924e1b9ec25981f166c1b4d2bce94fd7",
   "content/docs/(framework)/[framework]/markdown/validate-links.mdx": "a8bb4386eb6b3a739794341d61beeb5c63344f9c1538ec6738af76e96f3ca7ae",
-  "content/docs/(framework)/[framework]/meta.ts": "ea28ca64597842ca2de5f6239619ff342f7fdb2b4c06b524df503a018ce3b6e8",
+  "content/docs/(framework)/[framework]/meta.ts": "1c90bd1eca25cb6d3f3e7ba3ba4109cd822bc7adc679beaaac1487d7a38f851a",
   "content/docs/(framework)/[framework]/navigation.mdx": "cd1a29677cdaebb143b7b723a6daa51e0f7e17fb238c3a9ce93bafbc219011cb",
   "content/docs/(framework)/[framework]/page-conventions.mdx": "a40999aee9f92a8333966ba4b6dc2a37493b89489a5f59436ffa7852e5ff5fbf",
   "content/docs/(framework)/[framework]/search/.shared.mdx": "a868aff0fbbd2233b8232f90b6af4ee9b339149853d430d8c1a57d187c236f82",
@@ -188,5 +188,5 @@
   "content/docs/ui/search.mdx": "ddc9b0042aea06a3c35ba855ae2cb77bc30596a726fe4c08fb7ab8ad504d44b3",
   "content/docs/ui/theme.mdx": "d9beafa4ff6c7c4e543ecef52ddd13d5c139a45f10b234f86b476294ae0f332a",
   "content/docs/ui/translations.mdx": "574f5720716d0c20f2eb389b6ccf5ef9470f21344351d6f02c3387a9824053bc",
-  "gt-context.json": "42b34ad1302774c143937d78baf6a150f8c54db5b873045088abd8f5a9e245ef"
+  "gt-context.json": "f67707f8c16e0a0188c3f1b2d236e1059d3a48257d97f299f5945d434dd40f01"
 }

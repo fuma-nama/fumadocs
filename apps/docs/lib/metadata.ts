@@ -1,5 +1,6 @@
 import type { Metadata } from 'next/types';
 import { Page } from './source';
+import { i18n } from './i18n';
 
 export function createMetadata(override: Metadata): Metadata {
   return {
@@ -36,11 +37,13 @@ export function createMetadata(override: Metadata): Metadata {
 }
 
 export function getPageImageUrl(page: Page) {
+  // the default language has no locale, like the URLs of its pages
   const segments = [...page.slugs, 'image.webp'];
+  if (page.locale && page.locale !== i18n.defaultLanguage) segments.unshift(page.locale);
 
   return {
     segments,
-    url: `/og/${page.locale}/${segments.join('/')}`,
+    url: `/og/${segments.join('/')}`,
   };
 }
 

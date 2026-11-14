@@ -1,0 +1,382 @@
+---
+title: ページスラッグとページツリー
+description: 生成されるページスラッグとページツリーをカスタマイズします。
+---
+
+> このガイドは、**Fumadocs MDX** など、`loader()` APIを使用するコンテンツソースにのみ該当します。
+
+## 概要 [#overview]
+
+Fumadocs は [`loader()`](/docs/headless/source-api) を使用して、コンテンツディレクトリから**ページスラッグ**と**ページツリー**(サイドバーの項目)を生成します。
+ルーティングは、お使いの React フレームワークが処理します。
+
+ファイルシステムベースのルーティングと同じ要領で、フォルダーとページを定義できます。
+
+<Files>
+  <Folder name="content/docs(コンテンツディレクトリ)" defaultOpen>
+    <File name="index.mdx" />
+
+    <File name="getting-started.mdx" />
+  </Folder>
+</Files>
+
+出力をさらにカスタマイズしたい場合は、[ローダープラグイン](/docs/headless/source-api/plugins)を使用できます。
+
+## ファイル [#file]
+
+[MDX](https://mdxjs.com) &amp; Markdown ファイルでは、フロントマターでページ情報をカスタマイズできます。
+
+```mdx
+---
+title: My Page
+description: Best document ever
+icon: House
+---
+
+## Learn More
+```
+
+Fumadocs は、以下のプロパティをもとにページツリーを構築します。
+
+| 名前            | 説明                            |
+| ------------- | ----------------------------- |
+| `title`       | ページのタイトル                      |
+| `description` | ページの説明                        |
+| `icon`        | アイコン名。[アイコン](#icons)を参照してください |
+
+<Callout title="補足">
+  ページ情報は、**Fumadocs MDX** などのコンテンツソースから提供されます。
+
+  Fumadocs MDX では、[`schema`](/docs/mdx/collections#schema-1) オプションを指定することで、フロントマターのスキーマをカスタマイズできます。
+</Callout>
+
+### スラッグ [#slugs]
+
+ページのスラッグは、そのファイルパスから生成されます。
+
+| パス (コンテンツフォルダーからの相対パス)  | スラッグ              |
+| ----------------------- | ----------------- |
+| `./dir/page.mdx`        | `['dir', 'page']` |
+| `./dir/index.mdx`       | `['dir']`         |
+
+## フォルダー [#folder]
+
+複数のページをまとめて整理できます。[Metaファイル](#meta)を作成すると、フォルダーをカスタマイズできます。
+
+### フォルダーグループ [#folder-group]
+
+デフォルトでは、ファイルをフォルダーに入れるとその slugs が変わります。
+フォルダー名を括弧で囲むと、子ファイルの slugs に影響を与えないようにできます。
+
+| パス(コンテンツフォルダーからの相対パス)     | slugs      |
+| ------------------------- | ---------- |
+| `./(group-name)/page.mdx` | `['page']` |
+
+### ルートフォルダー [#root-folder]
+
+フォルダーをルートフォルダーとして指定します。その場合、開いているルートフォルダー内のアイテムのみが表示されます。
+
+```json title="meta.json"
+{
+  "title": "Name of Folder",
+  "description": "The description of root folder (optional)",
+  "root": true
+}
+```
+
+たとえば、ルートフォルダー `framework` を開いている場合、他のフォルダー(例: `headless`)はサイドバーやその他のナビゲーション要素に表示されません。
+
+<Files>
+  <Folder name="framework" defaultOpen>
+    <File name="index.mdx" />
+
+    <File name="current-page.mdx" className="text-fd-primary! bg-fd-primary/10!" />
+
+    <File name="other-pages.mdx" />
+  </Folder>
+
+  <Folder name="headless (hidden)" className="opacity-50" disabled defaultOpen>
+    <File name="my-page.mdx" />
+  </Folder>
+</Files>
+
+<Callout title="Fumadocs UI">
+  Fumadocs UI はルートフォルダーを [Layout Tabs](/docs/ui/layouts/docs#layout-tabs) としてレンダリングするため、ユーザーはルートフォルダー間を切り替えられます。
+</Callout>
+
+### ルートタイプ [#root-type]
+
+`root` には文字列も指定でき、これはルートフォルダーの**タイプ**を表します。
+同じ親スコープ内にある同じタイプのルートフォルダーは、同じドキュメントの異なるバージョンのように、互いに切り替え可能なものとして扱われます。
+
+<Files>
+  <Folder name="v1" defaultOpen>
+    <File name="meta.json" />
+
+    <File name="index.mdx" />
+
+    <File name="guide.mdx" className="text-fd-primary! bg-fd-primary/10!" />
+  </Folder>
+
+  <Folder name="v2" defaultOpen>
+    <File name="meta.json" />
+
+    <File name="index.mdx" />
+
+    <File name="guide.mdx" className="text-fd-primary! bg-fd-primary/10!" />
+  </Folder>
+</Files>
+
+```json tab="v1/meta.json"
+{
+  "title": "1.0.0",
+  "root": "version"
+}
+```
+
+```json tab="v2/meta.json"
+{
+  "title": "2.0.0",
+  "root": "version"
+}
+```
+
+`root: true` は単なるデフォルトのタイプで、タブとして表示されます。
+
+同じタイプの別のルートフォルダーに切り替えると、ページはその**構造的射影**、つまりルートフォルダーからの相対パスが同じページに対応付けられます。
+
+| ページ                   | `v2` での射影                                    |
+| --------------------- | -------------------------------------------- |
+| `v1/guide.mdx`        | `v2/guide.mdx`                               |
+| `v1/python/guide.mdx` | `v2/python/guide.mdx`(ネストされたルートフォルダーは維持されます) |
+
+<Callout title="Fumadocs UI">
+  Fumadocs UI は、現在のページのパス上にある各ルートフォルダーごとに、同じタイプのルートフォルダー間で切り替えるための[ドロップダウン](/docs/ui/layouts/docs#tabs-groups)をレンダリングします。完全な例は[バージョニング](/docs/navigation#versioning)を参照してください。
+</Callout>
+
+## Meta [#meta]
+
+フォルダー内に `meta.json` ファイルを作成すると、そのフォルダーをカスタマイズできます。
+
+```json tab="meta.json"
+{
+  "title": "Display Name",
+  "icon": "MyIcon",
+  "pages": ["index", "getting-started"],
+  "defaultOpen": true
+}
+```
+
+```ts tab="meta.ts"
+export default {
+  title: 'Display Name',
+  icon: 'MyIcon',
+  pages: ['index', 'getting-started'],
+  defaultOpen: true,
+};
+```
+
+コンテンツソースが対応している場合は、メタファイルをコード(`meta.ts` または `meta.js`)で記述し、データをデフォルトエクスポートとして公開できます。
+
+| 名前            | 説明                                 |
+| ------------- | ---------------------------------- |
+| `title`       | 表示名                                |
+| `icon`        | アイコン名([アイコン](#icons)を参照)           |
+| `defaultOpen` | フォルダーをデフォルトで開いた状態にする               |
+| `collapsible` | フォルダーの内容を折りたたみ可能にする(デフォルト: `true`) |
+| `pages`       | フォルダー内のアイテム(後述)                    |
+| `pagesIndex`  | インデックスアイテム(後述)                     |
+
+### Pages [#pages]
+
+フォルダー内のアイテムはデフォルトでアルファベット順に並びます。`pages` を使用すると、アイテムを追加したり、並び順を指定したりできます。
+
+```json title="meta.json"
+{
+  "pages": ["index", "getting-started"]
+}
+```
+
+> 指定した場合、`pages` に記載されていない項目は含まれません。
+
+| 種類                | 構文                                                                 | 説明                                                                |
+| ----------------- | ------------------------------------------------------------------ | ----------------------------------------------------------------- |
+| **パス**            | `./path/to/page`                                                   | ページまたはフォルダーへのパスです。                                                |
+| **セパレーター**        | `---Label---`<br />`---[Icon]Label---`                             | 2つのセクションの間に置く区切りです (アイコン対応) 。                                     |
+| **リンク**           | `[Text](url)`<br />`[Icon][Text](url)`<br />`external:[Text](url)` | リンクを挿入します (アイコン対応) 。<br />`external:` プレフィックスを付けると、外部リンクとして扱われます。 |
+| **Rest**          | `...`                                                              | 残りのページを含めます (アルファベット順) 。                                          |
+| **Reversed Rest** | `z...a`                                                            | **Rest** 項目の逆順版です。                                                |
+| **Extract**       | `...folder`                                                        | フォルダー内の項目を展開します。                                                  |
+| **Except**        | `!item`                                                            | `...` または `z...a` から項目を除外します。                                     |
+
+```json title="meta.json"
+{
+  "pages": [
+    "components",
+    "---My Separator---",
+    "...folder",
+    "...",
+    "!file",
+    "!otherFolder",
+    "[Vercel](https://vercel.com)",
+    "[Triangle][Vercel](https://vercel.com)"
+  ]
+}
+```
+
+<Callout type="warn" title="URL の重複禁止">
+  同じページ URL をページツリー全体で複数回使用することはできません。
+  同じ理由から、ページ項目を重複させることもできません。
+
+  これは意図的な仕様です。これにより、Fumadocs は現在のパス名だけを基にアクティブなツリー項目を特定できます。
+</Callout>
+
+### フォルダーのインデックス [#folder-index]
+
+フォルダーがインデックス項目を持つ場合、そのフォルダーはクリック可能になり、クリックするとインデックス項目に移動します。
+
+デフォルトでは、各フォルダー内の `index` ファイルがインデックス項目になります。フォルダーのインデックス項目は任意に指定することもでき、**パス**または**リンク**を指定できます。
+
+```json tab="meta.json (Path)"
+{
+  // フォルダー内に "overview.mdx" ファイルがあると仮定します
+  "pagesIndex": "overview"
+}
+```
+
+```json tab="meta.json (Link)"
+{
+  "pagesIndex": "[Example](https://example.com)"
+}
+```
+
+## アイコン [#icons]
+
+Fumadocs にはアイコンライブラリが含まれていないため、ランタイムでアイコン名を JSX 要素に変換し、コンポーネントとしてレンダリングする必要があります。
+
+そのためには、`loader()` に [`icon` ハンドラー](/docs/headless/source-api#icons)を追加します。
+
+## i18n ルーティング [#i18n-routing]
+
+i18n ルーティングのスタイルは、用途に応じて定義できます。
+
+```ts title="lib/i18n.ts"
+import type { I18nConfig } from 'fumadocs-core/i18n';
+
+export const i18n: I18nConfig = {
+  // デフォルト
+  parser: 'dot',
+  // または
+  parser: 'dir',
+};
+```
+
+<Tabs items={['dot', 'dir']}>
+  <Tab>
+    ファイル名の末尾に `.{locale}` を付けると、言語ごとの Markdown/meta ファイルを追加できます。例:
+
+    <Files>
+      <Folder name="content/docs" defaultOpen>
+        <File name="meta.json" />
+
+        <File name="meta.cn.json" />
+
+        <File name="get-started.mdx" />
+
+        <File name="get-started.cn.mdx" />
+      </Folder>
+    </Files>
+
+    デフォルトのロケールでは、ロケールコードを省略できます。
+  </Tab>
+
+  <Tab>
+    すべてのコンテンツファイルを言語ごとのフォルダーに分けて配置します。
+
+    <Files>
+      <Folder name="content/docs" defaultOpen>
+        <Folder name="en" defaultOpen>
+          <File name="meta.json" />
+
+          <File name="get-started.mdx" />
+        </Folder>
+
+        <Folder name="cn" defaultOpen>
+          <File name="meta.json" />
+
+          <File name="get-started.mdx" />
+        </Folder>
+      </Folder>
+    </Files>
+  </Tab>
+</Tabs>
+
+## パスパラメーター [#path-params]
+
+`[name]` という名前のフォルダーは、パラメーターの値ごとに生成されます。値は、そのフォルダーのメタファイルの `staticParams` に列挙してください。
+
+<Files>
+  <Folder name="content/docs" defaultOpen>
+    <Folder name="[framework]" defaultOpen>
+      <File name="meta.json" />
+
+      <File name="deploy.mdx" />
+    </Folder>
+  </Folder>
+</Files>
+
+```json title="[framework]/meta.json"
+{
+  "title": "Framework",
+  "staticParams": [{ "framework": "waku" }, { "framework": "astro" }]
+}
+```
+
+| パス (コンテンツフォルダーからの相対パス)     | slugs                                       |
+| -------------------------- | ------------------------------------------- |
+| `./[framework]/deploy.mdx` | `['waku', 'deploy']`, `['astro', 'deploy']` |
+
+meta ファイルは、生成されるすべてのフォルダーに適用されます。各ページは params を [props](/docs/markdown#props) として受け取るほか、`loader()` から `page.params` としても取得できます。
+
+`meta.ts` では、代わりに params を受け取る関数をエクスポートすることもできます。その場合は、`staticParams` を名前付きエクスポートとして併せてエクスポートします。
+
+```ts title="[framework]/meta.ts"
+const names = { waku: 'Waku', astro: 'Astro' };
+
+export const staticParams = [{ framework: 'waku' }, { framework: 'astro' }];
+
+export default ({ framework }: { framework: keyof typeof names }) => ({
+  title: names[framework],
+});
+```
+
+<Callout title="補足">
+  `[name]` フォルダーは、その値を列挙するものがなければ、通常のフォルダーのままです。
+</Callout>
+
+### ページのパラメーター [#page-params]
+
+ページのフロントマターにも `staticParams` を指定できます。親フォルダーでも指定されている場合、そのページは両方に共通する値に対してのみ生成されます。
+
+```mdx title="[framework]/fumadocs-mdx.mdx"
+---
+title: Fumadocs MDX
+staticParams:
+  - framework: waku
+---
+```
+
+### 静的パス [#static-paths]
+
+固定のパスに置かれたファイルは、動的に生成されるファイルよりも優先されます。たとえば、`astro/deploy.mdx` は `[framework]/deploy.mdx` から生成される `astro` ページを置き換えます。meta ファイルについても同様です。
+
+### ローカライズされたページ [#localized-pages]
+
+[i18n](#i18n-routing) を使用する場合、各ロケールのファイルはフォールバックロケールのファイルよりも優先されます。`/cn/docs/astro/deploy` の場合は、次のうち最初に見つかったファイルが使用されます。
+
+1. `astro/deploy.cn.mdx`
+2. `[framework]/deploy.cn.mdx`
+3. `astro/deploy.mdx`
+4. `[framework]/deploy.mdx`
+
+ローカライズされたページでは、まず `meta.cn.json` から `staticParams` が読み込まれます。`dir` パーサーを使用する場合は、言語ごとのフォルダーにそれぞれの値を記述します。

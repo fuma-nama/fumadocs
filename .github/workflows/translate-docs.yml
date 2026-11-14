@@ -6,6 +6,7 @@ on:
     paths:
       - 'apps/docs/content/docs/**'
       - '!apps/docs/content/docs/**/*.zh-TW.*'
+      - '!apps/docs/content/docs/**/*.ja.*'
   workflow_dispatch:
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}

@@ -1,0 +1,116 @@
+---
+title: Meilisearch
+description: Meilisearch を Fumadocs に統合する
+---
+
+[Meilisearch](https://www.meilisearch.com) は、タイプミス許容とフィルタリング機能を備えたオープンソースの検索エンジンです。セルフホストすることも、Meilisearch Cloud を利用することもできます。
+
+## セットアップ [#setup]
+
+依存関係をインストールします。
+
+```package-install
+meilisearch
+```
+
+### API キー [#api-keys]
+
+[セルフホスト](https://www.meilisearch.com/docs/learn/self_hosted/getting_started_with_self_hosted_meilisearch)するか [Meilisearch Cloud](https://www.meilisearch.com/cloud) を利用して Meilisearch インスタンスを起動し、その認証情報を `.env.local` に保存します(`NEXT_PUBLIC_` の部分は、Vite ベースのフレームワークでは `VITE_`、Astro では `PUBLIC_` に置き換えてください)。
+
+```dotenv
+NEXT_PUBLIC_MEILISEARCH_HOST="URL of your instance"
+NEXT_PUBLIC_MEILISEARCH_SEARCH_KEY="search API key"
+MEILISEARCH_ADMIN_KEY="Default Admin API Key"
+```
+
+検索キーはブラウザに公開されるため、`docs` インデックスの検索のみが可能なキーを[作成してください](https://www.meilisearch.com/docs/learn/security/basic_security)。管理キーは外部に公開しないでください。
+
+### ドキュメントの同期 [#sync-documents]
+
+`static.json` ルートを事前レンダリングしてビルド時に検索ドキュメントをエクスポートし、ビルドのたびにスクリプトで Meilisearch へ同期します。
+
+<feature>search/meilisearch</feature>
+
+`sync()` はインデックスを設定してドキュメントを置き換えます。新しいドキュメントのインデックス登録が完了するまでは、古いドキュメントを引き続き検索できます。`build` スクリプトはビルドのたびに同期を行うため、デプロイ先のプラットフォームにも同じ環境変数を設定してください。
+
+### 検索 UI [#search-ui]
+
+UI の実装方法には、いくつかの選択肢があります。
+
+* [Fumadocs UI の検索ダイアログ](/docs/search/meilisearch)を使用する。
+
+* 組み込みの検索クライアントフックを使用して独自に構築する。
+
+  ```ts twoslash
+  import { Meilisearch } from 'meilisearch';
+  import { useMeilisearch } from 'fumadocs-core/search/client';
+
+  const client = new Meilisearch({
+    host: 'host url',
+    apiKey: 'search api key',
+  });
+
+  const { search, onSearchChange, isLoading, data } = useMeilisearch({
+    client,
+    indexName: 'docs',
+  });
+  ```
+
+  <auto-type-table type="import(&#x22;fumadocs-core/search/client/meilisearch&#x22;).MeilisearchOptions" />
+
+* Meilisearch の公式クライアントを直接使用する。
+
+## オプション [#options]
+
+### タグフィルター [#tag-filter]
+
+タグフィルターを設定するには、`static.json` ルートで `toDocuments()` に `tag` を渡します。
+
+```ts
+toDocuments(source, { tag: (page) => page.slugs[0] });
+```
+
+あわせて、検索クライアントも更新してください。
+
+* **Fumadocs UI**: 検索 UI で[タグフィルター](/docs/search/meilisearch#tag-filter)を有効にします。
+* **検索クライアント**: `useMeilisearch()` にタグを渡します。
+
+  ```ts
+  import { useMeilisearch } from 'fumadocs-core/search/client';
+
+  const { search, onSearchChange, isLoading, data } = useMeilisearch({
+    tag: '<your tag value>', // [!code ++]
+    // ...
+  });
+  ```
+
+### 国際化 [#internationalization]
+
+ドキュメントには各ページのロケールが含まれているため、`locale` を渡すと特定の言語で検索できます。
+
+```ts
+import { useI18n } from 'fumadocs-ui/contexts/i18n';
+import { useMeilisearch } from 'fumadocs-core/search/client';
+
+const { locale } = useI18n();
+const { search, onSearchChange, isLoading, data } = useMeilisearch({
+  locale, // [!code ++]
+  // ...
+});
+```
+
+### インデックス設定 [#index-settings]
+
+`sync()` が設定するのは `searchableAttributes` と `filterableAttributes` のみで、シノニムやタイポ許容などのその他の設定はそのまま保持されます。これらの設定は Meilisearch のダッシュボードまたは `meilisearch` クライアントから調整できます。
+
+## 内部の仕組み [#under-the-hood]
+
+各見出しと段落はそれぞれ1つのドキュメントとして扱われ、ページタイトル、URL、パンくずリストを持ちます。検索対象は `content` のみで、検索クライアントは結果をページ単位でグループ化します。
+
+| 属性        | 説明                          |
+| --------- | --------------------------- |
+| `type`    | `page`、`heading` または `text` |
+| `content` | ページタイトル、見出し、または段落           |
+| `heading` | 所属する見出しの ID (任意)            |
+| `tag`     | 結果を絞り込むためのタグ (任意)           |
+| `locale`  | ページのロケール (任意)               |

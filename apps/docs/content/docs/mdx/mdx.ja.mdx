@@ -1,0 +1,203 @@
+---
+title: MDX プリセット
+description: MDX プロセッサーのデフォルト設定をカスタマイズします。
+---
+
+Fumadocs MDX には、**シンタックスハイライト**などの機能の設定を簡単にする MDX プリセットが用意されています。
+
+デフォルトでは unified でコンパイルされます。コレクションごとに [Sätteri](#satteri) でコンパイルすることもでき、Sätteri にも同じプラグインで構成されたプリセットが用意されています。
+
+## デフォルトプリセット [#default-preset]
+
+ドキュメントサイト向けに設計されたプリセットで、グローバルな MDX オプションではデフォルトで有効になっています。
+
+デフォルト設定を上書きするには、[`ProcessorOptions`](https://mdxjs.com/packages/mdx/#processoroptions) を継承したインターフェースのオプションを渡します。
+
+### Remark プラグイン [#remark-plugins]
+
+以下のプラグインがデフォルトで適用されます。
+
+* Remark GFM - [GitHub Flavored Markdown](https://github.github.com/gfm)
+* [Remark Heading](/docs/headless/mdx/headings) - 目次を抽出します。
+* [Remark Image](/docs/headless/mdx/remark-image) - 画像を処理します。
+* [Remark Code Tab](/docs/markdown#tab-groups) - コードブロックのタブグループ
+* [Remark NPM](/docs/headless/mdx/remark-npm) - パッケージマネージャーのコマンド
+* [Remark Structure](/docs/headless/mdx/structure) - 検索インデックスを生成します。
+
+[インクルード](/docs/mdx/include)は、プリセット以外でも常に有効です。
+
+その他の remark プラグインは、次のように追加できます。
+
+```ts tab="Global Config"
+import { defineConfig } from 'fumadocs-mdx/config';
+import { myPlugin } from './remark-plugin';
+
+export default defineConfig({
+  mdxOptions: {
+    remarkPlugins: [myPlugin],
+    // 関数を渡して remark プラグインの順序を制御することもできます。
+    remarkPlugins: (v) => [myPlugin, ...v],
+  },
+});
+```
+
+```ts tab="Collection Config"
+import { defineCollections, applyMdxPreset } from 'fumadocs-mdx/config';
+import { myPlugin } from './remark-plugin';
+
+export const blog = defineCollections({
+  type: 'doc',
+  mdxOptions: applyMdxPreset({
+    remarkPlugins: [myPlugin],
+    // 関数を渡して remark プラグインの順序を制御することもできます。
+    remarkPlugins: (v) => [myPlugin, ...v],
+  }),
+});
+```
+
+### Rehype プラグイン [#rehype-plugins]
+
+以下のプラグインがデフォルトで適用されます。
+
+* [Rehype Code](/docs/headless/mdx/rehype-code) - シンタックスハイライト
+* [Rehype TOC](/docs/headless/mdx/headings#rehype-toc) - 目次のエクスポート
+
+remark プラグインと同様に、配列または関数を渡すことで、ほかの rehype プラグインを追加できます。
+
+```ts tab="Global Config"
+import { defineConfig } from 'fumadocs-mdx/config';
+import { myPlugin } from './rehype-plugin';
+
+export default defineConfig({
+  mdxOptions: {
+    rehypePlugins: (v) => [myPlugin, ...v],
+  },
+});
+```
+
+```ts tab="Collection Config"
+import { defineCollections, applyMdxPreset } from 'fumadocs-mdx/config';
+import { myPlugin } from './rehype-plugin';
+
+export const blog = defineCollections({
+  type: 'doc',
+  mdxOptions: applyMdxPreset({
+    rehypePlugins: (v) => [myPlugin, ...v],
+  }),
+});
+```
+
+### 組み込みプラグインのカスタマイズ [#customize-built-in-plugins]
+
+次のように、組み込みプラグインのオプションをカスタマイズできます：
+
+```ts tab="Global Config"
+import { defineConfig } from 'fumadocs-mdx/config';
+
+export default defineConfig({
+  mdxOptions: {
+    rehypeCodeOptions: {
+      // オプション
+    },
+    remarkImageOptions: {
+      // 画像のプレースホルダーを `blur` に設定します（Next.js でのみ有効）
+      placeholder: 'blur',
+    },
+    remarkHeadingOptions: {
+      // オプション
+    },
+  },
+});
+```
+
+```ts tab="Collection Config"
+import { defineCollections, applyMdxPreset } from 'fumadocs-mdx/config';
+
+export const blog = defineCollections({
+  type: 'doc',
+  mdxOptions: applyMdxPreset({
+    rehypeCodeOptions: {
+      // オプション
+    },
+    remarkImageOptions: {
+      // オプション
+    },
+    remarkHeadingOptions: {
+      // オプション
+    },
+  }),
+});
+```
+
+## Sätteri [#satteri]
+
+[Sätteri](https://github.com/bruits/satteri) は、独自のプラグインモデルを備えたコンパイラです。次のようにインストールします。
+
+```package-install
+@fumadocs/satteri satteri
+```
+
+[コレクション](/docs/mdx/collections#compiler)に `compiler: 'satteri'` を設定します。この場合、`mdxOptions` ではなくグローバルな `satteriOptions` が読み込まれます。
+
+```ts title="source.config.ts"
+import { defineConfig, defineDocs } from 'fumadocs-mdx/config';
+import { remarkSteps } from '@fumadocs/satteri/remark-steps';
+
+export const docs = defineDocs({
+  docs: {
+    compiler: 'satteri',
+  },
+});
+
+export default defineConfig({
+  satteriOptions: {
+    // remark プラグインの代わりに使います（rehype プラグインの代わりは `hastPlugins`）
+    mdastPlugins: [remarkSteps()],
+    // 組み込みプラグインには `mdxOptions` と同じオプションを指定できます
+    rehypeCodeOptions: {
+      themes: { light: 'github-light', dark: 'github-dark' },
+    },
+  },
+});
+```
+
+remark および rehype のプラグインは Sätteri では動作しません。Fumadocs は独自のプラグインを `@fumadocs/satteri/<name>`(例: `@fumadocs/satteri/remark-steps`)として移植しています。どちらのプラグインオプションも、`mdxOptions` と同様に配列または関数を指定できます。
+
+プリセットは unified の場合と同じプラグインを適用します。GFM とディレクティブはパーサーの `features` としてデフォルトで有効になっており、`features: { math: true }` を指定すると KaTeX による[数式](/docs/markdown/math)のレンダリングも行われます。
+
+グローバルな `compiler` オプションで選択されるのは、コレクション外の MDX ファイルのコンパイラのみです。
+
+## ソースマップ [#source-map]
+
+ソースマップを生成するとコンパイルが遅くなるため、unified ではデフォルトで無効になっています。
+
+有効にするには、`source-map` をインストールし、そのジェネレーターを MDX のオプションに渡してください。
+
+```npm
+npm i -D source-map
+```
+
+```ts tab="Global Config" title="source.config.ts"
+import { defineConfig } from 'fumadocs-mdx/config';
+import { SourceMapGenerator } from 'source-map';
+
+export default defineConfig({
+  mdxOptions: {
+    SourceMapGenerator,
+  },
+});
+```
+
+```ts tab="Collection Config"
+import { defineCollections, applyMdxPreset } from 'fumadocs-mdx/config';
+import { SourceMapGenerator } from 'source-map';
+
+export const blog = defineCollections({
+  type: 'doc',
+  mdxOptions: applyMdxPreset({
+    SourceMapGenerator,
+  }),
+});
+```
+
+コンパイル済みコンテンツからスローされたエラーを、元の Markdown ファイルまでさかのぼって追跡できるようになりました。

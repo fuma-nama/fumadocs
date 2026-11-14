@@ -1,0 +1,22 @@
+---
+title: Orama Cloud
+description: Fumadocs UI で Orama Cloud を使用する方法。
+---
+
+## セットアップ [#setup]
+
+Fumadocs CLI を使うと、セットアップを自動で行えます。検索ダイアログ、`static.json` ルート、およびビルドのたびに検索インデックスを同期するスクリプトが作成されます。
+
+```package-install
+npx @fumadocs/cli feature search --provider orama-cloud
+```
+
+手動で設定する場合は、次の手順に従います。
+
+1. [Orama Cloud](/docs/headless/search/orama-cloud) を統合します。
+
+2. 検索ダイアログを作成し、`endpoint` と `api_key` を使用する値に置き換えます。
+
+   <include meta="title=&#x22;components/search.tsx&#x22;">orama-cloud.tsx</include>
+
+<include>.shared.ja.mdx</include>

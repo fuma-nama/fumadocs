@@ -1,0 +1,233 @@
+---
+title: createAsyncAPI()
+description: AsyncAPI のサーバーインスタンスです。
+---
+
+## AsyncAPI Server [#asyncapi-server]
+
+Fumadocs AsyncAPI のメイン設定です。
+
+> ブラウザ環境では参照しないでください。
+
+### `input` [#input]
+
+読み込む AsyncAPI スキーマです。
+
+* ファイルパス
+* 外部 URL
+* 関数(後述)
+
+読み込めるのはここに列挙したスキーマのみです。それ以外の ID を `getSchema()` に渡したり、ページでプリロードしたりするとエラーがスローされます。
+
+<Callout type="warn">
+  信頼できないスキーマを `input` に渡さないでください。スキーマ内の `$ref` によって、ローカルファイルの読み取りや、プライベートホストを含む任意の URL へのフェッチが行われる可能性があります。
+</Callout>
+
+```ts tab="Basic"
+import { createAsyncAPI } from '@fumadocs/asyncapi/server';
+
+export const asyncapi = createAsyncAPI({
+  input: ['./streetlights.yaml'],
+});
+```
+
+```ts tab="Functions"
+import { createAsyncAPI } from '@fumadocs/asyncapi/server';
+
+export const asyncapi = createAsyncAPI({
+  input: {
+    // [id]: ダウンロードした AsyncAPI スキーマ
+    galaxy: async () => {
+      const res = await fetch('https://example.com/asyncapi.yaml');
+      return res.text();
+    },
+  },
+});
+```
+
+### `disableCache` [#disablecache]
+
+読み込んだスキーマのキャッシュを無効にします。スキーマを頻繁に変更する開発時に便利です。
+
+```ts
+import { createAsyncAPI } from '@fumadocs/asyncapi/server';
+
+export const asyncapi = createAsyncAPI({
+  input: ['./asyncapi.yaml'],
+  disableCache: true,
+});
+```
+
+## ドキュメントを一度だけ読み込む [#loading-documents-once]
+
+ページは props としてドキュメント全体を受け取るため、ページの読み込み、ナビゲーション、プリフェッチのたびにドキュメントが毎回送信されます。大きなドキュメントの場合は、props に含めないようにしてください。
+
+```ts title="lib/asyncapi.ts"
+import { createAsyncAPI } from '@fumadocs/asyncapi/server';
+
+export const asyncapi = createAsyncAPI({
+  // ID は URL に含まれるため、URL セーフにしてください
+  input: { streetlights: './streetlights.yaml' },
+  includeDocument: false, // [!code ++]
+});
+```
+
+<show when={props.framework !== 'tanstack-start'}>
+  `loadDocument` を渡すと、各ドキュメントの読み込みがブラウザセッションごとに1回だけになります。この関数はサーバーレンダリング時にも実行されます。
+</show>
+
+<show when={props.framework === 'next'}>
+  ```tsx title="components/api-page.tsx"
+  'use client';
+  import { preload } from 'react-dom';
+  import { createAsyncAPIPage } from '@fumadocs/asyncapi/ui';
+
+  export const AsyncAPIPage = createAsyncAPIPage({
+    async loadDocument(id) {
+      if (typeof window === 'undefined') {
+        // ブラウザがページと同時にダウンロードを開始する
+        preload(`/api/asyncapi/${id}`, { as: 'fetch', crossOrigin: 'anonymous' });
+        const { asyncapi } = await import('@/lib/asyncapi');
+        return (await asyncapi.getSchema(id)).bundled;
+      }
+      return (await fetch(`/api/asyncapi/${id}`)).json();
+    },
+  });
+  ```
+</show>
+
+<show when={props.framework === 'react-router' || props.framework === 'waku' || props.framework === 'astro'}>
+  ```tsx title="components/api-page.tsx"
+  'use client';
+  import { preload } from 'react-dom';
+  import { createAsyncAPIPage } from '@fumadocs/asyncapi/ui';
+
+  export const AsyncAPIPage = createAsyncAPIPage({
+    async loadDocument(id) {
+      if (import.meta.env.SSR) {
+        // ブラウザがページと同時にダウンロードを開始する
+        preload(`/api/asyncapi/${id}`, { as: 'fetch', crossOrigin: 'anonymous' });
+        const { asyncapi } = await import('@/lib/asyncapi');
+        return (await asyncapi.getSchema(id)).bundled;
+      }
+      return (await fetch(`/api/asyncapi/${id}`)).json();
+    },
+  });
+  ```
+</show>
+
+<show when={props.framework !== 'tanstack-start'}>
+  ルートを用意して、ブラウザにドキュメントを配信します。
+</show>
+
+<show when={props.framework === 'next'}>
+  ```ts title="app/api/asyncapi/[id]/route.ts"
+  import { asyncapi } from '@/lib/asyncapi';
+
+  export async function GET(_req: Request, { params }: RouteContext<'/api/asyncapi/[id]'>) {
+    return Response.json((await asyncapi.getSchema((await params).id)).bundled);
+  }
+
+  // 静的エクスポート用
+  export async function generateStaticParams() {
+    return Object.keys(await asyncapi.getSchemas()).map((id) => ({ id }));
+  }
+  ```
+</show>
+
+<show when={props.framework === 'react-router'}>
+  ```ts tab="app/routes/asyncapi.ts"
+  import type { Route } from './+types/asyncapi';
+  import { asyncapi } from '@/lib/asyncapi';
+
+  export async function loader({ params }: Route.LoaderArgs) {
+    return Response.json((await asyncapi.getSchema(params.id)).bundled);
+  }
+  ```
+
+  ```ts tab="app/routes.ts"
+  import { route, type RouteConfig } from '@react-router/dev/routes';
+
+  export default [
+    // [!code ++]
+    route('api/asyncapi/:id', 'routes/asyncapi.ts'),
+    // ...
+  ] satisfies RouteConfig;
+  ```
+</show>
+
+<show when={props.framework === 'waku'}>
+  ```ts title="src/pages/_api/api/asyncapi/[id].ts"
+  import type { ApiContext } from 'waku/router';
+  import { asyncapi } from '@/lib/asyncapi';
+
+  export async function GET(_: Request, { params }: ApiContext<'/api/asyncapi/[id]'>) {
+    return Response.json((await asyncapi.getSchema(params.id)).bundled);
+  }
+  ```
+</show>
+
+<show when={props.framework === 'astro'}>
+  ```ts title="src/pages/api/asyncapi/[id].ts"
+  import type { APIRoute, GetStaticPaths } from 'astro';
+  import { asyncapi } from '@/lib/asyncapi';
+
+  export const prerender = true;
+
+  export const getStaticPaths = (async () => {
+    return Object.keys(await asyncapi.getSchemas()).map((id) => ({ params: { id } }));
+  }) satisfies GetStaticPaths;
+
+  export const GET: APIRoute = async ({ params }) => {
+    return Response.json((await asyncapi.getSchema(params.id!)).bundled);
+  };
+  ```
+</show>
+
+<show when={props.framework === 'tanstack-start'}>
+  TanStack Start のルートローダーはサーバーとブラウザの両方で実行されるため、docs ルートでは `loadDocument` を使わずにドキュメントを読み込めます。サーバー関数は、ブラウザがまだドキュメントを保持していない場合にのみ呼び出してください。
+
+  ```tsx title="src/routes/docs/$.tsx"
+  import { createServerFn } from '@tanstack/react-start';
+  import type { AsyncAPI } from '@fumadocs/asyncapi';
+  import { asyncapi } from '@/lib/asyncapi';
+
+  // ブラウザで読み込み済みのドキュメント
+  const documents = new Map<string, AsyncAPI.AsyncAPIObject>();
+
+  const getDocument = createServerFn({ method: 'GET' })
+    .validator((id: string) => id)
+    .handler(async ({ data: id }) => (await asyncapi.getSchema(id)).bundled);
+
+  export const Route = createFileRoute('/docs/$')({
+    component: Page,
+    loader: async ({ params }) => {
+      const data = await serverLoader({ data: params._splat?.split('/') ?? [] });
+      if (data.type === 'asyncapi') {
+        const { document: id, payload } = data.props;
+        payload.bundled = documents.get(id) ?? (await getDocument({ data: id }));
+      }
+      return data;
+    },
+  });
+
+  function Page() {
+    const page = useFumadocsLoader(Route.useLoaderData());
+    // 最初のページのドキュメントも保持する
+    if (page.type === 'asyncapi' && typeof window !== 'undefined')
+      documents.set(page.props.document, page.props.payload.bundled!);
+    // ...
+  }
+  ```
+</show>
+
+<show when={props.framework !== 'tanstack-start'}>
+  * `loadDocument` は生成された MDX ファイルでも使用できます。
+  * [Fumadocs CLI でインストールした UI](/docs/integrations/asyncapi/api-page#full-ui) の場合は、`loadDocument` を `createAsyncAPIRenderer()` に渡してください。
+  * ブラウザは各ドキュメントをリロードまで保持します。[`disableCache`](#disablecache) を使用する場合は、`includeDocument` を有効にしたままにしてください。
+</show>
+
+<show when={props.framework === 'tanstack-start'}>
+  * 生成された MDX ファイルを使用する場合は、代わりにドキュメントを `preloaded.docs` に配置してください。
+  * ブラウザは各ドキュメントをリロードまで保持します。[`disableCache`](#disablecache) を使用する場合は、`includeDocument` を有効にしたままにしてください。
+</show>

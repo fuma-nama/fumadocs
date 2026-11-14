@@ -2,11 +2,10 @@ import '../global.css';
 import type { Viewport } from 'next';
 import { baseUrl, createMetadata } from '@/lib/metadata';
 import { Body } from '@/app/layout.client';
-import { Provider } from '@/app/provider';
+import { Framework, Provider } from '@/app/provider';
 import { Geist, JetBrains_Mono } from 'next/font/google';
 import { TreeContextProvider } from 'fumadocs-ui/contexts/tree';
 import { source } from '@/lib/source';
-import { NextProvider } from 'fumadocs-core/framework/next';
 import { i18n } from '@/lib/i18n';
 import { i18nProvider, uiTranslations } from 'fumadocs-ui/i18n';
 import { openapiTranslations } from 'fumadocs-openapi/i18n';
@@ -15,6 +14,7 @@ import { graphqlTranslations } from '@fumadocs/graphql/i18n';
 import { storyTranslations } from '@fumadocs/story/i18n';
 import { aiChatTranslations } from '@fumadocs/ai-chat/i18n';
 import { zhTW } from '@fumadocs/language/zh-tw';
+import { ja } from '@fumadocs/language/ja';
 
 export const metadata = createMetadata({
   title: {
@@ -33,7 +33,8 @@ const translations = i18n
   .extend(graphqlTranslations())
   .extend(storyTranslations())
   .extend(aiChatTranslations())
-  .preset('zh-TW', zhTW());
+  .preset('zh-TW', zhTW())
+  .preset('ja', ja());
 
 const geist = Geist({
   variable: '--font-sans',
@@ -61,11 +62,11 @@ export default async function RootLayout({ params, children }: LayoutProps<'/[la
   return (
     <html lang={lang} className={`${geist.variable} ${mono.variable}`} suppressHydrationWarning>
       <Body>
-        <NextProvider>
+        <Framework>
           <TreeContextProvider tree={source.getPageTree(lang)}>
             <Provider i18n={i18nProvider(translations, lang)}>{children}</Provider>
           </TreeContextProvider>
-        </NextProvider>
+        </Framework>
       </Body>
     </html>
   );

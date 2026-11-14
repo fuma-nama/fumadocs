@@ -1,0 +1,1051 @@
+---
+title: 国際化
+---
+
+import { frameworkName } from '@/lib/framework';
+
+export const frontmatter = {
+  description: `${frameworkName(props.framework)}のドキュメントを多言語に対応させます。`,
+};
+
+<Callout title="Fumadocs CLI">
+  `npx @fumadocs/cli init --i18n` を実行すると、i18n に対応した新しいドキュメントをセットアップできます。手動で設定する場合は、以下の手順に従ってください。
+</Callout>
+
+## 概要 [#overview]
+
+{frameworkName(props.framework)} と Fumadocs の両方で i18n ルーティングを設定します。
+
+Fumadocs が担当するのは、ドキュメントのコンテンツとサイドバーの i18n です。アプリのその他の部分は、独自の i18n 設定で国際化してください。
+
+<show when={props.framework === 'next'}>
+  [next-intl](https://github.com/amannn/next-intl) などのライブラリを Fumadocs と組み合わせて使うこともできます。基本については、[Next.js の i18n](https://nextjs.org/docs/app/building-your-application/routing/internationalization) を参照してください。
+</show>
+
+## セットアップ [#setup]
+
+i18n の設定をファイルに定義します。このガイドでは、`@/lib/i18n` としてインポートします。
+
+<show when={props.framework === 'next'}>
+  <include cwd meta="title=&#x22;lib/i18n.ts&#x22;">
+    ../../examples/i18n/lib/i18n.ts
+  </include>
+</show>
+
+<show when={props.framework === 'react-router'}>
+  ```ts title="app/lib/i18n.ts"
+  import { defineI18n } from 'fumadocs-core/i18n';
+
+  export const i18n = defineI18n({
+    defaultLanguage: 'en',
+    languages: ['cn', 'en'],
+  });
+  ```
+</show>
+
+<show when={props.framework === 'tanstack-start' || props.framework === 'waku' || props.framework === 'astro'}>
+  ```ts title="src/lib/i18n.ts"
+  import { defineI18n } from 'fumadocs-core/i18n';
+
+  export const i18n = defineI18n({
+    defaultLanguage: 'en',
+    languages: ['cn', 'en'],
+  });
+  ```
+</show>
+
+> i18n の設定で使用できるオプションについては、[こちら](/docs/headless/internationalization/config)を参照してください。
+
+<show when={props.framework === 'next'}>
+  ### ミドルウェア [#middleware]
+
+  ユーザーを適切なロケールへリダイレクトするミドルウェアを作成します。
+
+  <include cwd meta="title=&#x22;proxy.ts&#x22;">
+    ../../examples/i18n/proxy.ts
+  </include>
+
+  <Callout title="独自のミドルウェアを使う場合">
+    デフォルトのミドルウェアの使用は任意です。独自のミドルウェアや、i18n ライブラリが提供するミドルウェアを使うこともできます。
+
+    その場合は、ミドルウェアの動作が i18n の設定で指定した [`hideLocale`](/docs/headless/internationalization/config#hide-locale-prefix) オプションと整合していることを確認してください。
+  </Callout>
+</show>
+
+### ルーティング [#routing]
+
+<show when={props.framework === 'next'}>
+  `/app/[lang]` フォルダーを作成し、ルートハンドラー以外のページとレイアウトをすべてその中に移動してください。
+
+  <Files>
+    <Folder name="app" defaultOpen>
+      <File name="api/search/route.ts" />
+
+      <Folder name="[lang]" defaultOpen>
+        <File name="layout.tsx" />
+
+        <File name="(home)/page.tsx" />
+
+        <File name="..." />
+      </Folder>
+    </Folder>
+  </Files>
+
+  <Callout title="よくある間違い" type="error">
+    スタイルが消えてしまっていませんか？`global.css` のインポートパスが正しいままか確認してください。
+  </Callout>
+</show>
+
+<show when={props.framework === 'react-router'}>
+  ページに `:lang` プレフィックスを追加します。
+
+  ```ts title="app/routes.ts"
+  import { index, route, type RouteConfig } from '@react-router/dev/routes'; // [!code --]
+  import { route, type RouteConfig } from '@react-router/dev/routes'; // [!code ++]
+
+  export default [
+    index('routes/home.tsx'), // [!code --]
+    route('docs/*', 'routes/docs.tsx'), // [!code --]
+    // [!code ++:2]
+    route(':lang', 'routes/home.tsx'),
+    route(':lang/docs/*', 'routes/docs.tsx'),
+    route('api/search', 'routes/search.ts'),
+  ] satisfies RouteConfig;
+  ```
+
+  デフォルト言語をプレフィックスなし (例: `/docs`) で配信するには、パラメーターを省略可能にし、`hideLocale` を有効にします。
+
+  ```ts tab="app/routes.ts"
+  export default [
+    // [!code highlight:2]
+    route(':lang?', 'routes/home.tsx'),
+    route(':lang?/docs/*', 'routes/docs.tsx'),
+    route('api/search', 'routes/search.ts'),
+  ] satisfies RouteConfig;
+  ```
+
+  ```ts tab="app/lib/i18n.ts"
+  export const i18n = defineI18n({
+    defaultLanguage: 'en',
+    languages: ['cn', 'en'],
+    hideLocale: 'default-locale', // [!code ++]
+  });
+  ```
+</show>
+
+<show when={props.framework === 'tanstack-start'}>
+  `routes` の下に `$lang` ディレクトリを作成し、すべてのページをその中に移動してください。
+
+  <Files>
+    <Folder name="src/routes" defaultOpen>
+      <Folder name="$lang" defaultOpen>
+        <File name="index.tsx" />
+
+        <File name="docs/$.tsx" />
+      </Folder>
+
+      <Folder name="api" defaultOpen>
+        <File name="search.ts" />
+      </Folder>
+    </Folder>
+  </Files>
+</show>
+
+<show when={props.framework === 'waku'}>
+  すべてのページに `[lang]` プレフィックスを追加します。
+
+  <Files>
+    <Folder name="src/pages" defaultOpen>
+      <Folder name="[lang]" defaultOpen>
+        <File name="(home)/_layout.tsx" />
+
+        <File name="(home)/index.tsx" />
+
+        <File name="docs/_layout.tsx" />
+
+        <File name="docs/[...slugs].tsx" />
+      </Folder>
+
+      <Folder name="_api" defaultOpen>
+        <File name="api/search.ts" />
+      </Folder>
+    </Folder>
+  </Files>
+</show>
+
+<show when={props.framework === 'astro'}>
+  ページに `[...lang]` プレフィックスを追加します。レストパラメーターを使うことで、デフォルト言語をプレフィックスなし (例: `/docs`) で扱えます。
+
+  <Files>
+    <Folder name="src/pages" defaultOpen>
+      <Folder name="[...lang]" defaultOpen>
+        <File name="index.astro" />
+
+        <Folder name="docs" defaultOpen>
+          <File name="[...slug].astro" />
+        </Folder>
+      </Folder>
+
+      <Folder name="api" defaultOpen>
+        <File name="search.ts" />
+      </Folder>
+    </Folder>
+  </Files>
+
+  Fumadocs が生成する URL をこれらのルートと一致させるため、`hideLocale` を有効にします。
+
+  ```ts title="src/lib/i18n.ts"
+  export const i18n = defineI18n({
+    defaultLanguage: 'en',
+    languages: ['cn', 'en'],
+    hideLocale: 'default-locale', // [!code ++]
+  });
+  ```
+</show>
+
+### 翻訳 [#translations]
+
+翻訳は `lib/layout.shared.tsx` で定義します。公式の言語パックなど、詳しくは[翻訳](/docs/ui/translations)を参照してください。
+
+また、`baseOptions()` に `locale` パラメーターを追加すると、ロケールごとにレイアウトオプションを切り替えられます。
+
+<show when={props.framework === 'next'}>
+  ```tsx title="lib/layout.shared.tsx"
+  // [!code ++:2]
+  import { i18n } from '@/lib/i18n';
+  import { uiTranslations } from 'fumadocs-ui/i18n';
+  import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
+
+  // [!code ++:11]
+  export const translations = i18n
+    .translations()
+    .extend(uiTranslations())
+    .add({
+      en: {
+        displayName: 'English',
+      },
+      cn: {
+        displayName: 'Chinese',
+      },
+    });
+
+  export function baseOptions(): BaseLayoutProps { // [!code --]
+  export function baseOptions(locale: string): BaseLayoutProps { // [!code ++]
+    return {
+      // `locale` に応じて異なる props を指定
+    };
+  }
+  ```
+
+  翻訳を `<RootProvider />` に渡します。
+
+  ```tsx title="app/[lang]/layout.tsx"
+  import { RootProvider } from 'fumadocs-ui/provider/next';
+  // [!code ++:2]
+  import { i18nProvider } from 'fumadocs-ui/i18n';
+  import { translations } from '@/lib/layout.shared';
+
+  export default function Layout({ children }: LayoutProps<'/'>) { // [!code --]
+  // [!code ++:2]
+  export default async function Layout({ params, children }: LayoutProps<'/[lang]'>) {
+    const { lang } = await params;
+
+    return (
+      // [!code highlight]
+      <html lang={lang} suppressHydrationWarning>
+        <body className="flex flex-col min-h-screen">
+          <RootProvider
+            // [!code ++]
+            i18n={i18nProvider(translations, lang)}
+          >
+            {children}
+          </RootProvider>
+        </body>
+      </html>
+    );
+  }
+  ```
+</show>
+
+<show when={props.framework === 'react-router'}>
+  ```tsx title="app/lib/layout.shared.tsx"
+  // [!code ++:2]
+  import { i18n } from '@/lib/i18n';
+  import { uiTranslations } from 'fumadocs-ui/i18n';
+  import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
+
+  // [!code ++:11]
+  export const translations = i18n
+    .translations()
+    .extend(uiTranslations())
+    .add({
+      en: {
+        displayName: 'English',
+      },
+      cn: {
+        displayName: 'Chinese',
+      },
+    });
+
+  export function baseOptions(): BaseLayoutProps { // [!code --]
+  export function baseOptions(locale: string = i18n.defaultLanguage): BaseLayoutProps { // [!code ++]
+    return {
+      // `locale` に応じて異なる props を指定
+    };
+  }
+  ```
+
+  翻訳を `<RootProvider />` に渡します。
+
+  ```tsx title="app/root.tsx"
+  import {
+    isRouteErrorResponse,
+    Links,
+    Meta,
+    Outlet,
+    Scripts,
+    ScrollRestoration,
+    useParams, // [!code ++]
+  } from 'react-router';
+  import { RootProvider } from 'fumadocs-ui/provider/react-router';
+  // [!code ++:3]
+  import { i18nProvider } from 'fumadocs-ui/i18n';
+  import { i18n } from '@/lib/i18n';
+  import { translations } from '@/lib/layout.shared';
+
+  export function Layout({ children }: { children: React.ReactNode }) {
+    const { lang = i18n.defaultLanguage } = useParams(); // [!code ++]
+
+    return (
+      // [!code highlight]
+      <html lang={lang} suppressHydrationWarning>
+        <head>{/* ... */}</head>
+        <body className="flex flex-col min-h-screen">
+          <RootProvider
+            // [!code ++]
+            i18n={i18nProvider(translations, lang)}
+          >
+            {children}
+          </RootProvider>
+          <ScrollRestoration />
+          <Scripts />
+        </body>
+      </html>
+    );
+  }
+  ```
+</show>
+
+<show when={props.framework === 'tanstack-start'}>
+  ```tsx title="src/lib/layout.shared.tsx"
+  // [!code ++:2]
+  import { i18n } from '@/lib/i18n';
+  import { uiTranslations } from 'fumadocs-ui/i18n';
+  import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
+
+  // [!code ++:11]
+  export const translations = i18n
+    .translations()
+    .extend(uiTranslations())
+    .add({
+      en: {
+        displayName: 'English',
+      },
+      cn: {
+        displayName: 'Chinese',
+      },
+    });
+
+  export function baseOptions(): BaseLayoutProps { // [!code --]
+  export function baseOptions(locale: string): BaseLayoutProps { // [!code ++]
+    return {
+      // `locale` に応じて異なる props を指定
+    };
+  }
+  ```
+
+  翻訳を `<RootProvider />` に渡します。
+
+  ```tsx title="src/routes/__root.tsx"
+  import { createRootRoute, HeadContent, Outlet, Scripts } from '@tanstack/react-router'; // [!code --]
+  import { createRootRoute, HeadContent, Outlet, Scripts, useParams } from '@tanstack/react-router'; // [!code ++]
+  import { RootProvider } from 'fumadocs-ui/provider/tanstack';
+  // [!code ++:3]
+  import { i18nProvider } from 'fumadocs-ui/i18n';
+  import { i18n } from '@/lib/i18n';
+  import { translations } from '@/lib/layout.shared';
+
+  // ...
+
+  function RootComponent() {
+    const { lang = i18n.defaultLanguage } = useParams({ strict: false }); // [!code ++]
+
+    return (
+      // [!code highlight]
+      <html lang={lang} suppressHydrationWarning>
+        <head>
+          <HeadContent />
+        </head>
+        <body className="flex flex-col min-h-screen">
+          <RootProvider
+            // [!code ++]
+            i18n={i18nProvider(translations, lang)}
+          >
+            <Outlet />
+          </RootProvider>
+          <Scripts />
+        </body>
+      </html>
+    );
+  }
+  ```
+</show>
+
+<show when={props.framework === 'waku'}>
+  ```tsx title="src/lib/layout.shared.tsx"
+  // [!code ++:2]
+  import { i18n } from '@/lib/i18n';
+  import { uiTranslations } from 'fumadocs-ui/i18n';
+  import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
+
+  // [!code ++:11]
+  export const translations = i18n
+    .translations()
+    .extend(uiTranslations())
+    .add({
+      en: {
+        displayName: 'English',
+      },
+      cn: {
+        displayName: 'Chinese',
+      },
+    });
+
+  export function baseOptions(): BaseLayoutProps { // [!code --]
+  export function baseOptions(locale: string): BaseLayoutProps { // [!code ++]
+    return {
+      nav: {
+        title: 'My App',
+        url: `/${locale}`, // [!code ++]
+      },
+    };
+  }
+  ```
+
+  翻訳を `<RootProvider />` に渡します。
+
+  ```tsx title="src/components/provider.tsx"
+  'use client';
+  import type { ReactNode } from 'react';
+  import { RootProvider } from 'fumadocs-ui/provider/waku';
+  // [!code ++:4]
+  import { i18nProvider } from 'fumadocs-ui/i18n';
+  import { useRouter } from 'waku/router/client';
+  import { i18n } from '@/lib/i18n';
+  import { translations } from '@/lib/layout.shared';
+
+  export function Provider({ children }: { children: ReactNode }) {
+    // パスの最初のセグメント [!code ++:2]
+    const lang = useRouter().path.split('/')[1] || i18n.defaultLanguage;
+
+    return <RootProvider>{children}</RootProvider>; // [!code --]
+    return <RootProvider i18n={i18nProvider(translations, lang)}>{children}</RootProvider>; // [!code ++]
+  }
+  ```
+</show>
+
+<show when={props.framework === 'astro'}>
+  ```tsx title="src/lib/layout.shared.tsx"
+  // [!code ++:2]
+  import { i18n } from '@/lib/i18n';
+  import { uiTranslations } from 'fumadocs-ui/i18n';
+  import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
+
+  // [!code ++:3]
+  export const translations = i18n
+    .translations()
+    .extend(uiTranslations());
+
+  export function baseOptions(): BaseLayoutProps { // [!code --]
+  export function baseOptions(locale: string): BaseLayoutProps { // [!code ++]
+    return {
+      nav: {
+        title: 'My App',
+        url: locale === i18n.defaultLanguage ? '/' : `/${locale}`, // [!code ++]
+      },
+    };
+  }
+  ```
+
+  翻訳を `<Provider />` に渡します。MDX コンテンツはそれ自体が独立したアイランドなので、こちらにもプロバイダーが必要です。
+
+  ```tsx tab="src/components/provider.tsx"
+  import { navigate } from 'astro:transitions/client';
+  import type { ReactNode } from 'react';
+  import { RootProvider } from 'fumadocs-ui/provider/astro';
+  // [!code ++:2]
+  import { i18nProvider } from 'fumadocs-ui/i18n';
+  import { translations } from '@/lib/layout.shared';
+  import SearchDialog from '@/components/search';
+
+  export interface ProviderProps {
+    lang: string; // [!code ++]
+    pathname: string;
+    params: Record<string, string | undefined>;
+    children?: ReactNode;
+  }
+
+  export function Provider({ lang, pathname, params, children }: ProviderProps) {
+    return (
+      <RootProvider
+        pathname={pathname}
+        params={params}
+        navigate={navigate}
+        // [!code ++]
+        i18n={i18nProvider(translations, lang)}
+        search={{ SearchDialog }}
+      >
+        {children}
+      </RootProvider>
+    );
+  }
+
+  // [!code ++:16]
+  /**
+   * MDX コンテンツ用(それ自体が独立したアイランドのため)。
+   */
+  export function ContentProvider({ lang, pathname, params, children }: ProviderProps) {
+    return (
+      <RootProvider
+        pathname={pathname}
+        params={params}
+        navigate={navigate}
+        i18n={i18nProvider(translations, lang)}
+        theme={{ enabled: false }}
+        search={{ enabled: false }}
+      >
+        {children}
+      </RootProvider>
+    );
+  }
+  ```
+
+  ```tsx tab="src/components/mdx.tsx"
+  import defaultMdxComponents from 'fumadocs-ui/mdx';
+  import { DocsBody } from 'fumadocs-ui/layouts/docs/page';
+  import type { MDXComponents } from 'mdx/types';
+  import { ContentProvider, type ProviderProps } from '@/components/provider'; // [!code ++]
+
+  export function getMDXComponents(components?: MDXComponents) {
+    return {
+      ...defaultMdxComponents,
+      ...components,
+    } satisfies MDXComponents;
+  }
+
+  // Fumadocs のインテグレーションでは、`wrapper` は `<Content />` の props を受け取ります
+  export default getMDXComponents({
+    wrapper: DocsBody, // [!code --]
+    // [!code ++:5]
+    wrapper: ({ children, ...props }: ProviderProps) => (
+      <ContentProvider {...props}>
+        <DocsBody>{children}</DocsBody>
+      </ContentProvider>
+    ),
+  });
+  ```
+</show>
+
+### ロケールを渡す [#pass-locale]
+
+<show when={props.framework !== 'waku' && props.framework !== 'astro'}>
+  ページとレイアウトで、ロケールを Fumadocs に渡します。
+</show>
+
+<show when={props.framework === 'waku'}>
+  ページとレイアウトで、ロケールを Fumadocs に渡します。`[lang]` 配下のレイアウトとページは、ロケールを prop として受け取ります。
+</show>
+
+<show when={props.framework === 'astro'}>
+  ソース、レイアウト、ページで、ロケールを Fumadocs に渡します。
+</show>
+
+<show when={props.framework === 'next'}>
+  ```ts tab="lib/source.ts"
+  import { i18n } from '@/lib/i18n'; // [!code ++]
+  import { loader } from 'fumadocs-core/source';
+
+  export const source = loader({
+    i18n, // [!code ++]
+    // その他のオプション
+  });
+  ```
+
+  ```tsx tab="Home Layout" title="app/[lang]/(home)/layout.tsx"
+  export default function Layout({ children }: LayoutProps<'/'>) { // [!code --]
+  // [!code ++:2]
+  export default async function Layout({ params, children }: LayoutProps<'/[lang]'>) {
+    const { lang } = await params;
+
+    return <HomeLayout {...baseOptions(lang)}>{children}</HomeLayout>; // [!code highlight]
+  }
+  ```
+
+  ```tsx tab="Docs Layout" title="app/[lang]/docs/layout.tsx"
+  export default function Layout({ children }: LayoutProps<'/docs'>) { // [!code --]
+  // [!code ++:2]
+  export default async function Layout({ params, children }: LayoutProps<'/[lang]/docs'>) {
+    const { lang } = await params;
+
+    return (
+      // [!code highlight]
+      <DocsLayout {...baseOptions(lang)} tree={source.getPageTree(lang)}>
+        {children}
+      </DocsLayout>
+    );
+  }
+  ```
+
+  ```tsx tab="Docs Page" title="app/[lang]/docs/[[...slug]]/page.tsx"
+  export default async function Page(props: PageProps<'/docs/[[...slug]]'>) { // [!code --]
+  export default async function Page(props: PageProps<'/[lang]/docs/[[...slug]]'>) { // [!code ++]
+    const params = await props.params;
+    const page = source.getPage(params.slug); // [!code --]
+    const page = source.getPage(params.slug, params.lang); // [!code ++]
+    if (!page) notFound();
+
+    // ...
+  }
+  ```
+
+  <Callout title={<>動的セグメントに <code>lang</code> 以外の名前を使用する場合</>}>
+    `app/[locale]` のように別の名前を使用している場合は、docs ページの `generateStaticParams()` も更新する必要があります。
+
+    ```tsx
+    export function generateStaticParams() {
+      return source.generateParams(); // [!code --]
+      return source.generateParams('slug', 'locale'); // [!code ++]
+    }
+    ```
+  </Callout>
+</show>
+
+<show when={props.framework === 'react-router'}>
+  ```ts tab="app/lib/source.ts"
+  import { i18n } from '@/lib/i18n'; // [!code ++]
+
+  export const source = loader({
+    source: docs.toFumadocsSource(),
+    baseUrl: '/docs',
+    i18n, // [!code ++]
+  });
+  ```
+
+  ```tsx tab="ホームページ" title="app/routes/home.tsx"
+  export default function Home() { // [!code --]
+  export default function Home({ params }: Route.ComponentProps) { // [!code ++]
+    return (
+      // [!code highlight]
+      <HomeLayout {...baseOptions(params.lang)}>
+        {/* ... */}
+      </HomeLayout>
+    );
+  }
+  ```
+
+  ```tsx tab="ドキュメントページ" title="app/routes/docs.tsx"
+  export async function loader({ params }: Route.LoaderArgs) {
+    const slugs = params['*'].split('/').filter((v) => v.length > 0);
+    const page = source.getPage(slugs); // [!code --]
+    const page = source.getPage(slugs, params.lang); // [!code ++]
+    if (!page) throw new Response('Not found', { status: 404 });
+
+    return {
+      path: page.path,
+      pageTree: await source.serializePageTree(source.getPageTree()), // [!code --]
+      pageTree: await source.serializePageTree(source.getPageTree(params.lang)), // [!code ++]
+    };
+  }
+
+  export default function Page({ loaderData }: Route.ComponentProps) { // [!code --]
+  export default function Page({ loaderData, params }: Route.ComponentProps) { // [!code ++]
+    const { path, pageTree } = useFumadocsLoader(loaderData);
+
+    return (
+      // [!code highlight]
+      <DocsLayout {...baseOptions(params.lang)} tree={pageTree}>
+        <Content path={path} />
+      </DocsLayout>
+    );
+  }
+  ```
+</show>
+
+<show when={props.framework === 'tanstack-start' || props.framework === 'waku'}>
+  ```ts tab="src/lib/source.ts"
+  import { i18n } from '@/lib/i18n'; // [!code ++]
+
+  export const source = loader({
+    source: docs.toFumadocsSource(),
+    baseUrl: '/docs',
+    i18n, // [!code ++]
+  });
+  ```
+</show>
+
+<show when={props.framework === 'tanstack-start'}>
+  ```tsx tab="ホームページ" title="src/routes/$lang/index.tsx"
+  export const Route = createFileRoute('/')({ // [!code --]
+  export const Route = createFileRoute('/$lang/')({ // [!code ++]
+    component: Home,
+  });
+
+  function Home() {
+    const { lang } = Route.useParams(); // [!code ++]
+
+    return (
+      // [!code highlight]
+      <HomeLayout {...baseOptions(lang)}>
+        {/* ... */}
+      </HomeLayout>
+    );
+  }
+  ```
+
+  ```tsx tab="ドキュメントページ" title="src/routes/$lang/docs/$.tsx"
+  export const Route = createFileRoute('/docs/$')({ // [!code --]
+  export const Route = createFileRoute('/$lang/docs/$')({ // [!code ++]
+    component: Page,
+    loader: async ({ params }) => {
+      const slugs = params._splat?.split('/') ?? [];
+      const data = await serverLoader({ data: slugs }); // [!code --]
+      const data = await serverLoader({ data: { slugs, lang: params.lang } }); // [!code ++]
+      await docs.getPage(data.path)?.preload();
+      return data;
+    },
+  });
+
+  const serverLoader = createServerFn({
+    method: 'GET',
+  })
+    .validator((slugs: string[]) => slugs) // [!code --]
+    .handler(async ({ data: slugs }) => { // [!code --]
+    .validator((data: { slugs: string[]; lang: string }) => data) // [!code ++]
+    .handler(async ({ data: { slugs, lang } }) => { // [!code ++]
+      const page = source.getPage(slugs); // [!code --]
+      const page = source.getPage(slugs, lang); // [!code ++]
+      if (!page) throw notFound();
+
+      return {
+        path: page.path,
+        pageTree: await source.serializePageTree(source.getPageTree()), // [!code --]
+        pageTree: await source.serializePageTree(source.getPageTree(lang)), // [!code ++]
+      };
+    });
+
+  function Page() {
+    const { lang } = Route.useParams(); // [!code ++]
+    const data = useFumadocsLoader(Route.useLoaderData());
+
+    return (
+      // [!code highlight]
+      <DocsLayout {...baseOptions(lang)} tree={data.pageTree}>
+        <Suspense>
+          <Content path={data.path} />
+        </Suspense>
+      </DocsLayout>
+    );
+  }
+  ```
+</show>
+
+<show when={props.framework === 'waku'}>
+  ```tsx tab="Home Layout" title="src/pages/[lang]/(home)/_layout.tsx"
+  export default function Layout({ children }: { children: ReactNode }) { // [!code --]
+  export default function Layout({ lang, children }: { lang: string; children: ReactNode }) { // [!code ++]
+    return <HomeLayout {...baseOptions()}>{children}</HomeLayout>; // [!code --]
+    return <HomeLayout {...baseOptions(lang)}>{children}</HomeLayout>; // [!code ++]
+  }
+  ```
+
+  ```tsx tab="Home Page" title="src/pages/[lang]/(home)/index.tsx"
+  import { i18n } from '@/lib/i18n'; // [!code ++]
+
+  // ...
+
+  export async function getConfig() {
+    return {
+      render: 'static',
+      staticPaths: i18n.languages, // [!code ++]
+    };
+  }
+  ```
+
+  ```tsx tab="Docs Layout" title="src/pages/[lang]/docs/_layout.tsx"
+  export default function Layout({ children }: { children: ReactNode }) { // [!code --]
+  export default function Layout({ lang, children }: { lang: string; children: ReactNode }) { // [!code ++]
+    return (
+      // [!code highlight]
+      <DocsLayout {...baseOptions(lang)} tree={source.getPageTree(lang)}>
+        {children}
+      </DocsLayout>
+    );
+  }
+  ```
+
+  ```tsx tab="Docs Page" title="src/pages/[lang]/docs/[...slugs].tsx"
+  export default function Page({ slugs }: PageProps<'/docs/[...slugs]'>) { // [!code --]
+  export default function Page({ lang, slugs }: PageProps<'/[lang]/docs/[...slugs]'>) { // [!code ++]
+    const page = source.getPage(slugs); // [!code --]
+    const page = source.getPage(slugs, lang); // [!code ++]
+    if (!page) unstable_notFound();
+
+    // ...
+  }
+
+  export async function getConfig() {
+    const pages = source
+      .generateParams()
+      .map((item) => (item.lang ? [item.lang, ...item.slug] : item.slug)); // [!code highlight]
+
+    return {
+      render: 'static',
+      staticPaths: pages,
+    } as const;
+  }
+  ```
+</show>
+
+<show when={props.framework === 'astro'}>
+  ```ts tab="src/lib/source.ts"
+  import { i18n } from '@/lib/i18n'; // [!code ++]
+
+  export const source = loader({
+    source: toFumadocsSource(await getCollection('docs'), await getCollection('meta')),
+    baseUrl: '/docs',
+    i18n, // [!code ++]
+  });
+  ```
+
+  ```tsx tab="src/components/docs.tsx"
+  export function Docs({ tree, title, description, toc, children, ...props }: DocsProps) {
+    const data = useFumadocsLoader({ tree });
+
+    return (
+      <Provider {...props}>
+        {/* [!code highlight] */}
+        <DocsLayout {...baseOptions(props.lang)} tree={data.tree}>
+          {/* ... */}
+        </DocsLayout>
+      </Provider>
+    );
+  }
+  ```
+
+  ```astro tab="src/layouts/Layout.astro"
+  ---
+  interface Props {
+    lang: string; // [!code ++]
+    title: string;
+    description?: string;
+  }
+
+  const { lang, title, description } = Astro.props;
+  ---
+
+  <html lang={lang} transition:animate="none">
+    {/* ... */}
+  </html>
+  ```
+
+  ```astro tab="ドキュメントページ" title="src/pages/[...lang]/docs/[...slug].astro"
+  ---
+  import type { GetStaticPaths, InferGetStaticPropsType } from 'astro';
+  import Layout from '@/layouts/Layout.astro';
+  import { Docs } from '@/components/docs';
+  import { i18n } from '@/lib/i18n';
+  import { source } from '@/lib/source';
+
+  export const prerender = true;
+
+  export const getStaticPaths = (() => {
+    const paths = [];
+    for (const { language, pages } of source.getLanguages()) {
+      for (const page of pages) {
+        paths.push({
+          params: {
+            lang: language === i18n.defaultLanguage ? undefined : language,
+            slug: decodeURI(page.slugs.join('/')) || undefined,
+          },
+          props: { lang: language, page },
+        });
+      }
+    }
+    return paths;
+  }) satisfies GetStaticPaths;
+
+  type Props = InferGetStaticPropsType<typeof getStaticPaths>;
+
+  const { lang, page } = Astro.props;
+  const { body: Content, toc } = await page.data.load();
+  const pageTree = await source.serializePageTree(source.getPageTree(lang));
+  const provider = { lang, pathname: Astro.url.pathname, params: Astro.params };
+  ---
+
+  <Layout lang={lang} title={page.data.title} description={page.data.description}>
+    <Docs
+      client:load
+      transition:persist="docs"
+      {...provider}
+      tree={pageTree}
+      title={page.data.title}
+      description={page.data.description}
+      toc={toc}
+    >
+      <Content {...provider} />
+    </Docs>
+  </Layout>
+  ```
+
+  ```astro tab="ホームページ" title="src/pages/[...lang]/index.astro"
+  ---
+  import type { GetStaticPaths, InferGetStaticPropsType } from 'astro';
+  import Layout from '@/layouts/Layout.astro';
+  import { i18n } from '@/lib/i18n';
+
+  export const prerender = true;
+
+  export const getStaticPaths = (() => {
+    return i18n.languages.map((lang) => ({
+      params: { lang: lang === i18n.defaultLanguage ? undefined : lang },
+      props: { lang },
+    }));
+  }) satisfies GetStaticPaths;
+
+  type Props = InferGetStaticPropsType<typeof getStaticPaths>;
+
+  const { lang } = Astro.props;
+  ---
+
+  <Layout lang={lang} title="My App">
+    <a href={lang === i18n.defaultLanguage ? '/docs' : `/${lang}/docs`}>
+      Open Docs
+    </a>
+  </Layout>
+  ```
+</show>
+
+### 検索 [#search]
+
+使用している検索ソリューションで i18n を設定してください。
+
+* **組み込み検索:** [国際化](/docs/headless/search/orama#internationalization)を参照してください。
+* **クラウドソリューション(Algolia など):** 多くの場合、多言語対応が公式にサポートされています。
+
+## ドキュメントの作成 [#writing-documents]
+
+特定のロケール向けのページを作成する方法については、[i18n ルーティング](/docs/page-conventions#i18n-routing)を参照してください。
+
+### ナビゲーション [#navigation]
+
+Fumadocs がナビゲーションを処理するのは、Fumadocs 自身のレイアウト(サイドバーなど)のみです。
+
+<show when={props.framework === 'next'}>
+  それ以外の場所では、`useParams` フックで URL からロケールを取得し、`href` の先頭に付加してください。
+
+  ```tsx
+  import Link from 'next/link';
+  import { useParams } from 'next/navigation';
+
+  const { lang } = useParams();
+
+  return <Link href={`/${lang}/another-page`}>This is a link</Link>;
+  ```
+</show>
+
+<show when={props.framework === 'react-router'}>
+  それ以外の場所では、`useParams` フックで URL からロケールを取得してください。
+
+  ```tsx
+  import { Link, useParams } from 'react-router';
+
+  const { lang } = useParams();
+
+  <Link to={`/${lang}/about`}>About Us</Link>;
+  ```
+</show>
+
+<show when={props.framework === 'tanstack-start'}>
+  それ以外の場所では、`useParams` フックで URL からロケールを取得してください。
+
+  ```tsx
+  import { Link, useParams } from '@tanstack/react-router';
+
+  const { lang } = useParams({ from: '/$lang/' });
+
+  <Link
+    to="/$lang/docs/$"
+    params={{
+      lang,
+      _splat: '',
+    }}
+  >
+    Open Docs
+  </Link>;
+  ```
+</show>
+
+<show when={props.framework === 'waku'}>
+  それ以外の場所では、パスからロケールを取り出し、リンクの先頭に付加してください。
+
+  ```tsx
+  import { Link, useRouter } from 'waku/router/client';
+
+  const router = useRouter();
+  const lang = router.path.split('/')[1];
+
+  <Link to={`/${lang}/about`}>About Us</Link>;
+  ```
+</show>
+
+<show when={props.framework === 'astro'}>
+  それ以外の場所では、`Astro.params` またはパスからロケールを取り出し、リンクの先頭に付加してください。
+
+  ```astro
+  ---
+  const { lang } = Astro.params;
+  ---
+
+  <a href={lang ? `/${lang}/about` : '/about'}>About Us</a>
+  ```
+</show>
+
+[`fumadocs-core/dynamic-link`](/docs/headless/components/link#dynamic-hrefs) コンポーネントは動的な href に対応しているため、Markdown/MDX コンテンツ内でロケールのプレフィックスを付加する際に利用できます。
+
+<show when={props.framework !== 'astro'}>
+  ```mdx title="content.mdx"
+  import { DynamicLink } from 'fumadocs-core/dynamic-link';
+
+  <DynamicLink href="/[lang]/another-page">This is a link</DynamicLink>
+  ```
+</show>
+
+<show when={props.framework === 'astro'}>
+  MDX コンテンツはコンポーネントを独自のアイランド内でレンダリングするため、MDX コンポーネントに追加してください。
+
+  ```tsx title="src/components/mdx.tsx"
+  import { DynamicLink } from 'fumadocs-core/dynamic-link'; // [!code ++]
+
+  export function getMDXComponents(components?: MDXComponents) {
+    return {
+      ...defaultMdxComponents,
+      DynamicLink, // [!code ++]
+      ...components,
+    } satisfies MDXComponents;
+  }
+  ```
+
+  ```mdx title="content.mdx"
+  <DynamicLink href="/[lang]/another-page">This is a link</DynamicLink>
+  ```
+</show>

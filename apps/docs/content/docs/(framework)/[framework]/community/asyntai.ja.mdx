@@ -1,0 +1,76 @@
+---
+title: Asyntai AI チャットボット
+description: 読者がドキュメントに質問し、その内容に基づいた回答を得られるようにします。
+staticParams:
+  - framework: next
+---
+
+> これはコミュニティによってメンテナンスされているインテグレーションです。
+
+読者が必要なページを見つけられなかったり、検索ボックスでは解決できない疑問を抱えていたりすることはよくあります。その結果、読者はサイトを離れるか、サポートチケットを作成することになります。
+
+[Asyntai](https://asyntai.com/documentation/integrations/nextjs/) を使うと、Fumadocs サイトに AI チャットアシスタントを追加できます。公開済みのページを読み取り、その内容をもとに80以上の言語で読者の質問に回答します。[`nextjs-ai-chatbot`](https://www.npmjs.com/package/nextjs-ai-chatbot) パッケージを使えば、コンポーネントを1つ追加するだけでチャットウィジェットを導入できます。無料プランも用意されています。
+
+## セットアップ [#setup]
+
+Asyntai のウィジェット ID が必要です。ID は `asyntai_` で始まる文字列で、Asyntai ダッシュボードの **Install** ページで確認できます。
+
+### 1. パッケージのインストール [#install-the-package]
+
+```package-install
+nextjs-ai-chatbot
+```
+
+### 2. コンポーネントを追加する [#add-the-component]
+
+ルートレイアウトの `<body>` の末尾に `<AsyntaiChatbot />` を配置します。このコンポーネントはサーバーコンポーネント内でも使用できます。レイアウトのその他の部分は変更する必要はありません。
+
+```tsx title="app/layout.tsx"
+import { RootProvider } from 'fumadocs-ui/provider/next';
+import { AsyntaiChatbot } from 'nextjs-ai-chatbot';
+import type { ReactNode } from 'react';
+
+export default function Layout({ children }: { children: ReactNode }) {
+  return (
+    <html lang="en" suppressHydrationWarning>
+      <body className="flex flex-col min-h-screen">
+        <RootProvider>{children}</RootProvider>
+        <AsyntaiChatbot widgetId="asyntai_YOURWIDGETID" />
+      </body>
+    </html>
+  );
+}
+```
+
+ウィジェットはページの `load` イベントの後に読み込まれるため、ドキュメントは常に先にレンダリングされます。Fumadocs はページ全体を再読み込みせずにページを切り替えるため、読者がドキュメント内を移動している間もチャットは画面に表示されたままです。
+
+### 3. ダッシュボードにドキュメントを追加する [#add-your-docs-in-the-dashboard]
+
+Asyntai のダッシュボードで、ドキュメントサイトの URL を追加してください。これで、アシスタントはウィジェットを設置したページ自体の内容をもとに回答するようになります。
+
+## 環境変数から Widget ID を設定する [#widget-id-from-an-environment-variable]
+
+`widgetId` は省略し、代わりに `.env` で設定することもできます：
+
+```bash title=".env"
+NEXT_PUBLIC_ASYNTAI_WIDGET_ID=asyntai_YOURWIDGETID
+```
+
+Next.js は `NEXT_PUBLIC_` の値をビルド時に読み込むため、`next build` を実行する環境で設定してください。
+
+## パッケージを使用しない場合 [#without-the-package]
+
+`next/script` を使用して、ウィジェットを手動で追加することもできます。
+
+```tsx title="app/layout.tsx"
+import Script from 'next/script';
+
+<Script
+  id="asyntai-chatbot"
+  src="https://widget.asyntai.com/static/js/chat-widget.js"
+  data-asyntai-id="asyntai_YOURWIDGETID"
+  strategy="lazyOnload"
+/>;
+```
+
+すべてのオプションについては[パッケージの README](https://github.com/asyntai/nextjs-ai-chatbot)を、ダッシュボードについては[Asyntai のドキュメント](https://asyntai.com/documentation/integrations/nextjs/)を参照してください。

@@ -1,0 +1,62 @@
+---
+title: 検索
+description: ドキュメントサイトに検索機能を実装します
+---
+
+## 検索 UI [#search-ui]
+
+ドキュメント検索の UI をカスタマイズする方法については、[検索 UI](/docs/ui/search) を参照してください。
+
+## 検索クライアント [#search-client]
+
+使用する検索エンジンに応じて、検索クライアントを選択・設定できます。デフォルトは ZBSearch です。
+
+<DocsCategory />
+
+### 検索フック [#search-hooks]
+
+検索クライアントには、`useFetchSearch()` や `useAlgoliaSearch()` などの React フックが用意されています。これらのフックは `<SearchDialog />` の props を返します。
+
+```tsx
+import { useFetchSearch } from 'fumadocs-core/search/client';
+
+const search = useFetchSearch();
+
+<SearchDialog {...search} {...props} />;
+```
+
+これらのフックは、検索入力用の `search` と `onSearchChange` に加えて、次の値を返します。
+
+* `data`: 最後に成功した検索です。再検索中やエラー発生後も保持されます。
+  * `items`: その検索結果です。各結果のコンテンツは [hast](https://github.com/syntax-tree/hast) としてもパースされ、`hastContent` に格納されます。テーブルの行は 1 つの `table` アイテムにまとめられます。
+  * `query`: 検索に使用されたクエリです。
+* `error`: 最後の検索が失敗した場合に設定されます。
+* `isLoading`: `search` に対する検索が処理中かどうかを示します。
+
+他の検索エンジンを使用する場合は、メモ化した検索関数を `experimental_useSearch()` に渡してください。関数が変更されると、再検索が実行されます。
+
+```tsx
+'use client';
+import { useCallback } from 'react';
+import { experimental_useSearch } from 'fumadocs-core/search/client';
+import type { SortedResult } from 'fumadocs-core/search';
+
+export function useMySearch(locale: string) {
+  const search = useCallback(
+    async (query: string): Promise<SortedResult[]> => {
+      const res = await fetch(`/api/my-search?${new URLSearchParams({ query, locale })}`);
+      return res.json();
+    },
+    [locale],
+  );
+
+  return experimental_useSearch(search);
+}
+```
+
+### コミュニティによるインテグレーション [#community-integrations]
+
+コミュニティがメンテナンスしているインテグレーションの一覧です。
+
+* [Trieve Search](/docs/headless/search/trieve)
+* [Typesense Search](/docs/headless/search/typesense)

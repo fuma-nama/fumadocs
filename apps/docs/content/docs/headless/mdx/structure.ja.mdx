@@ -1,0 +1,135 @@
+---
+title: Remark Structure
+description: ドキュメントから検索用のレコードを抽出します。
+---
+
+`remarkStructure` プラグインは、ドキュメントの見出しと本文を[検索](/docs/headless/search)用のレコードとして抽出します。レコードには、記述した Markdown がそのまま保持されます。生成の仕組みについては、[文字列化](/docs/headless/mdx/stringification)を参照してください。
+
+```mdx tab="Input"
+## Installation
+
+Run the [command](/docs/cli) below.
+
+<Callout>Restart the **server** after it.</Callout>
+
+| Option | Default |
+| ------ | ------- |
+| `dir`  | `docs`  |
+```
+
+```json tab="Output"
+{
+  "headings": [{ "id": "installation", "content": "Installation" }],
+  "contents": [
+    { "heading": "installation", "content": "Run the command below." },
+    { "heading": "installation", "content": "<Callout>Restart the **server** after it.</Callout>" },
+    {
+      "heading": "installation",
+      "content": "| Option | Default |\n| --- | --- |\n| `dir` | `docs` |",
+      "table": "table-0"
+    }
+  ]
+}
+```
+
+## 使い方 [#usage]
+
+Remark Structure は remark プラグインです。Fumadocs MDX ではデフォルトで有効になっており、レコードは `structuredData` としてエクスポートされます。オプションは `remarkStructureOptions` で指定します。
+
+Fumadocs MDX では、レコードはページの props を使って生成されます。[`<show>`](/docs/markdown#show) 内のコンテンツのうちレンダリングされない部分は除外され、式はその評価値に置き換えられます。Fumadocs MDX 以外の環境では、式はソースコードのテキストのまま残ります。
+
+## レコード [#records]
+
+見出し、段落、引用ブロック、テーブル、JSX 要素がレコードとして記録されます (`types` を参照) 。
+
+* リンクはテキストに置き換えられ、画像は削除されます。
+* テーブルは行ごとに1つのレコードになり、各レコードはヘッダー行とその行からなるテーブルとして記録されます。各行は `table` フィールドを共有します。
+* JSX 要素はその内容に置き換えられます。ただし、`filterElement` で保持される要素は除きます ([コンポーネント](#components)を参照) 。
+* JSX 要素は、子を持たない場合 (`mdxTypes` を参照) 、または1行に収まる場合にレコードになります。
+* レコード内のコンテンツが重複して記録されることはありません。
+
+Fumadocs MDX では、プラグインはデフォルトでコンポーネントの要素を保持します。たとえば `<Callout>` は保持されますが、`<div>` は保持されません。Fumadocs MDX 以外では、`File`、`TypeTable`、`Callout`、`Card` が保持されます。この動作は `filterElement` で変更できます。
+
+```ts tab="unified" title="source.config.ts"
+import { defineConfig } from 'fumadocs-mdx/config';
+
+export default defineConfig({
+  mdxOptions: {
+    remarkStructureOptions: {
+      filterElement: (node) => node.name === 'Callout' || node.name === 'Banner',
+    },
+  },
+});
+```
+
+```ts tab="Sätteri" title="source.config.ts"
+import { defineConfig, defineDocs } from 'fumadocs-mdx/config';
+
+export const docs = defineDocs({
+  docs: { compiler: 'satteri' },
+});
+
+export default defineConfig({
+  satteriOptions: {
+    remarkStructureOptions: {
+      filterElement: (node) => node.name === 'Callout' || node.name === 'Banner',
+    },
+  },
+});
+```
+
+## コンポーネント [#components]
+
+Fumadocs MDX では、保持された JSX 要素は、レコードの読み取り方法に応じて次の 2 つの形式のいずれかで記録されます。
+
+* `page.data.structuredData`: コンポーネントはレンダリングされません。要素は HTML タグとして保持され、検索ダイアログがそれをコンポーネントとしてレンダリングします。`async` または `dynamic` コレクションでは、読み込んだページから読み取ってください。
+* `await page.data.structuredData()`: コンポーネントは [`search` ターゲット](/docs/headless/utils/markdown#targets)向けにレンダリングされ、要素はその Markdown 形式に置き換えられます。この関数を持つのは `async` および `dynamic` コレクションのみです。
+
+レンダリング時、コンポーネントは MDX と同じ方法で解決されます。まずファイル内のインポートと宣言が参照され、次に[ページの props](/docs/headless/source-api#custom-props) の MDX コンポーネントが参照されます。
+
+検索は `getPages()` からページを読み取りますが、これらのページにはカスタム props がありません。検索時にコンポーネントをレンダリングさせたい場合は、ファイル内でそのコンポーネントをインポートまたは宣言してください。
+
+コンポーネントの検索用テキストは、[`asMarkdown()`](/docs/headless/utils/markdown#asmarkdown) で定義します。
+
+```tsx
+import { asMarkdown } from 'fumadocs-core/server';
+
+export function ProductName() {
+  if (asMarkdown()) return 'Fumadocs';
+  return <span className="font-semibold">Fumadocs</span>;
+}
+```
+
+Markdown 形式を持たないコンポーネントは、ページの props に含まれていない MDX コンポーネントと同様に、JSX 構文のまま残ります。
+
+## プラグイン [#plugins]
+
+プラグインが挿入したノードは、レコードとして記録されません。プラグイン側で `data.structuredData` を使い、自身のノードのレコードを追加します。
+
+```ts
+node.data = {
+  ...node.data,
+  structuredData: {
+    // `heading` のデフォルトは現在の見出しです
+    contents: [{ heading: undefined, content: 'Generated **content**' }],
+  },
+};
+```
+
+執筆したコンテンツの Markdown をレコード内でのみ変更するには、[`replaceSource()`](/docs/headless/mdx/stringification#editing-the-output) で `search` 名前空間を編集してください。
+
+## 関数として使用する [#as-a-function]
+
+unified では、`structure()` を使って文字列からレコードを抽出できます。
+
+```ts
+import { structure } from 'fumadocs-core/mdx-plugins';
+import remarkMath from 'remark-math';
+
+// コンテンツに必要な remark プラグインを指定します
+const data = structure(content, [remarkMath], options);
+```
+
+## オプション [#options]
+
+<auto-type-table path="../props.ts" name="StructureOptions" />

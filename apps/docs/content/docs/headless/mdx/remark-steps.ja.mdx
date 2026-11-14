@@ -1,0 +1,75 @@
+---
+title: Remark Steps
+description: 見出しからステップを生成します
+---
+
+## 使い方 [#usage]
+
+Remark Steps は remark プラグインです。次のように設定に追加してください。
+
+```ts tab="unified" title="source.config.ts"
+import { defineConfig } from 'fumadocs-mdx/config';
+import { remarkSteps } from 'fumadocs-core/mdx-plugins/remark-steps';
+
+export default defineConfig({
+  mdxOptions: {
+    remarkPlugins: [remarkSteps],
+  },
+});
+```
+
+```ts tab="Sätteri" title="source.config.ts"
+import { defineConfig, defineDocs } from 'fumadocs-mdx/config';
+import { remarkSteps } from '@fumadocs/satteri/remark-steps';
+
+export const docs = defineDocs({
+  docs: { compiler: 'satteri' },
+});
+
+export default defineConfig({
+  satteriOptions: {
+    mdastPlugins: [remarkSteps()],
+  },
+});
+```
+
+### 入力 [#input]
+
+ステップの見出しを作成します。
+
+```md tab="Using Tag"
+# Heading 1 [step]
+
+## Sub Heading 1 [step]
+
+## Sub Heading 2 [step]
+
+# Heading 2 [step]
+```
+
+```md tab="Using Number"
+# 1. Heading 1
+
+## 1. Sub Heading 1
+
+## 2. Sub Heading 2
+
+# 2. Heading 2
+```
+
+### 出力 [#output]
+
+プラグインによって、次のような構造が生成されます。
+
+```mdx
+<div className="fd-steps">
+  <div className="fd-step">
+    # Heading 1
+    <div className="fd-steps">
+      <div className="fd-step">## Sub Heading 1</div>
+      <div className="fd-step">## Sub Heading 2</div>
+    </div>
+  </div>
+  <div className="fd-step"># Heading 2</div>
+</div>
+```

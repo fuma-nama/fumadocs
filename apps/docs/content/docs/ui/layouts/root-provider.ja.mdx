@@ -1,0 +1,151 @@
+---
+title: Root Provider
+description: Fumadocs UI のコンテキストプロバイダーです。
+---
+
+`next-themes` や [`<FrameworkProvider />`](/docs/headless#installation) を含む、すべてのコンポーネントに対するコンテキストプロバイダーです。ルートレイアウトに配置してください。
+
+## 使い方 [#usage]
+
+お使いの React.js フレームワークに応じて、次のようにインポートしてください。
+
+```jsx tab="Next.js"
+import { RootProvider } from 'fumadocs-ui/provider/next';
+
+export default function Layout({ children }) {
+  return (
+    <html lang="en">
+      <body>
+        <RootProvider>{children}</RootProvider>
+      </body>
+    </html>
+  );
+}
+```
+
+```jsx tab="React Router"
+import { RootProvider } from 'fumadocs-ui/provider/react-router';
+
+export function Layout({ children }) {
+  return (
+    <html lang="en">
+      <body>
+        <RootProvider>{children}</RootProvider>
+      </body>
+    </html>
+  );
+}
+```
+
+```jsx tab="TanStack Start"
+import {
+  HeadContent,
+  Scripts,
+} from '@tanstack/react-router';
+import { RootProvider } from 'fumadocs-ui/provider/tanstack';
+
+function RootDocument({ children }: { children: React.ReactNode }) {
+  return (
+    <html suppressHydrationWarning>
+      <head>
+        <HeadContent />
+      </head>
+      <body className="flex flex-col min-h-screen">
+        <RootProvider>{children}</RootProvider>
+        <Scripts />
+      </body>
+    </html>
+  );
+}
+
+```
+
+```jsx tab="Waku"
+import { RootProvider } from 'fumadocs-ui/provider/waku';
+
+export default function Layout({ children }) {
+  return (
+    <html lang="en">
+      <body>
+        <RootProvider>{children}</RootProvider>
+      </body>
+    </html>
+  );
+}
+```
+
+```jsx tab="Astro"
+import { navigate } from 'astro:transitions/client';
+import { RootProvider } from 'fumadocs-ui/provider/astro';
+
+// React アイランド内でレンダリングされるため、Astro ページから pathname と params を渡してください。
+export function Provider({ pathname, params, children }) {
+  return (
+    <RootProvider pathname={pathname} params={params} navigate={navigate}>
+      {children}
+    </RootProvider>
+  );
+}
+```
+
+### 検索ダイアログ [#search-dialog]
+
+`search` オプションで、検索ダイアログをカスタマイズしたり無効化したりできます。
+
+```jsx
+<RootProvider
+  search={{
+    enabled: false,
+  }}
+>
+  {children}
+</RootProvider>
+```
+
+詳しくは[検索](/docs/ui/search)をご覧ください。
+
+### テーマプロバイダー [#theme-provider]
+
+Fumadocs は [`next-themes`](https://github.com/pacocoursey/next-themes) を使用してライト/ダークモードに対応しています。
+`theme` オプションでカスタマイズしたり、無効化したりできます。
+
+```jsx
+<RootProvider
+  theme={{
+    enabled: false,
+  }}
+>
+  {children}
+</RootProvider>
+```
+
+テーマの管理には、`next-themes` をインストールしてコード内で直接参照することもできます。
+
+#### ホットキー [#hotkey]
+
+<kbd>D</kbd> を押すと、ライトモードとダークモードが切り替わります。
+ただし、編集可能な要素 (`<input />` など) に入力している間や、検索ダイアログなどのダイアログが開いている間は反応しません。
+
+別のキーを使う場合は `theme.hotKey` に指定し、無効にする場合は `false` を渡してください。
+
+```jsx
+<RootProvider
+  theme={{
+    hotKey: false,
+  }}
+>
+  {children}
+</RootProvider>
+```
+
+一致するキーの組み合わせを完全に制御したい場合は、関数を渡すこともできます。
+
+```jsx
+<RootProvider
+  theme={{
+    hotKey: (e) => e.shiftKey && e.key === 'D',
+  }}
+>
+  {children}
+</RootProvider>
+```

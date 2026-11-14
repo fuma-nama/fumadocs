@@ -1,0 +1,154 @@
+---
+title: Trieve Search
+description: Trieve Search を Fumadocs に統合する
+---
+
+> これはコミュニティによってメンテナンスされているインテグレーションです。
+
+## はじめに [#introduction]
+
+Trieve 連携は、サイト内検索用の Trieve Search を自動で設定します。
+
+デフォルトでは、ドキュメントの**段落ごと**にチャンクを作成します。これは
+Trieve が公式に推奨している方法です。
+
+## セットアップ [#setup]
+
+### 依存関係のインストール [#install-dependencies]
+
+```package-install
+trieve-ts-sdk trieve-fumadocs-adapter
+```
+
+### Trieve に登録する [#sign-up-on-trieve]
+
+Trieve に登録し、データセットを作成します。次に、API キーを 2 つ取得します。1 つは読み取り専用、もう 1 つはチャンクの作成と削除が可能な管理者権限を持つキーです。
+同期に使用するため、データセット ID と管理者キーを `.env.local` に保存してください。
+
+```dotenv
+TRIEVE_DATASET_ID="dataset ID"
+TRIEVE_ADMIN_API_KEY="admin API key"
+```
+
+<Callout title="注意">
+  一方の API キーには公開検索用の読み取り権限のみを付与し、もう一方にはチャンクの作成・削除を行うための
+  管理者権限を付与してください。
+</Callout>
+
+### データセットの同期 [#sync-dataset]
+
+Trieve は [Algolia 連携](/docs/headless/search/algolia)と同じレコードを使用します。事前レンダリングされる `static.json` ルートでレコードをエクスポートし、ビルドのたびにスクリプトで Trieve に同期してください。
+
+<feature>search/trieve</feature>
+
+`build` スクリプトはビルドのたびに同期を行うため、デプロイ先のプラットフォームにも同じ環境変数を設定してください。
+
+### 検索 UI [#search-ui]
+
+提供されている `SearchDialog` コンポーネントを使用できます。
+
+```tsx title="components/search.tsx"
+'use client';
+import type { SharedProps } from 'fumadocs-ui/components/dialog/search';
+import SearchDialog from 'trieve-fumadocs-adapter/components/dialog/search';
+import { TrieveSDK } from 'trieve-ts-sdk';
+
+const trieveClient = new TrieveSDK({
+  apiKey: 'readOnlyApiKey',
+  datasetId: 'datasetId',
+});
+
+export default function CustomSearchDialog(props: SharedProps) {
+  return <SearchDialog trieveClient={trieveClient} {...props} />;
+}
+```
+
+1. `apiKey` と `datasetId` を使用する値に置き換えてください。
+
+2. デフォルトの検索ダイアログを、新しく作成した検索ダイアログに置き換えてください。
+
+### 検索クライアント [#search-client]
+
+`useTrieveSearch` フックを追加します。
+
+```ts
+import { TrieveSDK } from 'trieve-ts-sdk';
+import { useTrieveSearch } from 'trieve-fumadocs-adapter/search/trieve';
+
+const client = new TrieveSDK({
+  apiKey: 'readOnlyApiKey',
+  datasetId: 'datasetId',
+});
+
+const { search, setSearch, query } = useTrieveSearch(client);
+```
+
+## オプション [#options]
+
+### タグフィルター [#tag-filter]
+
+タグフィルターを設定するには、インデックスに `tag` の値を追加します。
+
+```js
+import { sync } from 'trieve-fumadocs-adapter/search/sync';
+import { TrieveSDK } from 'trieve-ts-sdk';
+
+const client = new TrieveSDK({
+  apiKey: 'adminApiKey',
+  datasetId: 'datasetId',
+});
+
+const documents = records.map((index) => ({
+  ...index,
+  tag: 'value', // [!code highlight]
+}));
+
+sync(client, documents);
+```
+
+#### 検索 UI [#search-ui-1]
+
+タグフィルターを有効にします。
+
+```tsx title="components/search.tsx"
+import SearchDialog from 'trieve-fumadocs-adapter/components/dialog/search';
+
+<SearchDialog
+  defaultTag="value"
+  tags={[
+    {
+      name: 'Tag Name',
+      value: 'value',
+    },
+  ]}
+/>;
+```
+
+#### 検索クライアント [#search-client-1]
+
+`tag_set` フィールドは、フィルタリングに使用する属性です。タグでインデックスを絞り込むには、Trieve の検索クライアントでフィルターを指定してください。
+
+```json
+{
+  "must": [
+    {
+      "field": "tag_set",
+      "match": ["value"]
+    }
+  ]
+}
+```
+
+または、`useTrieveSearch` フックを使用する場合は次のとおりです。
+
+```ts
+import { TrieveSDK } from 'trieve-ts-sdk';
+import { useTrieveSearch } from 'trieve-fumadocs-adapter/search/trieve';
+
+const client = new TrieveSDK({
+  apiKey: 'readOnlyApiKey',
+  datasetId: 'datasetId',
+});
+
+const { search, setSearch, query } = useTrieveSearch(client, undefined, '<your tag value>');
+```

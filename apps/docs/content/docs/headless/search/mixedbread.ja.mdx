@@ -1,0 +1,174 @@
+---
+title: Mixedbread
+description: Mixedbread SearchをFumadocsに統合する
+---
+
+[Mixedbread](https://www.mixedbread.com)はセマンティック検索を提供しています。ユーザーは自然言語で検索でき、キーワードではなく意味に基づいてコンテンツを見つけられます。
+
+## セットアップ [#setup]
+
+依存関係をインストールします。
+
+```package-install
+@mixedbread/sdk
+```
+
+### API キー [#api-key]
+
+[Mixedbread](https://platform.mixedbread.com) にサインアップし、[API キー](https://platform.mixedbread.com/platform?next=api-keys)とドキュメント用の [store](https://platform.mixedbread.com/platform?next=stores) を作成したら、それらを `.env.local` に保存します。
+
+```dotenv
+MXBAI_API_KEY="your API key"
+MIXEDBREAD_STORE_ID="your store ID"
+```
+
+検索はサーバー上で実行されるため、API キーがブラウザに露出することはありません。
+
+### ドキュメントの同期 [#sync-documents]
+
+`static.json` ルートを事前レンダリングしてビルド時に検索ドキュメントをエクスポートし、ビルドのたびにスクリプトでストアへ同期します。
+
+<feature>search/mixedbread</feature>
+
+`sync()` はページごとにファイルをアップロードし、前回の同期から変更のないページはスキップします。削除されたページのファイルはストアからも削除されるため、ドキュメント専用のストアを使用してください。`build` スクリプトはビルドのたびに同期を行うため、デプロイ先のプラットフォームにも同じ環境変数を設定してください。
+
+### Search API [#search-api]
+
+store を検索するためのルートを作成します。
+
+```ts tab="Next.js" title="app/api/search/route.ts"
+import { createMixedbreadSearchAPI } from 'fumadocs-core/search/mixedbread';
+import Mixedbread from '@mixedbread/sdk';
+
+export const { GET } = createMixedbreadSearchAPI({
+  client: new Mixedbread(), // `MXBAI_API_KEY` を読み取ります
+  storeIdentifier: process.env.MIXEDBREAD_STORE_ID!,
+});
+```
+
+```ts tab="React Router" title="app/routes/search.ts"
+import type { Route } from './+types/search';
+import { createMixedbreadSearchAPI } from 'fumadocs-core/search/mixedbread';
+import Mixedbread from '@mixedbread/sdk';
+
+const server = createMixedbreadSearchAPI({
+  client: new Mixedbread(), // `MXBAI_API_KEY` を読み込みます
+  storeIdentifier: process.env.MIXEDBREAD_STORE_ID!,
+});
+
+export async function loader({ request }: Route.LoaderArgs) {
+  return server.GET(request);
+}
+```
+
+```ts tab="TanStack Start" title="src/routes/api/search.ts"
+import { createFileRoute } from '@tanstack/react-router';
+import { createMixedbreadSearchAPI } from 'fumadocs-core/search/mixedbread';
+import Mixedbread from '@mixedbread/sdk';
+
+const server = createMixedbreadSearchAPI({
+  client: new Mixedbread(), // `MXBAI_API_KEY` を読み取ります
+  storeIdentifier: process.env.MIXEDBREAD_STORE_ID!,
+});
+
+export const Route = createFileRoute('/api/search')({
+  server: {
+    handlers: {
+      GET: async ({ request }) => server.GET(request),
+    },
+  },
+});
+```
+
+```ts tab="Waku" title="src/pages/_api/api/search.ts"
+import { createMixedbreadSearchAPI } from 'fumadocs-core/search/mixedbread';
+import Mixedbread from '@mixedbread/sdk';
+
+export const { GET } = createMixedbreadSearchAPI({
+  client: new Mixedbread(), // `MXBAI_API_KEY` を読み取ります
+  storeIdentifier: process.env.MIXEDBREAD_STORE_ID!,
+});
+```
+
+```ts tab="Astro" title="src/pages/api/search.ts"
+import type { APIRoute } from 'astro';
+import { createMixedbreadSearchAPI } from 'fumadocs-core/search/mixedbread';
+import Mixedbread from '@mixedbread/sdk';
+import { getSecret } from 'astro:env/server';
+
+// リクエストごとにレンダリングするため、アダプターが必要です
+export const prerender = false;
+
+const server = createMixedbreadSearchAPI({
+  client: new Mixedbread({ apiKey: getSecret('MXBAI_API_KEY') }),
+  storeIdentifier: getSecret('MIXEDBREAD_STORE_ID')!,
+});
+
+export const GET: APIRoute = ({ request }) => server.GET(request);
+```
+
+### 検索 UI [#search-ui]
+
+UI の実装方法には、いくつかの選択肢があります。
+
+* [Fumadocs UI の検索ダイアログ](/docs/search/mixedbread)を使用する。
+* 組み込みの検索クライアントフックを使って独自に構築する。
+
+  ```ts twoslash
+  import { useFetchSearch } from 'fumadocs-core/search/client';
+
+  const { search, onSearchChange, isLoading, data } = useFetchSearch({
+    api: '/api/search',
+    // 検索のたびに Mixedbread へリクエストが送信されます
+    delayMs: 300,
+  });
+  ```
+
+## オプション [#options]
+
+### タグフィルター [#tag-filter]
+
+タグによるフィルタリングを設定するには、`static.json` ルートで `toDocuments()` に `tag` を渡します。
+
+```ts
+toDocuments(source, { tag: (page) => page.slugs[0] });
+```
+
+あわせて、検索クライアントも更新してください。
+
+* **Fumadocs UI**: 検索 UI で[タグフィルター](/docs/search/mixedbread#tag-filter)を有効にします。
+* **検索クライアント**: `useFetchSearch()` にタグを渡します。
+
+  ```ts
+  import { useFetchSearch } from 'fumadocs-core/search/client';
+
+  const { search, onSearchChange, isLoading, data } = useFetchSearch({
+    tag: '<your tag value>', // [!code ++]
+    // ...
+  });
+  ```
+
+### 国際化 [#internationalization]
+
+ドキュメントには各ページのロケールが含まれています。特定の言語で検索するには、`locale` を渡します。
+
+```ts
+import { useI18n } from 'fumadocs-ui/contexts/i18n';
+import { useFetchSearch } from 'fumadocs-core/search/client';
+
+const { locale } = useI18n();
+const { search, onSearchChange, isLoading, data } = useFetchSearch({
+  locale, // [!code ++]
+  // ...
+});
+```
+
+## 内部の仕組み [#under-the-hood]
+
+各ページはURLをキーとするファイルで、ページタイトル、URL、パンくずリスト、タグ、ロケールをメタデータとして持ちます。ページのチャンクはタイトル、見出し、段落で構成され、検索結果はすべてチャンク単位で返されます。
+
+| チャンクのメタデータ | 説明                          |
+| ---------- | --------------------------- |
+| `kind`     | `page`、`heading`、または `text` |
+| `heading`  | 所属する見出しのID (任意)             |
+| `table`    | テーブル行が属するテーブル (任意)          |

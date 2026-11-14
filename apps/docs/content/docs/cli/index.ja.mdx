@@ -1,0 +1,155 @@
+---
+title: ユーザーガイド
+description: セットアップの自動化やコンポーネントのインストールを行うCLIツールです。
+---
+
+## インストール [#installation]
+
+CLI の設定ファイルを初期化します。
+
+```package-install
+npx @fumadocs/cli
+```
+
+コンポーネントの出力パスは、設定ファイルで変更できます。
+
+### 初期化 [#init]
+
+既存のアプリに Fumadocs をセットアップします。Next.js、React Router、TanStack Start、Waku、Astro に対応しています。
+
+```package-install
+npx @fumadocs/cli init
+```
+
+アプリとの競合を避けるため、ドキュメントページは独自のプロバイダーとレイアウトを持つ専用のルートグループ(Next.js の場合は `app/(docs)` など)に追加されます。検索 API などのルートハンドラーは[サンプル](https://github.com/fuma-nama/fumadocs/tree/dev/examples)に準拠します。既存のファイルへの変更はわずかです。
+
+* フレームワーク設定への Fumadocs MDX プラグインの追加。
+* グローバル CSS への Fumadocs UI スタイルの追加。
+* テーマ切り替えのため、ルートレイアウトの `<html>` 要素への `suppressHydrationWarning` の追加。
+* `.gitignore` への `.source` の追加。
+
+`--i18n` を指定すると、[国際化](/docs/internationalization)もセットアップされます。ドキュメントのルートにロケールセグメントが追加され(ルーターが対応していれば、デフォルトロケールでは省略可能)、`lib/i18n.ts` 設定ファイルが作成されます。Next.js の場合は、ドキュメントのルートに限定したプロキシも作成されます。その他の機能は、プロジェクトの i18n 設定に従います。
+
+ファイルを上書きする前には確認が求められます。プロンプトをスキップするには `--yes` を、依存関係を `package.json` に書き込むだけでインストールを行わない場合は `--no-install` を指定してください。
+
+### 機能 [#features]
+
+プロジェクトで機能を設定すると、必要なコンポーネントとルートがインストールされ、アプリに組み込まれます。
+
+```package-install
+npx @fumadocs/cli feature ai --provider openrouter
+```
+
+| 機能         | 説明                                                                             |
+| ---------- | ------------------------------------------------------------------------------ |
+| `docs`     | Fumadocs をセットアップします。`init` と同じです。                                              |
+| `ai`       | [AIに質問](/docs/integrations/llms#ask-ai)ダイアログ。`--provider` を指定できます。             |
+| `llms`     | [LLM ルート](/docs/integrations/llms):`llms.txt`、`llms-full.txt`、ページごとの Markdown。 |
+| `mcp`      | ドキュメントを検索・閲覧するための [MCP サーバー](/docs/integrations/llms#mcp-server)。              |
+| `webmcp`   | ブラウザー上の AIエージェント向けの [WebMCP](/docs/integrations/llms#webmcp) ツール(実験的)。         |
+| `og`       | Takumi または next/og(Next.js のみ)による Open Graph 画像の生成。`--engine` を指定できます。         |
+| `search`   | サードパーティの[検索ソリューション](/docs/search)。`--provider` を指定できます。                        |
+| `feedback` | ドキュメントページに表示する[フィードバック](/docs/integrations/feedback)コンポーネント。                   |
+| `epub`     | [EPUB をエクスポート](/docs/guides/export-epub)するためのルート。                              |
+| `lint`     | ESLint(Next.js のみ)、Biome、Oxlint のいずれかを設定します。`--linter` を指定できます。                |
+
+各機能はお使いの構成に合わせて調整されます。
+
+* [Macro API](/docs/mdx/macro) または `source.config.ts` を使用した Fumadocs MDX。その他のコンテンツソースでは `llms`、`mcp`、`epub` を使用できません。
+* ドキュメントの `baseUrl`、`src/` ディレクトリ、`next.config.ts`、i18n、静的エクスポート、SPA モード。
+* ファイルベースのルートを使用する React Router:代わりに、登録が必要なルートが出力されます。
+* `@fumadocs/astro` コレクションを使用する Astro:`ai` は利用できず、`mcp` と `epub` にはアダプターが必要です。
+
+ルートのパスは `lib/shared.ts` の定数として定義されます。
+
+利用可能なオプションはヘルプで確認できます。
+
+```package-install
+npx @fumadocs/cli feature -h
+```
+
+### コンポーネント [#components]
+
+コンポーネントを選択してインストールします。
+
+```package-install
+npx @fumadocs/cli add
+```
+
+コンポーネント名を直接渡すこともできます。
+
+```package-install
+npx @fumadocs/cli add banner files
+```
+
+#### 仕組み [#how-the-magic-works]
+
+CLI は Fumadocs レジストリ (`https://fumadocs.dev/registry`) からコンポーネントの最新バージョンを取得します。
+そのため、インストールしたコンポーネントは常に最新の状態です。
+
+また、import パスの変換も行います。
+CLI は必ず最新バージョンを使用してください。
+
+> この仕組みは Shadcn UI から大きな影響を受けています。
+
+### カスタマイズ [#customize]
+
+Fumadocs のレイアウトを手軽にカスタマイズする方法です。
+
+```package-install
+npx @fumadocs/cli customize
+```
+
+このコマンドはレイアウトを `layouts` にインストールし、ルートファイルのインポート先をそのレイアウトに書き換えます。
+
+### Shadcn UI [#shadcn-ui]
+
+`components.json` があるプロジェクトでは、CLI は Shadcn UI のエイリアスに従って次の処理を行います。
+
+* `shadcn` プリセットをインストールし、Fumadocs UI でプロジェクトのテーマカラーが使われるようにします。
+* `ui` ディレクトリ内の `button`、`popover`、`collapsible` を再利用します。これらは Shadcn UI と共通の API を持っています。
+* `cn` を `utils` エイリアスからインポートします。
+
+Fumadocs 版のコンポーネントは、プロジェクトにまだ存在しない場合にのみインストールされます。
+
+### Tree [#tree]
+
+ターミナルの `tree` コマンドを使って、Fumadocs UI の `Files` コンポーネント用のファイルツリーを生成します。
+
+```package-install
+npx @fumadocs/cli tree ./my-dir ./output.tsx
+```
+
+MDX ファイルとして出力することもできます。
+
+```package-install
+npx @fumadocs/cli tree ./my-dir ./output.mdx
+```
+
+詳しくは、ヘルプを参照してください。
+
+```package-install
+npx @fumadocs/cli tree -h
+```
+
+#### 出力例 [#example-output]
+
+```tsx title="output.tsx"
+import { File, Folder, Files } from 'fumadocs-ui/components/files';
+
+export default (
+  <Files>
+    <Folder name="app">
+      <File name="layout.tsx" />
+      <File name="page.tsx" />
+      <File name="global.css" />
+    </Folder>
+    <Folder name="components">
+      <File name="button.tsx" />
+      <File name="tabs.tsx" />
+      <File name="dialog.tsx" />
+    </Folder>
+    <File name="package.json" />
+  </Files>
+);
+```

@@ -1,0 +1,96 @@
+---
+title: Privatus Analytics
+description: Cookie を使わずに、ドキュメントの閲覧者数を把握できます。
+staticParams:
+  - framework: next
+---
+
+> これはコミュニティが管理しているインテグレーションです。
+
+どのドキュメントページが読まれているのか、閲覧者がどこから来ているのかを知りたいことはよくあります。多くのアナリティクスツールは Cookie を使用するため、多くの国では最初に Cookie の同意ポップアップを表示する必要があります。しかし、拒否を選ぶ訪問者も多く、そうした訪問は数値に反映されません。
+
+[Privatus Analytics](https://privatusanalytics.com) は Cookie を使わずに訪問数を計測し、IP アドレスも保存しません。既知のボットは計測から除外されます。[`@privatus-analytics/next`](https://www.npmjs.com/package/@privatus-analytics/next) パッケージを使えば、タグを 1 つ追加するだけで Fumadocs サイトにスクリプトを組み込めます。最大 3 サイトで月 10,000 イベントまで利用できる無料プランがあり、クレジットカードの登録も不要です。
+
+## セットアップ [#setup]
+
+Privatus Analytics のサイト ID が必要です。サイト ID は `pa_` で始まり、**Site settings** &gt; **Tracking** で確認できます。
+
+### 1. パッケージのインストール [#install-the-package]
+
+```package-install
+@privatus-analytics/next
+```
+
+### 2. サイトIDを設定する [#set-your-site-id]
+
+```bash title=".env"
+PRIVATUS_SITE_ID=pa_YOURSITEID
+```
+
+サイトを実行する環境だけでなく、`next build` を実行する環境にも設定してください。Next.js がビルド時にレンダリングするページはその時点で値を読み取るため、実行時にしか存在しない値では、それらのページにトラッカーが組み込まれません。`siteId` としてタグに渡すこともできます。
+
+### 3. タグを追加する [#add-the-tag]
+
+ルートレイアウトの `<head>` 内に `<PrivatusAnalyticsTag />` を配置します。このコンポーネントはサーバーコンポーネント内でも動作します。レイアウトのその他の部分は変更する必要はありません。
+
+```tsx title="app/layout.tsx"
+import { RootProvider } from 'fumadocs-ui/provider/next';
+import { PrivatusAnalyticsTag } from '@privatus-analytics/next/server';
+import type { ReactNode } from 'react';
+
+export default function Layout({ children }: { children: ReactNode }) {
+  return (
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <PrivatusAnalyticsTag modules={['engage', 'auto', 'vitals', 'clicks', 'ask']} />
+      </head>
+      <body className="flex flex-col min-h-screen">
+        <RootProvider>{children}</RootProvider>
+      </body>
+    </html>
+  );
+}
+```
+
+このタグは本番環境(`next build` と `next start`)でのみ出力されます。`next dev` では何も出力されないため、執筆中のご自身のアクセスはカウントされません。Fumadocs はページ全体を再読み込みせずにページを遷移しますが、スクリプトがページ遷移を毎回自動で検知します。
+
+## パッケージを使用しない場合 [#without-the-package]
+
+代わりに、`script` タグを手動で追加することもできます。
+
+```tsx title="app/layout.tsx"
+<head>
+  <script
+    defer
+    src="https://privatusstats.com/js/pa.js"
+    data-site="pa_YOURSITEID"
+    data-modules="engage,auto,vitals,clicks,ask"
+  />
+</head>
+```
+
+## イベントのトラッキング [#track-events]
+
+ダウンロードなどのアクションを計測するには、Client Component 内で `usePrivatus()` を呼び出します。そのためには、次のパッケージが必要です：
+
+```tsx
+'use client';
+import { usePrivatus } from '@privatus-analytics/next';
+
+export function DownloadButton() {
+  const privatus = usePrivatus();
+  return (
+    <button onClick={() => privatus.track('Download', { file: 'guide.pdf' })}>Download</button>
+  );
+}
+```
+
+script タグを手動で追加した場合は、代わりに属性を追加することもできます。スクリプトはブラウザ上でこの属性を読み取ります。
+
+```tsx
+<a href="/guide.pdf" data-privatus-event="Download" data-privatus-prop-file="guide.pdf">
+  Download
+</a>
+```
+
+各設定の詳細は[パッケージの README](https://github.com/Privatus-Analytics/js/tree/main/next)を、ダッシュボードについては[Privatus Analytics のドキュメント](https://privatusanalytics.com/docs)を参照してください。

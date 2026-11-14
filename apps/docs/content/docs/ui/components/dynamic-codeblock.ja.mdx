@@ -1,0 +1,74 @@
+---
+title: コードブロック（動的）
+description: コードのハイライトも行うコードブロック
+preview: dynamicCodeBlock
+---
+
+## 使い方 [#usage]
+
+### クライアントコンポーネント [#client-component]
+
+```tsx
+import { DynamicCodeBlock } from 'fumadocs-ui/components/dynamic-codeblock';
+
+export function MyComp() {
+  const code = `console.log("Hello World")`;
+
+  return <DynamicCodeBlock lang="ts" code={code} />;
+}
+```
+
+MDX の [`CodeBlock`](/docs/ui/components/codeblock) コンポーネントとは異なり、これは MDX なしで使用できるクライアントコンポーネントです。
+Shiki でコードをハイライトし、デフォルトのコンポーネントでレンダリングします。
+
+特徴:
+
+* React.js 19 の Suspense を使用します。
+* サーバー上で事前レンダリングできます。
+* 言語とテーマはブラウザ上で遅延読み込みされます。
+
+#### オプション [#options]
+
+```tsx
+import { DynamicCodeBlock } from 'fumadocs-ui/components/dynamic-codeblock';
+
+<DynamicCodeBlock
+  lang="ts"
+  code='console.log("Hello World")'
+  options={{
+    themes: {
+      light: 'github-light',
+      dark: 'github-dark',
+    },
+    components: {
+      // コンポーネントを上書き（例: `pre` や `code`）
+    },
+    // その他の Shiki オプション
+  }}
+/>;
+```
+
+### サーバーコンポーネント [#server-component]
+
+サーバーコンポーネント版が必要な場合は、RSC 版を使用できます。
+
+```tsx
+import { ServerCodeBlock } from 'fumadocs-ui/components/codeblock.rsc';
+
+<ServerCodeBlock
+  lang="ts"
+  code='console.log("Hello World")'
+  themes={{
+    light: 'github-light',
+    dark: 'github-dark',
+  }}
+  components={
+    {
+      // コンポーネントを上書き（例: `pre` や `code`）
+    }
+  }
+  // その他の Shiki オプション
+/>;
+```
+
+独自のハイライターでハイライトする場合は、[Highlighter](/docs/headless/utils/shiki#usage) を参照してください。

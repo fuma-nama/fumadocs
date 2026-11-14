@@ -1,0 +1,445 @@
+---
+title: ページの生成
+description: OpenAPI スキーマからページを生成します。
+---
+
+`staticSource()` と `dynamicSource()` は [`loader()`](/docs/integrations/openapi#generate-pages) 用のページを生成し、`generateFiles()` はそれらを MDX ファイルとしてコンテンツディレクトリに書き出します。いずれも同じオプションを受け付けます。
+
+ページのコンテンツは、引き続き `<OpenAPIPage />` がレンダリングします。ジェネレーターが行うのは、各ページにエンドポイントと Webhook を割り振ることだけです。
+
+## オプション [#options]
+
+### `per` [#per]
+
+各ページに含める内容をカスタマイズします。デフォルトは `operation` です。
+
+<Callout>オペレーションとは、`/api/weather:GET` のように特定のメソッドを持つ API エンドポイントを指します。</Callout>
+
+| モード       | 内容                  | ファイルパス                               |
+| --------- | ------------------- | ------------------------------------ |
+| tag       | 同じタグを持つオペレーション      | `{tag_name}.mdx`                     |
+| file      | 同じスキーマファイル内のオペレーション | `{file_name}.mdx`                    |
+| operation | オペレーションごと           | `{operationId ?? endpoint_path}.mdx` |
+| custom    | 後述                  | N/A                                  |
+
+```ts
+import { openapi } from '@/lib/openapi';
+
+await openapi.staticSource({
+  per: 'tag',
+});
+```
+
+`custom` に設定すると、関数を渡して生成処理を自由にカスタマイズできます。
+
+```ts title="Example"
+import type { OperationOutput } from 'fumadocs-openapi';
+import { openapi } from '@/lib/openapi';
+
+await openapi.staticSource({
+  per: 'custom',
+  toPages(builder) {
+    const items = builder.extract();
+
+    for (const op of items.operations) {
+      const { pathItem, operation, displayName } = builder.fromExtractedOperation(op)!;
+
+      const entry: OperationOutput = {
+        type: 'operation',
+        schemaId: builder.id,
+        item: op,
+        path: '...',
+        info: {
+          title: displayName,
+          description: operation.description ?? pathItem.description,
+        },
+      };
+
+      builder.create(entry);
+    }
+  },
+});
+```
+
+`tag` に設定した場合は、タグ定義に `x-displayName` を追加することで各ページのタイトルを指定できます。
+
+```yaml title="openapi.yaml"
+tags:
+  - name: test
+    description: this is a tag.
+    x-displayName: My Test Name
+```
+
+ページは [`groupBy`](#groupby) と同様に OpenAPI 3.2 のタグ階層に従って構成されます。オペレーションを持たないタグについては、ページは生成されません。
+
+```yaml title="openapi.yaml"
+tags:
+  - name: store
+    kind: nav
+  # 出力: store/products.mdx
+  - name: products
+    parent: store
+```
+
+### `groupBy` [#groupby]
+
+`operation` モードでは、出力ファイルをフォルダーごとにグループ化できます。
+
+| 値             | 出力                                                    |
+| ------------- | ----------------------------------------------------- |
+| tag           | `{tag}/{operationId ?? endpoint_path}.mdx`            |
+| route         | `{endpoint_path}/{method}.mdx` (`name` オプションは無視されます)  |
+| none (デフォルト)  | `{operationId ?? endpoint_path}.mdx`                  |
+
+```ts
+import { openapi } from '@/lib/openapi';
+
+await openapi.staticSource({
+  per: 'operation',
+  groupBy: 'tag',
+});
+```
+
+`tag` でグループ化する場合は、OpenAPI 3.2 のタグ階層に従います。各タグは `parent` タグのフォルダー内にネストされ、`kind` が `nav` 以外のタグは無視されます。
+
+```yaml title="openapi.yaml"
+tags:
+  - name: store
+    summary: Store
+    kind: nav
+  - name: products
+    parent: store
+
+paths:
+  /products:
+    get:
+      # 出力: store/products/listProducts.mdx
+      operationId: listProducts
+      tags: [products]
+```
+
+タグが指定されていないオペレーションは、`unknown` フォルダーにまとめられます。
+
+### `name` [#name]
+
+生成されるページのファイル名を制御する関数です。
+
+```ts
+import { openapi } from '@/lib/openapi';
+
+await openapi.staticSource({
+  name(output) {
+    const doc = this.document;
+    if (output.type === 'operation') {
+      const operation = doc.paths![output.item.path]![output.item.method]!;
+      // オペレーションオブジェクト
+      console.log(operation);
+
+      return 'my-dir/filename';
+    }
+
+    const hook = this.dereferenceShallow(doc.webhooks![output.item.name])[output.item.method]!;
+    // Webhook オブジェクト
+    console.log(hook);
+    return 'my-dir/filename';
+  },
+});
+```
+
+### `meta` [#meta]
+
+[`meta.json`](/docs/page-conventions#meta) ファイルを自動生成します。
+
+最大限の柔軟性が必要な場合は、`meta.json` ファイルをいつでも手動で定義できます。
+
+```ts
+import { openapi } from '@/lib/openapi';
+
+await openapi.staticSource({
+  meta: true,
+});
+```
+
+または、フォルダーの表示方法をカスタマイズすることもできます：
+
+```ts
+import { openapi } from '@/lib/openapi';
+
+await openapi.staticSource({
+  meta: {
+    folderStyle: 'separator',
+  },
+});
+```
+
+## MDX ファイル [#mdx-files]
+
+ページを MDX ファイルとして書き出すには、次のようなスクリプトを作成します。
+
+```ts title="scripts/generate-docs.ts"
+import { generateFiles } from 'fumadocs-openapi';
+import { openapi } from '@/lib/openapi';
+
+void generateFiles({
+  input: openapi,
+  output: './content/docs',
+  // 有効にすることをおすすめします
+  // エンドポイントの説明が MDX の構文を壊さないよう注意してください。
+  includeDescription: true,
+});
+```
+
+スクリプトを実行して、ドキュメントを生成します。
+
+```bash
+bun ./scripts/generate-docs.ts
+```
+
+`OpenAPIPage` コンポーネントを MDX コンポーネントに追加します。
+
+<show when={props.framework === 'next'}>
+  ```tsx title="app/docs/[[...slug]]/page.tsx"
+  // [!code ++:2]
+  import { openapi } from '@/lib/openapi';
+  import { OpenAPIPage } from '@/components/api-page';
+
+  export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
+    // ...
+    <MDX
+      components={getMDXComponents({
+        // [!code ++:3]
+        OpenAPIPage: async (props) => (
+          <OpenAPIPage {...await openapi.preloadOpenAPIPage(page)} {...props} />
+        ),
+      })}
+    />;
+  }
+  ```
+</show>
+
+<show when={props.framework === 'react-router'}>
+  ```tsx title="app/routes/docs.tsx"
+  // [!code ++:3]
+  import type { MDXComponents } from 'mdx/types';
+  import { openapi } from '@/lib/openapi';
+  import { OpenAPIPage } from '@/components/api-page';
+
+  export async function loader({ params }: Route.LoaderArgs) {
+    // ...
+    return {
+      path: page.path,
+      pageTree: await source.serializePageTree(source.getPageTree()),
+      ...(await openapi.preloadOpenAPIPage(page)), // [!code ++]
+    };
+  }
+
+  // [!code highlight]
+  function Content({ path, components }: { path: string; components?: MDXComponents }) {
+    // ...
+    <MDX components={useMDXComponents(components)} />; // [!code highlight]
+  }
+
+  export default function Page({ loaderData }: Route.ComponentProps) {
+    const { path, pageTree, preloaded } = useFumadocsLoader(loaderData); // [!code highlight]
+
+    return (
+      <DocsLayout {...baseOptions()} tree={pageTree}>
+        <Content
+          path={path}
+          // [!code ++:3]
+          components={{
+            OpenAPIPage: (props) => <OpenAPIPage {...props} preloaded={preloaded} />,
+          }}
+        />
+      </DocsLayout>
+    );
+  }
+  ```
+</show>
+
+<show when={props.framework === 'tanstack-start'}>
+  ```tsx title="src/routes/docs/$.tsx"
+  // [!code ++:3]
+  import type { MDXComponents } from 'mdx/types';
+  import { openapi } from '@/lib/openapi';
+  import { OpenAPIPage } from '@/components/api-page';
+
+  const serverLoader = createServerFn({
+    method: 'GET',
+  })
+    .validator((slugs: string[]) => slugs)
+    .handler(async ({ data: slugs }) => {
+      // ...
+      return {
+        path: page.path,
+        pageTree: await source.serializePageTree(source.getPageTree()),
+        ...(await openapi.preloadOpenAPIPage(page)), // [!code ++]
+      };
+    });
+
+  // [!code highlight]
+  function Content({ path, components }: { path: string; components?: MDXComponents }) {
+    // ...
+    <MDX components={useMDXComponents(components)} />; // [!code highlight]
+  }
+
+  function Page() {
+    const { path, pageTree, preloaded } = useFumadocsLoader(Route.useLoaderData()); // [!code highlight]
+
+    return (
+      <DocsLayout {...baseOptions()} tree={pageTree}>
+        <Suspense>
+          <Content
+            path={path}
+            // [!code ++:3]
+            components={{
+              OpenAPIPage: (props) => <OpenAPIPage {...props} preloaded={preloaded} />,
+            }}
+          />
+        </Suspense>
+      </DocsLayout>
+    );
+  }
+  ```
+</show>
+
+<show when={props.framework === 'waku'}>
+  ```tsx title="src/pages/docs/[...slugs].tsx"
+  // [!code ++:2]
+  import { openapi } from '@/lib/openapi';
+  import { OpenAPIPage } from '@/components/api-page';
+
+  export default function Page({ slugs }: PageProps<'/docs/[...slugs]'>) {
+    // ...
+    <MDX
+      components={getMDXComponents({
+        // [!code ++:3]
+        OpenAPIPage: async (props) => (
+          <OpenAPIPage {...await openapi.preloadOpenAPIPage(page)} {...props} />
+        ),
+      })}
+    />;
+  }
+  ```
+</show>
+
+<show when={props.framework === 'astro'}>
+  ```tsx title="src/components/mdx.tsx"
+  import { OpenAPIPage } from '@/components/api-page'; // [!code ++]
+
+  export default getMDXComponents({
+    wrapper: DocsBody,
+    // [!code ++]
+    OpenAPIPage: (props) => <OpenAPIPage {...props} preloaded={{ docs: {} }} />,
+  });
+  ```
+
+  MDX コンポーネントのモジュールは全ページで共有されるため、ページ単位でドキュメントをプリロードすることはできません。代わりに [`loadDocument`](/docs/integrations/openapi/server#loading-documents-once) を渡して、ドキュメントを読み込むようにしてください。
+</show>
+
+`loader()` にプラグインを追加します。
+
+```ts title="lib/source.ts"
+import { openapi } from '@/lib/openapi';
+import { loader } from 'fumadocs-core/source';
+
+export const source = loader({
+  // [!code ++:2] 省略可: ページツリー内の各ページ項目にバッジを追加します
+  plugins: [openapi.loaderPlugin()],
+});
+```
+
+`generateFiles()` では、以下のオプションも指定できます。
+
+### `index` [#index]
+
+生成されたページへのリンクカードを並べたインデックスファイルを生成します。
+
+```ts
+import { generateFiles } from 'fumadocs-openapi';
+
+void generateFiles({
+  index: {
+    // `href` の生成に使用
+    url: {
+      baseUrl: '/docs',
+      contentDir: './content/docs',
+    },
+    items: [
+      {
+        // 出力パス
+        path: 'index.mdx',
+        // 任意: 入力ファイルを絞り込みます(サーバーの `input` フィールドと同じ)
+        only: ['petstore.yaml'],
+        // 任意: フロントマターを設定します
+        description: 'All available pages',
+      },
+    ],
+  },
+});
+```
+
+### `imports` [#imports]
+
+生成される MDX ファイルにカスタムインポートを追加します。生成されるドキュメントにコンポーネントやユーティリティなどの依存関係を含めたい場合に便利です。
+
+```ts
+import { generateFiles } from 'fumadocs-openapi';
+
+void generateFiles({
+  imports: [
+    {
+      names: ['API_BASE_URL'],
+      from: '@/constants',
+    },
+  ],
+});
+```
+
+これにより、生成されるすべての MDX ファイルに次のインポートが追加されます。
+
+```ts
+import { API_BASE_URL } from '@/constants';
+```
+
+### `frontmatter` [#frontmatter]
+
+MDX ファイルのフロントマターをカスタマイズします。
+
+デフォルトでは、次の項目が含まれます。
+
+| プロパティ         | 説明                              |
+| ------------- | ------------------------------- |
+| `title`       | ページのタイトル                        |
+| `description` | ページの説明                          |
+| `full`        | 常に `true`。Fumadocs UI 向けに追加されます |
+| `_openapi`    | 内部プロパティ                         |
+
+```ts
+import { generateFiles } from 'fumadocs-openapi';
+
+void generateFiles({
+  frontmatter: (title, description) => ({
+    myProperty: 'hello',
+  }),
+});
+```
+
+### `addGeneratedComment` [#addgeneratedcomment]
+
+生成されたファイルの先頭に、自動生成されたものであることを示すコメントを追加します。
+
+```ts
+import { generateFiles } from 'fumadocs-openapi';
+
+void generateFiles({
+  // デフォルトのコメントを追加
+  addGeneratedComment: true,
+
+  // またはカスタムコメントを指定
+  addGeneratedComment: 'Custom auto-generated comment',
+
+  // またはコメントを無効化
+  addGeneratedComment: false,
+});
+```

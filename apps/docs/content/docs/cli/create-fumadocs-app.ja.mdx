@@ -1,0 +1,70 @@
+---
+title: create-fumadocs-app
+description: 新しい Fumadocs アプリを作成するための CLI
+---
+
+## 使い方 [#usage]
+
+```npm
+npx create-fumadocs-app@latest my-docs
+```
+
+使用するテンプレートと設定する機能を対話形式で尋ねられます。これらはオプションとして渡すこともできます。
+
+### オプション [#options]
+
+| オプション               | 説明                                                                                                       |
+| ------------------- | -------------------------------------------------------------------------------------------------------- |
+| `--template <name>` | 使用するテンプレートです。[テンプレート](#templates)を参照してください。                                                              |
+| `--src`             | (Next.js のみ)`src/` ディレクトリを使用します。                                                                         |
+| `--linter <name>`   | リンターを設定します:`eslint`(Next.js のみ)、`oxlint`、`biome` から選択できます。                                               |
+| `--search <name>`   | 検索ソリューション:`orama`(デフォルト、ローカル検索)、`orama-cloud`、`algolia`、`meilisearch`、`typesense`、`mixedbread`(サーバーが必要)。 |
+| `--og-image <name>` | OG 画像:`next-og`(Next.js のみ)または `takumi`。それ以外のテンプレートでは Takumi が使用されます。                                    |
+| `--ai-chat <name>`  | AI チャット:`openrouter`、`llmgateway`、`inkeep`。静的、SPA、Astro の各テンプレートでは利用できません。                               |
+| `--install`         | 依存関係を自動でインストールします。                                                                                       |
+| `--no-git`          | Git リポジトリの初期化をスキップします。                                                                                   |
+| `--pm <name>`       | パッケージマネージャー:`npm`、`pnpm`、`yarn`、`bun`。CLI の実行方法から自動で検出されます。                                              |
+| `-y, --yes`         | プロンプトをスキップし、指定されていないオプションにはデフォルト値を使用します。                                                                 |
+
+### テンプレート [#templates]
+
+| 値                            | 説明                      |
+| ---------------------------- | ----------------------- |
+| `+next+fuma-docs-mdx`        | Next.js(デフォルト)          |
+| `+next+fuma-docs-mdx+static` | Next.js(静的エクスポート)       |
+| `waku`                       | Waku                    |
+| `react-router`               | React Router            |
+| `react-router-spa`           | React Router(SPA モード)   |
+| `tanstack-start`             | TanStack Start          |
+| `tanstack-start-spa`         | TanStack Start(SPA モード) |
+| `astro`                      | Astro                   |
+
+### 非対話モード [#non-interactive]
+
+`--yes` を渡すとプロンプトをスキップできます。スクリプトや CI、AIエージェントから実行する場合に便利です。
+
+```npm
+npx create-fumadocs-app@latest my-docs --template +next+fuma-docs-mdx --install --yes
+```
+
+指定しなかったオプションにはデフォルト値が使用されます (リンターなし、ローカル検索、AI チャットなし) 。対象のディレクトリがすでに存在し、空でない場合はエラーになります。
+
+テンプレートには i18n のオプションがありません。新しいプロジェクトに i18n を追加するには、各フレームワークの国際化ガイドを参照してください：[Next.js](/docs/next/internationalization)、[React Router](/docs/react-router/internationalization)、[TanStack Start](/docs/tanstack-start/internationalization)、[Waku](/docs/waku/internationalization)、[Astro](/docs/astro/internationalization)。
+
+## Programmatic API [#programmatic-api]
+
+通常の CLI としての使い方のほかに、次のようにスクリプト内から使用することもできます。
+
+```npm
+npm install create-fumadocs-app
+```
+
+```ts
+import { create } from 'create-fumadocs-app';
+
+await create({
+  outputDir: 'my-app',
+  template: '+next+fuma-docs-mdx',
+  packageManager: 'pnpm',
+});
+```

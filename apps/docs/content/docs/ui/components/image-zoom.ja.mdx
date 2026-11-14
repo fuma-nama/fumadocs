@@ -1,0 +1,114 @@
+---
+title: ズーム可能な画像
+description: ドキュメント内の画像をズームできるようにします
+preview: zoomImage
+---
+
+import { ImageZoom, Lightbox } from 'fumadocs-ui/components/image-zoom';
+
+<Installation name="image-zoom" />
+
+## 使い方 [#usage]
+
+MDX コンポーネントの `img` を `ImageZoom` に置き換えてください。
+
+```tsx title="components/mdx.tsx"
+import { ImageZoom } from 'fumadocs-ui/components/image-zoom';
+import defaultComponents from 'fumadocs-ui/mdx';
+import type { MDXComponents } from 'mdx/types';
+
+export function getMDXComponents(components?: MDXComponents) {
+  return {
+    ...defaultComponents,
+    // [!code ++]
+    img: (props) => <ImageZoom {...(props as any)} />,
+    ...components,
+  } satisfies MDXComponents;
+}
+```
+
+これで、すべての画像で画像ズームが自動的に有効になります。
+
+```mdx
+![Test](/banner.png)
+```
+
+### 画像の最適化 [#image-optimization]
+
+Next.js では、`<Image />` コンポーネントに [`sizes` プロパティ](https://nextjs.org/docs/app/api-reference/components/image#sizes)が指定されていない場合、デフォルト値が設定されます。
+
+## Lightbox [#lightbox]
+
+`<Lightbox />` 内のズーム可能な画像は 1 つのビューアーで開かれ、矢印キーやスワイプ、左右のボタンで切り替えて閲覧できます。
+
+<Wrapper>
+  <Lightbox>
+    <div className="not-prose grid grid-cols-2 gap-2">
+      <ImageZoom src="/docs/notebook-tab-mode.png" width={1453} height={963} alt="Notebook レイアウト" title="タブモード: ナビゲーションバー" />
+
+      <ImageZoom
+        src="/docs/notebook-nav-mode.png"
+        width={1451}
+        height={954}
+        alt="Notebook レイアウト"
+        caption={
+      <>
+        ナビゲーションモード: 上部（<a href="/docs/ui/layouts/notebook#nav-mode">Notebook レイアウト</a>を参照）
+      </>
+    }
+      />
+    </div>
+  </Lightbox>
+</Wrapper>
+
+ページのコンテンツ全体をラップすると、ページ内のすべての画像を閲覧できます。
+
+```tsx title="app/docs/[[...slug]]/page.tsx"
+import { Lightbox } from 'fumadocs-ui/components/image-zoom';
+
+<DocsBody>
+  {/* [!code ++] */}
+  <Lightbox>
+    <MDX components={getMDXComponents()} />
+    {/* [!code ++] */}
+  </Lightbox>
+</DocsBody>;
+```
+
+### キャプション [#caption]
+
+画像のタイトルがキャプションとして表示されます。
+
+```mdx
+![Notebook Layout](/notebook.png 'Tab mode: navbar')
+```
+
+リンクなどのリッチコンテンツを表示するには、`caption` を渡してください。
+
+```tsx
+<ImageZoom
+  src="/notebook.png"
+  alt="Notebook Layout"
+  caption={
+    <>
+      See <a href="/docs/ui/layouts/notebook">Notebook Layout</a>
+    </>
+  }
+/>
+```
+
+### ギャラリー [#gallery]
+
+一連の画像をまとめて個別に閲覧できるようにするには、それらを別の `<Lightbox />` で囲みます。たとえば、次のようにグリッド状に配置できます。
+
+```mdx
+<Lightbox>
+<div className="not-prose grid grid-cols-2 gap-2">
+
+![Light Mode](/light.png)
+
+![Dark Mode](/dark.png)
+
+</div>
+</Lightbox>
+```

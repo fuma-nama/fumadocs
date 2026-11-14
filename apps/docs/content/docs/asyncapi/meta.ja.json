@@ -1,0 +1,10 @@
+{
+  "title": "AsyncAPIの例",
+  "description": "Fumadocs AsyncAPIのデモ",
+  "root": true,
+  "icon": "Shapes",
+  "pages": [
+    "index",
+    "...(generated)"
+  ]
+}

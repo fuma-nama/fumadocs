@@ -1,0 +1,65 @@
+---
+title: ページ履歴
+description: ドキュメントページにコントリビューターと Git 履歴を表示します。
+---
+
+> これはコミュニティがメンテナンスしているインテグレーションです。
+
+[fumadocs-page-history](https://github.com/shenxianovo/fumadocs-page-history) は、ドキュメントページにコントリビューターと折りたたみ可能な変更履歴を表示します。ビルド時に Git 履歴を読み取り、Fumadocs MDX と Sätteri に対応しています。
+
+[ライブデモを見る](https://fumadocs-page-history.vercel.app)
+
+## セットアップ [#setup]
+
+Node.js 24.14 以降と、16.x 系の Fumadocs 16.17 以降が必要です。
+
+### 1. パッケージのインストール [#install-the-package]
+
+```package-install
+fumadocs-page-history
+```
+
+### 2. スタイルをインポートする [#import-the-styles]
+
+Fumadocs のスタイルの後に、次の import 文を追加してください。
+
+```css title="app/global.css"
+@import 'fumadocs-page-history/css/preset.css';
+```
+
+### 3. プラグインを登録する [#register-the-plugin]
+
+docs コレクションに `remarkGitChangelog` を追加し、`repoURL` にリポジトリの URL を設定します。既存のスキーマやコンパイラのオプションは変更せずにそのまま残してください。
+
+```ts title="source.config.ts"
+import { applyMdxPreset, defineDocs } from 'fumadocs-mdx/config';
+import { remarkGitChangelog } from 'fumadocs-page-history/remark';
+
+export const docs = defineDocs({
+  dir: 'content/docs',
+  docs: {
+    mdxOptions: applyMdxPreset({
+      remarkPlugins: [[remarkGitChangelog, { repoURL: 'https://github.com/owner/repository' }]],
+    }),
+  },
+});
+```
+
+これで、このコレクション内の各ドキュメントの末尾に、コントリビューターとページ履歴が表示されるようになります。ページテンプレートを変更する必要はありません。
+
+## Git の履歴 [#git-history]
+
+ビルド環境には Git と、リポジトリの完全な履歴が必要です。GitHub Actions では `fetch-depth: 0` を指定してください。
+
+```yaml
+- uses: actions/checkout@v6
+  with:
+    fetch-depth: 0
+```
+
+* 新しいファイルの履歴を含めるには、ビルド前にコミットしてください。
+* 新しくコミットした後は再ビルドしてください。開発中に Git 上でのみ発生した変更を反映させるには、サーバーを再起動してください。
+
+## 設定 [#configuration]
+
+コントリビューターと履歴の表示はそれぞれ個別に切り替えられます。また、翻訳をカスタマイズしたり、必要に応じて GitHub のアバターとプロフィールリンクを取得したりすることもできます。

@@ -1,0 +1,447 @@
+---
+title: createGraphQL()
+description: GraphQL サーバーのインスタンスです。
+---
+
+## GraphQL Server [#graphql-server]
+
+Fumadocs GraphQL のメインとなる設定です。
+
+> ブラウザ環境から参照しないでください。
+
+### `input` [#input]
+
+読み込む GraphQL スキーマです。次のいずれかを指定します。
+
+* SDL ファイルのパス/URL の配列。
+* スキーマ ID -&gt; 入力 のレコード。
+
+レコード形式の入力には、SDL ファイルのパス/URL、SDL テキスト、イントロスペクション結果、`GraphQLSchema` インスタンス、またはそれらを返す関数を指定できます。
+
+読み込めるのはここに列挙したスキーマのみです。それ以外の ID を `getSchema()` に渡すとエラーがスローされます。
+
+```ts tab="Basic"
+import { createGraphQL } from '@fumadocs/graphql/server';
+
+export const graphql = createGraphQL({
+  input: ['./schema.graphql'],
+});
+```
+
+```ts tab="Record"
+import { createGraphQL } from '@fumadocs/graphql/server';
+
+export const graphql = createGraphQL({
+  input: {
+    // [id]: スキーマ入力
+    store: './store.graphql',
+    remote: 'https://example.com/schema.graphql',
+    // 関数も使用可能（例: イントロスペクション結果をダウンロードする）
+    galaxy: async () => {
+      const res = await fetch('https://example.com/introspection.json');
+      return res.json();
+    },
+  },
+});
+```
+
+SDL ファイルの配列を渡すと、それらを 1 つのスキーマにマージできます。型の拡張 (例: `extend type Query`) にも対応しています。
+
+```ts
+import { createGraphQL } from '@fumadocs/graphql/server';
+
+export const graphql = createGraphQL({
+  input: {
+    api: ['./base.graphql', './orders.graphql'],
+  },
+});
+```
+
+### `examples` [#examples]
+
+GraphQL ドキュメントから読み込むオペレーションの例です。ファイルパス、URL、または GraphQL テキストを指定できます。
+
+```ts tab="Basic"
+import { createGraphQL } from '@fumadocs/graphql/server';
+
+export const graphql = createGraphQL({
+  input: ['./schema.graphql'],
+  examples: ['./examples.graphql'],
+});
+```
+
+```ts tab="Record"
+import { createGraphQL } from '@fumadocs/graphql/server';
+
+export const graphql = createGraphQL({
+  input: {
+    store: './store.graphql',
+    admin: './admin.graphql',
+  },
+  examples: {
+    // [id]: そのスキーマ用の GraphQL ドキュメント
+    store: ['./examples/store.graphql'],
+  },
+});
+```
+
+配列を指定すると、すべてのスキーマに適用されます。名前付きの各オペレーションは、そのオペレーションが選択するルートフィールドのページに例として表示され、自動生成された例の代わりに使用されます。
+
+```graphql title="examples.graphql"
+# 顧客の公開プロフィールです。
+query CustomerProfile($id: ID! = "cus_42") {
+  customer(id: $id) {
+    id
+    name
+  }
+}
+```
+
+| 例           | 取得元                                                      |
+| ----------- | -------------------------------------------------------- |
+| title       | オペレーション名(例: `CustomerProfile` の場合は **Customer Profile**) |
+| description | オペレーションの `"""` による説明、またはその直上にある `#` コメント(Markdown 形式)    |
+| variables   | 変数のデフォルト値(クエリからは除外されます)、または必須の変数に対して自動生成された値             |
+| response    | 選択セットから生成                                                |
+
+各オペレーションは一意の名前を持ち、スキーマに対して有効である必要があります。満たさない場合はビルドが失敗します。
+
+プレイグラウンドで編集できるように、ルートフィールドの引数は `customer(id: $id)` のように、同名の変数で指定する必要があります。
+
+### `disableCache` [#disablecache]
+
+読み込んだスキーマとサンプルのキャッシュを無効にします。開発中など、スキーマやサンプルを頻繁に変更する場合に便利です。
+
+```ts
+import { createGraphQL } from '@fumadocs/graphql/server';
+
+export const graphql = createGraphQL({
+  input: ['./schema.graphql'],
+  disableCache: true,
+});
+```
+
+## スキーマを一度だけ読み込む [#loading-schemas-once]
+
+ページは props でスキーマ全体を受け取るため、ページの読み込み、ナビゲーション、プリフェッチのたびにスキーマが再送信されます。スキーマが大きい場合は、props から除外してください。
+
+```ts title="lib/graphql.ts"
+import { createGraphQL } from '@fumadocs/graphql/server';
+
+export const graphql = createGraphQL({
+  // ID は URL に含まれるため、URL セーフな値にしてください
+  input: { store: './store.graphql' },
+  includeSchema: false, // [!code ++]
+});
+```
+
+<show when={props.framework !== 'tanstack-start'}>
+  `loadSchema` を渡すと、各スキーマの SDL をブラウザセッションごとに1回だけ読み込みます。この処理はサーバーレンダリング時にも実行されます。
+</show>
+
+<show when={props.framework === 'next'}>
+  ```tsx title="components/api-page.tsx"
+  'use client';
+  import { preload } from 'react-dom';
+  import { createGraphQLPage } from '@fumadocs/graphql/ui';
+
+  export const GraphQLPage = createGraphQLPage({
+    async loadSchema(id) {
+      if (typeof window === 'undefined') {
+        // ブラウザがページと同時にダウンロードを開始します
+        preload(`/api/graphql-schema/${id}`, { as: 'fetch', crossOrigin: 'anonymous' });
+        const { graphql } = await import('@/lib/graphql');
+        return (await graphql.getSchema(id)).sdl;
+      }
+      return (await fetch(`/api/graphql-schema/${id}`)).text();
+    },
+  });
+  ```
+</show>
+
+<show when={props.framework === 'react-router' || props.framework === 'waku' || props.framework === 'astro'}>
+  ```tsx title="components/api-page.tsx"
+  'use client';
+  import { preload } from 'react-dom';
+  import { createGraphQLPage } from '@fumadocs/graphql/ui';
+
+  export const GraphQLPage = createGraphQLPage({
+    async loadSchema(id) {
+      if (import.meta.env.SSR) {
+        // ブラウザがページと同時にダウンロードを開始します
+        preload(`/api/graphql-schema/${id}`, { as: 'fetch', crossOrigin: 'anonymous' });
+        const { graphql } = await import('@/lib/graphql');
+        return (await graphql.getSchema(id)).sdl;
+      }
+      return (await fetch(`/api/graphql-schema/${id}`)).text();
+    },
+  });
+  ```
+</show>
+
+<show when={props.framework !== 'tanstack-start'}>
+  ルートを用意して、スキーマをブラウザに配信します。
+</show>
+
+<show when={props.framework === 'next'}>
+  ```ts title="app/api/graphql-schema/[id]/route.ts"
+  import { graphql } from '@/lib/graphql';
+
+  export async function GET(_req: Request, { params }: RouteContext<'/api/graphql-schema/[id]'>) {
+    return new Response((await graphql.getSchema((await params).id)).sdl);
+  }
+
+  // 静的エクスポート用
+  export async function generateStaticParams() {
+    return Object.keys(await graphql.getSchemas()).map((id) => ({ id }));
+  }
+  ```
+</show>
+
+<show when={props.framework === 'react-router'}>
+  ```ts tab="app/routes/graphql-schema.ts"
+  import type { Route } from './+types/graphql-schema';
+  import { graphql } from '@/lib/graphql';
+
+  export async function loader({ params }: Route.LoaderArgs) {
+    return new Response((await graphql.getSchema(params.id)).sdl);
+  }
+  ```
+
+  ```ts tab="app/routes.ts"
+  import { route, type RouteConfig } from '@react-router/dev/routes';
+
+  export default [
+    // [!code ++]
+    route('api/graphql-schema/:id', 'routes/graphql-schema.ts'),
+    // ...
+  ] satisfies RouteConfig;
+  ```
+</show>
+
+<show when={props.framework === 'waku'}>
+  ```ts title="src/pages/_api/api/graphql-schema/[id].ts"
+  import type { ApiContext } from 'waku/router';
+  import { graphql } from '@/lib/graphql';
+
+  export async function GET(_: Request, { params }: ApiContext<'/api/graphql-schema/[id]'>) {
+    return new Response((await graphql.getSchema(params.id)).sdl);
+  }
+  ```
+</show>
+
+<show when={props.framework === 'astro'}>
+  ```ts title="src/pages/api/graphql-schema/[id].ts"
+  import type { APIRoute, GetStaticPaths } from 'astro';
+  import { graphql } from '@/lib/graphql';
+
+  export const prerender = true;
+
+  export const getStaticPaths = (async () => {
+    return Object.keys(await graphql.getSchemas()).map((id) => ({ params: { id } }));
+  }) satisfies GetStaticPaths;
+
+  export const GET: APIRoute = async ({ params }) => {
+    return new Response((await graphql.getSchema(params.id!)).sdl);
+  };
+  ```
+</show>
+
+<show when={props.framework === 'tanstack-start'}>
+  TanStack Start のルートローダーはサーバーとブラウザの両方で実行されるため、docs ルートでは `loadSchema` を使わずにスキーマを読み込めます。server function は、ブラウザがまだスキーマを保持していない場合にのみ呼び出してください。
+
+  ```tsx title="src/routes/docs/$.tsx"
+  import { createServerFn } from '@tanstack/react-start';
+  import { graphql } from '@/lib/graphql';
+
+  // ブラウザが読み込み済みのスキーマ
+  const schemas = new Map<string, string>();
+
+  const getSchema = createServerFn({ method: 'GET' })
+    .validator((id: string) => id)
+    .handler(async ({ data: id }) => (await graphql.getSchema(id)).sdl);
+
+  export const Route = createFileRoute('/docs/$')({
+    component: Page,
+    loader: async ({ params }) => {
+      const data = await serverLoader({ data: params._splat?.split('/') ?? [] });
+      if (data.type === 'graphql') {
+        const { schema: id, payload } = data.props;
+        payload.sdl = schemas.get(id) ?? (await getSchema({ data: id }));
+      }
+      return data;
+    },
+  });
+
+  function Page() {
+    const page = useFumadocsLoader(Route.useLoaderData());
+    // 最初のページのスキーマも保存する
+    if (page.type === 'graphql' && typeof window !== 'undefined')
+      schemas.set(page.props.schema, page.props.payload.sdl!);
+    // ...
+  }
+  ```
+</show>
+
+<show when={props.framework !== 'tanstack-start'}>
+  * [Fumadocs CLI でインストールした UI](/docs/integrations/graphql/api-page#full-ui) では、`createGraphQLRenderer()` に `loadSchema` を渡してください。
+  * ブラウザは各スキーマをリロードするまで保持します。[`disableCache`](#disablecache) を使う場合は、`includeSchema` を有効のままにしておいてください。
+</show>
+
+<show when={props.framework === 'tanstack-start'}>
+  * ブラウザは各スキーマをリロードするまで保持します。[`disableCache`](#disablecache) を使う場合は、`includeSchema` を有効のままにしておいてください。
+</show>
+
+## ページの生成 [#generating-pages]
+
+`staticSource()` と `dynamicSource()` は、`loader()` で使用するページを生成します。どちらも同じオプションを受け付けます。
+
+```ts title="lib/source.ts"
+export const source = loader(
+  {
+    docs: docs.toFumadocsSource(),
+    graphql: await graphql.staticSource({
+      baseDir: 'graphql',
+    }),
+  },
+  // ...
+);
+```
+
+### `per` [#per]
+
+ページの内容をカスタマイズします。デフォルトは `item` です。
+
+| モード    | 内容                                               | ファイルパス            |
+| ------ | ------------------------------------------------ | ----------------- |
+| item   | オペレーションごと (`includeTypes` を指定した場合は名前付き型ごとにも生成)   | `{name}.mdx`      |
+| file   | スキーマ内のオペレーション、および `includeTypes` を指定した場合はその名前付き型 | `{file_name}.mdx` |
+| custom | 下記を参照                                            | N/A               |
+
+`custom` に設定すると、関数を渡して生成プロセスを完全にカスタマイズできます。
+
+```ts
+import { graphql } from '@/lib/graphql';
+
+await graphql.staticSource({
+  per: 'custom',
+  toPages(builder) {
+    builder.create({
+      type: 'operation',
+      path: 'my-orders.mdx',
+      info: { title: 'My Orders' },
+      item: { kind: 'query', name: 'orders' },
+    });
+  },
+});
+```
+
+### `groupBy` [#groupby]
+
+`per: 'item'` の場合に、生成されたページをフォルダーにまとめる方法をカスタマイズします。デフォルトは `kind` です。
+
+| モード  | フォルダー                                |
+| ---- | ------------------------------------ |
+| kind | 種類ごとに分類 (例: `queries/`、`mutations/`) |
+| none | フォルダーを作成しない                          |
+
+エントリーのグループ名を返す関数を渡すこともできます。
+
+```ts
+import { graphql } from '@/lib/graphql';
+
+await graphql.staticSource({
+  groupBy: (entry) => (entry.type === 'operation' ? 'operations' : 'types'),
+});
+```
+
+### `includeOperations` &amp; `includeTypes` [#includeoperations--includetypes]
+
+ドキュメント化するオペレーション(クエリ/ミューテーション/サブスクリプションのフィールド)と名前付き型を絞り込みます。
+
+* `includeOperations`: `per: 'item'` の場合、オペレーションごとに1ページを生成します。デフォルトは `true` です。
+* `includeTypes`: 名前付き型を対象にします。`per: 'item'` の場合は型ごとに個別のページを生成し、`per: 'file'` の場合は同じページ内に出力します。デフォルトは `false` です。どちらの場合でも、オペレーションのページには使用している型が表示されます。
+
+型のページには、その型が使用されている箇所が表示されます。また、型のページ同士や、型のページとオペレーションのページは相互にリンクされます。
+
+```ts
+import { graphql } from '@/lib/graphql';
+
+await graphql.staticSource({
+  // サブスクリプションは除外
+  includeOperations: (kind, field) => kind !== 'subscription',
+  // 内部の型以外をドキュメント化
+  includeTypes: (type) => !type.name.startsWith('Internal'),
+});
+```
+
+### `name` &amp; `slugify` [#name--slugify]
+
+生成されるページのファイル名をカスタマイズします。
+
+GraphQL の名前はもともと URL セーフなため、デフォルトでは元の名前が大文字・小文字も含めてそのまま使用されます。
+
+```ts
+import { graphql } from '@/lib/graphql';
+
+await graphql.staticSource({
+  per: 'item',
+  name: (entry) => entry.item.name.toLowerCase(),
+});
+```
+
+`slugify` は、グループ名(およびデフォルトではアイテム名)を URL で使用できる形式のセグメントに変換します。
+
+### `meta` [#meta]
+
+ページツリーをカスタマイズするための `meta.json` ファイルを生成します。デフォルトでは無効です。
+
+| `folderStyle` | ページツリー                     |
+| ------------- | -------------------------- |
+| folder        | グループごとにフォルダーを1つ作成(デフォルト)   |
+| separator     | グループごとに区切りを1つ置き、その下にページを配置 |
+
+```ts
+import { graphql } from '@/lib/graphql';
+
+await graphql.staticSource({
+  meta: { folderStyle: 'separator' },
+});
+```
+
+## LLM向けのMarkdown [#markdown-for-llms]
+
+`page.data.getText()` は、ページの項目をMarkdown形式で返します。オペレーションにはシグネチャ、引数、例、使用している型のSDLが、名前付き型にはそのSDLと使用箇所が含まれます。たとえば、[`docsLlms`](/docs/integrations/llms#docsllms) では次のように使用します。
+
+```ts
+import { llms } from 'fumadocs-core/source';
+import { source } from '@/lib/source';
+
+export const docsLlms = llms(source, {
+  renderPage: async (page) => {
+    // [!code ++:3]
+    if (page.type === 'graphql') {
+      return `# ${page.data.title}\n\n${await page.data.getText('processed')}`;
+    }
+
+    // 以下は既存の処理...
+  },
+});
+```
+
+## ローダープラグイン [#loader-plugin]
+
+`loaderPlugin()` は、ページツリー内の GraphQL ページに次の装飾を加えます。
+
+* 各オペレーションページに `query`/`mutation`/`subscription` のバッジを付けます。
+* 非推奨のオペレーションに取り消し線を付けます。
+
+```ts title="lib/source.ts"
+export const source = loader(
+  // ...
+  {
+    baseUrl: '/docs',
+    plugins: [graphql.loaderPlugin()],
+  },
+);
+```

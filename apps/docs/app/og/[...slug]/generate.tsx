@@ -19,21 +19,19 @@ const fontBold = readFile('./lib/og/JetBrainsMono-Bold.ttf').then((data) => ({
   weight: 600,
 }));
 
-let cjkFonts: ReturnType<typeof googleFonts> | undefined;
+/** the font of the text of each translation, a render downloads only the subsets it uses */
+const localeFonts: Record<string, string> = { 'zh-TW': 'Noto Sans TC', ja: 'Noto Sans JP' };
+const loaded = new Map<string, ReturnType<typeof googleFonts>>();
 
-/** @param cjk - for the text of translated pages, a render downloads only the subsets it uses */
-export async function getImageResponseOptions(cjk: boolean): Promise<ImageResponseOptions> {
+export async function getImageResponseOptions(locale?: string): Promise<ImageResponseOptions> {
   const fonts = await Promise.all([font, fontBold]);
+  const name = locale && localeFonts[locale];
+  if (name && !loaded.has(name)) loaded.set(name, googleFonts([{ name, weight: [400, 600] }]));
   return {
     width: 1200,
     height: 630,
     format: 'webp',
-    fonts: cjk
-      ? [
-          ...fonts,
-          ...(await (cjkFonts ??= googleFonts([{ name: 'Noto Sans TC', weight: [400, 600] }]))),
-        ]
-      : fonts,
+    fonts: name ? [...fonts, ...(await loaded.get(name)!)] : fonts,
   };
 }
 
@@ -64,7 +62,7 @@ export function generate({ title, description }: GenerateProps) {
         height: '100%',
         color: 'white',
         backgroundColor: 'rgb(10,10,10)',
-        fontFamily: 'JetBrainsMono, Noto Sans TC',
+        fontFamily: 'JetBrainsMono, Noto Sans TC, Noto Sans JP',
       }}
     >
       <div

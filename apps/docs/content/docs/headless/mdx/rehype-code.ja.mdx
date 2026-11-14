@@ -1,0 +1,163 @@
+---
+title: Rehype Code
+description: コードのシンタックスハイライター
+---
+
+Fumadocs で使用されているシンタックスハイライター [`@shikijs/rehype`](https://shiki.style/packages/rehype) のラッパーです。
+
+未加工の `<pre />` コードブロックを、シンタックスハイライトが適用されたコードブロックに変換します。
+
+````md tab="Input"
+```ts
+console.log('Hello World');
+```
+````
+
+```html tab="Output"
+<pre>
+  <code>
+    <span class="line">
+      <span style="--shiki-light: #4C4F69; --shiki-dark: #CDD6F4;">console</span>...
+    </span>
+  </code>
+</pre>
+```
+
+## 使い方 [#usage]
+
+Rehype Code は rehype プラグインで、Fumadocs MDX ではデフォルトで有効になっています。オプションは `rehypeCodeOptions` で指定します。
+
+```ts tab="unified" title="source.config.ts"
+import { defineConfig } from 'fumadocs-mdx/config';
+
+export default defineConfig({
+  mdxOptions: {
+    rehypeCodeOptions: {
+      themes: {
+        light: 'github-light',
+        dark: 'github-dark',
+      },
+    },
+  },
+});
+```
+
+```ts tab="Sätteri" title="source.config.ts"
+import { defineConfig, defineDocs } from 'fumadocs-mdx/config';
+
+export const docs = defineDocs({
+  docs: { compiler: 'satteri' },
+});
+
+export default defineConfig({
+  satteriOptions: {
+    rehypeCodeOptions: {
+      themes: {
+        light: 'github-light',
+        dark: 'github-dark',
+      },
+    },
+  },
+});
+```
+
+### ハイライター [#highlighter]
+
+このプラグインは Shiki を使用します。`rehypeCodeFromHighlighter` は Shiki の代わりに Highlights などの別の[ハイライター](/docs/headless/utils/shiki)を受け取り、Shiki 固有のオプションを除いた同じオプションを使用します。プラグインのトランスフォーマーを適用してハイライターを作成する関数を渡してください。
+
+デフォルトのプラグインを無効にし、こちらを追加します。
+
+```ts tab="unified" title="source.config.ts"
+import { defineConfig } from 'fumadocs-mdx/config';
+import { rehypeCodeFromHighlighter } from 'fumadocs-core/mdx-plugins/rehype-code.core';
+import { highlighter } from './lib/highlighter';
+
+export default defineConfig({
+  mdxOptions: {
+    rehypeCodeOptions: false,
+    rehypePlugins: [
+      () =>
+        rehypeCodeFromHighlighter(({ transformers }) =>
+          highlighter.override({ shikiTransformers: transformers }),
+        ),
+    ],
+  },
+});
+```
+
+```ts tab="Sätteri" title="source.config.ts"
+import { defineConfig, defineDocs } from 'fumadocs-mdx/config';
+import { rehypeCodeFromHighlighter } from '@fumadocs/satteri/rehype-code';
+import { highlighter } from './lib/highlighter';
+
+export const docs = defineDocs({
+  docs: { compiler: 'satteri' },
+});
+
+export default defineConfig({
+  satteriOptions: {
+    rehypeCodeOptions: false,
+    hastPlugins: [
+      rehypeCodeFromHighlighter(({ transformers }) =>
+        highlighter.override({ shikiTransformers: transformers }),
+      ),
+    ],
+  },
+});
+```
+
+### Meta [#meta]
+
+メタ文字列から `title` をパースし、`pre` 要素に属性として追加します。
+
+````mdx tab="Input"
+```js title="Title"
+console.log('Hello');
+```
+````
+
+```jsx tab="Output"
+<pre title="Title">...</pre>
+```
+
+`filterMetaString` オプションを使用すると、処理前に meta 文字列をフィルタリングできます。
+
+### インラインコード [#inline-code]
+
+`inline` オプションを使うと有効にできます。
+
+```ts
+import { type RehypeCodeOptions } from 'fumadocs-core/mdx-plugins';
+
+const rehypeCodeOptions: RehypeCodeOptions = {
+  // [!code ++]
+  inline: 'tailing-curly-colon',
+};
+```
+
+```md title="Syntax"
+これはハイライトされたインラインコードです: `console.log("hello world"){:js}`.
+```
+
+これはハイライトされたインラインコードです：`console.log("hello world"){:js}`。
+
+### アイコン [#icon]
+
+このプラグインは、コードブロックの言語指定に応じて `icon` 属性を自動的に追加します。
+値は HTML 文字列なので、React の `dangerouslySetInnerHTML` を使ってレンダリングできます。
+
+````md tab="Input"
+```ts
+console.log('This should shows the logo of TypeScript');
+```
+````
+
+```jsx tab="Output"
+<pre icon="<svg />">...</pre>
+```
+
+`icon` オプションで、アイコンを無効化またはカスタマイズできます。
+
+### その他のオプション [#more-options]
+
+オプションは [Shiki](https://shiki.style) から継承しています。その他のオプションについては Shiki のドキュメントを参照してください。

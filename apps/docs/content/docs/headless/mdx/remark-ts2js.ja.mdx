@@ -1,0 +1,66 @@
+---
+title: Remark TS to JS
+description: TypeScriptのコードブロックを、TypeScript版とJavaScript版の2つのタブを持つコードブロックに変換するremarkプラグインです。
+---
+
+## 使い方 [#usage]
+
+依存関係をインストールします。
+
+```package-install tab="unified"
+fumadocs-docgen
+```
+
+```package-install tab="Sätteri"
+@fumadocs/satteri
+```
+
+Remark TS to JS は remark プラグインです。次のように設定に追加してください。
+
+```ts tab="unified" title="source.config.ts"
+import { remarkTypeScriptToJavaScript } from 'fumadocs-docgen/remark-ts2js';
+import { defineConfig } from 'fumadocs-mdx/config';
+
+export default defineConfig({
+  mdxOptions: {
+    remarkPlugins: [remarkTypeScriptToJavaScript],
+  },
+});
+```
+
+```ts tab="Sätteri" title="source.config.ts"
+import { remarkTs2js } from '@fumadocs/satteri/remark-ts2js';
+import { defineConfig, defineDocs } from 'fumadocs-mdx/config';
+
+export const docs = defineDocs({
+  docs: { compiler: 'satteri' },
+});
+
+export default defineConfig({
+  satteriOptions: {
+    mdastPlugins: [remarkTs2js()],
+  },
+});
+```
+
+[Remark NPM](/docs/headless/mdx/remark-npm#usage) と同じ `CodeBlockTabs` コンポーネントを生成します。このコンポーネントは Fumadocs UI にデフォルトで含まれています。
+
+これで、次のように TypeScript/TSX のコードブロックで有効にできます。
+
+````md
+```tsx ts2js
+import { ReactNode } from 'react';
+
+export default function Layout({ children }: { children: ReactNode }) {
+  return <div>{children}</div>;
+}
+```
+````
+
+```tsx ts2js
+import { ReactNode } from 'react';
+
+export default function Layout({ children }: { children: ReactNode }) {
+  return <div>{children}</div>;
+}
+```

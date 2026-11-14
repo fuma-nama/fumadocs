@@ -33,6 +33,7 @@
 
     // written by `pnpm translate` in apps/docs
     "apps/docs/content/docs/**/*.zh-TW.*",
+    "apps/docs/content/docs/**/*.ja.*",
     "apps/docs/translations.lock.json",
   ],
 }

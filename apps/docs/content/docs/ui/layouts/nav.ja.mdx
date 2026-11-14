@@ -1,0 +1,149 @@
+---
+title: ナビゲーションバー
+description: ナビゲーションバーとヘッダーの設定。
+---
+
+## 設定 [#configurations]
+
+ナビゲーションバー(ヘッダー)のオプションです。
+
+<auto-type-table cwd path="content/docs/ui/props.ts" type="Omit<NavbarProps, 'children'>" />
+
+### 透過モード [#transparent-mode]
+
+ナビゲーションバーの背景を透過にしたい場合は、透過モードを設定してください。
+
+```tsx tab="All" title="lib/layout.shared.tsx"
+import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
+
+export function baseOptions(): BaseLayoutProps {
+  return {
+    nav: {
+      title: 'My App',
+      // [!code ++]
+      transparentMode: 'top',
+    },
+  };
+}
+```
+
+```tsx tab="Home Layout"
+import { baseOptions } from '@/lib/layout.shared';
+import { HomeLayout } from 'fumadocs-ui/layouts/home';
+import type { ReactNode } from 'react';
+
+export default function Layout({ children }: { children: ReactNode }) {
+  const base = baseOptions();
+  return (
+    <HomeLayout
+      {...base}
+      nav={{
+        ...base.nav,
+        // [!code ++]
+        transparentMode: 'top',
+      }}
+    >
+      {children}
+    </HomeLayout>
+  );
+}
+```
+
+```tsx tab="Docs Layout"
+import { baseOptions } from '@/lib/layout.shared';
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+import type { ReactNode } from 'react';
+
+export default function Layout({ children }: { children: ReactNode }) {
+  const base = baseOptions();
+  return (
+    <DocsLayout
+      {...base}
+      nav={{
+        ...base.nav,
+        // [!code ++]
+        transparentMode: 'top',
+      }}
+    >
+      {children}
+    </DocsLayout>
+  );
+}
+```
+
+| モード      | 説明                     |
+| -------- | ---------------------- |
+| `always` | 常に背景を透明にします            |
+| `top`    | ページ最上部にあるときのみ背景を透明にします |
+| `none`   | 背景の透明化を無効にします (デフォルト)  |
+
+### ナビゲーションバーの置き換え [#replace-navbar]
+
+各レイアウトのナビゲーションバーを置き換えるには、`nav.component` に独自のコンポーネントを指定します。
+
+```tsx tab="All" title="lib/layout.shared.tsx"
+import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
+
+export function baseOptions(): BaseLayoutProps {
+  return {
+    nav: {
+      // [!code ++]
+      component: <CustomNavbar />,
+    },
+  };
+}
+```
+
+```tsx tab="Home Layout"
+import { baseOptions } from '@/lib/layout.shared';
+import { HomeLayout } from 'fumadocs-ui/layouts/home';
+import type { ReactNode } from 'react';
+
+export default function Layout({ children }: { children: ReactNode }) {
+  const base = baseOptions();
+  return (
+    <HomeLayout
+      {...base}
+      nav={{
+        ...base.nav,
+        // [!code ++]
+        component: <CustomNavbar />,
+      }}
+    >
+      {children}
+    </HomeLayout>
+  );
+}
+```
+
+```tsx tab="Docs Layout"
+import { baseOptions } from '@/lib/layout.shared';
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+import type { ReactNode } from 'react';
+
+export default function Layout({ children }: { children: ReactNode }) {
+  const base = baseOptions();
+  return (
+    <DocsLayout
+      {...base}
+      nav={{
+        ...base.nav,
+        // [!code ++]
+        component: <CustomNavbar />,
+      }}
+    >
+      {children}
+    </DocsLayout>
+  );
+}
+```
+
+Fumadocs は **CSS 変数**を使ってレイアウトコンポーネントのサイズを共有し、各レイアウトコンポーネントを適切な位置に配置しています。
+
+`--fd-nav-height` を、カスタムナビゲーションバーの実際の高さに合わせて上書きする必要があります。これは CSS スタイルシート (例: `global.css`) で設定できます。
+
+```css
+:root {
+  --fd-nav-height: 80px !important;
+}
+```

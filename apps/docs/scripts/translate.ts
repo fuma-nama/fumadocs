@@ -171,14 +171,16 @@ for (const file of files) {
     await rm(file);
 }
 
-const changed: { file: string; source: string; hash: string }[] = [];
+const changed: { file: string; source: string; hash: string; locales: string[] }[] = [];
 for (const file of sources) {
   const source = await readFile(file, 'utf8');
   const ext = path.extname(file);
-  const outdated =
-    lock[file] !== hash(source) ||
-    locales.some((locale) => !existsSync(`${file.slice(0, -ext.length)}.${locale}${ext}`));
-  if (outdated) changed.push({ file, source, hash: hash(source) });
+  // the locales without a translation, or every locale when the source changed
+  const outdated = locales.filter(
+    (locale) =>
+      lock[file] !== hash(source) || !existsSync(`${file.slice(0, -ext.length)}.${locale}${ext}`),
+  );
+  if (outdated.length > 0) changed.push({ file, source, hash: hash(source), locales: outdated });
 }
 console.log(`translating ${changed.length} files`);
 
@@ -186,8 +188,9 @@ const failed = new Set<string>();
 for (const locale of locales) {
   const target = (file: string) =>
     `${file.slice(0, -path.extname(file).length)}.${locale}${path.extname(file)}`;
-  const pages = changed.filter(({ file }) => file.endsWith('.mdx'));
-  const metas = changed.filter(({ file }) => !file.endsWith('.mdx'));
+  const outdated = changed.filter((item) => item.locales.includes(locale));
+  const pages = outdated.filter(({ file }) => file.endsWith('.mdx'));
+  const metas = outdated.filter(({ file }) => !file.endsWith('.mdx'));
   const batches: (typeof pages)[] = [];
   for (let i = 0; i < pages.length; i += 10) batches.push(pages.slice(i, i + 10));
 

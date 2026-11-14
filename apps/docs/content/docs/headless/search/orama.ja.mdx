@@ -1,0 +1,402 @@
+---
+title: 組み込み検索
+description: Fumadocs の組み込みドキュメント検索
+---
+
+Fumadocs は [ZBSearch](https://www.zbsearch.dev) によるドキュメント検索をサポートしています。これはデフォルトの選択肢であるだけでなく、セルフホストが可能で完全に無料で使えるため、推奨の選択肢でもあります。
+
+## セットアップ [#setup]
+
+検索リクエストを処理するサーバーをホストします。
+
+### ソースから作成する [#from-source]
+
+ソースオブジェクトからサーバーを作成します。
+
+<include cwd meta="tab=&#x22;Next.js&#x22; title=&#x22;app/api/search/route.ts&#x22;">
+  ../../examples/next/app/api/search/route.ts
+</include>
+
+<include cwd meta="tab=&#x22;React Router&#x22; title=&#x22;app/routes/search.ts&#x22;">
+  ../../examples/react-router-min/app/routes/search.ts
+</include>
+
+<include cwd meta="tab=&#x22;TanStack Start&#x22; title=&#x22;src/routes/api/search.ts&#x22;">
+  ../../examples/tanstack-start-min/src/routes/api/search.ts
+</include>
+
+<include cwd meta="tab=&#x22;Waku&#x22; title=&#x22;src/pages/_api/api/search.ts&#x22;">
+  ../../examples/waku/src/pages/&#95;api/api/search.ts
+</include>
+
+```ts tab="Astro" title="src/pages/api/search.ts"
+import type { APIRoute } from 'astro';
+import { createFromSource } from 'fumadocs-core/search/server';
+import { source } from '@/lib/source';
+
+// リクエストごとにレンダリング（アダプターが必要）
+export const prerender = false;
+
+const server = createFromSource(source);
+
+export const GET: APIRoute = ({ request }) => server.GET(request);
+```
+
+### 検索インデックスから作成する [#from-search-indexes]
+
+検索インデックスからサーバーを作成します。各インデックスには `structuredData` フィールドが必要です。
+
+通常、これはコンテンツソース (例：Fumadocs MDX) から提供されます。[Remark Structure](/docs/headless/mdx/structure) プラグインを使って、Markdown/MDX ドキュメントから抽出することもできます。
+
+```ts tab="Next.js" title="app/api/search/route.ts"
+import { source } from '@/lib/source';
+import { createSearchAPI } from 'fumadocs-core/search/server';
+
+export const { GET } = createSearchAPI('advanced', {
+  indexes: source.getPages().map((page) => ({
+    title: page.data.title,
+    description: page.data.description,
+    url: page.url,
+    id: page.url,
+    structuredData: page.data.structuredData,
+  })),
+});
+```
+
+```ts tab="React Router" title="app/routes/search.ts"
+import type { Route } from './+types/search';
+import { createSearchAPI } from 'fumadocs-core/search/server';
+import { source } from '@/lib/source';
+
+const server = createSearchAPI('advanced', {
+  indexes: source.getPages().map((page) => ({
+    title: page.data.title,
+    description: page.data.description,
+    url: page.url,
+    id: page.url,
+    structuredData: page.data.structuredData,
+  })),
+});
+
+export async function loader({ request }: Route.LoaderArgs) {
+  return server.GET(request);
+}
+```
+
+```ts tab="TanStack Start" title="src/routes/api/search.ts"
+import { createFileRoute } from '@tanstack/react-router';
+import { source } from '@/lib/source';
+import { createSearchAPI } from 'fumadocs-core/search/server';
+
+const server = createSearchAPI('advanced', {
+  indexes: source.getPages().map((page) => ({
+    title: page.data.title,
+    description: page.data.description,
+    url: page.url,
+    id: page.url,
+    structuredData: page.data.structuredData,
+  })),
+});
+
+export const Route = createFileRoute('/api/search')({
+  server: {
+    handlers: {
+      GET: async ({ request }) => server.GET(request),
+    },
+  },
+});
+```
+
+```ts tab="Waku" title="src/pages/_api/api/search.ts"
+import { source } from '@/lib/source';
+import { createSearchAPI } from 'fumadocs-core/search/server';
+
+export const { GET } = createSearchAPI('advanced', {
+  indexes: source.getPages().map((page) => ({
+    title: page.data.title,
+    description: page.data.description,
+    url: page.url,
+    id: page.url,
+    structuredData: page.data.structuredData,
+  })),
+});
+```
+
+```ts tab="Astro" title="src/pages/api/search.ts"
+import type { APIRoute } from 'astro';
+import { createSearchAPI } from 'fumadocs-core/search/server';
+import { source } from '@/lib/source';
+
+const server = createSearchAPI('advanced', {
+  // `structuredData` はオンデマンドで読み込まれます
+  indexes: () =>
+    Promise.all(
+      source.getPages().map(async (page) => ({
+        title: page.data.title,
+        description: page.data.description,
+        url: page.url,
+        id: page.url,
+        structuredData: await page.data.structuredData(),
+      })),
+    ),
+});
+
+// リクエストごとにレンダリングするため、アダプターが必要です
+export const prerender = false;
+
+export const GET: APIRoute = ({ request }) => server.GET(request);
+```
+
+### ドキュメントの検索 [#searching-documents]
+
+ドキュメントは次の方法で検索できます。
+
+* **Fumadocs UI**: 追加設定なしでサポートされています。詳しくは[検索 UI](/docs/search/orama)を参照してください。
+* **検索クライアント**:
+
+```ts twoslash
+import { useFetchSearch } from 'fumadocs-core/search/client';
+
+const { search, onSearchChange, isLoading, data } = useFetchSearch();
+```
+
+<auto-type-table type="import(&#x22;fumadocs-core/search/client/fetch&#x22;).FetchOptions" />
+
+## 設定 [#configurations]
+
+### タグフィルター [#tag-filter]
+
+タグで検索結果を絞り込めます。このドキュメントのような複数ドキュメント構成を実装する際に便利です。
+
+```ts
+import { source } from '@/lib/source';
+import { createFromSource } from 'fumadocs-core/search/server';
+
+const server = createFromSource(source, {
+  buildIndex(page) {
+    return {
+      title: page.data.title,
+      description: page.data.description,
+      url: page.url,
+      id: page.url,
+      structuredData: page.data.structuredData,
+      // 任意の値を指定します（例: page.slugs[0]） [!code ++:2]
+      tag: '<value>',
+    };
+  },
+});
+```
+
+次に、検索クライアントを更新します。
+
+* **Fumadocs UI**: 検索 UI で[タグフィルター](/docs/search/orama#tag-filter)を設定します。
+* **検索クライアント**: `useFetchSearch()` にタグを渡します。
+
+```ts
+import { useFetchSearch } from 'fumadocs-core/search/client';
+
+const { search, onSearchChange, isLoading, data } = useFetchSearch({
+  tag: '<value>', // [!code ++]
+});
+```
+
+### 静的モード [#static-export]
+
+静的サイトで使用する場合は、検索サーバーの `staticGET` を使用し、ルートを静的ルートにするか、プリレンダリングするように設定してください。
+
+```ts tab="Next.js" title="app/api/search/route.ts"
+import { source } from '@/lib/source';
+import { createFromSource } from 'fumadocs-core/search/server';
+
+// 静的にキャッシュ [!code highlight:3]
+export const revalidate = false;
+export const { staticGET: GET } = createFromSource(source);
+```
+
+```ts tab="React Router" title="app/routes/search.ts"
+// このルートが `react-router.config.ts` でプリレンダリングされるよう設定してください。
+export async function loader() {
+  // [!code highlight]
+  return server.staticGET();
+}
+```
+
+```ts tab="TanStack Start" title="src/routes/api/search.ts"
+import { createFileRoute } from '@tanstack/react-router';
+
+export const Route = createFileRoute('/api/search')({
+  server: {
+    handlers: {
+      // [!code highlight]
+      GET: async () => server.staticGET(),
+    },
+  },
+});
+```
+
+```ts tab="TanStack Start" title="vite.config.ts"
+import { tanstackStart } from '@tanstack/react-start/plugin/vite';
+import { defineConfig } from 'vite';
+
+export default defineConfig({
+  plugins: [
+    tanstackStart({
+      prerender: {
+        enabled: true,
+      },
+      // [!code ++:2] 検索インデックスをプリレンダリング
+      pages: [{ path: '/api/search' }],
+    }),
+  ],
+});
+```
+
+```ts tab="Waku" title="src/pages/_api/api/search.ts"
+import { source } from '@/lib/source';
+import { createFromSource } from 'fumadocs-core/search/server';
+
+// [!code highlight]
+export const { staticGET: GET } = createFromSource(source);
+
+// 静的にキャッシュ [!code highlight:4]
+export const getConfig = async () => ({
+  render: 'static',
+});
+```
+
+```ts tab="Astro" title="src/pages/api/search.ts"
+import type { APIRoute } from 'astro';
+import { createFromSource } from 'fumadocs-core/search/server';
+import { source } from '@/lib/source';
+
+const server = createFromSource(source);
+
+// デフォルトでプリレンダリングされます [!code highlight]
+export const GET: APIRoute = () => server.staticGET();
+```
+
+> `staticGET` は `createSearchAPI` でも利用できます。
+
+続いて、検索クライアントを更新してください。
+
+* **Fumadocs UI**: 検索 UI で[静的クライアント](/docs/search/orama#static)を使用します。
+
+* **検索クライアント**: `useFetchSearch()` の代わりに `useStaticSearch()` を使用します。
+
+  ```ts
+  import { useStaticSearch } from 'fumadocs-core/search/client';
+
+  const { search, onSearchChange, isLoading, data } = useStaticSearch();
+  ```
+
+  <auto-type-table type="import(&#x22;fumadocs-core/search/client/orama-static&#x22;).StaticOptions" />
+
+<Callout type="warn" title="注意">
+  静的検索では、エクスポートされた検索インデックスをクライアント側でダウンロードする必要があります。
+  大規模なドキュメントサイトでは、コストが高くなる可能性があります。
+
+  そのような場合は、Orama Cloud や Algolia などのクラウドソリューションを使用してください。
+</Callout>
+
+## 国際化 [#internationalization]
+
+検索機能は、追加設定なしですべての言語に対応しています。デフォルトの `multilingual` モードでは Unicode の単語分割を使用するため、中国語や日本語を含むすべてのロケールが、設定不要で単一の検索データベースを共有できます。
+
+```ts title="app/api/search/route.ts" tab="From Source"
+import { source } from '@/lib/source';
+import { createFromSource } from 'fumadocs-core/search/server';
+
+// i18n 用の追加設定は不要です
+const server = createFromSource(source);
+```
+
+```ts tab="From Search Indexes"
+import { source } from '@/lib/source';
+import { createI18nSearchAPI } from 'fumadocs-core/search/server';
+import { i18n } from '@/lib/i18n';
+
+const server = createI18nSearchAPI('advanced', {
+  i18n, // [!code ++]
+  indexes: source.getLanguages().flatMap(({ language, pages }) =>
+    pages.map((page) => ({
+      title: page.data.title,
+      description: page.data.description,
+      structuredData: page.data.structuredData,
+      id: page.url,
+      url: page.url,
+      locale: language, // [!code ++]
+    })),
+  ),
+});
+```
+
+次に、検索クライアントを更新します。
+
+* **Fumadocs UI**: 変更は不要です。i18n が正しく設定されていれば、Fumadocs UI が自動的に処理します。
+* **検索クライアント**:
+  検索クライアントに `locale` を追加します。これにより、ユーザーが検索できるのは指定したロケールのページのみになります。
+
+```ts
+import { useFetchSearch } from 'fumadocs-core/search/client';
+
+const { search, onSearchChange, isLoading, data } = useFetchSearch({
+  locale: 'cn',
+});
+```
+
+これは **静的モード** にも当てはまります。その場合は、代わりに `useStaticSearch()` に `locale` を渡してください。
+
+<Callout title="言語固有のトークン化">
+  `multilingual` モードでは、言語固有のステミングやストップワード除去は行われません。
+  ステミングがないと、`recordings` のような複数形のクエリは `recording` を含むページにマッチしません。
+
+  多言語のセグメンテーションと単一のデータベースを維持したままステマーを組み込むには、`tokenizer` を渡します。
+
+  ```ts
+  import { source } from '@/lib/source';
+  import { createFromSource } from 'fumadocs-core/search/server';
+  import { stemmer } from '@zbsearch/stemmers/english';
+
+  const server = createFromSource(source, {
+    tokenizer: { language: 'multilingual', stemming: true, stemmer }, // [!code ++]
+  });
+  ```
+
+  または、`localeMap` を使用して、[サポートされている言語](https://www.zbsearch.dev/docs/zbsearch/supported-languages)の一覧にある言語をロケールごとに指定することもできます。
+
+  ```ts
+  import { source } from '@/lib/source';
+  import { createFromSource } from 'fumadocs-core/search/server';
+
+  const server = createFromSource(source, {
+    localeMap: {
+      // [locale]: 検索オプション [!code ++:3]
+      ru: { language: 'russian' },
+      en: { language: 'english' },
+    },
+  });
+  ```
+
+  `localeMap` を有効にすると、ロケールごとに個別の検索データベースが作成される点に注意してください。
+
+  <Callout type="warn" title="静的モード">
+    クライアント側でもクエリを同じ方法でトークン化する必要があるため、カスタムの `tokenizer` はクライアントにも渡す必要があります。
+    `useStaticSearch()` の `initDB` を介して渡してください。
+  </Callout>
+</Callout>
+
+## ヘッドレス [#headless]
+
+検索サーバーは、Express や Elysia などの別のバックエンドでホストすることもできます。
+
+```ts
+import { initAdvancedSearch } from 'fumadocs-core/search/server';
+
+const server = initAdvancedSearch({
+  // この場合もインデックスを渡す必要があります
+});
+
+server.search('query', {
+  // ここで `locale` と `tag` を指定できます
+});
+```

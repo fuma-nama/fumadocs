@@ -1,0 +1,52 @@
+---
+title: Flux レイアウト
+description: 極限までミニマルなドキュメント向けレイアウト
+---
+
+import { flux } from './layouts.story';
+
+実用性を度外視したほどミニマルでクリーンな Docs レイアウトです。もともとは実験的な目的で作られました。
+
+<flux.WithControl />
+
+<Customization />
+
+## 使い方 [#usage]
+
+`fumadocs-ui/layouts/flux` を使用して Flux レイアウトを有効にします。
+
+```tsx title="layout.tsx"
+import { DocsLayout } from 'fumadocs-ui/layouts/flux'; // [!code highlight]
+import { baseOptions } from '@/lib/layout.shared';
+import { source } from '@/lib/source';
+import type { ReactNode } from 'react';
+
+export default function Layout({ children }: { children: ReactNode }) {
+  return (
+    <DocsLayout {...baseOptions()} tree={source.getPageTree()}>
+      {children}
+    </DocsLayout>
+  );
+}
+```
+
+ページ側の import も忘れずに更新してください:
+
+```tsx title="page.tsx"
+import { ... } from 'fumadocs-ui/layouts/docs/page'; // [!code --]
+import { ... } from 'fumadocs-ui/layouts/flux/page'; // [!code ++]
+```
+
+<Callout title="注意事項">
+  * [静的/ローカル検索](/docs/search/orama#static)と組み合わせて使うのがおすすめです。ドキュメント検索を使うほうが効率よくナビゲーションできます。
+  * ユーザー体験よりも主観的な見た目の美しさを優先しています。
+  * 独自の設計方針に基づいているため、カスタマイズしたい場合は Fumadocs CLI を使用してください。
+</Callout>
+
+## 設定 [#configurations]
+
+オプションは [Docs レイアウト](/docs/ui/layouts/docs) から継承されますが、いくつか違いがあります。
+
+* Flux レイアウトはクライアントコンポーネントであるため、サーバーコンポーネントからシリアライズできない props を渡すことはできません。
+* 下部のナビゲーションパネルをカスタマイズするための `renderNavigationPanel` prop が追加されています。
+* `tocPopover` オプションはありません。

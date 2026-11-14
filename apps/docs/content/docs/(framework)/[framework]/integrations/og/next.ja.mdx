@@ -1,0 +1,67 @@
+---
+title: next/og
+description: Next.js の Metadata API と組み合わせて使用する方法。
+staticParams:
+  - framework: next
+---
+
+> Metadata API の基本については、Next.js ドキュメントの [Metadata セクション](https://nextjs.org/docs/app/building-your-application/optimizing/metadata)を必ずお読みください。
+
+## メタデータ画像 [#metadata-image]
+
+`next/og` を使用すると、メタデータ画像を動的に生成できます。
+
+ローダーの定義の下に以下のコードを追加し、各ページの画像メタデータを定義してください。
+
+```ts tab="lib/source.ts"
+// [!code ++:8]
+export function getPageImageUrl(page: (typeof source)['$inferPage']) {
+  const segments = [...page.slugs, 'image.png'];
+
+  return {
+    segments,
+    url: '/' + [page.locale, 'og', 'docs', ...segments].filter(Boolean).join('/'),
+  };
+}
+```
+
+```tsx tab="app/docs/[[...slug]]/page.tsx"
+import { notFound } from 'next/navigation';
+import { source, getPageImageUrl } from '@/lib/source';
+import type { Metadata } from 'next';
+
+export async function generateMetadata(props: PageProps<'/docs/[[...slug]]'>): Promise<Metadata> {
+  const params = await props.params;
+  const page = source.getPage(params.slug);
+  if (!page) notFound();
+
+  return {
+    title: page.data.title,
+    description: page.data.description,
+    openGraph: {
+      // [!code ++]
+      images: getPageImageUrl(page).url,
+    },
+  };
+}
+```
+
+> `/og/docs/my-page/image.png` でアクセスできるように、slug の末尾に `image.png` を追加しています。
+
+最後に、ビルド時に画像を生成するルートハンドラーを作成します。
+
+<include cwd meta="title=&#x22;app/og/docs/[...slug]/route.tsx&#x22;">
+  ../../examples/next/app/og/docs/&#91;...slug&#93;/route.tsx
+</include>
+
+Satori (`next/og` が内部で使用) のオプションも指定できます。詳しくは https://github.com/vercel/satori を参照してください。
+
+### その他のプリセット [#other-presets]
+
+Fumadocs CLI では、`mono` など、ほかのスタイルも利用できます。
+
+```npm
+npx @fumadocs/cli@latest add og/mono
+```
+
+既存の `generate` を、インストールしたものに置き換えてください。

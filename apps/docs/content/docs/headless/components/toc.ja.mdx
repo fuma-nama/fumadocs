@@ -1,0 +1,45 @@
+---
+title: 目次
+description: 目次
+---
+
+アクティブなアンカーの監視と自動スクロールに対応した目次です。
+
+## 使い方 [#usage]
+
+```tsx
+import * as Base from 'fumadocs-core/toc';
+
+return (
+  <Base.AnchorProvider>
+    <Base.ScrollProvider>
+      <Base.TOCItem />
+      <Base.TOCItem />
+    </Base.ScrollProvider>
+  </Base.AnchorProvider>
+);
+```
+
+### Anchor Provider [#anchor-provider]
+
+Intersection Observer API を使用して、アクティブなアンカーを監視します。
+
+<auto-type-table path="../props.ts" name="AnchorProviderProps" />
+
+### Scroll Provider [#scroll-provider]
+
+アクティブなアンカーの位置までスクロールコンテナをスクロールします。
+
+<auto-type-table path="../props.ts" name="ScrollProviderProps" />
+
+### 目次アイテム [#toc-item]
+
+対象のアンカーへジャンプするためのアンカーアイテムです。
+
+| データ属性         | 値             | 説明             |
+| ------------- | ------------- | -------------- |
+| `data-active` | `true, false` | アンカーがアクティブかどうか |
+
+## 例 [#example]
+
+<include>./toc-example.tsx</include>

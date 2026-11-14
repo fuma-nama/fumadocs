@@ -1,0 +1,55 @@
+---
+title: Steps
+description: ドキュメントにステップを追加する
+preview: steps
+---
+
+<Installation name="steps" />
+
+## 使い方 [#usage]
+
+各ステップを `Steps` コンテナの中に配置します。
+
+```mdx title="content.mdx"
+import { Step, Steps } from 'fumadocs-ui/components/steps';
+
+<Steps>
+<Step>
+
+### Hello World
+
+</Step>
+
+<Step>
+
+### Hello World
+
+</Step>
+</Steps>
+```
+
+### インポートせずに使用する [#without-imports]
+
+Tailwind CSS のユーティリティは、インポートしなくても使用できます。
+
+```mdx
+<div className="fd-steps">
+  <div className="fd-step" />
+</div>
+```
+
+任意のバリアント (arbitrary variants) を使用すると、見出しにのみステップのスタイルを適用できます。
+
+```mdx
+<div className='fd-steps [&_h3]:fd-step'>
+
+### Hello World
+
+</div>
+```
+
+<div className="fd-steps [&_h3]:fd-step">
+  ### Hello World [#hello-world]
+
+  `<Step />` コンポーネントを使わずにレンダリングしています。
+</div>

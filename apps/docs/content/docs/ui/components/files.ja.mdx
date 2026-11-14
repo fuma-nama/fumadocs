@@ -1,0 +1,100 @@
+---
+title: Files
+description: ドキュメント内にファイル構造を表示します
+preview: 'files'
+---
+
+<Installation name="files" />
+
+## 使い方 [#usage]
+
+ファイルコンポーネントを `Files` で囲みます。MDX コンテンツ内でも、通常の React.js コンポーネントとしても使用できます。
+
+```mdx title="content.mdx"
+import { File, Folder, Files } from 'fumadocs-ui/components/files';
+
+<Files>
+  <Folder name="app" defaultOpen>
+    <File name="layout.tsx" />
+    <File name="page.tsx" />
+    <File name="global.css" />
+  </Folder>
+  <Folder name="components">
+    <File name="button.tsx" />
+    <File name="tabs.tsx" />
+    <File name="dialog.tsx" />
+  </Folder>
+  <File name="package.json" />
+</Files>
+```
+
+### File [#file]
+
+<auto-type-table cwd path="content/docs/ui/props.ts" name="FileProps" />
+
+### フォルダー [#folder]
+
+<auto-type-table cwd path="content/docs/ui/props.ts" name="FolderProps" />
+
+## Remark プラグイン [#remark-plugin]
+
+[`remark-mdx-files`](/docs/headless/mdx/remark-mdx-files) は、追加の機能や構文を利用できるようにする remark プラグインです。
+
+```ts tab="unified" title="source.config.ts"
+import { remarkMdxFiles } from 'fumadocs-core/mdx-plugins/remark-mdx-files';
+import { defineConfig } from 'fumadocs-mdx/config';
+
+export default defineConfig({
+  mdxOptions: {
+    // [!code ++]
+    remarkPlugins: [remarkMdxFiles],
+  },
+});
+```
+
+```ts tab="Sätteri" title="source.config.ts"
+import { remarkMdxFiles } from '@fumadocs/satteri/remark-mdx-files';
+import { defineConfig, defineDocs } from 'fumadocs-mdx/config';
+
+export const docs = defineDocs({
+  docs: {
+    compiler: 'satteri',
+  },
+});
+
+export default defineConfig({
+  satteriOptions: {
+    // [!code ++]
+    mdastPlugins: [remarkMdxFiles()],
+  },
+});
+```
+
+### コードブロック構文 [#codeblock-syntax]
+
+`files` コードブロックを、次のように `<Files />` コンポーネントへ変換します。
+
+````md title="content.md"
+```files
+project
+├── src
+│   ├── index.js
+│   └── utils
+│       └── helper.js
+├── package.json
+```
+````
+
+### `<auto-files>` [#auto-files]
+
+glob パターンから `<Files />` コンポーネントを生成します。
+
+```mdx title="content.mdx"
+<auto-files dir="./my-dir" pattern="**/*.{ts,tsx}" />
+
+<auto-files dir="./my-dir" pattern="**/*.{ts,tsx}" defaultOpenAll />
+```
+
+<Callout type="warn">
+  信頼できない値を `dir` に渡さないでください。マシン上のあらゆるディレクトリのファイルが一覧表示されるおそれがあります。
+</Callout>

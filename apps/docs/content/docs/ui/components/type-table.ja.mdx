@@ -1,0 +1,35 @@
+---
+title: 型テーブル
+description: 型の情報をドキュメントに記載するためのテーブル
+preview: typeTable
+---
+
+<Installation name="type-table" />
+
+## 使い方 [#usage]
+
+`type` プロパティを受け付けます。
+
+```mdx
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+
+<TypeTable
+  type={{
+    percentage: {
+      description: 'The percentage of scroll position to display the roll button',
+      type: 'number',
+      default: 0.2,
+    },
+  }}
+/>
+```
+
+## リファレンス [#references]
+
+### 型テーブル [#type-table]
+
+<auto-type-table cwd path="content/docs/ui/props.ts" name="TypeTableProps" />
+
+### オブジェクト型 [#object-type]
+
+<auto-type-table cwd path="content/docs/ui/props.ts" name="ObjectTypeProps" />

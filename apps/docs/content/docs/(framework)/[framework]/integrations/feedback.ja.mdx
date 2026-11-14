@@ -1,0 +1,328 @@
+---
+title: フィードバック
+description: ユーザーからのフィードバックを受け取ります
+---
+
+## 概要 [#overview]
+
+フィードバックを集めると、読者がドキュメントをどう評価しているか、どのページに改善が必要かを把握できます。
+Fumadocs には、ページ単位やコンテンツのブロック単位でフィードバックを収集するためのコンポーネントが用意されています。
+
+## インストール [#installation]
+
+**Fumadocs CLI** を使ってインストールします。ドキュメントページが見つかった場合は、そのページにコンポーネントも自動で追加されます。
+
+```npm
+npx @fumadocs/cli feature feedback
+```
+
+または、コンポーネントのみをインストールすることもできます。
+
+```npm
+npx @fumadocs/cli@latest add feedback
+```
+
+### ページフィードバック [#page-feedback]
+
+ドキュメントページの最下部に `<Feedback />` を追加します。`onSendAction` コールバックは、読者がフィードバックを送信したときに実行されます。
+
+<show when={props.framework === 'next' || props.framework === 'waku'}>
+  フィードバックはサーバーアクションで処理します。たとえば、`on_rate_docs` イベントとして PostHog に送信できます。
+
+  ```tsx
+  import { DocsPage } from 'fumadocs-ui/layouts/docs/page';
+  import { Feedback } from '@/components/feedback/client';
+
+  export default async function Page() {
+    return (
+      <DocsPage>
+        {/* ページの最下部に配置 */}
+        <Feedback
+          onSendAction={async (feedback) => {
+            'use server';
+
+            console.log(feedback);
+            return {};
+          }}
+        />
+      </DocsPage>
+    );
+  }
+  ```
+</show>
+
+<show when={props.framework === 'tanstack-start'}>
+  フィードバックはサーバー関数で処理します。たとえば、`on_rate_docs` イベントとして PostHog に送信できます。
+
+  ```tsx
+  import { createServerFn } from '@tanstack/react-start';
+  import { DocsPage } from 'fumadocs-ui/layouts/docs/page';
+  import { Feedback } from '@/components/feedback/client';
+  import { type PageFeedback, pageFeedback } from '@/components/feedback/schema';
+
+  const sendFeedback = createServerFn({ method: 'POST' })
+    .validator((feedback: PageFeedback) => pageFeedback.parse(feedback))
+    .handler(async ({ data: feedback }) => {
+      console.log(feedback);
+      return {};
+    });
+
+  function Content() {
+    return (
+      <DocsPage>
+        {/* ページの最下部に配置 */}
+        <Feedback onSendAction={(feedback) => sendFeedback({ data: feedback })} />
+      </DocsPage>
+    );
+  }
+  ```
+</show>
+
+<show when={props.framework === 'react-router' || props.framework === 'astro'}>
+  フィードバックをアプリ内のエンドポイントに送信します。
+
+  ```tsx
+  import { DocsPage } from 'fumadocs-ui/layouts/docs/page';
+  import { Feedback } from '@/components/feedback/client';
+
+  function Content() {
+    return (
+      <DocsPage>
+        {/* ページの最下部に配置 */}
+        <Feedback
+          onSendAction={async (feedback) => {
+            const res = await fetch('/api/feedback', {
+              method: 'POST',
+              body: JSON.stringify(feedback),
+            });
+
+            return res.json();
+          }}
+        />
+      </DocsPage>
+    );
+  }
+  ```
+</show>
+
+<show when={props.framework === 'react-router'}>
+  フィードバックは[リソースルート](https://reactrouter.com/how-to/resource-routes)で処理します。たとえば、`on_rate_docs` イベントとして PostHog に送信できます。
+
+  ```ts tab="app/routes/api.feedback.ts"
+  import type { Route } from './+types/api.feedback';
+  import { pageFeedback } from '@/components/feedback/schema';
+
+  export async function action({ request }: Route.ActionArgs) {
+    const feedback = pageFeedback.parse(await request.json());
+
+    console.log(feedback);
+    return Response.json({});
+  }
+  ```
+
+  ```ts tab="app/routes.ts"
+  import { route, type RouteConfig } from '@react-router/dev/routes';
+
+  export default [
+    // [!code ++]
+    route('api/feedback', 'routes/api.feedback.ts'),
+  ] satisfies RouteConfig;
+  ```
+</show>
+
+<show when={props.framework === 'astro'}>
+  フィードバックはエンドポイントで処理します。たとえば、`on_rate_docs` イベントとして PostHog に送信できます。このエンドポイントはリクエストごとにレンダリングされるため、プロジェクトに[アダプター](https://docs.astro.build/en/guides/on-demand-rendering/)が必要です。
+
+  ```ts title="src/pages/api/feedback.ts"
+  import type { APIRoute } from 'astro';
+  import { pageFeedback } from '@/components/feedback/schema';
+
+  export const prerender = false;
+
+  export const POST: APIRoute = async ({ request }) => {
+    const feedback = pageFeedback.parse(await request.json());
+
+    console.log(feedback);
+    return Response.json({});
+  };
+  ```
+</show>
+
+<show when={props.framework === 'next' || props.framework === 'waku'}>
+  <Callout type="warn">
+    サーバーアクションは誰でも任意の入力で呼び出せるため、フィードバックを保存・送信する前に必ずバリデーションを行ってください。
+  </Callout>
+</show>
+
+### ブロックフィードバック [#feedback-block]
+
+ブロックフィードバックを使うと、読者はテキストを選択したときに開くポップオーバーから、コンテンツの特定のブロックにコメントできます。
+
+各ブロックにIDを付与するremarkプラグイン`remarkBlockId`を追加します。
+
+<show when={props.framework !== 'astro'}>
+  ```ts tab="unified" title="source.config.ts"
+  import {
+    remarkBlockId,
+    type RemarkBlockIdOptions,
+  } from 'fumadocs-core/mdx-plugins/remark-block-id';
+  import { defineConfig } from 'fumadocs-mdx/config';
+
+  const blockIdOptions: RemarkBlockIdOptions = {
+    addDataAttribute: 'feedback',
+  };
+
+  export default defineConfig({
+    mdxOptions: {
+      remarkPlugins: [
+        // [!code ++]
+        [remarkBlockId, blockIdOptions],
+      ],
+    },
+  });
+  ```
+
+  ```ts tab="Sätteri" title="source.config.ts"
+  import { remarkBlockId } from '@fumadocs/satteri/remark-block-id';
+  import { defineConfig, defineDocs } from 'fumadocs-mdx/config';
+
+  export const docs = defineDocs({
+    docs: {
+      compiler: 'satteri',
+    },
+  });
+
+  export default defineConfig({
+    satteriOptions: {
+      mdastPlugins: [
+        // [!code ++]
+        remarkBlockId({ addDataAttribute: 'feedback' }),
+      ],
+    },
+  });
+  ```
+</show>
+
+<show when={props.framework === 'astro'}>
+  ```js title="astro.config.mjs"
+  import { defineConfig } from 'astro/config';
+  import fumadocs from '@fumadocs/astro';
+  import { remarkBlockId } from '@fumadocs/satteri/remark-block-id';
+
+  export default defineConfig({
+    integrations: [
+      fumadocs({
+        // [!code ++]
+        mdastPlugins: [remarkBlockId({ addDataAttribute: 'feedback' })],
+      }),
+    ],
+  });
+  ```
+</show>
+
+次に、ページのコンテンツを`<FeedbackText />`でラップします。`onSendAction`コールバックは、読者がブロックに対するフィードバックを送信したときに実行されます。
+
+<show when={props.framework === 'next' || props.framework === 'waku'}>
+  ```tsx
+  import { DocsPage } from 'fumadocs-ui/layouts/docs/page';
+  import { FeedbackText } from '@/components/feedback/client';
+
+  export default async function Page() {
+    return (
+      <DocsPage>
+        <FeedbackText
+          onSendAction={async (feedback) => {
+            'use server';
+
+            console.log(feedback);
+            return {};
+          }}
+        >
+          {/* ページのコンテンツ */}
+        </FeedbackText>
+      </DocsPage>
+    );
+  }
+  ```
+</show>
+
+<show when={props.framework === 'tanstack-start'}>
+  ```tsx
+  import { createServerFn } from '@tanstack/react-start';
+  import { DocsPage } from 'fumadocs-ui/layouts/docs/page';
+  import { FeedbackText } from '@/components/feedback/client';
+  import { type BlockFeedback, blockFeedback } from '@/components/feedback/schema';
+
+  const sendBlockFeedback = createServerFn({ method: 'POST' })
+    .validator((feedback: BlockFeedback) => blockFeedback.parse(feedback))
+    .handler(async ({ data: feedback }) => {
+      console.log(feedback);
+      return {};
+    });
+
+  function Content() {
+    return (
+      <DocsPage>
+        <FeedbackText onSendAction={(feedback) => sendBlockFeedback({ data: feedback })}>
+          {/* ページのコンテンツ */}
+        </FeedbackText>
+      </DocsPage>
+    );
+  }
+  ```
+</show>
+
+<show when={props.framework === 'react-router' || props.framework === 'astro'}>
+  ```tsx
+  import { DocsPage } from 'fumadocs-ui/layouts/docs/page';
+  import { FeedbackText } from '@/components/feedback/client';
+
+  function Content() {
+    return (
+      <DocsPage>
+        <FeedbackText
+          onSendAction={async (feedback) => {
+            const res = await fetch('/api/feedback/block', {
+              method: 'POST',
+              body: JSON.stringify(feedback),
+            });
+
+            return res.json();
+          }}
+        >
+          {/* ページのコンテンツ */}
+        </FeedbackText>
+      </DocsPage>
+    );
+  }
+  ```
+
+  ページフィードバックと同様に別のエンドポイントで処理します。ただし、リクエストボディは`blockFeedback`でパースしてください。
+</show>
+
+<Callout type="info" title="補足">
+  `remark-block-id`はブロックの内容とページ内での順序からブロックIDを生成するため、サードパーティのサービスでもブロックを追跡できます。
+</Callout>
+
+### GitHub Discussion との連携 [#integrating-with-github-discussion]
+
+フィードバックを GitHub Discussion に送信するには、以下のファイルをコピーしてベースとして利用できます。
+
+<include cwd meta="title='lib/github.ts'">
+  ./lib/github.ts
+</include>
+
+1. 独自の GitHub App を作成し、その App ID と秘密鍵を取得します。
+2. 必要な環境変数を設定します。
+3. `owner`、`repo`、`DocsCategory` などの定数を置き換えます。
+4. <show when={props.framework === 'next' || props.framework === 'waku'}>
+     フィードバックコンポーネントで `onPageFeedbackAction` と `onBlockFeedbackAction` を使用します。
+   </show>
+   <show when={props.framework === 'tanstack-start'}>
+     `'use server'` ディレクティブを削除し、サーバー関数から `onPageFeedbackAction` と
+     `onBlockFeedbackAction` を呼び出します。
+   </show>
+   <show when={props.framework === 'react-router' || props.framework === 'astro'}>
+     `'use server'` ディレクティブを削除し、エンドポイントから `onPageFeedbackAction` と
+     `onBlockFeedbackAction` を呼び出します。
+   </show>

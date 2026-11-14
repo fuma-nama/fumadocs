@@ -1,0 +1,127 @@
+---
+title: Glass レイアウト
+description: 半透明のサイドバーとヘッダーがフローティング表示されるドキュメントレイアウト
+---
+
+import { glass } from './layouts.story';
+
+フローティング表示される半透明 (ガラス風) のパネルを軸に構成された Docs レイアウトです。サイドバーとヘッダーは固定のカラムではなく、角丸でぼかしの効いたサーフェスとしてコンテンツの上に重なって表示されます。
+
+<glass.WithControl />
+
+<Customization />
+
+## 使い方 [#usage]
+
+`fumadocs-ui/layouts/glass` を使用して、Glass レイアウトを有効にします。
+
+```tsx title="layout.tsx"
+import { DocsLayout } from 'fumadocs-ui/layouts/glass'; // [!code highlight]
+import { baseOptions } from '@/lib/layout.shared';
+import { source } from '@/lib/source';
+import type { ReactNode } from 'react';
+
+export default function Layout({ children }: { children: ReactNode }) {
+  return (
+    <DocsLayout {...baseOptions()} tree={source.getPageTree()}>
+      {children}
+    </DocsLayout>
+  );
+}
+```
+
+ページの import も忘れずに更新してください。
+
+```tsx title="page.tsx"
+import { ... } from 'fumadocs-ui/layouts/docs/page'; // [!code --]
+import { ... } from 'fumadocs-ui/layouts/glass/page'; // [!code ++]
+```
+
+### スタイル [#styles]
+
+他のレイアウトとは異なり、Glass レイアウトのスタイルは CSS プリセットに**含まれていません**。そのため、このレイアウトを使用しない限り、余分なコストはかかりません。Tailwind CSS ファイルで次のようにインポートしてください。
+
+```css title="Tailwind CSS"
+@import 'tailwindcss';
+/* [!code ++] */
+@import 'fumadocs-ui/css/generated/glass.css';
+@import 'fumadocs-ui/css/neutral.css';
+@import 'fumadocs-ui/css/preset.css';
+```
+
+<Callout title="注意事項">
+  * Glass レイアウトは**クライアントコンポーネント**であるため、サーバーコンポーネントからシリアライズできない props を渡すことはできません。
+  * 設計上の制約が強いレイアウトです。サイドバーとヘッダーはデフォルトのレイアウトよりも自由度が低いため、カスタマイズするには Fumadocs CLI または `slots` オプションを使用してください。
+</Callout>
+
+## 設定 [#configurations]
+
+オプションは [Docs レイアウト](/docs/ui/layouts/docs) から継承されますが、いくつか細かな違いがあります。
+
+* `sidebar` オプションはありません。Glass レイアウトは、デフォルトのレイアウトよりも設計上の制約が強くなっています。
+* 追加のオプションがあります (以下を参照してください) 。
+
+### レイアウトタブ [#layout-tabs]
+
+[レイアウトタブ](/docs/ui/layouts/docs#layout-tabs)は `tabs` prop で設定します。追加方法はリンク先のドキュメントを参照してください。タブはサイドバー内にドロップダウンとして表示されます。
+
+```tsx title="layout.tsx"
+import { DocsLayout } from 'fumadocs-ui/layouts/glass';
+import { baseOptions } from '@/lib/layout.shared';
+import { source } from '@/lib/source';
+import type { ReactNode } from 'react';
+
+export default function Layout({ children }: { children: ReactNode }) {
+  return (
+    <DocsLayout
+      {...baseOptions()}
+      tabs={
+        {
+          // タブをカスタマイズ
+        }
+      }
+      tree={source.getPageTree()}
+    >
+      {children}
+    </DocsLayout>
+  );
+}
+```
+
+### AI チャット [#ai-chat]
+
+フローティングヘッダーには **AIに質問** ボタンを表示できます。AI 検索ダイアログを制御するには、開閉状態と変更ハンドラーを含む `aiChat` オブジェクトを渡してください。レイアウトは、広い画面ではチャットの `panel` をページの横に配置し、小さい画面ではページに重ねてフローティング表示します。
+
+```tsx title="layout.tsx"
+'use client';
+import { DocsLayout } from 'fumadocs-ui/layouts/glass';
+import { useState } from 'react';
+
+export function Layout({ children }) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <DocsLayout
+      aiChat={{ open, onOpenChange: setOpen, panel: <MyChat /> }} // [!code ++]
+      // ...
+    >
+      {children}
+    </DocsLayout>
+  );
+}
+```
+
+### スロット [#slots]
+
+他のレイアウトと同様に、Glass レイアウトには `slots` オプションがあり、共通のスロット (`navTitle`、`themeSwitch`、`searchTrigger`、`languageSelect`) に加えて、組み込みの `header`、`sidebar`、`sidebarDrawer` (モバイル) コンポーネントを上書きできます。
+
+```tsx title="layout.tsx"
+import { DocsLayout } from 'fumadocs-ui/layouts/glass';
+
+<DocsLayout
+  slots={{
+    header: MyHeader, // [!code ++]
+  }}
+  // ...
+/>;
+```

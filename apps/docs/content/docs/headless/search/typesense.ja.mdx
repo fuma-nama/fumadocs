@@ -1,0 +1,99 @@
+---
+title: Typesense 検索
+description: Typesense 検索を Fumadocs に統合します
+---
+
+> これはコミュニティによってメンテナンスされているインテグレーションです。
+
+## セットアップ [#setup]
+
+### 依存関係のインストール [#install-dependencies]
+
+```package-install
+typesense typesense-fumadocs-adapter
+```
+
+### Typesense サーバーを起動する [#start-typesense-server]
+
+Typesense サーバーは、セルフホストすることも、Typesense のクラウドサービスを利用することもできます。公式の[スタートガイド](https://typesense.org/docs/guide/install-typesense.html)に従ってサーバーをセットアップし、認証情報を `.env.local` に保存してください (`NEXT_PUBLIC_` は、Vite 系フレームワークでは `VITE_`、Astro では `PUBLIC_` に置き換えてください) 。
+
+```dotenv
+NEXT_PUBLIC_TYPESENSE_URL="server URL"
+NEXT_PUBLIC_TYPESENSE_SEARCH_KEY="search-only API key"
+TYPESENSE_API_KEY="API key with write access"
+```
+
+### データセットの同期 [#sync-dataset]
+
+事前レンダリングした `static.json` ルートで検索インデックスをエクスポートし、ビルドのたびにスクリプトで Typesense に同期します。
+
+<feature>search/typesense</feature>
+
+`build` スクリプトはビルドのたびに同期を実行するため、デプロイ先のプラットフォームにも同じ環境変数を設定してください。
+
+### 検索 UI [#search-ui]
+
+検索 UI は、次のいずれかの方法で実装できます。
+
+* [Fumadocs UI の検索ダイアログ](/docs/search/typesense)を使用する。
+* Typesense の検索クライアントフックを使って、独自の検索 UI を構築する。
+
+  ```ts
+  import { Client } from 'typesense';
+  import { useTypesenseSearch } from 'typesense-fumadocs-adapter/client';
+
+  const client = new Client({
+    nodes: [{ url: 'YOUR_TYPESENSE_SERVER_URL' }],
+    apiKey: 'YOUR_TYPESENSE_SEARCH_ONLY_API_KEY',
+  });
+
+  const { search, setSearch, query } = useTypesenseSearch({
+    typesenseCollectionName: 'docs',
+    client,
+  });
+  ```
+
+## オプション [#options]
+
+### タグフィルター [#tag-filter]
+
+タグフィルターを設定するには、`static.json` ルートで返すドキュメントに `tag` の値を追加します。
+
+```ts
+documents.push({
+  // その他のフィールド…
+  // [!code ++]
+  tag: '<your value>',
+});
+```
+
+次に、検索クライアントを更新します。
+
+* **Fumadocs UI**: 検索 UI で[タグフィルター](/docs/search/typesense#tag-filter)を有効にします。
+* **検索クライアント**: 次のようにタグフィルターを追加できます。
+
+  ```ts
+  import { useTypesenseSearch } from 'typesense-fumadocs-adapter/client';
+  const { search, setSearch, query } = useTypesenseSearch({
+    tag: '<your tag value>',
+    // ...
+  });
+  ```
+
+### 国際化 (i18n)  [#internationalization-i18n]
+
+ドキュメントにはページの `locale` が含まれているため、検索クライアントにも `locale` を渡してください。
+
+```ts
+import { useI18n } from 'fumadocs-ui/contexts/i18n';
+import { useTypesenseSearch } from 'typesense-fumadocs-adapter/client';
+
+const { locale } = useI18n();
+const { search, setSearch, query } = useTypesenseSearch({
+  // [!code ++]
+  locale,
+  // その他のフィールド…
+});
+```
+
+内部的には、Typesense はロケールごとに個別のコレクションを作成します。コレクション名の末尾には `_{locale}` サフィックスが付加されます (例：`docs_en`、`docs_fr`) 。
