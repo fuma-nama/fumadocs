@@ -1,0 +1,46 @@
+---
+title: Bun
+description: Bun でコンテンツにアクセスする方法です。
+---
+
+## セットアップ [#setup]
+
+プリロードスクリプトでプラグインを登録します。
+
+```toml tab="bunfig.toml"
+preload = ["./scripts/preload.ts"]
+```
+
+```ts tab="scripts/preload.ts"
+import { createMdxPlugin } from 'fumadocs-mdx/bun';
+
+await Bun.plugin(createMdxPlugin());
+```
+
+このプラグインは、MDX ファイルと meta ファイルを実行時に読み込みます。セットアップは非同期で行われるため、必ず `await` してください。`await` しないと、プラグインの準備が整う前にスクリプトが `lib/source.ts` をインポートしてしまい、[Macro API](/docs/mdx/macro) がエラーをスローします。
+
+これで、Bun でスクリプトを実行すれば、コンテンツファイルに直接アクセスできます。
+
+### `.source` フォルダーを再生成する [#re-generate-source-folder]
+
+必要に応じて、`.source` フォルダーを再生成することもできます。
+
+これは、フォルダーが存在しない可能性がある場合や、
+Vite ベースのフレームワーク (React Router、TanStack Start、Waku) を使用している場合に役立ちます。これらのフレームワークでは、デフォルトで Vite 固有の API を使用したコードが生成されるためです。
+
+```ts title="scripts/preload.ts" tab="Next.js"
+import { postInstall } from 'fumadocs-mdx/next';
+
+await postInstall({ configPath: 'source.config.ts' });
+```
+
+```ts title="scripts/preload.ts" tab="Vite"
+import { postInstall } from 'fumadocs-mdx/vite';
+
+await postInstall({
+  configPath: 'source.config.ts',
+  index: {
+    target: 'bun',
+  },
+});
+```

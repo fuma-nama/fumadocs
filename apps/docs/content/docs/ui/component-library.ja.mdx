@@ -1,0 +1,53 @@
+---
+title: コンポーネントライブラリ
+description: 基盤となるヘッドレスコンポーネントライブラリです。
+icon: Library
+---
+
+## 概要 [#overview]
+
+Fumadocs UI は [Base UI](https://base-ui.com) と [Radix UI](https://radix-ui.com/primitives) の両方をサポートしており、デフォルトでは Base UI を使用します。
+
+Fumadocs CLI でコンポーネントをカスタマイズする場合は、設定が異なることがあります。
+
+### Base UI [#base-ui]
+
+Base UI はデフォルトのコンポーネントライブラリです。手動でインストールする場合は、`fumadocs-ui` を `@fumadocs/base-ui` パッケージのエイリアスとして設定してください。
+
+```json title="package.json"
+{
+  "dependencies": {
+    "fumadocs-ui": "npm:@fumadocs/base-ui@latest",
+    // Base UI がインストール済みであることを確認してください
+    "@base-ui/react": "..."
+  }
+}
+```
+
+Fumadocs CLI では、これが `uiLibrary` のデフォルト値です：
+
+```json title="cli.json"
+{
+  "uiLibrary": "base-ui"
+}
+```
+
+### Radix UI [#radix-ui]
+
+`fumadocs-ui` パッケージを直接インストールすると、Radix UI を使用できます：
+
+```json title="package.json"
+{
+  "dependencies": {
+    "fumadocs-ui": "latest"
+  }
+}
+```
+
+Fumadocs CLI の場合は、`cli.json` 設定ファイルで次のように設定します。
+
+```json title="cli.json"
+{
+  "uiLibrary": "radix-ui"
+}
+```

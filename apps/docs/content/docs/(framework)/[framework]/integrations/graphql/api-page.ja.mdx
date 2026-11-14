@@ -1,0 +1,371 @@
+---
+title: createGraphQLPage()
+description: GraphQL ドキュメントのコンテンツをレンダリングするコンポーネント
+---
+
+## 概要 [#overview]
+
+Fumadocs GraphQL は、ページコンテンツのレンダリングに `<GraphQLPage />` コンポーネントを使用します。このコンポーネントはクライアントコンポーネントにする必要があります。
+
+```tsx title="components/api-page.tsx"
+'use client';
+import { createGraphQLPage } from '@fumadocs/graphql/ui';
+
+export const GraphQLPage = createGraphQLPage({
+  // 設定
+});
+```
+
+### プレイグラウンド [#playground]
+
+エンドポイントを設定すると、オペレーションページにプレイグラウンドが表示されます。読者はオペレーションを編集し、変数をフォームまたは JSON で入力して、必要なヘッダーを付けて送信できます。
+
+```tsx title="components/api-page.tsx"
+'use client';
+import { createGraphQLPage } from '@fumadocs/graphql/ui';
+
+export const GraphQLPage = createGraphQLPage({
+  playground: {
+    url: 'https://api.example.com/graphql',
+    // ユーザーによるエンドポイントURLの編集を許可する (デフォルト: true)
+    allowUrlEdit: false,
+    // プレイグラウンドから送信するリクエストのデフォルトヘッダー
+    headers: {
+      'X-Client-Name': 'docs',
+    },
+  },
+});
+```
+
+<Callout type="warn">
+  `headers` にシークレットを含めないでください。ヘッダーはブラウザに送信され、コードサンプルにも表示されるほか、エンドポイントのオリジンごとにブラウザのローカルストレージに保存されます。
+</Callout>
+
+クエリとミューテーションは HTTP POST で送信されます。fetcher を置き換えれば、たとえばリクエストをプロキシ経由で送信することもできます。
+
+```tsx title="components/api-page.tsx"
+'use client';
+import { createGraphQLPage } from '@fumadocs/graphql/ui';
+
+export const GraphQLPage = createGraphQLPage({
+  playground: {
+    async fetcher(request) {
+      const start = performance.now();
+      const res = await fetch('/api/proxy', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...request.headers },
+        body: JSON.stringify({ query: request.query, variables: request.variables }),
+      });
+
+      return {
+        type: 'response',
+        status: res.status,
+        time: performance.now() - start,
+        body: await res.text(),
+        contentType: res.headers.get('Content-Type') ?? '',
+        // 省略可能。Headers タブに表示されます
+        headers: Array.from(res.headers),
+      };
+    },
+  },
+});
+```
+
+また、`render` を使うとプレイグラウンドの UI 全体を置き換えることもできます。この場合、シグネチャバーの代わりに表示されます。
+
+```tsx title="components/api-page.tsx"
+'use client';
+import { createGraphQLPage } from '@fumadocs/graphql/ui';
+
+export const GraphQLPage = createGraphQLPage({
+  playground: {
+    render({ kind, name, operation }) {
+      return <div>my playground</div>;
+    },
+  },
+});
+```
+
+#### サブスクリプション [#subscriptions]
+
+サブスクリプションのページでは、プレイグラウンドが `subscriptionUrl` をサブスクライブし、受信したイベントをログに出力します。デフォルトでは、`url` のスキームを `ws(s)://` に置き換えたものが使用されます。
+
+| `subscriptionUrl`    | プロトコル                                      |
+| -------------------- | ------------------------------------------ |
+| `ws://`、`wss://`     | graphql-ws(`graphql-transport-ws`)         |
+| `http://`、`https://` | GraphQL over SSE(distinct connections モード) |
+
+```tsx title="components/api-page.tsx"
+'use client';
+import { createGraphQLPage } from '@fumadocs/graphql/ui';
+
+export const GraphQLPage = createGraphQLPage({
+  playground: {
+    url: 'https://api.example.com/graphql',
+    // 同じエンドポイントで GraphQL over SSE を使用
+    subscriptionUrl: 'https://api.example.com/graphql',
+  },
+});
+```
+
+<Callout title="ブラウザーの制限">
+  ブラウザーでは WebSocket 接続のヘッダーを設定できないため、graphql-ws はヘッダーを代わりに
+  `connection_init` のペイロードに含めて送信します。
+</Callout>
+
+### コードサンプル [#code-samples]
+
+リクエストの例は GraphQL で表示されるほか、cURL、JavaScript、Go、Python、Java、C#、Rust のコードとしても表示されます。これらのコードは `playground.headers` を付けて `playground.url`(未設定の場合はプレースホルダー)にリクエストを送信します。プレイグラウンドでも、編集中のリクエストについて同じコードが表示されます。サブスクリプションのページでは、例は GraphQL でのみ表示されます。
+
+`codeUsages` でジェネレーターを追加したり、デフォルトのジェネレーターを削除したりできます。
+
+```tsx title="components/api-page.tsx"
+'use client';
+import {
+  createCodeUsageGeneratorRegistry,
+  createGraphQLPage,
+  registerDefaultCodeUsages,
+} from '@fumadocs/graphql/ui';
+
+// ゼロから始める場合は、デフォルトを登録しないでください
+const codeUsages = registerDefaultCodeUsages(createCodeUsageGeneratorRegistry());
+
+// デフォルト: curl、js、go、python、java、csharp、rust
+codeUsages.remove('java');
+codeUsages.add('graphql-request', {
+  label: 'graphql-request',
+  lang: 'js',
+  generate({ url, query, variables = {}, headers }) {
+    return `import { request } from 'graphql-request';
+
+const data = await request(${JSON.stringify(url)}, ${JSON.stringify(query)}, ${JSON.stringify(variables)}, ${JSON.stringify(headers)});`;
+  },
+});
+
+export const GraphQLPage = createGraphQLPage({ codeUsages });
+```
+
+<auto-type-table path="props.ts" name="CodeUsageData" />
+
+### 相互リンク [#cross-linking]
+
+[型ページ](/docs/integrations/graphql/server#includeoperations--includetypes)は、型ページ同士およびオペレーションへ自動的にリンクされます。オペレーションページでは読者がページを離れることはなく、型はスキーマ UI 内で開かれます。
+
+リンクを独自に解決することもできます。
+
+```tsx title="components/api-page.tsx"
+'use client';
+import { createGraphQLPage } from '@fumadocs/graphql/ui';
+
+export const GraphQLPage = createGraphQLPage({
+  typeLinks(name) {
+    return `/docs/types/${name}`;
+  },
+  operationLinks(kind, name) {
+    return `/docs/${kind}/${name}`;
+  },
+});
+```
+
+専用のページを持たない型やオペレーションには `undefined` を返してください。
+
+### カスタムレイアウト [#custom-layout]
+
+オペレーションページと型ページのレイアウトをカスタマイズできます。
+
+<Tabs items={['オペレーション', '型']}>
+  <Tab>
+    ```tsx title="components/api-page.tsx"
+    'use client';
+    import { createGraphQLPage } from '@fumadocs/graphql/ui';
+
+    export const GraphQLPage = createGraphQLPage({
+      content: {
+        renderOperationLayout(slots) {
+          return (
+            <div className="flex flex-col gap-6">
+              {slots.header}
+              {slots.playground}
+              {slots.description}
+              {slots.deprecated}
+              {slots.arguments}
+              {slots.returns}
+              {slots.example}
+            </div>
+          );
+        },
+      },
+    });
+    ```
+
+    | スロット          | レンダリング内容                                                            |
+    | ------------- | ------------------------------------------------------------------- |
+    | `header`      | タイトル(複数の項目を含むページのみ)                                                 |
+    | `playground`  | `QUERY customer(id: ID!): Customer` のようなシグネチャ、そのディレクティブ、およびプレイグラウンド |
+    | `description` | オペレーションの説明                                                          |
+    | `deprecated`  | 非推奨の理由                                                              |
+    | `arguments`   | 引数                                                                  |
+    | `returns`     | 戻り値の型とそのフィールド                                                       |
+    | `example`     | リクエストとレスポンスの例(幅の広いページではオペレーションの横に表示)                                |
+  </Tab>
+
+  <Tab>
+    ```tsx title="components/api-page.tsx"
+    'use client';
+    import { createGraphQLPage } from '@fumadocs/graphql/ui';
+
+    export const GraphQLPage = createGraphQLPage({
+      content: {
+        renderTypeLayout(slots) {
+          return (
+            <div className="flex flex-col gap-6">
+              {slots.header}
+              {slots.definition}
+              {slots.description}
+              {slots.fields}
+              {slots.values}
+              {slots.usages}
+              {slots.sdl}
+            </div>
+          );
+        },
+      },
+    });
+    ```
+
+    | スロット          | レンダリング内容                                              |
+    | ------------- | ----------------------------------------------------- |
+    | `header`      | 名前(複数の項目を含むページのみ)                                     |
+    | `definition`  | `type Order implements Node` のような SDL の先頭部分とそのディレクティブ |
+    | `description` | 型の説明                                                  |
+    | `fields`      | オブジェクト、インターフェース、入力オブジェクトのフィールド、またはユニオンのメンバー           |
+    | `values`      | 列挙型の値                                                 |
+    | `usages`      | その型の実装、その型を含むユニオン、およびその型を使用するオペレーションとフィールド            |
+    | `sdl`         | 型の SDL(幅の広いページでは型の横に表示)                               |
+  </Tab>
+</Tabs>
+
+### スキーマ UI [#schema-ui]
+
+型のレンダリング方法をカスタマイズします。
+
+```tsx title="components/api-page.tsx"
+'use client';
+import { createGraphQLPage } from '@fumadocs/graphql/ui';
+
+export const GraphQLPage = createGraphQLPage({
+  schemaUI: {
+    render(options, ctx) {
+      // 完全カスタムのスキーマレンダラー
+      return <ctx.SchemaUI {...options} />;
+    },
+  },
+});
+```
+
+### 国際化 [#internationalization]
+
+UI レベルで[国際化](/docs/internationalization)を設定済みであることを前提とします。
+
+```tsx title="layout.shared.tsx"
+import { defineI18n } from 'fumadocs-core/i18n';
+import { uiTranslations } from 'fumadocs-ui/i18n';
+import { graphqlTranslations } from '@fumadocs/graphql/i18n';
+
+const i18n = defineI18n({
+  languages: ['en', 'cn'],
+  defaultLanguage: 'en',
+});
+
+export const translations = i18n
+  .translations()
+  .extend(uiTranslations())
+  // [!code ++]
+  .extend(graphqlTranslations())
+  .add({
+    cn: {
+      displayName: 'Chinese',
+      // [!code ++]
+      'Arguments(operation page)': '参数',
+    },
+  });
+```
+
+詳しくは[翻訳](/docs/ui/translations)を参照してください。
+
+### シンタックスハイライト [#syntax-highlighting]
+
+GraphQL ページでは Shiki を使ってコードブロックをハイライトします。カスタマイズするには、[ハイライター](/docs/headless/utils/shiki)を渡してください。
+
+```tsx title="components/api-page.tsx"
+'use client';
+import { createGraphQLPage } from '@fumadocs/graphql/ui';
+import { highlighter } from '@/lib/highlighter';
+
+export const GraphQLPage = createGraphQLPage({ highlighter });
+```
+
+### カスタムコンポーネント [#custom-components]
+
+見出し、コードブロック、Markdown のデフォルトコンポーネントを上書きできます。
+
+```tsx title="components/api-page.tsx"
+'use client';
+import { createGraphQLPage } from '@fumadocs/graphql/ui';
+
+export const GraphQLPage = createGraphQLPage({
+  components: {
+    Heading({ id, depth, ...props }) {
+      const Tag = `h${depth}` as const;
+      return <Tag id={id} {...props} />;
+    },
+    CodeBlock({ lang, code }) {
+      return <pre data-lang={lang}>{code}</pre>;
+    },
+  },
+});
+```
+
+## UIのカスタマイズ [#customise-ui]
+
+用意されているオプションでは対応できないカスタマイズが必要な場合は、[Fumadocs CLI](/docs/cli)を使ってUIをコードベースにインストールできます。
+
+### 完全な UI [#full-ui]
+
+[ヘッドレスレイヤー](/docs/integrations/graphql/headless)をベースに構築された、GraphQL ページの UI 一式です。
+
+```npm
+npx @fumadocs/cli add graphql/page
+```
+
+これにより `<GraphQLPage />` 自体がインストールされるため、`components/api-page.tsx` は不要になります。`<GraphQLPage />` のインポートを次のように更新してください：
+
+```tsx
+import { GraphQLPage } from '@/components/api-page'; // [!code --]
+import { GraphQLPage } from '@/components/graphql/page'; // [!code ++]
+```
+
+### パーツ [#parts]
+
+編集したいパーツだけをインストールし、`components` を通じて渡してください。プレイグラウンドには `components` 内のスロットがありません。インストールした `graphql/operation` でレンダリングされるほか、[`playground.render`](#playground) から `<OperationPlayground />` を返すこともできます。
+
+| コンポーネント              | 内容                      |
+| -------------------- | ----------------------- |
+| `graphql/operation`  | オペレーション (引数と例を含む)       |
+| `graphql/type-docs`  | 名前付きの型 (フィールドと使用箇所を含む)  |
+| `graphql/schema-ui`  | 型、引数、フィールドの詳細           |
+| `graphql/playground` | インタラクティブなプレイグラウンド       |
+
+```tsx title="components/api-page.tsx"
+'use client';
+import { createGraphQLPage } from '@fumadocs/graphql/ui';
+import { Operation } from '@/components/graphql/operation';
+import { TypeDocs } from '@/components/graphql/type-docs';
+
+export const GraphQLPage = createGraphQLPage({
+  components: {
+    Operation,
+    TypeDocs,
+  },
+});
+```

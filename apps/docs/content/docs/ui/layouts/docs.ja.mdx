@@ -1,0 +1,334 @@
+---
+title: Docs レイアウト
+description: ドキュメントページのレイアウト
+---
+
+import { docs } from './layouts.story';
+
+ドキュメントページのレイアウトです。サイドバーと、**モバイル専用**のナビゲーションバー/ヘッダーで構成されます。
+
+<docs.WithControl />
+
+<Customization />
+
+## 使い方 [#usage]
+
+ページツリーをコンポーネントに渡します。
+
+```tsx title="layout.tsx"
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+import { baseOptions } from '@/lib/layout.shared';
+import type { ReactNode } from 'react';
+
+export default function Layout({ children }: { children: ReactNode }) {
+  return (
+    <DocsLayout {...baseOptions()} tree={tree}>
+      {children}
+    </DocsLayout>
+  );
+}
+```
+
+[`links`](/docs/ui/layouts/links) オプションと [`nav`](/docs/ui/layouts/nav) オプションの詳細は、各ドキュメントを参照してください。
+
+### リファレンス [#references]
+
+<auto-type-table cwd path="content/docs/ui/props.ts" type="Omit<DocsLayoutProps, 'children' | 'disableThemeSwitch'>" />
+
+## サイドバー [#sidebar]
+
+```tsx title="layout.tsx"
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+
+<DocsLayout
+  sidebar={{
+    enabled: true,
+  }}
+/>;
+```
+
+### サイドバーアイテム [#sidebar-items]
+
+サイドバーのナビゲーションリンクをカスタマイズできます。
+
+<div className="flex justify-center items-center *:max-w-[200px] bg-linear-to-br from-fd-primary/10 rounded-xl border">
+  ![サイドバー](/docs/sidebar.png)
+</div>
+
+サイドバーアイテムは、`<DocsLayout />` に渡したページツリーをもとにレンダリングされます。
+
+[`loader()`](/docs/headless/source-api) で生成したページツリーの場合は、ファイル構造からツリーが作られます。詳しくは[利用可能なパターン](/docs/page-conventions)を参照してください。
+
+```tsx title="layout.tsx"
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+import { source } from '@/lib/source';
+import type { ReactNode } from 'react';
+
+export default function Layout({ children }: { children: ReactNode }) {
+  return (
+    <DocsLayout
+      tree={source.getPageTree()}
+      // その他の props
+    >
+      {children}
+    </DocsLayout>
+  );
+}
+```
+
+ハードコードすることもできます。
+
+```tsx title="layout.tsx"
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+import type { ReactNode } from 'react';
+
+export default function Layout({ children }: { children: ReactNode }) {
+  return (
+    <DocsLayout
+      tree={{
+        name: 'docs',
+        children: [],
+      }}
+      // その他の props
+    >
+      {children}
+    </DocsLayout>
+  );
+}
+```
+
+### レイアウトタブ (ドロップダウン) [#layout-tabs]
+
+レイアウトタブはタブのように動作するフォルダーで、開いているタブのコンテンツだけが表示されます。
+
+<div className="flex justify-center items-center *:max-w-[360px] bg-linear-to-br from-fd-primary/10 rounded-xl border">
+  ![レイアウトタブ](/docs/sidebar-tabs.png)
+</div>
+
+デフォルトでは、タブのトリガーは**ドロップダウン**コンポーネントとして表示されます (いずれかの項目がアクティブな場合を除き、非表示になります)。
+
+タブはページツリーから生成されます。フォルダー内に `meta.json` ファイルを作成すると、そのフォルダーを[ルートフォルダー](/docs/page-conventions#root-folder)として指定できます。
+
+```json title="content/docs/my-folder/meta.json"
+{
+  "title": "Name of Folder",
+  "description": "The description of root folder (optional)",
+  "root": true
+}
+```
+
+または、明示的に指定することもできます。
+
+```tsx title="/app/docs/layout.tsx"
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+
+<DocsLayout
+  tabs={[
+    {
+      title: 'Components',
+      description: 'Hello World!',
+      // `/docs/components` および `/docs/components/button` などのサブルートでアクティブになります
+      url: '/docs/components',
+
+      // 必要に応じて、このアイテムをアクティブにする URL のセットを指定することもできます
+      // urls: new Set(['/docs/test', '/docs/components']),
+    },
+  ]}
+/>;
+```
+
+無効にするには、`false` に設定します。
+
+```tsx
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+
+<DocsLayout tabs={false} />;
+```
+
+<Callout title="さらにカスタマイズしたい場合">
+  [Docs レイアウト](/docs/ui/layouts/docs)コンポーネントに `banner` を指定することもできます。
+
+  ```tsx
+  import { DocsLayout, type DocsLayoutProps } from 'fumadocs-ui/layouts/docs';
+  import type { ReactNode } from 'react';
+  import { baseOptions } from '@/lib/layout.shared';
+  import { source } from '@/lib/source';
+
+  export default function Layout({ children }: { children: ReactNode }) {
+    return (
+      <DocsLayout
+        {...baseOptions()}
+        tree={source.getPageTree()}
+        sidebar={{
+          // [!code ++]
+          banner: <div>Hello World</div>,
+        }}
+      >
+        {children}
+      </DocsLayout>
+    );
+  }
+  ```
+</Callout>
+
+#### 装飾 [#decoration]
+
+レイアウトタブのアイコンやスタイルを変更します。
+
+```tsx
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+
+<DocsLayout
+  tabs={{
+    transform: (option, node) => ({
+      ...option,
+      icon: <MyIcon />,
+    }),
+  }}
+/>;
+```
+
+### タブグループ [#tabs-groups]
+
+タブは[ルートタイプ](/docs/page-conventions#root-type)ごとにグループ化され、現在のページのパス上にあるルートフォルダーごとにドロップダウンが表示されます。
+
+<Files>
+  <Folder name="v2 (root: version)" defaultOpen>
+    <Folder name="framework (root: true)" defaultOpen>
+      <File name="quickstart.mdx" className="text-fd-primary! bg-fd-primary/10!" />
+    </Folder>
+
+    <Folder name="headless (root: true)">
+      <File name="quickstart.mdx" />
+    </Folder>
+  </Folder>
+
+  <Folder name="v1 (root: version)">
+    <Folder name="framework (root: true)">
+      <File name="quickstart.mdx" />
+    </Folder>
+  </Folder>
+</Files>
+
+`v2/framework/quickstart.mdx` では、サイドバーにバージョン用とセクション用の2つのドロップダウンが表示されます。
+
+<div className="flex justify-center items-center *:max-w-[360px] bg-linear-to-br from-fd-primary/10 rounded-xl border">
+  ![タブグループ](/docs/sidebar-tabs-groups.png)
+</div>
+
+オプションを選択すると、選択先のルートフォルダー内にある同じページに移動します。該当するページが存在しない場合は、そのフォルダーのインデックスページに移動します。完全な例については[バージョニング](/docs/navigation#versioning)を参照してください。
+
+### サイドバーのコンポーネント [#sidebar-components]
+
+ページツリーのレンダリングに使われる一部のコンポーネントは、置き換えることができます。
+
+```tsx tab="layout.tsx"
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+import { SidebarSeparator } from './layout.client';
+
+<DocsLayout
+  sidebar={{
+    enabled: true,
+    components: {
+      Separator: SidebarSeparator,
+    },
+  }}
+/>;
+```
+
+```tsx tab="layout.client.tsx"
+'use client';
+import * as Base from 'fumadocs-ui/components/sidebar/base';
+
+export function SidebarSeparator({ className, style, children, ...props }: ComponentProps<'p'>) {
+  const depth = Base.useFolderDepth();
+
+  return (
+    <Base.SidebarSeparator
+      className={cn('[&_svg]:size-4 [&_svg]:shrink-0', className)}
+      style={{
+        paddingInlineStart: `calc(${2 + 3 * depth} * var(--spacing))`,
+        ...style,
+      }}
+      {...props}
+    >
+      {children}
+    </Base.SidebarSeparator>
+  );
+}
+```
+
+### リファレンス [#references-1]
+
+<auto-type-table cwd path="content/docs/ui/props.ts" name="SidebarProps" />
+
+## AI チャット [#ai-chat]
+
+チャットパネルを開閉状態と一緒に `aiChat` に渡すと、レイアウトが広い画面ではページの横に配置し、狭い画面ではページの上にフローティング表示します。
+
+```tsx
+<DocsLayout aiChat={{ open, onOpenChange: setOpen, panel: <MyChat />, trigger: true }} />
+```
+
+このレイアウト自体には「AIに質問」ボタンがありません。`trigger` を使うと、フローティングボタンが追加されます。
+
+構築済みのチャットUIについては、[AIに質問](/docs/integrations/llms#ask-ai)を参照してください。
+
+## 高度な使い方 [#advanced]
+
+### プリフェッチ [#prefetching]
+
+Fumadocs は、使用している React フレームワークの `<Link />` コンポーネントを利用しており、そのデフォルトのプリフェッチ動作をそのまま維持しています。
+
+Vercel では、プリフェッチリクエストによってサーバーレス関数や Data Cache の使用量が増える場合があります。
+また、他のホスティングプラットフォームでも上限に達する可能性があります。
+
+プリフェッチを無効にしてリクエスト数を減らすことも、明示的に有効にすることもできます。
+
+```tsx
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+
+<DocsLayout sidebar={{ prefetch: false }} />;
+```
+
+### レイアウトシステム [#the-layout-system]
+
+レイアウトの扱いは難しく、Fumadocs UI には次の条件を満たすアプローチが必要でした。
+
+* **コンポーザブル：** レイアウトコンポーネントは、自身の位置とサイズを手間なく、できればその場で管理できる必要があります。
+* **柔軟性：** 固定値や固定の高さに依存せず、AI チャットインターフェースなどの外部コンポーネントをスムーズに組み込めるようにする必要があります。
+* **一貫性：** サイドバーの折りたたみをアニメーションさせるなど、各コンポーネントが他のコンポーネントの変化に反応できる必要があります。
+* **予測可能性：** レイアウトのプロパティを一元管理し、ソースコードから最終的な結果を容易に予測できるようにする必要があります。
+* **互換性：** Baseline Widely Available の CSS 機能のみを使用し、古いブラウザでも動作する必要があります。
+
+Fumadocs UI は、これらをグリッドシステムで実現しています。
+
+```css
+#nd-docs-layout {
+  grid-template:
+    'sidebar header toc'
+    'sidebar toc-popover toc'
+    'sidebar main toc' 1fr / minmax(var(--fd-sidebar-col), 1fr) minmax(0, var(--fd-page-col))
+    minmax(min-content, 1fr);
+
+  --fd-docs-row-1: var(--fd-banner-height, 0px);
+  --fd-docs-row-2: calc(var(--fd-docs-row-1) + var(--fd-header-height));
+  --fd-docs-row-3: calc(var(--fd-docs-row-2) + var(--fd-toc-popover-height));
+  --fd-sidebar-col: var(--fd-sidebar-width);
+  --fd-page-col: calc(
+    var(--fd-layout-width, 97rem) - var(--fd-sidebar-width) - var(--fd-toc-width)
+  );
+  --fd-sidebar-width: 0px;
+  --fd-toc-width: 0px;
+
+  --fd-header-height: 0px;
+  --fd-toc-popover-height: 0px;
+}
+```
+
+* レイアウトコンテナはグリッドレイアウトを採用しており、予測どおりの結果が得られるよう `grid-template` が設定されています。
+* `--fd-docs-row-*` は各行の上端オフセットを定義します。これにより、`position: sticky` を指定した要素が正しい上端オフセットを参照できます。
+* `--fd-*-width` と `--fd-*-height` は、レイアウトコンポーネントが CSS で設定します。これらはグリッド構造の維持や `--fd-docs-row-*` の計算に欠かせません。
+* `--fd-*-col` は動的な値で、状態の変化に応じて更新されます(例: サイドバーを折りたたむと `--fd-sidebar-col` が `0px` になります)。
+
+デフォルトレイアウトと Notebook レイアウトは、どちらもこの仕組みを利用しています。

@@ -1,0 +1,52 @@
+---
+title: グラフビュー
+description: すべてのページをグラフで表示します。
+preview: graphView
+---
+
+## インストール [#installation]
+
+CLI を使用してインストールできます。
+
+```npm
+npx @fumadocs/cli add graph-view
+```
+
+TypeScript を使用する場合は、型定義もインストールしてください。
+
+```npm
+npm i -D @types/d3-force
+```
+
+コンテンツソースで `extractLinkReferences` を有効にします。
+
+```ts title="source.config.ts"
+import { defineDocs } from 'fumadocs-mdx/config';
+
+export const docs = defineDocs({
+  docs: {
+    postprocess: {
+      // [!code ++]
+      extractLinkReferences: true,
+    },
+  },
+});
+```
+
+## 使い方 [#usage]
+
+MDX ファイル内や、レイアウトコンポーネント内 (例：`page.tsx`) で使用できます。
+
+```tsx title="page.tsx"
+import { GraphView } from '@/components/graph-view';
+import { buildGraph } from '@/lib/build-graph';
+
+export function PageBody() {
+  return (
+    <div>
+      <GraphView graph={buildGraph()} />
+      {/* ... */}
+    </div>
+  );
+}
+```

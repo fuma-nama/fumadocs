@@ -1,0 +1,145 @@
+---
+title: リンクの検証
+description: リンクが正しいかどうかを検証します。
+staticParams:
+  - framework: next
+  - framework: react-router
+  - framework: tanstack-start
+  - framework: waku
+---
+
+## セットアップ [#setup]
+
+[`next-validate-link`](https://next-validate-link.vercel.app) を使うと、コンテンツファイル内のリンクを検証できます。
+
+> このガイドは主に **Fumadocs MDX** を対象としています。その他の構成については `next-validate-link` のドキュメントを参照してください。
+
+アプリのルートをスキャンするスクリプトを作成します。`populate` には docs ルートの params を列挙します。
+
+<show when={props.framework === 'next'}>
+  ```ts title="scripts/lint.ts"
+  import { type FileObject, printErrors, scanURLs, validateFiles } from 'next-validate-link';
+  import { source } from '@/lib/source';
+
+  const scanned = await scanURLs({
+    preset: 'next',
+    populate: {
+      'docs/[[...slug]]': source.getPages().map((page) => ({
+        value: { slug: page.slugs },
+        hashes: getHeadings(page.data),
+      })),
+    },
+  });
+  ```
+</show>
+
+<show when={props.framework === 'react-router'}>
+  ```ts title="scripts/lint.ts"
+  import { type FileObject, printErrors, scanURLs, validateFiles } from 'next-validate-link';
+  import { source } from '@/lib/source';
+  import routes from '../app/routes';
+
+  const scanned = await scanURLs({
+    preset: 'react-router',
+    routerConfig: routes,
+    populate: {
+      // 非同期コレクションでは、目次はコンテンツと一緒に読み込まれます
+      'docs/[[...splat]]': await Promise.all(
+        source.getPages().map(async (page) => ({
+          value: { splat: page.slugs },
+          hashes: getHeadings(await page.data.load()),
+        })),
+      ),
+    },
+  });
+  ```
+</show>
+
+<show when={props.framework === 'tanstack-start'}>
+  ```ts title="scripts/lint.ts"
+  import { type FileObject, printErrors, scanURLs, validateFiles } from 'next-validate-link';
+  import { source } from '@/lib/source';
+
+  const scanned = await scanURLs({
+    preset: 'tanstack-start',
+    populate: {
+      // 非同期コレクションでは、目次はコンテンツと一緒に読み込まれます
+      'docs/[[..._splat]]': await Promise.all(
+        source.getPages().map(async (page) => ({
+          value: { _splat: page.slugs },
+          hashes: getHeadings(await page.data.load()),
+        })),
+      ),
+    },
+  });
+  ```
+</show>
+
+<show when={props.framework === 'waku'}>
+  ```ts title="scripts/lint.ts"
+  import { type FileObject, printErrors, scanURLs, validateFiles } from 'next-validate-link';
+  import { source } from '@/lib/source';
+
+  const scanned = await scanURLs({
+    preset: 'waku',
+    populate: {
+      'docs/[[...slugs]]': source.getPages().map((page) => ({
+        value: { slugs: page.slugs },
+        hashes: getHeadings(page.data),
+      })),
+    },
+  });
+  ```
+</show>
+
+同じスクリプト内で、スキャンした URL を基にコンテンツファイルを検証します。
+
+```ts title="scripts/lint.ts"
+import type { TOCItemType } from 'fumadocs-core/toc';
+
+printErrors(
+  await validateFiles(await getFiles(), {
+    scanned,
+    // 各種 MDX コンポーネントの `href` 属性をチェック
+    markdown: {
+      components: {
+        Card: { attributes: ['href'] },
+      },
+    },
+    // 相対パスをチェック
+    checkRelativePaths: 'as-url',
+  }),
+  true,
+);
+
+function getHeadings({ toc }: { toc: TOCItemType[] }): string[] {
+  return toc.map((item) => item.url.slice(1));
+}
+
+function getFiles() {
+  const promises = source.getPages().map(async (page): Promise<FileObject> => ({
+    path: page.absolutePath,
+    content: await page.data.getText('raw'),
+    url: page.url,
+    data: page.data,
+  }));
+
+  return Promise.all(promises);
+}
+```
+
+### Lint の実行 [#running-lint]
+
+アプリのランタイム外から `source` オブジェクトにアクセスするには、Bun 用に [Fumadocs MDX Loader](/docs/mdx/loader/bun) を設定してください。
+
+その後、スクリプトを実行してリンクを検証します。
+
+```bash
+bun ./scripts/lint.ts
+```
+
+<Callout title="Node.js ローダー">
+  TypeScript のトランスパイル設定(または新しいバージョンの Node.js)と、[Fumadocs MDX Loader](/docs/mdx/loader/node) の設定が必要になる場合があります。
+
+  特別な理由がなければ、Bun または [`tsx`](https://github.com/privatenumber/tsx) を使うほうが手軽です。
+</Callout>

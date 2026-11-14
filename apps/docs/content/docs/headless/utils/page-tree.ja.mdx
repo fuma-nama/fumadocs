@@ -1,0 +1,42 @@
+---
+title: ページツリーユーティリティ
+description: ページツリーを操作するための汎用ユーティリティです。
+---
+
+## 使い方 [#usage]
+
+ページツリーの詳細については、[定義](/docs/headless/page-tree)を参照してください。
+
+```ts
+import {
+  findNeighbour,
+  findSiblings,
+  getPageTreeRoots,
+  findParent,
+  findPath,
+  type Root,
+} from 'fumadocs-core/page-tree';
+
+const pageTree: Root = {
+  // ...ページツリーのルート
+};
+
+// ページの前後のページを取得
+const neighbours = findNeighbour(pageTree, '/url/to/page');
+
+// ルートフォルダーの一覧を取得
+const roots = getPageTreeRoots(pageTree);
+
+// ページの兄弟ノードを取得
+const siblings = findSiblings(pageTree, '/url/to/page');
+
+// ページの親ノードを取得
+const parent = findParent(pageTree, '/url/to/page');
+
+// 最初に一致するノードまでのパスを検索
+const path = findPath(
+  pageTree.children,
+  // マッチャー
+  (node) => node.type === 'page' && node.url === '/url/to/page',
+);
+```

@@ -1,0 +1,91 @@
+---
+title: 数式
+description: Markdown/MDX で数式を記述する方法です。
+---
+
+## はじめに [#getting-started]
+
+### インストール [#install]
+
+```package-install tab="unified"
+remark-math rehype-katex katex
+```
+
+```package-install tab="Sätteri"
+katex
+```
+
+### プラグインを追加する [#add-plugins]
+
+unified では、`remark-math` は数式構文をパースする remark プラグインで、`rehype-katex` はパースした数式を KaTeX でレンダリングする rehype プラグインです。
+Sätteri では、数式はパーサーの機能として提供されています。この機能を有効にすると、プリセットが KaTeX で数式をレンダリングします。
+
+```ts tab="unified" title="source.config.ts"
+import rehypeKatex from 'rehype-katex';
+import remarkMath from 'remark-math';
+import { defineConfig } from 'fumadocs-mdx/config';
+
+export default defineConfig({
+  mdxOptions: {
+    remarkPlugins: [remarkMath],
+    // シンタックスハイライターより前に実行する必要があるため、先頭に配置します
+    rehypePlugins: (v) => [rehypeKatex, ...v],
+  },
+});
+```
+
+```ts tab="Sätteri" title="source.config.ts"
+import { defineConfig, defineDocs } from 'fumadocs-mdx/config';
+
+export const docs = defineDocs({
+  docs: {
+    compiler: 'satteri',
+  },
+});
+
+export default defineConfig({
+  satteriOptions: {
+    features: { math: true },
+  },
+});
+```
+
+### スタイルシートを追加する [#add-stylesheet]
+
+ルートレイアウトに KaTeX のスタイルシートを追加します。
+
+```tsx title="layout.tsx"
+import 'katex/dist/katex.css';
+```
+
+### 完了 [#done]
+
+ドキュメント内に TeX の数式を書いてみましょう。たとえば、ピタゴラスの定理は次のように記述できます。
+
+````mdx
+Inline: $$c = \pm\sqrt{a^2 + b^2}$$
+
+```math
+c = \pm\sqrt{a^2 + b^2}
+```
+````
+
+インライン: $$c = \pm\sqrt{a^2 + b^2}$$
+
+```math
+c = \pm\sqrt{a^2 + b^2}
+```
+
+テイラー展開 (正則関数 $$f(x)$$ をべき級数で表したもの) ：
+
+```math
+\displaystyle {\begin{aligned}T_{f}(z)&=\sum _{k=0}^{\infty }{\frac {(z-c)^{k}}{2\pi i}}\int _{\gamma }{\frac {f(w)}{(w-c)^{k+1}}}\,dw\\&={\frac {1}{2\pi i}}\int _{\gamma }{\frac {f(w)}{w-c}}\sum _{k=0}^{\infty }\left({\frac {z-c}{w-c}}\right)^{k}\,dw\\&={\frac {1}{2\pi i}}\int _{\gamma }{\frac {f(w)}{w-c}}\left({\frac {1}{1-{\frac {z-c}{w-c}}}}\right)\,dw\\&={\frac {1}{2\pi i}}\int _{\gamma }{\frac {f(w)}{w-z}}\,dw=f(z),\end{aligned}}
+```
+
+<Callout title="ヒント">
+  実は、Wikipedia の数式はそのままコピーできます。貼り付けると KaTeX の文字列に変換されます。
+
+  ```math
+  \displaystyle S[{\boldsymbol {q}}]=\int _{a}^{b}L(t,{\boldsymbol {q}}(t),{\dot {\boldsymbol {q}}}(t))\,dt.
+  ```
+</Callout>

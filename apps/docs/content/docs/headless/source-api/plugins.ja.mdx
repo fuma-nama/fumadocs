@@ -1,0 +1,105 @@
+---
+title: ローダープラグイン
+description: ローダー API の拡張
+---
+
+## 概要 [#overview]
+
+ローダープラグインを使うと、`loader()` を拡張して出力をカスタマイズできます。
+
+組み込みプラグインの一覧:
+
+* **Lucide Icons**: [Lucide React](https://lucide.dev) のアイコンを使用できます(`lucide-react` のインストールが必要です)。
+
+  ```ts
+  import { loader } from 'fumadocs-core/source';
+  import { lucideIconsPlugin } from 'fumadocs-core/source/lucide-icons';
+
+  export const source = loader({
+    // ...
+    plugins: [lucideIconsPlugin()],
+  });
+  ```
+
+## プラグインの作成 [#creating-plugins]
+
+各プラグインは、次のようなオブジェクトです。
+
+```ts tab="Strictly Typed"
+import { loader } from 'fumadocs-core/source';
+
+export const source = loader({
+  plugins: ({ typedPlugin }) => [
+    typedPlugin({
+      // プラグインの設定
+    }),
+  ],
+});
+```
+
+```ts tab="Simple"
+import { loader, type LoaderPlugin } from 'fumadocs-core/source';
+
+export const source = loader({
+  plugins: [myPlugin()],
+});
+
+function myPlugin(): LoaderPlugin {
+  return {
+    // プラグインの設定
+  };
+}
+```
+
+<Callout title="補足">
+  `typedPlugin` を使うと、コンテンツソースのカスタムプロパティを含め、プラグインにより正確な型が適用されます。
+
+  ただし、プラグインを(複数のローダーで)再利用できるようにしたい場合は、代わりに `LoaderPlugin` 型を使用してください。
+</Callout>
+
+### ストレージ [#storage]
+
+処理の過程で、入力されたソースファイルはパースされ、メモリ上の仮想ストレージとして構築されます。
+
+処理の前に仮想ファイルシステム上の操作を行うには、`transformStorage` フックを使用します。
+
+```ts
+import { loader } from 'fumadocs-core/source';
+
+export const source = loader({
+  plugins: ({ typedPlugin }) => [
+    typedPlugin({
+      transformStorage({ storage }) {
+        storage.read('my/path');
+      },
+    }),
+  ],
+});
+```
+
+### ページツリー [#page-tree]
+
+ページツリーはファイルシステムから生成され、その際に不要な情報(使用されていないフロントマターのプロパティなど)は除外されます。
+
+`transformPageTree` を使うと、ノードにカスタムプロパティを付与したり、ページの表示名をカスタマイズしたりできます。
+
+```tsx
+import { loader } from 'fumadocs-core/source';
+
+export const source = loader({
+  plugins: ({ typedPlugin }) => [
+    typedPlugin({
+      transformPageTree: {
+        file(node, file) {
+          // 元の(フィルタリング前の)ファイルデータにアクセス
+          if (file) console.log(this.storage.read(file));
+
+          // ノードを変更
+          node.name = <>Some JSX Nodes here</>;
+          return node;
+        },
+      },
+    }),
+  ],
+});
+```

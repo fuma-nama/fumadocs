@@ -1,0 +1,432 @@
+---
+title: Obsidian
+description: Obsidian の Vault を Fumadocs で直接レンダリングします。
+---
+
+`fumadocs-obsidian` はランタイムで動作するコンテンツソースを提供します。Vault を直接読み込んでコンパイルするため、中間 MDX ファイルを生成せず、Fumadocs MDX の remark プラグインも不要です。
+
+サポートしている Obsidian の構文は次のとおりです。
+
+* ウィキリンクと埋め込み
+* コールアウト
+* ブロック ID
+* コメント
+
+名前が曖昧なウィキリンクは、Obsidian と同じ規則で解決されます。ノートが添付ファイルより優先され、次にパスが最も短いものが優先されます。未知の言語のコードフェンス (例: `dataview`) はプレーンテキストとしてレンダリングされます。
+
+## セットアップ [#setup]
+
+パッケージをインストールします。
+
+```package-install
+fumadocs-obsidian shiki
+```
+
+### スタイルの生成 [#generate-styles]
+
+`fumadocs-obsidian/ui` のコンポーネントは Tailwind CSS でスタイリングされています。これらのクラスが生成されるよう、次の行を追加してください。
+
+```css title="Tailwind CSS"
+@import 'tailwindcss';
+@import 'fumadocs-ui/css/neutral.css';
+@import 'fumadocs-ui/css/preset.css';
+/* [!code ++] */
+@import 'fumadocs-obsidian/css/preset.css';
+```
+
+### ソースの設定 [#configure-source]
+
+Obsidian のソースを作成し、`dynamicLoader()` に渡します。
+
+```ts title="lib/source.ts"
+import { dynamicLoader } from 'fumadocs-core/source';
+import { obsidian } from 'fumadocs-obsidian';
+
+const vault = obsidian({
+  dir: 'public/vault',
+  // Vault の添付ファイルを公開 URL にマッピングします
+  url: (path) => `/vault/${path}`,
+});
+
+const vaultLoader = dynamicLoader(vault.dynamicSource(), {
+  baseUrl: '/docs',
+});
+
+export function getSource() {
+  return vaultLoader.get();
+}
+```
+
+この例ではVaultを `public/vault` に配置しているため、`url` が返すURLでフレームワークが添付ファイルを配信できます。アプリ側で添付ファイルを別途配信またはアップロードする場合は、Vaultを別の場所に配置してもかまいません。
+
+次に、ページを読み込んでレンダリングします。`page.data.load()` は、コンパイル済みページのレンダラーを返します。
+
+<show when={props.framework === 'react-router' || props.framework === 'tanstack-start'}>
+  ローダーでシリアライズし、クライアントでレンダリングします。
+</show>
+
+<show when={props.framework === 'astro'}>
+  ページでシリアライズし、Reactアイランドでレンダリングします。
+</show>
+
+<show when={props.framework === 'next'}>
+  ```tsx title="app/docs/[[...slug]]/page.tsx"
+  import { getSource } from '@/lib/source';
+  import { notFound } from 'next/navigation';
+  import defaultMdxComponents, { createRelativeLink } from 'fumadocs-ui/mdx';
+  import * as ObsidianComponents from 'fumadocs-obsidian/ui';
+  import { DocsBody, DocsPage } from 'fumadocs-ui/layouts/docs/page';
+
+  export default async function Page({ params }: PageProps<'/docs/[[...slug]]'>) {
+    const source = await getSource();
+    const page = source.getPage((await params).slug);
+    if (!page) notFound();
+
+    const { body, toc } = await (
+      await page.data.load()
+    ).render({
+      ...defaultMdxComponents,
+      ...ObsidianComponents,
+      a: createRelativeLink(source, page),
+    });
+
+    return (
+      <DocsPage toc={toc}>
+        <DocsBody>{body}</DocsBody>
+      </DocsPage>
+    );
+  }
+  ```
+</show>
+
+<show when={props.framework === 'react-router'}>
+  ```tsx title="app/routes/docs.tsx"
+  import type { Route } from './+types/docs';
+  import { useMemo } from 'react';
+  import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+  import { DocsBody, DocsPage } from 'fumadocs-ui/layouts/docs/page';
+  import defaultMdxComponents from 'fumadocs-ui/mdx';
+  import { useFumadocsLoader } from 'fumadocs-core/source/client';
+  import * as ObsidianComponents from 'fumadocs-obsidian/ui';
+  import { rendererFromSerialized } from 'fumadocs-obsidian/client';
+  import { getSource } from '@/lib/source';
+
+  export async function loader({ params }: Route.LoaderArgs) {
+    const source = await getSource();
+    const page = source.getPage(params['*'].split('/').filter((v) => v.length > 0));
+    if (!page) throw new Response('Not found', { status: 404 });
+
+    return {
+      // 構文木（クライアントでレンダリングされます）
+      render: (await page.data.load()).serialize(),
+      pageTree: await source.serializePageTree(source.getPageTree()),
+    };
+  }
+
+  export default function Page({ loaderData }: Route.ComponentProps) {
+    const { render, pageTree } = useFumadocsLoader(loaderData);
+    const renderer = useMemo(() => rendererFromSerialized(render), [render]);
+    const { body, toc } = renderer.renderSync({ ...defaultMdxComponents, ...ObsidianComponents });
+
+    return (
+      <DocsLayout tree={pageTree}>
+        <DocsPage toc={toc}>
+          <DocsBody>{body}</DocsBody>
+        </DocsPage>
+      </DocsLayout>
+    );
+  }
+  ```
+</show>
+
+<show when={props.framework === 'tanstack-start'}>
+  ```tsx title="src/routes/docs/$.tsx"
+  import { createFileRoute, notFound } from '@tanstack/react-router';
+  import { createServerFn } from '@tanstack/react-start';
+  import { useMemo } from 'react';
+  import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+  import { DocsBody, DocsPage } from 'fumadocs-ui/layouts/docs/page';
+  import defaultMdxComponents from 'fumadocs-ui/mdx';
+  import { useFumadocsLoader } from 'fumadocs-core/source/client';
+  import * as ObsidianComponents from 'fumadocs-obsidian/ui';
+  import { rendererFromSerialized, type ObsidianRendererOptions } from 'fumadocs-obsidian/client';
+  import { getSource } from '@/lib/source';
+
+  // サーバー関数の戻り値に対する型レベルのチェックでは構文木を検証できないため、
+  // シリアライズ可能な型として登録します（`@tanstack/router-core` を解決できない場合はインストールしてください）
+  declare module '@tanstack/router-core' {
+    interface SerializableExtensions {
+      fumadocsObsidianRenderer: ObsidianRendererOptions;
+    }
+  }
+
+  export const Route = createFileRoute('/docs/$')({
+    component: Page,
+    loader: ({ params }) => serverLoader({ data: params._splat?.split('/') ?? [] }),
+  });
+
+  const serverLoader = createServerFn({
+    method: 'GET',
+  })
+    .validator((slugs: string[]) => slugs)
+    .handler(async ({ data: slugs }) => {
+      const source = await getSource();
+      const page = source.getPage(slugs);
+      if (!page) throw notFound();
+
+      return {
+        // 構文木（クライアント側でレンダリングされます）
+        render: (await page.data.load()).serialize(),
+        pageTree: await source.serializePageTree(source.getPageTree()),
+      };
+    });
+
+  function Page() {
+    const { render, pageTree } = useFumadocsLoader(Route.useLoaderData());
+    const renderer = useMemo(() => rendererFromSerialized(render), [render]);
+    const { body, toc } = renderer.renderSync({ ...defaultMdxComponents, ...ObsidianComponents });
+
+    return (
+      <DocsLayout tree={pageTree}>
+        <DocsPage toc={toc}>
+          <DocsBody>{body}</DocsBody>
+        </DocsPage>
+      </DocsLayout>
+    );
+  }
+  ```
+</show>
+
+<show when={props.framework === 'waku'}>
+  ```tsx title="src/pages/docs/[...slugs].tsx"
+  import type { PageProps } from 'waku/router';
+  import { unstable_notFound } from 'waku/router/server';
+  import defaultMdxComponents, { createRelativeLink } from 'fumadocs-ui/mdx';
+  import * as ObsidianComponents from 'fumadocs-obsidian/ui';
+  import { DocsBody, DocsPage } from 'fumadocs-ui/layouts/docs/page';
+  import { getSource } from '@/lib/source';
+
+  export default async function Page({ slugs }: PageProps<'/docs/[...slugs]'>) {
+    const source = await getSource();
+    const page = source.getPage(slugs);
+    if (!page) unstable_notFound();
+
+    const { body, toc } = await (
+      await page.data.load()
+    ).render({
+      ...defaultMdxComponents,
+      ...ObsidianComponents,
+      a: createRelativeLink(source, page),
+    });
+
+    return (
+      <DocsPage toc={toc}>
+        <DocsBody>{body}</DocsBody>
+      </DocsPage>
+    );
+  }
+
+  export const getConfig = async () => ({ render: 'dynamic' }) as const;
+  ```
+</show>
+
+<show when={props.framework === 'astro'}>
+  ```astro tab="src/pages/docs/[...slug].astro"
+  ---
+  import type { GetStaticPaths, InferGetStaticPropsType } from 'astro';
+  import Layout from '@/layouts/Layout.astro';
+  import { Docs } from '@/components/docs';
+  import { getSource } from '@/lib/source';
+
+  export const prerender = true;
+
+  export const getStaticPaths = (async () => {
+    const source = await getSource();
+    return source.getPages().map((page) => ({
+      params: { slug: decodeURI(page.slugs.join('/')) || undefined },
+      props: { page },
+    }));
+  }) satisfies GetStaticPaths;
+
+  type Props = InferGetStaticPropsType<typeof getStaticPaths>;
+
+  const { page } = Astro.props;
+  const source = await getSource();
+  const pageTree = await source.serializePageTree(source.getPageTree());
+  const renderer = await page.data.load();
+  ---
+
+  <Layout title={page.data.title}>
+    <Docs
+      client:load
+      pathname={Astro.url.pathname}
+      params={Astro.params}
+      tree={pageTree}
+      render={renderer.serialize()}
+    />
+  </Layout>
+  ```
+
+  ```tsx tab="src/components/docs.tsx"
+  import { useMemo } from 'react';
+  import { type SerializedPageTree, useFumadocsLoader } from 'fumadocs-core/source/client';
+  import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+  import { DocsBody, DocsPage } from 'fumadocs-ui/layouts/docs/page';
+  import defaultMdxComponents from 'fumadocs-ui/mdx';
+  import * as ObsidianComponents from 'fumadocs-obsidian/ui';
+  import { rendererFromSerialized, type ObsidianRendererOptions } from 'fumadocs-obsidian/client';
+  import { Provider, type ProviderProps } from '@/components/provider';
+
+  export interface DocsProps extends ProviderProps {
+    tree: SerializedPageTree;
+    // 構文木(アイランド内でレンダリングされます)
+    render: ObsidianRendererOptions;
+  }
+
+  export function Docs({ tree, render, ...props }: DocsProps) {
+    const data = useFumadocsLoader({ tree });
+    const renderer = useMemo(() => rendererFromSerialized(render), [render]);
+    const { body, toc } = renderer.renderSync({ ...defaultMdxComponents, ...ObsidianComponents });
+
+    return (
+      <Provider {...props}>
+        <DocsLayout tree={data.tree}>
+          <DocsPage toc={toc}>
+            <DocsBody>{body}</DocsBody>
+          </DocsPage>
+        </DocsLayout>
+      </Provider>
+    );
+  }
+  ```
+</show>
+
+`page.data.load()` は、Vault のスナップショットごとに各ページを最大1回だけコンパイルします。Vault のコンテンツはプレーンな Markdown としてコンパイルされ、レンダリング時には JSX へのマッピングとコンポーネント名の解決しか行わないため、コンテンツ内の JavaScript が実行されることはありません。メディアファイルは URL で参照されるため、メモリに読み込まれることはありません。
+
+## ホットリロード [#hot-reload]
+
+<show when={props.framework === 'next'}>
+  開発中は、付属のコンテンツウォッチャーをアプリと並行して実行します。
+
+  ```json title="package.json"
+  {
+    "scripts": {
+      "dev": "fumadocs-obsidian dev -- next dev"
+    }
+  }
+  ```
+
+  Vault をウォッチャーに接続します。
+
+  ```ts title="lib/source.ts"
+  if (process.env.NODE_ENV === 'development') {
+    void vault.devServer();
+  }
+  ```
+</show>
+
+<show when={props.framework !== 'next'}>
+  開発中は、Vite プラグインが Vite のファイルウォッチャーを使って Vault を監視します。設定にプラグインを追加し、Vault を接続してください。
+
+  <show when={props.framework === 'react-router' || props.framework === 'tanstack-start'}>
+    ```ts tab="vite.config.ts"
+    import { defineConfig } from 'vite';
+    import { localContentPlugin } from 'fumadocs-obsidian/dev/vite';
+
+    export default defineConfig({
+      plugins: [localContentPlugin()],
+    });
+    ```
+  </show>
+
+  <show when={props.framework === 'waku'}>
+    ```ts tab="waku.config.ts"
+    import { defineConfig } from 'waku/config';
+    import { localContentPlugin } from 'fumadocs-obsidian/dev/vite';
+
+    export default defineConfig({
+      vite: {
+        plugins: [localContentPlugin()],
+      },
+    });
+    ```
+  </show>
+
+  <show when={props.framework === 'astro'}>
+    ```js tab="astro.config.mjs"
+    import { defineConfig } from 'astro/config';
+    import { localContentPlugin } from 'fumadocs-obsidian/dev/vite';
+
+    export default defineConfig({
+      vite: {
+        plugins: [localContentPlugin()],
+      },
+    });
+    ```
+  </show>
+
+  ```ts tab="lib/source.ts"
+  import { watchWithVite } from 'fumadocs-obsidian/dev/vite';
+
+  if (import.meta.env.DEV) watchWithVite(vault);
+  ```
+</show>
+
+Wikilink やエイリアスによってファイル間に依存関係が生じることがあるため、いずれかのファイルが変更されると、ソースのスナップショット全体が無効化されます。
+
+## 静的ソース [#static-source]
+
+vault を一度だけ読み込めばよい場合は、`staticSource()` を使用します。
+
+```ts title="lib/source.ts"
+import { loader } from 'fumadocs-core/source';
+import { obsidian } from 'fumadocs-obsidian';
+
+const vault = obsidian({
+  dir: 'public/vault',
+  url: (path) => `/vault/${path}`,
+});
+
+export const source = loader(await vault.staticSource(), {
+  baseUrl: '/docs',
+});
+```
+
+## スキーマ [#schema]
+
+Standard Schema 互換のバリデーターを使って、ページのフロントマターと `meta.json` ファイルをカスタマイズできます。
+
+```ts title="lib/source.ts"
+import { frontmatterSchema, obsidian } from 'fumadocs-obsidian';
+import { metaSchema } from 'fumadocs-core/source/schema';
+import { z } from 'zod';
+
+const vault = obsidian({
+  dir: 'public/vault',
+  frontmatterSchema: frontmatterSchema.extend({
+    tags: z.array(z.string()).optional(),
+  }),
+  metaSchema,
+});
+```
+
+デフォルトの `frontmatterSchema` は、構造が緩い Vault にも柔軟に対応します。`title: 2024` のようなスカラー値のタイトルは文字列に変換され、`aliases` には単一の名前とリストのどちらも指定できます。検証に失敗したノートは報告されたうえでスキップされ、Vault 内の他のノートには影響しません。
+
+### 追加機能 [#additions]
+
+remark/rehype プラグインを渡すと、構文機能を個別に有効にできます。
+
+* [Mermaid](/docs/markdown/mermaid)
+* [数式](/docs/markdown/math)
+
+```ts title="lib/source.ts"
+import { obsidian } from 'fumadocs-obsidian';
+import remarkMath from 'remark-math';
+import rehypeKatex from 'rehype-katex';
+
+const vault = obsidian({
+  dir: 'public/vault',
+  remarkPlugins: [remarkMath],
+  rehypePlugins: [rehypeKatex],
+});
+```

@@ -1,0 +1,60 @@
+---
+title: ビジュアルエディター
+description: ファイルを信頼できる唯一の情報源（Source of Truth）としたまま、Markdown と MDX を視覚的に編集できます。
+---
+
+## はじめに [#introduction]
+
+[Fumadocs Editor](https://editor.fumadocs.dev) は、Fumadocs MDX 向けのビジュアルエディターです。
+
+### Studio から始める [#start-with-studio]
+
+Studio を使えば、アプリにエディターを組み込まずに、ローカルのドキュメントをブラウザーで開けます。
+Fumadocs プロジェクトのディレクトリで、次のコマンドを実行してください。
+
+```bash
+npx @fumadocs-editor/studio
+```
+
+Studioを使用するには**Node.js 24以降**が必要です。Studioは`content/docs`を探し、見つからない場合は親ディレクトリを探索します。
+別のコンテンツフォルダーを指定するには、次のようにします。
+
+```bash
+npx @fumadocs-editor/studio --root ./docs
+```
+
+編集内容はディスクに自動保存され、コードエディターで加えた変更は開いているドキュメントにマージされます。
+ファイル一覧は `meta.json` で指定した順序で表示されます。
+
+変更内容を Git で確認し、サイトの通常のデプロイワークフローで公開してください。
+
+> Studio で編集できるのは既存のファイルのみです。ファイルの作成、名前の変更、削除は、コードエディターまたはファイルマネージャーで行ってください。
+
+### ライブラリとして使用する [#use-as-a-library]
+
+`@fumadocs-editor/ui` を使用すると、独自のアプリ内に編集インターフェースを構築できます。詳しくはドキュメントを参照してください。
+
+<Cards>
+  <Card title="React クイックスタート" href="https://editor.fumadocs.dev">
+    エディターをインストールしてスタイルをインポートし、最初の編集可能なドキュメントをレンダリングします。
+  </Card>
+
+  <Card title="Studio の設定" href="https://editor.fumadocs.dev/studio">
+    コンテンツフォルダー、カスタムコンポーネント、スタイルを設定します。
+  </Card>
+
+  <Card title="ファイル同期" href="https://editor.fumadocs.dev/sync">
+    開発サーバーを介して、埋め込みエディターをファイルと接続します。
+  </Card>
+</Cards>
+
+### コンポーネントで執筆する [#write-with-components]
+
+Callout、Cards、Steps、Accordions、Files などの Fumadocs コンポーネントは、標準で編集に対応しています。
+
+カスタムコンポーネントでは、[コンポーネント仕様](https://editor.fumadocs.dev/components)を使って独自の編集可能領域を定義できます。
+
+<Callout title="既存のコンテンツ構成はそのまま使えます">
+  エディターは Markdown および MDX ファイルを直接編集します。ファイルの読み込みには引き続き [Fumadocs MDX](/docs/mdx) を、
+  公開サイトのレンダリングにはお使いの React フレームワークを使用してください。
+</Callout>

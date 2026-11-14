@@ -1,0 +1,24 @@
+---
+title: カスタム検索
+description: その他の検索ソリューションを利用する場合の設定です。
+---
+
+## 概要 [#overview]
+
+Fumadocs には、任意の検索エンジンを統合できます。
+
+### 検索インデックス [#search-indexes]
+
+<show when={props.framework !== 'astro'}>
+  Fumadocs MDX は、ページの検索インデックスをランタイムに公開します。
+</show>
+
+<show when={props.framework === 'astro'}>
+  `@fumadocs/astro` は、ページの検索インデックスをランタイムに公開します。
+</show>
+
+これらを静的にエクスポートするには、事前レンダリングされる `static.json` ルートを追加し、ビルドのたびにスクリプトでそのレコードを処理してください。
+
+<feature>search/custom</feature>
+
+`structured` フィールドには、各ページの見出しと段落が格納されています。これを使って、精度の高い検索インデックスを生成してください。

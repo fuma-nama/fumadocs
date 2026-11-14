@@ -1,0 +1,126 @@
+---
+title: 独自に構築する
+description: Fumadocs 用の独自のコンテンツソースを構築します。
+---
+
+## はじめに [#introduction]
+
+カスタムコンテンツソースを実装する方法は2つあります。
+
+### ローダー API を使う [#using-loader-api]
+
+ローダー API は、さまざまなコンテンツソースを統合するための、ファイルシステムに似たインターフェースを提供します。
+
+詳しくは [ローダー API の `source`](/docs/headless/source-api/source) を参照してください。
+
+### 低レベル API の使用 [#using-low-level-api]
+
+より細かく制御したい場合は、低レベル API を直接使用できます。
+
+#### ページツリー [step] [#page-tree]
+
+ページツリーはハードコードすることも、コードを書いて生成することもできます。
+詳しくは[ページツリーの定義](/docs/headless/page-tree)を参照してください。
+
+Docs レイアウトで、ページツリーを `DocsLayout` に渡します。
+
+```tsx title="layout.tsx"
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+import type { ReactNode } from 'react';
+
+export default function Layout({ children }: { children: ReactNode }) {
+  return (
+    <DocsLayout
+      // [!code ++:5]
+      tree={
+        {
+          // 独自のページツリー
+        }
+      }
+    >
+      {children}
+    </DocsLayout>
+  );
+}
+```
+
+ページツリーは、より高機能な「サイドバー項目」のようなもので、ページのフッターなど、UI 内のさまざまなナビゲーション要素から参照されます。
+
+#### ページコンテンツ [step] [#page-content]
+
+ドキュメントページも同じ考え方です。
+
+* パスパラメータ (`slugs`) を定義します。
+* パスパラメータをもとにページコンテンツを取得します。
+* `DocsPage` コンポーネント内でコンテンツをレンダリングします。
+
+必要に応じて目次も用意してください。目次は自前で生成することも、[`getTableOfContents`](/docs/headless/utils/get-toc) ユーティリティ (Markdown/MDX のみ対応) で生成することもできます。
+
+使用しているフレームワークのドキュメント用ルートでレンダリングします。
+
+```tsx title="components/docs-page.tsx"
+import { DocsPage, DocsBody } from 'fumadocs-ui/layouts/docs/page';
+import { getPage } from './my-content-source';
+
+export function Page({ slugs }: { slugs: string[] }) {
+  const page = getPage(slugs);
+  // フレームワークの API を使って 404 を返す
+  if (!page) return null;
+
+  return (
+    <DocsPage toc={page.tableOfContents}>
+      <DocsBody>{page.render()}</DocsBody>
+    </DocsPage>
+  );
+}
+```
+
+#### プリレンダリング [step] [#pre-rendering]
+
+初回の読み込み時間を短縮するため、ページ、特にアクセス頻度の高いページをプリレンダリングします。
+
+<show when={props.framework === 'next'}>
+  [`generateStaticParams`](https://nextjs.org/docs/app/api-reference/functions/generate-static-params) 関数を定義して、動的ルートと catch-all ルートのパラメータを生成します。
+</show>
+
+<show when={props.framework === 'react-router'}>
+  `react-router.config.ts` の `prerender` からパスを返します。
+</show>
+
+<show when={props.framework === 'tanstack-start'}>
+  `tanstackStart()` Vite プラグインの `prerender` を有効にします。
+</show>
+
+<show when={props.framework === 'waku'}>
+  ページの `getConfig` エクスポートから `staticPaths` を返します。
+</show>
+
+<show when={props.framework === 'astro'}>
+  ページの `getStaticPaths()` から params を返します。
+</show>
+
+リモートのソースからページをプリレンダリングする場合は、ビルド時に同じデータを繰り返し読み込まないよう最適化してください。
+たとえば GitHub API 経由でコンテンツを取得している場合は、リポジトリのコンテンツをローカルにクローンしてからプリレンダリングすることをおすすめします。
+
+```text tab="Before"
+/docs/* -> GET github.com
+/docs/introduction -> GET github.com
+/docs/my-page -> GET github.com
+Error: API Ratelimit
+```
+
+```text tab="After"
+start -> git clone
+/docs/* -> ls
+/docs/introduction -> read file
+/docs/my-page -> read file
+```
+
+#### ドキュメント検索 [step] [#document-search]
+
+コンテンツが必ずしも Markdown/MDX とは限らないため、検索の実装は難しくなる場合があります。
+Markdown と MDX であれば、組み込みの [Search API](/docs/headless/search/orama) と検索インデックスを使うだけで、ほとんどのユースケースに対応できます。
+それ以外の場合は、独自に実装する必要があります。
+
+Orama や Algolia Search などのサードパーティ製ソリューションをおすすめします。これらは組み込みの Search API よりも柔軟性が高く、リモートのソースとも簡単に統合できます。
+Fumadocs では、さまざまな[検索インテグレーション](/docs/headless/search)を提供しています。

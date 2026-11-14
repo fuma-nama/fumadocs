@@ -1,0 +1,27 @@
+---
+title: 型の生成
+description: dev/build サーバーを起動せずに型を生成します
+---
+
+### 概要 [#overview]
+
+`fumadocs-mdx` を実行すると、`source.config.ts` で定義したコレクションの型とエントリーファイル(`.source` フォルダー)を生成できます。[Macro API](/docs/mdx/macro) のコレクションでは、ファイルを生成する必要はありません。
+
+必要に応じて postinstall で実行するようにしておくと、プロジェクトの初期化時に確実に型を生成できます。
+
+```json title="package.json"
+{
+  "scripts": {
+    "postinstall": "fumadocs-mdx"
+  }
+}
+```
+
+プロジェクトで設定ファイルや出力ディレクトリにカスタムパスを使用している場合は、コマンドの引数で指定できます。
+
+```npm
+npx fumadocs-mdx "config-path" "output-dir"
+```
+
+* `config-path`: Fumadocs MDX の設定ファイルのパスです。デフォルトは `source.config.ts` です。
+* `output-dir`: 生成ファイルの出力先ディレクトリです。デフォルトは `.source` です。

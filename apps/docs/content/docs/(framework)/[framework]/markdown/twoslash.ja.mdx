@@ -1,0 +1,209 @@
+---
+title: Twoslash
+description: ドキュメントで TypeScript Twoslash を使用する
+---
+
+## 使い方 [#usage]
+
+デフォルトのコードシンタックスハイライターである [Shiki](https://github.com/shikijs/shiki) には Twoslash インテグレーションがあるため、transformer を追加するだけで簡単に利用できます。
+型情報は、プロジェクトの作業ディレクトリを起点として、ネイティブ版の TypeScript 7 コンパイラによって解決されます。
+
+```package-install
+fumadocs-twoslash
+```
+
+<show when={props.framework === 'next'}>
+  サーバーバンドルから `typescript` を除外 (外部化) します。
+
+  ```js title="next.config.mjs"
+  const config = {
+    reactStrictMode: true,
+    // [!code ++]
+    serverExternalPackages: ['typescript'],
+  };
+  ```
+</show>
+
+`transformerTwoslash` は Shiki のトランスフォーマーです。rehype code プラグインの `transformers` に追加してください。
+
+```ts tab="unified" title="source.config.ts"
+import { defineConfig } from 'fumadocs-mdx/config';
+import { transformerTwoslash } from 'fumadocs-twoslash';
+import { rehypeCodeDefaultOptions } from 'fumadocs-core/mdx-plugins';
+
+export default defineConfig({
+  mdxOptions: {
+    rehypeCodeOptions: {
+      themes: {
+        light: 'github-light',
+        dark: 'github-dark',
+      },
+      transformers: [...(rehypeCodeDefaultOptions.transformers ?? []), transformerTwoslash()],
+    },
+  },
+});
+```
+
+```ts tab="Sätteri" title="source.config.ts"
+import { defineConfig, defineDocs } from 'fumadocs-mdx/config';
+import { transformerTwoslash } from 'fumadocs-twoslash';
+import { rehypeCodeDefaultOptions } from 'fumadocs-core/mdx-plugins';
+
+export const docs = defineDocs({
+  docs: {
+    compiler: 'satteri',
+  },
+});
+
+export default defineConfig({
+  satteriOptions: {
+    rehypeCodeOptions: {
+      themes: {
+        light: 'github-light',
+        dark: 'github-dark',
+      },
+      transformers: [...(rehypeCodeDefaultOptions.transformers ?? []), transformerTwoslash()],
+    },
+  },
+});
+```
+
+スタイルを追加します。Tailwind CSS v4 が必要です。
+
+```css title="Tailwind CSS"
+@import 'fumadocs-twoslash/twoslash.css';
+```
+
+MDX コンポーネントを追加します。
+
+```tsx title="components/mdx.tsx"
+import * as Twoslash from 'fumadocs-twoslash/ui'; // [!code ++]
+import defaultComponents from 'fumadocs-ui/mdx';
+import type { MDXComponents } from 'mdx/types';
+
+export function getMDXComponents(components?: MDXComponents) {
+  return {
+    ...defaultComponents,
+    // [!code ++]
+    ...Twoslash,
+    ...components,
+  } satisfies MDXComponents;
+}
+```
+
+これで、コードブロックに `twoslash` メタ文字列を追加できます。
+
+````md
+```ts twoslash
+console.log('Hello World');
+```
+````
+
+### キャッシュ [#cache]
+
+必要に応じて、`typesCache` オプションでファイルシステムキャッシュを有効にできます。
+
+```ts twoslash title="source.config.ts"
+import { transformerTwoslash } from 'fumadocs-twoslash';
+import { createFileSystemTypesCache } from 'fumadocs-twoslash/cache-fs';
+
+transformerTwoslash({
+  typesCache: createFileSystemTypesCache(),
+});
+```
+
+### 例 [#example]
+
+詳しくは [Twoslash の記法](https://twoslash.netlify.app/refs/notations)を参照してください。
+
+````ts twoslash tab="Output" lineNumbers
+type Player = {
+  /**
+   * プレイヤー名
+   * ```php
+   * $a = "60"
+   * ```
+   *
+   * @default 'user'
+   */
+  name: string;
+};
+
+/**
+ * カスタム関数です。
+ *
+ * @example
+ *
+ * ```ts
+ * const str = fn("hello world")
+ * console.log(str)
+ * ```
+ */
+function fn<const T extends string>(s: T): T {
+  return s;
+}
+
+// ---cut---
+// @noErrors
+console.g;
+//       ^|
+
+const player: Player = { name: 'Hello World' };
+//    ^?
+
+fn('test');
+````
+
+`````md tab="Input" lineNumbers
+````ts twoslash lineNumbers
+type Player = {
+  /**
+   * プレイヤー名
+   * ```php
+   * $a = "60"
+   * ```
+   *
+   * @default 'user'
+   */
+  name: string;
+};
+
+/**
+ * カスタム関数です。
+ *
+ * @example
+ *
+ * ```ts
+ * const str = fn("hello world")
+ * console.log(str)
+ * ```
+ */
+function fn<const T extends string>(s: T): T {
+  return s;
+}
+
+// ---cut---
+// @noErrors
+console.g;
+//       ^|
+
+const player: Player = { name: 'Hello World' };
+//    ^?
+
+fn('test');
+````
+`````
+
+```ts twoslash
+const a = '123';
+
+console.log(a);
+//      ^^^
+```
+
+```ts twoslash
+// @errors: 2588
+const a = '123';
+
+a = 132;
+```

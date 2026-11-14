@@ -1,0 +1,53 @@
+---
+title: コンポーネント
+description: ドキュメントを充実させるための追加コンポーネント
+---
+
+## 概要 [#overview]
+
+そのほかに利用できるコンポーネントは以下のとおりです。
+
+<DocsCategory />
+
+### MDX コンポーネント [#mdx-components]
+
+デフォルトの MDX コンポーネントには、Cards、Callouts、Code Blocks、Headings などがあります。
+
+```ts
+import defaultMdxComponents from 'fumadocs-ui/mdx';
+```
+
+### 相対リンク [#relative-link]
+
+<Callout type="warn">サーバーコンポーネントでのみ使用できます。</Callout>
+
+`href` に相対ファイルパスを指定したリンクをサポートするには、デフォルトの `a` コンポーネントを次のようにオーバーライドします。
+
+```tsx title="app/docs/[[...slug]]/page.tsx"
+import { createRelativeLink } from 'fumadocs-ui/mdx';
+import { source } from '@/lib/source';
+import { getMDXComponents } from '@/components/mdx';
+
+const page = source.getPage(['...']);
+
+return (
+  <MdxContent
+    components={getMDXComponents({
+      // `a` タグをオーバーライド
+      a: createRelativeLink(source, page),
+    })}
+  />
+);
+```
+
+Astro では、これを `<Content />` に渡します。`<Content />` は Astro の MDX と同様にレンダリングを行います。
+
+```astro title="src/pages/docs/[...slug].astro"
+<Content components={{ a: createRelativeLink(source, page) }} />
+```
+
+```mdx
+[My Link](./file.mdx)
+```
+
+例: [`../../(integrations)/feedback.mdx`](../../\(integrations\)/feedback.mdx)

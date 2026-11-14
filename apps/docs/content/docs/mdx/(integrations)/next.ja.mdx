@@ -1,0 +1,79 @@
+---
+title: Next.js
+description: Next.js で Fumadocs MDX を使用する
+---
+
+## セットアップ [#setup]
+
+Next.js アプリケーションに Fumadocs MDX をセットアップします。
+
+<section id="setup-section">
+  <div className="fd-steps [&_h3]:fd-step">
+    ### インストール [#installation]
+
+    ```npm
+    npm i fumadocs-mdx fumadocs-core @types/mdx
+    ```
+
+    Next.js の設定ファイルにプラグインを追加します。
+
+    ```js title="next.config.mjs"
+    import { createMDX } from 'fumadocs-mdx/next';
+
+    /** @type {import('next').NextConfig} */
+    const config = {
+      reactStrictMode: true,
+    };
+
+    // [!code ++:4]
+    const withMDX = createMDX();
+
+    // [!code highlight]
+    export default withMDX(config);
+    ```
+
+    <Callout title="ESM 専用" type="warn">
+      Fumadocs MDX は ESM 専用です。ESM を正しく解決するため、`next.config.mjs` の使用をおすすめします。
+
+      TypeScript の設定ファイルを使用するには、Node.js ネイティブの TypeScript リゾルバーが必要です。詳しくは [Next.js のドキュメント](https://nextjs.org/docs/app/api-reference/config/typescript#using-nodejs-native-typescript-resolver-for-nextconfigts)を参照してください。
+    </Callout>
+
+    ### Fumadocs との統合 [#integrate-with-fumadocs]
+
+    `lib/source.ts` ファイルを作成します。
+
+    ```ts title="lib/source.ts"
+    import { defineDocs } from 'fumadocs-mdx/macro';
+    import { loader } from 'fumadocs-core/source';
+
+    const docs = defineDocs({
+      dir: 'content/docs',
+    });
+
+    export const source = loader({
+      baseUrl: '/docs',
+      source: docs.toFumadocsSource(),
+    });
+    ```
+
+    ### 完了 [#done]
+
+    これで `content/docs` フォルダーにコンテンツを作成できます。
+  </div>
+</section>
+
+## 次のステップ [#what-is-next]
+
+<Cards>
+  <Card title="Macro API" href="/docs/mdx/macro">
+    `fumadocs-mdx/macro` を使って、アプリのモジュール内でコレクションを定義します。
+  </Card>
+
+  <Card title="Config API" href="/docs/mdx/collections">
+    `source.config.ts` でコレクションを定義し、生成されたエントリーファイルを利用します。
+  </Card>
+
+  <Card title="遅延読み込み" href="/docs/mdx/async">
+    パフォーマンスのボトルネックでお困りの場合は、遅延読み込みをお試しください。
+  </Card>
+</Cards>

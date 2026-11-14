@@ -1,0 +1,126 @@
+---
+title: Typesense
+description: Fumadocs UI で Typesense を使用する方法です。
+---
+
+> これはコミュニティがメンテナンスしているインテグレーションです。
+
+## セットアップ [#setup]
+
+Fumadocs CLI を使うと、セットアップを自動で行えます。検索ダイアログ、`static.json` ルート、およびビルドのたびに検索インデックスを同期するスクリプトが作成されます。
+
+```package-install
+npx @fumadocs/cli feature search --provider typesense
+```
+
+または手動で設定する場合:
+
+1. [Typesense Search](/docs/headless/search/typesense) を統合します。
+
+2. 検索ダイアログコンポーネントを作成します。
+
+   ```tsx title="components/search.tsx"
+   'use client';
+   import {
+     SearchDialog,
+     SearchDialogClose,
+     SearchDialogContent,
+     SearchDialogFooter,
+     SearchDialogHeader,
+     SearchDialogIcon,
+     SearchDialogInput,
+     SearchDialogList,
+     SearchDialogOverlay,
+     type SharedProps,
+   } from 'fumadocs-ui/components/dialog/search';
+   import { useI18n } from 'fumadocs-ui/contexts/i18n';
+   import { Client } from 'typesense';
+   import { useTypesenseSearch } from 'typesense-fumadocs-adapter/client';
+
+   const client = new Client({
+     nodes: [{ url: 'YOUR_TYPESENSE_SERVER_URL' }],
+     apiKey: 'YOUR_TYPESENSE_SEARCH_ONLY_API_KEY',
+   });
+
+   export default function TypesenseSearchDialog(props: SharedProps) {
+     const { locale } = useI18n(); // 任意
+     const { search, setSearch, query } = useTypesenseSearch({
+       typesenseCollectionName: 'docs',
+       locale,
+       legacy: false, // 任意。fumadocs-ui のバージョンが 16.6.0 未満の場合は true に設定します
+       client,
+     });
+
+     return (
+       <SearchDialog
+         search={search}
+         onSearchChange={setSearch}
+         isLoading={query.isLoading}
+         {...props}
+       >
+         <SearchDialogOverlay />
+         <SearchDialogContent>
+           <SearchDialogHeader>
+             <SearchDialogIcon />
+             <SearchDialogInput />
+             <SearchDialogClose />
+           </SearchDialogHeader>
+           <SearchDialogList items={query.data !== 'empty' ? query.data : null} />
+           <SearchDialogFooter>
+             <div className="w-full text-right text-xs text-fd-muted-foreground">
+               <a href="https://typesense.org" rel="noreferrer noopener" target="_blank">
+                 Search powered by Typesense
+               </a>
+             </div>
+           </SearchDialogFooter>
+         </SearchDialogContent>
+       </SearchDialog>
+     );
+   }
+   ```
+
+<include>.shared.ja.mdx</include>
+
+### タグフィルター [#tag-filter]
+
+必要に応じて、検索結果をタグで絞り込むための UI を追加できます。検索サーバー側で[タグフィルター](/docs/headless/search/typesense#tag-filter)を設定したうえで、以下を追加してください。
+
+```tsx
+'use client';
+
+import {
+  SearchDialog,
+  SearchDialogContent,
+  SearchDialogFooter,
+  SearchDialogOverlay,
+  type SharedProps,
+  TagsList,
+  TagsListItem,
+} from 'fumadocs-ui/components/dialog/search';
+import { useState } from 'react';
+import { useTypesenseSearch } from 'typesense-fumadocs-adapter/client';
+
+export default function TypesenseSearchDialog(props: SharedProps) {
+  // [!code ++]
+  const [tag, setTag] = useState<string | undefined>();
+  const { search, setSearch, query } = useTypesenseSearch({
+    tag, // [!code ++]
+    // その他のオプション...
+  });
+
+  return (
+    <SearchDialog>
+      <SearchDialogOverlay />
+      <SearchDialogContent>
+        ...
+        <SearchDialogFooter className="flex flex-row">
+          {/* [!code ++:3] */}
+          <TagsList tag={tag} onTagChange={setTag}>
+            <TagsListItem value="my-value">My Value</TagsListItem>
+          </TagsList>
+        </SearchDialogFooter>
+      </SearchDialogContent>
+    </SearchDialog>
+  );
+}
+```

@@ -1,0 +1,63 @@
+---
+title: アコーディオン
+description: ドキュメントにアコーディオンを追加します
+preview: accordion
+---
+
+<Installation name="accordion" />
+
+## 使い方 [#usage]
+
+[Base UI Accordion](https://base-ui.com/react/components/accordion) をベースにしており、FAQ セクションなどに適しています。
+
+> Radix UI 版のパッケージでは、[Radix UI Accordion](https://www.radix-ui.com/primitives/docs/components/accordion) がベースになっています。
+
+MDX ファイル内でも、通常の React コンポーネントとしても使用できます。
+
+```mdx tab="MDX"
+---
+title: Hello World
+---
+
+import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
+
+<Accordions type="single">
+  <Accordion title="My Title">My Content</Accordion>
+</Accordions>
+```
+
+```tsx tab="React.js"
+import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
+
+export default function Page() {
+  return (
+    <Accordions type="single">
+      <Accordion title="My Title">My Content</Accordion>
+    </Accordions>
+  );
+}
+```
+
+### Accordions [#accordions]
+
+<auto-type-table cwd path="content/docs/ui/props.ts" name="AccordionsProps" />
+
+### Accordion [#accordion]
+
+<auto-type-table cwd path="content/docs/ui/props.ts" name="AccordionProps" />
+
+### アコーディオンへのリンク [#linking-to-accordion]
+
+アコーディオンには `id` を指定できます。URL のハッシュに指定した `id` を含めてユーザーがページにアクセスすると、そのアコーディオンが自動的に開きます。
+
+```mdx
+<Accordions>
+<Accordion title="My Title" id="my-title">
+
+My Content
+
+</Accordion>
+</Accordions>
+```
+
+> アコーディオンの値は、デフォルトではタイトルと同じです。id が指定されている場合は、代わりに id が値として使用されます。

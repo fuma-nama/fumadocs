@@ -1,0 +1,10 @@
+{
+  "title": "OpenAPIの例",
+  "description": "Fumadocs OpenAPIのデモ",
+  "root": true,
+  "icon": "Shapes",
+  "pages": [
+    "index",
+    "...(generated)"
+  ]
+}

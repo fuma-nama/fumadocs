@@ -1,0 +1,316 @@
+---
+title: Notion
+description: Notion からページを取得し、Fumadocs でレンダリングします。
+staticParams:
+  - framework: next
+  - framework: waku
+---
+
+## はじめに [#introduction]
+
+`@fumadocs/notion` を使うと、Notion データベースを Fumadocs のコンテンツソースとして利用できます。公式の Notion API 経由でページを取得する動的な[コンテンツソース](/docs/headless/source-api)と、Notion のブロックを Fumadocs UI でレンダリングするサーバーレンダラーを提供します。
+
+クライアントサイドのレンダラーは含まれておらず、コンテンツを MDX に変換することもありません。ブロックはサーバー上でレンダリングされるため、バンドラーや型生成のステップは不要です。
+
+## セットアップ [#setup]
+
+インテグレーションと公式の Notion クライアントをインストールします。
+
+```package-install
+@fumadocs/notion @notionhq/client
+```
+
+Fumadocs UI のスタイルの後に、レンダラーの Tailwind CSS ソースをインポートしてください：
+
+```css title="Tailwind CSS"
+@import 'fumadocs-ui/css/neutral.css';
+@import 'fumadocs-ui/css/preset.css';
+/* [!code ++] */
+@import '@fumadocs/notion/css/preset.css';
+```
+
+### Notion データベース [step] [#notion-database]
+
+1. コンテンツの読み取り権限を付与した [Notion インテグレーションを作成します](https://developers.notion.com/docs/getting-started)。
+2. ページを格納しているデータベースをインテグレーションに接続します。
+3. インテグレーショントークンとデータベースの **データソース ID** を、サーバー専用の環境変数に保存します。
+
+```ini title=".env.local"
+NOTION_TOKEN=ntn_...
+NOTION_DATA_SOURCE_ID=...
+```
+
+<Callout type="info">
+  データベースの URL に表示されるデータベース ID ではなく、データソース ID を使用してください。現在の Notion API では、データベースはコンテナであり、各クエリはその中のいずれかのデータソースを対象とします。詳しくは Notion の[データソースアップグレードガイド](https://developers.notion.com/guides/get-started/upgrade-guide-2025-09-03)を参照してください。
+</Callout>
+
+### Notion インテグレーション [step] [#notion-integration]
+
+インテグレーションは一度だけ作成し、コンテンツソースとファイルルートで共有します。
+
+```ts title="lib/notion.ts"
+import { Client } from '@notionhq/client';
+import { createNotion } from '@fumadocs/notion';
+
+export const notion = createNotion({
+  client: new Client({ auth: process.env.NOTION_TOKEN }),
+  dataSourceId: process.env.NOTION_DATA_SOURCE_ID!,
+});
+```
+
+### コンテンツローダー [step] [#content-loader]
+
+`notion.dynamicSource()` を `dynamicLoader()` に渡し、`getSource()` からローダーを公開します。
+
+```ts title="lib/source.ts"
+import { dynamicLoader } from 'fumadocs-core/source';
+import { notion } from '@/lib/notion';
+
+const source = dynamicLoader(
+  notion.dynamicSource({
+    // Notion のプロパティをページのフィールドにマッピングします
+    properties: {
+      title: 'Name',
+      slug: 'Slug',
+      description: 'Description',
+    },
+    // フィルタリングや並べ替えなど、クエリを自由にカスタマイズします
+    query: {
+      filter: {
+        property: 'Published',
+        checkbox: { equals: true },
+      },
+    },
+  }),
+  {
+    baseUrl: '/docs',
+  },
+);
+
+export async function getSource() {
+  return source.get();
+}
+```
+
+このソースは、条件に一致するデータソースの行をすべてページネーションで取得し、各ページのネストされたブロックを遅延読み込みします。同じページ本文を読み込む呼び出しは、ローダーが無効化されるまで重複排除されます。
+
+### ページをレンダリングする [step] [#render-pages]
+
+レイアウトでローダーを使用してページツリーを構築します。ページのブロックを読み込み、`NotionRenderer` でレンダリングします。目次は `blocksToTableOfContents()` で生成します。
+
+<show when={props.framework === 'next'}>
+  ```tsx tab="app/docs/layout.tsx"
+  import { getSource } from '@/lib/source';
+  import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+
+  export default async function Layout({ children }: LayoutProps<'/docs'>) {
+    const source = await getSource();
+
+    return <DocsLayout tree={source.getPageTree()}>{children}</DocsLayout>;
+  }
+  ```
+
+  ```tsx tab="app/docs/[[...slug]]/page.tsx"
+  import { notFound } from 'next/navigation';
+  import { getSource } from '@/lib/source';
+  import {
+    NotionRenderer,
+    blocksToTableOfContents,
+    createNotionFileUrlResolver,
+  } from '@fumadocs/notion';
+  import { DocsPage, DocsBody, DocsDescription, DocsTitle } from 'fumadocs-ui/layouts/docs/page';
+
+  export default async function Page({ params }: PageProps<'/docs/[[...slug]]'>) {
+    const { slug = [] } = await params;
+    const source = await getSource();
+
+    const page = source.getPage(slug);
+    if (!page) notFound();
+
+    // [!code highlight:2] ページ本文を読み込む
+    const { blocks } = await page.data.load();
+
+    return (
+      <DocsPage toc={blocksToTableOfContents(blocks)}>
+        <DocsTitle>{page.data.title}</DocsTitle>
+        <DocsDescription>{page.data.description}</DocsDescription>
+        <DocsBody>
+          <NotionRenderer
+            blocks={blocks}
+            getFileUrl={createNotionFileUrlResolver({ pageId: page.data.id })}
+          />
+        </DocsBody>
+      </DocsPage>
+    );
+  }
+  ```
+</show>
+
+<show when={props.framework === 'waku'}>
+  ```tsx tab="src/pages/docs/_layout.tsx"
+  import type { ReactNode } from 'react';
+  import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+  import { getSource } from '@/lib/source';
+
+  export default async function Layout({ children }: { children: ReactNode }) {
+    const source = await getSource();
+
+    return <DocsLayout tree={source.getPageTree()}>{children}</DocsLayout>;
+  }
+  ```
+
+  ```tsx tab="src/pages/docs/[...slugs].tsx"
+  import type { PageProps } from 'waku/router';
+  import { unstable_notFound } from 'waku/router/server';
+  import { getSource } from '@/lib/source';
+  import {
+    NotionRenderer,
+    blocksToTableOfContents,
+    createNotionFileUrlResolver,
+  } from '@fumadocs/notion';
+  import { DocsPage, DocsBody, DocsDescription, DocsTitle } from 'fumadocs-ui/layouts/docs/page';
+
+  export default async function Page({ slugs }: PageProps<'/docs/[...slugs]'>) {
+    const source = await getSource();
+
+    const page = source.getPage(slugs);
+    if (!page) unstable_notFound();
+
+    // [!code highlight:2] ページ本文を読み込む
+    const { blocks } = await page.data.load();
+
+    return (
+      <DocsPage toc={blocksToTableOfContents(blocks)}>
+        <DocsTitle>{page.data.title}</DocsTitle>
+        <DocsDescription>{page.data.description}</DocsDescription>
+        <DocsBody>
+          <NotionRenderer
+            blocks={blocks}
+            getFileUrl={createNotionFileUrlResolver({ pageId: page.data.id })}
+          />
+        </DocsBody>
+      </DocsPage>
+    );
+  }
+
+  export const getConfig = async () => ({ render: 'dynamic' }) as const;
+  ```
+</show>
+
+### Notion ファイル [step] [#notion-files]
+
+Notion でホストされているファイル(画像、動画、PDF)の URL は約 1 時間で失効するため、キャッシュされるページや静的に配信されるページに直接埋め込むことはできません。
+
+`createNotionFileUrlResolver()` は、これらの内部アセットをファイルハンドラー経由でルーティングし、リクエストのたびに新しい署名付き URL を取得します。ハンドラーは `createNotionFileHandler()` でマウントしてください。このハンドラーは、リクエストされたブロックがデータソース内のページに属しているかを検証してからリダイレクトします。
+
+<show when={props.framework === 'next'}>
+  ```ts title="app/api/notion/file/route.ts"
+  import { createNotionFileHandler } from '@fumadocs/notion';
+  import { notion } from '@/lib/notion';
+
+  export const GET = createNotionFileHandler(notion);
+  ```
+</show>
+
+<show when={props.framework === 'waku'}>
+  ```ts title="src/pages/_api/api/notion/file.ts"
+  import { createNotionFileHandler } from '@fumadocs/notion';
+  import { notion } from '@/lib/notion';
+
+  export const GET = createNotionFileHandler(notion);
+  ```
+</show>
+
+デフォルトのルートは `/api/notion/file` です。別の場所にマウントする場合は、両方の関数に同じ `path` を渡してください。
+
+```ts
+createNotionFileUrlResolver({ pageId: page.data.id, path: '/notion/file' });
+```
+
+<Callout type="info">
+  静的エクスポートを行う場合は、アセットに恒久的な外部 URL を使用し、`getFileUrl` を省略してください。この場合、レンダラーは
+  Notion の URL を直接リンクします。ファイルハンドラーには動的なランタイムが必要です。
+</Callout>
+
+### 完了 [step] [#done]
+
+データベースにページを追加して公開済みに設定すると、docs ルート配下に表示されます。
+
+## 再検証 [#revalidation]
+
+ローダーは、キャッシュを無効化するまでページをキャッシュし続けます。Notion での編集内容を反映するには、信頼できる Webhook または再検証用のルートから `revalidate()` を呼び出してください。
+
+```ts title="lib/source.ts"
+export function revalidateNotion() {
+  return source.revalidate();
+}
+```
+
+すべてのリクエストで最新のコンテンツを反映させるプレビュー向けの構成では、読み込む前にキャッシュを無効化してください。
+
+```ts title="lib/source.ts"
+export async function getSource() {
+  source.invalidate(); // [!code ++]
+  return source.get();
+}
+```
+
+## ページプロパティ [#page-properties]
+
+`properties` は、Notion のプロパティをページのフィールドにマッピングします。省略した場合、ソースは次のように動作します。
+
+* 最初の Notion `title` プロパティをページタイトルとして使用します。
+* `Slug` という名前のプロパティを URL に使用します。存在しない場合は、タイトルから生成したスラッグにフォールバックします。
+* `Description` という名前のプロパティがあれば、それを使用します。
+
+スラッグに `/` を含めると、ネストされたルートを作成できます。仮想パスが重複している場合や安全でない場合は、ページを暗黙的に置き換えるのではなく、内容がわかるエラーを出して失敗します。
+
+## クエリとパス [#query-and-paths]
+
+Notion のフィルターとソートは `query` で渡します。仮想ページを特定のディレクトリ配下に配置するには `baseDir` を、仮想ファイルのパスを完全に制御するには `generatePath` を使用します。
+
+```ts
+notion.dynamicSource({
+  baseDir: 'docs',
+  query: {
+    sorts: [{ timestamp: 'last_edited_time', direction: 'descending' }],
+  },
+  generatePath(page, info) {
+    return info.slugs.length > 0 ? `${info.slugs.join('/')}.mdx` : `${page.id}.mdx`;
+  },
+});
+```
+
+## レンダリングのカスタマイズ [#customize-rendering]
+
+`NotionRenderer` には、一般的なブロックタイプ用のレンダラーが組み込まれています。`components` を渡すと、レンダラーを追加または上書きできます。上書きするレンダラーには、それぞれ対応するブロックに応じた型が付きます。
+
+```tsx
+import { NotionRenderer } from '@fumadocs/notion';
+
+<NotionRenderer
+  blocks={blocks}
+  components={{
+    callout({ block, children, renderRichText }) {
+      return (
+        <aside className="rounded-lg bg-fd-muted p-4">
+          {renderRichText(block.callout.rich_text)}
+          {children}
+        </aside>
+      );
+    },
+  }}
+/>;
+```
+
+コードブロックは、デフォルトでサーバー側で Shiki によってハイライトされます。ハイライトせずにプレーンなコードとしてレンダリングするには `highlightCode={false}` を、独自のハイライターを組み込むには関数を渡してください。
+
+## ソースのみのインポート [#source-only-import]
+
+検索インデクサーや `llms.txt` ルートなど、Notion ページを取得するだけのコードでは、`@fumadocs/notion/source` からインポートすることで、React レンダラーのエントリーを読み込まずに済みます：
+
+```ts
+import { createNotion } from '@fumadocs/notion/source';
+```
+
+このエントリーポイントでは Notion SDK を外部依存として扱い、React のインポートは一切含みません。`blocksToPlainText()`、`blocksToStructuredData()`、`blocksToTableOfContents()` もこちらから利用できます。

@@ -1,0 +1,512 @@
+---
+title: OpenAPI
+description: OpenAPI スキーマからドキュメントを生成します。
+---
+
+## セットアップ [#setup]
+
+必要なパッケージをインストールします。
+
+```npm
+npm i fumadocs-openapi shiki
+```
+
+### スタイルの生成 [#generate-styles]
+
+次の行を追加します。
+
+```css title="Tailwind CSS"
+@import 'tailwindcss';
+@import 'fumadocs-ui/css/neutral.css';
+@import 'fumadocs-ui/css/preset.css';
+/* [!code ++] */
+@import 'fumadocs-openapi/css/preset.css';
+```
+
+### プラグインの設定 [#configure-plugin]
+
+OpenAPI サーバーインスタンスと `<OpenAPIPage />` コンポーネントを作成します。
+
+```ts tab="lib/openapi.ts"
+import { createOpenAPI } from 'fumadocs-openapi/server';
+
+// 注: これはサーバーサイドの API です
+export const openapi = createOpenAPI({
+  // OpenAPI スキーマ。外部 URL を指定することもできます。
+  input: ['./openapi.json'],
+});
+```
+
+```tsx tab="components/api-page.tsx"
+'use client';
+import { createOpenAPIPage } from 'fumadocs-openapi/ui';
+
+export const OpenAPIPage = createOpenAPIPage();
+```
+
+それぞれのオプションについては、[`createOpenAPI()`](/docs/integrations/openapi/server) と [`createOpenAPIPage()`](/docs/integrations/openapi/api-page) を参照してください。
+
+### ページを生成する [#generate-pages]
+
+[`loader()`](/docs/headless/source-api/source) に `staticSource()` を渡します。ファイルを書き出すことなくページを生成できます。
+
+<show when={props.framework === 'react-router' || props.framework === 'tanstack-start'}>
+  `staticSource()` はファイルを読み込むため、`source.ts` はサーバー専用になります。クライアントのコードからインポートできるように、`docs` を `collections.ts` に移動してください。
+</show>
+
+<show when={props.framework === 'next'}>
+  ```ts title="lib/source.ts"
+  import { loader } from 'fumadocs-core/source';
+  import { defineDocs } from 'fumadocs-mdx/macro';
+  import { openapi } from '@/lib/openapi'; // [!code ++]
+
+  const docs = defineDocs({
+    dir: 'content/docs',
+  });
+
+  export const source = loader(
+    // [!code ++:6]
+    {
+      docs: docs.toFumadocsSource(),
+      openapi: await openapi.staticSource({
+        baseDir: 'openapi',
+      }),
+    },
+    {
+      baseUrl: '/docs',
+      // [!code ++:2] 任意：ページツリーの各ページ項目にバッジを追加します
+      plugins: [openapi.loaderPlugin()],
+    },
+  );
+  ```
+</show>
+
+<show when={props.framework === 'react-router'}>
+  ```ts tab="app/lib/source.ts"
+  import { loader } from 'fumadocs-core/source';
+  import { defineDocs } from 'fumadocs-mdx/macro'; // [!code --]
+  // [!code ++:2]
+  import { docs } from '@/lib/collections';
+  import { openapi } from '@/lib/openapi';
+
+  // [!code --:6]
+  export const docs = defineDocs({
+    dir: 'content/docs',
+    docs: {
+      async: true,
+    },
+  });
+
+  // `staticSource()` がファイルを読み込むため、サーバー専用になります [!code ++]
+  export const source = loader(
+    // [!code ++:6]
+    {
+      docs: docs.toFumadocsSource(),
+      openapi: await openapi.staticSource({
+        baseDir: 'openapi',
+      }),
+    },
+    {
+      baseUrl: '/docs',
+      // [!code ++:2] 任意：ページツリーの各ページ項目にバッジを追加します
+      plugins: [openapi.loaderPlugin()],
+    },
+  );
+  ```
+
+  ```ts tab="app/lib/collections.ts"
+  import { defineDocs } from 'fumadocs-mdx/macro';
+
+  export const docs = defineDocs({
+    dir: 'content/docs',
+    docs: {
+      async: true,
+    },
+  });
+  ```
+</show>
+
+<show when={props.framework === 'tanstack-start'}>
+  ```ts tab="src/lib/source.ts"
+  import { loader } from 'fumadocs-core/source';
+  import { defineDocs } from 'fumadocs-mdx/macro'; // [!code --]
+  // [!code ++:2]
+  import { docs } from '@/lib/collections';
+  import { openapi } from '@/lib/openapi';
+
+  // [!code --:6]
+  export const docs = defineDocs({
+    dir: 'content/docs',
+    docs: {
+      async: true,
+    },
+  });
+
+  // `staticSource()` がファイルを読み込むため、サーバー専用になります [!code ++]
+  export const source = loader(
+    // [!code ++:6]
+    {
+      docs: docs.toFumadocsSource(),
+      openapi: await openapi.staticSource({
+        baseDir: 'openapi',
+      }),
+    },
+    {
+      baseUrl: '/docs',
+      // [!code ++:2] 任意：ページツリーの各ページ項目にバッジを追加します
+      plugins: [openapi.loaderPlugin()],
+    },
+  );
+  ```
+
+  ```ts tab="src/lib/collections.ts"
+  import { defineDocs } from 'fumadocs-mdx/macro';
+
+  export const docs = defineDocs({
+    dir: 'content/docs',
+    docs: {
+      async: true,
+    },
+  });
+  ```
+</show>
+
+<show when={props.framework === 'waku'}>
+  ```ts title="src/lib/source.ts"
+  import { loader } from 'fumadocs-core/source';
+  import { defineDocs } from 'fumadocs-mdx/macro';
+  import { openapi } from '@/lib/openapi'; // [!code ++]
+
+  const docs = defineDocs({
+    dir: 'content/docs',
+  });
+
+  export const source = loader(
+    // [!code ++:6]
+    {
+      docs: docs.toFumadocsSource(),
+      openapi: await openapi.staticSource({
+        baseDir: 'openapi',
+      }),
+    },
+    {
+      baseUrl: '/docs',
+      // [!code ++:2] 任意：ページツリーの各ページ項目にバッジを追加します
+      plugins: [openapi.loaderPlugin()],
+    },
+  );
+  ```
+</show>
+
+<show when={props.framework === 'astro'}>
+  ```ts title="src/lib/source.ts"
+  import { getCollection } from 'astro:content';
+  import { loader } from 'fumadocs-core/source';
+  import { toFumadocsSource } from '@fumadocs/astro/source';
+  import { openapi } from '@/lib/openapi'; // [!code ++]
+
+  export const source = loader(
+    // [!code ++:6]
+    {
+      docs: toFumadocsSource(await getCollection('docs'), await getCollection('meta')),
+      openapi: await openapi.staticSource({
+        baseDir: 'openapi',
+      }),
+    },
+    {
+      baseUrl: '/docs',
+      // [!code ++:2] 任意：ページツリー内の各ページ項目にバッジを追加します
+      plugins: [openapi.loaderPlugin()],
+    },
+  );
+  ```
+</show>
+
+`staticSource()` は、デフォルトでオペレーションごとに1ページを生成します。カスタマイズする場合は、[ページの生成](/docs/integrations/openapi/generate-files)を参照してください。
+
+**これにより、`source` のページは `docs` と `openapi` の2種類になります。** LLM 向けにテキストを返す箇所など、`source` を使用しているすべての箇所を更新してください。
+
+```ts
+import { llms } from 'fumadocs-core/source';
+import { source } from '@/lib/source';
+
+export const docsLlms = llms(source, {
+  renderPage: (page) => {
+    // [!code ++:4]
+    if (page.type === 'openapi') {
+      // 例: 文字列化した OpenAPI スキーマを返す
+      return JSON.stringify(page.data.getSchema().bundled, null, 2);
+    }
+
+    // 以下は既存の処理...
+  },
+});
+```
+
+<show when={props.framework !== 'astro'}>
+  ドキュメントページで `<OpenAPIPage />` を使用して OpenAPI ページをレンダリングします。
+</show>
+
+<show when={props.framework === 'astro'}>
+  OpenAPI ページは専用のアイランド内でレンダリングします。このアイランドでは、`<OpenAPIPage />` を Docs レイアウトでラップします。
+</show>
+
+<show when={props.framework === 'next'}>
+  ```tsx title="app/docs/[[...slug]]/page.tsx"
+  import { OpenAPIPage } from '@/components/api-page'; // [!code ++]
+
+  export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
+    const params = await props.params;
+    const page = source.getPage(params.slug);
+    if (!page) notFound();
+
+    // [!code ++:10]
+    if (page.type === 'openapi') {
+      return (
+        <DocsPage full>
+          <DocsTitle>{page.data.title}</DocsTitle>
+          <DocsBody>
+            <OpenAPIPage {...page.data.getOpenAPIPageProps()} />
+          </DocsBody>
+        </DocsPage>
+      );
+    }
+
+    // ...
+  }
+  ```
+</show>
+
+<show when={props.framework === 'react-router'}>
+  ```tsx title="app/routes/docs.tsx"
+  import { docs, source } from '@/lib/source'; // [!code --]
+  // [!code ++:3]
+  import { docs } from '@/lib/collections';
+  import { source } from '@/lib/source';
+  import { OpenAPIPage } from '@/components/api-page';
+
+  export async function loader({ params }: Route.LoaderArgs) {
+    const slugs = params['*'].split('/').filter((v) => v.length > 0);
+    const page = source.getPage(slugs);
+    if (!page) throw new Response('Not found', { status: 404 });
+
+    // [!code ++:9]
+    const pageTree = await source.serializePageTree(source.getPageTree());
+    if (page.type === 'openapi') {
+      return {
+        type: 'openapi' as const,
+        title: page.data.title,
+        props: page.data.getOpenAPIPageProps(),
+        pageTree,
+      };
+    }
+
+    return { type: 'docs' as const, path: page.path, pageTree }; // [!code highlight]
+  }
+
+  export default function Page({ loaderData }: Route.ComponentProps) {
+    const data = useFumadocsLoader(loaderData);
+
+    return (
+      <DocsLayout {...baseOptions()} tree={data.pageTree}>
+        {/* [!code ++:8] */}
+        {data.type === 'openapi' && (
+          <DocsPage full>
+            <DocsTitle>{data.title}</DocsTitle>
+            <DocsBody>
+              <OpenAPIPage {...data.props} />
+            </DocsBody>
+          </DocsPage>
+        )}
+        {/* [!code highlight] */}
+        {data.type === 'docs' && <Content path={data.path} />}
+      </DocsLayout>
+    );
+  }
+  ```
+</show>
+
+<show when={props.framework === 'tanstack-start'}>
+  ```tsx title="src/routes/docs/$.tsx"
+  import { docs, source } from '@/lib/source'; // [!code --]
+  // [!code ++:3]
+  import { docs } from '@/lib/collections';
+  import { source } from '@/lib/source';
+  import { OpenAPIPage } from '@/components/api-page';
+
+  export const Route = createFileRoute('/docs/$')({
+    component: Page,
+    loader: async ({ params }) => {
+      const slugs = params._splat?.split('/') ?? [];
+      const data = await serverLoader({ data: slugs });
+      if (data.type === 'docs') await docs.getPage(data.path)?.preload(); // [!code highlight]
+      return data;
+    },
+  });
+
+  const serverLoader = createServerFn({
+    method: 'GET',
+  })
+    .validator((slugs: string[]) => slugs)
+    .handler(async ({ data: slugs }) => {
+      const page = source.getPage(slugs);
+      if (!page) throw notFound();
+
+      // [!code ++:9]
+      const pageTree = await source.serializePageTree(source.getPageTree());
+      if (page.type === 'openapi') {
+        return {
+          type: 'openapi',
+          title: page.data.title,
+          props: page.data.getOpenAPIPageProps(),
+          pageTree,
+        };
+      }
+
+      return { type: 'docs', path: page.path, pageTree }; // [!code highlight]
+    });
+
+  function Page() {
+    const data = useFumadocsLoader(Route.useLoaderData());
+
+    return (
+      <DocsLayout {...baseOptions()} tree={data.pageTree}>
+        {/* [!code ++:8] */}
+        {data.type === 'openapi' && (
+          <DocsPage full>
+            <DocsTitle>{data.title}</DocsTitle>
+            <DocsBody>
+              <OpenAPIPage {...data.props} />
+            </DocsBody>
+          </DocsPage>
+        )}
+        <Suspense>
+          {/* [!code highlight] */}
+          {data.type === 'docs' && <Content path={data.path} />}
+        </Suspense>
+      </DocsLayout>
+    );
+  }
+  ```
+</show>
+
+<show when={props.framework === 'waku'}>
+  ```tsx title="src/pages/docs/[...slugs].tsx"
+  import { OpenAPIPage } from '@/components/api-page'; // [!code ++]
+
+  export default function Page({ slugs }: PageProps<'/docs/[...slugs]'>) {
+    const page = source.getPage(slugs);
+    if (!page) unstable_notFound();
+
+    // [!code ++:10]
+    if (page.type === 'openapi') {
+      return (
+        <DocsPage full>
+          <DocsTitle>{page.data.title}</DocsTitle>
+          <DocsBody>
+            <OpenAPIPage {...page.data.getOpenAPIPageProps()} />
+          </DocsBody>
+        </DocsPage>
+      );
+    }
+
+    // ...
+  }
+  ```
+</show>
+
+<show when={props.framework === 'astro'}>
+  ```astro tab="src/pages/docs/[...slug].astro"
+  ---
+  import type { GetStaticPaths, InferGetStaticPropsType } from 'astro';
+  import Layout from '@/layouts/Layout.astro';
+  import { Docs } from '@/components/docs';
+  import { OpenAPIDocs } from '@/components/openapi-docs'; // [!code ++]
+  import { source } from '@/lib/source';
+
+  export const prerender = true;
+
+  export const getStaticPaths = (() => {
+    return source.getPages().map((page) => ({
+      params: { slug: decodeURI(page.slugs.join('/')) || undefined },
+      props: { page },
+    }));
+  }) satisfies GetStaticPaths;
+
+  type Props = InferGetStaticPropsType<typeof getStaticPaths>;
+
+  const { page } = Astro.props;
+  const pageTree = await source.serializePageTree(source.getPageTree());
+  ---
+
+  {/* [!code ++:13] */}
+  {page.type === 'openapi' && (
+    <Layout title={page.data.title ?? 'My App'}>
+      <OpenAPIDocs
+        client:load
+        pathname={Astro.url.pathname}
+        params={Astro.params}
+        tree={pageTree}
+        title={page.data.title}
+        props={page.data.getOpenAPIPageProps()}
+      />
+    </Layout>
+  )}
+  ```
+
+  ```tsx tab="src/components/openapi-docs.tsx"
+  import { type SerializedPageTree, useFumadocsLoader } from 'fumadocs-core/source/client';
+  import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+  import { DocsBody, DocsPage, DocsTitle } from 'fumadocs-ui/layouts/docs/page';
+  import { OpenAPIPage } from '@/components/api-page';
+  import { Provider, type ProviderProps } from '@/components/provider';
+  import { baseOptions } from '@/lib/layout.shared';
+  import type { OpenAPIPageProps } from 'fumadocs-openapi/ui';
+
+  export function OpenAPIDocs({
+    tree,
+    title,
+    props,
+    ...rest
+  }: ProviderProps & { tree: SerializedPageTree; title?: string; props: OpenAPIPageProps }) {
+    const data = useFumadocsLoader({ tree });
+
+    return (
+      <Provider {...rest}>
+        <DocsLayout {...baseOptions()} tree={data.tree}>
+          <DocsPage full>
+            <DocsTitle>{title}</DocsTitle>
+            <DocsBody>
+              <OpenAPIPage {...props} />
+            </DocsBody>
+          </DocsPage>
+        </DocsLayout>
+      </Provider>
+    );
+  }
+  ```
+</show>
+
+<Callout type="warn" title="移行が完了しているか確認してください">
+  次に進む前に、型チェックを実行してください。
+
+  ```npm
+  npm run types:check
+  ```
+</Callout>
+
+ページを生成する代わりに MDX ファイルをコンテンツディレクトリへ書き出す方法については、[MDX ファイル](/docs/integrations/openapi/generate-files#mdx-files)を参照してください。
+
+## 機能 [#features]
+
+公式の OpenAPI インテグレーションは、以下の機能をサポートしています。
+
+* API エンドポイントの基本情報
+* インタラクティブな API プレイグラウンド
+* リクエスト送信用のサンプルコード(複数のプログラミング言語に対応)
+* レスポンスのサンプルと TypeScript の型定義
+* スキーマから生成されるリクエストのパラメーターとボディ
+
+### デモ [#demo]
+
+[デモを見る](/docs/openapi)。

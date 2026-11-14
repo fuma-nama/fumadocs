@@ -1,0 +1,107 @@
+---
+title: スタンドアロン
+description: ドキュメントサイトなしで、OpenAPI ドキュメントから API ドキュメントを生成します。
+---
+
+`@fumadocs/openapi-standalone` は、OpenAPI ドキュメントを Fumadocs UI でレンダリングし、静的な HTML ファイルまたは [Hono](https://hono.dev) サーバーとして提供します。
+
+## CLI [#cli]
+
+```bash
+npx @fumadocs/openapi-standalone build ./openapi.yaml
+```
+
+```bash
+npx @fumadocs/openapi-standalone serve ./openapi.yaml --port 8080
+```
+
+| オプション                 | 説明                                |
+| --------------------- | --------------------------------- |
+| `-o, --out <dir>`     | `build` の出力ディレクトリ (デフォルト: `out`)  |
+| `--base-url <path>`   | ドキュメントを配信する URL パス                |
+| `-p, --port <port>`   | `serve` のポート (デフォルト: `8080`)      |
+| `--host <host>`       | `serve` のホスト (デフォルト: `localhost`) |
+| `-c, --config <file>` | 設定ファイル                            |
+
+`serve` は API プレイグラウンド用の CORS プロキシを追加します。このプロキシは、ドキュメントの `servers` に記載された絶対 URL へのリクエストのみを転送します。
+
+### 設定ファイル [#config-file]
+
+入力を指定しない場合、CLI は `fumadocs-openapi.config.ts`(または `.mts`、`.js`、`.mjs`)を読み込みます。フラグを指定すると、設定ファイルの内容より優先されます。
+
+```ts title="fumadocs-openapi.config.ts"
+import type { Config } from '@fumadocs/openapi-standalone';
+
+export default {
+  input: ['./openapi.yaml'],
+  outDir: 'out',
+} satisfies Config;
+```
+
+## 静的 HTML [#static-html]
+
+```ts
+import { generateStatic } from '@fumadocs/openapi-standalone';
+
+await generateStatic({
+  input: ['./openapi.yaml'],
+  outDir: 'out',
+});
+```
+
+```txt title="Output"
+out/
+├── index.html                   # ドキュメントの概要
+├── pets/listPets/index.html     # オペレーションごとに 1 ページ
+├── 404.html
+└── _fumadocs/                   # スクリプト、スタイル、ドキュメント、検索インデックス
+```
+
+## Hono [#hono]
+
+```ts
+import { Hono } from 'hono';
+import { createApp } from '@fumadocs/openapi-standalone/hono';
+
+const app = new Hono();
+
+// ルートは `baseUrl` 配下に配置されます
+app.route(
+  '/',
+  createApp({
+    input: ['./openapi.yaml'],
+    baseUrl: '/docs',
+    // API プレイグラウンド用の CORS プロキシです。`servers` 内の絶対 URL にのみリクエストを転送します
+    proxy: true,
+  }),
+);
+
+export default app;
+```
+
+ページはリクエストごとにレンダリングされ、アプリはスクリプトをディスクから読み込みます。そのため、Node.js、Bun、Deno のいずれかで実行してください。
+
+## オプション [#options]
+
+```ts
+await generateStatic({
+  // ファイルパスと URL の配列、またはドキュメント ID から ファイルパス・URL・ドキュメントオブジェクトへのレコード
+  input: ['./openapi.yaml', './billing.yaml'],
+  // 書き込み前に中身が削除されます
+  outDir: 'out',
+  // 'operation'(デフォルト)、'tag'、'file' ごとに 1 ページ
+  per: 'operation',
+  // オペレーションページのフォルダー: 'tag'(オペレーションにタグがある場合のデフォルト)、'route'、'none'
+  groupBy: 'tag',
+  // ドキュメントを配信する URL パス(デフォルト: '/')
+  baseUrl: '/docs',
+  // デフォルト: ドキュメントの `info.title`
+  title: 'Acme API',
+  // API プレイグラウンド用の `createProxy()` ルート
+  proxyUrl: 'https://example.com/api/proxy',
+});
+```
+
+複数のドキュメントがある場合は、ドキュメントごとにサイドバーのフォルダーとタブが作成されます。
+
+`proxyUrl` については、[プロキシの作成](/docs/integrations/openapi/server#creating-proxy)を参照してください。

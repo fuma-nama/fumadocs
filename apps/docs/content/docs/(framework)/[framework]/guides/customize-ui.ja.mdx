@@ -1,0 +1,131 @@
+---
+title: UIのカスタマイズ
+description: Fumadocs UIをカスタマイズする方法を網羅的に解説するガイドです。
+---
+
+## はじめに [#introduction]
+
+Fumadocs UI は、手軽に使えるビルド済みのコンポーネントを提供しており、「すべての UI コードをコードベースに取り込む」方式と、設計方針の決まったパッケージとの中間的な立ち位置にあります。
+
+Fumadocs UI 自体は柔軟性と後方互換性を考慮してさまざまな設計上の工夫がなされていますが、使い方を誤ると、それらの工夫が効果を発揮しない場合があります。
+
+> AIエージェントが UI を編集する可能性がある場合は、このガイドを AIエージェントに読み込ませることもおすすめします。
+
+### 適切なコンポーネントを選ぶ [step] [#pick-the-right-component]
+
+レイアウト UI には、組み込みのレイアウトコンポーネントがいくつか用意されています。用途に合わせて試してみてください。
+
+<Cards>
+  <Card title="Docs レイアウト" href="/docs/ui/layouts/docs">
+    ドキュメント用のレイアウト
+  </Card>
+
+  <Card title="Notebook レイアウト" href="/docs/ui/layouts/notebook">
+    Docs レイアウトをよりコンパクトにしたもの
+  </Card>
+
+  <Card title="Home レイアウト" href="/docs/ui/layouts/home-layout">
+    その他のページで共通して使うレイアウト
+  </Card>
+
+  <Card title="Flux レイアウト" href="/docs/ui/layouts/flux">
+    無駄を徹底的に削ぎ落とした、ミニマルなドキュメント用レイアウト
+  </Card>
+
+  <Card title="Glass レイアウト" href="/docs/ui/layouts/glass">
+    浮かび上がる半透明のサイドバーとヘッダーを備えたドキュメント用レイアウト
+  </Card>
+
+  <Card title="Spacious レイアウト" href="/docs/ui/layouts/spacious">
+    Docs レイアウトよりもゆとりを持たせたもの
+  </Card>
+</Cards>
+
+### Props [step] [#props]
+
+まずは、コンポーネントのオプションで要件を満たせるかどうかを確認してください。例えば、次のようなものがあります。
+
+```tsx
+<DocsLayout sidebar={{ enabled: false }}>{/* コンテンツ */}</DocsLayout>
+```
+
+または、props でコンテナのスタイルを指定することもできます。
+
+```tsx
+<DocsLayout
+  containerProps={{
+    className: '...',
+  }}
+>
+  {/* コンテンツ */}
+</DocsLayout>
+```
+
+各コンポーネントの詳細なドキュメントは [Fumadocs UI](/docs/ui) セクションにあるので、リファレンスとしてご活用ください。
+
+ほとんどのオプションは JSX 要素を受け取れるため、独自のコンポーネントを組み込めます。
+目次の下やサイドバーにセクションを追加するなど、たいていのユースケースはこの方法で十分に対応できます。
+
+### CSS [step] [#css]
+
+より複雑なスタイリングに対応できるよう、Fumadocs UI の一部のコンポーネントには、要素を選択するための独自の `id` &amp; `data-` 属性が付与されています。
+CSS セレクターでこれらを指定できます。
+
+```css
+#nd-docs-layout #nd-subnav {
+  background-color: purple;
+}
+
+[data-toc-popover] {
+  background-color: purple;
+}
+```
+
+**影響範囲の広い強引なスタイルや、特定の DOM 構造を強く前提とするスタイルは避けてください**。特に新しい UI 機能が追加された際に、後方互換性を保証するのが難しくなるためです。
+
+```css title="Bad Example"
+/* このような要素の指定方法は避けてください！ */
+[data-toc-popover] > div {
+  background-color: purple;
+}
+```
+
+CSS によるアプローチにはリスクが伴います。独自のライフサイクルでバージョン管理されるのは `id` &amp; `data-` 属性のみであるため、可能であれば他のアプローチを選択してください。
+
+### CLI でインストールする [step] [#install-via-cli]
+
+公開されているオプションでは対応できない高度な要件がある場合や、カスタム CSS が既存のスタイルに過度に干渉するようになってしまった場合には、Fumadocs CLI が強力なツールになります。
+
+インストール可能なコンポーネントについては、関連するドキュメントに次のような案内が掲載されています。
+
+<Installation name="layouts/docs" />
+
+**レイアウトコンポーネント**(多くの場合、複数のコンポーネントで構成されています)向けには、細かく選択しながらカスタマイズできる専用の `customize` コマンドが Fumadocs CLI に用意されています。
+
+```npm
+npx @fumadocs/cli@latest customize
+```
+
+レイアウトコンポーネント全体をインストールする代わりに、**スロット** (レイアウトコンポーネントの置き換え可能な部分) だけをインストールすることもできます。
+上記のコマンドを実行すると、すべてのオプションを確認できます。
+
+インストール後は、Fumadocs UI からエクスポートされた型ではなく、インストールした型を使用してください。たとえば、`layout/docs` をインストールした場合は、インポートを次のように更新します。
+
+```tsx
+// [!code --]
+import type { DocsLayoutProps } from 'fumadocs-ui/layouts/docs';
+// [!code ++]
+import type { DocsLayoutProps } from '@/components/layout/docs';
+```
+
+これにより、ローカルのコンポーネントは Fumadocs UI から切り離されます。
+
+Fumadocs CLI を使うと UI コードを完全に制御できますが、次の点に注意してください。
+
+* インストールしたコンポーネントには、UI のアップデートが反映されなくなります。
+* Fumadocs CLI でコンポーネントを再インストールすることはできますが、それまでのカスタマイズは失われます(上書きするファイルは選択できます)。
+* Fumadocs CLI は、最新の Fumadocs Core + UI を使用していることを前提としています。
+
+## その他の質問 [#other-questions]
+
+ご質問がある場合や、予期しない不具合が発生した場合は、お気軽に [GitHub Discussions](https://github.com/fuma-nama/fumadocs/discussions) でご相談ください。

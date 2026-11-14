@@ -1,0 +1,102 @@
+---
+title: Algolia Search
+description: Algolia Search を Fumadocs と統合します
+---
+
+<Callout title="注意">
+  Algolia の無料プランを利用している場合は、[検索ダイアログに Algolia のロゴを表示する](https://algolia.com/policies/free-services-terms)必要があります。
+</Callout>
+
+## セットアップ [#setup]
+
+依存関係をインストールします。
+
+```package-install
+algoliasearch
+```
+
+### Algolia への登録 [#sign-up-on-algolia]
+
+Algolia に登録して検索用のアプリ ID と API キーを取得し、`.env.local` に保存してください(Vite 系のフレームワークでは `NEXT_PUBLIC_` の代わりに `VITE_` を、Astro では `PUBLIC_` を使用します):
+
+```dotenv
+NEXT_PUBLIC_ALGOLIA_APP_ID="app ID"
+NEXT_PUBLIC_ALGOLIA_SEARCH_KEY="search-only API key"
+ALGOLIA_WRITE_KEY="write API key"
+```
+
+### 検索インデックスを同期する [#sync-search-indexes]
+
+`static.json` ルートをプリレンダリングしてビルド時に検索インデックスをエクスポートし、ビルドのたびにスクリプトで Algolia に同期します。
+
+<feature>search/algolia</feature>
+
+`sync()` はインデックスの設定を更新し、すべてのレコードを置き換えます。`build` スクリプトはビルドのたびに同期を行うため、デプロイ先のプラットフォームにも同じ環境変数を設定してください。
+
+### 検索 UI [#search-ui]
+
+UI の実装方法には、いくつかの選択肢があります。
+
+* [Fumadocs UI の検索ダイアログ](/docs/search/algolia)を使用する。
+
+* 組み込みの検索クライアントフックを使って独自に構築する。
+
+  ```ts twoslash
+  import { liteClient } from 'algoliasearch/lite';
+  import { useAlgoliaSearch } from 'fumadocs-core/search/client';
+
+  const algolia = liteClient('id', 'key');
+
+  const { search, onSearchChange, isLoading, data } = useAlgoliaSearch({
+    indexName: 'document',
+    client: algolia,
+  });
+  ```
+
+* Algolia 公式のクライアントを直接使用する。
+
+## 高度な使い方 [#advanced]
+
+### タグフィルター [#tag-filter]
+
+タグフィルターを設定するには、`static.json` ルートで `toDocuments()` に `tag` を渡します。
+
+```ts
+toDocuments(source, { tag: (page) => page.slugs[0] });
+```
+
+次に、検索クライアントを更新します。
+
+* **Fumadocs UI**: 検索 UI で[タグフィルター](/docs/search/algolia#tag-filter)を有効にします。
+* **検索クライアント**: 次のようにタグフィルターを追加できます。
+
+  ```ts
+  import { useAlgoliaSearch } from 'fumadocs-core/search/client';
+
+  const { search, onSearchChange, isLoading, data } = useAlgoliaSearch({
+    tag: '<your tag value>',
+    // ...
+  });
+  ```
+
+`tag` フィールドはファセット用の属性です。Algolia の検索クライアントでは、`tag:value` というフィルターも使用できます。
+
+### 内部の仕組み [#under-the-hood]
+
+Algolia Integrationは、ドキュメント検索用にAlgolia Searchを自動で設定します。
+
+ドキュメント内の**段落ごと**にレコードを作成します。これはAlgoliaも推奨している方法です。
+
+各レコードには、次の検索可能な属性が含まれます。
+
+| 属性        | 説明              |
+| --------- | --------------- |
+| `title`   | ページタイトル         |
+| `section` | 見出しID (null許容)  |
+| `content` | 段落の内容           |
+
+`section` フィールドは、見出しの下にある段落にのみ存在します。見出しと
+段落はそれぞれ個別のレコードとしてインデックスされ、ページIDごとにグループ化されます。
+
+ページの `url` プロパティは一意である必要がある点に注意してください。同じ
+URLを持つページが複数存在しないようにしてください。

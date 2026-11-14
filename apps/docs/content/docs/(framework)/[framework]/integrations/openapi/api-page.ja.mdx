@@ -1,0 +1,321 @@
+---
+title: createOpenAPIPage()
+description: OpenAPI ドキュメントのコンテンツをレンダリングするコンポーネント
+---
+
+## 概要 [#overview]
+
+Fumadocs OpenAPI は、ページコンテンツのレンダリングに `<OpenAPIPage />` コンポーネントを使用します。このコンポーネントはクライアントコンポーネントにする必要があります。
+
+```tsx title="components/api-page.tsx"
+'use client';
+import { createOpenAPIPage } from 'fumadocs-openapi/ui';
+
+export const OpenAPIPage = createOpenAPIPage({
+  // 設定
+});
+```
+
+### コード例の生成 [#generate-code-usages]
+
+各APIエンドポイントのコード例を生成します。
+
+```tsx title="components/api-page.tsx" twoslash
+'use client';
+import { createOpenAPIPage } from 'fumadocs-openapi/ui';
+import {
+  createCodeUsageGeneratorRegistry,
+  type CodeUsageGenerator,
+} from 'fumadocs-openapi/requests/generators';
+import { registerDefault } from 'fumadocs-openapi/requests/generators/all';
+
+const codeUsages = createCodeUsageGeneratorRegistry();
+
+// デフォルトのジェネレーターを登録
+registerDefault(codeUsages);
+
+// カスタムジェネレーターを追加
+codeUsages.add('custom-id', {
+  label: 'My Example',
+  lang: 'js',
+  generate(data, { mediaAdapters }) {
+    // リクエストデータ
+    console.log(data);
+
+    return 'const response = "hello world";';
+  },
+});
+
+export const OpenAPIPage = createOpenAPIPage({
+  // [!code ++]
+  codeUsages,
+});
+```
+
+また、OpenAPI スキーマでコードサンプルを指定することもできます。
+
+```yaml
+paths:
+  /plants:
+    get:
+      x-codeSamples:
+        - lang: js
+          label: JavaScript SDK
+          source: |
+            const planter = require('planter');
+            planter.list({ unwatered: true });
+```
+
+### 国際化 [#internationalization]
+
+UI レベルで[国際化](/docs/internationalization)を設定済みの場合は、次のように設定します。
+
+```tsx title="layout.shared.tsx"
+import { defineI18n } from 'fumadocs-core/i18n';
+import { uiTranslations } from 'fumadocs-ui/i18n';
+import { openapiTranslations } from 'fumadocs-openapi/i18n';
+
+const i18n = defineI18n({
+  languages: ['en', 'cn'],
+  defaultLanguage: 'en',
+});
+
+export const translations = i18n
+  .translations()
+  .extend(uiTranslations())
+  // [!code ++]
+  .extend(openapiTranslations())
+  .add({
+    cn: {
+      displayName: 'Chinese',
+      // [!code ++]
+      'Body(playground)': '請求正文',
+    },
+  });
+```
+
+詳しくは[翻訳](/docs/ui/translations)を参照してください。
+
+## メディアアダプター [#media-adapters]
+
+メディアアダプターを作成すると、API ページで他のメディアタイプをサポートできます。メディアアダプターは次の処理を実装します。
+
+* 値を、対応するメディアタイプに適合する `fetch()` のボディに変換する。
+* プログラミング言語やツールごとにコード例を生成する。
+
+メディアアダプターが用意されていないメディアタイプのリクエストボディは読み取り専用になります。コード例には含まれず、プレイグラウンドから送信することもできません。
+
+```tsx title="components/api-page.tsx" twoslash
+'use client';
+import { createOpenAPIPage } from 'fumadocs-openapi/ui';
+import type { MediaAdapter } from 'fumadocs-openapi';
+
+const mediaAdapters: Record<string, MediaAdapter> = {
+  // 例: カスタムの `application/json
+  'application/json': {
+    encode(data) {
+      return JSON.stringify(data.body);
+    },
+    // リクエストボディに使用される `body` 変数を初期化するコードを返します
+    generateExample(data, ctx) {
+      if (ctx.lang === 'js') {
+        return `const body = "hello world"`;
+      }
+
+      if (ctx.lang === 'python') {
+        return `body = "hello world"`;
+      }
+
+      if (ctx.lang === 'go' && 'addImport' in ctx) {
+        ctx.addImport('strings');
+
+        return `body := strings.NewReader("hello world")`;
+      }
+    },
+  },
+};
+
+export const OpenAPIPage = createOpenAPIPage({
+  // [!code ++]
+  mediaAdapters,
+});
+```
+
+## 認可 [#authorization]
+
+Auth プロバイダーは、プレイグラウンドのセキュリティスキームを処理します。具体的には、各値を入力する行の表示と、値の送信方法を担います。
+
+```tsx title="components/api-page.tsx"
+'use client';
+import { createOpenAPIPage } from 'fumadocs-openapi/ui';
+import { Custom } from 'fumadocs-openapi/ui/playground/client';
+import type { AuthPanelProps } from 'fumadocs-openapi/playground';
+
+export const OpenAPIPage = createOpenAPIPage({
+  playground: {
+    authProviders: [
+      {
+        // スキーム ID または関数。省略した場合はすべてのスキームが対象
+        on: 'my-auth',
+        render: ({ Value, Panel }) => (
+          <>
+            <Value name="Authorization" type="header" start="Bearer" />
+            <Panel title="Sign in" component={SignIn} />
+          </>
+        ),
+      },
+    ],
+  },
+});
+
+function SignIn({ field, close }: AuthPanelProps) {
+  const { setValue } = Custom.useController(field.fieldName);
+
+  return (
+    <button
+      onClick={async () => {
+        const res = await fetch('/api/token');
+        setValue(await res.text());
+        close();
+      }}
+    >
+      Sign in
+    </button>
+  );
+}
+```
+
+| オプション       | 内容                                          |
+| ----------- | ------------------------------------------- |
+| `on`        | 処理対象のセキュリティスキーム                             |
+| `render`    | 行のレンダリング。`Value`(値の入力欄)と `Panel`(パネル)で構成します |
+| `onRequest` | 値をリクエストデータに書き込みます。リクエストとコード例(マスク済み)に使用されます  |
+
+プロバイダーはコンポーネントの外で定義してください。プロバイダーが変わるたびに、認証フィールドが再作成されます。
+
+行とパネルはそれぞれ独自の状態を持ち、`Custom.useController(field.fieldName)` で値を読み書きします。値はタブを開いている間、スキームごとに保持されます。トークンは `Bearer <token>` のように、スキームを付けて送信されます。
+
+<Accordions>
+  <Accordion title="ページ遷移を伴うサインイン">
+    ページを離れる際は、`useAuthRedirect()` が返す関数を使用してください。ページが再読み込みされるとプレイグラウンドが再び開き、行は `onReturn` でデータを受け取ります。
+
+    ```tsx
+    import { Custom } from 'fumadocs-openapi/ui/playground/client';
+    import {
+      type AuthPanelProps,
+      type AuthRenderProps,
+      useAuthRedirect,
+    } from 'fumadocs-openapi/playground';
+
+    function Rows({ field, Value, Panel }: AuthRenderProps) {
+      const { setValue } = Custom.useController(field.fieldName);
+
+      useAuthRedirect(field, (url, state) => {
+        if (url.searchParams.get('state') === state)
+          setValue(url.searchParams.get('token')!);
+      });
+
+      return (
+        <>
+          <Value name="Authorization" type="header" start="Bearer" />
+          <Panel title="Sign in" component={SignIn} />
+        </>
+      );
+    }
+
+    function SignIn({ field }: AuthPanelProps) {
+      const redirect = useAuthRedirect(field);
+
+      return (
+        <button
+          onClick={() => {
+            const state = crypto.randomUUID();
+            redirect(`https://auth.example.com/login?state=${state}`, state);
+          }}
+        >
+          Sign in
+        </button>
+      );
+    }
+    ```
+  </Accordion>
+</Accordions>
+
+## UIのカスタマイズ [#customise-ui]
+
+既存のオプションでは対応できないカスタマイズを行いたい場合は、[Fumadocs CLI](/docs/cli)を使ってUIをコードベースにインストールできます。
+
+### フル UI [#full-ui]
+
+API ページの UI 全体です。[ヘッドレスレイヤー](/docs/integrations/openapi/headless)をベースに構築されています。
+
+```npm
+npx @fumadocs/cli add openapi/page
+```
+
+`<OpenAPIPage />` 自体もインストールされるため、`components/api-page.tsx` は不要になります。`<OpenAPIPage />` のインポートを次のように更新してください。
+
+```tsx
+import { OpenAPIPage } from '@/components/api-page'; // [!code --]
+import { OpenAPIPage } from '@/components/openapi/page'; // [!code ++]
+```
+
+### API プレイグラウンド [#api-playground]
+
+プレイグラウンドの UI です。状態は [`usePlayground()`](/docs/integrations/openapi/headless#playground) から提供されます。
+
+```npm
+npx @fumadocs/cli add openapi/playground
+```
+
+```tsx title="components/api-page.tsx"
+'use client';
+import { createOpenAPIPage } from 'fumadocs-openapi/ui';
+import PlaygroundClient from '@/components/openapi/playground';
+
+export const OpenAPIPage = createOpenAPIPage({
+  playground: {
+    render: () => <PlaygroundClient />,
+  },
+});
+```
+
+### オペレーション [#operation]
+
+オペレーションと Webhook の UI です。
+
+```npm
+npx @fumadocs/cli add openapi/operation
+```
+
+```tsx title="components/api-page.tsx"
+'use client';
+import { createOpenAPIPage } from 'fumadocs-openapi/ui';
+import { Operation } from '@/components/openapi/operation';
+
+export const OpenAPIPage = createOpenAPIPage({
+  components: {
+    Operation,
+  },
+});
+```
+
+### スキーマ UI [#schema-ui]
+
+JSON スキーマを表示する UI です。状態は [`<SchemaUIProvider />`](/docs/integrations/openapi/headless#schema-ui) から提供されます。
+
+```npm
+npx @fumadocs/cli add api-docs/schema
+```
+
+```tsx title="components/api-page.tsx"
+'use client';
+import { createOpenAPIPage } from 'fumadocs-openapi/ui';
+import { Schema } from '@/components/api/schema';
+
+export const OpenAPIPage = createOpenAPIPage({
+  components: {
+    SchemaUI: Schema,
+  },
+});
+```

@@ -1,0 +1,178 @@
+---
+title: ハイライター
+description: Shiki または任意のハイライターでコードをハイライトします。
+---
+
+Fumadocs はデフォルトで [Shiki](https://shiki.style) を使用してコードをハイライトします。代わりにハイライターを作成し、コードをハイライトする箇所に渡すこともできます。その場合、Shiki は読み込まれません。
+
+```ts tab="Highlights" title="lib/highlighter.ts"
+// npm i @pierre/highlights
+import { createHighlights } from 'fumadocs-core/highlight/highlights';
+import githubLight from '@pierre/highlights/themes/github-light';
+import githubDark from '@pierre/highlights/themes/github-dark';
+
+export const highlighter = createHighlights({
+  themes: { light: githubLight, dark: githubDark },
+});
+```
+
+```ts tab="Shiki" title="lib/highlighter.ts"
+import { createShikiHighlighter } from 'fumadocs-core/highlight/shiki';
+import { defaultShikiFactory } from 'fumadocs-core/highlight/shiki/full';
+
+export const highlighter = createShikiHighlighter(() => defaultShikiFactory.getOrInit(), {
+  themes: { light: 'github-light', dark: 'github-dark' },
+  // Fumadocs UI はトークンの色付けに CSS 変数を使用します
+  defaultColor: false,
+});
+```
+
+[Highlights](https://diffs.com/highlights) は WebAssembly で書かれており、Shiki の何倍も高速です。80 の言語を組み込みでサポートし(それ以外の言語はプレーンテキストとしてハイライトされます)、`@pierre/highlights/themes` の[独自のテーマ](https://diffs.com/docs#highlights)を使用します。また、互換レイヤーである `shikiTransformers` を介して Shiki のトランスフォーマーを実行できます。
+
+`highlighter.override()` を使うと、別のトランスフォーマーなど、異なるオプションを指定したハイライターを作成できます。
+
+## 使い方 [#usage]
+
+`rehypeCodeFromHighlighter` は rehype プラグインです。Fumadocs MDX のデフォルトの Shiki プラグインの代わりに使用してください：
+
+```ts tab="unified" title="source.config.ts"
+import { defineConfig } from 'fumadocs-mdx/config';
+import { rehypeCodeFromHighlighter } from 'fumadocs-core/mdx-plugins/rehype-code.core';
+import { highlighter } from './lib/highlighter';
+
+export default defineConfig({
+  mdxOptions: {
+    // デフォルトの Shiki プラグインを無効化
+    rehypeCodeOptions: false,
+    rehypePlugins: (v) => [
+      () =>
+        rehypeCodeFromHighlighter(
+          // 記法やアイコンなど、Fumadocs のトランスフォーマーを適用して作成
+          ({ transformers }) => highlighter.override({ shikiTransformers: transformers }),
+        ),
+      ...v,
+    ],
+  },
+});
+```
+
+```ts tab="Sätteri" title="source.config.ts"
+import { defineConfig, defineDocs } from 'fumadocs-mdx/config';
+import { rehypeCodeFromHighlighter } from '@fumadocs/satteri/rehype-code';
+import { highlighter } from './lib/highlighter';
+
+export const docs = defineDocs({
+  docs: {
+    compiler: 'satteri',
+  },
+});
+
+export default defineConfig({
+  satteriOptions: {
+    // デフォルトの Shiki プラグインを無効化
+    rehypeCodeOptions: false,
+    hastPlugins: [
+      rehypeCodeFromHighlighter(
+        // 記法やアイコンなど、Fumadocs のトランスフォーマーを適用して作成
+        ({ transformers }) => highlighter.override({ shikiTransformers: transformers }),
+      ),
+    ],
+  },
+});
+```
+
+これをコードブロックのコンポーネントに渡します。
+
+```tsx tab="Server Code Block" title="components/codeblock.tsx"
+import { createServerCodeBlock } from 'fumadocs-ui/components/codeblock.rsc';
+import { highlighter } from '@/lib/highlighter';
+
+export const ServerCodeBlock = createServerCodeBlock({ highlighter });
+```
+
+```tsx tab="Dynamic Code Block" title="components/dynamic-codeblock.tsx"
+'use client';
+import { createDynamicCodeBlock } from 'fumadocs-ui/components/dynamic-codeblock.core';
+import { highlighter } from '@/lib/highlighter';
+
+export const DynamicCodeBlock = createDynamicCodeBlock({ highlighter });
+```
+
+各インテグレーションでは、メインエントリでこれを受け取ります。
+
+| インテグレーション                                                                                       | オプション                                                                                |
+| ----------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| [ローカル Markdown (Sätteri)](/docs/integrations/content/satteri-local-md)                          | `hastPlugins` 内で `@fumadocs/satteri/rehype-code` の `rehypeCodeFromHighlighter()` を使用 |
+| [Python](/docs/integrations/content/python)、[Local HTML](/docs/integrations/content/local-html) | `createPython({ highlighter })`、`localHtml({ highlighter })`                         |
+| [OpenAPI](/docs/integrations/openapi)、GraphQL、AsyncAPI                                          | `createOpenAPIPage({ highlighter })`                                                 |
+| [型テーブル](/docs/ui/components/auto-type-table)                                                    | `remarkAutoTypeTable({ highlighter })`、`<AutoTypeTable highlighter />`               |
+| shadcn                                                                                          | `@fumadocs/shadcn/rsc` の `createSnippet({ highlighter })`                            |
+
+`rehypeCodeFromHighlighter()` や、Python、Local HTML、shadcn のインテグレーションのように、Fumadocs がコードブロックにトランスフォーマーを追加する箇所では、それらを関数で受け取ります。
+
+## Shiki ファクトリー [#shiki-factory]
+
+Fumadocs は Shiki ファクトリーを使って Shiki インスタンスを管理しています。細粒度バンドルを使うなど、特定の用途に合わせて独自のファクトリーを作成することもできます。
+
+```ts
+import { createShikiFactory } from 'fumadocs-core/highlight/shiki';
+
+export const myShikiFactory = createShikiFactory({
+  async init(options) {
+    const { createHighlighter, createJavaScriptRegexEngine } = await import('shiki');
+
+    return createHighlighter({
+      langs: [],
+      themes: [],
+      langAlias: options?.langAlias,
+      engine: createJavaScriptRegexEngine(),
+    });
+  },
+});
+```
+
+次に、これを各モジュールや機能に渡します。
+
+```tsx tab="Dynamic CodeBlock (UI)"
+'use client';
+import * as Base from 'fumadocs-ui/components/dynamic-codeblock.core';
+
+export type DynamicCodeblockProps = Omit<Base.DynamicCodeblockProps, 'highlighter'>;
+
+export function DynamicCodeBlock(props: DynamicCodeblockProps) {
+  return <Base.DynamicCodeBlock highlighter={() => myShikiFactory.getOrInit()} {...props} />;
+}
+```
+
+```ts tab="Highlighter"
+import { createShikiHighlighter } from 'fumadocs-core/highlight/shiki';
+
+export const highlighter = createShikiHighlighter(() => myShikiFactory.getOrInit(), {
+  themes: { light: 'github-light', dark: 'github-dark' },
+  defaultColor: false,
+});
+```
+
+## カスタムハイライター [#custom-highlighter]
+
+`Highlighter` インターフェースを実装します。
+
+```ts
+import type { Highlighter } from 'fumadocs-core/highlight';
+
+export const highlighter: Highlighter = {
+  codeToHast(code, { lang, structure, meta }) {
+    // `<pre>` に `meta` を付与した `pre > code > span.line` を返します。`structure` が `inline` の場合は `<code>` の中身を返します
+  },
+  // 任意。オンデマンドで読み込む言語向けです
+  async loadLanguage(...langs) {},
+};
+```
+
+Fumadocs UI は、`--shiki-light` や `--shiki-dark` などの CSS 変数を使ってトークンに色を付けます。ほかのハイライターと同じように渡すか、`rehypeCodeFromHighlighter` を使って独自の rehype パイプラインでハイライトしてください。
+
+```ts
+import { rehypeCodeFromHighlighter } from 'fumadocs-core/mdx-plugins/rehype-code.core';
+
+unified().use(rehypeCodeFromHighlighter, highlighter);
+```

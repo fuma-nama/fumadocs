@@ -1,0 +1,27 @@
+---
+title: Remark Show
+description: 条件に応じてコンテンツを表示します。
+---
+
+## 使い方 [#usage]
+
+Remark Show は、[`<show>`](/docs/markdown#show) 構文を扱う remark プラグインです。Fumadocs MDX、`@fumadocs/astro`、[ローカル Markdown](/docs/integrations/content/local-md) では、デフォルトで有効になっています。
+
+`<show>` は、`when` の式が true の場合に内容をレンダリングします。式はページのレンダリング時に評価されるため、[パスパラメーター](/docs/headless/page-conventions#path-params)などのページの props を参照できます。`when` を指定していない `<show>` はコンパイルエラーになります。
+
+## ページデータ [#page-data]
+
+レンダリングされないコンテンツは、ページデータからも除外されます。対象となるのは、目次、[見出しID](/docs/headless/mdx/headings#headings-with-expressions)、[構造化データ](/docs/headless/mdx/structure)、[処理済みのMarkdown](/docs/headless/mdx/remark-llms)です。
+
+<Callout type="warn">
+  これらのデータは、Rehype TOC、Remark Structure、Remark LLMsが生成します。Fumadocs MDXを使用しない場合、
+  これらは条件を評価できるより前のコンパイル時にデータを生成するため、`<show>`を含むドキュメントはコンパイルに失敗します。
+  カスタムのコンテンツソースでは、[ランタイム出力](/docs/headless/source-api/source#runtime-outputs)を有効にしてください。
+</Callout>
+
+## ステップとタブグループ [#steps-and-tab-groups]
+
+`<show>` では、[ステップ](/docs/headless/mdx/remark-steps)や[タブグループ](/docs/markdown#tab-groups)のコードブロックをラップできます。[例](/docs/markdown#show)を参照してください。
+
+* プラグインの配列では、Remark Show を Remark Steps と `remarkCodeTab` よりも前に追加してください。
+* 少なくとも 1 つのステップまたはタブを `<show>` の外側に残してください。そうしないと、`<show>` ごとに別々のステップやタブグループが生成されます。

@@ -1,0 +1,108 @@
+---
+title: ヘッドレス
+description: ストーリーのUIを置き換えるか、ヘッドレスレイヤーを使って独自のUIを構築します。
+---
+
+## 概要 [#overview]
+
+`@fumadocs/story` は `<StoryProvider />`、`useStory()`、`useStoryArgs()` をエクスポートしています。これらは UI を持たず、ストーリーの状態のみを提供します。
+
+* 選択中のバリアントと、そのバリアントに対応するプリセット
+* レンダリングされるコンポーネントの引数 (キー入力のたびに再レンダリングされないよう、デバウンスされます) 
+
+組み込みのパネルはこれらを基に作られており、パネルを独自のものに置き換えることもできます。
+
+## 独自のパネル [#your-own-panel]
+
+`defineStoryFactory()` には `WithControl` コンポーネントを渡せます。このコンポーネントは、組み込みのパネルの代わりにレンダリングされます。
+
+<show when={props.framework === 'next'}>
+  ```tsx title="lib/story.tsx"
+  import { defineStoryFactory } from '@fumadocs/story/next/client';
+  import { StoryPanel } from '@/components/story-panel';
+
+  export const { defineStory } = defineStoryFactory({ WithControl: StoryPanel });
+  ```
+</show>
+
+<show when={props.framework !== 'next'}>
+  ```tsx title="lib/story.tsx"
+  import { defineStoryFactory } from '@fumadocs/story/vite/client';
+  import { StoryPanel } from '@/components/story-panel';
+
+  export const { defineStory } = defineStoryFactory({ WithControl: StoryPanel });
+  ```
+</show>
+
+このコンポーネントは、ストーリーのプリセットと、レンダリング対象のコンポーネントを受け取ります。
+
+```tsx title="components/story-panel.tsx"
+'use client';
+import { StoryProvider, useStory, useStoryArgs, type WithControlProps } from '@fumadocs/story';
+
+export function StoryPanel(props: WithControlProps) {
+  return (
+    <StoryProvider {...props}>
+      <Content />
+    </StoryProvider>
+  );
+}
+
+function Content() {
+  const { presets, variant, setVariant, preset, Component } = useStory();
+  const args = useStoryArgs();
+
+  return (
+    <div>
+      <select value={variant} onChange={(e) => setVariant(e.target.value)}>
+        {presets.map((item) => (
+          <option key={item.variant} value={item.variant}>
+            {item.variant}
+          </option>
+        ))}
+      </select>
+      <Component {...args} />
+      <pre>{JSON.stringify(preset?.controls, null, 2)}</pre>
+    </div>
+  );
+}
+```
+
+| フック               | 説明                                                                                 |
+| ----------------- | ---------------------------------------------------------------------------------- |
+| `useStory()`      | プリセット、選択中の `variant` と `setVariant`、`Component`、`frame` を返します。                     |
+| `useStoryArgs()`  | コントロールの値を反映した、レンダリング対象のコンポーネントの引数を返します。                                            |
+| `useStoryFrame()` | [`frame`](/docs/integrations/story#frame) の iframe 用の ref を返し、その iframe に引数を送信します。 |
+
+コントロールの編集には、`<StoryProvider />` がセットアップするフォームエンジン [`@fumari/stf`](https://github.com/fuma-nama/fumadocs/tree/dev/packages/stf) を使用します。`preset.controls` は、コンポーネントの props の[型ツリー](/docs/integrations/story#controls)です。
+
+<Callout title="組み込みパネルをベースにする">
+  コントロールパネルを一から作成するには、型ツリーのあらゆる種類のノードを処理する必要があります。以下の組み込みパネルをインストールし、
+  それを編集することをおすすめします。
+</Callout>
+
+## UI のインストール [#install-the-ui]
+
+引数のコントロールを含む、パネル全体です。
+
+```npm
+npx @fumadocs/cli add story/controls
+```
+
+<show when={props.framework === 'next'}>
+  ```tsx title="lib/story.tsx"
+  import { defineStoryFactory } from '@fumadocs/story/next/client';
+  import { WithControl } from '@/components/story';
+
+  export const { defineStory } = defineStoryFactory({ WithControl });
+  ```
+</show>
+
+<show when={props.framework !== 'next'}>
+  ```tsx title="lib/story.tsx"
+  import { defineStoryFactory } from '@fumadocs/story/vite/client';
+  import { WithControl } from '@/components/story';
+
+  export const { defineStory } = defineStoryFactory({ WithControl });
+  ```
+</show>

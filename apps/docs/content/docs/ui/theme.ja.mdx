@@ -1,0 +1,200 @@
+---
+title: テーマ
+description: Fumadocs UI にテーマを追加する
+icon: Palette
+---
+
+import { WidthTrigger } from './theme.client';
+
+## 概要 [#overview]
+
+Fumadocs UI は、Tailwind CSS のプリセットによって独自のカラー、アニメーション、ユーティリティを追加します。
+
+### セットアップ [#setup]
+
+サポートされているのは Tailwind CSS v4 のみです。プリセットには Fumadocs UI 自体のソースも含まれます:
+
+```css title="Tailwind CSS"
+@import 'tailwindcss';
+@import 'fumadocs-ui/css/neutral.css';
+@import 'fumadocs-ui/css/preset.css';
+```
+
+**Shadcn UI** を使用している場合は、代わりに `shadcn` プリセットを使用できます。Fumadocs UI は Shadcn UI のテーマの色をそのまま使用します。
+
+```css
+@import 'tailwindcss';
+@import 'fumadocs-ui/css/shadcn.css';
+@import 'fumadocs-ui/css/preset.css';
+```
+
+詳しくは[カラー](#colors)を参照してください。
+
+### Preflight の変更 [#preflight-changes]
+
+Tailwind CSS プラグインまたはビルド済みのスタイルシートを使用すると、ボーダー、テキスト、背景のデフォルトの色が変更されます。
+
+### ライト/ダークモード [#lightdark-modes]
+
+Fumadocs は [`next-themes`](https://github.com/pacocoursey/next-themes) を使用してライト/ダークモードをサポートしています。`next-themes` は Root Provider に含まれています。
+
+詳しくは [Root Provider](/docs/ui/layouts/root-provider#theme-provider) を参照してください。
+
+### RTL レイアウト [#rtl-layout]
+
+RTL (右から左) レイアウトに対応しています。
+
+RTL を有効にするには、body 要素とルートプロバイダーの `dir` prop を `rtl` に設定してください。
+
+```tsx
+import { RootProvider } from 'fumadocs-ui/provider/<framework>';
+import type { ReactNode } from 'react';
+
+export default function RootLayout({ children }: { children: ReactNode }) {
+  return (
+    <html lang="en" suppressHydrationWarning>
+      <body dir="rtl">
+        <RootProvider dir="rtl">{children}</RootProvider>
+      </body>
+    </html>
+  );
+}
+```
+
+### レイアウトの幅 [#layout-width]
+
+CSS 変数を使って、Docs レイアウトの最大幅をカスタマイズできます。
+
+```css
+:root {
+  --fd-layout-width: 1400px;
+}
+```
+
+<WidthTrigger />
+
+### カラー [#colors]
+
+多数のプリセットが標準で用意されているので、お好みのものを選んで使用できます。
+
+```css
+@import 'fumadocs-ui/css/<theme>.css';
+@import 'fumadocs-ui/css/preset.css';
+```
+
+<Tabs items={['neutral', 'black', 'vitepress', 'dusk', 'catppuccin', 'ocean', 'purple', 'solar', 'emerald', 'ruby', 'aspen']}>
+  <Tab value="neutral">
+    ![Neutral](/themes/neutral.png)
+  </Tab>
+
+  <Tab value="black">
+    ![Black](/themes/black.png)
+  </Tab>
+
+  <Tab value="vitepress">
+    ![Vitepress](/themes/vitepress.png)
+  </Tab>
+
+  <Tab value="dusk">
+    ![Dusk](/themes/dusk.png)
+  </Tab>
+
+  <Tab value="Catppuccin">
+    ![Catppuccin](/themes/catppuccin.png)
+  </Tab>
+
+  <Tab value="ocean">
+    ![Ocean](/themes/ocean.png)
+  </Tab>
+
+  <Tab value="purple">
+    ![Purple](/themes/purple.png)
+  </Tab>
+
+  <Tab value="solar">
+    ![Solar](/themes/solar.png)
+  </Tab>
+
+  <Tab value="emerald">
+    ![Emerald](/themes/emerald.png)
+  </Tab>
+
+  <Tab value="ruby">
+    ![Ruby](/themes/ruby.png)
+  </Tab>
+
+  <Tab value="aspen">
+    ![Aspen](/themes/aspen.png)
+  </Tab>
+</Tabs>
+
+このデザインシステムは [Shadcn UI](https://ui.shadcn.com) をベースにしています。[CSS/テーマ変数](https://tailwindcss.com/docs/theme)で色をカスタマイズすることもできます。
+
+```css title="global.css"
+@theme {
+  --color-fd-background: hsl(0, 0%, 96%);
+  --color-fd-foreground: hsl(0, 0%, 3.9%);
+  --color-fd-muted: hsl(0, 0%, 96.1%);
+  --color-fd-muted-foreground: hsl(0, 0%, 45.1%);
+  --color-fd-popover: hsl(0, 0%, 98%);
+  --color-fd-popover-foreground: hsl(0, 0%, 15.1%);
+  --color-fd-card: hsl(0, 0%, 94.7%);
+  --color-fd-card-foreground: hsl(0, 0%, 3.9%);
+  --color-fd-border: hsla(0, 0%, 80%, 50%);
+  --color-fd-primary: hsl(0, 0%, 9%);
+  --color-fd-primary-foreground: hsl(0, 0%, 98%);
+  --color-fd-secondary: hsl(0, 0%, 93.1%);
+  --color-fd-secondary-foreground: hsl(0, 0%, 9%);
+  --color-fd-accent: hsla(0, 0%, 82%, 50%);
+  --color-fd-accent-foreground: hsl(0, 0%, 9%);
+  --color-fd-ring: hsl(0, 0%, 63.9%);
+}
+
+.dark {
+  --color-fd-background: hsl(0, 0%, 7.04%);
+  --color-fd-foreground: hsl(0, 0%, 92%);
+  --color-fd-muted: hsl(0, 0%, 12.9%);
+  --color-fd-muted-foreground: hsla(0, 0%, 70%, 0.8);
+  --color-fd-popover: hsl(0, 0%, 11.6%);
+  --color-fd-popover-foreground: hsl(0, 0%, 86.9%);
+  --color-fd-card: hsl(0, 0%, 9.8%);
+  --color-fd-card-foreground: hsl(0, 0%, 98%);
+  --color-fd-border: hsla(0, 0%, 40%, 20%);
+  --color-fd-primary: hsl(0, 0%, 98%);
+  --color-fd-primary-foreground: hsl(0, 0%, 9%);
+  --color-fd-secondary: hsl(0, 0%, 12.9%);
+  --color-fd-secondary-foreground: hsl(0, 0%, 92%);
+  --color-fd-accent: hsla(0, 0%, 40.9%, 30%);
+  --color-fd-accent-foreground: hsl(0, 0%, 90%);
+  --color-fd-ring: hsl(0, 0%, 54.9%);
+}
+```
+
+### タイポグラフィ [#typography]
+
+[Tailwind CSS Typography](https://tailwindcss.com/docs/typography-plugin) をフォークした組み込みプラグインを提供しています。
+
+このプラグインは `prose` クラスと、それをカスタマイズするためのバリアントを追加します。
+
+```tsx
+<div className="prose">
+  <h1>Good Heading</h1>
+</div>
+```
+
+`prose` と併せて `prose-sm` または `prose-xs` を使用すると、`text-sm` または `text-xs` と同じフォントサイズと行の高さが適用され、フォントウェイトも見た目に合わせて調整されます：
+
+```tsx
+<div className="prose prose-sm">...</div>
+```
+
+> このプラグインは Fumadocs UI の MDX コンポーネントと組み合わせて使うことを前提としているため、`@tailwindcss/typography` と競合する場合があります。
+>
+> デフォルトのプラグインではなく `@tailwindcss/typography` を使う必要がある場合は、競合を避けるために [`className` オプションを設定](https://github.com/tailwindlabs/tailwindcss-typography/blob/main/README.md#changing-the-default-class-name)してください。
+>
+> ```sass
+> @import 'tailwindcss';
+> @plugin "@tailwindcss/typography" {
+>   className: wysiwyg;
+> }
+> ```

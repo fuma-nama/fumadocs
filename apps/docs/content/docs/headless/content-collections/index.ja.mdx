@@ -1,0 +1,87 @@
+---
+title: Content Collections
+description: Fumadocs で Content Collections を使用する
+---
+
+[Content Collections](https://www.content-collections.dev) は、コンテンツを型安全なデータコレクションに変換するライブラリです。
+
+## セットアップ [#setup]
+
+Content Collections の[公式ガイド](https://content-collections.dev/docs)に従って、お使いの React フレームワークに Content Collections をセットアップしてください。
+
+MDX が設定されていることを確認してください。
+
+```npm
+npm i @content-collections/mdx
+```
+
+Fumadocs と統合するには、`content-collections.ts` に以下を追加します。
+
+<include cwd meta="title=&#x22;content-collections.ts&#x22;">
+  ../../examples/content-collections/content-collections.ts
+</include>
+
+次に、これを `loader()` に渡します。
+
+<include cwd meta="title=&#x22;lib/source.ts&#x22;">
+  ../../examples/content-collections/lib/source.ts
+</include>
+
+これで完了です。Source API から、ページや生成されたページツリーにアクセスできます。
+
+```ts
+import { getPage } from '@/lib/source';
+
+const page = getPage(slugs);
+
+// MDX の出力
+page?.data.body;
+
+// 目次
+page?.data.toc;
+
+// 構造化データ（Search API 用）
+page?.data.structuredData;
+```
+
+### MDX オプション [#mdx-options]
+
+MDX のオプションは `transformMDX` 関数でカスタマイズできます。
+
+```ts
+import { defineCollection } from '@content-collections/core';
+import { transformMDX } from '@fumadocs/content-collections/configuration';
+
+const docs = defineCollection({
+  transform: (document, context) =>
+    transformMDX(document, context, {
+      // ここにオプションを指定
+    }),
+});
+```
+
+### コンポーネントのインポート [#import-components]
+
+Fumadocs UI など、他のパッケージのコンポーネントを使用するには、`<MDXContent />` コンポーネントに渡してください。
+
+```tsx
+import { MDXContent } from '@content-collections/mdx/react';
+import { getMDXComponents } from '@/components/mdx';
+
+return <MDXContent code={page.data.body} components={getMDXComponents()} />;
+```
+
+MDXファイル内でインポートすることもできますが、推奨されません。
+
+<Callout title="詳細解説: なぜ推奨されないのか？">
+  Content Collectionsは、MDXファイルのバンドルに`mdx-bundler`を使用しています。
+
+  node modulesからパッケージをインポートできるように、FumadocsはMDX Bundlerの`cwd`オプションにデフォルト値を設定しています。
+  これで問題なく動作しますが、それでもMDXファイル内でコンポーネントをインポートすることは**推奨しません**。
+
+  理由:
+
+  * コンポーネントをesbuildでバンドルする必要がありますが、本来これはフレームワークのバンドラー(ViteやTurbopackなど)が担うべき処理です。
+  * MDXファイルを変更せずに、コンポーネントのインポートパスをリファクタリングできます。
+  * Remote Sourcesを使用する場合、MDXファイルにインポートを記述する意味がありません。
+</Callout>

@@ -1,0 +1,71 @@
+---
+title: FlexSearch
+description: 高速で軽量な検索エンジンです。
+---
+
+## 概要 [#overview]
+
+セットアップ手順については、[FlexSearch の統合](/docs/headless/search/flexsearch)を参照してください。
+
+サーバー上で動作する API エンドポイント経由で検索するか、静的サイトの場合は静的にキャッシュされた JSON ファイルを使って検索します。
+
+## セットアップ [#setup]
+
+検索ダイアログを作成します。
+
+<Tabs items={['fetch (default)', 'static']}>
+  <Tab>
+    <include meta="title=&#x22;components/search.tsx&#x22;">fetch.tsx</include>
+  </Tab>
+
+  <Tab id="static">
+    静的サイトの場合は、検索サーバーで[静的モード](/docs/headless/search/flexsearch#static-export)を設定したうえで、検索クライアントを次のように変更してください。
+
+    <include meta="title=&#x22;components/search.tsx&#x22;">flexsearch.tsx</include>
+  </Tab>
+</Tabs>
+
+<include>.shared.ja.mdx</include>
+
+### タグフィルター [#tag-filter]
+
+必要に応じて、検索結果をタグで絞り込むための UI を追加できます。検索サーバー側で[タグフィルター](/docs/headless/search/flexsearch#tag-filter)を設定したうえで、以下を追加してください。
+
+```tsx
+'use client';
+
+import {
+  SearchDialog,
+  SearchDialogContent,
+  SearchDialogFooter,
+  SearchDialogOverlay,
+  type SharedProps,
+  TagsList,
+  TagsListItem,
+} from 'fumadocs-ui/components/dialog/search';
+import { useState } from 'react';
+import { useFlexsearchStatic } from 'fumadocs-core/search/client/flexsearch-static';
+
+export default function CustomSearchDialog(props: SharedProps) {
+  // [!code ++]
+  const [tag, setTag] = useState<string | undefined>();
+  const search = useFlexsearchStatic({
+    tag, // [!code ++]
+  });
+
+  return (
+    <SearchDialog {...search} {...props}>
+      <SearchDialogOverlay />
+      <SearchDialogContent>
+        ...
+        <SearchDialogFooter className="flex flex-row">
+          {/* [!code ++:3] */}
+          <TagsList tag={tag} onTagChange={setTag}>
+            <TagsListItem value="my-value">My Value</TagsListItem>
+          </TagsList>
+        </SearchDialogFooter>
+      </SearchDialogContent>
+    </SearchDialog>
+  );
+}
+```

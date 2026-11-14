@@ -1,0 +1,81 @@
+---
+title: 設定
+description: 共通の i18n 設定
+---
+
+<Callout title="Core API のみ">
+  フレームワークとの統合方法については、[国際化](/docs/internationalization)のガイドを参照してください。
+</Callout>
+
+## 設定を定義する [#define-config]
+
+Fumadocs Core は、i18n 対応に必要なミドルウェアとユーティリティを提供しています。
+
+各ユーティリティで共有する設定を定義できます。
+
+<include cwd meta="title=&#x22;lib/i18n.ts&#x22;">
+  ../../examples/i18n/lib/i18n.ts
+</include>
+
+### ロケールプレフィックスを非表示にする [#hide-locale-prefix]
+
+ロケールプレフィックスを非表示にする (例: `/en/page` -&gt; `/page`) には、`hideLocale` オプションを使用します。
+
+```ts
+import { defineI18n } from 'fumadocs-core/i18n';
+
+export const i18n = defineI18n({
+  defaultLanguage: 'en',
+  languages: ['en', 'cn'],
+  hideLocale: 'default-locale',
+});
+```
+
+| モード              | 説明                                  |
+| ---------------- | ----------------------------------- |
+| `always`         | プレフィックスを常に非表示にし、Cookie からロケールを検出します |
+| `default-locale` | デフォルトロケールのみを非表示にします                 |
+| `never`          | プレフィックスを非表示にしません(デフォルト)             |
+
+<Callout type="warn" title={<><code>always</code> を使用する場合</>}>
+  `always` モードでは、ロケールは(ミドルウェアによって設定される)Cookie に保存されるため、静的サイトには最適ではありません。
+
+  意図しないキャッシュの問題が発生する可能性があります。また、検索エンジンがページを正しくインデックスできるよう、SEO にも特に注意を払う必要があります。
+</Callout>
+
+### フォールバック言語 [#fallback-language]
+
+ファイルの翻訳が存在しない場合に使用するフォールバック言語です。デフォルトでは `defaultLanguage` が使用されます。
+
+`languages` 配列に含まれる言語のいずれかを指定できます。
+
+```ts
+import { defineI18n } from 'fumadocs-core/i18n';
+
+export const i18n = defineI18n({
+  languages: ['en', 'cn'],
+  defaultLanguage: 'en',
+  // 英語版のファイルが存在しない場合は中国語版が使用されます
+  fallbackLanguage: 'cn',
+});
+```
+
+フォールバックを無効にするには、`null` を設定します。
+
+```ts
+import { defineI18n } from 'fumadocs-core/i18n';
+
+export const i18n = defineI18n({
+  languages: ['en', 'cn'],
+  defaultLanguage: 'en',
+  fallbackLanguage: null,
+});
+```
+
+無効にすると、フォールバックは一切行われません (`meta.json` も含む) 。ただし、`$` を使えば、すべてのロケールで共有するファイルを作成できます。
+
+<Files>
+  <File name="my-page.$.md" />
+
+  <File name="meta.$.json" />
+</Files>

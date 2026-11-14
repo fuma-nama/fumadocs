@@ -1,0 +1,274 @@
+---
+title: コレクション
+description: アプリで扱うコンテンツデータのコレクション
+---
+
+## コレクションの定義 [#define-collections]
+
+特定のファイル群をパースするには、コレクションを定義します。このページの例では `source.config.ts` でコレクションを定義していますが、[Macro API](/docs/mdx/macro) では `lib/source.ts` で定義します。オプションはほぼ共通です。
+
+```ts
+import { defineCollections } from 'fumadocs-mdx/config';
+import { z } from 'zod';
+
+export const blog = defineCollections({
+  type: 'doc',
+  dir: './content/blog',
+  schema: z.object({
+    // スキーマ
+  }),
+  // その他のオプション
+});
+```
+
+### `type` [#type]
+
+指定できるコレクションの種類です。
+
+```ts
+import { defineCollections } from 'fumadocs-mdx/config';
+
+// meta ファイルのみをスキャン
+export const metaFiles = defineCollections({
+  type: 'meta',
+  // オプション
+});
+```
+
+* `type: meta`
+
+  JSON/YAML ファイルと、デフォルトエクスポートを持つコードモジュール (`meta.ts` または `meta.js`) を受け付けます。詳しくは [Meta](/docs/page-conventions#meta) を参照してください。利用可能なオプションは次のとおりです。
+
+  <auto-type-table path="./props.ts" name="MetaCollection" />
+
+* `type: doc`
+
+  Markdown/MDX ドキュメントを扱います。利用可能なオプションは次のとおりです。
+
+  <auto-type-table path="./props.ts" name="DocCollection" />
+
+### `schema` [#schema]
+
+ファイルデータを検証するスキーマです (`doc` タイプではフロントマター、`meta` タイプではファイルの内容を検証します) 。
+
+```ts
+import { defineCollections } from 'fumadocs-mdx/config';
+import { z } from 'zod';
+
+export const blog = defineCollections({
+  type: 'doc',
+  dir: './content/blog',
+  schema: z.object({
+    name: z.string(),
+  }),
+});
+```
+
+> Zod をはじめとする [Standard Schema](https://standardschema.dev) 互換のライブラリに対応しています。
+
+バリデーションはビルド時に実行されるため、出力はシリアライズ可能である必要がある点に注意してください。
+transform コンテキストを受け取る関数を渡すこともできます。
+
+```ts
+import { defineCollections } from 'fumadocs-mdx/config';
+import { z } from 'zod';
+
+export const blog = defineCollections({
+  type: 'doc',
+  dir: './content/blog',
+  schema: (ctx) => {
+    return z.object({
+      name: z.string(),
+      testPath: z.string().default(
+        // ファイルの絶対パス
+        ctx.path,
+      ),
+    });
+  },
+});
+```
+
+### `mdxOptions` [#mdxoptions]
+
+unifiedでコンパイルされるコレクションに対して、コレクション単位でMDXオプションをカスタマイズできます。
+
+> このAPIは`doc`タイプでのみ使用できます。
+
+```ts title="source.config.ts"
+import { defineCollections } from 'fumadocs-mdx/config';
+
+export const blog = defineCollections({
+  type: 'doc',
+  dir: './content/blog',
+  mdxOptions: {
+    // MDX のオプション
+  },
+});
+```
+
+仕様上、グローバル設定と Fumadocs MDX によって適用されるデフォルト設定はすべて削除されます。
+MDX のオプションを完全に制御できます。
+
+デフォルトの MDX プリセットを適用するには、[`applyMdxPreset`](/docs/mdx/mdx) を使用してください。
+
+```ts title="source.config.ts"
+import { applyMdxPreset, defineCollections } from 'fumadocs-mdx/config';
+
+export const blog = defineCollections({
+  type: 'doc',
+  dir: './content/blog',
+  mdxOptions: applyMdxPreset({
+    // プリセットを拡張
+  }),
+});
+```
+
+### `compiler` [#compiler]
+
+> このAPIは `doc` タイプでのみ使用できます。
+
+unified の代わりに [Sätteri](/docs/mdx/mdx#satteri) でコレクションをコンパイルします。その際は `mdxOptions` の代わりに `satteriOptions` を渡してください。
+
+```ts title="source.config.ts"
+import { defineCollections } from 'fumadocs-mdx/config';
+
+export const blog = defineCollections({
+  type: 'doc',
+  dir: './content/blog',
+  compiler: 'satteri',
+  // 省略可能。デフォルトはグローバルの `satteriOptions` です
+  satteriOptions: {
+    // Sätteri のオプション
+  },
+});
+```
+
+`mdxOptions` とは異なり、コレクションレベルの `satteriOptions` では、`preset: 'minimal'` を渡さない限りデフォルトのプリセットが維持されます。また、グローバルの `satteriOptions` とはマージされず、それを置き換えます。
+
+### `postprocess` [#postprocess]
+
+> このAPIは `doc` タイプでのみ利用できます。
+
+`postprocess` APIを使用すると、ビルド時の情報をランタイムに渡すことができます。
+
+* #### `includeProcessedMarkdown` [#includeprocessedmarkdown]
+
+  [Remark LLMs](/docs/headless/mdx/remark-llms) によって生成された、ドキュメントのMarkdownをエクスポートします。`true` またはオプションを渡してください。
+
+  ```ts tab="docs"
+  import { defineDocs } from 'fumadocs-mdx/config';
+
+  export default defineDocs({
+    docs: {
+      postprocess: {
+        // [!code ++]
+        includeProcessedMarkdown: true,
+      },
+    },
+  });
+  ```
+
+  ```ts tab="doc"
+  import { defineCollections } from 'fumadocs-mdx/config';
+
+  export const blog = defineCollections({
+    type: 'doc',
+    postprocess: {
+      // [!code ++]
+      includeProcessedMarkdown: true,
+    },
+  });
+  ```
+
+  出力は `getText('processed')` で読み取れます。たとえば `loader()` からは次のように取得します。
+
+  ```ts
+  import { source } from '@/lib/source';
+
+  const page = source.getPage('...');
+  console.log(await page.data.getText('processed'));
+  ```
+
+* #### `valueToExport` [#valuetoexport]
+
+  一部のremarkプラグインは出力を `vfile.data`(コンパイル時のメモリ)に保存するため、コードからはアクセスできません。
+
+  含めたいプロパティ名を指定すると、それらがESMエクスポートに変換され、MDXファイルをインポートしたときにアクセスできるようになります。
+
+  ```ts tab="docs"
+  import { defineDocs } from 'fumadocs-mdx/config';
+
+  export default defineDocs({
+    docs: {
+      postprocess: {
+        // [!code ++]
+        valueToExport: ['dataName'],
+      },
+    },
+  });
+  ```
+
+  ```ts tab="doc"
+  import { defineCollections } from 'fumadocs-mdx/config';
+
+  export const blog = defineCollections({
+    type: 'doc',
+    postprocess: {
+      // [!code ++]
+      valueToExport: ['dataName'],
+    },
+  });
+  ```
+
+## Docs の定義 [#define-docs]
+
+Fumadocs 用のコレクションを定義します。
+
+```ts
+import { defineDocs } from 'fumadocs-mdx/config';
+
+export const docs = defineDocs({
+  dir: '/my/content/dir',
+  docs: {
+    // 省略可能。`doc` コレクションのオプション
+  },
+  meta: {
+    // 省略可能。`meta` コレクションのオプション
+  },
+});
+```
+
+### `dir` [#dir]
+
+コンテンツディレクトリは、コレクションごとではなく `defineDocs` でカスタマイズしてください。
+
+```ts
+import { defineDocs } from 'fumadocs-mdx/config';
+
+export const docs = defineDocs({
+  dir: 'content/guides',
+});
+```
+
+### `schema` [#schema-1]
+
+`docs` と `meta` のデフォルトの Zod 4 スキーマを拡張できます。
+
+```ts
+import { defineDocs } from 'fumadocs-mdx/config';
+import { metaSchema, pageSchema } from 'fumadocs-core/source/schema';
+import { z } from 'zod';
+
+export const docs = defineDocs({
+  docs: {
+    schema: pageSchema.extend({
+      index: z.boolean().default(false),
+    }),
+  },
+  meta: {
+    schema: metaSchema.extend({
+      // その他の props
+    }),
+  },
+});
+```

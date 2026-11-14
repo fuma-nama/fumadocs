@@ -1,0 +1,217 @@
+---
+title: 翻訳
+description: UI に翻訳を追加する
+---
+
+## 概要 [#overview]
+
+Fumadocs の公式パッケージはすべてデフォルトで英語を使用しますが、他の言語の翻訳を追加することもできます。
+
+> このページでは主に UI の翻訳を追加する方法について詳しく説明します。国際化の全体像については、[国際化](/docs/internationalization)ガイドを参照してください。
+
+### 単一言語 [#singular]
+
+**単一言語**(Singular)とは、1つの言語のみの翻訳を追加する方法を指します。
+
+```ts title="lib/layout.shared.tsx"
+import { defineTranslations } from 'fumadocs-core/i18n';
+import { uiTranslations } from 'fumadocs-ui/i18n';
+
+export const translations = defineTranslations().extend(uiTranslations()).add({
+  // [ラベル]: [翻訳]
+  'Search(search trigger)': '搜尋文檔',
+});
+```
+
+> `.add()` は、すべての `.extend()` の呼び出しが完了した**後に**呼び出してください。
+
+翻訳を `<RootProvider />` に渡します。
+
+```tsx
+import { RootProvider } from 'fumadocs-ui/provider/<framework>';
+import { i18nProvider } from 'fumadocs-ui/i18n';
+import { translations } from '@/lib/layout.shared';
+
+export function Layout({ children }: { children: React.ReactNode }) {
+  return (
+    <RootProvider
+      // [!code ++]
+      i18n={i18nProvider(translations)}
+    >
+      {children}
+    </RootProvider>
+  );
+}
+```
+
+### 多言語対応 [#multilingual]
+
+複数の言語の翻訳を定義できます。これには標準的な [i18n](/docs/internationalization) のセットアップが必要です。
+
+```ts title="lib/layout.shared.tsx"
+import { defineTranslations } from 'fumadocs-core/i18n';
+import { uiTranslations } from 'fumadocs-ui/i18n';
+import { i18n } from '@/lib/i18n';
+
+export const translations = i18n
+  .translations()
+  .extend(uiTranslations())
+  .add({
+    // [ロケールコード]: [翻訳]
+    cn: {
+      // [ラベル]: [翻訳]
+      'Search(search trigger)': '搜尋文檔',
+    },
+  });
+```
+
+翻訳を `<RootProvider />` に渡します。
+
+```tsx
+import { RootProvider } from 'fumadocs-ui/provider/<framework>';
+import { i18nProvider } from 'fumadocs-ui/i18n';
+import { translations } from '@/lib/layout.shared';
+
+export function Layout({ locale, children }: { locale: string; children: React.ReactNode }) {
+  return (
+    <RootProvider
+      // [!code ++]
+      i18n={i18nProvider(translations, locale)}
+    >
+      {children}
+    </RootProvider>
+  );
+}
+```
+
+## 言語パック [#language-packs]
+
+言語パックは、`fumadocs-ui` のほか、Fumadocs OpenAPI などいくつかのインテグレーション向けの翻訳を提供します。
+
+```npm
+npm i @fumadocs/language
+```
+
+> ご希望の言語が公式の言語パックにない場合は、ぜひ[リポジトリ](https://github.com/fuma-nama/fumadocs)へのコントリビューションをお願いします。
+
+言語パックを利用するには、`preset()` を使用します。
+
+```ts tab="Singular"
+import { defineTranslations } from 'fumadocs-core/i18n';
+import { openapiTranslations } from 'fumadocs-openapi/i18n';
+import { uiTranslations } from 'fumadocs-ui/i18n';
+import { zhTW } from '@fumadocs/language/zh-tw';
+
+export const translations = defineTranslations()
+  .extend(uiTranslations())
+  // 設定したインテグレーションに応じて拡張機能を追加します（例: Fumadocs OpenAPI）:
+  .extend(openapiTranslations())
+  // 繁体字中国語
+  .preset(zhTW());
+```
+
+```ts tab="Multilingual"
+import { defineTranslations } from 'fumadocs-core/i18n';
+import { openapiTranslations } from 'fumadocs-openapi/i18n';
+import { uiTranslations } from 'fumadocs-ui/i18n';
+import { zhTW } from '@fumadocs/language/zh-tw';
+import { i18n } from '@/lib/i18n';
+
+export const translations = i18n
+  .translations()
+  .extend(uiTranslations())
+  // 設定したインテグレーションに応じて拡張機能を追加します(例: Fumadocs OpenAPI)
+  .extend(openapiTranslations())
+  // "cn" ロケールコードに繁体字中国語の翻訳を追加します
+  .preset('cn', zhTW());
+```
+
+### カスタムパック [#custom-packs]
+
+独自の言語パックを作成して公開することもできます。
+
+たとえば、`zh-TW` 言語パックの構成は次のとおりです。
+
+```ts twoslash
+import type { TranslationPreset } from 'fumadocs-core/i18n';
+import * as OpenAPI from 'fumadocs-openapi/i18n';
+import * as UI from 'fumadocs-ui/i18n';
+import * as Story from '@fumadocs/story/i18n';
+
+const translations = {
+  displayName: '繁體中文',
+  'Server URL(playground server select)': '伺服器 URL',
+  'Variant(story controls)': '變體',
+  // ...
+} satisfies Partial<UI.Translations & OpenAPI.Translations & Story.Translations>;
+
+export function zhTW(): TranslationPreset<keyof typeof translations> {
+  return {
+    name: 'zh-TW',
+    value: translations,
+  };
+}
+```
+
+## 拡張機能 [#extensions]
+
+拡張機能は、翻訳に使用できるラベルを宣言します。クライアントに送信されるペイロードには、登録済みのラベルのみが含まれます。
+
+### カスタム拡張機能 [#custom-extension]
+
+Fumadocs 向けのコミュニティパッケージを開発している場合は、拡張機能を作成して独自の翻訳を登録できます。
+
+まず、Fumadocs が使用している翻訳ツールキットをインストールしてください。
+
+```npm
+npm i @fuma-translate/react
+```
+
+```ts tab="i18n.ts" twoslash
+import type { TranslationExtension } from 'fumadocs-core/i18n';
+
+const keys = [
+  // キーの形式: "your label(additional context)"
+  'Hello {user}(welcome screen)',
+] as const;
+
+export function myTranslations(): TranslationExtension<(typeof keys)[number]> {
+  return { keys };
+}
+```
+
+```tsx tab="Reference"
+'use client';
+import { useTranslations } from '@fuma-translate/react';
+
+export function Comp() {
+  const t = useTranslations();
+
+  return (
+    <div>
+      {t('Hello {user}', {
+        note: 'welcome screen',
+        variables: {
+          user: '...',
+        },
+      })}
+    </div>
+  );
+}
+```
+
+> ここでは簡略化のため省略していますが、翻訳キーと型をハードコーディングせずにコンパイルする方法については、[Fuma Translate](https://fuma-translate.vercel.app) のドキュメントを参照してください。
+
+利用者は、次のようにこの拡張機能を使用できます。
+
+```ts
+import { defineTranslations } from 'fumadocs-core/i18n';
+import { myTranslations } from 'my-package/i18n';
+
+export const translations = defineTranslations()
+  // [!code ++]
+  .extend(myTranslations())
+  .add({
+    'Hello {user}(welcome screen)': '你好 {user}',
+  });
+```

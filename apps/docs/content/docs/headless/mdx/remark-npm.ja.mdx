@@ -1,0 +1,116 @@
+---
+title: Remark NPM
+description: パッケージマネージャーごとのコードブロックを生成します
+---
+
+## 使い方 [#usage]
+
+Remark NPM は remark プラグインです。Fumadocs MDX ではデフォルトで有効になっています。オプションは `remarkNpmOptions` で指定できます。
+
+必要なコンポーネントを定義します。
+
+```tsx tab="Custom" title="components/mdx.tsx"
+import { CodeBlockTabs, CodeBlockTab, CodeBlockTabsList, CodeBlockTabsTrigger } from 'my-ui';
+import type { MDXComponents } from 'mdx/types';
+
+export function getMDXComponents(components?: MDXComponents) {
+  return {
+    CodeBlockTabs,
+    CodeBlockTab,
+    CodeBlockTabsList,
+    CodeBlockTabsTrigger,
+    ...components,
+  } satisfies MDXComponents;
+}
+```
+
+```tsx tab="Fumadocs UI" title="components/mdx.tsx"
+import defaultComponents from 'fumadocs-ui/mdx';
+import type { MDXComponents } from 'mdx/types';
+
+export function getMDXComponents(components?: MDXComponents) {
+  return {
+    // `defaultComponents` にデフォルトで含まれています
+    ...defaultComponents,
+    ...components,
+  } satisfies MDXComponents;
+}
+```
+
+### 入力 [#input]
+
+言語に `npm` を指定してコードブロックを作成します。
+
+````mdx
+```npm
+npm i my-package
+```
+
+```npm
+npm i my-package -D
+```
+````
+
+`package-install` コードブロックも使用できます。`my-package` のようなパッケージ名を記述すると、`npm install` コマンドに変換されます。
+
+### 出力 [#output]
+
+プラグインによって、次のような構造が生成されます。
+
+```mdx
+<CodeBlockTabs defaultValue="npm">
+  <CodeBlockTabsList>
+    <CodeBlockTabsTrigger value="npm">npm</CodeBlockTabsTrigger>
+    <CodeBlockTabsTrigger value="pnpm">pnpm</CodeBlockTabsTrigger>
+    <CodeBlockTabsTrigger value="yarn">yarn</CodeBlockTabsTrigger>
+    <CodeBlockTabsTrigger value="bun">bun</CodeBlockTabsTrigger>
+  </CodeBlockTabsList>
+
+  <CodeBlockTab value="npm">...</CodeBlockTab>
+  <CodeBlockTab value="pnpm">...</CodeBlockTab>
+  <CodeBlockTab value="yarn">...</CodeBlockTab>
+  <CodeBlockTab value="bun">...</CodeBlockTab>
+</CodeBlockTabs>
+```
+
+```npm
+npm i my-package
+```
+
+### 永続化 [#persistent]
+
+Fumadocs UI と組み合わせて使用する場合は、`persist` オプションで選択した値を永続化できます。
+
+```ts tab="unified" title="source.config.ts"
+import { defineConfig } from 'fumadocs-mdx/config';
+
+export default defineConfig({
+  mdxOptions: {
+    remarkNpmOptions: {
+      persist: {
+        id: 'package-manager',
+      },
+    },
+  },
+});
+```
+
+```ts tab="Sätteri" title="source.config.ts"
+import { defineConfig, defineDocs } from 'fumadocs-mdx/config';
+
+export const docs = defineDocs({
+  docs: { compiler: 'satteri' },
+});
+
+export default defineConfig({
+  satteriOptions: {
+    remarkNpmOptions: {
+      persist: {
+        id: 'package-manager',
+      },
+    },
+  },
+});
+```
+
+これにより、`<CodeBlockTabs />` に [`persist`](/docs/ui/components/tabs#persistent) prop が付与されます。

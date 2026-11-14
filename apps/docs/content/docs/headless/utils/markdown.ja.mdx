@@ -1,0 +1,97 @@
+---
+title: Markdown レンダリング
+description: React 要素を Markdown としてレンダリングします。
+---
+
+## 概要 [#overview]
+
+`fumadocs-core/server` は、React サーバーコンポーネントを Markdown ドキュメントとしてレンダリングします。
+
+```tsx tab="Input"
+import { renderToMarkdown } from 'fumadocs-core/server';
+
+const text = await renderToMarkdown(
+  <div>
+    <h2>Hello World</h2>
+    <p>
+      Some <b>rich</b> content.
+    </p>
+  </div>,
+);
+```
+
+```md tab="Output"
+## Hello World
+
+Some **rich** content.
+```
+
+これは [Remark LLMs](/docs/headless/mdx/remark-llms#jsx-elements) がエクスポートするコンポーネントの内部で使用されており、Markdown として配信したいサーバーレンダリングされたコンテンツであれば、どのようなものにも使用できます。
+
+> `renderToMarkdown()` はサーバー専用です。
+
+## `asMarkdown` [#asmarkdown]
+
+各コンポーネントは、それぞれ独自の Markdown 表現を定義します。レンダリング中に `asMarkdown()` を呼び出すことで、この機能を有効化 (オプトイン) できます。`asMarkdown()` は、コンポーネントが Markdown にレンダリングされている場合に[ターゲット](#targets)を返し、そのときコンポーネントが返す HTML 要素は Markdown に変換されます。
+
+```tsx
+import { asMarkdown, md } from 'fumadocs-core/server';
+
+function Callout({ title, children }) {
+  if (asMarkdown()) return md.linePrefix('> ')`**${title}**\n${children}`;
+
+  return <div className="...">...</div>;
+}
+```
+
+これを一度も呼び出さないコンポーネントは、次のように props を保持したまま JSX 構文として残ります。
+
+```mdx
+<Tabs items={['a', 'b']}>...</Tabs>
+```
+
+これには、サーバー上では実行されないクライアントコンポーネントも含まれます。
+
+### ターゲット [#targets]
+
+ツリーはターゲットに応じてレンダリングされます。ターゲットは `renderToMarkdown()` の `target` オプションで指定します。
+
+* `markdown` (デフォルト) : エージェント向けのドキュメントです。
+* `search`: [検索レコード](/docs/headless/mdx/structure#components)のテキストです。リンクのテキストは含まれますが、画像やコードブロックは含まれません。また、Markdown 形式を持たないコンポーネントは、テキストの props を持つ HTML タグとして出力されます。
+
+これらのルールは、`<a href>` のようにコンポーネントが返す要素に適用されます。`md` テンプレート内にテキストとして書かれたリンクは、検索でもリンク先が残ります。そのため、要素を返すか、ターゲットを確認してください。
+
+`asMarkdown()` はターゲットを返すため、コンポーネントは検索インデックス向けよりも多くの情報をエージェントに提供できます。
+
+```tsx
+import { asMarkdown, md } from 'fumadocs-core/server';
+
+function Version({ name, released }) {
+  const target = asMarkdown();
+  if (target === 'search') return name;
+  if (target) return md`${name} (released ${released})`;
+
+  return <span title={released}>{name}</span>;
+}
+```
+
+## `md` [#md]
+
+Markdown 出力用のタグ付きテンプレートです。埋め込む値には、文字列、React ノード、Promise、またはそれらの配列を指定できます。`children` を加工する前に文字列化したい場合に使用します。
+
+コンテンツをブロックとして返すバリアントが 2 つあります。
+
+* `md.linePrefix(prefix)`: すべての行の先頭にプレフィックスを付けます(例: 引用ブロックの場合は `'> '`)。
+* `md.indent(size)`: すべての行をインデントします。
+
+## `renderRoute` [#renderroute]
+
+ページ要素を Markdown にレンダリングします。そのコンポーネントが `asMarkdown()` を呼び出していない場合は `undefined` を返します。
+
+```tsx
+import { renderRoute } from 'fumadocs-core/server';
+
+const text = await renderRoute(<Page params={params} />);
+```
+
+ルートの Markdown 版を配信する場合に便利です。オプトインしたページは Markdown を生成し、それ以外のページは `undefined` を返すため、404 を返したり別のソースにフォールバックしたりできます。

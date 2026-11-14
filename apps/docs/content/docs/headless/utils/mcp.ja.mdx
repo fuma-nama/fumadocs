@@ -1,0 +1,48 @@
+---
+title: MCP
+description: ドキュメントをMCPツールとしてAIエージェントに公開します。
+---
+
+`fumadocs-core/mcp` は [MCP](https://modelcontextprotocol.io) サーバーにツールを登録し、AIエージェントがドキュメントを読み取ったり検索したりできるようにします。
+
+<Callout>
+  [MCP Server](/docs/integrations/llms#mcp-server) ガイドに従うと、これらのツールを備えたルートがセットアップされます。
+</Callout>
+
+## 使い方 [#usage]
+
+```package-install
+fumadocs-core @modelcontextprotocol/server zod
+```
+
+ソース、その [`docsLlms`](/docs/integrations/llms#docsllms) レンダラー、検索サーバーを指定して、ツールを登録します：
+
+```ts title="lib/mcp.ts"
+import { McpServer } from '@modelcontextprotocol/server';
+import { registerSearchTool, registerSourceTools } from 'fumadocs-core/mcp';
+import { createFromSource } from 'fumadocs-core/search/server';
+import { source, docsLlms } from '@/lib/source';
+
+export const mcp = new McpServer({ name: 'docs', version: '1.0.0' });
+
+// `list_pages` & `get_page`
+registerSourceTools(mcp, source, docsLlms);
+// `search`
+registerSearchTool(mcp, createFromSource(source));
+```
+
+ランタイムで読み込むコンテンツソースの場合は、ソースのゲッターを渡してください。
+
+```ts
+registerSourceTools(mcp, getSource, docsLlms);
+```
+
+次に、Streamable HTTP トランスポートなどのトランスポートにサーバーを接続します。
+
+## ツール [#tools]
+
+| ツール          | 入力                | 出力                                  |
+| ------------ | ----------------- | ----------------------------------- |
+| `list_pages` | なし                | `llms.index()`(ページのインデックス)          |
+| `get_page`   | ページの `url`        | `llms.page(page)`(一致するページがない場合はエラー) |
+| `search`     | `query`、`locale?` | JSON 形式の検索結果                        |

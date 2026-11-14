@@ -1,0 +1,376 @@
+---
+title: ドキュメントページ
+description: ドキュメント内の 1 ページ
+---
+
+import { TOCStyle, TOCStylePreview } from './page.client';
+
+Page はドキュメントの基本となる要素で、目次、
+フッター、パンくずリストが含まれます。
+
+<Customization />
+
+## 使い方 [#usage]
+
+使用しているレイアウトに合わせてインポートしてください。
+
+```tsx title="page.tsx" tab="Docs Layout"
+import { DocsPage, DocsDescription, DocsTitle, DocsBody } from 'fumadocs-ui/layouts/docs/page';
+
+<DocsPage>
+  <DocsTitle>title</DocsTitle>
+  <DocsDescription>description</DocsDescription>
+  <DocsBody>
+    <h2>This heading looks good!</h2>
+    It applies the Typography styles, wrap your content here.
+  </DocsBody>
+</DocsPage>;
+```
+
+```tsx title="page.tsx" tab="Notebook Layout"
+import { DocsPage, DocsDescription, DocsTitle, DocsBody } from 'fumadocs-ui/layouts/notebook/page';
+
+<DocsPage>
+  <DocsTitle>title</DocsTitle>
+  <DocsDescription>description</DocsDescription>
+  <DocsBody>
+    <h2>This heading looks good!</h2>
+    It applies the Typography styles, wrap your content here.
+  </DocsBody>
+</DocsPage>;
+```
+
+<Callout type="info" title="補足">
+  `page.tsx` で `DocsTitle` を使ってタイトルをレンダリングする代わりに、MDX ファイル内にタイトルを記述することもできます。
+  この場合、タイトルは MDX の本文内でレンダリングされます。
+</Callout>
+
+### ページアクション [#page-actions]
+
+GitHub へのリンクと、AI 向けのショートカットリンクを表示します。
+
+```tsx
+import { DocsPage, ViewOptionsPopover } from 'fumadocs-ui/layouts/<layout>/page';
+
+const githubUrl = `https://github.com/fuma-nama/fumadocs/blob/main/content/docs/${encodeURI(page.path)}`
+
+<DocsPage>
+  <ViewOptionsPopover githubUrl={githubUrl} />
+</DocsPage>;
+```
+
+### 最終更新日時 [#last-updated-time]
+
+ページの最終更新日時を表示します。
+
+```tsx
+import { DocsPage, PageLastUpdate } from 'fumadocs-ui/layouts/<layout>/page';
+
+const lastModifiedTime: Date | undefined;
+
+<DocsPage>
+  {/* その他のコンテンツ */}
+  {lastModifiedTime && <PageLastUpdate date={lastModifiedTime} />}
+</DocsPage>;
+```
+
+`lastModifiedTime` の取得には、GitHub などのバージョン管理システムや CMS を利用できます。
+
+<Tabs items={['Fumadocs MDX', 'GitHub API']}>
+  <Tab>
+    [`lastModified`](/docs/mdx/last-modified) を有効にすると利用できます。
+
+    ```tsx
+    import { source } from '@/lib/source';
+    const page = source.getPage(['...']);
+
+    const lastModifiedTime = page.data.lastModified;
+    ```
+  </Tab>
+
+  <Tab>
+    GitHub でホストしているドキュメントの場合は、
+    [`getGithubLastEdit`](/docs/headless/utils/git-last-edit) ユーティリティを使用できます。
+
+    ```tsx
+    import { getGithubLastEdit } from 'fumadocs-core/content/github';
+
+    const lastModifiedTime = await getGithubLastEdit({
+      owner: 'fuma-nama',
+      repo: 'fumadocs',
+      // Git 内のファイルパス
+      path: `content/docs/${page.path}`,
+    });
+    ```
+  </Tab>
+</Tabs>
+
+## 設定 [#configurations]
+
+### フルモード [#full-mode]
+
+ページを広げて利用可能なスペース全体を使うには、ページコンポーネントに `full` を渡します。
+この場合、目次は常にポップオーバーとして表示されます。
+
+```tsx
+import { DocsPage } from 'fumadocs-ui/layouts/<layout>/page';
+
+<DocsPage full>...</DocsPage>;
+```
+
+### 目次 [#table-of-contents]
+
+記事内のすべての見出しを一覧で表示します。見出しの配列を渡す必要があります。
+
+Markdown および MDX ドキュメントの場合は、
+[目次ユーティリティ](/docs/headless/utils/get-toc)を使って取得できます。Fumadocs MDX などのコンテンツソースでは、この機能が標準で用意されています。
+
+```tsx
+import { DocsPage } from 'fumadocs-ui/layouts/<layout>/page';
+
+<DocsPage toc={headings}>...</DocsPage>;
+```
+
+`tableOfContent` でカスタマイズできます。小さい画面のデバイスでは `tableOfContentPopover` でカスタマイズできます。
+
+```tsx title="page.tsx"
+import { DocsPage } from 'fumadocs-ui/layouts/<layout>/page';
+
+return (
+  <DocsPage tableOfContent={options} tableOfContentPopover={options}>
+    ...
+  </DocsPage>
+);
+```
+
+<auto-type-table type="import('fumadocs-ui/layouts/docs/page/slots/toc').TOCProps" />
+
+#### スタイル [#style]
+
+目次のスタイルは変更できます。
+
+<Wrapper>
+  <TOCStylePreview>
+    <TOCStyle value="normal">トラックラインと、アクティブな見出しを示すサムを表示します(デフォルト)。</TOCStyle>
+
+    <TOCStyle value="clerk">
+      見出しの階層に沿ったトラックラインを表示します。[Clerk](https://clerk.com)のデザインを参考にしています。
+    </TOCStyle>
+
+    <TOCStyle value="block">トラックラインは表示せず、アクティブな見出しの背後でブロックがスライドします。</TOCStyle>
+  </TOCStylePreview>
+</Wrapper>
+
+```tsx
+import { DocsPage } from 'fumadocs-ui/layouts/<layout>/page';
+
+<DocsPage
+  tableOfContent={{
+    style: 'clerk',
+  }}
+>
+  ...
+</DocsPage>;
+```
+
+#### 目次の置き換え [#replace-toc]
+
+コンポーネントを置き換えるには、次のようにします。
+
+```tsx tab="page.tsx"
+import { TOCProvider, TOC, TOCPopover } from './my-toc';
+
+return (
+  <DocsPage
+    slots={{
+      toc: {
+        provider: TOCProvider,
+        main: TOC,
+        popover: TOCPopover,
+      },
+    }}
+  >
+    ...
+  </DocsPage>
+);
+```
+
+```tsx tab="my-toc.tsx"
+'use client';
+import type {
+  TOCProps,
+  TOCPopoverProps,
+  TOCProviderProps,
+} from 'fumadocs-ui/layouts/<layout>/page/slots/toc';
+
+export function TOCProvider({ toc, children }: TOCProviderProps) {
+  // 目次の項目を受け取ります。React コンテキストを使って子コンポーネントに渡せます
+  console.log(toc);
+  return children;
+}
+
+export function TOC(props: TOCProps) {
+  return <div>Hello World</div>;
+}
+
+export function TOCPopover(props: TOCPopoverProps) {
+  return <div>Popover</div>;
+}
+```
+
+Fumadocs CLI を使うと、デフォルトの実装をベースに作成を始められます。
+
+```bash tab="Docs Layout"
+npx @fumadocs/cli add slots/docs/page/toc
+```
+
+```bash tab="Notebook Layout"
+npx @fumadocs/cli add slots/notebook/page/toc
+```
+
+```bash tab="Flux Layout"
+npx @fumadocs/cli add slots/flux/page/toc
+```
+
+### フッター [#footer]
+
+フッターは、前後のページへ移動する2つのボタンを備えたナビゲーション要素です。指定しない場合は、ページツリーから取得した隣接ページが表示されます。
+
+`footer` prop でフッターをカスタマイズできます。
+
+```tsx
+import { DocsPage } from 'fumadocs-ui/layouts/<layout>/page';
+
+<DocsPage footer={options}>...</DocsPage>;
+```
+
+<auto-type-table type="Omit<import('fumadocs-ui/layouts/docs/page').FooterProps, keyof React.ComponentProps<'div'>>" />
+
+#### フッターを置き換える [#replace-footer]
+
+コンポーネントを置き換えるには、次のようにします。
+
+```tsx tab="page.tsx"
+import { DocsPage } from 'fumadocs-ui/layouts/<layout>/page';
+import { Footer } from './my-footer';
+
+<DocsPage
+  slots={{
+    footer: Footer,
+  }}
+/>;
+```
+
+```tsx tab="my-footer.tsx"
+'use client';
+import type { FooterProps } from 'fumadocs-ui/layouts/<layout>/page/slots/footer';
+
+export function Footer(props: FooterProps) {
+  return <div>Hello World</div>;
+}
+```
+
+Fumadocs CLI を使うと、デフォルトの実装をベースにカスタマイズを始められます。
+
+```bash tab="Docs Layout"
+npx @fumadocs/cli add slots/docs/page/footer
+```
+
+```bash tab="Notebook Layout"
+npx @fumadocs/cli add slots/notebook/page/footer
+```
+
+```bash tab="Flux Layout"
+npx @fumadocs/cli add slots/flux/page/footer
+```
+
+### パンくずリスト [#breadcrumb]
+
+ユーザーがフォルダー内のページを閲覧している場合にのみ表示されるナビゲーション要素です。
+
+`breadcrumb` オプションでパンくずリストをカスタマイズできます。
+
+```tsx
+import { DocsPage } from 'fumadocs-ui/layouts/<layout>/page';
+
+<DocsPage breadcrumb={options}>...</DocsPage>;
+```
+
+<auto-type-table type="Omit<import('fumadocs-ui/layouts/docs/page').BreadcrumbProps, keyof React.ComponentProps<'div'>>" />
+
+#### パンくずリストを置き換える [#replace-breadcrumb]
+
+コンポーネントを置き換えるには、次のようにします。
+
+```tsx tab="page.tsx"
+import { DocsPage } from 'fumadocs-ui/layouts/<layout>/page';
+import { Breadcrumb } from './my-breadcrumb';
+
+<DocsPage
+  slots={{
+    breadcrumb: Breadcrumb,
+  }}
+/>;
+```
+
+```tsx tab="my-breadcrumb.tsx"
+'use client';
+import type { BreadcrumbProps } from 'fumadocs-ui/layouts/<layout>/page/slots/breadcrumb';
+
+export function Breadcrumb(props: BreadcrumbProps) {
+  return <div>Hello World</div>;
+}
+```
+
+Fumadocs CLI を使うと、デフォルトの実装をベースにして始められます。
+
+```bash tab="Docs Layout"
+npx @fumadocs/cli add slots/docs/page/breadcrumb
+```
+
+```bash tab="Notebook Layout"
+npx @fumadocs/cli add slots/notebook/page/breadcrumb
+```
+
+```bash tab="Flux Layout"
+npx @fumadocs/cli add slots/flux/page/breadcrumb
+```
+
+### Container [#container]
+
+Container は、パンくずリスト、本文、フッターを囲む記事のラッパーを制御します。
+
+ページのコンテナを置き換えるには、次のようにします。
+
+```tsx tab="page.tsx"
+import { DocsPage } from 'fumadocs-ui/layouts/<layout>/page';
+import { Container } from './my-container';
+
+<DocsPage
+  slots={{
+    container: Container,
+  }}
+/>;
+```
+
+```tsx tab="my-container.tsx"
+'use client';
+
+export function Container(props: React.ComponentProps<'article'>) {
+  return <div />;
+}
+```
+
+Fumadocs CLI を使って、デフォルトの実装をベースに始めることができます。
+
+```bash tab="Docs Layout"
+npx @fumadocs/cli add slots/docs/page/container
+```
+
+```bash tab="Notebook Layout"
+npx @fumadocs/cli add slots/notebook/page/container
+```
+
+```bash tab="Flux Layout"
+npx @fumadocs/cli add slots/flux/page/container
+```

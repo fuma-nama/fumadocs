@@ -1,0 +1,257 @@
+---
+title: ヘッドレス
+description: UI を含まない、API ページの状態とロジックです。
+---
+
+## 概要 [#overview]
+
+`fumadocs-openapi/ui` 以外はすべてヘッドレスです。
+
+| パス                                     | モジュール                             |
+| -------------------------------------- | --------------------------------- |
+| `fumadocs-openapi`                     | ページ: ドキュメント、そのサーバー、独自のコンポーネント     |
+| `fumadocs-openapi/operation`           | オペレーション: 詳細、リクエスト例、コード例           |
+| `fumadocs-openapi/playground`          | API プレイグラウンド: フォーム、認証、リクエスト       |
+| `fumadocs-openapi/requests`            | 例のデータを実際のリクエストにエンコード              |
+| `fumadocs-openapi/requests/generators` | そのリクエストをコード例に変換                   |
+| `@fumadocs/json-schema/react`          | スキーマ UI: UI 向けにフラット化された JSON スキーマ |
+| `@fumadocs/json-schema/react/client`   | スキーマ UI の状態                       |
+
+## ページ [#page]
+
+`createOpenAPIRenderer()` は独自のコンポーネントを受け取って `<OpenAPIPage />` を返します。`<OpenAPIPage />` は、生成されたページの props を受け取ります。
+
+```tsx title="components/api-page.tsx"
+'use client';
+import { type CodeBlockProps, createOpenAPIRenderer } from 'fumadocs-openapi';
+import { Operation } from '@/components/my-operation';
+import { SchemaUI } from '@/components/my-schema';
+
+export const OpenAPIPage = createOpenAPIRenderer({
+  components: {
+    Operation,
+    SchemaUI,
+    CodeBlock({ lang, code }: CodeBlockProps) {
+      return (
+        <pre>
+          <code className={`language-${lang}`}>{code}</code>
+        </pre>
+      );
+    },
+  },
+});
+```
+
+| コンポーネント     | レンダリング対象                                                         |
+| ----------- | ---------------------------------------------------------------- |
+| `Operation` | 各オペレーションと Webhook。詳しくは [Operation](#operation) を参照してください         |
+| `SchemaUI`  | パラメーター、ボディ、レスポンスの JSON スキーマ。詳しくは [スキーマ UI](#schema-ui) を参照してください |
+| `Layout`    | 任意。レンダリングされたオペレーションと Webhook をラップします                             |
+
+### フック [#hooks]
+
+ページ配下のコンポーネントは、これらのフックでページの状態を読み取れます。
+
+| フック                                         | 戻り値                               |
+| ------------------------------------------- | --------------------------------- |
+| `useOpenAPI()`                              | 参照解決済みのドキュメント (`doc`) とリクエストオプション |
+| `useComponents()`                           | ページに渡されたコンポーネント                   |
+| `useServer()`                               | 選択中のサーバーとその変数                     |
+| `useTypeScriptDefinitions(schema, options)` | JSON スキーマの TypeScript 型定義         |
+| `useRenderContext()`                        | `playground` など、ページのレンダリングオプション   |
+
+## オペレーション [#operation]
+
+`<OperationProvider />` は、オペレーションまたは Webhook の詳細情報を算出し、選択中のリクエスト例を保持します。
+
+```tsx title="components/my-operation.tsx"
+'use client';
+import {
+  OperationProvider,
+  type PageOperationProps,
+  useCodeUsage,
+  useOperation,
+  useResponseExamples,
+} from 'fumadocs-openapi/operation';
+
+export function Operation(props: PageOperationProps) {
+  return (
+    <OperationProvider {...props}>
+      <Content />
+    </OperationProvider>
+  );
+}
+
+function Content() {
+  const { title, parameters, codeUsages } = useOperation();
+  const responses = useResponseExamples();
+
+  return (
+    <>
+      <h2>{title}</h2>
+      {parameters.map(({ in: location, items }) => (
+        <section key={location}>{items.map((param) => param.name).join(', ')}</section>
+      ))}
+      {Array.from(codeUsages.map().keys(), (id) => (
+        <CodeUsage key={id} id={id} />
+      ))}
+      {responses.map((tab) => (
+        <pre key={tab.code}>{JSON.stringify(tab.examples?.[0]?.sample)}</pre>
+      ))}
+    </>
+  );
+}
+
+function CodeUsage({ id }: { id: string }) {
+  const code = useCodeUsage(id);
+  return code && <pre>{code}</pre>;
+}
+```
+
+| フック                     | 戻り値                                                           |
+| ----------------------- | ------------------------------------------------------------- |
+| `useOperation()`        | 詳細が解決済みのオペレーション                                               |
+| `useExampleRequests()`  | リクエスト例の一覧、選択中のリクエスト例、およびそのデータを編集するための `select()` と `update()` |
+| `useExampleRequest()`   | 選択中のリクエスト例のデータ (更新に追従)                                        |
+| `useCodeUsage(id)`      | 選択中のリクエスト例に対して `codeUsages` が生成したコード                          |
+| `useResponseExamples()` | 各レスポンスと、その優先メディアタイプにおける例の値                                    |
+
+<auto-type-table path="props.ts" name="OperationInfo" />
+
+## スキーマ UI [#schema-ui]
+
+`generateSchemaUI()` は JSON スキーマをフラット化します。到達したすべての `$ref` は `refs` のエントリーになるため、UI は再帰処理を行わずに `$root` からマップをたどるだけで済みます。
+
+`<SchemaUIProvider />` は、その上で状態を管理します。具体的には、プロパティから開いたスキーマ、ユニオンで選択されたメンバー、プロパティへのリンクです。
+
+```tsx title="components/my-schema.tsx"
+'use client';
+import { useMemo } from 'react';
+import { generateSchemaUI } from '@fumadocs/json-schema/react';
+import { SchemaUIProvider, useSchemaUI } from '@fumadocs/json-schema/react/client';
+import type { OpenAPIComponents } from 'fumadocs-openapi';
+
+export const SchemaUI: OpenAPIComponents['SchemaUI'] = ({ client, ...options }) => {
+  const generated = useMemo(() => generateSchemaUI(options), [options.root]);
+
+  return (
+    <SchemaUIProvider id={client.rootId} name={client.name} generated={generated}>
+      <div id={client.rootId}>
+        <Schema />
+      </div>
+    </SchemaUIProvider>
+  );
+};
+
+function Schema() {
+  const { refs, path, open, back } = useSchemaUI();
+  const { schema } = path[path.length - 1];
+
+  return (
+    <>
+      {path.length > 1 && <button onClick={() => back(path.length - 2)}>Back</button>}
+      {schema.type === 'object' && (
+        <ul>
+          {schema.props.map((prop) => (
+            <li key={prop.name}>
+              {prop.name}:{' '}
+              <button onClick={() => open(prop.name, prop.$type)}>
+                {refs[prop.$type].typeName}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </>
+  );
+}
+```
+
+| `useSchemaUI()`                   | 内容                                        |
+| --------------------------------- | ----------------------------------------- |
+| `path`                            | ルートから順に開かれているスキーマ                         |
+| `open(name, $ref)`, `back(index)` | `path` 内を移動します                            |
+| `getLink(index, name)`            | パス項目のプロパティを指す URL。アクセスすると再び `path` が開かれます |
+| `highlighted`                     | URL が指している、最後のパス項目のプロパティ                  |
+
+`path` の各項目は、表示する `schema` と、選択中のメンバーを含む `unions` を持ちます。ユニオンの `select()` を呼び出すと、別のメンバーが表示されます。
+
+ページから `renderMarkdown` と `renderCodeblock` が渡されるため、説明や例は独自のコンポーネントでレンダリングされます。`client` はルートのアンカー ID と名前を保持しており、プロパティへのリンクはこれを基準に解決されます。
+
+<Callout title="client のスロットをレンダリングする">
+  ボディとレスポンスは、メディアタイプの選択用に `client.selector` を、TypeScript の型定義の
+  コピー用に `client.actions` を渡します。
+</Callout>
+
+<Accordions>
+  <Accordion title="各エントリーの構造">
+    `infoTags` は、API ページでフィールドの横に表示されるラベル付きの値 (`Format` や `Default` など) です。`open` を持つタグは、型と同じように別のスキーマを開きます。そこからさらにどう開くかは `type` によって決まります。
+
+    <auto-type-table path="props.ts" name="SchemaData" />
+  </Accordion>
+</Accordions>
+
+## プレイグラウンド [#playground]
+
+`usePlayground()` は、`<OperationProvider />` 配下にある API プレイグラウンドの状態を保持します。フォームは選択中のサンプルリクエストを初期値とし、編集内容はサンプルに同期されます。そのため、コード例にも編集内容が反映されます。その際、認証情報はマスクされます。
+
+```tsx title="components/my-playground.tsx"
+'use client';
+import { StfProvider, useFieldValue } from '@fumari/stf';
+import { useOperation } from 'fumadocs-openapi/operation';
+import { usePlayground } from 'fumadocs-openapi/playground';
+
+export function MyPlayground() {
+  const { parameters } = useOperation();
+  const { stf, send, isSending, response } = usePlayground();
+
+  return (
+    <StfProvider value={stf}>
+      {parameters.map(({ in: location, items }) =>
+        items.map((param) => (
+          <ParameterInput key={`${location}.${param.name}`} location={location} name={param.name} />
+        )),
+      )}
+      <button disabled={isSending} onClick={send}>
+        Send
+      </button>
+      {response?.result.type === 'response' && <pre>{response.result.text()}</pre>}
+    </StfProvider>
+  );
+}
+
+function ParameterInput({ location, name }: { location: string; name: string }) {
+  const [value, setValue] = useFieldValue([location, name]);
+
+  return (
+    <input
+      aria-label={name}
+      value={String(value ?? '')}
+      onChange={(e) => setValue(e.target.value)}
+    />
+  );
+}
+```
+
+| フィールド                                                | 内容                                                                                               |
+| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| `stf`                                                | フォーム(`@fumari/stf` のデータエンジン)。`path`、`query`、`header`、`cookie`、`body` を保持し、ページの認証値は `auth` に保持します |
+| `body`                                               | フォームで編集するリクエストボディと、その優先メディアタイプ                                                                   |
+| `auth`                                               | 選択中のセキュリティ要件の認証フィールド。`select()` で切り替え、`authorize()` で OAuth 2.0 トークンを取得してフィールドに設定します             |
+| `send()`, `isSending`, `response`, `clearResponse()` | フォームをリクエストとして送信する機能と、最後のリクエストの結果                                                                 |
+
+`onRequestInit()` などでリクエストをカスタマイズする `fetchOptions`、セキュリティスキームを処理する `authProviders`([認証](/docs/integrations/openapi/api-page#authorization)を参照)、認証フィールドをカスタマイズする `transformAuthInputs` を指定できます。
+
+### リクエスト [#requests]
+
+`usePlayground()` が内部で使用している部品です。これらを使うと、`usePlayground()` を使わずにリクエストを送信できます。
+
+| エクスポート                    | 機能                                                                                                         |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `createBrowserFetcher()`  | ブラウザからリクエストを送信します。`proxyUrl` が設定されている場合はそれを経由します。レスポンスには `duration`、`mediaType`、`fileName`、`text()` が含まれます |
+| `encodeRequestData()`     | サンプルのデータをボディ、ヘッダー、クエリに変換します。`fumadocs-openapi/requests` からインポートします                                         |
+| `resolveMediaAdapter()`   | メディアタイプに対応するアダプターを返します。サポートされていない場合は `undefined` を返します                                                     |
+| `useAuthFields()`         | オペレーションの認証フィールドと、それらから生成されるリクエストデータを返します                                                                   |
+| `usePlaygroundAuth()`     | ページの認証値を `stf` で、ページに戻ってきたフローを `returned` で返します                                                            |
+| `useOpenIdConnectFlows()` | OpenID Connect の設定に含まれる OAuth 2.0 フロー、または検出に失敗した場合の `error` を返します。読み込み中はサスペンドします                           |
+| `requestOAuthToken()`     | OAuth 2.0 フローを実行します。`onUserCode` で、デバイス認可時にユーザーが入力するコードを表示します                                              |

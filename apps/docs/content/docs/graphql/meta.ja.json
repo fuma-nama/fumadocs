@@ -1,0 +1,10 @@
+{
+  "title": "GraphQLの例",
+  "description": "Fumadocs GraphQLのデモ",
+  "root": true,
+  "icon": "Hexagon",
+  "pages": [
+    "index",
+    "...(generated)"
+  ]
+}

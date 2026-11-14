@@ -1,0 +1,76 @@
+---
+title: バナー
+description: サイトにバナーを追加します
+preview: banner
+---
+
+<Installation name="banner" />
+
+## 使い方 [#usage]
+
+この要素をルートレイアウトの最上部に配置します。お知らせの表示などに利用できます。
+
+```tsx
+import { Banner } from 'fumadocs-ui/components/banner';
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en">
+      <body>
+        {/* [!code ++] */}
+        <Banner>Hello World</Banner>
+        {children}
+      </body>
+    </html>
+  );
+}
+```
+
+### バリアント [#variant]
+
+デフォルトのバリアントを変更します。
+
+```tsx
+import { Banner } from 'fumadocs-ui/components/banner';
+
+<Banner variant="rainbow">Hello World</Banner>;
+
+// 色のカスタマイズ
+<Banner
+  variant="rainbow"
+  rainbowColors={[
+    'rgba(255,100,0, 0.5)',
+    'rgba(255,100,0, 0.5)',
+    'transparent',
+    'rgba(255,100,0, 0.5)',
+    'transparent',
+    'rgba(255,100,0, 0.5)',
+    'transparent',
+  ]}
+>
+  Hello World
+</Banner>;
+```
+
+### レイアウトの変更 [#change-layout]
+
+デフォルトでは、バナーは `style` タグを使って Fumadocs のレイアウトを調整します(例: サイドバーの高さを縮める)。
+この動作は次のように無効化できます。
+
+```tsx
+import { Banner } from 'fumadocs-ui/components/banner';
+
+<Banner changeLayout={false}>Hello World</Banner>;
+```
+
+### 閉じる [#close]
+
+ユーザーがバナーを閉じられるようにするには、バナーに ID を指定します。
+
+```tsx
+import { Banner } from 'fumadocs-ui/components/banner';
+
+<Banner id="hello-world">Hello World</Banner>;
+```
+
+状態は自動的に永続化されます。

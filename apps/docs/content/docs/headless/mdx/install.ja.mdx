@@ -1,0 +1,95 @@
+---
+title: パッケージのインストール
+description: パッケージをインストールするためのコードブロックを生成します
+---
+
+<Callout type="warn" title="非推奨">
+  代わりに [Remark NPM](/docs/headless/mdx/remark-npm) を使用してください。コードを変更せずにそのまま置き換えられ、Fumadocs MDX ではデフォルトで有効になっています。
+</Callout>
+
+## 使い方 [#usage]
+
+```package-install
+fumadocs-docgen
+```
+
+`remarkInstall` は、Sätteri 版が存在しない remark プラグインです。このプラグインを追加し、`package-install` コードブロックを先に処理してしまう Remark NPM を無効にしてください。
+
+```ts title="source.config.ts"
+import { remarkInstall } from 'fumadocs-docgen';
+import { defineConfig } from 'fumadocs-mdx/config';
+
+export default defineConfig({
+  mdxOptions: {
+    remarkNpmOptions: false,
+    remarkPlugins: [remarkInstall],
+  },
+});
+```
+
+必要なコンポーネントを定義します。
+
+```tsx title="components/mdx.tsx"
+import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
+import defaultComponents from 'fumadocs-ui/mdx';
+import type { MDXComponents } from 'mdx/types';
+
+export function getMDXComponents(components?: MDXComponents) {
+  return {
+    ...defaultComponents,
+    // [!code ++:2]
+    Tab,
+    Tabs,
+    ...components,
+  } satisfies MDXComponents;
+}
+```
+
+言語に `package-install` を指定してコードブロックを作成します。
+
+````mdx
+```package-install
+my-package
+```
+
+```package-install
+npm i my-package -D
+```
+````
+
+### 出力 [#output]
+
+```mdx
+<Tabs items={['npm', 'pnpm', 'yarn', 'bun']}>
+  <Tab value="npm">...</Tab>
+  <Tab value="pnpm">...</Tab>
+  <Tab value="yarn">...</Tab>
+  <Tab value="bun">...</Tab>
+</Tabs>
+```
+
+## オプション [#options]
+
+### 永続化 [#persistent]
+
+Fumadocs UI と併用する場合は、`persist` オプションで永続化を有効にできます。
+
+```ts title="source.config.ts"
+import { remarkInstall } from 'fumadocs-docgen';
+import { defineConfig } from 'fumadocs-mdx/config';
+
+export default defineConfig({
+  mdxOptions: {
+    remarkNpmOptions: false,
+    remarkPlugins: [[remarkInstall, { persist: { id: 'some-id' } }]],
+  },
+});
+```
+
+この場合は、代わりに次のように生成されます。
+
+```mdx
+<Tabs groupId="some-id" persist items={[...]}>
+  ...
+</Tabs>
+```

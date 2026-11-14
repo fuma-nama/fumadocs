@@ -1,0 +1,363 @@
+---
+title: createAsyncAPIPage()
+description: AsyncAPI ドキュメントのコンテンツをレンダリングするコンポーネント
+---
+
+## 概要 [#overview]
+
+Fumadocs AsyncAPI は、ページコンテンツのレンダリングに `<AsyncAPIPage />` コンポーネントを使用します。このコンポーネントはクライアントコンポーネントにする必要があります。
+
+```tsx title="components/api-page.tsx"
+'use client';
+import { createAsyncAPIPage } from '@fumadocs/asyncapi/ui';
+
+export const AsyncAPIPage = createAsyncAPIPage({
+  // 設定
+});
+```
+
+### カスタムレイアウト [#custom-layout]
+
+オペレーションの各セクションのレイアウトをカスタマイズできます。
+
+```tsx title="components/api-page.tsx"
+'use client';
+import { createAsyncAPIPage } from '@fumadocs/asyncapi/ui';
+
+export const AsyncAPIPage = createAsyncAPIPage({
+  content: {
+    renderOperationLayout(slots) {
+      return (
+        <div className="flex flex-col gap-6">
+          {slots.header}
+          {slots.connection}
+          {slots.description}
+          {slots.parameters}
+          {slots.messages}
+        </div>
+      );
+    },
+  },
+});
+```
+
+| スロット          | レンダリング内容                                  |
+| ------------- | ----------------------------------------- |
+| `header`      | タイトル(複数のオペレーションを含むページの場合)                 |
+| `connection`  | メッセージの方向、サーバーとチャンネルのアドレス、プレイグラウンド         |
+| `description` | オペレーションとそのチャンネルの説明、外部ドキュメント               |
+| `usage`       | 選択中のサーバー向けのコードサンプル(幅の広いページではオペレーションの横に表示) |
+| `authSchemes` | サーバーとオペレーションのセキュリティスキーム                   |
+| `parameters`  | アドレスのパラメーター、WebSocket 接続のクエリとヘッダー         |
+| `messages`    | メッセージ(ペイロード、ヘッダー、例、相関 ID を含む)             |
+| `reply`       | リクエストに対する応答                               |
+| `bindings`    | 選択中のサーバーのプロトコルの詳細                         |
+
+### メッセージの方向 [#direction-of-messages]
+
+AsyncAPI では、アプリケーションを `send` と `receive` のアクションで記述します。ページでは、アプリケーションとやり取りする読者の視点に合わせてこれらを反転して表示します。つまり、`send` は **Receive**、`receive` は **Send** と表示されます。サイドバーでは、スマートフォンに入る矢印またはスマートフォンから出る矢印で表されます。
+
+### プレイグラウンド [#playground]
+
+オペレーションはプレイグラウンドで試すことができます。読者はアドレスのパラメーター、クエリ、認証情報を指定して接続し、サンプルのメッセージをテキスト、16進数、Base64 のいずれかの形式で送信して、受信したメッセージを確認できます。
+
+各プロトコルのサーバーへの接続はトランスポートが担います。WebSocket(`ws` と `wss`)は組み込みでサポートされています。
+
+```tsx title="components/api-page.tsx"
+'use client';
+import { createAsyncAPIPage } from '@fumadocs/asyncapi/ui';
+import { sseTransport } from '@fumadocs/asyncapi/playground';
+
+export const AsyncAPIPage = createAsyncAPIPage({
+  playground: {
+    // サーバーのプロトコル別に指定
+    transports: { http: sseTransport, https: sseTransport },
+    // `false` にするとプレイグラウンドが無効になります
+    enabled: true,
+  },
+});
+```
+
+<Callout title="ブラウザーの制限">
+  ブラウザーは WebSocket 接続で他サイトのヘッダーや Cookie を送信できないため、使用できるのはクエリで渡す認証情報のみです。
+  HTTPS で配信されているページからは、`wss` サーバーにしか接続できません。
+</Callout>
+
+#### Server-Sent Events [#server-sent-events]
+
+`sseTransport` は `fetch` を使って `http` および `https` サーバーからイベントを受信します。このトランスポートでは、読者がメッセージを送信することはできません。
+
+* API キーはヘッダーまたはクエリで送信されます。
+* HTTP Bearer 認証および Basic 認証の認証情報は `Authorization` ヘッダーで送信されます。
+
+Webhook も `http` サーバー上で提供されるため、このトランスポートはオプトインになっています。
+
+#### カスタムトランスポート [#custom-transports]
+
+トランスポートはサーバーに接続し、発生したイベントを `events` を通じて通知します。たとえば、[MQTT.js](https://github.com/mqttjs/MQTT.js) を使って WebSocket 経由で MQTT を利用する場合は次のようになります。
+
+```ts title="lib/mqtt-transport.ts"
+import mqtt from 'mqtt';
+import type { PlaygroundTransport } from '@fumadocs/asyncapi/playground';
+
+export const mqttTransport: PlaygroundTransport = {
+  // このトランスポートが対応するセキュリティスキーム。プレイグラウンドの入力項目になります
+  auth: (scheme) => scheme.type === 'userPassword',
+  connect({ url, address, auth }, events) {
+    const credentials = auth[0]?.value;
+    // サーバーはブローカーの WebSocket リスナーです（例: `localhost:9001`）
+    const client = mqtt.connect(`ws://${new URL(url).host}`, {
+      ...(typeof credentials === 'object' && credentials),
+      reconnectPeriod: 0,
+    });
+
+    client.on('connect', () =>
+      client.subscribe(address, (error) => (error ? events.error(error.message) : events.open())),
+    );
+    client.on('message', (_topic, payload) => events.message(payload.toString()));
+    client.on('error', (error) => events.error(error.message));
+    client.on('close', () => events.close());
+
+    return {
+      send: (data) =>
+        client.publish(address, typeof data === 'string' ? data : (new Uint8Array(data) as Buffer)),
+      close: () => client.end(),
+    };
+  },
+};
+```
+
+```tsx title="components/api-page.tsx"
+'use client';
+import { createAsyncAPIPage } from '@fumadocs/asyncapi/ui';
+import { mqttTransport } from '@/lib/mqtt-transport';
+
+export const AsyncAPIPage = createAsyncAPIPage({
+  playground: {
+    transports: { mqtt: mqttTransport },
+  },
+});
+```
+
+詳細は [`PlaygroundTransport`](/docs/integrations/asyncapi/headless#transports) を参照してください。
+
+### コードサンプル [#code-samples]
+
+各オペレーションには、選択したサーバー上でメッセージを受信・送信する方法が JavaScript と Python のコード例で表示されます。
+
+| プロトコル                          | JavaScript                | Python            |
+| ------------------------------ | ------------------------- | ----------------- |
+| `ws`, `wss`                    | `WebSocket`               | `websockets`      |
+| `mqtt`, `mqtts`, `secure-mqtt` | `mqtt`                    | `paho-mqtt`       |
+| `kafka`, `kafka-secure`        | `kafkajs`                 | `confluent-kafka` |
+| `amqp`, `amqps`                | `amqplib`                 | `pika`            |
+| `nats`                         | `@nats-io/transport-node` | `nats-py`         |
+
+`codeUsages` を使うと、ジェネレーターを追加したり、デフォルトのジェネレーターを置き換えたりできます。
+
+```tsx title="components/api-page.tsx"
+'use client';
+import {
+  createAsyncAPIPage,
+  createCodeUsageGeneratorRegistry,
+  registerDefaultCodeUsages,
+} from '@fumadocs/asyncapi/ui';
+
+// ゼロから作成する場合は、デフォルトを登録しないでください
+const codeUsages = registerDefaultCodeUsages(createCodeUsageGeneratorRegistry());
+
+codeUsages.add('websocat', {
+  label: 'websocat',
+  lang: 'bash',
+  // `url` は WebSocket チャンネルに接続するための URL です
+  generate({ protocol }, { url }) {
+    // 他のプロトコルでは非表示になります
+    if (protocol !== 'ws' && protocol !== 'wss') return '';
+    return `websocat "${url}"`;
+  },
+});
+
+export const AsyncAPIPage = createAsyncAPIPage({ codeUsages });
+```
+
+<auto-type-table path="props.ts" name="CodeUsageData" />
+
+各オペレーションでは、`x-codeSamples` に独自のサンプルを定義できます。定義したサンプルは同じ `lang` の自動生成サンプルを置き換えます。また、`source: false` を指定すると、そのサンプルを削除できます。
+
+```yaml
+operations:
+  receiveLightMeasurement:
+    action: receive
+    x-codeSamples:
+      - lang: js
+        label: SDK
+        source: |
+          lights.onMeasured((event) => console.log(event));
+      - lang: python
+        source: false
+```
+
+### スキーマ UI [#schema-ui]
+
+JSON スキーマのレンダリング方法をカスタマイズしたり、スキーマの例の表示を無効にしたりできます。
+
+```tsx title="components/api-page.tsx"
+'use client';
+import { createAsyncAPIPage } from '@fumadocs/asyncapi/ui';
+
+export const AsyncAPIPage = createAsyncAPIPage({
+  schemaUI: {
+    showExample: true,
+    render(options, ctx) {
+      // 完全カスタムのスキーマレンダラー
+      return ctx.SchemaUI(options);
+    },
+  },
+});
+```
+
+### TypeScript の型定義 [#typescript-definitions]
+
+ペイロードとヘッダーには、[`@fumari/json-schema-ts`](https://npmjs.com/package/@fumari/json-schema-ts) で生成された TypeScript の型定義をコピーするボタンがあります。
+
+ページ上のスキーマと同様に、読者が送信するメッセージでは `readOnly` プロパティが、受信するメッセージでは `writeOnly` プロパティが省かれます。
+
+```tsx title="components/api-page.tsx"
+'use client';
+import { createAsyncAPIPage } from '@fumadocs/asyncapi/ui';
+
+export const AsyncAPIPage = createAsyncAPIPage({
+  // 独自に生成する場合は `(schema, ctx) => string | undefined` を指定します
+  generateTypeScriptDefinitions: false,
+});
+```
+
+### 国際化 [#internationalization]
+
+UI レベルで[国際化](/docs/internationalization)を設定済みであれば、次のようになります。
+
+```tsx title="layout.shared.tsx"
+import { defineI18n } from 'fumadocs-core/i18n';
+import { uiTranslations } from 'fumadocs-ui/i18n';
+import { asyncapiTranslations } from '@fumadocs/asyncapi/i18n';
+
+const i18n = defineI18n({
+  languages: ['en', 'cn'],
+  defaultLanguage: 'en',
+});
+
+export const translations = i18n
+  .translations()
+  .extend(uiTranslations())
+  // [!code ++]
+  .extend(asyncapiTranslations())
+  .add({
+    cn: {
+      displayName: 'Chinese',
+      // [!code ++]
+      'Messages(operation page)': '消息',
+    },
+  });
+```
+
+詳しくは[翻訳](/docs/ui/translations)を参照してください。
+
+### シンタックスハイライト [#syntax-highlighting]
+
+AsyncAPI ページでは、Shiki を使ってコードブロックをハイライトします。カスタマイズするには、[ハイライター](/docs/headless/utils/shiki)を渡してください。
+
+```tsx title="components/api-page.tsx"
+'use client';
+import { createAsyncAPIPage } from '@fumadocs/asyncapi/ui';
+import { highlighter } from '@/lib/highlighter';
+
+export const AsyncAPIPage = createAsyncAPIPage({ highlighter });
+```
+
+### カスタムコンポーネント [#custom-components]
+
+デフォルトの見出しやコードブロックのコンポーネントを上書きします。
+
+```tsx title="components/api-page.tsx"
+'use client';
+import { createAsyncAPIPage } from '@fumadocs/asyncapi/ui';
+
+export const AsyncAPIPage = createAsyncAPIPage({
+  components: {
+    Heading({ id, depth, ...props }) {
+      const Tag = `h${depth}` as const;
+      return <Tag id={id} {...props} />;
+    },
+    CodeBlock({ lang, code }) {
+      return <pre data-lang={lang}>{code}</pre>;
+    },
+  },
+});
+```
+
+## UIのカスタマイズ [#customise-ui]
+
+用意されているオプションでは対応できないカスタマイズが必要な場合は、[Fumadocs CLI](/docs/cli) を使ってUIをコードベースにインストールできます。
+
+### フルUI [#full-ui]
+
+[ヘッドレスレイヤー](/docs/integrations/asyncapi/headless)をベースに構築された、APIページのUI一式です。
+
+```npm
+npx @fumadocs/cli add asyncapi/page
+```
+
+これにより `<AsyncAPIPage />` 自体がインストールされるため、`components/api-page.tsx` は不要になります。`<AsyncAPIPage />` のインポートを次のように更新してください。
+
+```tsx
+import { AsyncAPIPage } from '@/components/api-page'; // [!code --]
+import { AsyncAPIPage } from '@/components/asyncapi/page'; // [!code ++]
+```
+
+### オペレーション [#operation]
+
+単一のオペレーションのUIで、チャンネル、メッセージ、バインディングを含みます。
+
+```npm
+npx @fumadocs/cli add asyncapi/operation
+```
+
+### プレイグラウンド [#playground-1]
+
+[`usePlayground()`](/docs/integrations/asyncapi/headless#playground) を基盤として構築されたプレイグラウンドです。
+
+```npm
+npx @fumadocs/cli add asyncapi/playground
+```
+
+```tsx title="components/api-page.tsx"
+'use client';
+import { createAsyncAPIPage } from '@fumadocs/asyncapi/ui';
+import { Operation } from '@/components/asyncapi/operation';
+
+export const AsyncAPIPage = createAsyncAPIPage({
+  components: {
+    Operation,
+  },
+});
+```
+
+### スキーマ UI [#schema-ui-1]
+
+JSON スキーマを表示する UI で、他の API 連携と共通で使用されます。状態は [`<SchemaUIProvider />`](/docs/integrations/openapi/headless#schema-ui) から提供されます。
+
+```npm
+npx @fumadocs/cli add api-docs/schema
+```
+
+```tsx title="components/api-page.tsx"
+'use client';
+import { createAsyncAPIPage } from '@fumadocs/asyncapi/ui';
+import { Schema } from '@/components/api/schema';
+
+export const AsyncAPIPage = createAsyncAPIPage({
+  components: {
+    SchemaUI: Schema,
+  },
+});
+```

@@ -1,0 +1,68 @@
+---
+title: レイアウト
+description: レイアウトコンポーネントの一覧です。
+---
+
+## 概要 [#overview]
+
+Fumadocs UI には、コンテンツを表示するための基本的なレイアウトが用意されています。
+
+<DocsCategory />
+
+### 設定 [#configurations]
+
+各レイアウトでは、共通のオプションを利用できます。
+
+これらのオプションは1つのファイルにまとめ、各レイアウトに渡すことをおすすめします。
+
+```tsx tab="Shared Options" title="lib/layout.shared.tsx"
+import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
+
+export function baseOptions(): BaseLayoutProps {
+  return {
+    nav: {
+      title: 'My App',
+    },
+  };
+}
+```
+
+```tsx tab="Docs Layout" title="app/docs/layout.tsx"
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+import { baseOptions } from '@/lib/layout.shared';
+import { source } from '@/lib/source';
+import type { ReactNode } from 'react';
+
+export default function Layout({ children }: { children: ReactNode }) {
+  return (
+    <DocsLayout
+      // [!code highlight]
+      {...baseOptions()}
+      tree={source.getPageTree()}
+    >
+      {children}
+    </DocsLayout>
+  );
+}
+```
+
+```tsx tab="Home Layout" title="app/(home)/layout.tsx"
+import { HomeLayout } from 'fumadocs-ui/layouts/home';
+import { baseOptions } from '@/lib/layout.shared';
+import type { ReactNode } from 'react';
+
+export default function Layout({ children }: { children: ReactNode }) {
+  return (
+    <HomeLayout
+      // [!code highlight]
+      {...baseOptions()}
+    >
+      {children}
+    </HomeLayout>
+  );
+}
+```
+
+[`links`](/docs/ui/layouts/links) オプションと [`nav`](/docs/ui/layouts/nav) オプションの詳細は、それぞれのドキュメントを参照してください。
+
+<auto-type-table cwd path="content/docs/ui/props.ts" name="BaseLayoutProps" />

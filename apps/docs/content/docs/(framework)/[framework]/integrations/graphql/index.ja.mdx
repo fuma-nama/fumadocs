@@ -1,0 +1,513 @@
+---
+title: GraphQL
+description: GraphQL スキーマからドキュメントを生成します。
+---
+
+## セットアップ [#setup]
+
+必要なパッケージをインストールします。
+
+```npm
+npm i @fumadocs/graphql graphql
+```
+
+### スタイルの生成 [#generate-styles]
+
+次の行を追加します。
+
+```css title="Tailwind CSS"
+@import 'tailwindcss';
+@import 'fumadocs-ui/css/neutral.css';
+@import 'fumadocs-ui/css/preset.css';
+/* [!code ++] */
+@import '@fumadocs/graphql/css/preset.css';
+```
+
+### プラグインの設定 [#configure-plugin]
+
+GraphQL サーバーインスタンスと `<GraphQLPage />` コンポーネントを作成します。
+
+```ts tab="lib/graphql.ts"
+import { createGraphQL } from '@fumadocs/graphql/server';
+
+// 注: これはサーバーサイドAPIです
+export const graphql = createGraphQL({
+  // GraphQLスキーマ。次の形式を指定できます:
+  // SDLファイル/URL(`extend type` を含む)、SDLテキスト、
+  // イントロスペクション結果、`GraphQLSchema` インスタンス。
+  input: ['./schema.graphql'],
+});
+```
+
+```tsx tab="components/api-page.tsx"
+'use client';
+import { createGraphQLPage } from '@fumadocs/graphql/ui';
+
+export const GraphQLPage = createGraphQLPage({
+  playground: {
+    // オペレーションページでインタラクティブなプレイグラウンドを有効にします(省略可)
+    url: 'https://api.example.com/graphql',
+  },
+});
+```
+
+各オプションについては、[`createGraphQL()`](/docs/integrations/graphql/server) と [`createGraphQLPage()`](/docs/integrations/graphql/api-page) を参照してください。
+
+### ページを生成する [#generate-pages]
+
+[`loader()`](/docs/headless/source-api/source) に `staticSource()` を渡します。ファイルを書き出さずにページを生成できます。
+
+<show when={props.framework === 'react-router' || props.framework === 'tanstack-start'}>
+  `staticSource()` はファイルを読み込むため、`source.ts` はサーバー専用になります。クライアントのコードから import できるよう、`docs` を `collections.ts` に移動してください。
+</show>
+
+<show when={props.framework === 'next'}>
+  ```ts title="lib/source.ts"
+  import { loader } from 'fumadocs-core/source';
+  import { defineDocs } from 'fumadocs-mdx/macro';
+  import { graphql } from '@/lib/graphql'; // [!code ++]
+
+  const docs = defineDocs({
+    dir: 'content/docs',
+  });
+
+  export const source = loader(
+    // [!code ++:6]
+    {
+      docs: docs.toFumadocsSource(),
+      graphql: await graphql.staticSource({
+        baseDir: 'graphql',
+      }),
+    },
+    {
+      baseUrl: '/docs',
+      // [!code ++:2] 任意: ページツリーの各ページ項目に query/mutation/subscription のバッジを追加します
+      plugins: [graphql.loaderPlugin()],
+    },
+  );
+  ```
+</show>
+
+<show when={props.framework === 'react-router'}>
+  ```ts tab="app/lib/source.ts"
+  import { loader } from 'fumadocs-core/source';
+  import { defineDocs } from 'fumadocs-mdx/macro'; // [!code --]
+  // [!code ++:2]
+  import { docs } from '@/lib/collections';
+  import { graphql } from '@/lib/graphql';
+
+  // [!code --:6]
+  export const docs = defineDocs({
+    dir: 'content/docs',
+    docs: {
+      async: true,
+    },
+  });
+
+  // `staticSource()` がファイルを読み込むため、サーバー専用になりました [!code ++]
+  export const source = loader(
+    // [!code ++:6]
+    {
+      docs: docs.toFumadocsSource(),
+      graphql: await graphql.staticSource({
+        baseDir: 'graphql',
+      }),
+    },
+    {
+      baseUrl: '/docs',
+      // [!code ++:2] 任意: ページツリーの各ページ項目に query/mutation/subscription のバッジを追加します
+      plugins: [graphql.loaderPlugin()],
+    },
+  );
+  ```
+
+  ```ts tab="app/lib/collections.ts"
+  import { defineDocs } from 'fumadocs-mdx/macro';
+
+  export const docs = defineDocs({
+    dir: 'content/docs',
+    docs: {
+      async: true,
+    },
+  });
+  ```
+</show>
+
+<show when={props.framework === 'tanstack-start'}>
+  ```ts tab="src/lib/source.ts"
+  import { loader } from 'fumadocs-core/source';
+  import { defineDocs } from 'fumadocs-mdx/macro'; // [!code --]
+  // [!code ++:2]
+  import { docs } from '@/lib/collections';
+  import { graphql } from '@/lib/graphql';
+
+  // [!code --:6]
+  export const docs = defineDocs({
+    dir: 'content/docs',
+    docs: {
+      async: true,
+    },
+  });
+
+  // `staticSource()` がファイルを読み込むため、サーバー専用になりました [!code ++]
+  export const source = loader(
+    // [!code ++:6]
+    {
+      docs: docs.toFumadocsSource(),
+      graphql: await graphql.staticSource({
+        baseDir: 'graphql',
+      }),
+    },
+    {
+      baseUrl: '/docs',
+      // [!code ++:2] 任意: ページツリーの各ページ項目に query/mutation/subscription のバッジを追加します
+      plugins: [graphql.loaderPlugin()],
+    },
+  );
+  ```
+
+  ```ts tab="src/lib/collections.ts"
+  import { defineDocs } from 'fumadocs-mdx/macro';
+
+  export const docs = defineDocs({
+    dir: 'content/docs',
+    docs: {
+      async: true,
+    },
+  });
+  ```
+</show>
+
+<show when={props.framework === 'waku'}>
+  ```ts title="src/lib/source.ts"
+  import { loader } from 'fumadocs-core/source';
+  import { defineDocs } from 'fumadocs-mdx/macro';
+  import { graphql } from '@/lib/graphql'; // [!code ++]
+
+  const docs = defineDocs({
+    dir: 'content/docs',
+  });
+
+  export const source = loader(
+    // [!code ++:6]
+    {
+      docs: docs.toFumadocsSource(),
+      graphql: await graphql.staticSource({
+        baseDir: 'graphql',
+      }),
+    },
+    {
+      baseUrl: '/docs',
+      // [!code ++:2] 任意: ページツリーの各ページ項目に query/mutation/subscription のバッジを追加します
+      plugins: [graphql.loaderPlugin()],
+    },
+  );
+  ```
+</show>
+
+<show when={props.framework === 'astro'}>
+  ```ts title="src/lib/source.ts"
+  import { getCollection } from 'astro:content';
+  import { loader } from 'fumadocs-core/source';
+  import { toFumadocsSource } from '@fumadocs/astro/source';
+  import { graphql } from '@/lib/graphql'; // [!code ++]
+
+  export const source = loader(
+    // [!code ++:6]
+    {
+      docs: toFumadocsSource(await getCollection('docs'), await getCollection('meta')),
+      graphql: await graphql.staticSource({
+        baseDir: 'graphql',
+      }),
+    },
+    {
+      baseUrl: '/docs',
+      // [!code ++:2] 任意: ページツリーの各ページ項目に query/mutation/subscription のバッジを追加します
+      plugins: [graphql.loaderPlugin()],
+    },
+  );
+  ```
+</show>
+
+`staticSource()` はオペレーションごとに1ページを生成し、種類別のフォルダー (例: `queries/`) にまとめます。名前付き型のページは[オプトイン](/docs/integrations/graphql/server#includeoperations--includetypes)で生成されます。
+
+**`source` のページは `docs` と `graphql` の2種類になりました。** `source` を使用しているすべての箇所を更新してください。
+
+<show when={props.framework !== 'astro'}>
+  docs ページで `<GraphQLPage />` を使用して GraphQL ページをレンダリングします。
+</show>
+
+<show when={props.framework === 'astro'}>
+  GraphQL ページは専用のアイランドでレンダリングします。このアイランドでは、`<GraphQLPage />` を docs レイアウトでラップします。
+</show>
+
+<show when={props.framework === 'next'}>
+  ```tsx title="app/docs/[[...slug]]/page.tsx"
+  import { GraphQLPage } from '@/components/api-page'; // [!code ++]
+
+  export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
+    const params = await props.params;
+    const page = source.getPage(params.slug);
+    if (!page) notFound();
+
+    // [!code ++:10]
+    if (page.type === 'graphql') {
+      return (
+        <DocsPage full>
+          <DocsTitle>{page.data.title}</DocsTitle>
+          <DocsBody>
+            <GraphQLPage {...page.data.getGraphQLPageProps()} />
+          </DocsBody>
+        </DocsPage>
+      );
+    }
+
+    // ...
+  }
+  ```
+</show>
+
+<show when={props.framework === 'react-router'}>
+  ```tsx title="app/routes/docs.tsx"
+  import { docs, source } from '@/lib/source'; // [!code --]
+  // [!code ++:3]
+  import { docs } from '@/lib/collections';
+  import { source } from '@/lib/source';
+  import { GraphQLPage } from '@/components/api-page';
+
+  export async function loader({ params }: Route.LoaderArgs) {
+    const slugs = params['*'].split('/').filter((v) => v.length > 0);
+    const page = source.getPage(slugs);
+    if (!page) throw new Response('Not found', { status: 404 });
+
+    // [!code ++:9]
+    const pageTree = await source.serializePageTree(source.getPageTree());
+    if (page.type === 'graphql') {
+      return {
+        type: 'graphql' as const,
+        title: page.data.title,
+        props: page.data.getGraphQLPageProps(),
+        pageTree,
+      };
+    }
+
+    return { type: 'docs' as const, path: page.path, pageTree }; // [!code highlight]
+  }
+
+  export default function Page({ loaderData }: Route.ComponentProps) {
+    const data = useFumadocsLoader(loaderData);
+
+    return (
+      <DocsLayout {...baseOptions()} tree={data.pageTree}>
+        {/* [!code ++:8] */}
+        {data.type === 'graphql' && (
+          <DocsPage full>
+            <DocsTitle>{data.title}</DocsTitle>
+            <DocsBody>
+              <GraphQLPage {...data.props} />
+            </DocsBody>
+          </DocsPage>
+        )}
+        {/* [!code highlight] */}
+        {data.type === 'docs' && <Content path={data.path} />}
+      </DocsLayout>
+    );
+  }
+  ```
+</show>
+
+<show when={props.framework === 'tanstack-start'}>
+  ```tsx title="src/routes/docs/$.tsx"
+  import { docs, source } from '@/lib/source'; // [!code --]
+  // [!code ++:4]
+  import { docs } from '@/lib/collections';
+  import { source } from '@/lib/source';
+  import { GraphQLPage } from '@/components/api-page';
+  import type { OperationExample } from '@fumadocs/graphql';
+
+  // [!code ++:7]
+  // サーバー関数の戻り値に対する型レベルのチェックではオペレーションの例を検証できないため、
+  // シリアライズ可能な型として登録します(`@tanstack/router-core` を解決できない場合はインストールしてください)
+  declare module '@tanstack/router-core' {
+    interface SerializableExtensions {
+      graphqlExample: OperationExample;
+    }
+  }
+
+  export const Route = createFileRoute('/docs/$')({
+    component: Page,
+    loader: async ({ params }) => {
+      const slugs = params._splat?.split('/') ?? [];
+      const data = await serverLoader({ data: slugs });
+      if (data.type === 'docs') await docs.getPage(data.path)?.preload(); // [!code highlight]
+      return data;
+    },
+  });
+
+  const serverLoader = createServerFn({
+    method: 'GET',
+  })
+    .validator((slugs: string[]) => slugs)
+    .handler(async ({ data: slugs }) => {
+      const page = source.getPage(slugs);
+      if (!page) throw notFound();
+
+      // [!code ++:9]
+      const pageTree = await source.serializePageTree(source.getPageTree());
+      if (page.type === 'graphql') {
+        return {
+          type: 'graphql',
+          title: page.data.title,
+          props: page.data.getGraphQLPageProps(),
+          pageTree,
+        };
+      }
+
+      return { type: 'docs', path: page.path, pageTree }; // [!code highlight]
+    });
+
+  function Page() {
+    const data = useFumadocsLoader(Route.useLoaderData());
+
+    return (
+      <DocsLayout {...baseOptions()} tree={data.pageTree}>
+        {/* [!code ++:8] */}
+        {data.type === 'graphql' && (
+          <DocsPage full>
+            <DocsTitle>{data.title}</DocsTitle>
+            <DocsBody>
+              <GraphQLPage {...data.props} />
+            </DocsBody>
+          </DocsPage>
+        )}
+        <Suspense>
+          {/* [!code highlight] */}
+          {data.type === 'docs' && <Content path={data.path} />}
+        </Suspense>
+      </DocsLayout>
+    );
+  }
+  ```
+</show>
+
+<show when={props.framework === 'waku'}>
+  ```tsx title="src/pages/docs/[...slugs].tsx"
+  import { GraphQLPage } from '@/components/api-page'; // [!code ++]
+
+  export default function Page({ slugs }: PageProps<'/docs/[...slugs]'>) {
+    const page = source.getPage(slugs);
+    if (!page) unstable_notFound();
+
+    // [!code ++:10]
+    if (page.type === 'graphql') {
+      return (
+        <DocsPage full>
+          <DocsTitle>{page.data.title}</DocsTitle>
+          <DocsBody>
+            <GraphQLPage {...page.data.getGraphQLPageProps()} />
+          </DocsBody>
+        </DocsPage>
+      );
+    }
+
+    // ...
+  }
+  ```
+</show>
+
+<show when={props.framework === 'astro'}>
+  ```astro tab="src/pages/docs/[...slug].astro"
+  ---
+  import type { GetStaticPaths, InferGetStaticPropsType } from 'astro';
+  import Layout from '@/layouts/Layout.astro';
+  import { Docs } from '@/components/docs';
+  import { GraphQLDocs } from '@/components/graphql-docs'; // [!code ++]
+  import { source } from '@/lib/source';
+
+  export const prerender = true;
+
+  export const getStaticPaths = (() => {
+    return source.getPages().map((page) => ({
+      params: { slug: decodeURI(page.slugs.join('/')) || undefined },
+      props: { page },
+    }));
+  }) satisfies GetStaticPaths;
+
+  type Props = InferGetStaticPropsType<typeof getStaticPaths>;
+
+  const { page } = Astro.props;
+  const pageTree = await source.serializePageTree(source.getPageTree());
+  ---
+
+  {/* [!code ++:13] */}
+  {page.type === 'graphql' && (
+    <Layout title={page.data.title ?? 'My App'}>
+      <GraphQLDocs
+        client:load
+        pathname={Astro.url.pathname}
+        params={Astro.params}
+        tree={pageTree}
+        title={page.data.title}
+        props={page.data.getGraphQLPageProps()}
+      />
+    </Layout>
+  )}
+  ```
+
+  ```tsx tab="src/components/graphql-docs.tsx"
+  import { type SerializedPageTree, useFumadocsLoader } from 'fumadocs-core/source/client';
+  import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+  import { DocsBody, DocsPage, DocsTitle } from 'fumadocs-ui/layouts/docs/page';
+  import { GraphQLPage } from '@/components/api-page';
+  import { Provider, type ProviderProps } from '@/components/provider';
+  import { baseOptions } from '@/lib/layout.shared';
+  import type { GraphQLPageProps } from '@fumadocs/graphql/ui';
+
+  export function GraphQLDocs({
+    tree,
+    title,
+    props,
+    ...rest
+  }: ProviderProps & { tree: SerializedPageTree; title?: string; props: GraphQLPageProps }) {
+    const data = useFumadocsLoader({ tree });
+
+    return (
+      <Provider {...rest}>
+        <DocsLayout {...baseOptions()} tree={data.tree}>
+          <DocsPage full>
+            <DocsTitle>{title}</DocsTitle>
+            <DocsBody>
+              <GraphQLPage {...props} />
+            </DocsBody>
+          </DocsPage>
+        </DocsLayout>
+      </Provider>
+    );
+  }
+  ```
+</show>
+
+<Callout type="warn" title="移行が完了していることを確認してください">
+  次に進む前に、型チェックを実行してください。
+
+  ```npm
+  npm run types:check
+  ```
+</Callout>
+
+## 機能 [#features]
+
+公式の GraphQL インテグレーションは、以下の機能をサポートしています。
+
+* オペレーション(query/mutation/subscription)ごとのページ。使用している型をその場で展開して確認できます
+* 引数、フィールド、非推奨情報、デフォルト値、`@oneOf` 入力オブジェクト
+* スキーマで適用されているディレクティブとその定義
+* リクエストとレスポンスの例(自動生成、または[独自のオペレーション](/docs/integrations/graphql/server#examples)を使用)
+* cURL、JavaScript、Go、Python、Java、C#、Rust のコードサンプル
+* 変数フォームを備えたプレイグラウンド。WebSocket や SSE 経由で[サブスクリプション](/docs/integrations/graphql/api-page#subscriptions)も実行できます
+* LLM 向けの[ページの Markdown](/docs/integrations/graphql/server#markdown-for-llms)
+* 名前付き型のページ(任意)。スキーマ全体での使用箇所も表示されます
+
+### デモ [#demo]
+
+[GraphQL のサンプル](/docs/graphql)をご覧ください。

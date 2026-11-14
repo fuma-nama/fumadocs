@@ -1,0 +1,33 @@
+---
+title: 動的エントリー
+description: オンデマンドでコンパイルしてコレクションにアクセスします。
+---
+
+## 使い方 [#usage]
+
+docs/doc コレクションで[動的モード](/docs/mdx/async#dynamic-mode)を有効にし、`server` エントリではなく `dynamic` エントリからインポートしてください。
+
+出力は `server` エントリと同じですが、コンパイル済みのプロパティは `load()` メソッドで読み込む必要があります。
+
+```ts tab="Docs (Meta + Doc)"
+// [!code highlight]
+import { docs } from 'collections/dynamic';
+import { loader } from 'fumadocs-core/source';
+
+export const source = loader({
+  baseUrl: '/docs',
+  source: docs.toFumadocsSource(),
+});
+```
+
+```ts tab="Doc"
+// [!code highlight]
+import { blogPosts } from 'collections/dynamic';
+import { toFumadocsSource } from 'fumadocs-mdx/runtime/server';
+import { loader } from 'fumadocs-core/source';
+
+export const blog = loader({
+  baseUrl: '/blog',
+  source: toFumadocsSource(blogPosts, []),
+});
+```

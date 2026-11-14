@@ -1,0 +1,524 @@
+---
+title: Markdown
+description: ドキュメントの書き方
+---
+
+import { Building, HomeIcon, Rocket } from 'lucide-react';
+
+## はじめに [#introduction]
+
+Fumadocs は、マークアップ言語である MDX に便利な拡張機能を多数提供しています。ここでは、Fumadocs におけるデフォルトの MDX 構文を簡単に紹介します。
+
+> Fumadocs がサポートしているフォーマットは MDX だけではありません。実際には、ヘッドレス CMS など任意のレンダラーを使用できます。
+>
+> 詳しくは[カスタムコンテンツソース](/docs/integrations/content/custom)を参照してください。
+
+## MDX [#mdx]
+
+JSX 構文を使える Markdown のスーパーセットである MDX をおすすめします。
+コンポーネントをインポートしてドキュメント内で使用したり、JavaScript を記述したりすることもできます。
+
+詳しくは以下を参照してください。
+
+* [MDX 構文](https://mdxjs.com/docs/what-is-mdx/#mdx-syntax)
+* GFM (GitHub Flavored Markdown) もサポートしています。[GFM 仕様](https://github.github.com/gfm)を参照してください。
+
+```mdx noCopy
+import { Component } from './component';
+
+<Component name="Hello" />
+
+## Heading
+
+### Heading
+
+#### Heading
+
+Hello World, **Bold**, _Italic_, ~~Hidden~~
+
+1. First
+2. Second
+3. Third
+
+- Item 1
+- Item 2
+
+> Quote here
+
+![alt](/image.png)
+
+| Table | Description |
+| ----- | ----------- |
+| Hello | World       |
+```
+
+### フロントマター [#frontmatter]
+
+Fumadocs はデフォルトで YAML 形式のフロントマターに対応しています。Fumadocs UI では、`title` がページタイトル (`h1`) として使用されます。
+
+```mdx
+---
+title: This is a document
+---
+
+...
+```
+
+そのため、ページタイトルのレンダリングに独自のロジックを用意していない限り、Markdown/MDX を書く際に h1 タイトル (`# Heading`) は通常使用しません。
+
+コンテンツソースが対応していれば、フロントマターをコード内でエクスポートすることもできます。エクスポートした値は YAML のフロントマターを上書きする形でマージされ、[props](#props) を参照することもできます。
+
+```mdx
+---
+title: Deploy
+---
+
+export const frontmatter = {
+  description: `Deploy your ${props.framework} site.`,
+};
+```
+
+<Callout title="Fumadocs MDX の場合">
+  [`schema`](/docs/mdx/collections#schema-1) オプションを使用すると、フロントマターにプロパティを追加できます。詳しくは[フロントマターのカスタマイズ](/docs/mdx#customize-frontmatter)を参照してください。
+</Callout>
+
+### 自動リンク [#auto-links]
+
+内部リンクには、使用している React フレームワークの `<Link />` コンポーネントが使われるため、プリフェッチが可能になり、ハードリロードも発生しません。
+
+外部リンクには、セキュリティ対策としてデフォルトで `rel="noreferrer noopener" target="_blank"` 属性が付与されます。
+
+```mdx
+[My Link](https://github.github.com/gfm)
+
+This also works: https://github.github.com/gfm.
+```
+
+### Cards [#cards]
+
+リンクを追加するのに便利です。
+
+```mdx
+import { HomeIcon } from 'lucide-react';
+
+<Cards>
+  <Card href="/docs" title="Documentation">
+    Browse the full documentation.
+  </Card>
+  <Card title="href is optional">Cards can hold plain content too.</Card>
+  <Card icon={<HomeIcon />} href="/" title="Home">
+    You can include icons too.
+  </Card>
+</Cards>
+```
+
+<Cards>
+  <Card href="/docs" title="ドキュメント">
+    ドキュメント全体を見る。
+  </Card>
+
+  <Card title="href は省略可能です">カードには通常のコンテンツだけを入れることもできます。</Card>
+
+  <Card icon={<HomeIcon />} href="/" title="ホーム">
+    アイコンを追加することもできます。
+  </Card>
+</Cards>
+
+#### 「関連情報」セクション [#further-reading-section]
+
+次のように記述できます。
+
+```tsx title="page.tsx"
+import { getPageTreePeers } from 'fumadocs-core/page-tree';
+import { source } from '@/lib/source';
+
+<Cards>
+  {getPageTreePeers(source.getPageTree(), '/docs/my-page').map((peer) => (
+    <Card key={peer.url} title={peer.name} href={peer.url}>
+      {peer.description}
+    </Card>
+  ))}
+</Cards>;
+```
+
+同じフォルダー内にある他のページがカード形式で表示されます。
+
+<DocsCategory url="/docs/ui/navigation" />
+
+### Callouts [#callouts]
+
+ヒントや警告を追加するのに便利なコンポーネントで、デフォルトで含まれています。Callout の種類は次のように指定できます。
+
+* `info` (デフォルト) 
+* `warn`/`warning`
+* `error`
+* `success`
+* `idea`
+
+```mdx
+<Callout>Hello World</Callout>
+
+<Callout title="Title" type="warn">
+  Hello World
+</Callout>
+
+<Callout title="Title" type="error">
+  Hello World
+</Callout>
+
+<Callout title="Title" type="idea">
+  Hello World
+</Callout>
+```
+
+<Callout>Hello World</Callout>
+
+<Callout title="タイトル" type="warn">
+  Hello World
+</Callout>
+
+<Callout title="タイトル" type="error">
+  Hello World
+</Callout>
+
+<Callout title="タイトル" type="idea">
+  Hello World
+</Callout>
+
+### 見出し [#headings]
+
+各見出しにはアンカーが自動的に付与され、スペースなどの無効な文字はサニタイズされます(例：`Hello World` は `hello-world` になります)。
+
+```md
+# Hello `World`
+```
+
+#### 目次の設定 [#toc-settings]
+
+目次 (TOC) は見出しをもとに生成されます。見出しが目次にどう反映されるかをカスタマイズすることもできます。
+
+```md
+# Heading [!toc]
+
+This heading will be hidden from TOC.
+
+# Another Heading [toc]
+
+This heading will **only** be visible in TOC, you can use it to add additional TOC items.
+Like headings rendered in a React component:
+
+<MyComp />
+```
+
+#### カスタムアンカー [#custom-anchor]
+
+見出しに `[#slug]` を追加すると、アンカーをカスタマイズできます。
+
+```md
+# heading [#my-heading-id]
+```
+
+次のように、目次の設定と組み合わせることもできます。
+
+```md
+# heading [toc] [#my-heading-id]
+```
+
+特定の見出しへのリンクを共有するには、ハッシュフラグメントに見出しの ID を指定します (例: `/page#my-heading-id`) 。
+
+### コードブロック [#codeblock]
+
+シンタックスハイライトは、[Rehype Code](/docs/headless/mdx/rehype-code) によってデフォルトでサポートされています。
+
+````mdx
+```js
+console.log('Hello World');
+```
+
+```js title="My Title"
+console.log('Hello World');
+```
+````
+
+#### 行番号 [#line-numbers]
+
+行番号を表示します。Twoslash やその他のトランスフォーマーと組み合わせて使うこともできます。
+
+````mdx tab="Input"
+```ts twoslash lineNumbers
+const a = 'Hello World';
+//    ^?
+console.log(a); // [!code highlight]
+```
+````
+
+```ts twoslash lineNumbers tab="Output"
+const a = 'Hello World';
+//    ^?
+console.log(a); // [!code highlight]
+```
+
+行番号の開始値を設定できます。
+
+````mdx tab="Input"
+```js lineNumbers=4
+function main() {
+  console.log('starts from 4');
+
+  return 0;
+}
+```
+````
+
+```js lineNumbers=4 tab="Output"
+function main() {
+  console.log('starts from 4');
+
+  return 0;
+}
+```
+
+#### Shiki トランスフォーマー [#shiki-transformers]
+
+[Shiki トランスフォーマー](https://shiki.style/packages/transformers)の一部に対応しており、特定の行をハイライトしたり、スタイルを適用したりできます。
+
+````md tab="Input"
+```tsx
+// 行をハイライト
+<div>Hello World</div> // [\!code highlight]
+
+// 単語をハイライト
+// [\!code word:Fumadocs]
+<div>Fumadocs</div>
+
+// 差分の表示
+console.log('hewwo'); // [\!code --]
+console.log('hello'); // [\!code ++]
+
+// フォーカス
+return new ResizeObserver(() => {}) // [\!code focus]
+```
+````
+
+```tsx tab="Output"
+// 行をハイライト
+<div>Hello World</div> // [!code highlight]
+
+// 単語をハイライト
+// [!code word:Fumadocs]
+<div>Fumadocs</div>
+
+// diff スタイル：
+console.log('hewwo'); // [!code --]
+console.log('hello'); // [!code ++]
+
+// フォーカス表示
+return new ResizeObserver(() => {}) // [!code focus]
+```
+
+#### タブグループ [#tab-groups]
+
+````mdx
+```ts tab="Tab 1"
+console.log('A');
+```
+
+```ts tab="Tab 2"
+console.log('B');
+```
+````
+
+```ts tab="Tab 1"
+console.log('A');
+```
+
+```ts tab="Tab 2"
+console.log('B');
+```
+
+永続化用の ID を追加するには、最初のコードブロックで `tab-group` を定義します。
+
+````mdx
+```ts tab="Tab 1" tab-group="my-custom-group"
+console.log('A');
+```
+
+```ts tab="Tab 2"
+console.log('B');
+```
+````
+
+```ts tab="Tab 1" tab-group="my-custom-group"
+console.log('A');
+```
+
+```ts tab="Tab 2"
+console.log('B');
+```
+
+別のグループ：
+
+```ts tab="Tab 1" tab-group="my-custom-group"
+console.log('A');
+```
+
+```ts tab="Tab 2"
+console.log('B');
+```
+
+#### タブグループ内の MDX [#mdx-in-tab-groups]
+
+タブグループは remark プラグインの `remarkCodeTab` によって提供されており、Fumadocs MDX ではデフォルトで有効になっています。タブの値で MDX を使用するには、`parseMdx` オプションを有効にしてください。
+
+```ts tab="unified" title="source.config.ts"
+import { defineConfig } from 'fumadocs-mdx/config';
+
+export default defineConfig({
+  mdxOptions: {
+    remarkCodeTabOptions: {
+      parseMdx: true, // [!code ++]
+    },
+  },
+});
+```
+
+```ts tab="Sätteri" title="source.config.ts"
+import { defineConfig, defineDocs } from 'fumadocs-mdx/config';
+
+export const docs = defineDocs({
+  docs: {
+    compiler: 'satteri',
+  },
+});
+
+export default defineConfig({
+  satteriOptions: {
+    remarkCodeTabOptions: {
+      parseMdx: true, // [!code ++]
+    },
+  },
+});
+```
+
+````mdx
+```ts tab="<Building /> Tab 1"
+console.log('A');
+```
+
+```ts tab="<Rocket /> Tab 2"
+console.log('B');
+```
+````
+
+```ts tab="<Building /> Tab 1"
+console.log('A');
+```
+
+```ts tab="<Rocket /> Tab 2"
+console.log('B');
+```
+
+### インクルード [#include]
+
+別のファイル (Markdown/MDX ドキュメントも可) を参照します。Fumadocs MDX では、[Remark Include](/docs/headless/mdx/remark-include) によって常に有効になっています。
+`<include>` タグで対象ファイルのパスを指定してください (パスは MDX ファイル自体からの相対パスです) 。
+
+```mdx title="page.mdx"
+<include>./another.mdx</include>
+```
+
+インクルードのその他の使い方については、[こちら](/docs/mdx/include)を参照してください。
+
+### Props [#props]
+
+ページの props は、MDX 内で `props` として利用できます。たとえば、`[framework]` フォルダー内のページは、[パスパラメーター](/docs/page-conventions#path-params)から `framework` を受け取ります。
+
+```mdx title="[framework]/deploy.mdx"
+## Deploy on {props.framework}
+
+Deploy your {props.framework} site.
+```
+
+式は、目次、検索インデックス、LLM向けのMarkdownでも、評価後の値に置き換えられます。Astroのページでは、上の見出しのIDは`deploy-on-astro`になります。
+
+ページに[カスタムprops](/docs/headless/source-api#custom-props)を渡すこともできます。
+
+### Show [#show]
+
+条件に応じてコンテンツをレンダリングします。Fumadocs MDX では、[Remark Show](/docs/headless/mdx/remark-show) によってデフォルトで有効になっています。
+
+`when` は、[props](#props) を参照できる JavaScript の式です。
+
+```mdx title="[framework]/deploy.mdx"
+<show when={props.framework === 'astro'}>
+
+## Adapters
+
+Add an adapter to your Astro config.
+
+</show>
+```
+
+このセクションは、`framework` が `astro` のページでのみレンダリングされます。それ以外のページでは、目次、検索インデックス、LLM 向けの Markdown からも除外されます。
+
+[ステップ](#steps)を `<show>` で囲むこともできます。
+
+```mdx title="[framework]/deploy.mdx"
+### Build [step]
+
+<show when={props.framework === 'astro'}>
+
+### Add an Adapter [step]
+
+</show>
+
+### Deploy [step]
+```
+
+レンダリングされないステップは番号付けの対象外になります。たとえば Deploy は、Astro のページではステップ 3、それ以外のページではステップ 2 になります。
+
+[タブグループ](#tab-groups)のコードブロックも同様です。タブは、対応するコードブロックがレンダリングされる場合にのみ表示されます。
+
+### NPM コマンド [#npm-commands]
+
+各種パッケージマネージャー向けに、パッケージのインストールコマンドを生成する際に便利です。
+
+````md tab="Input"
+```npm
+npm i next -D
+```
+````
+
+```npm tab="Output"
+npm i next -D
+```
+
+詳細は[`remark-npm`](/docs/headless/mdx/remark-npm)を参照してください。
+
+### ステップ [#steps]
+
+ガイドで手順を示すのに便利です。有効化と設定の方法については、[`remark-steps`](/docs/headless/mdx/remark-steps) を参照してください。
+
+```md
+### Installation [step]
+
+### Write Code [step]
+
+### Deploy [step]
+```
+
+#### インストール [step] [#installation]
+
+#### コードを書く [step] [#write-code]
+
+#### デプロイ [step] [#deploy]
+
+### その他のコンポーネント [#other-components]
+
+タブ、アコーディオン、Zoomable Image などの[組み込みコンポーネント](/docs/ui/components)を設定して、MDX ドキュメント内で使用できます。
+
+## その他の機能 [#additional-features]
+
+以下のページもあわせてご覧ください。
+
+<DocsCategory />

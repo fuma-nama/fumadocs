@@ -1,0 +1,166 @@
+---
+title: ヘッドレス
+description: UIを含まない、AsyncAPIページの状態とロジック。
+---
+
+## 概要 [#overview]
+
+`@fumadocs/asyncapi/ui` 以外はすべてヘッドレスです。
+
+| パス                              | モジュール                         |
+| ------------------------------- | ----------------------------- |
+| `@fumadocs/asyncapi`            | ページ：ドキュメント、サーバー、独自のコンポーネント    |
+| `@fumadocs/asyncapi/operation`  | オペレーション：チャンネル、パラメーター、メッセージ、応答 |
+| `@fumadocs/asyncapi/playground` | オペレーションのチャンネル上のセッション          |
+
+## ページ [#page]
+
+`createAsyncAPIRenderer()` は独自のコンポーネントを受け取り、`<AsyncAPIPage />` を返します。このコンポーネントは、生成されたページの props を受け取ります。
+
+```tsx title="components/api-page.tsx"
+'use client';
+import { type CodeBlockProps, createAsyncAPIRenderer } from '@fumadocs/asyncapi';
+import { Operation } from '@/components/my-operation';
+import { SchemaUI } from '@/components/my-schema';
+
+export const AsyncAPIPage = createAsyncAPIRenderer({
+  components: {
+    Operation,
+    SchemaUI,
+    CodeBlock({ lang, code }: CodeBlockProps) {
+      return (
+        <pre>
+          <code className={`language-${lang}`}>{code}</code>
+        </pre>
+      );
+    },
+  },
+});
+```
+
+| コンポーネント     | レンダリング対象                                       |
+| ----------- | ---------------------------------------------- |
+| `Operation` | ページ内の各オペレーション。[Operation](#operation)を参照してください |
+| `SchemaUI`  | パラメーター、ヘッダー、メッセージペイロードのJSONスキーマ                |
+| `Layout`    | 省略可能。レンダリングされたオペレーションをラップします                   |
+
+### フック [#hooks]
+
+ページ配下のコンポーネントは、以下のフックでページの状態を読み取ります。
+
+| フック                  | 戻り値                             |
+| -------------------- | ------------------------------- |
+| `useAsyncAPI()`      | 参照解決済みのドキュメント (`doc`) とページオプション |
+| `useComponents()`    | ページに渡されたコンポーネント                 |
+| `useServer()`        | サーバー一覧、選択中のサーバー、およびその変数         |
+| `useRenderContext()` | `content` などのページのレンダリングオプション    |
+
+オペレーションを独自にレンダリングするには、`createAsyncAPIRenderer()` の代わりに `<AsyncAPIProvider document={bundled} components={...} />` をマウントしてください。
+
+## オペレーション [#operation]
+
+`<OperationProvider />` は、オペレーションの詳細を一度だけ導出します。この際にトレイトが適用され、オペレーションのチャンネル、パラメーター、メッセージ、応答が解決されます。
+
+```tsx title="components/my-operation.tsx"
+'use client';
+import {
+  OperationProvider,
+  type PageOperationProps,
+  useOperation,
+  useOperationSecurity,
+} from '@fumadocs/asyncapi/operation';
+
+export function Operation(props: PageOperationProps) {
+  return (
+    <OperationProvider {...props}>
+      <Content />
+    </OperationProvider>
+  );
+}
+
+function Content() {
+  const { title, channel, parameters, messages } = useOperation();
+  const security = useOperationSecurity();
+
+  return (
+    <>
+      <h2>{title}</h2>
+      <code>{channel.address}</code>
+      <ul>
+        {parameters.map((param) => (
+          <li key={param.name}>{param.name}</li>
+        ))}
+      </ul>
+      {messages.map((message) => (
+        <section key={message.id}>
+          <h3>{message.name}</h3>
+          {message.examples.map((example) => (
+            <pre key={example.id}>{JSON.stringify(example.payload, null, 2)}</pre>
+          ))}
+        </section>
+      ))}
+      <p>{security.operation.map((item) => item.id).join(', ')}</p>
+    </>
+  );
+}
+```
+
+| フック                      | 戻り値                                      |
+| ------------------------ | ---------------------------------------- |
+| `useOperation()`         | 詳細が解決済みのオペレーション                          |
+| `useOperationSecurity()` | 選択中のサーバーとオペレーションのセキュリティスキーム (両方が適用されます)  |
+| `useChannelMessages()`   | チャンネルの全オペレーションを通じて読者が受信・送信するメッセージ        |
+
+<auto-type-table path="props.ts" name="OperationInfo" />
+
+メッセージの例は、ドキュメントから取得されるか、そのスキーマから生成されます。
+
+<auto-type-table path="props.ts" name="OperationMessage" />
+
+## プレイグラウンド [#playground]
+
+`usePlayground()` は `<OperationProvider />` の配下で、トランスポートを使ってオペレーションのチャンネルに接続します。
+
+```tsx
+'use client';
+import { usePlayground } from '@fumadocs/asyncapi/playground';
+import { mqttTransport } from '@/lib/mqtt-transport';
+
+export function Playground() {
+  const { url, status, connect, disconnect, send, log } = usePlayground({
+    // ページの `playground.transports` に加えて使用されます
+    transports: { mqtt: mqttTransport },
+  });
+  if (!url) return null; // サーバーに対応するトランスポートがない場合
+
+  return (
+    <>
+      <button onClick={status === 'closed' ? connect : disconnect}>{status}</button>
+      {send && <button onClick={() => send('{"type":"ping"}')}>Ping</button>}
+      {log.map((entry) => (
+        <p key={entry.id}>
+          {entry.type} {entry.message?.name} {entry.data}
+        </p>
+      ))}
+    </>
+  );
+}
+```
+
+* アドレスのパラメーター、クエリ、認証の入力はフォーム `stf` で管理され、`url` はその値に連動して更新されます。
+* `send` は接続中に使用できます。ただし、受信専用の接続では使用できません。
+* 受信したメッセージは、チャンネル上の各メッセージのペイロードと照合され、一致したドキュメント上のメッセージが `entry.message` に入ります。バイナリメッセージは `entry.binary` に入ります。
+
+<auto-type-table path="props.ts" name="Playground" />
+
+### トランスポート [#transports]
+
+トランスポートは、プロトコルのサーバーへの接続を担います ([MQTT の例](/docs/integrations/asyncapi/api-page#custom-transports)を参照してください) 。トランスポートは `usePlayground()` の `transports`、ページの `playground.transports`、組み込みの WebSocket トランスポートの順に選択されます。
+
+`usePlaygroundTransport()` は同じ `transports` を受け取り、選択中のサーバーに対応するトランスポートを返します。そのサーバーに接続できるトランスポートがない場合は `undefined` を返します。
+
+<auto-type-table path="props.ts" name="PlaygroundTransport" />
+
+`connect()` は `events` に対して、`open()`、テキストまたは `ArrayBuffer` を渡す `message(data)`、接続を終了させる `close()` または `error()` を通知します。
+
+<auto-type-table path="props.ts" name="ConnectTarget" />

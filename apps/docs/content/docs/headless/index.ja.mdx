@@ -1,0 +1,105 @@
+---
+title: はじめに
+description: コアライブラリの導入ガイド
+icon: SquareBookmark
+---
+
+## Fumadocs Core とは [#what-is-this]
+
+Fumadocs Core は、Next.js、React Router、TanStack Start、Waku、Astro などの React.js フレームワークでドキュメントを構築するための、サーバーサイド関数とヘッドレスコンポーネントを提供します。
+
+* [検索](/docs/headless/search)
+* パンくずリスト、サイドバー、目次コンポーネント
+* Remark/Rehype プラグイン
+* AIエージェントがドキュメントを検索・閲覧するための [MCP ツール](/docs/headless/utils/mcp)
+* [その他のユーティリティ](/docs/headless/utils)
+
+<Callout title="ヒント">
+  Fumadocs UI なしでも使用できます。つまり、ヘッドレスなライブラリです。
+
+  初心者の方や一般的な用途には、[Fumadocs UI](/docs/ui) の使用をおすすめします。
+</Callout>
+
+## インストール [#installation]
+
+コアパッケージをインストールしてください。インテグレーションによっては追加の依存関係が必要になります。詳しくは各ガイドを参照してください。
+
+```package-install
+fumadocs-core
+```
+
+一部のコンポーネントでは、フレームワークプロバイダーが必要です。
+
+```tsx tab="Next.js"
+import type { ReactNode } from 'react';
+import { NextProvider } from 'fumadocs-core/framework/next';
+
+export function RootLayout({ children }: { children: ReactNode }) {
+  // Fumadocs UI を使用している場合は、代わりに `<RootProvider />` を使用してください
+  return <NextProvider>{children}</NextProvider>;
+}
+```
+
+```tsx tab="React Router"
+import type { ReactNode } from 'react';
+import { ReactRouterProvider } from 'fumadocs-core/framework/react-router';
+
+export function Root({ children }: { children: ReactNode }) {
+  return <ReactRouterProvider>{children}</ReactRouterProvider>;
+}
+```
+
+```tsx tab="TanStack Start"
+import type { ReactNode } from 'react';
+import { TanstackProvider } from 'fumadocs-core/framework/tanstack';
+
+export function Root({ children }: { children: ReactNode }) {
+  return <TanstackProvider>{children}</TanstackProvider>;
+}
+```
+
+```tsx tab="Waku"
+import type { ReactNode } from 'react';
+import { WakuProvider } from 'fumadocs-core/framework/waku';
+
+export function Root({ children }: { children: ReactNode }) {
+  return <WakuProvider>{children}</WakuProvider>;
+}
+```
+
+```tsx tab="Astro"
+import { navigate } from 'astro:transitions/client';
+import type { ReactNode } from 'react';
+import { AstroProvider } from 'fumadocs-core/framework/astro';
+
+// React アイランド内でレンダリングされます。Astro ページから pathname と params を渡してください。
+export function Root({
+  pathname,
+  params,
+  children,
+}: {
+  pathname: string;
+  params: Record<string, string | undefined>;
+  children: ReactNode;
+}) {
+  return (
+    <AstroProvider pathname={pathname} params={params} navigate={navigate}>
+      {children}
+    </AstroProvider>
+  );
+}
+```
+
+APIとコンポーネントの詳細は以下をご覧ください。
+
+<Cards>
+  <Card title="パンくずリスト" href="/docs/headless/components/breadcrumb" description="画面上部に表示されるナビゲーションコンポーネント" />
+
+  <Card title="目次" href="/docs/headless/components/toc" description="アクティブなアンカーを監視する機能を備えた目次" />
+
+  <Card title="Source API" href="/docs/headless/source-api" description="コンテンツソースを扱うための統一インターフェース" />
+
+  <Card title="検索" href="/docs/headless/search" description="ドキュメント検索を実装します" />
+
+  <Card title="MCP" href="/docs/headless/utils/mcp" description="ページの探索、Markdownコンテンツ、検索機能をAIエージェントに提供します" />
+</Cards>
