@@ -70,48 +70,35 @@ function server(options: Options): SearchServer {
   };
 }
 
-function serverI18n(options: I18nOptions): SearchServer {
-  const { indexes: inputIndexes, localeMap } = options;
+/** a server for each locale, built on its first use */
+function localeServers(
+  i18n: I18nConfig,
+  getIndexes: (locale: string) => Awaitable<Index[]>,
+  { localeMap, document }: Omit<I18nOptions, 'i18n' | 'indexes'>,
+): SearchServer {
+  const servers = new Map<string, SearchServer>();
 
-  async function initSearchServers() {
-    const map = new Map<string, SearchServer>();
-    const indexMap = new Map<string, IndexWithLocale[]>();
-    const indexes = typeof inputIndexes === 'function' ? await inputIndexes() : inputIndexes;
-
-    for (const index of indexes) {
-      let list = indexMap.get(index.locale);
-      if (!list) {
-        list = [];
-        indexMap.set(index.locale, list);
-      }
-      list.push(index);
-    }
-
-    for (const [locale, list] of indexMap) {
+  function get(locale: string): SearchServer {
+    let localeServer = servers.get(locale);
+    if (!localeServer) {
       const override = localeMap?.[locale];
-
-      map.set(
-        locale,
-        server({
-          indexes: list,
-          document:
-            override === 'cjk'
-              ? { ...options.document, encoder: Search.Charset.CJK }
-              : { ...options.document, ...override },
-        }),
-      );
+      localeServer = server({
+        indexes: () => getIndexes(locale),
+        document:
+          override === 'cjk'
+            ? { ...document, encoder: Search.Charset.CJK }
+            : { ...document, ...override },
+      });
+      servers.set(locale, localeServer);
     }
-
-    return map;
+    return localeServer;
   }
 
-  const get = initSearchServers();
   return {
     async export(): Promise<ExportedData> {
-      const map = await get;
-      const entries = Array.from(map.entries()).map(async ([k, v]) => {
-        const data = (await v.export()) as Extract<ExportedData, { type: 'default' }>;
-        return [k, data.raw];
+      const entries = i18n.languages.map(async (locale) => {
+        const data = (await get(locale).export()) as Extract<ExportedData, { type: 'default' }>;
+        return [locale, data.raw];
       });
 
       return {
@@ -120,13 +107,27 @@ function serverI18n(options: I18nOptions): SearchServer {
       };
     },
     async search(query, searchOptions) {
-      const map = await get;
-      const handler = map.get(searchOptions?.locale ?? options.i18n.defaultLanguage);
-
-      if (handler) return handler.search(query, searchOptions);
-      return [];
+      const locale = searchOptions?.locale ?? i18n.defaultLanguage;
+      if (!i18n.languages.includes(locale)) return [];
+      return get(locale).search(query, searchOptions);
     },
   };
+}
+
+function serverI18n({ i18n, indexes, ...options }: I18nOptions): SearchServer {
+  const indexMap = Promise.resolve(typeof indexes === 'function' ? indexes() : indexes).then(
+    (list) => {
+      const map = new Map<string, IndexWithLocale[]>();
+      for (const index of list) {
+        const items = map.get(index.locale);
+        if (items) items.push(index);
+        else map.set(index.locale, [index]);
+      }
+      return map;
+    },
+  );
+
+  return localeServers(i18n, async (locale) => (await indexMap).get(locale) ?? [], options);
 }
 
 export function flexsearch(options: Options): SearchAPI {
@@ -151,30 +152,21 @@ export function flexsearchFromSource<C extends LoaderConfig>(
   loader: LoaderOutput<C> | (() => Awaitable<LoaderOutput<C>>),
   options: FromSourceOptions<NoInfer<C>> = {},
 ) {
-  const cache = new WeakMap<LoaderOutput<C>, Promise<SearchServer>>();
+  const cache = new WeakMap<LoaderOutput<C>, SearchServer>();
   const { buildIndex = buildIndexDefault, ...rest } = options;
 
-  async function initServer(loader: LoaderOutput<C>): Promise<SearchServer> {
+  function initServer(loader: LoaderOutput<C>): SearchServer {
     const getBreadcrumbs = createBreadcrumbs(loader);
-    const indexes = await Promise.all(
-      loader.getPages().map(async (page): Promise<IndexWithLocale> => {
-        const index = await buildIndex(page);
-        return {
-          ...index,
-          locale: page.locale!,
-          breadcrumbs: index.breadcrumbs ?? getBreadcrumbs(page),
-        };
-      }),
-    );
+    const getIndexes = (locale?: string) =>
+      Promise.all(
+        loader.getPages(locale).map(async (page): Promise<Index> => {
+          const index = await buildIndex(page);
+          return { ...index, breadcrumbs: index.breadcrumbs ?? getBreadcrumbs(page) };
+        }),
+      );
 
-    if (loader._i18n)
-      return serverI18n({
-        indexes,
-        i18n: loader._i18n,
-        ...rest,
-      });
-
-    return server({ indexes, ...rest });
+    if (loader._i18n) return localeServers(loader._i18n, getIndexes, rest);
+    return server({ indexes: () => getIndexes(), ...rest });
   }
 
   async function getCurrentServer() {
@@ -184,7 +176,7 @@ export function flexsearchFromSource<C extends LoaderConfig>(
       server = initServer(l);
       cache.set(l, server);
     }
-    return await server;
+    return server;
   }
 
   return createEndpoint({

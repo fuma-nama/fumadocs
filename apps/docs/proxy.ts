@@ -1,7 +1,5 @@
-import { type NextFetchEvent, type NextRequest, NextResponse } from 'next/server';
+import { type NextRequest, NextResponse } from 'next/server';
 import { isMarkdownPreferred, rewritePath } from 'fumadocs-core/negotiation';
-import { createI18nMiddleware } from 'fumadocs-core/i18n/middleware';
-import { i18n } from '@/lib/i18n';
 
 const { rewrite: rewriteLLM } = rewritePath(
   '{/:lang}/docs{/*path}',
@@ -15,7 +13,6 @@ const { rewrite: rewriteText } = rewritePath(
   '{/:lang}/docs{/*path}.txt',
   '/llms.mdx{/:lang}/docs{/*path}.txt',
 );
-const i18nProxy = createI18nMiddleware(i18n);
 
 /** generated API pages have no Markdown, they keep their HTML */
 const apiPage = /^(?:\/[^/]+)?\/docs\/(?:openapi|asyncapi|graphql)\/./;
@@ -27,11 +24,20 @@ const markdownVersions = new Map([
 ]);
 
 export const config = {
-  // pages and their text files: API routes (like MCP streams) and other files never pass through it
-  matcher: '/((?!api/|_next/|og/|llms\\.mdx/|export/|.*\\.(?!mdx?$|txt$)[^/]+$).*)',
+  // the docs and the pages with a Markdown version, the locale prefix is a rewrite in `next.config.mts`
+  matcher: [
+    '/',
+    '/showcase',
+    '/docs.md',
+    '/docs.mdx',
+    '/docs/:path*',
+    '/:lang/docs.md',
+    '/:lang/docs.mdx',
+    '/:lang/docs/:path*',
+  ],
 };
 
-export default function proxy(request: NextRequest, event: NextFetchEvent) {
+export default function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const result = rewriteMd(pathname) || rewriteText(pathname);
   if (result) {
@@ -49,7 +55,5 @@ export default function proxy(request: NextRequest, event: NextFetchEvent) {
     }
   }
 
-  // files outside the docs, like `/llms.txt`, have no locale
-  if (pathname.includes('.')) return NextResponse.next();
-  return i18nProxy(request, event);
+  return NextResponse.next();
 }
