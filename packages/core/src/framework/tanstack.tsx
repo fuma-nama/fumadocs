@@ -1,4 +1,4 @@
-import { type ReactNode, useRef, useMemo } from 'react';
+import { type ReactNode, useMemo } from 'react';
 import { type Framework, FrameworkProvider } from '@/framework/index';
 import { useParams, Link, useRouter, useRouterState } from '@tanstack/react-router';
 
@@ -26,22 +26,10 @@ const framework: Framework = {
     );
   },
   usePathname() {
-    const { isLoading, pathname } = useRouterState({
-      select: (state) => ({
-        isLoading: state.isLoading,
-        pathname: state.location.pathname,
-      }),
+    // `location` is the next page during a navigation, keep the current page until it loads
+    return useRouterState({
+      select: (state) => ((state.isLoading && state.resolvedLocation) || state.location).pathname,
     });
-
-    const activePathname = useRef(pathname);
-    return useMemo(() => {
-      if (isLoading) {
-        return activePathname.current;
-      }
-
-      activePathname.current = pathname;
-      return pathname;
-    }, [isLoading, pathname]);
   },
   useRouter() {
     const router = useRouter();
