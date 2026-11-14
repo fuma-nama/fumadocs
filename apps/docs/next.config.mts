@@ -4,6 +4,7 @@ import { createNextStory } from '@fumadocs/story/next';
 import type { NextConfig } from 'next';
 import { defaultFramework, frameworks } from './lib/framework.ts';
 import { frameworkPages } from './lib/remark-framework-links.ts';
+import { i18n } from './lib/i18n.ts';
 
 const withAnalyzer = createBundleAnalyzer({
   enabled: process.env.ANALYZE === 'true',
@@ -31,11 +32,28 @@ const config: NextConfig = {
       },
     ],
   },
+  async rewrites() {
+    const { defaultLanguage, languages } = i18n;
+
+    return {
+      // the default language has no prefix, a routing rule instead of running the proxy on every request.
+      // Paths with a dot are files without a locale.
+      beforeFiles: [
+        { source: '/', destination: `/${defaultLanguage}` },
+        {
+          source: `/:path((?!(?:${languages.join('|')})(?:/|$)|api/|_next/|og/|llms\\.mdx/|export/)[^.]+)`,
+          destination: `/${defaultLanguage}/:path`,
+        },
+      ],
+    };
+  },
   async redirects() {
     const values = frameworks.map((item) => item.value).join('|');
     const pages = [...frameworkPages].join('|');
 
     return [
+      { source: `/${i18n.defaultLanguage}`, destination: '/', permanent: false },
+      { source: `/${i18n.defaultLanguage}/:path*`, destination: '/:path*', permanent: false },
       // the pages of each framework became one page per framework
       {
         source: `/docs/:page(manual-installation|internationalization)/:framework(${values})`,

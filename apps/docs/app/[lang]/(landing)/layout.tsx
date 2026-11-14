@@ -1,7 +1,7 @@
-import type { ReactNode } from 'react';
 import { Geist_Pixel } from 'next/font/google';
 import { SiteHomeLayout } from '@/components/layouts/home';
 import { i18n } from '@/lib/i18n';
+import { notFound } from 'next/navigation';
 import { StatusBar } from './ui/status-bar';
 import './landing.css';
 
@@ -13,7 +13,8 @@ const pixel = Geist_Pixel({
   adjustFontFallback: false,
 });
 
-export default function Layout({ children }: { children: ReactNode }) {
+export default async function Layout({ params, children }: LayoutProps<'/[lang]'>) {
+  if ((await params).lang !== i18n.defaultLanguage) notFound();
   return (
     <SiteHomeLayout
       // from the sheet's width the navbar's content edge lands on the sheet's: two 1px frame lines,
