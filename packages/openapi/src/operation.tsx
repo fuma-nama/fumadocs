@@ -461,7 +461,9 @@ export function useResponseExamples(): ResponseTab[] {
       } else if (responseOfType?.example !== undefined) {
         tab.examples = [{ label: t('Example'), sample: getRaw(responseOfType.example) }];
       } else if (responseOfType?.schema) {
-        tab.examples = [{ label: t('Example'), sample: sample(responseOfType.schema) }];
+        // without the properties hidden from responses, like in Schema UI
+        const value = sample(responseOfType.schema, { skipWriteOnly: true });
+        tab.examples = [{ label: t('Example'), sample: value }];
       }
 
       tabs.push(tab);
