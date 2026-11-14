@@ -8,7 +8,7 @@ import { createAutomate } from './engine';
 
 function mount(desk: HTMLDivElement) {
   // the windows' code and buttons are previews, read and selected but not tabbed to
-  for (const el of desk.querySelectorAll<HTMLElement>('[role=region], a, button')) el.tabIndex = -1;
+  for (const el of desk.querySelectorAll<HTMLElement>('[tabindex], a, button')) el.tabIndex = -1;
   return nearby(desk, () => createAutomate(desk));
 }
 
