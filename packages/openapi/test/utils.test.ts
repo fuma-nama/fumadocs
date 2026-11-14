@@ -248,19 +248,29 @@ test('sends a path parameter with reserved characters to the right URL', () => {
   expect(data.header['X-Name'].value).toBe('a/b c');
 });
 
-test('names an exploded array cookie once per value', () => {
-  const cookie = (value: unknown, explode?: boolean) =>
+test('serializes cookie parameters by their style', () => {
+  const cookie = (value: unknown, style?: 'form' | 'cookie', explode?: boolean) =>
     cookieString(
       encodeRequestData(
-        { method: 'get', path: {}, query: {}, header: {}, cookie: { id: value } },
+        { method: 'get', path: {}, query: {}, header: {}, cookie: { color: value } },
         defaultAdapters,
-        [{ name: 'id', in: 'cookie', explode }],
+        [{ name: 'color', in: 'cookie', style, explode }],
       ).cookie,
     );
+  const list = ['blue', 'black', 'brown'];
+  const rgb = { R: 100, G: 200, B: 150 };
 
-  // `form` style, as in https://swagger.io/docs/specification/v3_0/serialization
-  expect(cookie([3, 4])).toBe('id=3&id=4');
-  expect(cookie([3, 4], false)).toBe('id=3,4');
-  expect(cookie('x')).toBe('id=x');
-  expect(cookie({ a: 1, b: 2 })).toBe('a=1; b=2');
+  // https://spec.openapis.org/oas/v3.2.0.html#style-examples
+  for (const style of ['form', 'cookie'] as const) {
+    expect(cookie('blue', style)).toBe('color=blue');
+    expect(cookie(list, style, false)).toBe('color=blue,black,brown');
+    expect(cookie(rgb, style, false)).toBe('color=R,100,G,200,B,150');
+  }
+  expect(cookie(list)).toBe('color=blue&color=black&color=brown');
+  expect(cookie(rgb)).toBe('R=100&G=200&B=150');
+  expect(cookie(list, 'cookie')).toBe('color=blue; color=black; color=brown');
+  expect(cookie(rgb, 'cookie')).toBe('R=100; G=200; B=150');
+
+  expect(cookie(['a b', 'c;d'])).toBe('color=a%20b&color=c%3Bd');
+  expect(cookie('Hello%2C world!', 'cookie')).toBe('color=Hello%2C world!');
 });

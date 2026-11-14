@@ -3,6 +3,8 @@ packages:
   'fumadocs-openapi': patch
 ---
 
-### Array cookies
+### Cookie parameters
 
-- An array cookie parameter with `explode` (the default) is sent as `id=3&id=4` by the playground and code usages, instead of repeating its name as `id=id=3&id=4`.
+- Exploded `form` cookies are sent as `color=blue&color=black` and `R=100&G=200`, instead of repeating the name as `color=color=blue&color=black` or splitting an object into separate cookies.
+- `style: cookie` is supported: values are sent as given and joined by `; `.
+- Code usages percent-encode `form` cookie values like the playground.
