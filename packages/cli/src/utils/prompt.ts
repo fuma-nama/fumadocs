@@ -1,4 +1,4 @@
-import { isCancel as isCancelSymbol } from '@clack/prompts';
+import { isCI, isCancel as isCancelSymbol } from '@clack/prompts';
 
 /**
  * `@clack/core` narrows to its own `unique symbol`, which can't exclude the wider `symbol` that
@@ -8,5 +8,5 @@ export function isCancel<T>(value: T | symbol): value is symbol {
   return isCancelSymbol(value);
 }
 
-/** without a terminal, like in scripts and AI agents, a prompt waits forever */
-export const canPrompt = process.stdin.isTTY === true;
+/** a prompt waits forever without a terminal, like in scripts and AI agents, or in CI with a pseudo-terminal */
+export const canPrompt = process.stdin.isTTY === true && !isCI();

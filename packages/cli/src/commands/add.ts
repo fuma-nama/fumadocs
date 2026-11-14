@@ -52,10 +52,17 @@ export async function add(input: string[], connector: RegistryConnector, config:
 
     spin.stop(styleText(['bold', 'greenBright'], 'registry fetched'));
     const options = groups.flat();
-    if (!canPrompt)
+    if (!canPrompt) {
+      // other registries can't be installed by a bare name
+      const names: string[] = [];
+      for (const { value } of options) {
+        if (value.subRegistry === undefined || value.subRegistry === subRegistry)
+          names.push(value.name);
+      }
       throw new Error(
-        `Pass the components to install, like \`fumadocs add <name>\`: ${options.map((option) => option.value.name).join(', ')}`,
+        `Pass the components to install, like \`fumadocs add <name>\`: ${names.join(', ')}`,
       );
+    }
     const value = await autocompleteMultiselect({
       message: 'Select components to install',
       options: options.sort((a, b) => a.label.localeCompare(b.label)),
