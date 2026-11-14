@@ -56,7 +56,9 @@ export function registerSourceTools<C extends LoaderConfig>(
     },
     async ({ url }) => {
       const loader = typeof source === 'function' ? await source() : source;
-      const page = findPage(loader, url);
+      // search results have the hash of a heading, `llms.txt` links the `.md` file
+      const path = url.replace(/[?#].*$/, '').replace(/\.md$/, '');
+      const page = loader.getPageByUrl(path === '/index' ? '/' : path);
       if (!page)
         return {
           content: [{ type: 'text', text: `page not found: ${url}` }],
@@ -68,13 +70,4 @@ export function registerSourceTools<C extends LoaderConfig>(
       };
     },
   );
-}
-
-/** URLs are unique across languages, an i18n loader looks them up per language */
-function findPage<C extends LoaderConfig>(loader: LoaderOutput<C>, url: string) {
-  if (!loader._i18n) return loader.getPageByUrl(url);
-  for (const language of loader._i18n.languages) {
-    const page = loader.getPageByUrl(url, language);
-    if (page) return page;
-  }
 }

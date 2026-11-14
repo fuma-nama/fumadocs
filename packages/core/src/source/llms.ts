@@ -8,6 +8,8 @@ interface Context {
 
 interface RenderContext<C extends LoaderConfig> extends Context {
   loader: LoaderOutput<C>;
+  /** link pages to their `.md` files */
+  markdown?: boolean;
 }
 
 export interface LLMsConfig<Page = unknown> {
@@ -17,12 +19,20 @@ export interface LLMsConfig<Page = unknown> {
     item: PageTree.Root | PageTree.Item | PageTree.Folder,
     ctx: Context,
   ) => string;
+  /**
+   * The URL of a link, in files `item.url` is the path of the `.md` file of the page.
+   */
   renderUrl?: (item: PageTree.Item, ctx: Context) => string;
 
   /**
-   * Render a page as Markdown, required by `page()` and `full()`.
+   * Render a page as Markdown, required by `page()`, `full()` and the files.
    */
   renderPage?: (page: Page) => Awaitable<string>;
+
+  /**
+   * The pages in `full()` and the files, every page by default.
+   */
+  filter?: (page: Page) => boolean;
 }
 
 export interface LLMs<IndexOutput extends Awaitable<string> = Awaitable<string>> {
@@ -52,6 +62,24 @@ export interface LLMsWithPages<
    * generate `llms-full.txt` content: every page rendered with `renderPage`.
    */
   full: (lang?: string) => Promise<string>;
+
+  /**
+   * The paths of the files for agents, for static output:
+   *
+   * - `/llms.txt` and `/llms-full.txt`: every page, linked to its `.md` file, and the `llms-full.txt` of directories.
+   * - `<dir>/llms-full.txt`: the pages under a URL directory with two or more pages, like `/docs/guide`.
+   * - `<page>.md`: a page, `/index.md` for `/`.
+   *
+   * @param lang - only the pages of a language, required when URLs don't have the locale (`hideLocale: 'always'`)
+   */
+  files: (lang?: string) => Promise<string[]>;
+
+  /**
+   * Respond with the file at a path, `undefined` when there's none.
+   *
+   * @param lang - only the pages of a language, see `files()`
+   */
+  serve: (path: string, lang?: string) => Promise<Response | undefined>;
 }
 
 export function llms<C extends LoaderConfig = LoaderConfig>(
@@ -74,7 +102,8 @@ export function llms<C extends LoaderConfig = LoaderConfig>(
   input: LoaderOutput<C> | (() => Awaitable<LoaderOutput<C>>),
   config: LLMsConfig<C['page']> = {},
 ): LLMs | LLMsWithPages<C['page']> {
-  const { TAB = '  ' } = config;
+  type Page = C['page'];
+  const { TAB = '  ', filter = () => true } = config;
 
   function renderName(node: PageTree.Node | PageTree.Root, ctx: RenderContext<C>): string {
     if (config.renderName) return config.renderName(node, ctx);
@@ -118,6 +147,9 @@ export function llms<C extends LoaderConfig = LoaderConfig>(
   function formatNode(node: PageTree.Node, indent: number, ctx: RenderContext<C>): string {
     switch (node.type) {
       case 'page': {
+        const page = ctx.markdown && ctx.loader.getNodePage(node, ctx.lang);
+        if (page && filter(page)) node = { ...node, url: markdownPath(page.url) };
+
         return formatListItem(
           formatMarkdownLink(renderName(node, ctx), config.renderUrl?.(node, ctx) ?? node.url),
           renderDescription(node, ctx),
@@ -142,15 +174,16 @@ export function llms<C extends LoaderConfig = LoaderConfig>(
     }
   }
 
-  function formatIndex(loader: LoaderOutput<C>, lang?: string): string {
+  function formatIndex(ctx: RenderContext<C>): string {
+    const { loader, lang } = ctx;
     if (loader._i18n && lang === undefined) {
       const out: string[] = [];
-      for (const language of loader._i18n.languages) out.push(formatIndex(loader, language));
+      for (const language of loader._i18n.languages)
+        out.push(formatIndex({ ...ctx, lang: language }));
 
       return out.join('\n\n');
     }
 
-    const ctx: RenderContext<C> = { lang, loader };
     const pageTree = loader.getPageTree(lang);
     const out: string[] = [];
     out.push(`# ${renderName(pageTree, ctx)}`, '');
@@ -161,11 +194,21 @@ export function llms<C extends LoaderConfig = LoaderConfig>(
     return out.join('\n');
   }
 
-  function renderPage(page: C['page']) {
+  function renderPage(page: Page) {
     if (!config.renderPage)
       throw new Error('`renderPage` is required by `page()` and `full()`, see llms() options.');
 
     return config.renderPage(page);
+  }
+
+  async function renderPages(pages: Page[]): Promise<string> {
+    return (await Promise.all(pages.map(renderPage))).join('\n\n');
+  }
+
+  function getPages(loader: LoaderOutput<C>, lang?: string): Page[] {
+    const out: Page[] = [];
+    for (const page of loader.getPages(lang)) if (filter(page)) out.push(page);
+    return out;
   }
 
   function withLoader(render: (loader: LoaderOutput<C>) => string): Awaitable<string> {
@@ -173,20 +216,87 @@ export function llms<C extends LoaderConfig = LoaderConfig>(
     return render(input);
   }
 
+  const resolveLoader = async () => (typeof input === 'function' ? await input() : input);
+
+  async function renderFile(
+    loader: LoaderOutput<C>,
+    path: string,
+    lang?: string,
+  ): Promise<string | undefined> {
+    const pages = getPages(loader, lang);
+    if (path === '/llms.txt') {
+      let text = formatIndex({ loader, lang, markdown: true });
+      const dirs = sections(pages);
+      if (dirs.size > 0) text += '\n\n## Sections\n';
+      for (const dir of dirs.keys()) text += `\n- [${dir}](${dir}/llms-full.txt)`;
+      return text;
+    }
+    if (path === '/llms-full.txt') return renderPages(pages);
+    if (path.endsWith('/llms-full.txt')) {
+      const dirPages = sections(pages).get(path.slice(0, -'/llms-full.txt'.length));
+      return dirPages && renderPages(dirPages);
+    }
+    if (path.endsWith('.md')) {
+      const url = path === '/index.md' ? '/' : path.slice(0, -'.md'.length);
+      const page = loader.getPageByUrl(url, lang) ?? loader.getPageByUrl(`${url}/`, lang);
+      if (page && filter(page)) return renderPage(page);
+    }
+  }
+
   return {
-    index: (lang) => withLoader((loader) => formatIndex(loader, lang)),
+    index: (lang) => withLoader((loader) => formatIndex({ loader, lang })),
     indexNode: (node, lang) => withLoader((loader) => formatNode(node, 0, { lang, loader })),
     async page(page) {
       return renderPage(page);
     },
     async full(lang) {
-      const loader = typeof input === 'function' ? await input() : input;
-      const rendered: Awaitable<string>[] = [];
-      for (const page of loader.getPages(lang)) rendered.push(renderPage(page));
+      return renderPages(getPages(await resolveLoader(), lang));
+    },
+    async files(lang) {
+      const pages = getPages(await resolveLoader(), lang);
+      const out = new Set(['/llms.txt', '/llms-full.txt']);
+      for (const page of pages) out.add(markdownPath(page.url));
+      for (const dir of sections(pages).keys()) out.add(`${dir}/llms-full.txt`);
+      return Array.from(out);
+    },
+    async serve(path, lang) {
+      const loader = await resolveLoader();
+      // generated URLs are URI encoded, routers may pass paths decoded
+      const text =
+        (await renderFile(loader, path, lang)) ?? (await renderFile(loader, encodeURI(path), lang));
+      if (text === undefined) return;
 
-      return (await Promise.all(rendered)).join('\n\n');
+      return new Response(text, {
+        headers: {
+          'Content-Type': `${path.endsWith('.md') ? 'text/markdown' : 'text/plain'}; charset=utf-8`,
+        },
+      });
     },
   };
+}
+
+/** the URL directories with two or more pages, and their pages */
+function sections<Page extends { url: string }>(pages: Page[]): Map<string, Page[]> {
+  const dirs = new Map<string, Page[]>();
+  for (const page of pages) {
+    const url = page.url.replace(/\/$/, '');
+    if (!url.startsWith('/')) continue;
+
+    for (let end = url.length; end > 0; end = url.lastIndexOf('/', end - 1)) {
+      const dir = url.slice(0, end);
+      const list = dirs.get(dir);
+      if (list) list.push(page);
+      else dirs.set(dir, [page]);
+    }
+  }
+
+  for (const [dir, list] of dirs) if (list.length < 2) dirs.delete(dir);
+  return dirs;
+}
+
+/** the path of the `.md` file of a page: `<page>.md`, `/index.md` for `/` */
+function markdownPath(url: string): string {
+  return url === '/' ? '/index.md' : `${url.replace(/\/$/, '')}.md`;
 }
 
 function formatMarkdownLink(title: string, url: string): string {
