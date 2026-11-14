@@ -9,3 +9,7 @@ pnpm dev
 # or
 yarn dev
 ```
+
+## AI Agents
+
+`AGENTS.md` points coding agents (Claude Code, Cursor, Codex, etc.) to the [Fumadocs instructions](https://fumadocs.dev/agents.md) for writing content and upgrading.

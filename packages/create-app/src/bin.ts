@@ -314,6 +314,9 @@ async function main(defaultName: string | undefined, config: CliOptions): Promis
     console.log(styleText('cyan', `${config.pm} dev`));
   }
   console.log(styleText('bold', '\nYou can now open the project and start writing documents'));
+  console.log(
+    styleText('dim', 'Using an AI agent? AGENTS.md points it to https://fumadocs.dev/agents.md'),
+  );
 
   process.exit(0);
 }

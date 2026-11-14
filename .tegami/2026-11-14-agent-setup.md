@@ -1,6 +1,7 @@
 ---
 packages:
   '@fumadocs/cli': patch
+  'create-fumadocs-app': patch
   'fumadocs-core': patch
   'fumadocs-mdx': patch
 ---
@@ -13,3 +14,4 @@ packages:
 - `init --i18n` on a static Next.js site keeps the locale in URLs and writes no proxy.
 - The duplicated slugs error names both files.
 - The macro error of Fumadocs MDX explains how to load content outside the bundler.
+- New projects include an `AGENTS.md` that points coding agents to the Fumadocs instructions at https://fumadocs.dev/agents.md.
