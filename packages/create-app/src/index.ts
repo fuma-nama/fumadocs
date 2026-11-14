@@ -77,7 +77,8 @@ export async function create(createOptions: Options): Promise<void> {
   }
 
   const appDir = path.join(outputDir, template.appDir);
-  const projectName = path.basename(outputDir);
+  // `.` creates the project in the current folder
+  const projectName = path.basename(path.resolve(outputDir));
   const pluginContext: TemplatePluginContext = {
     template,
     dest: outputDir,
