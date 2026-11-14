@@ -156,7 +156,7 @@ export function typeTableToStructuredData(
       tableRowToStructuredData({
         table: id,
         heading: `${id}-${entry.name}`,
-        row: typeTableRow(entry),
+        row: typeTableRow(entry, entry.simplifiedType),
       }),
     );
   }
@@ -169,22 +169,24 @@ export function typeTableToMarkdown(doc: GeneratedDoc): string {
   let out = `### ${doc.name}\n\n`;
   if (doc.description) out += `${doc.description.trim()}\n\n`;
   const rows = [['Prop', 'Type', 'Description']];
-  for (const entry of doc.entries) rows.push(typeTableRow(entry));
+  for (const entry of doc.entries) rows.push(typeTableRow(entry, entry.type));
 
   return out + markdownTable(rows);
 }
 
-function typeTableRow(entry: DocEntry): string[] {
+/** search records show the type like the table, Markdown has the full type for agents */
+function typeTableRow(entry: DocEntry, type: string): string[] {
   const tags = parseTags(entry.tags);
   let description = entry.description.replace(/{@link (?<link>[^}]*)}/g, '$1').trim();
-  if (tags.default) description += `${description ? ' ' : ''}Default: \`${tags.default}\``;
+  if (tags.default) description += `${description ? ' ' : ''}Default: ${code(tags.default)}`;
   if (entry.deprecated) description = `**Deprecated.** ${description}`;
 
-  return [
-    `\`${entry.name}${entry.required ? '' : '?'}\``,
-    `\`${entry.simplifiedType}\``,
-    description,
-  ];
+  return [code(`${entry.name}${entry.required ? '' : '?'}`), code(type), description];
+}
+
+/** template literal types have backticks */
+function code(text: string): string {
+  return text.includes('`') ? `\`\` ${text} \`\`` : `\`${text}\``;
 }
 
 export interface TypeTableProps extends BaseTypeTableProps {

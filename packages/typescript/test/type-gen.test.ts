@@ -99,10 +99,10 @@ test('Markdown of type tables', async () => {
 
     Player in the room
 
-    | Prop   | Type        | Description                         |
-    | ------ | ----------- | ----------------------------------- |
-    | \`name\` | \`string\`    | The name of player Default: \`Henry\` |
-    | \`age\`  | \`timestamp\` |                                     |
+    | Prop   | Type     | Description                         |
+    | ------ | -------- | ----------------------------------- |
+    | \`name\` | \`string\` | The name of player Default: \`Henry\` |
+    | \`age\`  | \`number\` |                                     |
     "
   `);
 });
