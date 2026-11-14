@@ -1,24 +1,10 @@
 import type { Metadata } from 'next';
-import { type ComponentProps, type FC, type ReactNode } from 'react';
-import * as Twoslash from 'fumadocs-twoslash/ui';
-import { Callout } from 'fumadocs-ui/components/callout';
-import { TypeTable } from 'fumadocs-ui/components/type-table';
+import type { ReactNode } from 'react';
 import * as Preview from '@/components/preview';
 import { createMetadata, getPageImageUrl } from '@/lib/metadata';
 import { source } from '@/lib/source';
-import { Wrapper } from '@/components/preview/wrapper';
-import { Mermaid } from '@/components/mdx/mermaid';
 import { Feedback, FeedbackText } from '@/components/feedback/client';
 import { onBlockFeedbackAction, onPageFeedbackAction, owner, repo } from '@/lib/github';
-import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
-import Link from 'fumadocs-core/link';
-import { findSiblings } from 'fumadocs-core/page-tree';
-import { Card, Cards } from 'fumadocs-ui/components/card';
-import { getMDXComponents } from '@/components/mdx';
-import { Banner } from 'fumadocs-ui/components/banner';
-import { Installation } from '@/components/preview/installation';
-import { Customization } from '@/components/preview/customization';
-import { AgentInstructions } from '@/components/agent-instructions';
 import {
   DocsBody,
   DocsPage,
@@ -27,14 +13,11 @@ import {
   ViewOptionsPopover,
   DocsPageProps,
 } from 'fumadocs-ui/layouts/spacious/page';
-import { NotFound } from '@/components/layouts/not-found';
-import { getSuggestions } from './suggestions';
-import { PathUtils } from 'fumadocs-core/source';
+import { getPageComponents } from '@/components/mdx/page';
 import { AsyncAPIPageLazy, GraphQLPageLazy, OpenAPIPageLazy } from './lazy';
 import { SponsorsMarquee } from '@fumari/sponsors';
 import { frameworks, isFramework } from '@/lib/framework';
-import { frameworkLink } from '@/lib/remark-framework-links';
-import { redirect } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 
 function PreviewRenderer({ preview }: { preview: string }): ReactNode {
   if (preview && preview in Preview) {
@@ -61,11 +44,7 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
       }
     }
 
-    return (
-      <NotFound
-        getSuggestions={async () => (params.slug ? getSuggestions(params.slug.join(' ')) : [])}
-      />
-    );
+    notFound();
   }
 
   const pageProps = {
@@ -112,94 +91,26 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
 
   const { body: Mdx, toc, lastModified } = await page.data.load();
 
-  const framework = page.params?.framework;
-  function resolveLink(href: string) {
-    const found = source.getPageByHref((framework && frameworkLink(href, framework)) || href, {
-      dir: PathUtils.dirname(page!.path),
-    });
-    if (!found) return;
-
-    return {
-      page: found.page,
-      href: found.hash ? `${found.page.url}#${found.hash}` : found.page.url,
-    };
-  }
-
   return (
     <DocsPage toc={toc} {...pageProps}>
       <h1 className="text-[1.75em] font-semibold">{page.data.title}</h1>
       <p className="text-lg text-fd-muted-foreground mb-2">{page.data.description}</p>
       <div className="flex flex-row flex-wrap gap-2 items-center border-b pb-6 mb-4">
-        <MarkdownCopyButton markdownUrl={`${page.url}.mdx`} />
+        <MarkdownCopyButton markdownUrl={`${page.url}.md`} />
         <ViewOptionsPopover
-          markdownUrl={`${page.url}.mdx`}
+          markdownUrl={`${page.url}.md`}
           githubUrl={`https://github.com/${owner}/${repo}/blob/dev/apps/docs/content/docs/${encodeURI(page.path)}`}
         />
       </div>
       <div className="prose flex-1 text-fd-foreground/90">
         {page.data.preview && <PreviewRenderer preview={page.data.preview} />}
         <FeedbackText onSendAction={onBlockFeedbackAction}>
-          <Mdx
-            components={getMDXComponents({
-              ...Twoslash,
-              a({ href, ...props }) {
-                const found = href ? resolveLink(href) : undefined;
-                if (!found) return <Link href={href} {...props} />;
-
-                return (
-                  <HoverCard>
-                    <HoverCardTrigger href={found.href} {...props}>
-                      {props.children}
-                    </HoverCardTrigger>
-                    <HoverCardContent className="text-sm">
-                      <p className="font-medium">{found.page.data.title}</p>
-                      <p className="text-fd-muted-foreground">{found.page.data.description}</p>
-                    </HoverCardContent>
-                  </HoverCard>
-                );
-              },
-              Card: ({ href, ...props }) => (
-                <Card href={href && (resolveLink(href)?.href ?? href)} {...props} />
-              ),
-              Banner,
-              Mermaid,
-              TypeTable,
-              Wrapper,
-              blockquote: Callout as unknown as FC<ComponentProps<'blockquote'>>,
-              DocsCategory: ({ url }) => {
-                return <DocsCategory url={url ?? page.url} />;
-              },
-              Installation,
-              Customization,
-              AgentInstructions,
-            })}
-          />
+          <Mdx components={getPageComponents(page)} />
         </FeedbackText>
-        {page.data.index ? <DocsCategory url={page.url} /> : null}
       </div>
       <Feedback onSendAction={onPageFeedbackAction} />
       {lastModified && <PageLastUpdate date={lastModified} />}
     </DocsPage>
-  );
-}
-
-function DocsCategory({ url }: { url: string }) {
-  return (
-    <Cards>
-      {findSiblings(source.getPageTree(), url).map((item) => {
-        if (item.type === 'separator') return;
-        if (item.type === 'folder') {
-          if (!item.index) return;
-          item = item.index;
-        }
-
-        return (
-          <Card key={item.url} title={item.name} href={item.url}>
-            {item.description}
-          </Card>
-        );
-      })}
-    </Cards>
   );
 }
 
@@ -228,6 +139,9 @@ export async function generateMetadata(props: PageProps<'/docs/[[...slug]]'>): P
     },
     twitter: {
       images: [image],
+    },
+    alternates: {
+      types: page.type === 'docs' ? { 'text/markdown': `${page.url}.md` } : undefined,
     },
   });
 }

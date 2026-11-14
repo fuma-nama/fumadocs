@@ -19,10 +19,29 @@ test('config: align with shadcn aliases', async () => {
   `);
 });
 
+test('config: detect the framework and UI library', async () => {
+  const cwd = await fs.mkdtemp(path.join(os.tmpdir(), 'fumadocs-cli-'));
+  await fs.writeFile(path.join(cwd, 'package.json'), '{}');
+  await expect(getDefaultConfig(cwd)).rejects.toThrow('No supported framework');
+
+  await fs.writeFile(
+    path.join(cwd, 'package.json'),
+    '{"dependencies":{"next":"*","fumadocs-ui":"^16.0.0"}}',
+  );
+  expect(await getDefaultConfig(cwd)).toMatchObject({ framework: 'next', uiLibrary: 'radix-ui' });
+
+  await fs.writeFile(
+    path.join(cwd, 'package.json'),
+    '{"dependencies":{"next":"*","fumadocs-ui":"npm:@fumadocs/base-ui@^16.0.0"}}',
+  );
+  expect(await getDefaultConfig(cwd)).toMatchObject({ uiLibrary: 'base-ui' });
+});
+
 test('customise: rewrite layout imports of route files', async () => {
   const cwd = await fs.mkdtemp(path.join(os.tmpdir(), 'fumadocs-cli-'));
   const file = path.join(cwd, 'app/(docs)/layout.tsx');
   await fs.mkdir(path.dirname(file), { recursive: true });
+  await fs.writeFile(path.join(cwd, 'package.json'), '{"dependencies":{"next":"*"}}');
   await fs.writeFile(
     file,
     "import { DocsLayout } from 'fumadocs-ui/layouts/docs';\nimport { baseOptions } from '@/lib/layout.shared';\n",

@@ -1,3 +1,34 @@
+## fumadocs-openapi@12.6.4
+
+### Cookie parameters
+
+- Exploded `form` cookies are sent as `color=blue&color=black` and `R=100&G=200`, instead of repeating the name as `color=color=blue&color=black` or splitting an object into separate cookies.
+- `style: cookie` is supported: values are sent as given and joined by `; `.
+- Code usages percent-encode `form` cookie values like the playground.
+
+### Encode path parameters
+
+- The playground and code usages percent-encode path parameter values, so `#`, `?`, `/` or a space in a value no longer cuts the request URL short or sends it to another path.
+
+### Form bodies keep their fields
+
+- `application/x-www-form-urlencoded` bodies keep `0`, `false` and empty fields in code usages, leave out unset fields instead of sending `"null"`, repeat the key for each array item and send objects as JSON, like `multipart/form-data`.
+- The playground and the code usages of every language send the same form body.
+
+### Multipart arrays in code usages
+
+- Code usages of `multipart/form-data` bodies send one part for each item of an array, like the playground, instead of the whole array as JSON in one part.
+- Object fields are sent as compact JSON, like the playground.
+
+### Response examples without write-only fields
+
+- Response examples generated from a schema leave out `writeOnly` properties, like the response schema and its TypeScript definitions already do.
+
+### Ruby code usages
+
+- Operation pages and the playground show a Ruby code usage, with `Net::HTTP` from the standard library. Every body media type is supported, multipart bodies are sent with `set_form`.
+- `fumadocs-openapi/requests/generators/ruby` exports the generator.
+
 ## fumadocs-openapi@12.6.3
 
 ### Credentials in the playground

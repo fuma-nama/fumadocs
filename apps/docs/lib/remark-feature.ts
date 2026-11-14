@@ -2,6 +2,7 @@ import path from 'node:path';
 import type { Code } from 'mdast';
 import { defineMdastPlugin, type MdastVisitorContext, type MdxJsxFlowElement } from 'satteri';
 import {
+  addImport,
   addNextRewrites,
   addReactRouterRoute,
   addTanstackPrerender,
@@ -11,11 +12,9 @@ import {
 } from '@fumadocs/cli/codemod';
 import {
   docsLlms,
-  llmsRoutes,
-  markdownRewrite,
-  markdownUrl,
-  suffixMarkdownUrl,
-  tanstackMarkdownUrl,
+  internalPrefix,
+  nextRewrites,
+  reactRouterMiddleware,
   templates,
 } from '@fumadocs/cli/features/llms';
 import { mcpRoute, templates as mcpTemplates } from '@fumadocs/cli/features/mcp';
@@ -28,7 +27,6 @@ import {
   templates as searchTemplates,
 } from '@fumadocs/cli/features/search';
 import { sourceRef } from '@fumadocs/cli/features/utils';
-import { component as webmcp } from '@fumadocs/cli/features/webmcp';
 import type {} from '@fumadocs/satteri/remark-show';
 import { type Framework, frameworks } from './framework';
 import { inFramework } from './remark-framework-links';
@@ -158,45 +156,31 @@ export const docs = defineDocs({
 `,
       enableProcessedMarkdown,
     ),
+    'llms/docs-llms-prefixed.ts': `import { llms } from 'fumadocs-core/source';\n${docsLlms(src, '/llms.mdx')}\n`,
   };
   for (const { value: framework } of frameworks) {
-    const base = `llms/${framework}`;
-    const tanstack = framework === 'tanstack-start';
-    files[`webmcp/${framework}/components/webmcp.tsx`] = webmcp({
-      static: false,
-      i18n: false,
-      framework,
-    });
+    const baseDir = baseDirs[framework];
     const mcp = mcpRoute(framework);
     files[`mcp/${framework}/${mcp.file}`] = mcpTemplates(framework, mcp, src);
-    const routes = llmsRoutes(framework, null, '/docs', '/llms.mdx/docs');
-    for (const [route, content] of templates(framework, routes, null, src)) {
-      files[`${base}/${route.file}`] = content;
+
+    const entries: [string, string][] = [];
+    const routes: { path: string; entry: string }[] = [];
+    const project = { framework, static: false };
+    for (const { file, content, route } of templates(project, null, '/docs')) {
+      entries.push([path.posix.join(baseDir, file), content]);
+      if (route) routes.push({ path: route.path, entry: route.file });
     }
-    if (tanstack) {
-      files[`${base}/lib/shared.ts`] =
-        `import { createGetUrl } from 'fumadocs-core/source';\n\nexport const docsRoute = '/docs';\n${tanstackMarkdownUrl(false)}\n`;
-      continue;
-    }
-    if (framework === 'astro') {
-      files[`${base}/lib/shared.ts`] =
-        `import { createGetUrl } from 'fumadocs-core/source';\n\nexport const docsRoute = '/docs';\n${suffixMarkdownUrl(false)}\n`;
-      continue;
-    }
-    files[`${base}/lib/shared.ts`] =
-      `import { createGetUrl } from 'fumadocs-core/source';\n\nexport const docsContentRoute = '/llms.mdx/docs';\n${markdownUrl(false)}\n`;
-    if (framework === 'react-router') {
-      files[`${base}/routes.ts`] = codemod('routes.ts', routesConfig, (file) =>
-        addReactRouterRoute(
-          file,
-          Object.values(routes).map((route) => ({ path: route.path, entry: route.file })),
-        ),
-      );
-    }
+    if (internalPrefix(project))
+      entries.push([
+        path.posix.join(baseDir, 'lib/source.ts'),
+        files['llms/docs-llms-prefixed.ts'],
+      ]);
     if (framework === 'next') {
-      files[`${base}/next.config.ts`] = codemod(
+      entries.push([
         'next.config.ts',
-        `import type { NextConfig } from 'next';
+        codemod(
+          'next.config.ts',
+          `import type { NextConfig } from 'next';
 
 const config: NextConfig = {
   reactStrictMode: true,
@@ -204,11 +188,27 @@ const config: NextConfig = {
 
 export default config;
 `,
-        (file) => addNextRewrites(file, [markdownRewrite('/docs', routes.markdown, false)]),
+          (file) => addNextRewrites(file, nextRewrites('/docs', false)),
+        ),
+      ]);
+    } else if (framework === 'react-router') {
+      entries.push(
+        [
+          'app/routes.ts',
+          codemod('routes.ts', routesConfig, (file) => addReactRouterRoute(file, routes)),
+        ],
+        [
+          'app/root.tsx',
+          codemod('root.tsx', "import type { Route } from './+types/root';\n", (file) => {
+            addImport(file, { from: 'fumadocs-core/negotiation', named: ['isMarkdownPreferred'] });
+            addImport(file, { from: '@/lib/source', named: ['docsLlms'] });
+            file.s.append(reactRouterMiddleware);
+          }),
+        ],
       );
     }
+    addGroup('llms/routes', framework, entries);
   }
-
   for (const { value: framework } of frameworks) {
     const baseDir = baseDirs[framework];
     const route = staticJson(framework);
@@ -340,7 +340,8 @@ export function remarkFeature() {
         for (const file of group) {
           let list = branches.get(file.framework);
           if (!list) branches.set(file.framework, (list = []));
-          list.push(toCode(file.title, `tab="${file.title}"`, file.value));
+          // code meta is parsed like MDX, braces start an expression
+          list.push(toCode(file.title, `tab="${file.title.replace(/[{}]/g, '\\$&')}"`, file.value));
         }
         nodes = [];
         const byFramework: Record<string, string> = {};

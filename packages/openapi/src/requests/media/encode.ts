@@ -42,13 +42,14 @@ export function encodeRequestData(
       const encoder = getMediaEncoder(field, adapters);
       if (encoder) {
         if (type === 'query') result[type][key] = { values: [encoder(value)] };
+        else if (type === 'path') result[type][key] = { value: encodeURIComponent(encoder(value)) };
         else result[type][key] = { value: encoder(value) };
         continue;
       }
 
       switch (type) {
         case 'path':
-          serializePathParameter(field, value, result.path);
+          serializePathParameter(field, encodePathMembers(value), result.path);
           break;
         case 'query':
           serializeQueryParameter(field, value, result.query);
@@ -92,6 +93,16 @@ function serializeSimple(value: NonNullable<unknown>, explode: boolean): string 
       : Object.entries(value).flat().join(',');
   }
   return String(value);
+}
+
+/** the delimiters a style adds stay literal, so only the members are encoded (RFC 6570) */
+function encodePathMembers(value: NonNullable<unknown>): NonNullable<unknown> {
+  if (Array.isArray(value)) return value.map((item) => encodeURIComponent(String(item)));
+  if (typeof value === 'object')
+    return Object.fromEntries(
+      Object.entries(value).map(([k, v]) => [encodeURIComponent(k), encodeURIComponent(String(v))]),
+    );
+  return encodeURIComponent(String(value));
 }
 
 function serializePathParameter(
@@ -227,26 +238,31 @@ function serializeCookieParameter(
   // write output
   output: Record<string, EncodedParameter>,
 ) {
-  const { explode = true } = field;
+  const { name, style, explode = true } = field;
+  // `style: cookie` takes values as given, `form` (the default) percent-encodes them
+  const encode = style === 'cookie' ? String : (v: unknown) => encodeURIComponent(String(v));
 
-  // form
-  if (Array.isArray(value)) {
-    output[field.name!] = {
-      value: explode ? value.map((v) => `${field.name}=${v}`).join('&') : value.join(','),
+  if (typeof value !== 'object') {
+    output[name!] = { value: encode(value) };
+  } else if (!explode) {
+    output[name!] = {
+      value: Array.isArray(value)
+        ? value.map(encode).join(',')
+        : Object.entries(value)
+            .map(([k, v]) => `${encode(k)},${encode(v)}`)
+            .join(','),
     };
-  } else if (typeof value === 'object' && explode) {
-    for (const [k, v] of Object.entries(value)) {
-      output[k] = {
-        value: String(v),
-      };
-    }
-  } else if (typeof value === 'object') {
-    output[field.name!] = {
-      value: Object.entries(value).flat().join(','),
-    };
+  } else if (style === 'cookie' && !Array.isArray(value)) {
+    for (const [k, v] of Object.entries(value)) output[k] = { value: encode(v) };
   } else {
-    output[field.name!] = {
-      value: String(value),
-    };
+    // each cookie is written as `name=value`, so the pairs after the first go into its value
+    const [first, ...rest]: [string, unknown][] = Array.isArray(value)
+      ? value.map((v) => [name!, v])
+      : Object.entries(value).map(([k, v]) => [encode(k), v]);
+    if (!first) return;
+
+    let out = encode(first[1]);
+    for (const [k, v] of rest) out += `${style === 'cookie' ? '; ' : '&'}${k}=${encode(v)}`;
+    output[first[0]] = { value: out };
   }
 }

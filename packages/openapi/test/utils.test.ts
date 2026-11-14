@@ -2,6 +2,7 @@ import { describe, expect, test } from 'vitest';
 import { pathnameFromRequest } from '@/requests/generators';
 import { defaultAdapters } from '@/requests/media/adapter';
 import { encodeRequestData } from '@/requests/media/encode';
+import { cookieString } from '@/requests/string-utils';
 import type { RequestData } from '@/requests/types';
 
 describe('URL utilities', () => {
@@ -202,4 +203,74 @@ test('serializes matrix path parameters', () => {
   expect(encode([3, 4], false)).toBe(';id=3,4');
   expect(encode({ a: 1, b: 2 }, true)).toBe(';a=1;b=2');
   expect(encode({ a: 1, b: 2 }, false)).toBe(';id=a,1,b,2');
+});
+
+test('percent-encodes path parameter values but not their delimiters', () => {
+  const encode = (value: unknown, style?: 'simple' | 'label' | 'matrix', explode = false) =>
+    encodeRequestData(
+      { method: 'get', path: { id: value }, query: {}, header: {}, cookie: {} },
+      defaultAdapters,
+      [{ name: 'id', in: 'path', style, explode }],
+    ).path.id.value;
+
+  expect(encode('report#1')).toBe('report%231');
+  expect(encode('a/b?c d%')).toBe('a%2Fb%3Fc%20d%25');
+  expect(encode(['a b', 'c/d'])).toBe('a%20b,c%2Fd');
+  expect(encode({ 'k y': 'a,b' }, 'simple', true)).toBe('k%20y=a%2Cb');
+  expect(encode(['a b', 'c'], 'label', true)).toBe('.a%20b.c');
+  expect(encode('a;b', 'matrix')).toBe(';id=a%3Bb');
+  expect(encode({ x: 'a=b' }, 'matrix', true)).toBe(';x=a%3Db');
+  expect(encode(JSON.parse('{"__proto__":"x","ok":"y"}'))).toBe('__proto__,x,ok,y');
+
+  const json = encodeRequestData(
+    { method: 'get', path: { id: { a: '/' } }, query: {}, header: {}, cookie: {} },
+    defaultAdapters,
+    [{ name: 'id', in: 'path', content: { 'application/json': {} } }],
+  ).path.id.value;
+  expect(decodeURIComponent(json)).toBe(JSON.stringify({ a: '/' }));
+  expect(json).not.toMatch(/[/{}"]/);
+});
+
+test('sends a path parameter with reserved characters to the right URL', () => {
+  const data = encodeRequestData(
+    {
+      method: 'get',
+      path: { name: 'report#1' },
+      query: { q: 'a&b' },
+      header: { 'X-Name': 'a/b c' },
+      cookie: {},
+    },
+    defaultAdapters,
+  );
+
+  expect(pathnameFromRequest('/files/{name}', data)).toBe('/files/report%231?q=a%26b');
+  // headers are not part of the URL
+  expect(data.header['X-Name'].value).toBe('a/b c');
+});
+
+test('serializes cookie parameters by their style', () => {
+  const cookie = (value: unknown, style?: 'form' | 'cookie', explode?: boolean) =>
+    cookieString(
+      encodeRequestData(
+        { method: 'get', path: {}, query: {}, header: {}, cookie: { color: value } },
+        defaultAdapters,
+        [{ name: 'color', in: 'cookie', style, explode }],
+      ).cookie,
+    );
+  const list = ['blue', 'black', 'brown'];
+  const rgb = { R: 100, G: 200, B: 150 };
+
+  // https://spec.openapis.org/oas/v3.2.0.html#style-examples
+  for (const style of ['form', 'cookie'] as const) {
+    expect(cookie('blue', style)).toBe('color=blue');
+    expect(cookie(list, style, false)).toBe('color=blue,black,brown');
+    expect(cookie(rgb, style, false)).toBe('color=R,100,G,200,B,150');
+  }
+  expect(cookie(list)).toBe('color=blue&color=black&color=brown');
+  expect(cookie(rgb)).toBe('R=100&G=200&B=150');
+  expect(cookie(list, 'cookie')).toBe('color=blue; color=black; color=brown');
+  expect(cookie(rgb, 'cookie')).toBe('R=100; G=200; B=150');
+
+  expect(cookie(['a b', 'c;d'])).toBe('color=a%20b&color=c%3Bd');
+  expect(cookie('Hello%2C world!', 'cookie')).toBe('color=Hello%2C world!');
 });

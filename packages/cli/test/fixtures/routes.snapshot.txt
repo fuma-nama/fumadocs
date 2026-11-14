@@ -1,4 +1,54 @@
 {
+  "llms.mdx (astro)": {
+    "file": "pages/llms.mdx/[...path].ts",
+    "path": "/llms.mdx/[...path]",
+    "pattern": "/llms.mdx/:path*",
+  },
+  "llms.mdx (astro, i18n)": {
+    "file": "pages/[...lang]/llms.mdx/[...path].ts",
+    "path": "/[...lang]/llms.mdx/[...path]",
+    "pattern": "/:lang/llms.mdx/:path*",
+  },
+  "llms.mdx (next)": {
+    "file": "app/llms.mdx/[...path]/route.ts",
+    "path": "/llms.mdx/[...path]",
+    "pattern": "/llms.mdx/:path*",
+  },
+  "llms.mdx (next, i18n)": {
+    "file": "app/[lang]/llms.mdx/[...path]/route.ts",
+    "path": "/[lang]/llms.mdx/[...path]",
+    "pattern": "/:lang/llms.mdx/:path*",
+  },
+  "llms.mdx (react-router)": {
+    "file": "routes/llms.mdx.ts",
+    "path": "llms.mdx/*",
+    "pattern": "/llms.mdx/:path*",
+  },
+  "llms.mdx (react-router, i18n)": {
+    "file": "routes/llms.mdx.ts",
+    "path": ":lang?/llms.mdx/*",
+    "pattern": "/:lang/llms.mdx/:path*",
+  },
+  "llms.mdx (tanstack-start)": {
+    "file": "routes/llms[.]mdx/$.ts",
+    "path": "/llms.mdx/$",
+    "pattern": "/llms.mdx/:path*",
+  },
+  "llms.mdx (tanstack-start, i18n)": {
+    "file": "routes/{-$lang}/llms[.]mdx/$.ts",
+    "path": "/{-$lang}/llms.mdx/$",
+    "pattern": "/:lang/llms.mdx/:path*",
+  },
+  "llms.mdx (waku)": {
+    "file": "pages/_api/llms.mdx/[...path].ts",
+    "path": "/llms.mdx/[...path]",
+    "pattern": "/llms.mdx/:path*",
+  },
+  "llms.mdx (waku, i18n)": {
+    "file": "pages/_api/[lang]/llms.mdx/[...path].ts",
+    "path": "/[lang]/llms.mdx/[...path]",
+    "pattern": "/:lang/llms.mdx/:path*",
+  },
   "llms.txt (astro)": {
     "file": "pages/llms.txt.ts",
     "path": "/llms.txt",
@@ -48,56 +98,6 @@
     "file": "pages/_api/llms.txt.ts",
     "path": "/llms.txt",
     "pattern": "/llms.txt",
-  },
-  "markdown (astro)": {
-    "file": "pages/llms.mdx/docs/[...slug]/content.md.ts",
-    "path": "/llms.mdx/docs/[...slug]/content.md",
-    "pattern": "/llms.mdx/docs/:slug*",
-  },
-  "markdown (astro, i18n)": {
-    "file": "pages/[...lang]/llms.mdx/docs/[...slug]/content.md.ts",
-    "path": "/[...lang]/llms.mdx/docs/[...slug]/content.md",
-    "pattern": "/:lang/llms.mdx/docs/:slug*",
-  },
-  "markdown (next)": {
-    "file": "app/llms.mdx/docs/[[...slug]]/route.ts",
-    "path": "/llms.mdx/docs/[[...slug]]",
-    "pattern": "/llms.mdx/docs/:slug*",
-  },
-  "markdown (next, i18n)": {
-    "file": "app/[lang]/llms.mdx/docs/[[...slug]]/route.ts",
-    "path": "/[lang]/llms.mdx/docs/[[...slug]]",
-    "pattern": "/:lang/llms.mdx/docs/:slug*",
-  },
-  "markdown (react-router)": {
-    "file": "routes/llms.mdx.docs.ts",
-    "path": "llms.mdx/docs/*",
-    "pattern": "/llms.mdx/docs/:slug*",
-  },
-  "markdown (react-router, i18n)": {
-    "file": "routes/llms.mdx.docs.ts",
-    "path": ":lang?/llms.mdx/docs/*",
-    "pattern": "/:lang/llms.mdx/docs/:slug*",
-  },
-  "markdown (tanstack-start)": {
-    "file": "routes/llms[.]mdx/docs/$.ts",
-    "path": "/llms.mdx/docs/$",
-    "pattern": "/llms.mdx/docs/:slug*",
-  },
-  "markdown (tanstack-start, i18n)": {
-    "file": "routes/{-$lang}/llms[.]mdx/docs/$.ts",
-    "path": "/{-$lang}/llms.mdx/docs/$",
-    "pattern": "/:lang/llms.mdx/docs/:slug*",
-  },
-  "markdown (waku)": {
-    "file": "pages/_api/llms.mdx/docs/[...slug]/content.md.ts",
-    "path": "/llms.mdx/docs/[...slug]/content.md",
-    "pattern": "/llms.mdx/docs/:slug*",
-  },
-  "markdown (waku, i18n)": {
-    "file": "pages/_api/[lang]/llms.mdx/docs/[...slug]/content.md.ts",
-    "path": "/[lang]/llms.mdx/docs/[...slug]/content.md",
-    "pattern": "/:lang/llms.mdx/docs/:slug*",
   },
   "mcp (astro)": {
     "file": "pages/api/mcp.ts",
@@ -198,56 +198,6 @@
     "file": "pages/_api/[lang]/og/docs/[...slug]/image.png.ts",
     "path": "/[lang]/og/docs/[...slug]/image.png",
     "pattern": "/:lang/og/docs/:slug*",
-  },
-  "root docs markdown (astro)": {
-    "file": "pages/llms.mdx/[...slug]/content.md.ts",
-    "path": "/llms.mdx/[...slug]/content.md",
-    "pattern": "/llms.mdx/:slug*",
-  },
-  "root docs markdown (astro, i18n)": {
-    "file": "pages/llms.mdx/[...slug]/content.md.ts",
-    "path": "/llms.mdx/[...slug]/content.md",
-    "pattern": "/llms.mdx/:slug*",
-  },
-  "root docs markdown (next)": {
-    "file": "app/llms.mdx/[...slug]/route.ts",
-    "path": "/llms.mdx/[...slug]",
-    "pattern": "/llms.mdx/:slug*",
-  },
-  "root docs markdown (next, i18n)": {
-    "file": "app/llms.mdx/[...slug]/route.ts",
-    "path": "/llms.mdx/[...slug]",
-    "pattern": "/llms.mdx/:slug*",
-  },
-  "root docs markdown (react-router)": {
-    "file": "routes/llms.mdx.ts",
-    "path": "llms.mdx/*",
-    "pattern": "/llms.mdx/:slug*",
-  },
-  "root docs markdown (react-router, i18n)": {
-    "file": "routes/llms.mdx.ts",
-    "path": "llms.mdx/*",
-    "pattern": "/llms.mdx/:slug*",
-  },
-  "root docs markdown (tanstack-start)": {
-    "file": "routes/llms[.]mdx/$.ts",
-    "path": "/llms.mdx/$",
-    "pattern": "/llms.mdx/:slug*",
-  },
-  "root docs markdown (tanstack-start, i18n)": {
-    "file": "routes/llms[.]mdx/$.ts",
-    "path": "/llms.mdx/$",
-    "pattern": "/llms.mdx/:slug*",
-  },
-  "root docs markdown (waku)": {
-    "file": "pages/_api/llms.mdx/[...slug]/content.md.ts",
-    "path": "/llms.mdx/[...slug]/content.md",
-    "pattern": "/llms.mdx/:slug*",
-  },
-  "root docs markdown (waku, i18n)": {
-    "file": "pages/_api/llms.mdx/[...slug]/content.md.ts",
-    "path": "/llms.mdx/[...slug]/content.md",
-    "pattern": "/llms.mdx/:slug*",
   },
   "tanstack markdown": {
     "file": "routes/{-$lang}/docs/{$}[.]md.ts",

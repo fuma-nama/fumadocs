@@ -17,12 +17,22 @@ export async function isFumapress(cwd = process.cwd()): Promise<boolean> {
 }
 
 /** `fuma-cli` doesn't detect Astro, or Waku brought by Fumapress */
-async function detect(cwd: string): Promise<Framework> {
+async function detect(cwd: string): Promise<Framework | undefined> {
   const files = await fs.readdir(cwd).catch(() => []);
   if (files.some((file) => file.startsWith('astro.config.'))) return 'astro';
   if (await isFumapress(cwd)) return 'waku';
   const framework = await detectFramework(cwd);
-  return isSupportedFramework(framework) ? framework : 'next';
+  if (isSupportedFramework(framework)) return framework;
+}
+
+/** templates install Base UI as `fumadocs-ui`, aliased to `@fumadocs/base-ui` */
+async function detectUILibrary(cwd: string): Promise<LoadedConfig['uiLibrary']> {
+  const packageJson: { dependencies?: Record<string, string> } = await fs
+    .readFile(path.join(cwd, 'package.json'), 'utf-8')
+    .then(JSON.parse)
+    .catch(() => ({}));
+  const version = packageJson.dependencies?.['fumadocs-ui'];
+  return version && !version.includes('@fumadocs/base-ui') ? 'radix-ui' : 'base-ui';
 }
 
 /** directories from shadcn's `components.json`, so components are installed at the same place */
@@ -71,16 +81,24 @@ export interface ConfigInput extends Partial<Omit<LoadedConfig, 'aliases'>> {
 }
 
 export async function createConfigSchema(cwd = process.cwd()) {
-  const shadcn = await readShadcnAliases(cwd);
-  const framework = await detect(cwd);
+  const [shadcn, detected, detectedUILibrary] = await Promise.all([
+    readShadcnAliases(cwd),
+    detect(cwd),
+    detectUILibrary(cwd),
+  ]);
 
   return {
     /** fill the defaults of `cli.json` */
     parse(input: ConfigInput): LoadedConfig {
-      const { uiLibrary = 'base-ui' } = input;
+      const { uiLibrary = detectedUILibrary } = input;
       if (!uiLibraries.includes(uiLibrary)) throw new Error(`unknown uiLibrary "${uiLibrary}"`);
       if (input.framework && !isSupportedFramework(input.framework))
         throw new Error(`unknown framework "${input.framework}"`);
+      const framework = input.framework ?? detected;
+      if (!framework)
+        throw new Error(
+          `No supported framework (${frameworks.join(', ')}) found in ${cwd}. Run the command in your app, in a monorepo the docs app, or set \`framework\` in \`cli.json\`.`,
+        );
 
       return {
         $schema: input.$schema ?? 'node_modules/@fumadocs/cli/dist/schema.json',
@@ -95,7 +113,7 @@ export async function createConfigSchema(cwd = process.cwd()) {
         },
         baseDir: input.baseDir ?? defaultBaseDir(cwd, framework),
         uiLibrary,
-        framework: input.framework ?? framework,
+        framework,
         commands: input.commands ?? {},
       };
     },

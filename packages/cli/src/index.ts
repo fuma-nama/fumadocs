@@ -13,6 +13,9 @@ import { exportEpub } from '@/commands/export-epub';
 import { registerFeatureCommands } from '@/commands/feature';
 import { HttpRegistryConnector, LocalRegistryConnector } from 'fuma-cli/registry/connector';
 
+// without a terminal, a spinner prints every frame, Clack's accessible mode prints plain lines instead
+if (!process.stdout.isTTY) process.env.ACCESSIBLE ??= '1';
+
 const cli = cac('fumadocs');
 cli.option('--config <string>', 'path to the config file');
 

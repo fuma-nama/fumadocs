@@ -162,7 +162,7 @@ test('ai: the chat route reads processed Markdown', async () => {
   expect(await read(app, 'source.config.ts')).toContain('includeProcessedMarkdown: true');
 });
 
-test('llms: Markdown of pages at `<page>.md` on Astro', async () => {
+test('llms: files at their paths on Astro', async () => {
   const app = await project({
     'package.json': JSON.stringify({ dependencies: { astro: '7.4.2' } }),
     'astro.config.mjs': `import fumadocs from '@fumadocs/astro';
@@ -174,14 +174,42 @@ export const source = loader({ baseUrl: '/docs', source: toFumadocsSource([], []
   });
   await run(llms, {}, app);
 
-  expect(await read(app, 'src/pages/docs/[...slug].md.ts')).toContain(
-    "params: { slug: decodeURI(page.slugs.join('/')) || 'index' },",
+  expect(await read(app, 'src/pages/[...path].ts')).toContain('await docsLlms.files()');
+  expect(await read(app, 'src/lib/source.ts')).not.toContain('renderUrl');
+});
+
+test('llms: Next.js i18n rewrites files to a route under `[lang]`', async () => {
+  const app = await project({
+    ...nextDocs,
+    'next.config.mjs': `export default { reactStrictMode: true };`,
+    'lib/i18n.ts': `export const i18n = defineI18n({ defaultLanguage: 'en', languages: ['en', 'cn'], hideLocale: 'default-locale' });`,
+    'proxy.ts': `export const config = { matcher: ['/docs/:path*', '/:lang/docs/:path*'] };`,
+  });
+  await run(llms, {}, app);
+
+  expect(await read(app, 'app/[lang]/llms.mdx/[...path]/route.ts')).toContain(
+    'docsLlms.files(lang)',
   );
-  const shared = await read(app, 'src/lib/shared.ts');
-  expect(shared).toContain("export const docsRoute = '/docs';");
-  expect(shared).toContain("segments.push('index.md');");
-  expect(shared).not.toContain('decodeMarkdownUrl');
-  await expect(fs.access(path.join(app.cwd, 'src/pages/llms.mdx'))).rejects.toThrow();
+  expect(await read(app, 'next.config.mjs')).toContain(
+    "destination: '/:lang/llms.mdx/docs/:path*.md'",
+  );
+  expect(await read(app, 'proxy.ts')).toContain("'/docs.md'");
+});
+
+test('llms: React Router serves files under `/llms.mdx`, and at their paths from a middleware', async () => {
+  const app = await project({
+    'package.json': JSON.stringify({ dependencies: { 'react-router': '8.5.1' } }),
+    'react-router.config.ts': 'export default { ssr: true };',
+    'app/root.tsx': `import type { Route } from './+types/root';\n`,
+    'app/routes.ts': `export default [index('routes/home.tsx')] satisfies RouteConfig;\n`,
+    'source.config.ts': nextDocs['source.config.ts'],
+    'app/lib/source.ts': nextDocs['lib/source.ts'],
+  });
+  await run(llms, {}, app);
+
+  expect(await read(app, 'app/lib/source.ts')).toContain('`/llms.mdx${item.url}`');
+  expect(await read(app, 'app/routes.ts')).toContain("route('llms.mdx/*', 'routes/llms.mdx.ts')");
+  expect(await read(app, 'app/root.tsx')).toContain('export const middleware = [llmsMiddleware];');
 });
 
 test('mcp & epub: Astro routes render on request with static output and an adapter', async () => {

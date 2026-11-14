@@ -65,8 +65,9 @@ export function createMDX(options: CreateMDXOptions = {}) {
               macro.include.map((pattern) => [
                 pattern,
                 {
+                  // `foreign` is code in node_modules, which the macro never runs on
                   condition: {
-                    content: /['"]fumadocs-mdx\/macro['"]/,
+                    all: [{ not: 'foreign' }, { content: /['"]fumadocs-mdx\/macro['"]/ }],
                   },
                   loaders: [
                     {

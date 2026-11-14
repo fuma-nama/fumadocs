@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-openapi",
-  "version": "12.6.3",
+  "version": "12.6.4",
   "description": "Generate MDX docs for your OpenAPI spec",
   "keywords": [
     "Docs",
@@ -37,6 +37,7 @@
     "./requests/generators/java": "./dist/requests/generators/java.js",
     "./requests/generators/javascript": "./dist/requests/generators/javascript.js",
     "./requests/generators/python": "./dist/requests/generators/python.js",
+    "./requests/generators/ruby": "./dist/requests/generators/ruby.js",
     "./requests/generators/rust": "./dist/requests/generators/rust.js",
     "./server": "./dist/server/index.js",
     "./ui": "./dist/ui/index.js",

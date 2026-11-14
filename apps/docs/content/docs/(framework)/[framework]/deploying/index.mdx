@@ -49,13 +49,12 @@ Fumadocs doesn't work on the Edge runtime. Deploy with [OpenNext](https://openne
 
 ## Docker
 
-With Fumadocs MDX, the build reads `source.config.ts`. Add it and your `next.config.js` file to the `WORKDIR` in the Dockerfile.
-The following snippet is taken from the official [Next.js Dockerfile Example](https://github.com/vercel/next.js/blob/canary/examples/with-docker/Dockerfile):
+This Dockerfile is adapted from the official [Next.js Dockerfile Example](https://github.com/vercel/next.js/blob/canary/examples/with-docker/Dockerfile), and needs `output: 'standalone'` in your Next.js config:
 
 ```zsh title="Dockerfile"
 # syntax=docker.io/docker/dockerfile:1
 
-FROM node:18-alpine AS base
+FROM node:24-alpine AS base
 
 # Install dependencies only when needed
 FROM base AS deps
@@ -63,8 +62,8 @@ FROM base AS deps
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
-# Install dependencies based on the preferred package manager [!code highlight:2]
-COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* .npmrc* source.config.ts next.config.* ./
+# Install dependencies based on the preferred package manager
+COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* .npmrc* ./
 RUN \
   if [ -f yarn.lock ]; then yarn --frozen-lockfile; \
   elif [ -f package-lock.json ]; then npm ci; \
@@ -121,6 +120,6 @@ ENV HOSTNAME="0.0.0.0"
 CMD ["node", "server.js"]
 ```
 
-This ensures Fumadocs MDX can access your configuration file during builds.
+When `postinstall` in your `package.json` runs `fumadocs-mdx`, also copy `next.config.*`, `source.config.ts` and the local files it imports in the `deps` stage, because the script bundles the config.
 
 </show>

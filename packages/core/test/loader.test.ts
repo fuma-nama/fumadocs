@@ -278,6 +278,21 @@ test('Loader: custom slugs conflict resolution between index files', () => {
   expect(result.getPage(['same', 'index'])).toBeDefined();
 });
 
+test('Loader: duplicated slugs name both files', () => {
+  expect(() =>
+    loader({
+      baseUrl: '/',
+      source: {
+        files: [
+          { type: 'page', path: 'a.mdx', data: { title: 'A' } },
+          { type: 'page', path: 'b.mdx', data: { title: 'B' } },
+        ],
+      },
+      slugs: () => ['same'],
+    }).getPages(),
+  ).toThrow('Duplicated slugs "same" of a.mdx and b.mdx');
+});
+
 test('Loader: resolve encoded relative file paths', () => {
   const result = loader({
     baseUrl: '/docs',

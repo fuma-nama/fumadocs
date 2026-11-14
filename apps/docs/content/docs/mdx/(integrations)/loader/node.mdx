@@ -5,18 +5,24 @@ description: Access content in Node.js runtime.
 
 ## Setup
 
-Make sure to run the script under ESM environment.
+Run your scripts with a TypeScript runner like [tsx](https://tsx.is), because `lib/source.ts` of the templates has extensionless imports and path aliases that Node.js can't resolve.
 
-```js title="scripts/example.js"
+```ts title="scripts/example.ts"
 import { register } from 'fumadocs-mdx/node';
 
 // register the Node.js loader
 register();
 
 // accessing content
-const { source } = await import('./lib/source');
+const { source } = await import('../lib/source');
 console.log(source.getPages());
 ```
+
+```npm
+npx tsx scripts/example.ts
+```
+
+The loader only transforms ES modules. Set `"type": "module"` in your `package.json`, so `lib/source.ts` loads as one. It applies to every `.js` file of the package, so convert CommonJS files like `next.config.js` to ESM first.
 
 The `register()` function accepts options:
 

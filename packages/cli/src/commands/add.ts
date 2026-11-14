@@ -1,5 +1,5 @@
 import { autocompleteMultiselect, outro, spinner } from '@clack/prompts';
-import { isCancel } from '@/utils/prompt';
+import { canPrompt, isCancel } from '@/utils/prompt';
 import { styleText } from 'node:util';
 import { UIRegistries } from '@/commands/shared';
 import { RegistryConnector } from 'fuma-cli/registry/connector';
@@ -51,9 +51,21 @@ export async function add(input: string[], connector: RegistryConnector, config:
     ]);
 
     spin.stop(styleText(['bold', 'greenBright'], 'registry fetched'));
+    const options = groups.flat();
+    if (!canPrompt) {
+      // other registries can't be installed by a bare name
+      const names: string[] = [];
+      for (const { value } of options) {
+        if (value.subRegistry === undefined || value.subRegistry === subRegistry)
+          names.push(value.name);
+      }
+      throw new Error(
+        `Pass the components to install, like \`fumadocs add <name>\`: ${names.join(', ')}`,
+      );
+    }
     const value = await autocompleteMultiselect({
       message: 'Select components to install',
-      options: groups.flat().sort((a, b) => a.label.localeCompare(b.label)),
+      options: options.sort((a, b) => a.label.localeCompare(b.label)),
     });
 
     if (isCancel(value)) {

@@ -5,11 +5,8 @@ import type { Framework } from '@/project';
 const frameworks: Framework[] = ['next', 'react-router', 'tanstack-start', 'waku', 'astro'];
 
 const routes: Record<string, RouteDescriptor> = {
-  markdown: {
-    segments: [
-      '/llms.mdx/docs',
-      { param: 'slug', catchAll: true, optional: true, suffix: 'content.md' },
-    ],
+  'llms.mdx': {
+    segments: ['llms.mdx', { param: 'path', catchAll: true }],
     locale: true,
   },
   og: {
@@ -18,9 +15,6 @@ const routes: Record<string, RouteDescriptor> = {
   },
   mcp: { segments: ['api/mcp'] },
   'llms.txt': { segments: ['llms.txt'] },
-  'root docs markdown': {
-    segments: ['/llms.mdx', { param: 'slug', catchAll: true, suffix: 'content.md' }],
-  },
 };
 
 test('format routes', async () => {

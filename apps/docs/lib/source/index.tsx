@@ -68,7 +68,6 @@ const docs = defineDocs({
     compiler: 'satteri',
     schema: pageSchema.extend({
       preview: z.string().optional(),
-      index: z.boolean().default(false),
       /**
        * API routes only
        */
@@ -200,6 +199,15 @@ const blog = defineCollections({
   },
 });
 
+const agents = defineCollections({
+  type: 'doc',
+  compiler: 'satteri',
+  dir: 'content/agents',
+  postprocess: {
+    includeProcessedMarkdown: { headingIds: false },
+  },
+});
+
 export const source = loader(
   {
     docs: docs.toFumadocsSource(),
@@ -281,6 +289,11 @@ function transformerEscape(): ShikiTransformer {
 
 export const blogLoader = loader(blog.toFumadocsSource(), {
   baseUrl: '/blog',
+});
+
+/** the instructions for AI agents, docs pages render their Markdown for a framework */
+export const agentsLoader = loader(agents.toFumadocsSource(), {
+  baseUrl: '/',
 });
 
 export const blogAuthors: Record<string, BlogAuthor> = {

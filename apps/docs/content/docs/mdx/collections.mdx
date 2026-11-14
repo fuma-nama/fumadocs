@@ -5,7 +5,7 @@ description: Collection of content data for your app
 
 ## Define Collections
 
-Define a collection to parse a certain set of files.
+Define a collection to parse a certain set of files. The examples on this page define collections in `source.config.ts`, while the [Macro API](/docs/mdx/macro) defines them in `lib/source.ts` with largely the same options.
 
 ```ts
 import { defineCollections } from 'fumadocs-mdx/config';
@@ -80,7 +80,7 @@ export const blog = defineCollections({
     return z.object({
       name: z.string(),
       testPath: z.string().default(
-        // original file path
+        // absolute path of the file
         ctx.path,
       ),
     });
