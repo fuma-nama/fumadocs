@@ -5,7 +5,7 @@ description: Access content in Node.js runtime.
 
 ## Setup
 
-Run your scripts with a TypeScript runner such as [tsx](https://tsx.is). The `lib/source.ts` of templates uses extensionless imports and path aliases, which Node.js can't resolve on its own.
+Run your scripts with a TypeScript runner like [tsx](https://tsx.is), because `lib/source.ts` of the templates has extensionless imports and path aliases that Node.js can't resolve.
 
 ```ts title="scripts/example.ts"
 import { register } from 'fumadocs-mdx/node';
@@ -22,7 +22,7 @@ console.log(source.getPages());
 npx tsx scripts/example.ts
 ```
 
-The loader transforms `lib/source.ts` only when it loads as an ES module, so set `"type": "module"` in your `package.json` if it isn't set yet.
+The loader only transforms ES modules. Set `"type": "module"` in your `package.json`, so `lib/source.ts` loads as one.
 
 The `register()` function accepts options:
 

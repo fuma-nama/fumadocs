@@ -49,7 +49,7 @@ Fumadocs doesn't work on the Edge runtime. Deploy with [OpenNext](https://openne
 
 ## Docker
 
-Fumadocs builds like any other Next.js app in Docker. The following Dockerfile is adapted from the official [Next.js Dockerfile Example](https://github.com/vercel/next.js/blob/canary/examples/with-docker/Dockerfile). It needs `output: 'standalone'` in your Next.js config:
+This Dockerfile is adapted from the official [Next.js Dockerfile Example](https://github.com/vercel/next.js/blob/canary/examples/with-docker/Dockerfile), and needs `output: 'standalone'` in your Next.js config:
 
 ```zsh title="Dockerfile"
 # syntax=docker.io/docker/dockerfile:1
@@ -120,6 +120,6 @@ ENV HOSTNAME="0.0.0.0"
 CMD ["node", "server.js"]
 ```
 
-If your `package.json` runs `fumadocs-mdx` in `postinstall`, also copy `source.config.ts` in the `deps` stage, since the script reads it.
+When `postinstall` in your `package.json` runs `fumadocs-mdx`, also copy `source.config.ts` in the `deps` stage, because the script reads it.
 
 </show>
