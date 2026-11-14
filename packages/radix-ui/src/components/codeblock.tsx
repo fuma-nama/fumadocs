@@ -128,7 +128,6 @@ export function CodeBlock({
       <div
         ref={areaRef}
         {...viewportProps}
-        role="region"
         tabIndex={0}
         className={cn(
           'text-[0.8125rem] py-3.5 overflow-auto max-h-[600px] fd-scroll-container focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-fd-ring',
