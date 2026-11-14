@@ -164,6 +164,23 @@ test('llms: filter', async () => {
   expect(await text('/llms.txt')).toContain('[Deep](/docs/guide/deep/page)');
 });
 
+test('llms: section', async () => {
+  const output = llms(guideDocs, {
+    renderPage: renderTitle,
+    // top-level directories with several pages, `/llms-full.txt` has every page
+    section: (dir, pages) => pages.length > 1 && dir.split('/').length === 3,
+  });
+
+  await expect(output.files()).resolves.toEqual(
+    expect.arrayContaining(['/docs/guide/llms-full.txt', '/docs/api/llms-full.txt']),
+  );
+  await expect(output.files()).resolves.not.toContain('/docs/llms-full.txt');
+  expect(await (await output.serve('/llms.txt'))!.text()).toContain(
+    '## Sections\n\n- [/docs/guide](/docs/guide/llms-full.txt)\n- [/docs/api](/docs/api/llms-full.txt)',
+  );
+  expect(await output.serve('/docs/llms-full.txt')).toBeUndefined();
+});
+
 test('llms: files of groups and pages outside the page tree', async () => {
   const output = llms(
     loader({

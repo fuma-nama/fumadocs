@@ -33,6 +33,11 @@ export interface LLMsConfig<Page = unknown> {
    * The pages in `full()` and the files, every page by default.
    */
   filter?: (page: Page) => boolean;
+
+  /**
+   * Whether a URL directory has its own `llms-full.txt` of the pages under it, every directory with two or more pages by default.
+   */
+  section?: (dir: string, pages: Page[]) => boolean;
 }
 
 export interface LLMs<IndexOutput extends Awaitable<string> = Awaitable<string>> {
@@ -103,7 +108,7 @@ export function llms<C extends LoaderConfig = LoaderConfig>(
   config: LLMsConfig<C['page']> = {},
 ): LLMs | LLMsWithPages<C['page']> {
   type Page = C['page'];
-  const { TAB = '  ', filter = () => true } = config;
+  const { TAB = '  ', filter = () => true, section = (_dir, pages) => pages.length > 1 } = config;
 
   function renderName(node: PageTree.Node | PageTree.Root, ctx: RenderContext<C>): string {
     if (config.renderName) return config.renderName(node, ctx);
@@ -219,7 +224,7 @@ export function llms<C extends LoaderConfig = LoaderConfig>(
   ): Promise<string | undefined> {
     if (path === '/llms.txt') {
       let text = formatIndex({ loader, lang, markdown: true });
-      const dirs = sections(getPages(loader, lang));
+      const dirs = sections(getPages(loader, lang), section);
       if (dirs.size > 0) text += '\n\n## Sections\n';
       for (const dir of dirs.keys()) {
         const item: PageTree.Item = { type: 'page', name: dir, url: `${dir}/llms-full.txt` };
@@ -229,7 +234,7 @@ export function llms<C extends LoaderConfig = LoaderConfig>(
     }
     if (path === '/llms-full.txt') return renderPages(getPages(loader, lang));
     if (path.endsWith('/llms-full.txt')) {
-      const dirPages = sections(getPages(loader, lang)).get(
+      const dirPages = sections(getPages(loader, lang), section).get(
         path.slice(0, -'/llms-full.txt'.length),
       );
       return dirPages && renderPages(dirPages);
@@ -257,7 +262,7 @@ export function llms<C extends LoaderConfig = LoaderConfig>(
         const pages = getPages(loader, lang);
         const out = new Set(['/llms.txt', '/llms-full.txt']);
         for (const page of pages) out.add(markdownPath(page.url));
-        for (const dir of sections(pages).keys()) out.add(`${dir}/llms-full.txt`);
+        for (const dir of sections(pages, section).keys()) out.add(`${dir}/llms-full.txt`);
         return Array.from(out);
       });
     },
@@ -283,8 +288,11 @@ export function llms<C extends LoaderConfig = LoaderConfig>(
   };
 }
 
-/** the URL directories with two or more pages, and their pages */
-function sections<Page extends { url: string }>(pages: Page[]): Map<string, Page[]> {
+/** the URL directories that are sections, and their pages */
+function sections<Page extends { url: string }>(
+  pages: Page[],
+  isSection: (dir: string, pages: Page[]) => boolean,
+): Map<string, Page[]> {
   const dirs = new Map<string, Page[]>();
   for (const page of pages) {
     const url = page.url.replace(/\/$/, '');
@@ -298,7 +306,7 @@ function sections<Page extends { url: string }>(pages: Page[]): Map<string, Page
     }
   }
 
-  for (const [dir, list] of dirs) if (list.length < 2) dirs.delete(dir);
+  for (const [dir, list] of dirs) if (!isSection(dir, list)) dirs.delete(dir);
   return dirs;
 }
 
