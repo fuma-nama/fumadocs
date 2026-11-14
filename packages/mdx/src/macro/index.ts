@@ -126,7 +126,7 @@ export interface DefineMetaCollectionsOptions<
 
 function macroError(): Error {
   return new Error(
-    '[MDX] this macro was not compiled by the bundler plugin of `fumadocs-mdx`. To use `fumadocs-mdx/macro`, set the `include` option on your bundler plugin, and make sure this module matches its patterns.',
+    '[MDX] this macro was not compiled by the bundler plugin of `fumadocs-mdx`. Outside the bundler, like in a script or a test, run it with the Bun or Node loader of `fumadocs-mdx`: https://fumadocs.dev/docs/mdx/loader. In the bundler, set the `include` option on your bundler plugin, and make sure this module matches its patterns.',
   );
 }
 
