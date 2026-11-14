@@ -90,20 +90,28 @@ export async function renderRoute(element: ReactElement): Promise<string | undef
 }
 
 /**
+ * The element types of `jsxComponents()`, each stands for a component under its MDX tag: a component kept as JSX is
+ * named after its tag, as function names are minified in production builds and a component can have several tags.
+ */
+const tagged = new WeakMap<WeakKey, { tag: string; type: unknown }>();
+
+/**
  * Resolve the MDX components of a generated Markdown component (`remarkLLMs` with `output: 'function'`):
- * a missing component becomes a stub that `renderToMarkdown` serializes as JSX syntax.
+ * a missing component is serialized as JSX syntax by `renderToMarkdown`.
  */
 export function jsxComponents(
   components: Record<string, ElementType> | undefined,
 ): Record<string, ElementType> {
-  return new Proxy(components ?? {}, {
-    get(target, key) {
-      const value = target[key as string];
-      if (value !== undefined || typeof key !== 'string') return value;
+  // a target of its own: a proxy can't return another value for a frozen property of its target
+  return new Proxy({} as Record<string, ElementType>, {
+    get(_, key) {
+      if (typeof key !== 'string') return;
 
-      const stub = () => null;
-      stub.displayName = key;
-      return stub;
+      const type: unknown = components?.[key] ?? (() => null);
+      if (typeof type === 'string') return type;
+      const element = () => null;
+      tagged.set(element, { tag: key, type });
+      return element;
     },
   });
 }
@@ -237,11 +245,13 @@ async function walk(node: ReactNode, state: State): Promise<string> {
   return '';
 }
 
-async function element(type: unknown, props: Props, state: State): Promise<string> {
+async function element(type: unknown, props: Props, state: State, tag?: string): Promise<string> {
+  const entry = tagged.get(type as WeakKey);
+  if (entry) return element(entry.type, props, state, entry.tag);
   if (typeof type === 'string') return host(type, props, state);
   // client references can be callable proxies (Vite RSC) that throw when called, check them first
-  if (isClientReference(type)) return jsx(clientReferenceName(type.$$id), props, state);
-  if (typeof type === 'function') return component(type as Component, props, state);
+  if (isClientReference(type)) return jsx(tag ?? clientReferenceName(type.$$id), props, state);
+  if (typeof type === 'function') return component(type as Component, props, state, tag);
   // Fragment, Suspense, StrictMode, Profiler, Activity
   if (typeof type === 'symbol') return walk(props.children, state);
 
@@ -256,20 +266,25 @@ async function element(type: unknown, props: Props, state: State): Promise<strin
 
     switch (special.$$typeof) {
       case REACT_LAZY:
-        return element(await resolveLazy(special), props, state);
+        return element(await resolveLazy(special), props, state, tag);
       case REACT_MEMO:
-        return element(special.type, props, state);
+        return element(special.type, props, state, tag);
       case REACT_FORWARD_REF:
-        return component(special.render!, props, state);
+        return component(special.render!, props, state, tag);
     }
   }
 
   return '';
 }
 
-async function component(fn: Component, props: Props, state: State): Promise<string> {
+async function component(
+  fn: Component,
+  props: Props,
+  state: State,
+  tag: string | undefined,
+): Promise<string> {
   const result = await optIn(fn, props, state.target);
-  if (result === NOT_OPTED_IN) return jsx(componentName(fn), props, state);
+  if (result === NOT_OPTED_IN) return jsx(tag ?? componentName(fn), props, state);
   return walk(result, state);
 }
 

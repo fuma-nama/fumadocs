@@ -9,7 +9,7 @@ export type RouteSegment =
       catchAll?: boolean;
       /** the catch-all also matches zero segments */
       optional?: boolean;
-      /** static file name after the catch-all like `content.md`, part of the parameter when the framework can't express it */
+      /** static file name after the catch-all like `image.png`, part of the parameter when the framework can't express it */
       suffix?: string;
     };
 
@@ -202,9 +202,9 @@ ${out.join('\n')}
  * `getStaticPaths()` of an Astro route per docs page, also prerendered with `output: 'server'`.
  * With i18n, the route is under the locale segment, and reads `i18n` of `@/lib/i18n` for an optional locale.
  */
-export function astroPagePaths(i18n: I18nInfo | null, src: SourceRef, index?: string) {
+export function astroPagePaths(i18n: I18nInfo | null, src: SourceRef) {
   const fn = `${src.dynamic ? 'async ' : ''}() =>`;
-  const slug = `decodeURI(page.slugs.join('/')) || ${index ? `'${index}'` : 'undefined'}`;
+  const slug = "decodeURI(page.slugs.join('/')) || undefined";
   const prerender = 'export const prerender = true;\n\n';
   if (!i18n)
     return `${prerender}export const getStaticPaths = (${fn} {
@@ -231,18 +231,17 @@ export function astroPagePaths(i18n: I18nInfo | null, src: SourceRef, index?: st
 }) satisfies GetStaticPaths;`;
 }
 
-/** an Astro endpoint per docs page, `body` is the response of `page`, `index` is the slug of the root page */
+/** an Astro endpoint per docs page, `body` is the response of `page` */
 export const astroPageRoute = (
   i18n: I18nInfo | null,
   src: SourceRef,
   imports: string,
   body: string,
-  index?: string,
 ) =>
   `import type { APIRoute, GetStaticPaths, InferGetStaticPropsType } from 'astro';
 ${imports.trim()}
 ${i18n?.optionalLocale ? "import { i18n } from '@/lib/i18n';\n" : ''}
-${astroPagePaths(i18n, src, index)}
+${astroPagePaths(i18n, src)}
 
 export const GET: APIRoute<InferGetStaticPropsType<typeof getStaticPaths>> = async ({
   props: { page },

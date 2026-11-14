@@ -409,6 +409,33 @@ describe('jsxComponents', () => {
       ),
     ).toBe('> **Note**\n> hello\n\n<Tabs items={["a"]}>\ncontent\n</Tabs>');
   });
+
+  it('names components without a Markdown form after their tag', async () => {
+    function Box({ children }: { children?: ReactNode }) {
+      return <div>{children}</div>;
+    }
+
+    // minified, like production builds, and a component under two tags, in a frozen object
+    const _c = jsxComponents(
+      Object.freeze({
+        Card: (() => (props: object) => <div {...props} />)(),
+        Note: Box,
+        Aside: Box,
+      }),
+    );
+
+    expect(
+      await renderToMarkdown(
+        <>
+          <_c.Card title="A" />
+          {'\n\n'}
+          <_c.Note>{'hello'}</_c.Note>
+          {'\n\n'}
+          <_c.Aside>{'world'}</_c.Aside>
+        </>,
+      ),
+    ).toBe('<Card title="A" />\n\n<Note>\nhello\n</Note>\n\n<Aside>\nworld\n</Aside>');
+  });
 });
 
 describe('host elements', () => {

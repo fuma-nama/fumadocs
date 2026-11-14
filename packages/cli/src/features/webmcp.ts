@@ -1,27 +1,22 @@
 import path from 'node:path';
 import type { Feature } from '@/features';
-import type { Framework } from '@/project';
 import { addImport, appendJsxChildren, findJsxElement } from '@/codemod';
 import { docs } from './docs';
-import { llms } from './llms';
-import { findSource, requiresMarkdown } from './utils';
+import { internalPrefix, llms } from './llms';
+import { editOrNote, findSource, requiresMarkdown } from './utils';
 
 interface Input {
   static: boolean;
   i18n: boolean;
-  framework: Framework;
+  /** of the files of `docsLlms`, see `internalPrefix()` */
+  prefix: string;
 }
 
-export const component = ({ static: isStatic, i18n, framework }: Input) => {
-  // the Markdown route is `/docs/*.md`, see `llmsRoutes()`
-  const suffix = framework === 'tanstack-start' || framework === 'astro';
-
-  return `'use client';
+export const component = ({ static: isStatic, i18n, prefix }: Input) => `'use client';
 import { useEffect } from 'react';
 import { useRouter } from 'fumadocs-core/framework';
 import { ${isStatic ? 'staticClient' : 'fetchClient'} } from 'fumadocs-core/search/client/${isStatic ? 'orama-static' : 'fetch'}';
-${i18n ? "import { useI18n } from 'fumadocs-ui/contexts/i18n';\n" : ''}import { ${suffix ? 'docsRoute' : 'docsContentRoute, docsRoute'} } from '@/lib/shared';
-
+${i18n ? "import { useI18n } from 'fumadocs-ui/contexts/i18n';\n" : ''}
 interface ModelContextTool<Input> {
   name: string;
   description: string;
@@ -39,17 +34,6 @@ declare global {
       ) => Promise<void>;
     };
   }
-}
-
-/** the Markdown URL of a page, e.g. ${suffix ? '`/docs/page` -> `/docs/page.md`' : '`/docs/page` -> `/llms.mdx/docs/page/content.md`'} */
-function markdownUrl(url: string) {
-${
-  suffix
-    ? '  return url.endsWith(docsRoute) ? `${url}/index.md` : `${url}.md`;'
-    : `  const start = url.indexOf(docsRoute);
-  const slugs = url.slice(start + docsRoute.length).replace(/^\\//, '');
-  return [url.slice(0, start) + docsContentRoute, slugs, 'content.md'].filter(Boolean).join('/');`
-}
 }
 
 /** expose the docs to AI agents in the browser */
@@ -88,7 +72,7 @@ ${i18n ? '  const { locale } = useI18n();\n' : ''}
           required: ['url'],
         },
         async execute({ url }: { url: string }) {
-          const res = await fetch(markdownUrl(url));
+          const res = await fetch(\`${prefix}\${url}.md\`);
           if (!res.ok) throw new Error(\`page not found: \${url}\`);
           return res.text();
         },
@@ -118,7 +102,6 @@ ${i18n ? '  const { locale } = useI18n();\n' : ''}
   return null;
 }
 `;
-};
 
 export const webmcp: Feature = {
   id: 'webmcp',
@@ -128,28 +111,28 @@ export const webmcp: Feature = {
   requires: [docs, llms],
   supports: requiresMarkdown,
   async apply(ctx) {
-    const { cwd, baseDir, i18n, framework } = ctx.project;
+    const { cwd, baseDir, i18n } = ctx.project;
     await ctx.write(
       path.join(baseDir, 'components/webmcp.tsx'),
       component({
         static: ctx.project.static,
         i18n: i18n !== null,
-        framework,
+        prefix: internalPrefix(ctx.project),
       }),
     );
 
-    const provider = await findSource(cwd, baseDir, '<RootProvider');
-    const edited =
-      provider !== undefined &&
-      (await ctx.source(provider, (file) => {
+    await editOrNote(
+      ctx,
+      await findSource(cwd, baseDir, '<RootProvider'),
+      (file) => {
         if (file.code.includes('<WebMCP')) return;
         const element = findJsxElement(file, 'RootProvider');
-        if (!element) return;
+        if (!element) return false;
         appendJsxChildren(file, element, '<WebMCP />');
         addImport(file, { from: '@/components/webmcp', named: ['WebMCP'] });
-      }));
-    if (!edited)
-      ctx.note('Render `<WebMCP />` from `@/components/webmcp` inside `<RootProvider />`.');
+      },
+      'Render `<WebMCP />` from `@/components/webmcp` inside `<RootProvider />`.',
+    );
 
     ctx.note(
       'WebMCP is experimental, test it with the `#enable-webmcp-testing` flag of Chrome. The `search_docs` tool uses the search API route, see https://fumadocs.dev/docs/integrations/llms#webmcp.',

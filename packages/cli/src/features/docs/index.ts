@@ -19,7 +19,7 @@ import {
   sampleContentCn,
   templates,
 } from './templates';
-import { registerReactRouterRoutes } from '../utils';
+import { findNextProxy, registerReactRouterRoutes } from '../utils';
 
 const cssImports = (preset: string) => [
   `@import 'fumadocs-ui/css/${preset}.css';`,
@@ -138,16 +138,6 @@ export const docs: Feature<{ i18n: boolean }> = {
     );
   },
 };
-
-/** the Next.js proxy (middleware) file of the project, relative to cwd */
-export async function findNextProxy({ cwd, baseDir }: Project) {
-  for (const file of ['proxy.ts', 'middleware.ts']) {
-    for (const dir of new Set([baseDir, ''])) {
-      const target = path.join(dir, file);
-      if (await exists(path.join(cwd, target))) return target;
-    }
-  }
-}
 
 /** the i18n middleware redirects & rewrites docs URLs without locale */
 async function configureProxy(ctx: FeatureContext) {

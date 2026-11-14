@@ -13,7 +13,7 @@ import { baseOptions } from '@/lib/layout.shared';
 import { useFumadocsLoader } from 'fumadocs-core/source/client';
 import { useMDXComponents } from '@/components/mdx';
 import { use } from 'react';
-import { getPageImageUrl, getPageMarkdownUrl, gitConfig } from '@/lib/shared';
+import { getPageImageUrl, gitConfig } from '@/lib/shared';
 
 export async function loader({ params }: Route.LoaderArgs) {
   const slugs = params['*'].split('/').filter((v) => v.length > 0);
@@ -22,7 +22,7 @@ export async function loader({ params }: Route.LoaderArgs) {
 
   return {
     path: page.path,
-    markdownUrl: getPageMarkdownUrl(page).url,
+    markdownUrl: `/llms.mdx${page.url}.md`,
     pageTree: await source.serializePageTree(source.getPageTree()),
     imagePath: getPageImageUrl(page).url,
   };

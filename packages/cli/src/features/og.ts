@@ -9,9 +9,9 @@ import {
 } from '@/project/route';
 import { addElements, getConfigObject, getProperty } from '@/codemod';
 import { docs } from './docs';
-import { extendNextProxy } from './llms';
 import {
   addPageUrl,
+  extendNextProxy,
   registerReactRouterRoutes,
   sharedRoute,
   type SourceRef,
@@ -187,7 +187,9 @@ export const og: Feature<{ engine: Engine }> = {
           addElements(file, config, ["serverExternalPackages: ['@takumi-rs/core']"]);
       });
     }
-    if (framework === 'next' && i18n) await extendNextProxy(ctx, route);
+    // routes under `[lang]` need the i18n middleware to resolve the locale
+    if (framework === 'next' && i18n)
+      await extendNextProxy(ctx, [route.pattern.replace('/:lang', ''), route.pattern]);
     if (ctx.project.static && framework === 'react-router') {
       ctx.note(
         'Image routes are dynamic, add `getPageImageUrl(page).url` of each page to your prerender config.',

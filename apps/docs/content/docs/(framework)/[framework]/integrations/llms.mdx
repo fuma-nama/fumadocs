@@ -11,7 +11,7 @@ Serve your docs as Markdown for LLMs and AI agents:
 npx @fumadocs/cli feature llms
 ```
 
-It enables processed Markdown on your docs collection, adds `docsLlms` to `lib/source.ts`, and creates the routes below. The generated files are listed here if you prefer a manual setup.
+It enables processed Markdown on your docs collection, adds `docsLlms` to `lib/source.ts`, and serves the [files](#files) below. The generated files are listed here if you prefer a manual setup.
 
 ### `docsLlms`
 
@@ -24,10 +24,12 @@ It enables processed Markdown on your docs collection, adds `docsLlms` to `lib/s
 | `index(lang?)` | the `llms.txt` index, built from the page tree |
 | `page(page)`   | one page, rendered with `renderPage`           |
 | `full(lang?)`  | every page rendered with `renderPage`, joined  |
+| `files()`      | the paths of the [files for agents](#files)    |
+| `serve(path)`  | the response for the file at a path            |
 
 <Callout title="renderPage is required">
-  `page()` and `full()` are only available when you pass `renderPage`, since Fumadocs cannot know
-  how your content source exposes its Markdown.
+  `page()`, `full()`, `files()` and `serve()` are only available when you pass `renderPage`, since
+  Fumadocs cannot know how your content source exposes its Markdown.
 </Callout>
 
 `renderPage` reads the processed Markdown of pages, so enable `includeProcessedMarkdown`:
@@ -59,7 +61,7 @@ MDX components appear as JSX syntax unless they define their [Markdown form](/do
 
 </show>
 
-Runtime content sources like [`@fumadocs/local-md`](/docs/integrations/content/local-md) resolve on demand. Pass their `getSource` and the CLI generates the same routes:
+Runtime content sources like [`@fumadocs/local-md`](/docs/integrations/content/local-md) resolve on demand. Pass their `getSource` and the CLI generates the same files:
 
 ```ts
 export const docsLlms = llms(getSource, {
@@ -71,145 +73,146 @@ ${page.data.content}`,
 
 With `getSource`, `index()` and `indexNode()` return a promise instead of a string.
 
-### `llms.txt`
+### Files
 
-An index of all pages, generated from the page tree.
+The CLI serves these files for AI agents:
+
+- `/llms.txt`: an index of every page, linked to its Markdown, followed by the `llms-full.txt` of each section.
+- `/llms-full.txt`: the content of every page.
+- `<dir>/llms-full.txt`: the pages under a URL directory with two or more pages, like `/docs/ui/llms-full.txt`, so agents can read large docs one section at a time.
+- `<page>.md`: the Markdown of a page, like `/docs/ui.md`, and `/index.md` for `/`.
+
+To leave pages out of the files, like drafts, pass `filter`. `llms.txt` still lists them, linked to their HTML page:
+
+```ts title="lib/source.ts"
+export const docsLlms = llms(source, {
+  filter: (page) => page.slugs[0] !== 'drafts',
+  renderPage: async (page) => `# ${page.data.title}\n\n${await page.data.getText('processed')}`,
+});
+```
+
+In the files, `renderUrl` receives the path of the file that a link points to, like the `.md` file of a page.
+
+Agents that read the HTML of a page find its Markdown through a link in the `<head>`:
+
+```html
+<link rel="alternate" type="text/markdown" href="/docs/ui.md" />
+```
+
+### Routes
+
+`files()` lists the paths of the files, and `serve(path)` responds with the file at a path, so each route only passes the request path to `serve()`.
 
 <show when={props.framework === 'next'}>
 
-<feature title="app/llms.txt/route.ts">llms/next/app/llms.txt/route.ts</feature>
+Route handlers serve `/llms.txt` and `/llms-full.txt`. The other files sit beside `app/docs/[[...slug]]`, so the Next.js config rewrites their paths to the `/llms.mdx/[...path]` route:
 
 </show>
 
 <show when={props.framework === 'react-router'}>
 
-<feature tab="app/routes/llms.txt.ts">llms/react-router/routes/llms.txt.ts</feature>
-
-<feature tab="app/routes.ts">llms/react-router/routes.ts</feature>
+React Router can't match a path beside the docs pages, like `/docs/ui.md`, so a resource route serves the files under `/llms.mdx`, and `renderUrl` points the links of `llms.txt` there. The middleware of the root route also serves `/docs/ui.md` and other files under a matched route:
 
 </show>
 
 <show when={props.framework === 'tanstack-start'}>
 
-<feature title="src/routes/llms[.]txt.ts">llms/tanstack-start/routes/llms[.]txt.ts</feature>
+The docs page `docs/$` matches every path under `/docs`, so the routes of the files under the docs use a more specific path, like `docs/{$}.md`:
 
 </show>
 
 <show when={props.framework === 'waku'}>
 
-<feature title="src/pages/_api/llms.txt.ts">llms/waku/pages/_api/llms.txt.ts</feature>
+API routes serve the files under `/llms.mdx`, and `renderUrl` points the links of `llms.txt` there. On a server, a [Hono middleware](https://hono.dev/docs/guides/middleware) in `src/middleware` also serves `/docs/ui.md` and the other files at their paths. Install `hono` as a dev dependency for its types:
 
 </show>
 
 <show when={props.framework === 'astro'}>
 
-<feature title="src/pages/llms.txt.ts">llms/astro/pages/llms.txt.ts</feature>
+One endpoint prerenders every file at its path:
 
 </show>
 
-### `llms-full.txt`
+<feature>llms/routes</feature>
 
-The content of all pages in a single file.
+`serve()` returns `undefined` for a path without a file, so a middleware can pass the request on. With `hideLocale: 'always'`, URLs don't carry the locale: pass the language as the second argument of `serve()` and the first of `files()`.
+
+#### Static Output [#static-output]
 
 <show when={props.framework === 'next'}>
 
-<feature title="app/llms-full.txt/route.ts">llms/next/app/llms-full.txt/route.ts</feature>
+With `output: 'export'`, Next.js has no rewrites. The `/llms.mdx/[...path]` route serves the files at their prefixed paths, like `/llms.mdx/docs/ui.md`, and `renderUrl` points the links of `llms.txt` there:
+
+<feature title="lib/source.ts">llms/docs-llms-prefixed.ts</feature>
 
 </show>
 
 <show when={props.framework === 'react-router'}>
 
-<feature title="app/routes/llms-full.txt.ts">llms/react-router/routes/llms-full.txt.ts</feature>
+In SPA mode, prerender the files in `react-router.config.ts`. React Router loads the config without your Vite plugins, so load the source with `runnerImport` of Vite:
 
-</show>
+```ts title="react-router.config.ts"
+import type { Config } from '@react-router/dev/config';
+import { fumadocsMdx } from 'fumadocs-mdx/vite';
+import { runnerImport } from 'vite';
 
-<show when={props.framework === 'tanstack-start'}>
+export default {
+  ssr: false,
+  async prerender({ getStaticPaths }) {
+    const paths = getStaticPaths();
+    const { docsLlms } = (
+      await runnerImport<typeof import('./app/lib/source')>('./app/lib/source.ts', {
+        plugins: [fumadocsMdx()],
+        resolve: { tsconfigPaths: true },
+      })
+    ).module;
 
-<feature title="src/routes/llms-full[.]txt.ts">
-  llms/tanstack-start/routes/llms-full[.]txt.ts
-</feature>
-
-</show>
-
-<show when={props.framework === 'waku'}>
-
-<feature title="src/pages/_api/llms-full.txt.ts">llms/waku/pages/_api/llms-full.txt.ts</feature>
-
-</show>
-
-<show when={props.framework === 'astro'}>
-
-<feature title="src/pages/llms-full.txt.ts">llms/astro/pages/llms-full.txt.ts</feature>
-
-</show>
-
-### `*.md` [#md-extension]
-
-The Markdown of a single page, for AI agents.
-
-<show when={props.framework === 'next'}>
-
-<feature tab="lib/shared.ts">llms/next/lib/shared.ts</feature>
-
-<feature tab="app/llms.mdx/docs/[[...slug]]/route.ts">
-  llms/next/app/llms.mdx/docs/[[...slug]]/route.ts
-</feature>
-
-<feature tab="next.config.ts">llms/next/next.config.ts</feature>
-
-</show>
-
-<show when={props.framework === 'react-router'}>
-
-<feature tab="app/lib/shared.ts">llms/react-router/lib/shared.ts</feature>
-
-<feature tab="app/routes/llms.mdx.docs.ts">llms/react-router/routes/llms.mdx.docs.ts</feature>
-
-```ts tab="app/root.tsx"
-import { rewritePath } from 'fumadocs-core/negotiation';
-import type { Route } from './+types/root';
-
-// serve `/docs/page.md` [!code ++:14]
-const { rewrite: rewriteLLM } = rewritePath(
-  '/docs{/*path}.md',
-  '/llms.mdx/docs{/*path}/content.md',
-);
-const serverMiddleware: Route.MiddlewareFunction = async ({ request }, next) => {
-  const url = new URL(request.url);
-  const path = rewriteLLM(url.pathname);
-  if (path) return Response.redirect(new URL(path, url));
-
-  return next();
-};
-
-export const middleware = [serverMiddleware];
+    for (const path of await docsLlms.files())
+      paths.push(path === '/llms.txt' || path === '/llms-full.txt' ? path : `/llms.mdx${path}`);
+    return paths;
+  },
+} satisfies Config;
 ```
 
 </show>
 
 <show when={props.framework === 'tanstack-start'}>
 
-<feature tab="src/lib/shared.ts">llms/tanstack-start/lib/shared.ts</feature>
+In SPA mode, prerender the files with Nitro. TanStack Start requests prerendered paths with a trailing slash, which the routes of files don't match. Vite loads the config without your plugins, so load the source with `runnerImport`:
 
-<feature tab="src/routes/docs/\{$\}[.]md.ts">llms/tanstack-start/routes/docs/\{$\}[.]md.ts</feature>
+```ts title="vite.config.ts"
+import { defineConfig, runnerImport } from 'vite';
+import { fumadocsMdx } from 'fumadocs-mdx/vite';
+import { nitro } from 'nitro/vite';
+
+const { docsLlms } = (
+  await runnerImport<typeof import('./src/lib/source')>('./src/lib/source.ts', {
+    plugins: [fumadocsMdx()],
+    resolve: { tsconfigPaths: true },
+  })
+).module;
+
+export default defineConfig({
+  plugins: [
+    // other plugins
+    nitro({
+      prerender: { routes: await docsLlms.files() },
+    }),
+  ],
+});
+```
 
 </show>
 
 <show when={props.framework === 'waku'}>
 
-<feature tab="src/lib/shared.ts">llms/waku/lib/shared.ts</feature>
-
-<feature tab="src/pages/_api/llms.mdx/docs/[...slug]/content.md.ts">
-  llms/waku/pages/_api/llms.mdx/docs/[...slug]/content.md.ts
-</feature>
+The API routes are prerendered, so a Waku site deployed as static files serves the files under `/llms.mdx`. The middleware needs a server.
 
 </show>
 
 <show when={props.framework === 'astro'}>
 
-<feature tab="src/lib/shared.ts">llms/astro/lib/shared.ts</feature>
-
-<feature tab="src/pages/docs/[...slug].md.ts">llms/astro/pages/docs/[...slug].md.ts</feature>
+The endpoint is prerendered, with or without an adapter.
 
 </show>
 
@@ -217,27 +220,30 @@ export const middleware = [serverMiddleware];
 
 <show when={props.framework !== 'astro'}>
 
-AI agents can ask for Markdown with the `Accept` header. Serve the Markdown of a page when the request prefers it:
+AI agents can ask for Markdown with the `Accept` header.
 
 </show>
 
 <show when={props.framework === 'next'}>
 
+Serve the Markdown of a page when the request prefers it:
+
 ```ts title="proxy.ts"
 import { NextRequest, NextResponse } from 'next/server';
 import { isMarkdownPreferred, rewritePath } from 'fumadocs-core/negotiation';
 
-const { rewrite: rewriteLLM } = rewritePath('/docs{/*path}', '/llms.mdx/docs{/*path}/content.md');
+const { rewrite: rewriteDocs } = rewritePath('/docs{/*path}', '/llms.mdx/docs{/*path}.md');
 
 export default function proxy(request: NextRequest) {
-  if (isMarkdownPreferred(request)) {
-    const result = rewriteLLM(request.nextUrl.pathname);
+  const { pathname } = request.nextUrl;
+  // the rewrites of the Next.js config serve files like `/docs/ui.md`
+  const result =
+    isMarkdownPreferred(request) && !/\.(md|txt)$/.test(pathname) && rewriteDocs(pathname);
 
-    if (result) {
-      return NextResponse.rewrite(new URL(result, request.nextUrl), {
-        headers: { Vary: 'Accept' }, // [!code highlight]
-      });
-    }
+  if (result) {
+    return NextResponse.rewrite(new URL(result, request.nextUrl), {
+      headers: { Vary: 'Accept' }, // [!code highlight]
+    });
   }
 
   return NextResponse.next();
@@ -246,54 +252,36 @@ export default function proxy(request: NextRequest) {
 
 </show>
 
-<show when={props.framework === 'react-router'}>
+<show when={props.framework === 'react-router' || props.framework === 'waku'}>
 
-```ts title="app/root.tsx"
-import { isMarkdownPreferred, rewritePath } from 'fumadocs-core/negotiation';
-import type { Route } from './+types/root';
+The middleware above responds with the Markdown of a docs page when the request prefers it.
 
-const { rewrite: rewriteLLM } = rewritePath('/docs{/*path}', '/llms.mdx/docs{/*path}/content.md');
-const serverMiddleware: Route.MiddlewareFunction = async ({ request }, next) => {
-  const url = new URL(request.url);
-  const path = isMarkdownPreferred(request) && rewriteLLM(url.pathname);
-
-  // the headers of `Response.redirect()` are immutable, build the response directly
-  if (path)
-    return new Response(null, {
-      status: 302,
-      headers: { Location: new URL(path, url).toString(), Vary: 'Accept' }, // [!code highlight]
-    });
-
-  return next();
-};
-
-export const middleware = [serverMiddleware];
-```
+<Callout>
+  Prerendered pages are served as static files before the middleware runs, so they always respond
+  with HTML.
+</Callout>
 
 </show>
 
 <show when={props.framework === 'tanstack-start'}>
 
+Redirect to the Markdown of a page when the request prefers it:
+
 ```ts title="src/start.ts"
 import { createMiddleware, createStart } from '@tanstack/react-start';
 import { redirect } from '@tanstack/react-router';
 import { isMarkdownPreferred } from 'fumadocs-core/negotiation';
-import { getPageMarkdownUrl } from '@/lib/shared';
 
 const llmMiddleware = createMiddleware().server(({ next, request }) => {
   const url = new URL(request.url);
 
+  // the routes of files serve paths like `/docs/ui.md`
   if (
-    (url.pathname === '/docs' || url.pathname.startsWith('/docs/')) &&
-    !url.pathname.endsWith('.md') &&
+    url.pathname.startsWith('/docs') &&
+    !/\.(md|txt)$/.test(url.pathname) &&
     isMarkdownPreferred(request)
   ) {
-    const slugs = url.pathname
-      .slice('/docs'.length)
-      .split('/')
-      .filter((v) => v.length > 0);
-    url.pathname = getPageMarkdownUrl({ slugs }).url;
-
+    url.pathname += '.md';
     throw redirect({ href: url.href, headers: { Vary: 'Accept' } }); // [!code highlight]
   }
 
@@ -303,32 +291,6 @@ const llmMiddleware = createMiddleware().server(({ next, request }) => {
 export const startInstance = createStart(() => ({
   requestMiddleware: [llmMiddleware],
 }));
-```
-
-</show>
-
-<show when={props.framework === 'waku'}>
-
-Redirect those requests from a [Hono middleware](https://hono.dev/docs/guides/middleware) in `src/middleware`:
-
-```ts title="src/middleware/llms.ts"
-import type { MiddlewareHandler } from 'hono';
-import { isMarkdownPreferred, rewritePath } from 'fumadocs-core/negotiation';
-
-const { rewrite: rewriteLLM } = rewritePath('/docs{/*path}', '/llms.mdx/docs{/*path}/content.md');
-
-export default function llmsMiddleware(): MiddlewareHandler {
-  return async (c, next) => {
-    const path = isMarkdownPreferred(c.req.raw) && rewriteLLM(c.req.path);
-
-    if (path) {
-      c.header('Vary', 'Accept'); // [!code highlight]
-      return c.redirect(path);
-    }
-
-    await next();
-  };
-}
 ```
 
 </show>
@@ -356,7 +318,7 @@ Docs pages can't serve Markdown based on the `Accept` header. Astro middleware o
 
 ### Page Actions
 
-Page actions let readers copy the Markdown of a page, or open the page in AI apps. They require the [`*.md`](#md-extension) route.
+Page actions let readers copy the Markdown of a page, or open the page in AI apps. They read the [`.md` file](#files) of the page.
 
 ![AI Page Actions](/docs/ai-page-actions.png)
 
@@ -366,9 +328,8 @@ Render them in your docs page:
 
 ```tsx
 import { MarkdownCopyButton, ViewOptionsPopover } from 'fumadocs-ui/layouts/docs/page';
-import { getPageMarkdownUrl } from '@/lib/shared';
 
-const markdownUrl = getPageMarkdownUrl(page).url;
+const markdownUrl = `${page.url}.md`;
 
 <div className="flex flex-row gap-2 items-center border-b pt-2 pb-6">
   <MarkdownCopyButton markdownUrl={markdownUrl} />
@@ -381,18 +342,54 @@ const markdownUrl = getPageMarkdownUrl(page).url;
 
 </show>
 
-<show when={props.framework === 'react-router' || props.framework === 'tanstack-start'}>
+<show when={props.framework === 'next'}>
+
+With static export, the URL is `` `/llms.mdx${page.url}.md` `` instead.
+
+</show>
+
+<show when={props.framework === 'waku'}>
+
+Use `` `/llms.mdx${page.url}.md` `` as the URL, so static deployments serve it too.
+
+</show>
+
+<show when={props.framework === 'react-router'}>
 
 Return the Markdown URL from the loader of your docs page, and render them in the page:
 
 ```tsx
 import { MarkdownCopyButton, ViewOptionsPopover } from 'fumadocs-ui/layouts/docs/page';
-import { getPageMarkdownUrl } from '@/lib/shared';
 
 // in your loader
 return {
   path: page.path,
-  markdownUrl: getPageMarkdownUrl(page).url,
+  markdownUrl: `/llms.mdx${page.url}.md`,
+};
+
+// in your page
+<div className="flex flex-row gap-2 items-center border-b pt-2 pb-6">
+  <MarkdownCopyButton markdownUrl={markdownUrl} />
+  <ViewOptionsPopover
+    markdownUrl={markdownUrl}
+    githubUrl={`https://github.com/${owner}/${repo}/blob/main/content/docs/${encodeURI(path)}`}
+  />
+</div>;
+```
+
+</show>
+
+<show when={props.framework === 'tanstack-start'}>
+
+Return the Markdown URL from the loader of your docs page, and render them in the page:
+
+```tsx
+import { MarkdownCopyButton, ViewOptionsPopover } from 'fumadocs-ui/layouts/docs/page';
+
+// in your loader
+return {
+  path: page.path,
+  markdownUrl: `${page.url}.md`,
 };
 
 // in your page
@@ -412,13 +409,9 @@ return {
 Pass the Markdown URL from your docs page to its React island, and render them in the island:
 
 ```astro tab="src/pages/docs/[...slug].astro"
----
-import { getPageMarkdownUrl } from '@/lib/shared';
----
-
 <Docs
   client:load
-  markdownUrl={getPageMarkdownUrl(page).url}
+  markdownUrl={`${page.url}.md`}
   githubUrl={`https://github.com/${owner}/${repo}/blob/main/content/docs/${encodeURI(page.path)}`}
 >
   <Content />
@@ -508,7 +501,7 @@ npx @fumadocs/cli feature webmcp
 It creates a `WebMCP` component on top of the [LLM routes](#docs-for-llm). Render it inside `<RootProvider />`.
 
 - `search_docs` queries the search API route. You can replace `fetchClient` with [other clients](/docs/search).
-- `read_page` fetches the Markdown of a page, from <show when={props.framework === 'tanstack-start' || props.framework === 'astro'}>`/docs/page.md`</show><show when={props.framework !== 'tanstack-start' && props.framework !== 'astro'}>`/llms.mdx/docs/page/content.md`</show>.
+- `read_page` fetches the Markdown of a page, from <show when={props.framework === 'react-router' || props.framework === 'waku'}>`/llms.mdx/docs/page.md`</show><show when={props.framework !== 'react-router' && props.framework !== 'waku'}>`/docs/page.md`</show>.
 
 ## Ask AI
 
