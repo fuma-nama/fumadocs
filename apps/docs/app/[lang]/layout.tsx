@@ -14,6 +14,7 @@ import { graphqlTranslations } from '@fumadocs/graphql/i18n';
 import { storyTranslations } from '@fumadocs/story/i18n';
 import { aiChatTranslations } from '@fumadocs/ai-chat/i18n';
 import { zhTW } from '@fumadocs/language/zh-tw';
+import { ja } from '@fumadocs/language/ja';
 
 export const metadata = createMetadata({
   title: {
@@ -32,7 +33,8 @@ const translations = i18n
   .extend(graphqlTranslations())
   .extend(storyTranslations())
   .extend(aiChatTranslations())
-  .preset('zh-TW', zhTW());
+  .preset('zh-TW', zhTW())
+  .preset('ja', ja());
 
 const geist = Geist({
   variable: '--font-sans',
