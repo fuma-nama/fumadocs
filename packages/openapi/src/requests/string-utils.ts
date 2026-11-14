@@ -13,23 +13,30 @@ export function inputToString(value: unknown, format = 'application/json'): stri
       : JSON.stringify(value, null, 2);
   }
 
-  if (format === 'application/x-www-form-urlencoded') {
-    const params = new URLSearchParams();
-    if (typeof value !== 'object')
-      throw new Error(
-        `For url encoded data, \`value\` must be an object, but received: ${typeof value}`,
-      );
-
-    for (const key in value) {
-      if (value[key as keyof object]) params.set(key, String(value[key as keyof object]));
-    }
-
-    return params.toString();
-  }
+  if (format === 'application/x-www-form-urlencoded') return toSearchParams(value).toString();
 
   if (format === 'application/xml') return js2xml(value, { compact: true, spaces: 2 });
 
   return JSON.stringify(value, null, 2);
+}
+
+/**
+ * A form body, by the rules `multipart/form-data` encodes its fields with.
+ */
+export function toSearchParams(value: unknown): URLSearchParams {
+  if (typeof value !== 'object' || !value)
+    throw new Error(
+      `For url encoded data, \`value\` must be an object, but received: ${typeof value}`,
+    );
+
+  const params = new URLSearchParams();
+  for (const [key, field] of Object.entries(value)) {
+    for (const item of Array.isArray(field) ? field : [field]) {
+      if (item == null || Number.isNaN(item)) continue;
+      params.append(key, typeof item === 'object' ? JSON.stringify(item) : String(item));
+    }
+  }
+  return params;
 }
 
 /**
