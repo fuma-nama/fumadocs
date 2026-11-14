@@ -4,7 +4,7 @@ import { AIChat } from '@/components/inkeep/search';
 import { getSection } from '@/lib/source/navigation';
 import type { CSSProperties } from 'react';
 import { getLayoutTabs } from 'fumadocs-ui/layouts/shared';
-import { isFramework } from '@/lib/framework';
+import { folderFramework } from '@/lib/framework';
 import { FrameworkLogo } from '@/components/framework-logo';
 import { ClientSpaciousLayout } from './client';
 import 'katex/dist/katex.min.css';
@@ -14,9 +14,8 @@ export async function Spacious({ params, children }: LayoutProps<'/[lang]/docs'>
   const base = baseOptions();
   const tabs = getLayoutTabs(source.getPageTree(lang), {
     transform(option, node) {
-      // the root folder of a framework, like `(framework)/next`
-      const framework = node.$id?.replace('(framework)/', '');
-      if (node.root === 'framework' && isFramework(framework))
+      const framework = folderFramework(node);
+      if (framework)
         return {
           ...option,
           icon: <FrameworkLogo framework={framework} />,

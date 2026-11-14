@@ -1,3 +1,5 @@
+import type { Folder } from 'fumadocs-core/page-tree';
+
 /** the frameworks of the docs, values of the `[framework]` path param */
 export const frameworks = [
   { value: 'next', name: 'Next.js' },
@@ -18,4 +20,10 @@ export function frameworkName(value: string): string | undefined {
 
 export function isFramework(value: unknown): value is Framework {
   return frameworks.some((item) => item.value === value);
+}
+
+/** the framework of a root folder of `[framework]`, the last segment of its ID like `zh-TW:(framework)/next` */
+export function folderFramework(folder: Folder): Framework | undefined {
+  const value = folder.root === 'framework' ? folder.$id?.split('/').at(-1) : undefined;
+  return isFramework(value) ? value : undefined;
 }

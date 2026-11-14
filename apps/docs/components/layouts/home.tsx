@@ -17,6 +17,8 @@ export function SiteHomeLayout(props: { className?: string; children: ReactNode 
   return (
     <HomeLayout
       {...baseOptions()}
+      // its pages are English only
+      slots={{ languageSelect: false }}
       links={[
         {
           type: 'menu',

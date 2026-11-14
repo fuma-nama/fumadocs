@@ -31,7 +31,7 @@ export const steps: Step[] = [
 /** the blocks of `quick-start.mdx`, a file each for a plate each, compiled like the docs */
 export const quickStart = defineCollections({
   type: 'doc',
-  dir: 'app/(landing)/sections/write/content',
+  dir: 'app/[lang]/(landing)/sections/write/content',
   compiler: 'satteri',
   schema: z.object({
     title: z.string().optional(),
