@@ -102,11 +102,12 @@ const tagged = new WeakMap<WeakKey, { tag: string; type: unknown }>();
 export function jsxComponents(
   components: Record<string, ElementType> | undefined,
 ): Record<string, ElementType> {
-  return new Proxy(components ?? {}, {
-    get(target, key) {
-      if (typeof key !== 'string') return Reflect.get(target, key);
+  // a target of its own: a proxy can't return another value for a frozen property of its target
+  return new Proxy({} as Record<string, ElementType>, {
+    get(_, key) {
+      if (typeof key !== 'string') return;
 
-      const type: unknown = target[key] ?? (() => null);
+      const type: unknown = components?.[key] ?? (() => null);
       if (typeof type === 'string') return type;
       const element = () => null;
       tagged.set(element, { tag: key, type });

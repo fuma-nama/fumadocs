@@ -415,12 +415,14 @@ describe('jsxComponents', () => {
       return <div>{children}</div>;
     }
 
-    // minified, like production builds, and a component under two tags
-    const _c = jsxComponents({
-      Card: (() => (props: object) => <div {...props} />)(),
-      Note: Box,
-      Aside: Box,
-    });
+    // minified, like production builds, and a component under two tags, in a frozen object
+    const _c = jsxComponents(
+      Object.freeze({
+        Card: (() => (props: object) => <div {...props} />)(),
+        Note: Box,
+        Aside: Box,
+      }),
+    );
 
     expect(
       await renderToMarkdown(
