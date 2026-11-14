@@ -91,6 +91,15 @@ export const docsLlms = llms(source, {
 });
 ```
 
+To choose which directories have their own `llms-full.txt`, pass `section`. It replaces the default rule, here with one file per top-level directory, like `/docs/ui`:
+
+```ts title="lib/source.ts"
+export const docsLlms = llms(source, {
+  section: (dir, pages) => pages.length > 1 && dir.split('/').length === 3,
+  renderPage: async (page) => `# ${page.data.title}\n\n${await page.data.getText('processed')}`,
+});
+```
+
 In the files, `renderUrl` receives the path of the file that a link points to, like the `.md` file of a page.
 
 Agents that read the HTML of a page find its Markdown through a link in the `<head>`:
