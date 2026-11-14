@@ -7,6 +7,11 @@
       "value": "Write Traditional Chinese as used by developers in Taiwan, with Taiwanese technical terms (程式碼, 檔案, 預設, 設定, 伺服器, 函式, 變數, 物件, 介面) rather than Mainland ones (代码, 文件 for a file, 默认, 配置 for settings, 服务器, 函数, 对象, 接口). Use full-width punctuation in prose, and put a space between Chinese and Latin words or numbers."
     },
     {
+      "name": "Japanese conventions",
+      "locale": "ja",
+      "value": "Write in the です/ます style of Japanese technical documentation, with Japanese punctuation (、。) and half-width letters, numbers and symbols. Write established technical terms in katakana, like レンダリング and コンポーネント, and keep names of APIs and products in English."
+    },
+    {
       "name": "Code",
       "locale": null,
       "value": "Keep code identifiers, file paths, package names, commands, options, props and component names exactly as written, also in prose. In code blocks, translate only comments, and keep annotations like `[!code highlight]` and `// @noErrors` unchanged."
@@ -39,6 +44,9 @@
       "translations": {
         "zh-TW": {
           "translation": "props"
+        },
+        "ja": {
+          "translation": "props"
         }
       }
     },
@@ -48,6 +56,9 @@
       "translations": {
         "zh-TW": {
           "translation": "schema"
+        },
+        "ja": {
+          "translation": "スキーマ"
         }
       }
     },
@@ -57,6 +68,9 @@
       "translations": {
         "zh-TW": {
           "translation": "hook"
+        },
+        "ja": {
+          "translation": "フック"
         }
       }
     },
@@ -66,6 +80,9 @@
       "translations": {
         "zh-TW": {
           "translation": "frontmatter"
+        },
+        "ja": {
+          "translation": "フロントマター"
         }
       }
     },
@@ -75,6 +92,9 @@
       "translations": {
         "zh-TW": {
           "translation": "算繪"
+        },
+        "ja": {
+          "translation": "レンダリング"
         }
       }
     },
@@ -84,6 +104,9 @@
       "translations": {
         "zh-TW": {
           "translation": "用戶端"
+        },
+        "ja": {
+          "translation": "クライアント"
         }
       }
     },
@@ -93,6 +116,9 @@
       "translations": {
         "zh-TW": {
           "translation": "元件"
+        },
+        "ja": {
+          "translation": "コンポーネント"
         }
       }
     },
@@ -102,6 +128,9 @@
       "translations": {
         "zh-TW": {
           "translation": "版面配置"
+        },
+        "ja": {
+          "translation": "レイアウト"
         }
       }
     },
@@ -111,6 +140,9 @@
       "translations": {
         "zh-TW": {
           "translation": "頁面樹"
+        },
+        "ja": {
+          "translation": "ページツリー"
         }
       }
     },
@@ -120,6 +152,9 @@
       "translations": {
         "zh-TW": {
           "translation": "側邊欄"
+        },
+        "ja": {
+          "translation": "サイドバー"
         }
       }
     },
@@ -129,6 +164,9 @@
       "translations": {
         "zh-TW": {
           "translation": "目錄"
+        },
+        "ja": {
+          "translation": "目次"
         }
       }
     },
@@ -138,6 +176,9 @@
       "translations": {
         "zh-TW": {
           "translation": "外掛"
+        },
+        "ja": {
+          "translation": "プラグイン"
         }
       }
     },
@@ -147,6 +188,9 @@
       "translations": {
         "zh-TW": {
           "translation": "內容來源"
+        },
+        "ja": {
+          "translation": "コンテンツソース"
         }
       }
     },
@@ -156,6 +200,9 @@
       "translations": {
         "zh-TW": {
           "translation": "語系"
+        },
+        "ja": {
+          "translation": "ロケール"
         }
       }
     },
@@ -165,6 +212,9 @@
       "translations": {
         "zh-TW": {
           "translation": "國際化"
+        },
+        "ja": {
+          "translation": "国際化"
         }
       }
     },
@@ -174,6 +224,9 @@
       "translations": {
         "zh-TW": {
           "translation": "程式碼區塊"
+        },
+        "ja": {
+          "translation": "コードブロック"
         }
       }
     },
@@ -183,6 +236,9 @@
       "translations": {
         "zh-TW": {
           "translation": "靜態匯出"
+        },
+        "ja": {
+          "translation": "静的エクスポート"
         }
       }
     },
@@ -191,6 +247,9 @@
       "definition": "Settings of a tool or app, like a config file.",
       "translations": {
         "zh-TW": {
+          "translation": "設定"
+        },
+        "ja": {
           "translation": "設定"
         }
       }
