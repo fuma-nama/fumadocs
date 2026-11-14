@@ -11,4 +11,4 @@ packages:
 - In `llms.txt`, the line of a section's folder links to the `llms-full.txt` of the section.
 - The `section` option chooses the sections, and can collapse a section into one link to its own `llms.txt`.
 - The CLI serves the `llms.txt` of collapsed sections on every framework.
-- The `AGENTS.md` of new projects links the docs for customizing layouts, themes and MDX components.
+- The `AGENTS.md` of new projects links the Customize UI guide and the theme docs.
