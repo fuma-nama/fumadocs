@@ -30,6 +30,8 @@ import { createFileSystemTypesCache } from 'fumadocs-twoslash/cache-fs';
 import type { MdastPluginDefinition } from 'satteri';
 import { remarkFrameworkLinks } from '@/lib/remark-framework-links';
 import { i18n } from '@/lib/i18n';
+import { isFramework } from '@/lib/framework';
+import { FrameworkLogo } from '@/components/framework-logo';
 
 const typeTableGenerator = createGenerator({
   cache: createFileSystemGeneratorCache('.next/cache/fumadocs-typescript'),
@@ -236,6 +238,8 @@ export const source = loader(
   {
     baseUrl: '/docs',
     i18n,
+    // the logos of frameworks, Lucide icons otherwise
+    icon: (icon) => (isFramework(icon) ? <FrameworkLogo framework={icon} /> : icon),
     plugins: [
       pageTreeCodeTitles(),
       lucideIconsPlugin(),

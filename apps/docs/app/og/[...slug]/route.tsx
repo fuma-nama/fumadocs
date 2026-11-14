@@ -7,23 +7,23 @@ import { i18n } from '@/lib/i18n';
 
 export const revalidate = false;
 
-export async function GET(_req: Request, { params }: RouteContext<'/og/[lang]/[...slug]'>) {
-  const { lang, slug } = await params;
-  const page = source.getPage(slug.slice(0, -1), lang);
+export async function GET(_req: Request, { params }: RouteContext<'/og/[...slug]'>) {
+  const { slug } = await params;
+  // other languages start with their locale, like the URLs of their pages
+  const lang = i18n.languages.find((item) => item !== i18n.defaultLanguage && item === slug[0]);
+  const page = source.getPage(slug.slice(lang ? 1 : 0, -1), lang);
   if (!page) notFound();
 
   return new ImageResponse(
     <MetadataImage title={page.data.title} description={page.data.description} />,
-    await getImageResponseOptions(lang !== i18n.defaultLanguage),
+    await getImageResponseOptions(page.locale),
   );
 }
 
 export function generateStaticParams(): {
-  lang: string;
   slug: string[];
 }[] {
   return source.getPages().map((page) => ({
-    lang: page.locale!,
     slug: getPageImageUrl(page).segments,
   }));
 }
