@@ -2,6 +2,7 @@ import { describe, expect, test } from 'vitest';
 import { pathnameFromRequest } from '@/requests/generators';
 import { defaultAdapters } from '@/requests/media/adapter';
 import { encodeRequestData } from '@/requests/media/encode';
+import { cookieString } from '@/requests/string-utils';
 import type { RequestData } from '@/requests/types';
 
 describe('URL utilities', () => {
@@ -245,4 +246,21 @@ test('sends a path parameter with reserved characters to the right URL', () => {
   expect(pathnameFromRequest('/files/{name}', data)).toBe('/files/report%231?q=a%26b');
   // headers are not part of the URL
   expect(data.header['X-Name'].value).toBe('a/b c');
+});
+
+test('names an exploded array cookie once per value', () => {
+  const cookie = (value: unknown, explode?: boolean) =>
+    cookieString(
+      encodeRequestData(
+        { method: 'get', path: {}, query: {}, header: {}, cookie: { id: value } },
+        defaultAdapters,
+        [{ name: 'id', in: 'cookie', explode }],
+      ).cookie,
+    );
+
+  // `form` style, as in https://swagger.io/docs/specification/v3_0/serialization
+  expect(cookie([3, 4])).toBe('id=3&id=4');
+  expect(cookie([3, 4], false)).toBe('id=3,4');
+  expect(cookie('x')).toBe('id=x');
+  expect(cookie({ a: 1, b: 2 })).toBe('a=1; b=2');
 });

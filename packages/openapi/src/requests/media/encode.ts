@@ -243,7 +243,8 @@ function serializeCookieParameter(
   // form
   if (Array.isArray(value)) {
     output[field.name!] = {
-      value: explode ? value.map((v) => `${field.name}=${v}`).join('&') : value.join(','),
+      // the cookie is written as `name=value`, so the name of the first item is already there
+      value: value.join(explode ? `&${field.name}=` : ','),
     };
   } else if (typeof value === 'object' && explode) {
     for (const [k, v] of Object.entries(value)) {
