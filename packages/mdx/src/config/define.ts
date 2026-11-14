@@ -13,6 +13,14 @@ export type CollectionSchema<Schema extends StandardSchemaV1, Context> =
   | Schema
   | ((ctx: Context) => Schema);
 
+/** the file that a collection schema validates */
+interface SchemaContext {
+  /** absolute path of the file */
+  path: string;
+  /** content of the file */
+  source: string;
+}
+
 export type AnyCollection = DocsCollection | DocCollection | MetaCollection;
 
 export interface BaseCollection {
@@ -24,7 +32,7 @@ export interface MetaCollection<
   Schema extends StandardSchemaV1 = StandardSchemaV1,
 > extends BaseCollection {
   type: 'meta';
-  schema?: CollectionSchema<Schema, { path: string; source: string }>;
+  schema?: CollectionSchema<Schema, SchemaContext>;
 }
 
 export interface DocCollectionBase<
@@ -33,7 +41,7 @@ export interface DocCollectionBase<
   postprocess?: Partial<PostprocessOptions>;
   async?: boolean;
   dynamic?: boolean;
-  schema?: CollectionSchema<Schema, { path: string; source: string }>;
+  schema?: CollectionSchema<Schema, SchemaContext>;
 
   /**
    * Expose the last modified date of each document.

@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { cancel, group, intro, log, outro, select, type Option } from '@clack/prompts';
+import { canPrompt } from '@/utils/prompt';
 import { styleText } from 'node:util';
 import { parseSourceFile } from '@/codemod';
 import { frameworks } from '@/project';
@@ -25,6 +26,10 @@ interface SlotPrintInfo {
 }
 
 export async function customise(config: LoadedConfig, connector: RegistryConnector) {
+  if (!canPrompt)
+    throw new Error(
+      '`customise` is a guided prompt, install layouts with `fumadocs add <name>` instead.',
+    );
   intro(styleText(['bgBlack', 'whiteBright'], 'Customize Fumadocs UI'));
 
   const installer = new FumadocsComponentInstaller(connector, config);

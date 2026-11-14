@@ -23,6 +23,9 @@ import { lint } from '@fumadocs/cli/features/lint';
 import { og } from '@fumadocs/cli/features/og';
 import { search, type SearchProvider } from '@fumadocs/cli/features/search';
 
+// without a terminal, a spinner prints every frame, Clack's accessible mode prints plain lines instead
+if (!process.stdout.isTTY) process.env.ACCESSIBLE ??= '1';
+
 const linters = ['eslint', 'oxlint', 'biome'] as const;
 const searchProviders = [
   'orama',
@@ -313,7 +316,12 @@ async function main(defaultName: string | undefined, config: CliOptions): Promis
   } else {
     console.log(styleText('cyan', `${config.pm} dev`));
   }
+  const { appDir } = templates.find((item) => item.value === options.template)!;
+  console.log(styleText('bold', '\nSet your site name and GitHub repository'));
+  console.log(styleText('cyan', path.posix.join(options.src ? 'src' : appDir, 'lib/shared.ts')));
+
   console.log(styleText('bold', '\nYou can now open the project and start writing documents'));
+  console.log(styleText('dim', 'AGENTS.md links the Fumadocs docs for AI agents'));
 
   process.exit(0);
 }

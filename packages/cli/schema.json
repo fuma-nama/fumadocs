@@ -21,7 +21,10 @@
       "type": "string",
       "description": "directory of app code, detected from the routes directory of your framework"
     },
-    "uiLibrary": { "enum": ["radix-ui", "base-ui"], "default": "base-ui" },
+    "uiLibrary": {
+      "enum": ["radix-ui", "base-ui"],
+      "description": "detected from the `fumadocs-ui` dependency, Base UI by default"
+    },
     "framework": {
       "enum": ["next", "astro", "waku", "react-router", "tanstack-start"],
       "description": "detected from your project"

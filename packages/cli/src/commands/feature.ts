@@ -1,6 +1,6 @@
 import type { CAC, Command } from 'cac';
 import { cancel, confirm, intro, log, note, outro, select, spinner } from '@clack/prompts';
-import { isCancel } from '@/utils/prompt';
+import { canPrompt, isCancel } from '@/utils/prompt';
 import { styleText } from 'node:util';
 import type { RegistryConnector } from 'fuma-cli/registry/connector';
 import { createOrLoadConfig } from '@/config';
@@ -78,6 +78,10 @@ async function run(feature: AnyFeature, options: CommandOptions, connector: Regi
         continue;
       }
 
+      if (!canPrompt)
+        throw new Error(
+          `--${key} is required without a terminal: ${option.choices.map((choice) => choice.value).join(', ')}`,
+        );
       const value = await select({ message: option.message, options: option.choices });
       if (isCancel(value)) {
         cancel('Stopped.');
@@ -86,7 +90,7 @@ async function run(feature: AnyFeature, options: CommandOptions, connector: Regi
       values[key] = value;
     } else if (given !== undefined) {
       values[key] = given === true;
-    } else if (options.yes) {
+    } else if (options.yes || !canPrompt) {
       values[key] = option.initialValue ?? false;
     } else {
       const value = await confirm({ message: option.message, initialValue: option.initialValue });
@@ -105,6 +109,11 @@ async function run(feature: AnyFeature, options: CommandOptions, connector: Regi
     async confirmOverwrite(file) {
       if (options.yes) return true;
       spin.clear();
+      if (!canPrompt) {
+        log.warn(`Kept ${file}, pass --yes to overwrite it.`);
+        spin.start();
+        return false;
+      }
       const value = await confirm({ message: `Overwrite ${file}?`, initialValue: false });
       if (isCancel(value)) {
         cancel('Stopped.');

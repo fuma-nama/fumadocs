@@ -137,7 +137,7 @@ export const blog = defineCollections({
 @fumadocs/satteri satteri
 ```
 
-Set `compiler: 'satteri'` on a [collection](/docs/mdx/collections#compiler). It reads the global `satteriOptions`:
+Set `compiler: 'satteri'` on a [collection](/docs/mdx/collections#compiler). It reads the global `satteriOptions` instead of `mdxOptions`:
 
 ```ts title="source.config.ts"
 import { defineConfig, defineDocs } from 'fumadocs-mdx/config';

@@ -63,7 +63,7 @@ Install the packages:
 <show when={props.framework !== 'astro'}>
 
 ```npm
-npm i fumadocs-core fumadocs-ui
+npm i fumadocs-core fumadocs-ui@npm:@fumadocs/base-ui
 ```
 
 </show>
@@ -71,10 +71,12 @@ npm i fumadocs-core fumadocs-ui
 <show when={props.framework === 'astro'}>
 
 ```npm
-npm i fumadocs-core fumadocs-ui @fumadocs/astro @astrojs/react react react-dom @types/mdx
+npm i fumadocs-core fumadocs-ui@npm:@fumadocs/base-ui @fumadocs/astro @astrojs/react react react-dom @types/mdx
 ```
 
 </show>
+
+Like the templates, the command installs `fumadocs-ui` as an alias of `@fumadocs/base-ui`, the [Base UI](/docs/ui/component-library) version of Fumadocs UI. For Radix UI, install `fumadocs-ui` without the alias.
 
 ### Styles
 
@@ -319,6 +321,12 @@ Create the following files:
 </include>
 <include cwd meta='tab="app/routes/search.ts"'>
   ../../examples/react-router-min/app/routes/search.ts
+</include>
+
+In [RSC mode](https://reactrouter.com/how-to/react-server-components), the docs route exports a `ServerComponent` instead of a loader and a page component:
+
+<include cwd meta='title="app/routes/docs.tsx"'>
+  ../../examples/react-router-rsc/app/routes/docs.tsx
 </include>
 
 </show>

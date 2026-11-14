@@ -1,0 +1,90 @@
+import { frameworkName } from '@/lib/framework';
+
+# Set up Fumadocs
+
+Instructions for AI agents to set up Fumadocs on {frameworkName(props.framework)}. The setup changes between versions, so run the commands below and read the linked docs instead of writing the setup from memory. Add `.md` to the URL of a docs page to read it as Markdown.
+
+<show when={props.frameworks}>
+
+Use {frameworkName(props.framework)} unless the user asks for another framework, or their app uses another one. In that case, follow the instructions of that framework instead:
+
+{<ul>{props.frameworks.map((item) => <li key={item.value}>{item.name}: https://fumadocs.dev/docs/{item.value}.md</li>)}</ul>}
+
+</show>
+
+## New Site
+
+Create a new docs site in a new folder, or as a workspace package of a monorepo:
+
+<show when={props.framework === 'next'}>
+
+```bash
+npx create-fumadocs-app@latest my-docs --template +next+fuma-docs-mdx --install --yes
+```
+
+For a static site, use the `+next+fuma-docs-mdx+static` template.
+
+</show>
+
+<show when={props.framework === 'react-router'}>
+
+```bash
+npx create-fumadocs-app@latest my-docs --template react-router --install --yes
+```
+
+For a static site, use the `react-router-spa` template.
+
+</show>
+
+<show when={props.framework === 'tanstack-start'}>
+
+```bash
+npx create-fumadocs-app@latest my-docs --template tanstack-start --install --yes
+```
+
+For a static site, use the `tanstack-start-spa` template.
+
+</show>
+
+<show when={props.framework === 'waku'}>
+
+```bash
+npx create-fumadocs-app@latest my-docs --template waku --install --yes
+```
+
+</show>
+
+<show when={props.framework === 'astro'}>
+
+```bash
+npx create-fumadocs-app@latest my-docs --template astro --install --yes
+```
+
+</show>
+
+- `my-docs` is the folder to create.
+- `--yes` skips the prompts, and the options you don't pass use their defaults. The options are listed in https://fumadocs.dev/docs/cli/create-fumadocs-app.md
+
+## Existing App
+
+To add docs to an existing app, run the CLI in the folder of the app:
+
+```bash
+npx @fumadocs/cli@latest init
+```
+
+- The CLI detects the framework, and adds the docs pages with their own layout beside the existing routes.
+- `--i18n` sets up internationalization.
+- The CLI asks before it overwrites a file. Without a terminal, it keeps the file and prints its name. Pass `--yes` only when every file it writes can be overwritten.
+
+To set up by hand, or to merge a file that the CLI kept, follow {`https://fumadocs.dev/docs/${props.framework}/manual-installation.md`}
+
+## After the Setup
+
+Both commands print the next steps. Start the dev server and open the docs, at `/docs` unless the output names another path.
+
+For the tasks that follow, read the docs page of the task first:
+
+- Writing pages: {`https://fumadocs.dev/docs/${props.framework}/markdown.md`}
+- Organizing pages and folders: {`https://fumadocs.dev/docs/${props.framework}/page-conventions.md`}
+- Other tasks: https://fumadocs.dev/llms.txt lists every docs page.

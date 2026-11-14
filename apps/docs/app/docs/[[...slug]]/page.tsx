@@ -13,13 +13,11 @@ import {
   ViewOptionsPopover,
   DocsPageProps,
 } from 'fumadocs-ui/layouts/spacious/page';
-import { NotFound } from '@/components/layouts/not-found';
-import { getSuggestions } from './suggestions';
 import { getPageComponents } from '@/components/mdx/page';
 import { AsyncAPIPageLazy, GraphQLPageLazy, OpenAPIPageLazy } from './lazy';
 import { SponsorsMarquee } from '@fumari/sponsors';
 import { frameworks, isFramework } from '@/lib/framework';
-import { redirect } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 
 function PreviewRenderer({ preview }: { preview: string }): ReactNode {
   if (preview && preview in Preview) {
@@ -46,11 +44,7 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
       }
     }
 
-    return (
-      <NotFound
-        getSuggestions={async () => (params.slug ? getSuggestions(params.slug.join(' ')) : [])}
-      />
-    );
+    notFound();
   }
 
   const pageProps = {

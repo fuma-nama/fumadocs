@@ -6,7 +6,7 @@ icon: Rocket
 
 import { frameworkName } from '@/lib/framework';
 
-<AgentInstructions />
+<AgentInstructions framework={props.framework} />
 
 ## Terminology
 
@@ -83,11 +83,7 @@ Some common questions you may encounter.
 <Accordions>
 <Accordion id='upgrade-fumadocs' title="Getting error with missing APIs or bugs?">
 
-Make sure to upgrade Fumadocs when you've encountered any problems or trying out new features:
-
-```bash title="pnpm"
-pnpm update -i -r --latest
-```
+The API or the fix may be in a newer version. [Upgrade Fumadocs](/docs/upgrade) and try again.
 
 </Accordion>
 

@@ -44,7 +44,7 @@ export function slugsPlugin(optsOrFn: SlugsPluginOptions | SlugFn = {}): LoaderP
     name: 'fumadocs:slugs',
     transformStorage({ storage }) {
       const indexFiles: string[] = [];
-      const taken = new Set<string>();
+      const taken = new Map<string, string>();
 
       for (const [path, file] of storage.files) {
         if (file.format !== 'page') continue;
@@ -65,8 +65,9 @@ export function slugsPlugin(optsOrFn: SlugsPluginOptions | SlugFn = {}): LoaderP
 
         file.slugs = generateSlugs(path, file);
         const key = file.slugs.join('/');
-        if (taken.has(key)) throw new Error(`Duplicated slugs: ${key}`);
-        taken.add(key);
+        if (taken.has(key))
+          throw new Error(`Duplicated slugs "${key}" of ${taken.get(key)} and ${path}`);
+        taken.set(key, path);
       }
 
       for (const path of indexFiles) {
@@ -77,8 +78,9 @@ export function slugsPlugin(optsOrFn: SlugsPluginOptions | SlugFn = {}): LoaderP
         if (taken.has(file.slugs.join('/'))) file.slugs = [...file.slugs, 'index'];
 
         const key = file.slugs.join('/');
-        if (taken.has(key)) throw new Error(`Duplicated slugs: ${key}`);
-        taken.add(key);
+        if (taken.has(key))
+          throw new Error(`Duplicated slugs "${key}" of ${taken.get(key)} and ${path}`);
+        taken.set(key, path);
       }
     },
   };

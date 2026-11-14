@@ -1,0 +1,41 @@
+---
+title: Upgrading
+description: Update Fumadocs packages to their latest versions.
+icon: CircleArrowUp
+---
+
+Upgrade all Fumadocs packages together. Fumadocs UI has a peer dependency on the exact `fumadocs-core` version it was released with.
+
+These commands upgrade every `fumadocs-*` and `@fumadocs/*` package, and keep the `fumadocs-ui` alias to `@fumadocs/base-ui` that the templates use:
+
+```bash tab="npm"
+npx npm-check-updates -u "fumadocs-*" "@fumadocs/*" && npm install
+```
+
+```bash tab="pnpm"
+pnpm update --latest "fumadocs-*" "@fumadocs/*"
+```
+
+```bash tab="yarn"
+npx npm-check-updates -u "fumadocs-*" "@fumadocs/*" && yarn install
+```
+
+```bash tab="bun"
+bun update --latest "fumadocs-*" "@fumadocs/*"
+```
+
+The Yarn command uses npm-check-updates, because `yarn up` replaces the alias with the Radix UI version of `fumadocs-ui`.
+
+## Major Versions
+
+Read the release notes of a major version when you upgrade across it:
+
+- [Fumadocs 16](/blog/v16): removes the APIs deprecated since 15.2, moves the exports of `fumadocs-core/server` to specific modules, and requires React 19.2.
+- [Fumadocs 15](/blog/v15): migrates the styles to Tailwind CSS v4.
+
+<show when={props.framework !== 'astro'}>
+
+- [Fumadocs MDX 15](/blog/mdx-v15): requires `fumadocs-core` 16.7.0 or later{props.framework === 'next' && <>, and an ESM `next.config`</>}.
+- [Fumadocs MDX 14](/blog/mdx-v14): splits the generated `.source` folder into server, browser and dynamic entries.
+
+</show>
