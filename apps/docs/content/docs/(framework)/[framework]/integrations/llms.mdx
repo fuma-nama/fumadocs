@@ -77,25 +77,16 @@ With `getSource`, `index()` and `indexNode()` return a promise instead of a stri
 
 The CLI serves these files for AI agents:
 
-- `/llms.txt`: an index of every page, linked to its Markdown, with each section linked to its files.
+- `/llms.txt`: the index of your docs, with a link to the Markdown of each page.
 - `/llms-full.txt`: the content of every page.
-- `<path>/llms-full.txt`: the pages of a section, like `/docs/ui/llms-full.txt`, so agents can read large docs one section at a time. Sections are the root folders of the page tree, and a collapsed section also has its own `<path>/llms.txt`.
-- `<page>.md`: the Markdown of a page, like `/docs/ui.md`, and `/index.md` for `/`.
+- `<page>.md`: the Markdown of a page, like `/docs/ui.md`. The page at `/` is `/index.md`.
+- `<section>/llms-full.txt`: the content of a [section](#sections), like `/docs/ui/llms-full.txt`.
 
 To leave pages out of the files, like drafts, pass `filter`. `llms.txt` still lists them, linked to their HTML page:
 
 ```ts title="lib/source.ts"
 export const docsLlms = llms(source, {
   filter: (page) => page.slugs[0] !== 'drafts',
-  renderPage: async (page) => `# ${page.data.title}\n\n${await page.data.getText('processed')}`,
-});
-```
-
-To choose the sections, pass `section`. It receives a page tree folder and returns whether it's a section, or its options: `asPath` for the path it's served as, and `collapse` to list it in `llms.txt` as one link to its own `llms.txt`, which keeps `llms.txt` short on large sites:
-
-```ts title="lib/source.ts"
-export const docsLlms = llms(source, {
-  section: (folder) => (folder.root ? { collapse: true } : false),
   renderPage: async (page) => `# ${page.data.title}\n\n${await page.data.getText('processed')}`,
 });
 ```
@@ -107,6 +98,31 @@ Agents that read the HTML of a page find its Markdown through a link in the `<he
 ```html
 <link rel="alternate" type="text/markdown" href="/docs/ui.md" />
 ```
+
+### Sections
+
+A section is a folder of the page tree with its own `llms-full.txt`, so agents can read large docs one part at a time. Every root folder is a section by default. In `llms.txt`, the line of the folder links to the `llms-full.txt` of its section.
+
+To choose the sections, pass `section`. It receives a folder and returns whether the folder is a section:
+
+```ts title="lib/source.ts"
+export const docsLlms = llms(source, {
+  // every folder with an index page
+  section: (folder) => folder.index !== undefined,
+  renderPage: async (page) => `# ${page.data.title}\n\n${await page.data.getText('processed')}`,
+});
+```
+
+On a large site, collapse sections to keep `llms.txt` short. `llms.txt` lists a collapsed section as one link to its own `<section>/llms.txt`, which lists its pages:
+
+```ts title="lib/source.ts"
+export const docsLlms = llms(source, {
+  section: (folder) => (folder.root ? { collapse: true } : false),
+  renderPage: async (page) => `# ${page.data.title}\n\n${await page.data.getText('processed')}`,
+});
+```
+
+The files of a section are served under the URL of its folder's index page. A folder without an index page uses the URL directory of its pages instead. When two folders share a URL, like folder groups, pass `asPath` to serve one of them at another path, like `{ asPath: '/docs/guides' }`.
 
 ### Routes
 

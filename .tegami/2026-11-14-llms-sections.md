@@ -6,6 +6,7 @@ packages:
 
 ### Sections of `llms()` from the page tree
 
-- Sections of `llms()` are folders of the page tree, root folders by default, instead of URL directories. `llms.txt` links each section from its own line instead of a separate list.
-- The `section` option chooses the folders, the path they're served as (`asPath`), and whether `llms.txt` collapses them into one link to their own `llms.txt`.
-- The CLI routes the `llms.txt` of collapsed sections on every framework.
+- Sections of `llms()` are page tree folders instead of URL directories, and root folders are sections by default.
+- In `llms.txt`, the line of a section's folder links to the `llms-full.txt` of the section.
+- The `section` option chooses the sections, and can collapse a section into one link to its own `llms.txt`.
+- The CLI serves the `llms.txt` of collapsed sections on every framework.
