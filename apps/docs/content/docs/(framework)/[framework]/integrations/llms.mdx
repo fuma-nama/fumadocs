@@ -24,6 +24,8 @@ It enables processed Markdown on your docs collection, adds `docsLlms` to `lib/s
 | `index(lang?)` | the `llms.txt` index, built from the page tree |
 | `page(page)`   | one page, rendered with `renderPage`           |
 | `full(lang?)`  | every page rendered with `renderPage`, joined  |
+| `files()`      | the paths of the [files for agents](#files)    |
+| `serve(path)`  | the response for the file at a path            |
 
 <Callout title="renderPage is required">
   `page()` and `full()` are only available when you pass `renderPage`, since Fumadocs cannot know
@@ -353,6 +355,41 @@ The same URL now has two representations, so the response needs `Vary: Accept` t
 Docs pages can't serve Markdown based on the `Accept` header. Astro middleware only runs for pages rendered on request, while docs pages are prerendered.
 
 </show>
+
+### Files
+
+`files()` lists the paths of the files for agents, and `serve(path)` responds with one of them, so a single route can serve every file:
+
+- `/llms.txt`: every page, with links to the Markdown of each page, and the `llms-full.txt` of each section.
+- `/llms-full.txt`: every page.
+- `<dir>/llms-full.txt`: the pages under a URL directory with two or more pages, like `/docs/ui/llms-full.txt`, so agents can read large docs one section at a time.
+- `<page>.md`: the Markdown of a page, `/index.md` for `/`.
+
+```ts
+// in a route handler, with the public path of the file
+const response = await docsLlms.serve('/docs/ui/llms-full.txt');
+```
+
+`serve()` sets the content type, and returns `undefined` for paths without a file, so a middleware can pass the request on. Handle your own files before calling it. For static output, prerender the paths of `files()`.
+
+With `hideLocale: 'always'`, URLs don't carry the locale: pass the language as the second argument of `serve()` and the first of `files()`.
+
+In these files, `renderUrl` receives the URL of the Markdown file of a page.
+
+To leave pages out of `full()` and the files, like drafts, pass `filter`. `llms.txt` still lists them, linked to their HTML page:
+
+```ts title="lib/source.ts"
+export const docsLlms = llms(source, {
+  filter: (page) => page.slugs[0] !== 'drafts',
+  renderPage: async (page) => `# ${page.data.title}\n\n${await page.data.getText('processed')}`,
+});
+```
+
+Agents that read the HTML of a page find its Markdown through a link in the `<head>`:
+
+```html
+<link rel="alternate" type="text/markdown" href="/docs/ui.md" />
+```
 
 ### Page Actions
 

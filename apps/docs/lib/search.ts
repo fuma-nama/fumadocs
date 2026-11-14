@@ -7,7 +7,7 @@ import { frameworks, isFramework } from '@/lib/framework';
  * Pages are tagged with their frameworks, by themselves (`next`) and with their section (`ui/next`): the search dialog
  * filters by one tag, and a page outside `[framework]` has every framework.
  */
-export const { GET } = flexsearchFromSource(source, {
+export const search = flexsearchFromSource(source, {
   async buildIndex(page) {
     const section = getSection(page.slugs[0]);
     const framework = page.params?.framework;
