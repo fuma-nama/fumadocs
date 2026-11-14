@@ -9,6 +9,7 @@ import { javascript } from '@/requests/generators/javascript';
 import { csharp } from '@/requests/generators/csharp';
 import { java } from '@/requests/generators/java';
 import { rust } from '@/requests/generators/rust';
+import { ruby } from '@/requests/generators/ruby';
 
 describe('Code Sample Generators', () => {
   const _data: RequestData = {
@@ -63,6 +64,7 @@ describe('Code Sample Generators', () => {
     ['C#', csharp, 'cs'],
     ['Java', java, 'java'],
     ['Rust', rust, 'rs'],
+    ['Ruby', ruby, 'rb'],
   ] as const)('%s', async (_, generator, ext) => {
     await expect(generator.generate(data, context)).toMatchFileSnapshot(`./out/samples/1.${ext}`);
     await expect(generator.generate(multipart, context)).toMatchFileSnapshot(
@@ -103,7 +105,7 @@ describe('Code Sample Generators', () => {
     expect(defaultAdapters['application/x-www-form-urlencoded'].encode(form).toString()).toBe(
       encoded,
     );
-    for (const generator of [go, curl, python, javascript, csharp, java, rust]) {
+    for (const generator of [go, curl, python, javascript, csharp, java, rust, ruby]) {
       expect(generator.generate(form, context)).toContain(encoded);
     }
   });

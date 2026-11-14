@@ -4,6 +4,7 @@ import {
   javaTextBlock,
   jsTemplateLiteral,
   pythonString,
+  rubyString,
   rustString,
 } from 'shared-api/codegen';
 import { inputToString, toSearchParams } from '@/requests/string-utils';
@@ -268,5 +269,7 @@ function str(
       return `var body = new StringContent(${csharpRawString(text)}, Encoding.UTF8, "${mediaType}");`;
     case 'rust':
       return `let body = ${rustString(text)};`;
+    case 'ruby':
+      return `body = ${rubyString(text)}`;
   }
 }
