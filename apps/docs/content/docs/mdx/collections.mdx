@@ -80,7 +80,7 @@ export const blog = defineCollections({
     return z.object({
       name: z.string(),
       testPath: z.string().default(
-        // original file path
+        // absolute path of the file
         ctx.path,
       ),
     });
