@@ -1,0 +1,27 @@
+---
+title: 產生型別
+description: 無需執行 dev/build 伺服器即可產生型別
+---
+
+### 概覽 [#overview]
+
+您可以執行 `fumadocs-mdx`，為 `source.config.ts` 中定義的集合產生型別與進入點檔案 (即 `.source` 資料夾) 。使用 [Macro API](/docs/mdx/macro) 的集合則不需要產生任何檔案。
+
+您也可以選擇在 postinstall 階段執行此指令，確保初始化專案時就會產生型別。
+
+```json title="package.json"
+{
+  "scripts": {
+    "postinstall": "fumadocs-mdx"
+  }
+}
+```
+
+如果您的專案為設定檔或輸出目錄使用自訂路徑，可以透過命令引數指定：
+
+```npm
+npx fumadocs-mdx "config-path" "output-dir"
+```
+
+* `config-path`：Fumadocs MDX 設定檔，預設為 `source.config.ts`。
+* `output-dir`：產生的檔案所在的目錄，預設為 `.source`。

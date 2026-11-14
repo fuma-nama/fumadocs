@@ -1,0 +1,48 @@
+---
+title: ZBSearch（預設）
+description: 採用 ZBSearch 的預設搜尋引擎。
+---
+
+## 概覽 [#overview]
+
+Fumadocs 已預先設定好 [ZBSearch 搜尋引擎](/docs/headless/search/orama)，開箱即可使用。
+
+搜尋會透過在伺服器上執行的 API 端點進行；若是靜態網站，則改用靜態快取的 JSON 檔案。
+
+## 設定 [#setup]
+
+建立搜尋對話方塊。
+
+<Tabs items={['fetch (default)', 'static']}>
+  <Tab>
+    <show when={props.framework !== 'astro'}>
+      預設的搜尋對話方塊會使用此用戶端。若要自訂搜尋對話方塊，請重新建立它：
+    </show>
+
+    <show when={props.framework === 'astro'}>
+      若您的搜尋路由會在每次請求時算繪 (需要轉接器) ，請使用此用戶端：
+    </show>
+
+    <include meta="title=&#x22;components/search.tsx&#x22;">fetch.tsx</include>
+  </Tab>
+
+  <Tab id="static">
+    <show when={props.framework !== 'astro'}>
+      若為靜態網站，請在搜尋伺服器上設定[靜態模式](/docs/headless/search/orama#static-export)，並使用 `static` 用戶端：
+    </show>
+
+    <show when={props.framework === 'astro'}>
+      Astro 的設定預設使用 `static` 用戶端，並在搜尋伺服器上搭配[靜態模式](/docs/headless/search/orama#static-export)：
+    </show>
+
+    <include meta="title=&#x22;components/search.tsx&#x22;">./static.tsx</include>
+  </Tab>
+</Tabs>
+
+<include>.shared.zh-TW.mdx</include>
+
+### 標籤篩選 [#tag-filter]
+
+您也可以視需要加入依標籤篩選結果的 UI。請在搜尋伺服器上設定[標籤篩選](/docs/headless/search/orama#tag-filter)，並加入以下內容：
+
+<include>.tag-filter.zh-TW.mdx</include>

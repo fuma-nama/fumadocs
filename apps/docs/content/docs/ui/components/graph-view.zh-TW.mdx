@@ -1,0 +1,52 @@
+---
+title: 圖譜檢視
+description: 呈現所有頁面的關聯圖。
+preview: graphView
+---
+
+## 安裝 [#installation]
+
+您可以透過 CLI 安裝：
+
+```npm
+npx @fumadocs/cli add graph-view
+```
+
+若使用 TypeScript，請一併安裝其型別定義：
+
+```npm
+npm i -D @types/d3-force
+```
+
+請在您的內容來源中啟用 `extractLinkReferences`。
+
+```ts title="source.config.ts"
+import { defineDocs } from 'fumadocs-mdx/config';
+
+export const docs = defineDocs({
+  docs: {
+    postprocess: {
+      // [!code ++]
+      extractLinkReferences: true,
+    },
+  },
+});
+```
+
+## 使用方式 [#usage]
+
+您可以在 MDX 檔案或版面配置元件中使用 (例如 `page.tsx`) ：
+
+```tsx title="page.tsx"
+import { GraphView } from '@/components/graph-view';
+import { buildGraph } from '@/lib/build-graph';
+
+export function PageBody() {
+  return (
+    <div>
+      <GraphView graph={buildGraph()} />
+      {/* ... */}
+    </div>
+  );
+}
+```

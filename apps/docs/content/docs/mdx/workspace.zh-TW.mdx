@@ -1,0 +1,101 @@
+---
+title: 工作區
+description: 在多個工作區中使用 Fumadocs MDX。
+---
+
+## 概覽 [#overview]
+
+在 Fumadocs MDX 中，**工作區** 指的是擁有獨立設定與內容的專案。
+
+<Files>
+  <Folder name="my-workspace" defaultOpen>
+    <Folder name="content/docs" defaultOpen>
+      <File name="index.mdx" />
+
+      <File name="test.mdx" />
+    </Folder>
+
+    <File name="source.config.ts" />
+  </Folder>
+
+  <Folder name="content/docs" defaultOpen>
+    <File name="welcome.mdx" />
+  </Folder>
+
+  <File name="source.config.ts" />
+</Files>
+
+<Callout title="小提示">
+  Fumadocs MDX 工作區 並不侷限於套件管理工具中 工作區
+  的傳統定義。
+
+  工作區 不需要擁有自己的 `package.json`，只要有一個設定檔即可。
+</Callout>
+
+若要定義 工作區，請加入：
+
+```ts title="source.config.ts"
+import { defineConfig } from 'fumadocs-mdx/config';
+
+export default defineConfig({
+  workspaces: {
+    'my-workspace': {
+      dir: 'my-workspace',
+      config: await import('./my-workspace/source.config.ts'),
+    },
+  },
+});
+```
+
+在 工作區 中撰寫內容時，請注意：
+
+* `cwd` 指的是**目前的 工作區 目錄**。
+* 設定不會繼承，各個 工作區 一律彼此獨立。
+
+執行開發或建置伺服器後，您應該會看到所有 工作區 的集合項目皆已產生。
+
+### 存取集合 [#accessing-collections]
+
+您可以在 `.source/{workspace}/*` 存取工作區產生的檔案，例如：
+
+```ts title="lib/source.ts"
+import { docs } from 'collections/my-workspace/server';
+```
+
+> 根工作區的輸出位置維持不變。
+
+若要在 Fumadocs 中整合[多重來源](/docs/headless/source-api/source#multiple-sources)：
+
+```ts title="lib/source.ts"
+import { loader } from 'fumadocs-core/source';
+import { docs } from 'collections/server';
+import * as MyWorkspace from 'collections/my-workspace/server';
+
+export const source = loader(
+  {
+    root: docs.toFumadocsSource(),
+    'my-workspace': MyWorkspace.docs.toFumadocsSource(),
+  },
+  {
+    baseUrl: '/docs',
+  },
+);
+```
+
+## 使用時機 [#when-to-use]
+
+在某些架構中，您可能會有多個 Fumadocs MDX 設定，各自擁有獨立的內容目錄。
+
+透過 工作區，您可以將它們整合到單一 Fumadocs MDX 設定中，並存取每個 工作區 的所有集合。
+
+這在將內容分散儲存於多個儲存庫等情境中至關重要，簡化後的架構如下：
+
+* 假設主要文件儲存庫為 $A$，其他儲存庫為 $T&#95;n$
+* 對於每個儲存庫 $T&#95;n$：
+  * $T&#95;n$ 將 $A$ 加入為 git submodule。
+  * $T&#95;n$ 定義自己的設定檔 `source.config.ts`，並可獨立運作。
+  * 當 $T&#95;n$ 的內容有新的 commit 時，會觸發 GitHub action (或 CI) ，在 $A$ 上建立新的部署。
+* 當 $A$ 觸發部署時：
+  * Fumadocs MDX 會將每個 $T&#95;n$ 視為一個 工作區 處理。
+  * 每個 工作區 會產生各自的集合項目，例如 `collections/{repo}/server`。
+  * Fumadocs `loader()` 會將多個來源整合為一。

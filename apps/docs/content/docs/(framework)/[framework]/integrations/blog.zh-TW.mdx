@@ -1,0 +1,950 @@
+---
+title: 部落格
+description: 在您的應用程式中加入部落格。
+---
+
+## 安裝 [#installation]
+
+```npm
+npx @fumadocs/cli@latest add blog
+```
+
+這會將元件安裝至 `components/blog`，並將文章相關的工具函式安裝至 `lib/blog.ts`。
+
+使用 `blogPageSchema` 為您的文章定義集合，並註冊作者：
+
+<show when={props.framework !== 'astro'}>
+  ```ts title="lib/source.ts"
+  import { defineCollections } from 'fumadocs-mdx/macro';
+  import { loader } from 'fumadocs-core/source';
+  import { type BlogAuthor, blogPageSchema } from './blog';
+
+  export const blog = defineCollections({
+    type: 'doc',
+    dir: 'content/blog',
+    schema: blogPageSchema,
+  });
+
+  export const blogSource = loader({
+    baseUrl: '/blog',
+    source: blog.toFumadocsSource(),
+  });
+
+  export const blogAuthors: Record<string, BlogAuthor> = {
+    fuma: {
+      name: 'Fuma Nama',
+      title: 'Maintainer',
+      url: 'https://fuma-nama.dev',
+      image: 'https://avatars.githubusercontent.com/u/76240755',
+    },
+  };
+  ```
+</show>
+
+<show when={props.framework === 'astro'}>
+  ```js tab="astro.config.mjs"
+  import { defineConfig } from 'astro/config';
+  import fumadocs from '@fumadocs/astro';
+
+  export default defineConfig({
+    integrations: [
+      fumadocs({
+        components: './src/components/mdx.tsx',
+        // [!code ++:4]
+        collections: {
+          docs: { dir: 'content/docs' },
+          blog: { dir: 'content/blog' },
+        },
+      }),
+    ],
+  });
+  ```
+
+  ```ts tab="src/content.config.ts"
+  import { defineCollection } from 'astro:content';
+  import { metaLoader, pageLoader } from '@fumadocs/astro/loaders';
+  import { blogPageSchema } from '@/lib/blog'; // [!code ++]
+
+  export const collections = {
+    docs: defineCollection({ loader: pageLoader() }),
+    meta: defineCollection({ loader: metaLoader() }),
+    blog: defineCollection({ loader: pageLoader('blog'), schema: blogPageSchema }), // [!code ++]
+  };
+  ```
+
+  ```ts tab="src/lib/source.ts"
+  import { getCollection } from 'astro:content';
+  import { loader } from 'fumadocs-core/source';
+  import { toFumadocsSource } from '@fumadocs/astro/source';
+  import type { BlogAuthor } from './blog';
+
+  export const blogSource = loader({
+    baseUrl: '/blog',
+    source: toFumadocsSource(await getCollection('blog')),
+  });
+
+  export const blogAuthors: Record<string, BlogAuthor> = {
+    fuma: {
+      name: 'Fuma Nama',
+      title: 'Maintainer',
+      url: 'https://fuma-nama.dev',
+      image: 'https://avatars.githubusercontent.com/u/76240755',
+    },
+  };
+  ```
+</show>
+
+將文章撰寫在 `content/blog` 目錄下：
+
+```mdx title="content/blog/hello-world.mdx"
+---
+title: Hello World
+description: My first post.
+date: 2026-10-12
+tags: [Announcement]
+authors: [fuma]
+image: /blog/hello-world.png
+---
+```
+
+| 欄位        | 說明                         |
+| --------- | -------------------------- |
+| `date`    | 發布日期，文章會依此排序               |
+| `tags`    | 每個標籤在 `/blog/tags` 下都有專屬頁面 |
+| `authors` | 作者的鍵，無法對應的鍵會直接視為作者名稱       |
+| `image`   | 封面圖片 URL，會顯示在文章卡片上         |
+
+<show when={props.framework === 'next'}>
+  <Callout title="遠端圖片">
+    封面圖片與頭像會透過 `next/image` 算繪。請在 `images.remotePatterns` 中允許其來源主機。
+  </Callout>
+</show>
+
+## 頁面 [#pages]
+
+`getPosts()` 會解析頁面的作者與標籤，並由新到舊排序。請在[首頁版面配置](/docs/ui/layouts/home-layout)底下的路由中算繪這些頁面。
+
+### 文章 [#posts]
+
+<show when={props.framework === 'next'}>
+  ```tsx title="app/(home)/blog/page.tsx"
+  import { blogAuthors, blogSource } from '@/lib/source';
+  import { getPosts } from '@/lib/blog';
+  import { BlogCards } from '@/components/blog';
+
+  export default function Page() {
+    return (
+      <div className="mx-auto w-full max-w-(--fd-layout-width) px-4 py-12">
+        <BlogCards posts={getPosts(blogSource.getPages(), blogAuthors)} />
+      </div>
+    );
+  }
+  ```
+</show>
+
+<show when={props.framework === 'react-router'}>
+  ```tsx tab="app/routes/blog.tsx"
+  import type { Route } from './+types/blog';
+  import { HomeLayout } from 'fumadocs-ui/layouts/home';
+  import { baseOptions } from '@/lib/layout.shared';
+  import { blogAuthors, blogSource } from '@/lib/source';
+  import { getPosts } from '@/lib/blog';
+  import { BlogCards } from '@/components/blog';
+
+  export function loader() {
+    return getPosts(blogSource.getPages(), blogAuthors);
+  }
+
+  export default function Page({ loaderData }: Route.ComponentProps) {
+    return (
+      <HomeLayout {...baseOptions()}>
+        <div className="mx-auto w-full max-w-(--fd-layout-width) px-4 py-12">
+          <BlogCards posts={loaderData} />
+        </div>
+      </HomeLayout>
+    );
+  }
+  ```
+
+  ```ts tab="app/routes.ts"
+  import { route, type RouteConfig } from '@react-router/dev/routes';
+
+  export default [
+    // [!code ++:4]
+    route('blog', 'routes/blog.tsx'),
+    route('blog/:slug', 'routes/blog.post.tsx'),
+    route('blog/tags', 'routes/blog.tags.tsx'),
+    route('blog/tags/:tag', 'routes/blog.tag.tsx'),
+  ] satisfies RouteConfig;
+  ```
+</show>
+
+<show when={props.framework === 'tanstack-start'}>
+  ```tsx title="src/routes/blog/index.tsx"
+  import { createFileRoute } from '@tanstack/react-router';
+  import { createServerFn } from '@tanstack/react-start';
+  import { HomeLayout } from 'fumadocs-ui/layouts/home';
+  import { baseOptions } from '@/lib/layout.shared';
+  import { blogAuthors, blogSource } from '@/lib/source';
+  import { getPosts } from '@/lib/blog';
+  import { BlogCards } from '@/components/blog';
+
+  const getBlogPosts = createServerFn({ method: 'GET' }).handler(() =>
+    getPosts(blogSource.getPages(), blogAuthors),
+  );
+
+  export const Route = createFileRoute('/blog/')({
+    loader: () => getBlogPosts(),
+    component: Page,
+  });
+
+  function Page() {
+    return (
+      <HomeLayout {...baseOptions()}>
+        <div className="mx-auto w-full max-w-(--fd-layout-width) px-4 py-12">
+          <BlogCards posts={Route.useLoaderData()} />
+        </div>
+      </HomeLayout>
+    );
+  }
+  ```
+</show>
+
+<show when={props.framework === 'waku'}>
+  ```tsx title="src/pages/(home)/blog/index.tsx"
+  import { blogAuthors, blogSource } from '@/lib/source';
+  import { getPosts } from '@/lib/blog';
+  import { BlogCards } from '@/components/blog';
+
+  export default function Page() {
+    return (
+      <div className="mx-auto w-full max-w-(--fd-layout-width) px-4 py-12">
+        <BlogCards posts={getPosts(blogSource.getPages(), blogAuthors)} />
+      </div>
+    );
+  }
+
+  export const getConfig = async () => ({ render: 'static' }) as const;
+  ```
+</show>
+
+<show when={props.framework === 'astro'}>
+  ```astro tab="src/pages/blog/index.astro"
+  ---
+  import Layout from '@/layouts/Layout.astro';
+  import { BlogPosts } from '@/components/blog-posts';
+  import { blogAuthors, blogSource } from '@/lib/source';
+  import { getPosts } from '@/lib/blog';
+  ---
+
+  <Layout title="Blog">
+    <BlogPosts
+      client:load
+      pathname={Astro.url.pathname}
+      params={Astro.params}
+      posts={getPosts(blogSource.getPages(), blogAuthors)}
+    />
+  </Layout>
+  ```
+
+  ```tsx tab="src/components/blog-posts.tsx"
+  import { HomeLayout } from 'fumadocs-ui/layouts/home';
+  import { baseOptions } from '@/lib/layout.shared';
+  import { Provider, type ProviderProps } from '@/components/provider';
+  import type { BlogPost } from '@/lib/blog';
+  import { BlogCards } from '@/components/blog';
+
+  export function BlogPosts({ posts, ...props }: ProviderProps & { posts: BlogPost[] }) {
+    return (
+      <Provider {...props}>
+        <HomeLayout {...baseOptions()}>
+          <div className="mx-auto w-full max-w-(--fd-layout-width) px-4 py-12">
+            <BlogCards posts={posts} />
+          </div>
+        </HomeLayout>
+      </Provider>
+    );
+  }
+  ```
+</show>
+
+### 文章 [#post]
+
+`findPost()` 會找出指定的文章，以及其前後較新與較舊的文章。傳入 `toc` 後，會顯示一個浮動面板，內含目錄與分享按鈕。
+
+<show when={props.framework === 'next'}>
+  ```tsx title="app/(home)/blog/[slug]/page.tsx"
+  import { notFound } from 'next/navigation';
+  import { blogAuthors, blogSource } from '@/lib/source';
+  import { findPost, getPosts } from '@/lib/blog';
+  import { getMDXComponents } from '@/components/mdx';
+  import {
+    BlogAuthors,
+    BlogBackLink,
+    BlogBody,
+    BlogDate,
+    BlogDescription,
+    BlogHeader,
+    BlogPage,
+    BlogPostNav,
+    BlogTags,
+    BlogTitle,
+  } from '@/components/blog';
+
+  export default async function Page(props: PageProps<'/blog/[slug]'>) {
+    const { slug } = await props.params;
+    const page = blogSource.getPage([slug]);
+    const found = page && findPost(getPosts(blogSource.getPages(), blogAuthors), page.url);
+    if (!page || !found) notFound();
+
+    const { post, newer, older } = found;
+    const MDX = page.data.body;
+
+    return (
+      <BlogPage toc={page.data.toc}>
+        <BlogHeader>
+          <BlogBackLink href="/blog" />
+          <BlogTitle>{post.title}</BlogTitle>
+          <BlogDescription>{post.description}</BlogDescription>
+          <BlogAuthors authors={post.authors} />
+          <BlogTags tags={post.tags} />
+          {post.date && <BlogDate date={post.date} />}
+        </BlogHeader>
+        <BlogBody>
+          <MDX components={getMDXComponents()} />
+        </BlogBody>
+        <BlogPostNav newer={newer} older={older} />
+      </BlogPage>
+    );
+  }
+  ```
+</show>
+
+<show when={props.framework === 'react-router'}>
+  ```tsx title="app/routes/blog.post.tsx"
+  import type { Route } from './+types/blog.post';
+  import { HomeLayout } from 'fumadocs-ui/layouts/home';
+  import { baseOptions } from '@/lib/layout.shared';
+  import { blog, blogAuthors, blogSource } from '@/lib/source';
+  import { findPost, getPosts } from '@/lib/blog';
+  import { useMDXComponents } from '@/components/mdx';
+  import {
+    BlogAuthors,
+    BlogBackLink,
+    BlogBody,
+    BlogDate,
+    BlogDescription,
+    BlogHeader,
+    BlogPage,
+    BlogPostNav,
+    BlogTags,
+    BlogTitle,
+  } from '@/components/blog';
+
+  export function loader({ params }: Route.LoaderArgs) {
+    const page = blogSource.getPage([params.slug]);
+    const found = page && findPost(getPosts(blogSource.getPages(), blogAuthors), page.url);
+    if (!page || !found) throw new Response('Not Found', { status: 404 });
+
+    return { path: page.path, ...found };
+  }
+
+  export default function Page({ loaderData }: Route.ComponentProps) {
+    const { path, post, newer, older } = loaderData;
+    const page = blog.get(path)!;
+    const MDX = page.body;
+
+    return (
+      <HomeLayout {...baseOptions()}>
+        <BlogPage toc={page.toc}>
+          <BlogHeader>
+            <BlogBackLink href="/blog" />
+            <BlogTitle>{post.title}</BlogTitle>
+            <BlogDescription>{post.description}</BlogDescription>
+            <BlogAuthors authors={post.authors} />
+            <BlogTags tags={post.tags} />
+            {post.date && <BlogDate date={post.date} />}
+          </BlogHeader>
+          <BlogBody>
+            <MDX components={useMDXComponents()} />
+          </BlogBody>
+          <BlogPostNav newer={newer} older={older} />
+        </BlogPage>
+      </HomeLayout>
+    );
+  }
+  ```
+</show>
+
+<show when={props.framework === 'tanstack-start'}>
+  ```tsx title="src/routes/blog/$slug.tsx"
+  import { createFileRoute, notFound } from '@tanstack/react-router';
+  import { createServerFn } from '@tanstack/react-start';
+  import { HomeLayout } from 'fumadocs-ui/layouts/home';
+  import { baseOptions } from '@/lib/layout.shared';
+  import { blog, blogAuthors, blogSource } from '@/lib/source';
+  import { findPost, getPosts } from '@/lib/blog';
+  import { useMDXComponents } from '@/components/mdx';
+  import {
+    BlogAuthors,
+    BlogBackLink,
+    BlogBody,
+    BlogDate,
+    BlogDescription,
+    BlogHeader,
+    BlogPage,
+    BlogPostNav,
+    BlogTags,
+    BlogTitle,
+  } from '@/components/blog';
+
+  const getPost = createServerFn({ method: 'GET' })
+    .validator((slug: string) => slug)
+    .handler(({ data: slug }) => {
+      const page = blogSource.getPage([slug]);
+      const found = page && findPost(getPosts(blogSource.getPages(), blogAuthors), page.url);
+      if (!page || !found) throw notFound();
+
+      return { path: page.path, ...found };
+    });
+
+  export const Route = createFileRoute('/blog/$slug')({
+    loader: ({ params }) => getPost({ data: params.slug }),
+    component: Page,
+  });
+
+  function Page() {
+    const { path, post, newer, older } = Route.useLoaderData();
+    const page = blog.get(path)!;
+    const MDX = page.body;
+
+    return (
+      <HomeLayout {...baseOptions()}>
+        <BlogPage toc={page.toc}>
+          <BlogHeader>
+            <BlogBackLink href="/blog" />
+            <BlogTitle>{post.title}</BlogTitle>
+            <BlogDescription>{post.description}</BlogDescription>
+            <BlogAuthors authors={post.authors} />
+            <BlogTags tags={post.tags} />
+            {post.date && <BlogDate date={post.date} />}
+          </BlogHeader>
+          <BlogBody>
+            <MDX components={useMDXComponents()} />
+          </BlogBody>
+          <BlogPostNav newer={newer} older={older} />
+        </BlogPage>
+      </HomeLayout>
+    );
+  }
+  ```
+</show>
+
+<show when={props.framework === 'waku'}>
+  ```tsx title="src/pages/(home)/blog/[slug].tsx"
+  import type { PageProps } from 'waku/router';
+  import { unstable_notFound } from 'waku/router/server';
+  import { blogAuthors, blogSource } from '@/lib/source';
+  import { findPost, getPosts } from '@/lib/blog';
+  import { getMDXComponents } from '@/components/mdx';
+  import {
+    BlogAuthors,
+    BlogBackLink,
+    BlogBody,
+    BlogDate,
+    BlogDescription,
+    BlogHeader,
+    BlogPage,
+    BlogPostNav,
+    BlogTags,
+    BlogTitle,
+  } from '@/components/blog';
+
+  export default function Page({ slug }: PageProps<'/blog/[slug]'>) {
+    const page = blogSource.getPage([slug]);
+    const found = page && findPost(getPosts(blogSource.getPages(), blogAuthors), page.url);
+    if (!page || !found) unstable_notFound();
+
+    const { post, newer, older } = found;
+    const MDX = page.data.body;
+
+    return (
+      <BlogPage toc={page.data.toc}>
+        <BlogHeader>
+          <BlogBackLink href="/blog" />
+          <BlogTitle>{post.title}</BlogTitle>
+          <BlogDescription>{post.description}</BlogDescription>
+          <BlogAuthors authors={post.authors} />
+          <BlogTags tags={post.tags} />
+          {post.date && <BlogDate date={post.date} />}
+        </BlogHeader>
+        <BlogBody>
+          <MDX components={getMDXComponents()} />
+        </BlogBody>
+        <BlogPostNav newer={newer} older={older} />
+      </BlogPage>
+    );
+  }
+
+  export async function getConfig() {
+    return {
+      render: 'static',
+      staticPaths: blogSource.getPages().map((page) => page.slugs),
+    } as const;
+  }
+  ```
+</show>
+
+<show when={props.framework === 'astro'}>
+  ```astro tab="src/pages/blog/[slug].astro"
+  ---
+  import type { GetStaticPaths, InferGetStaticPropsType } from 'astro';
+  import Layout from '@/layouts/Layout.astro';
+  import { BlogPostPage } from '@/components/blog-post';
+  import { blogAuthors, blogSource } from '@/lib/source';
+  import { findPost, getPosts } from '@/lib/blog';
+
+  export const getStaticPaths = (() => {
+    const posts = getPosts(blogSource.getPages(), blogAuthors);
+
+    return blogSource.getPages().map((page) => ({
+      params: { slug: decodeURI(page.slugs[0]) },
+      props: { page, ...findPost(posts, page.url)! },
+    }));
+  }) satisfies GetStaticPaths;
+
+  type Props = InferGetStaticPropsType<typeof getStaticPaths>;
+
+  const { page, post, newer, older } = Astro.props;
+  const { body: Content, toc } = await page.data.load();
+  ---
+
+  <Layout title={post.title} description={post.description}>
+    <BlogPostPage
+      client:load
+      pathname={Astro.url.pathname}
+      params={Astro.params}
+      post={post}
+      newer={newer}
+      older={older}
+      toc={toc}
+    >
+      <Content />
+    </BlogPostPage>
+  </Layout>
+  ```
+
+  ```tsx tab="src/components/blog-post.tsx"
+  import type { TOCItemType } from 'fumadocs-core/toc';
+  import { HomeLayout } from 'fumadocs-ui/layouts/home';
+  import { baseOptions } from '@/lib/layout.shared';
+  import { Provider, type ProviderProps } from '@/components/provider';
+  import type { BlogPost } from '@/lib/blog';
+  import {
+    BlogAuthors,
+    BlogBackLink,
+    BlogBody,
+    BlogDate,
+    BlogDescription,
+    BlogHeader,
+    BlogPage,
+    BlogPostNav,
+    BlogTags,
+    BlogTitle,
+  } from '@/components/blog';
+
+  export interface BlogPostPageProps extends ProviderProps {
+    post: BlogPost;
+    newer?: BlogPost;
+    older?: BlogPost;
+    toc: TOCItemType[];
+  }
+
+  /** 內容會透過 children 傳入 */
+  export function BlogPostPage({ post, newer, older, toc, children, ...props }: BlogPostPageProps) {
+    return (
+      <Provider {...props}>
+        <HomeLayout {...baseOptions()}>
+          <BlogPage toc={toc}>
+            <BlogHeader>
+              <BlogBackLink href="/blog" />
+              <BlogTitle>{post.title}</BlogTitle>
+              <BlogDescription>{post.description}</BlogDescription>
+              <BlogAuthors authors={post.authors} />
+              <BlogTags tags={post.tags} />
+              {post.date && <BlogDate date={post.date} />}
+            </BlogHeader>
+            <BlogBody>{children}</BlogBody>
+            <BlogPostNav newer={newer} older={older} />
+          </BlogPage>
+        </HomeLayout>
+      </Provider>
+    );
+  }
+  ```
+</show>
+
+### 標籤 [#tags]
+
+使用 `getTags()` 列出所有標籤：
+
+<show when={props.framework === 'next'}>
+  ```tsx title="app/(home)/blog/tags/page.tsx"
+  import { blogSource } from '@/lib/source';
+  import { getPosts, getTags } from '@/lib/blog';
+  import { BlogHeader, BlogTagCards, BlogTitle } from '@/components/blog';
+
+  export default function Page() {
+    const tags = getTags(getPosts(blogSource.getPages()));
+
+    return (
+      <div className="mx-auto flex w-full max-w-(--fd-layout-width) flex-col gap-4 px-4 py-12">
+        <BlogHeader>
+          <BlogTitle>All Tags</BlogTitle>
+        </BlogHeader>
+        <BlogTagCards tags={tags} />
+      </div>
+    );
+  }
+  ```
+</show>
+
+<show when={props.framework === 'react-router'}>
+  ```tsx title="app/routes/blog.tags.tsx"
+  import type { Route } from './+types/blog.tags';
+  import { HomeLayout } from 'fumadocs-ui/layouts/home';
+  import { baseOptions } from '@/lib/layout.shared';
+  import { blogSource } from '@/lib/source';
+  import { getPosts, getTags } from '@/lib/blog';
+  import { BlogHeader, BlogTagCards, BlogTitle } from '@/components/blog';
+
+  export function loader() {
+    return getTags(getPosts(blogSource.getPages()));
+  }
+
+  export default function Page({ loaderData }: Route.ComponentProps) {
+    return (
+      <HomeLayout {...baseOptions()}>
+        <div className="mx-auto flex w-full max-w-(--fd-layout-width) flex-col gap-4 px-4 py-12">
+          <BlogHeader>
+            <BlogTitle>All Tags</BlogTitle>
+          </BlogHeader>
+          <BlogTagCards tags={loaderData} />
+        </div>
+      </HomeLayout>
+    );
+  }
+  ```
+</show>
+
+<show when={props.framework === 'tanstack-start'}>
+  ```tsx title="src/routes/blog/tags/index.tsx"
+  import { createFileRoute } from '@tanstack/react-router';
+  import { createServerFn } from '@tanstack/react-start';
+  import { HomeLayout } from 'fumadocs-ui/layouts/home';
+  import { baseOptions } from '@/lib/layout.shared';
+  import { blogSource } from '@/lib/source';
+  import { getPosts, getTags } from '@/lib/blog';
+  import { BlogHeader, BlogTagCards, BlogTitle } from '@/components/blog';
+
+  const getBlogTags = createServerFn({ method: 'GET' }).handler(() =>
+    getTags(getPosts(blogSource.getPages())),
+  );
+
+  export const Route = createFileRoute('/blog/tags/')({
+    loader: () => getBlogTags(),
+    component: Page,
+  });
+
+  function Page() {
+    return (
+      <HomeLayout {...baseOptions()}>
+        <div className="mx-auto flex w-full max-w-(--fd-layout-width) flex-col gap-4 px-4 py-12">
+          <BlogHeader>
+            <BlogTitle>All Tags</BlogTitle>
+          </BlogHeader>
+          <BlogTagCards tags={Route.useLoaderData()} />
+        </div>
+      </HomeLayout>
+    );
+  }
+  ```
+</show>
+
+<show when={props.framework === 'waku'}>
+  ```tsx title="src/pages/(home)/blog/tags/index.tsx"
+  import { blogSource } from '@/lib/source';
+  import { getPosts, getTags } from '@/lib/blog';
+  import { BlogHeader, BlogTagCards, BlogTitle } from '@/components/blog';
+
+  export default function Page() {
+    const tags = getTags(getPosts(blogSource.getPages()));
+
+    return (
+      <div className="mx-auto flex w-full max-w-(--fd-layout-width) flex-col gap-4 px-4 py-12">
+        <BlogHeader>
+          <BlogTitle>All Tags</BlogTitle>
+        </BlogHeader>
+        <BlogTagCards tags={tags} />
+      </div>
+    );
+  }
+
+  export const getConfig = async () => ({ render: 'static' }) as const;
+  ```
+</show>
+
+<show when={props.framework === 'astro'}>
+  ```astro tab="src/pages/blog/tags/index.astro"
+  ---
+  import Layout from '@/layouts/Layout.astro';
+  import { BlogTagsPage } from '@/components/blog-tags';
+  import { blogSource } from '@/lib/source';
+  import { getPosts, getTags } from '@/lib/blog';
+  ---
+
+  <Layout title="All Tags">
+    <BlogTagsPage
+      client:load
+      pathname={Astro.url.pathname}
+      params={Astro.params}
+      tags={getTags(getPosts(blogSource.getPages()))}
+    />
+  </Layout>
+  ```
+
+  ```tsx tab="src/components/blog-tags.tsx"
+  import { HomeLayout } from 'fumadocs-ui/layouts/home';
+  import { baseOptions } from '@/lib/layout.shared';
+  import { Provider, type ProviderProps } from '@/components/provider';
+  import type { BlogTag } from '@/lib/blog';
+  import { BlogHeader, BlogTagCards, BlogTitle } from '@/components/blog';
+
+  export function BlogTagsPage({
+    tags,
+    ...props
+  }: ProviderProps & { tags: (BlogTag & { count: number })[] }) {
+    return (
+      <Provider {...props}>
+        <HomeLayout {...baseOptions()}>
+          <div className="mx-auto flex w-full max-w-(--fd-layout-width) flex-col gap-4 px-4 py-12">
+            <BlogHeader>
+              <BlogTitle>All Tags</BlogTitle>
+            </BlogHeader>
+            <BlogTagCards tags={tags} />
+          </div>
+        </HomeLayout>
+      </Provider>
+    );
+  }
+  ```
+</show>
+
+接著使用 `getTagPosts()` 取得某個標籤下的文章；若標籤不存在，則會回傳 `undefined`：
+
+<show when={props.framework === 'next'}>
+  ```tsx title="app/(home)/blog/tags/[tag]/page.tsx"
+  import { notFound } from 'next/navigation';
+  import { blogAuthors, blogSource } from '@/lib/source';
+  import { getPosts, getTagPosts, getTags } from '@/lib/blog';
+  import { BlogCards, BlogHeader, BlogTitle } from '@/components/blog';
+
+  export default async function Page(props: PageProps<'/blog/tags/[tag]'>) {
+    const { tag } = await props.params;
+    const result = getTagPosts(getPosts(blogSource.getPages(), blogAuthors), tag);
+    if (!result) notFound();
+
+    return (
+      <div className="mx-auto flex w-full max-w-(--fd-layout-width) flex-col gap-4 px-4 py-12">
+        <BlogHeader>
+          <BlogTitle>{result.tag.name}</BlogTitle>
+        </BlogHeader>
+        <BlogCards posts={result.posts} />
+      </div>
+    );
+  }
+
+  export function generateStaticParams() {
+    return getTags(getPosts(blogSource.getPages())).map((tag) => ({ tag: tag.slug }));
+  }
+  ```
+</show>
+
+<show when={props.framework === 'react-router'}>
+  ```tsx title="app/routes/blog.tag.tsx"
+  import type { Route } from './+types/blog.tag';
+  import { HomeLayout } from 'fumadocs-ui/layouts/home';
+  import { baseOptions } from '@/lib/layout.shared';
+  import { blogAuthors, blogSource } from '@/lib/source';
+  import { getPosts, getTagPosts } from '@/lib/blog';
+  import { BlogCards, BlogHeader, BlogTitle } from '@/components/blog';
+
+  export function loader({ params }: Route.LoaderArgs) {
+    const result = getTagPosts(getPosts(blogSource.getPages(), blogAuthors), params.tag);
+    if (!result) throw new Response('Not Found', { status: 404 });
+
+    return result;
+  }
+
+  export default function Page({ loaderData }: Route.ComponentProps) {
+    return (
+      <HomeLayout {...baseOptions()}>
+        <div className="mx-auto flex w-full max-w-(--fd-layout-width) flex-col gap-4 px-4 py-12">
+          <BlogHeader>
+            <BlogTitle>{loaderData.tag.name}</BlogTitle>
+          </BlogHeader>
+          <BlogCards posts={loaderData.posts} />
+        </div>
+      </HomeLayout>
+    );
+  }
+  ```
+</show>
+
+<show when={props.framework === 'tanstack-start'}>
+  ```tsx title="src/routes/blog/tags/$tag.tsx"
+  import { createFileRoute, notFound } from '@tanstack/react-router';
+  import { createServerFn } from '@tanstack/react-start';
+  import { HomeLayout } from 'fumadocs-ui/layouts/home';
+  import { baseOptions } from '@/lib/layout.shared';
+  import { blogAuthors, blogSource } from '@/lib/source';
+  import { getPosts, getTagPosts } from '@/lib/blog';
+  import { BlogCards, BlogHeader, BlogTitle } from '@/components/blog';
+
+  const getTag = createServerFn({ method: 'GET' })
+    .validator((tag: string) => tag)
+    .handler(({ data: tag }) => {
+      const result = getTagPosts(getPosts(blogSource.getPages(), blogAuthors), tag);
+      if (!result) throw notFound();
+
+      return result;
+    });
+
+  export const Route = createFileRoute('/blog/tags/$tag')({
+    loader: ({ params }) => getTag({ data: params.tag }),
+    component: Page,
+  });
+
+  function Page() {
+    const { tag, posts } = Route.useLoaderData();
+
+    return (
+      <HomeLayout {...baseOptions()}>
+        <div className="mx-auto flex w-full max-w-(--fd-layout-width) flex-col gap-4 px-4 py-12">
+          <BlogHeader>
+            <BlogTitle>{tag.name}</BlogTitle>
+          </BlogHeader>
+          <BlogCards posts={posts} />
+        </div>
+      </HomeLayout>
+    );
+  }
+  ```
+</show>
+
+<show when={props.framework === 'waku'}>
+  ```tsx title="src/pages/(home)/blog/tags/[tag].tsx"
+  import type { PageProps } from 'waku/router';
+  import { unstable_notFound } from 'waku/router/server';
+  import { blogAuthors, blogSource } from '@/lib/source';
+  import { getPosts, getTagPosts, getTags } from '@/lib/blog';
+  import { BlogCards, BlogHeader, BlogTitle } from '@/components/blog';
+
+  export default function Page({ tag }: PageProps<'/blog/tags/[tag]'>) {
+    const result = getTagPosts(getPosts(blogSource.getPages(), blogAuthors), tag);
+    if (!result) unstable_notFound();
+
+    return (
+      <div className="mx-auto flex w-full max-w-(--fd-layout-width) flex-col gap-4 px-4 py-12">
+        <BlogHeader>
+          <BlogTitle>{result.tag.name}</BlogTitle>
+        </BlogHeader>
+        <BlogCards posts={result.posts} />
+      </div>
+    );
+  }
+
+  export async function getConfig() {
+    return {
+      render: 'static',
+      staticPaths: getTags(getPosts(blogSource.getPages())).map((tag) => tag.slug),
+    } as const;
+  }
+  ```
+</show>
+
+<show when={props.framework === 'astro'}>
+  ```astro tab="src/pages/blog/tags/[tag].astro"
+  ---
+  import type { GetStaticPaths, InferGetStaticPropsType } from 'astro';
+  import Layout from '@/layouts/Layout.astro';
+  import { BlogTagPage } from '@/components/blog-tag';
+  import { blogAuthors, blogSource } from '@/lib/source';
+  import { getPosts, getTagPosts, getTags } from '@/lib/blog';
+
+  export const getStaticPaths = (() => {
+    const posts = getPosts(blogSource.getPages(), blogAuthors);
+
+    return getTags(posts).map((tag) => ({
+      params: { tag: tag.slug },
+      props: getTagPosts(posts, tag.slug)!,
+    }));
+  }) satisfies GetStaticPaths;
+
+  type Props = InferGetStaticPropsType<typeof getStaticPaths>;
+
+  const { tag, posts } = Astro.props;
+  ---
+
+  <Layout title={tag.name}>
+    <BlogTagPage
+      client:load
+      pathname={Astro.url.pathname}
+      params={Astro.params}
+      tag={tag}
+      posts={posts}
+    />
+  </Layout>
+  ```
+
+  ```tsx tab="src/components/blog-tag.tsx"
+  import { HomeLayout } from 'fumadocs-ui/layouts/home';
+  import { baseOptions } from '@/lib/layout.shared';
+  import { Provider, type ProviderProps } from '@/components/provider';
+  import type { BlogPost, BlogTag } from '@/lib/blog';
+  import { BlogCards, BlogHeader, BlogTitle } from '@/components/blog';
+
+  export function BlogTagPage({
+    tag,
+    posts,
+    ...props
+  }: ProviderProps & { tag: BlogTag; posts: BlogPost[] }) {
+    return (
+      <Provider {...props}>
+        <HomeLayout {...baseOptions()}>
+          <div className="mx-auto flex w-full max-w-(--fd-layout-width) flex-col gap-4 px-4 py-12">
+            <BlogHeader>
+              <BlogTitle>{tag.name}</BlogTitle>
+            </BlogHeader>
+            <BlogCards posts={posts} />
+          </div>
+        </HomeLayout>
+      </Provider>
+    );
+  }
+  ```
+</show>
+
+## 國際化 [#internationalization]
+
+請將特定語系的頁面傳入 `getPosts()`，例如 `blogSource.getPages(lang)`。
+
+標籤頁面的 URL 由 `lib/blog.ts` 中的 `getBlogUrl` 產生。請將您的 i18n 設定傳給它，讓 URL 與載入器的 URL 保持一致：
+
+```ts title="lib/blog.ts"
+import { i18n } from '@/lib/i18n';
+
+export const getBlogUrl = createGetUrl('/blog', i18n);
+```
+
+若要為您的文章發布訂閱摘要，請參閱 [RSS 摘要](/docs/guides/rss)。

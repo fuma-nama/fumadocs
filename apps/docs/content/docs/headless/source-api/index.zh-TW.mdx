@@ -1,0 +1,321 @@
+---
+title: 載入器 API
+description: 將內容來源轉換為統一的介面
+---
+
+## 功能概述 [#what-it-does]
+
+`loader()` 提供一個介面，讓 Fumadocs 能與各種內容來源整合。
+
+* 產生[頁面 slug 與頁面樹](/docs/headless/page-conventions)。
+* 為每個頁面指派 URL。
+* 提供實用的工具函式，方便您操作內容。
+
+<Callout type="warn" title="重要須知">
+  - `loader()` 是伺服器端 API，並非建置時期的魔法，也不是可在瀏覽器中使用的 API。
+  - 它使用記憶體內儲存，檔案由您的內容來源傳入。
+</Callout>
+
+## 使用方式 [#usage]
+
+您可以搭配 Fumadocs MDX 等內容來源使用，詳情請參閱 [`source`](/docs/headless/source-api/source)。
+
+```ts
+import { loader } from 'fumadocs-core/source';
+import { docs } from 'collections/server';
+
+export const source = loader({
+  source: docs.toFumadocsSource(),
+  baseUrl: '/docs',
+});
+```
+
+### URL [#url]
+
+您可以覆寫基礎 URL，或指定一個函式，為每個頁面產生 URL。
+
+```ts
+import { loader } from 'fumadocs-core/source';
+
+loader({
+  baseUrl: '/docs',
+  // 或者您也可以使用函式自訂
+  url(slugs, locale) {
+    if (locale) return '/' + [locale, 'docs', ...slugs].join('/');
+    return '/' + ['docs', ...slugs].join('/');
+  },
+});
+```
+
+### Slugs [#slugs]
+
+定義自訂函式，用來從頁面檔案產生 slug。
+
+```ts
+import { loader } from 'fumadocs-core/source';
+
+loader({
+  slugs(file, next) {
+    console.log(file.path, file.data);
+    // 您可以透過 `next()`，以預設的 slug 為基礎進行擴充
+    if (file.path.startsWith('blog/')) return ['blog', ...next()];
+    // 或回傳 `undefined` 以改用預設值
+    return ['my', 'slug'];
+  },
+});
+```
+
+### 圖示 [#icons]
+
+載入頁面與 meta 檔案中指定的 [icon](/docs/headless/page-conventions#icons) 屬性。
+
+```ts
+import { loader } from 'fumadocs-core/source';
+import { icons } from 'lucide-react';
+import { createElement } from 'react';
+
+loader({
+  icon(icon) {
+    if (!icon) {
+      // 您可以設定預設圖示
+      return;
+    }
+
+    if (icon in icons) return createElement(icons[icon as keyof typeof icons]);
+  },
+});
+```
+
+### I18n [#i18n]
+
+將 `i18n` 設定傳入載入器。
+
+```ts title="lib/source.ts"
+import { i18n } from '@/lib/i18n';
+import { loader } from 'fumadocs-core/source';
+
+export const source = loader({
+  i18n, // [!code highlight]
+});
+```
+
+啟用 i18n 後，載入器會為每個語系產生一個頁面樹。
+
+若某個頁面缺少翻譯，則會改用 [`fallbackLanguage`](/docs/headless/internationalization/config#fallback-language) 所指定的備用語系。
+
+## 輸出 [#output]
+
+會輸出一個內容載入器實例。
+
+### 取得頁面 [#get-page]
+
+根據 slugs 取得頁面。
+
+```ts
+import { source } from '@/lib/source';
+
+source.getPage(['slug', 'of', 'page']);
+
+// 使用 i18n 時
+source.getPage(['slug', 'of', 'page'], 'locale');
+```
+
+#### 自訂 Props [#custom-props]
+
+您可以將 props 傳入頁面內容，例如讀者所選的版本。內容會透過 `props` 讀取這些值，用法與[路徑參數](/docs/headless/page-conventions#path-params)相同：
+
+```ts
+import { source } from '@/lib/source';
+
+const page = source.getPage(['slug', 'of', 'page'], {
+  props: { version: 'v2' },
+  // 使用 i18n 時
+  language: 'locale',
+});
+```
+
+頁面資料會依據這些 props 產生，包括內容與目錄。MDX 元件同樣屬於 props。若希望處理後的 Markdown 能算繪出您的元件，請將它們傳入：
+
+```ts
+import { getMDXComponents } from '@/components/mdx';
+
+const page = source.getPage(['slug', 'of', 'page'], {
+  props: { components: getMDXComponents() },
+});
+const markdown = await page.data.getText('processed');
+```
+
+<Callout title="小提醒">
+  搜尋與 LLM 路由會透過 `getPages()` 讀取頁面，而這些頁面只帶有路徑參數。若希望搜尋或 LLM 能看到某個變體，該變體就必須是路徑參數。
+</Callout>
+
+### 取得頁面 [#get-pages]
+
+取得指定語系下可用的頁面清單。
+
+```ts
+import { source } from '@/lib/source';
+
+// 取得所有語系的頁面
+source.getPages();
+
+// 取得特定語系的頁面
+source.getPages('locale');
+```
+
+### 頁面樹 [#page-tree]
+
+```ts
+import { source } from '@/lib/source';
+
+// 不使用 i18n
+source.getPageTree();
+
+// 使用 i18n
+source.getPageTree('locale');
+```
+
+### 從節點取得 [#get-from-node]
+
+頁面樹節點會保留其原始檔案路徑的參照。
+您可以從樹節點找到對應的原始頁面或 meta 檔案。
+
+```ts
+import { source } from '@/lib/source';
+
+source.getNodePage(pageNode);
+source.getNodeMeta(folderNode);
+```
+
+### 參數 [#params]
+
+產生每個頁面的路徑參數，用於預先算繪頁面。
+產生的參數名稱為 `slug: string[]` 與 `lang: string` (僅限 i18n) 。
+
+```ts tab="Next.js" title="app/docs/[[...slug]]/page.tsx"
+import { source } from '@/lib/source';
+
+export function generateStaticParams() {
+  return source.generateParams();
+}
+```
+
+```ts tab="Waku" title="src/pages/docs/[...slugs].tsx"
+import { source } from '@/lib/source';
+
+export async function getConfig() {
+  const pages = source
+    .generateParams()
+    .map((item) => (item.lang ? [item.lang, ...item.slug] : item.slug));
+
+  return {
+    render: 'static' as const,
+    staticPaths: pages,
+  } as const;
+}
+```
+
+```astro tab="Astro" title="src/pages/docs/[...slug].astro"
+---
+import type { GetStaticPaths } from 'astro';
+import { source } from '@/lib/source';
+
+export const prerender = true;
+
+export const getStaticPaths = (() => {
+  return source.getPages().map((page) => ({
+    params: { slug: decodeURI(page.slugs.join('/')) || undefined },
+    props: { page },
+  }));
+}) satisfies GetStaticPaths;
+---
+```
+
+React Router 與 TanStack Start 是依 URL 進行預先算繪，因此請改為列出 `source.getPages()` 各頁面的 `url`。
+
+### 語言項目 [#language-entries]
+
+取得所有可用的語言及其對應頁面。
+
+```ts
+import { source } from '@/lib/source';
+
+// 語言 -> 頁面
+const entries = source.getLanguages();
+```
+
+## 用戶端 API [#client-api]
+
+載入器 API 最適合在 RSC 環境中使用，因為 RSC 能跨越伺服器與用戶端的邊界傳遞 JSX 節點。
+
+在非 RSC 環境中，它則提供一層輕量的序列化機制。
+
+```ts tab="Server"
+import { source } from '@/lib/source';
+
+// 在此傳遞 loader 資料
+async function loader() {
+  const pageTree = source.getPageTree();
+
+  return {
+    pageTree: await source.serializePageTree(pageTree),
+  };
+}
+```
+
+```tsx tab="Client"
+import { useFumadocsLoader } from 'fumadocs-core/source/client';
+
+function MyComponent() {
+  // `useLoaderData()` 會接收載入器資料（由您的 React 框架提供）
+  const { pageTree, ...data } = useFumadocsLoader(useLoaderData());
+
+  // 接著將其算繪出來（例如透過 Fumadocs UI）
+  return <DocsLayout tree={pageTree}>...</DocsLayout>;
+}
+```
+
+## Dynamic 載入器 [#dynamic-loader]
+
+`dynamicLoader()` 可為內容來源提供額外的重新驗證功能，請搭配 [Dynamic 來源](/docs/headless/source-api/source#dynamic-source)使用。
+
+```ts
+import { dynamicLoader } from 'fumadocs-core/source';
+import { createMySource } from './my-source';
+
+const source = dynamicLoader(createMySource(), {
+  baseUrl: '/docs',
+});
+
+export async function getSource() {
+  return source.get();
+}
+```
+
+呼叫 `await source.get()` 時，會回傳一般的內容載入器物件：
+
+```ts
+const docs = await getSource();
+
+const page = docs.getPage(['...']);
+```
+
+### 重新驗證 [#revalidation]
+
+Dynamic 來源會由載入器進行快取。
+
+如果您的來源會隨時間變動，請呼叫 `invalidate()` 清除快取，或呼叫 `revalidate()` 更新快取：
+
+```ts
+source.invalidate();
+
+await source.revalidate();
+```
+
+若採用[多來源](/docs/headless/source-api/source#multiple-sources)設定，您可以針對特定來源使其失效或重新驗證：
+
+```ts
+source.invalidate('docs');
+
+await source.revalidate('docs');
+```

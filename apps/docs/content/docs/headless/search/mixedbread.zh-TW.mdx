@@ -1,0 +1,174 @@
+---
+title: Mixedbread
+description: 將 Mixedbread Search 整合至 Fumadocs
+---
+
+[Mixedbread](https://www.mixedbread.com) 提供語意搜尋功能，讓使用者能以自然語言進行搜尋，依據語意而非關鍵字找到相關內容。
+
+## 設定 [#setup]
+
+安裝相依套件：
+
+```package-install
+@mixedbread/sdk
+```
+
+### API 金鑰 [#api-key]
+
+請前往 [Mixedbread](https://platform.mixedbread.com) 註冊，為您的文件建立一組 [API 金鑰](https://platform.mixedbread.com/platform?next=api-keys)與一個[儲存區](https://platform.mixedbread.com/platform?next=stores)，然後將它們儲存在 `.env.local` 中：
+
+```dotenv
+MXBAI_API_KEY="your API key"
+MIXEDBREAD_STORE_ID="your store ID"
+```
+
+搜尋會在您的伺服器上執行，因此 API 金鑰絕不會暴露給瀏覽器。
+
+### 同步文件 [#sync-documents]
+
+預先算繪 `static.json` 路由，以便在建置時匯出搜尋文件，並在每次建置後透過腳本將這些文件同步到您的儲存區：
+
+<feature>search/mixedbread</feature>
+
+`sync()` 會為每個頁面上傳一個檔案，並略過自上次同步後未變更的頁面。已移除頁面的檔案會一併刪除，因此請使用專供文件使用的儲存區。`build` 腳本會在每次建置時進行同步，請在您的部署平台上設定相同的變數。
+
+### 搜尋 API [#search-api]
+
+建立一個用來搜尋您儲存區的路由：
+
+```ts tab="Next.js" title="app/api/search/route.ts"
+import { createMixedbreadSearchAPI } from 'fumadocs-core/search/mixedbread';
+import Mixedbread from '@mixedbread/sdk';
+
+export const { GET } = createMixedbreadSearchAPI({
+  client: new Mixedbread(), // 會讀取 `MXBAI_API_KEY`
+  storeIdentifier: process.env.MIXEDBREAD_STORE_ID!,
+});
+```
+
+```ts tab="React Router" title="app/routes/search.ts"
+import type { Route } from './+types/search';
+import { createMixedbreadSearchAPI } from 'fumadocs-core/search/mixedbread';
+import Mixedbread from '@mixedbread/sdk';
+
+const server = createMixedbreadSearchAPI({
+  client: new Mixedbread(), // 會讀取 `MXBAI_API_KEY`
+  storeIdentifier: process.env.MIXEDBREAD_STORE_ID!,
+});
+
+export async function loader({ request }: Route.LoaderArgs) {
+  return server.GET(request);
+}
+```
+
+```ts tab="TanStack Start" title="src/routes/api/search.ts"
+import { createFileRoute } from '@tanstack/react-router';
+import { createMixedbreadSearchAPI } from 'fumadocs-core/search/mixedbread';
+import Mixedbread from '@mixedbread/sdk';
+
+const server = createMixedbreadSearchAPI({
+  client: new Mixedbread(), // 會讀取 `MXBAI_API_KEY`
+  storeIdentifier: process.env.MIXEDBREAD_STORE_ID!,
+});
+
+export const Route = createFileRoute('/api/search')({
+  server: {
+    handlers: {
+      GET: async ({ request }) => server.GET(request),
+    },
+  },
+});
+```
+
+```ts tab="Waku" title="src/pages/_api/api/search.ts"
+import { createMixedbreadSearchAPI } from 'fumadocs-core/search/mixedbread';
+import Mixedbread from '@mixedbread/sdk';
+
+export const { GET } = createMixedbreadSearchAPI({
+  client: new Mixedbread(), // 會讀取 `MXBAI_API_KEY`
+  storeIdentifier: process.env.MIXEDBREAD_STORE_ID!,
+});
+```
+
+```ts tab="Astro" title="src/pages/api/search.ts"
+import type { APIRoute } from 'astro';
+import { createMixedbreadSearchAPI } from 'fumadocs-core/search/mixedbread';
+import Mixedbread from '@mixedbread/sdk';
+import { getSecret } from 'astro:env/server';
+
+// 於每次請求時算繪，需要轉接器
+export const prerender = false;
+
+const server = createMixedbreadSearchAPI({
+  client: new Mixedbread({ apiKey: getSecret('MXBAI_API_KEY') }),
+  storeIdentifier: getSecret('MIXEDBREAD_STORE_ID')!,
+});
+
+export const GET: APIRoute = ({ request }) => server.GET(request);
+```
+
+### 搜尋 UI [#search-ui]
+
+實作 UI 時，您可以考慮以下幾種方式：
+
+* 使用 [Fumadocs UI 搜尋對話方塊](/docs/search/mixedbread)。
+* 使用內建的搜尋用戶端 hook 自行打造：
+
+  ```ts twoslash
+  import { useFetchSearch } from 'fumadocs-core/search/client';
+
+  const { search, onSearchChange, isLoading, data } = useFetchSearch({
+    api: '/api/search',
+    // 每次搜尋都會向 Mixedbread 發送一次請求
+    delayMs: 300,
+  });
+  ```
+
+## 選項 [#options]
+
+### 標籤篩選 [#tag-filter]
+
+若要設定標籤篩選，請在 `static.json` 路由中將 `tag` 傳入 `toDocuments()`：
+
+```ts
+toDocuments(source, { tag: (page) => page.slugs[0] });
+```
+
+接著更新您的搜尋用戶端：
+
+* **Fumadocs UI**：在搜尋 UI 中啟用[標籤篩選](/docs/search/mixedbread#tag-filter)。
+* **搜尋用戶端**：將標籤傳入 `useFetchSearch()`。
+
+  ```ts
+  import { useFetchSearch } from 'fumadocs-core/search/client';
+
+  const { search, onSearchChange, isLoading, data } = useFetchSearch({
+    tag: '<your tag value>', // [!code ++]
+    // ...
+  });
+  ```
+
+### 國際化 [#internationalization]
+
+文件會包含其所屬頁面的語系，傳入 `locale` 即可搜尋特定語言的內容：
+
+```ts
+import { useI18n } from 'fumadocs-ui/contexts/i18n';
+import { useFetchSearch } from 'fumadocs-core/search/client';
+
+const { locale } = useI18n();
+const { search, onSearchChange, isLoading, data } = useFetchSearch({
+  locale, // [!code ++]
+  // ...
+});
+```
+
+## 底層運作原理 [#under-the-hood]
+
+每個頁面都是一個以 URL 為鍵的檔案，並以頁面標題、URL、Breadcrumb、標籤與語系作為中繼資料。頁面的區塊 (chunk) 包括標題、各個小標題與段落，而每個搜尋結果都是一個區塊：
+
+| 區塊中繼資料    | 說明                        |
+| --------- | ------------------------- |
+| `kind`    | `page`、`heading` 或 `text` |
+| `heading` | 所屬標題的 ID (選用)             |
+| `table`   | 表格列所屬的表格 (選用)             |

@@ -1,0 +1,92 @@
+---
+title: 匯入 MDX 檔案
+description: 直接匯入 MDX 檔案。
+---
+
+## 簡介 [#introduction]
+
+MDX 檔案會被編譯成 JavaScript，並包含以下匯出：
+
+* `default`：主要元件。
+* `frontmatter`：frontmatter 資料。
+* 由 remark/rehype 外掛產生的其他屬性。
+
+因此，它們既可以作為頁面使用，也可以作為元件匯入。
+
+### 作為元件使用 [#using-as-component]
+
+您可以將它們當作元件匯入：
+
+```tsx title="app/my-page.tsx"
+import MyPage from '@/content/page.mdx';
+import { getMDXComponents } from '@/components/mdx';
+
+export default function Page() {
+  return (
+    <div className="prose">
+      {/* 傳入 MDX 元件並算繪 */}
+      <MyPage components={getMDXComponents()} />
+    </div>
+  );
+}
+```
+
+### 作為頁面使用 [#using-as-page]
+
+在 Next.js 中，您可以在 app 目錄下使用 `page.mdx` 取代 `page.tsx` 來建立新頁面。
+
+```mdx tab="app/my-page/page.mdx"
+---
+title: My Page
+---
+
+export { default } from '@/components/layouts/page';
+
+# Hello World
+
+This is my page.
+```
+
+```tsx tab="components/layouts/page.tsx"
+import type { ComponentProps } from 'react';
+
+export default function Content(props: ComponentProps<'main'>) {
+  return (
+    <main className="px-8 py-12">
+      <article className="prose">{props.children}</article>
+    </main>
+  );
+}
+```
+
+它預設不包含 **MDX 元件**，您需要自行提供：
+
+```tsx tab="components/mdx.tsx"
+import defaultMdxComponents from 'fumadocs-ui/mdx';
+import type { MDXComponents } from 'mdx/types';
+
+export function getMDXComponents(components?: MDXComponents) {
+  return {
+    ...defaultMdxComponents, // 用於 Fumadocs UI
+    ...components,
+  } satisfies MDXComponents;
+}
+
+// 匯出會回傳 MDX 元件的 `useMDXComponents()`
+export const useMDXComponents = getMDXComponents; // [!code ++]
+```
+
+```ts tab="source.config.ts"
+import { defineConfig } from 'fumadocs-mdx/config';
+
+export default defineConfig({
+  mdxOptions: {
+    // 匯入上方 `components/mdx.tsx` 所用的路徑。[!code ++:2]
+    providerImportSource: '@/components/mdx',
+  },
+});
+```
+
+<Callout title="其他框架？">
+  若使用 React Router、TanStack Start 或 Waku，請改為在頁面中將 MDX 檔案當作元件匯入。
+</Callout>

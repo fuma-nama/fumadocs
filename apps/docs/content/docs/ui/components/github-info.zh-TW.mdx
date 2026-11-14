@@ -1,0 +1,50 @@
+---
+title: GitHub 資訊
+description: 顯示您的 GitHub 儲存庫資訊
+preview: githubInfo
+---
+
+<Installation name="github-info" />
+
+## 使用方式 [#usage]
+
+```tsx
+import { GithubInfo } from 'fumadocs-ui/components/github-info';
+
+export function MyComp() {
+  return (
+    <GithubInfo
+      owner="fuma-nama"
+      repo="fumadocs"
+      // 您自己的 GitHub 存取權杖（選填）
+      token={process.env.GITHUB_TOKEN}
+    />
+  );
+}
+```
+
+建議透過 `links` 選項，將它加入您的文件版面配置：
+
+```tsx title="app/docs/layout.tsx"
+import { DocsLayout, type DocsLayoutProps } from 'fumadocs-ui/layouts/notebook';
+import { baseOptions } from '@/lib/layout.shared';
+import { source } from '@/lib/source';
+import { GithubInfo } from 'fumadocs-ui/components/github-info';
+
+function docsOptions(): DocsLayoutProps {
+  return {
+    ...baseOptions(),
+    tree: source.getPageTree(),
+    links: [
+      {
+        type: 'custom',
+        children: <GithubInfo owner="fuma-nama" repo="fumadocs" />,
+      },
+    ],
+  };
+}
+
+export default function Layout({ children }: { children: React.ReactNode }) {
+  return <DocsLayout {...docsOptions()}>{children}</DocsLayout>;
+}
+```

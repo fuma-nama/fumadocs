@@ -1,0 +1,48 @@
+---
+title: MCP
+description: 將您的文件以 MCP 工具的形式提供給 AI 代理。
+---
+
+`fumadocs-core/mcp` 會在 [MCP](https://modelcontextprotocol.io) 伺服器上註冊工具，讓 AI 代理能夠閱讀及搜尋您的文件。
+
+<Callout>
+  [MCP 伺服器](/docs/integrations/llms#mcp-server)指南會為您設定一個包含這些工具的路由。
+</Callout>
+
+## 使用方式 [#usage]
+
+```package-install
+fumadocs-core @modelcontextprotocol/server zod
+```
+
+請搭配您的來源、其 [`docsLlms`](/docs/integrations/llms#docsllms) 算繪器以及搜尋伺服器來註冊這些工具：
+
+```ts title="lib/mcp.ts"
+import { McpServer } from '@modelcontextprotocol/server';
+import { registerSearchTool, registerSourceTools } from 'fumadocs-core/mcp';
+import { createFromSource } from 'fumadocs-core/search/server';
+import { source, docsLlms } from '@/lib/source';
+
+export const mcp = new McpServer({ name: 'docs', version: '1.0.0' });
+
+// `list_pages` & `get_page`
+registerSourceTools(mcp, source, docsLlms);
+// `search`
+registerSearchTool(mcp, createFromSource(source));
+```
+
+若使用執行階段的內容來源，請傳入來源的 getter：
+
+```ts
+registerSourceTools(mcp, getSource, docsLlms);
+```
+
+接著將伺服器連接到傳輸層，例如 Streamable HTTP 傳輸層。
+
+## 工具 [#tools]
+
+| 工具           | 輸入                | 輸出                               |
+| ------------ | ----------------- | -------------------------------- |
+| `list_pages` | 無                 | `llms.index()`，即頁面索引             |
+| `get_page`   | 頁面的 `url`         | `llms.page(page)`；若沒有符合的頁面，則回傳錯誤 |
+| `search`     | `query`、`locale?` | JSON 格式的搜尋結果                     |

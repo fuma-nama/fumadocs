@@ -1,0 +1,116 @@
+---
+title: Meilisearch
+description: 將 Meilisearch 整合至 Fumadocs
+---
+
+[Meilisearch](https://www.meilisearch.com) 是一款開源搜尋引擎，提供錯字容忍度與篩選功能。您可以自行架設，也可以使用 Meilisearch Cloud。
+
+## 設定 [#setup]
+
+安裝相依套件：
+
+```package-install
+meilisearch
+```
+
+### API 金鑰 [#api-keys]
+
+請透過[自行架設](https://www.meilisearch.com/docs/learn/self_hosted/getting_started_with_self_hosted_meilisearch)或使用 [Meilisearch Cloud](https://www.meilisearch.com/cloud) 啟動 Meilisearch 執行個體，並將其認證資訊存放在 `.env.local` 中 (若使用 Vite 框架，請將 `NEXT_PUBLIC_` 改為 `VITE_`；若使用 Astro，則改為 `PUBLIC_`) ：
+
+```dotenv
+NEXT_PUBLIC_MEILISEARCH_HOST="URL of your instance"
+NEXT_PUBLIC_MEILISEARCH_SEARCH_KEY="search API key"
+MEILISEARCH_ADMIN_KEY="Default Admin API Key"
+```
+
+搜尋金鑰會公開給瀏覽器，因此請[建立一組](https://www.meilisearch.com/docs/learn/security/basic_security)只能搜尋 `docs` 索引的金鑰。管理員 (admin) 金鑰則務必妥善保管，切勿外流。
+
+### 同步文件 [#sync-documents]
+
+預先算繪 `static.json` 路由，在建置時匯出搜尋文件，並於每次建置後透過指令碼將文件同步到 Meilisearch：
+
+<feature>search/meilisearch</feature>
+
+`sync()` 會設定索引並取代其中的文件，在新文件完成索引前，舊文件仍可供搜尋。`build` 指令碼會在每次建置時執行同步，請在您的部署平台上設定相同的變數。
+
+### 搜尋 UI [#search-ui]
+
+實作 UI 時，您可以考慮以下幾種做法：
+
+* 使用 [Fumadocs UI 搜尋對話方塊](/docs/search/meilisearch)。
+
+* 使用內建的搜尋用戶端 hook 自行建構：
+
+  ```ts twoslash
+  import { Meilisearch } from 'meilisearch';
+  import { useMeilisearch } from 'fumadocs-core/search/client';
+
+  const client = new Meilisearch({
+    host: 'host url',
+    apiKey: 'search api key',
+  });
+
+  const { search, onSearchChange, isLoading, data } = useMeilisearch({
+    client,
+    indexName: 'docs',
+  });
+  ```
+
+  <auto-type-table type="import(&#x22;fumadocs-core/search/client/meilisearch&#x22;).MeilisearchOptions" />
+
+* 直接使用 Meilisearch 的官方用戶端。
+
+## 選項 [#options]
+
+### 標籤篩選 [#tag-filter]
+
+若要設定標籤篩選，請在 `static.json` 路由中將 `tag` 傳給 `toDocuments()`：
+
+```ts
+toDocuments(source, { tag: (page) => page.slugs[0] });
+```
+
+接著更新您的搜尋用戶端：
+
+* **Fumadocs UI**：在搜尋 UI 中啟用[標籤篩選](/docs/search/meilisearch#tag-filter)。
+* **搜尋用戶端**：將標籤傳入 `useMeilisearch()`。
+
+  ```ts
+  import { useMeilisearch } from 'fumadocs-core/search/client';
+
+  const { search, onSearchChange, isLoading, data } = useMeilisearch({
+    tag: '<your tag value>', // [!code ++]
+    // ...
+  });
+  ```
+
+### 國際化 [#internationalization]
+
+文件會包含所屬頁面的語系，傳入 `locale` 即可搜尋特定語言的內容：
+
+```ts
+import { useI18n } from 'fumadocs-ui/contexts/i18n';
+import { useMeilisearch } from 'fumadocs-core/search/client';
+
+const { locale } = useI18n();
+const { search, onSearchChange, isLoading, data } = useMeilisearch({
+  locale, // [!code ++]
+  // ...
+});
+```
+
+### 索引設定 [#index-settings]
+
+`sync()` 只會設定 `searchableAttributes` 與 `filterableAttributes`，同義詞、錯字容忍度等其他設定則會維持不變。您可以透過 Meilisearch 控制台或 `meilisearch` 用戶端調整這些設定。
+
+## 運作原理 [#under-the-hood]
+
+每個標題與段落都是一筆文件，並附帶頁面標題、URL 與 Breadcrumb。只有 `content` 可供搜尋，搜尋用戶端會依頁面將結果分組。
+
+| 屬性        | 說明                        |
+| --------- | ------------------------- |
+| `type`    | `page`、`heading` 或 `text` |
+| `content` | 頁面標題、標題或段落                |
+| `heading` | 所屬標題的 ID (選填)             |
+| `tag`     | 用於篩選結果的標籤 (選填)            |
+| `locale`  | 頁面的語系 (選填)                |

@@ -1,0 +1,70 @@
+---
+title: create-fumadocs-app
+description: 用來建立新 Fumadocs 應用程式的 CLI
+---
+
+## 使用方式 [#usage]
+
+```npm
+npx create-fumadocs-app@latest my-docs
+```
+
+它會詢問要使用的範本與要設定的功能，您也可以改用選項直接傳入。
+
+### 選項 [#options]
+
+| 選項                  | 說明                                                                                                 |
+| ------------------- | -------------------------------------------------------------------------------------------------- |
+| `--template <name>` | 要使用的範本，請參閱[範本](#templates)。                                                                        |
+| `--src`             |  (僅限 Next.js) 使用 `src/` 目錄。                                                                        |
+| `--linter <name>`   | 設定 linter：`eslint` (僅限 Next.js) 、`oxlint` 或 `biome`。                                               |
+| `--search <name>`   | 搜尋方案：`orama` (預設，本機搜尋) 、`orama-cloud`、`algolia`、`meilisearch`、`typesense` 或 `mixedbread` (需要伺服器) 。 |
+| `--og-image <name>` | OG 圖片：`next-og` (僅限 Next.js) 或 `takumi`，其他框架一律使用 Takumi。                                           |
+| `--ai-chat <name>`  | AI 聊天：`openrouter`、`llmgateway` 或 `inkeep`，靜態、SPA 與 Astro 範本無法使用。                                  |
+| `--install`         | 自動安裝相依套件。                                                                                          |
+| `--no-git`          | 略過 Git 儲存庫初始化。                                                                                     |
+| `--pm <name>`       | 套件管理器：`npm`、`pnpm`、`yarn` 或 `bun`，會依據執行 CLI 的方式自動偵測。                                               |
+| `-y, --yes`         | 略過提示，未指定的選項一律使用預設值。                                                                                |
+
+### 範本 [#templates]
+
+| 值                            | 說明                       |
+| ---------------------------- | ------------------------ |
+| `+next+fuma-docs-mdx`        | Next.js (預設)             |
+| `+next+fuma-docs-mdx+static` | Next.js，採用靜態匯出           |
+| `waku`                       | Waku                     |
+| `react-router`               | React Router             |
+| `react-router-spa`           | React Router，採用 SPA 模式   |
+| `tanstack-start`             | TanStack Start           |
+| `tanstack-start-spa`         | TanStack Start，採用 SPA 模式 |
+| `astro`                      | Astro                    |
+
+### 非互動模式 [#non-interactive]
+
+傳入 `--yes` 即可略過所有提示，適合用於指令碼、CI 與 AI 代理：
+
+```npm
+npx create-fumadocs-app@latest my-docs --template +next+fuma-docs-mdx --install --yes
+```
+
+未指定的選項會使用預設值：不使用 linter、使用本機搜尋、不啟用 AI 聊天。若目標目錄已存在且非空，指令將會執行失敗。
+
+範本未提供 i18n 選項。若要為新專案加入 i18n，請參考對應框架的國際化指南：[Next.js](/docs/next/internationalization)、[React Router](/docs/react-router/internationalization)、[TanStack Start](/docs/tanstack-start/internationalization)、[Waku](/docs/waku/internationalization) 或 [Astro](/docs/astro/internationalization)。
+
+## 程式化 API [#programmatic-api]
+
+除了一般的 CLI 用法之外，您也可以在指令碼中使用它，例如：
+
+```npm
+npm install create-fumadocs-app
+```
+
+```ts
+import { create } from 'create-fumadocs-app';
+
+await create({
+  outputDir: 'my-app',
+  template: '+next+fuma-docs-mdx',
+  packageManager: 'pnpm',
+});
+```

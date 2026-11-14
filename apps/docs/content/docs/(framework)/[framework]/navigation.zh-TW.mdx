@@ -1,0 +1,98 @@
+---
+title: 導覽
+description: 整理側邊欄頁面、連結至其他資源，並發布多個版本的文件。
+---
+
+import { LinkIcon, PanelLeftDashed } from 'lucide-react';
+
+## 概覽 [#overview]
+
+**Fumadocs UI** 提供多種版面配置來呈現內容，您可以透過版面配置指定導覽設定。
+
+<Cards>
+  <Card icon={<LinkIcon />} title="版面配置連結" href="/docs/ui/layouts/links">
+    在版面配置中顯示**導覽連結**。
+
+    適合用來連結常用資源，例如作品展示頁與定價頁。
+  </Card>
+
+  <Card icon={<PanelLeftDashed />} title="側邊欄項目" href="/docs/ui/layouts/docs#sidebar-items">
+    側邊欄會算繪所有文件頁面的連結。
+
+    其底層是以**頁面樹**來表示導覽結構。
+  </Card>
+</Cards>
+
+## 版本管理 [#versioning]
+
+若讀者需要查閱舊版的文件，可以同時保留多個版本。您可以選擇讓各版本共用同一個網站，或分別部署：
+
+| 方式                         | 適用情況                     |
+| -------------------------- | ------------------------ |
+| [根類型](#root-type)          | 只有部分文件需要版本管理，且各版本位於同一個網站 |
+| [完整版本管理](#full-versioning) | 對整個網站進行版本管理，每個版本各自部署     |
+
+### 根類型 [#root-type]
+
+為每個版本建立一個資料夾，並在 `meta.json` 中將這些資料夾標記為同一類型的根資料夾：
+
+<Files>
+  <Folder name="content/docs" defaultOpen>
+    <Folder name="v1" defaultOpen>
+      <File name="meta.json" />
+
+      <File name="index.mdx" />
+
+      <File name="getting-started.mdx" />
+
+      <File name="legacy-api.mdx" />
+    </Folder>
+
+    <Folder name="v2" defaultOpen>
+      <File name="meta.json" />
+
+      <File name="index.mdx" />
+
+      <File name="getting-started.mdx" />
+    </Folder>
+  </Folder>
+</Files>
+
+```json tab="v1/meta.json"
+{
+  "title": "1.0.0",
+  "root": "version"
+}
+```
+
+```json tab="v2/meta.json"
+{
+  "title": "2.0.0",
+  "root": "version"
+}
+```
+
+側邊欄只會顯示目前開啟版本的內容，而文件版面配置會算繪一個下拉選單，讓您在各版本間切換，選項名稱即為各版本的 `title`。
+切換時會保留您目前的位置：它會導覽至另一個版本中的相同頁面；若該版本沒有這個頁面，則改為導覽至其索引頁面：
+
+| 頁面                         | 切換至 2.0.0                  |
+| -------------------------- | -------------------------- |
+| `/docs/v1/getting-started` | `/docs/v2/getting-started` |
+| `/docs/v1/legacy-api`      | `/docs/v2`，即索引頁面           |
+
+<Callout title="小提示">
+  類型名稱 (`"version"`) 可以任意命名，它僅用於識別類型：位於同一父層下、類型相同的根資料夾
+  可以互相切換。
+</Callout>
+
+### 完整版本管理 [#full-versioning]
+
+有時您會想為整個網站進行版本管理，例如 https://v14.fumadocs.dev (Fumadocs v14) 與 https://fumadocs.dev (最新版 Fumadocs) 。
+
+您可以為某個版本的文件建立 Git 分支 (例如命名為 `v2`) ，再將其部署為獨立的應用程式，放在另一個子網域上，例如 `v2.my-site.com`。
+
+您也可以視需要在文件中加入其他版本的連結。
+相較於部分版本管理，這種設計有以下優點：
+
+* 易於維護：當您迭代開發或升級相依套件時，舊版文件／分支不會受到影響。
+* 一致性更佳：不只是文件本身，您的首頁 (以及其他頁面) 也會一併納入版本管理。

@@ -1,0 +1,143 @@
+---
+title: 靜態建置
+description: 使用 Fumadocs 輸出靜態網站。
+---
+
+import { frameworkName } from '@/lib/framework';
+
+## 設定 [#setup]
+
+<show when={props.framework !== 'astro'}>
+  Fumadocs 預設採用伺服器優先的做法，因此需要有執行中的伺服器。
+  您可以透過設定 {frameworkName(props.framework)} 來輸出靜態建置。
+</show>
+
+<show when={props.framework === 'astro'}>
+  Astro 預設會輸出靜態網站 (`output: 'static'`) 。文件路由設定了 `export const prerender = true`，因此即使您為伺服器輸出加入轉接器，這些路由仍會維持靜態。
+</show>
+
+靜態建置沒有伺服器，因此以下功能無法運作：
+
+* 搜尋伺服器。請改用[靜態搜尋](#search)。
+* [詢問 AI](/docs/integrations/llms#ask-ai)，因為其聊天路由需要呼叫 AI 模型。
+* [MCP 伺服器](/docs/integrations/llms#mcp-server)。
+
+<show when={props.framework === 'next'}>
+  `proxy.ts` 也不會執行，因此不會有導向至對應語系的 [i18n 重新導向](/docs/internationalization#middleware)，頁面也無法[依 `Accept` 標頭提供 Markdown](/docs/integrations/llms#accept)。
+</show>
+
+<show when={props.framework === 'react-router' || props.framework === 'tanstack-start' || props.framework === 'waku'}>
+  中介軟體也不會執行，因此頁面無法[依 `Accept` 標頭提供 Markdown](/docs/integrations/llms#accept)。
+</show>
+
+### 搜尋 [step] [#search]
+
+#### 內建搜尋 [#built-in-search]
+
+1. [設定搜尋伺服器](/docs/headless/search/orama#static-export)。
+2. [設定搜尋 UI／用戶端](/docs/search/orama#static)。
+
+完成設定後，您的應用程式會以靜態方式儲存搜尋索引，搜尋運算則改在瀏覽器端進行。
+
+#### 雲端解決方案 [#cloud-solutions]
+
+由於搜尋功能是由遠端伺服器提供，靜態匯出無需額外設定即可運作。
+
+### 部署 [step] [#deployment]
+
+<show when={props.framework === 'next'}>
+  啟用靜態匯出，即可輸出不需 Node.js 伺服器也能執行的靜態 HTML 網站：
+
+  ```js title="next.config.mjs"
+  /**
+   * @type {import('next').NextConfig}
+   */
+  const nextConfig = {
+    output: 'export',
+
+    // 選用：將連結 `/me` 改為 `/me/`，並將輸出 `/me.html` 改為 `/me/index.html`
+    // trailingSlash: true,
+
+    // 選用：避免自動將 `/me` 重新導向至 `/me/`，改為保留 `href`
+    // skipTrailingSlashRedirect: true,
+  };
+  ```
+
+  限制與詳細資訊請參閱 [Next.js 文件](https://nextjs.org/docs/app/guides/static-exports)。
+</show>
+
+<show when={props.framework === 'react-router'}>
+  使用 SPA 模式時，您可以將 `build/client` 目錄當作靜態網站部署。
+
+  <Callout type="warning" title="別忘了預先算繪">
+    在 SPA 模式下，所有伺服器端載入器都必須預先算繪。
+
+    詳細資訊請參閱 [React Router 文件](https://reactrouter.com/how-to/spa)。
+  </Callout>
+
+  ```ts title="react-router.config.ts"
+  import type { Config } from '@react-router/dev/config';
+  import { glob } from 'node:fs/promises';
+  import { createGetUrl, getSlugs } from 'fumadocs-core/source';
+
+  const getUrl = createGetUrl('/docs');
+
+  export default {
+    // 停用 SSR [!code highlight:2]
+    ssr: false,
+
+    // [!code ++:9]
+    async prerender({ getStaticPaths }) {
+      const paths: string[] = [...getStaticPaths()];
+
+      for await (const entry of glob('**/*.{md,mdx}', { cwd: 'content/docs' })) {
+        paths.push(getUrl(getSlugs(entry)));
+      }
+
+      return paths;
+    },
+  } satisfies Config;
+  ```
+</show>
+
+<show when={props.framework === 'tanstack-start'}>
+  設定 SPA 模式與預先算繪。詳細資訊請參閱 [SPA 模式](https://tanstack.com/start/latest/docs/framework/react/guide/spa-mode)。
+
+  ```ts title="vite.config.ts"
+  import { tanstackStart } from '@tanstack/react-start/plugin/vite';
+  import { defineConfig } from 'vite';
+
+  export default defineConfig({
+    plugins: [
+      // ...其他外掛
+      tanstackStart({
+        spa: {
+          enabled: true,
+          // TanStack Router 會自動爬取您的頁面 [!code ++:4]
+          prerender: {
+            enabled: true,
+          },
+          // 若有未顯示在 UI 上的隱藏路徑，可以在此明確加入。 [!code highlight:6]
+          pages: [
+            {
+              path: '/docs/test',
+            },
+          ],
+        },
+      }),
+    ],
+  });
+  ```
+</show>
+
+<show when={props.framework === 'waku'}>
+  當所有頁面都設定為 `static` 算繪模式時，Waku 即可將您的網站以靜態方式提供。
+
+  詳細資訊請參閱 [部署](https://waku.gg/#deployment)。
+</show>
+
+<show when={props.framework === 'astro'}>
+  搜尋 API 使用 `staticGET()`，因此會一併包含在靜態輸出中。
+
+  詳細資訊請參閱 [Astro 部署](https://docs.astro.build/en/guides/deploy/)。
+</show>

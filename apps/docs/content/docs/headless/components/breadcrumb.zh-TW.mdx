@@ -1,0 +1,68 @@
+---
+title: Breadcrumb
+description: 位於畫面頂端的導覽元件
+---
+
+用於在文件中實作 Breadcrumb 的 hook，會根據指定的頁面樹回傳頁面的 Breadcrumb 項目。
+
+> 若資料夾有索引頁面，則會以該頁面作為項目。
+
+## 使用方式 [#usage]
+
+它匯出了 `useBreadcrumb` hook：
+
+```ts twoslash
+declare const tree: any;
+// ---cut---
+import { useBreadcrumb } from 'fumadocs-core/breadcrumb';
+// 或使用您的 React 框架所提供的 hook
+import { usePathname } from 'fumadocs-core/framework';
+
+const pathname = usePathname();
+const items = useBreadcrumb(pathname, tree);
+//    ^?
+```
+
+### 範例 [#example]
+
+已套用樣式的範例。搭配對應的[框架提供者](/docs/headless#installation)，Fumadocs 的 `usePathname()` 與 `Link` 可在任何框架上運作。
+
+```tsx
+'use client';
+import { usePathname } from 'fumadocs-core/framework';
+import { useBreadcrumb } from 'fumadocs-core/breadcrumb';
+import type { PageTree } from 'fumadocs-core/page-tree';
+import { Fragment } from 'react';
+import { ChevronRight } from 'lucide-react';
+import Link from 'fumadocs-core/link';
+
+export function Breadcrumb({ tree }: { tree: PageTree.Root }) {
+  const pathname = usePathname();
+  const items = useBreadcrumb(pathname, tree);
+
+  if (items.length === 0) return null;
+
+  return (
+    <div className="-mb-3 flex flex-row items-center gap-1 text-sm font-medium text-fd-muted-foreground">
+      {items.map((item, i) => (
+        <Fragment key={i}>
+          {i !== 0 && <ChevronRight className="size-4 shrink-0 rtl:rotate-180" />}
+          {item.url ? (
+            <Link href={item.url} className="truncate hover:text-fd-accent-foreground">
+              {item.name}
+            </Link>
+          ) : (
+            <span className="truncate">{item.name}</span>
+          )}
+        </Fragment>
+      ))}
+    </div>
+  );
+}
+```
+
+您可以在伺服器元件中，透過 `tree` prop 傳入頁面樹來使用它。
+
+### Breadcrumb 項目 [#breadcrumb-item]
+
+<auto-type-table path="../props.ts" name="BreadcrumbItem" />

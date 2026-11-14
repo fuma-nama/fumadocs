@@ -1,0 +1,209 @@
+---
+title: Twoslash
+description: 在您的文件中使用 TypeScript Twoslash
+---
+
+## 使用方式 [#usage]
+
+由於預設的程式碼語法突顯器 [Shiki](https://github.com/shikijs/shiki) 提供了 Twoslash 整合，只需加入一個 transformer 即可。
+型別資訊由原生的 TypeScript 7 編譯器解析，並以您專案的工作目錄為基準。
+
+```package-install
+fumadocs-twoslash
+```
+
+<show when={props.framework === 'next'}>
+  將 `typescript` 從伺服器 bundle 中排除，改為外部套件：
+
+  ```js title="next.config.mjs"
+  const config = {
+    reactStrictMode: true,
+    // [!code ++]
+    serverExternalPackages: ['typescript'],
+  };
+  ```
+</show>
+
+`transformerTwoslash` 是一個 Shiki transformer。請將它加入 rehype code 外掛的 transformer 中：
+
+```ts tab="unified" title="source.config.ts"
+import { defineConfig } from 'fumadocs-mdx/config';
+import { transformerTwoslash } from 'fumadocs-twoslash';
+import { rehypeCodeDefaultOptions } from 'fumadocs-core/mdx-plugins';
+
+export default defineConfig({
+  mdxOptions: {
+    rehypeCodeOptions: {
+      themes: {
+        light: 'github-light',
+        dark: 'github-dark',
+      },
+      transformers: [...(rehypeCodeDefaultOptions.transformers ?? []), transformerTwoslash()],
+    },
+  },
+});
+```
+
+```ts tab="Sätteri" title="source.config.ts"
+import { defineConfig, defineDocs } from 'fumadocs-mdx/config';
+import { transformerTwoslash } from 'fumadocs-twoslash';
+import { rehypeCodeDefaultOptions } from 'fumadocs-core/mdx-plugins';
+
+export const docs = defineDocs({
+  docs: {
+    compiler: 'satteri',
+  },
+});
+
+export default defineConfig({
+  satteriOptions: {
+    rehypeCodeOptions: {
+      themes: {
+        light: 'github-light',
+        dark: 'github-dark',
+      },
+      transformers: [...(rehypeCodeDefaultOptions.transformers ?? []), transformerTwoslash()],
+    },
+  },
+});
+```
+
+加入樣式。此功能需要 Tailwind CSS v4。
+
+```css title="Tailwind CSS"
+@import 'fumadocs-twoslash/twoslash.css';
+```
+
+新增 MDX 元件。
+
+```tsx title="components/mdx.tsx"
+import * as Twoslash from 'fumadocs-twoslash/ui'; // [!code ++]
+import defaultComponents from 'fumadocs-ui/mdx';
+import type { MDXComponents } from 'mdx/types';
+
+export function getMDXComponents(components?: MDXComponents) {
+  return {
+    ...defaultComponents,
+    // [!code ++]
+    ...Twoslash,
+    ...components,
+  } satisfies MDXComponents;
+}
+```
+
+現在您可以在程式碼區塊加上 `twoslash` meta 字串。
+
+````md
+```ts twoslash
+console.log('Hello World');
+```
+````
+
+### 快取 [#cache]
+
+您可以視需要透過 `typesCache` 選項啟用檔案系統快取：
+
+```ts twoslash title="source.config.ts"
+import { transformerTwoslash } from 'fumadocs-twoslash';
+import { createFileSystemTypesCache } from 'fumadocs-twoslash/cache-fs';
+
+transformerTwoslash({
+  typesCache: createFileSystemTypesCache(),
+});
+```
+
+### 範例 [#example]
+
+進一步了解 [Twoslash 標記法](https://twoslash.netlify.app/refs/notations)。
+
+````ts twoslash tab="Output" lineNumbers
+type Player = {
+  /**
+   * 玩家名稱
+   * ```php
+   * $a = "60"
+   * ```
+   *
+   * @default 'user'
+   */
+  name: string;
+};
+
+/**
+ * 自訂函式。
+ *
+ * @example
+ *
+ * ```ts
+ * const str = fn("hello world")
+ * console.log(str)
+ * ```
+ */
+function fn<const T extends string>(s: T): T {
+  return s;
+}
+
+// ---cut---
+// @noErrors
+console.g;
+//       ^|
+
+const player: Player = { name: 'Hello World' };
+//    ^?
+
+fn('test');
+````
+
+`````md tab="Input" lineNumbers
+````ts twoslash lineNumbers
+type Player = {
+  /**
+   * 玩家名稱
+   * ```php
+   * $a = "60"
+   * ```
+   *
+   * @default 'user'
+   */
+  name: string;
+};
+
+/**
+ * 自訂函式。
+ *
+ * @example
+ *
+ * ```ts
+ * const str = fn("hello world")
+ * console.log(str)
+ * ```
+ */
+function fn<const T extends string>(s: T): T {
+  return s;
+}
+
+// ---cut---
+// @noErrors
+console.g;
+//       ^|
+
+const player: Player = { name: 'Hello World' };
+//    ^?
+
+fn('test');
+````
+`````
+
+```ts twoslash
+const a = '123';
+
+console.log(a);
+//      ^^^
+```
+
+```ts twoslash
+// @errors: 2588
+const a = '123';
+
+a = 132;
+```

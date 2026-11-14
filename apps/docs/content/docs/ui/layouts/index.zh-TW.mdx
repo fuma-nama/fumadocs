@@ -1,0 +1,68 @@
+---
+title: 版面配置
+description: 版面配置元件一覽。
+---
+
+## 概覽 [#overview]
+
+Fumadocs UI 提供呈現內容所需的基本版面配置。
+
+<DocsCategory />
+
+### 設定 [#configurations]
+
+每種版面配置都支援一組共用的選項。
+
+建議將這些選項集中寫在一個檔案中，再傳入各個版面配置。
+
+```tsx tab="Shared Options" title="lib/layout.shared.tsx"
+import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
+
+export function baseOptions(): BaseLayoutProps {
+  return {
+    nav: {
+      title: 'My App',
+    },
+  };
+}
+```
+
+```tsx tab="Docs Layout" title="app/docs/layout.tsx"
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+import { baseOptions } from '@/lib/layout.shared';
+import { source } from '@/lib/source';
+import type { ReactNode } from 'react';
+
+export default function Layout({ children }: { children: ReactNode }) {
+  return (
+    <DocsLayout
+      // [!code highlight]
+      {...baseOptions()}
+      tree={source.getPageTree()}
+    >
+      {children}
+    </DocsLayout>
+  );
+}
+```
+
+```tsx tab="Home Layout" title="app/(home)/layout.tsx"
+import { HomeLayout } from 'fumadocs-ui/layouts/home';
+import { baseOptions } from '@/lib/layout.shared';
+import type { ReactNode } from 'react';
+
+export default function Layout({ children }: { children: ReactNode }) {
+  return (
+    <HomeLayout
+      // [!code highlight]
+      {...baseOptions()}
+    >
+      {children}
+    </HomeLayout>
+  );
+}
+```
+
+關於 [`links`](/docs/ui/layouts/links) 與 [`nav`](/docs/ui/layouts/nav) 選項的詳細說明，請參閱相關文件。
+
+<auto-type-table cwd path="content/docs/ui/props.ts" name="BaseLayoutProps" />

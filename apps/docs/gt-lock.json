@@ -1,0 +1,2274 @@
+{
+  "version": 2,
+  "branchId": "brc_v34cc0giys5orqbpjrqqkx09",
+  "entries": [
+    {
+      "fileId": "4945f107b278677016832d2c5f26ee7f99148864959b388583e13601bc9ab12c",
+      "versionId": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T12:41:00.298Z",
+          "fileName": "content/docs/meta.zh-TW.json",
+          "postProcessHash": "5ccda297561d3fe9f7759c352a571bc1d50ca618f0cac86b68422c2ca1d4d719"
+        }
+      },
+      "fileName": "content/docs/meta.json"
+    },
+    {
+      "fileId": "009db03dae5327720d93588f4a744c94c2a82ac3555c2b1af899e5bbab5a8e6d",
+      "versionId": "bfd679a7ffcf11918b4dd11c4a9db088217fc9cf1c0d3b71264e40a9f121bc46",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T12:41:00.299Z",
+          "fileName": "content/docs/asyncapi/meta.zh-TW.json",
+          "postProcessHash": "6d67a744980d8dac40c46d620efcc84e0944a04386da9840286cb849a6d9d871"
+        }
+      },
+      "fileName": "content/docs/asyncapi/meta.json"
+    },
+    {
+      "fileId": "5824c7a4c5048cc2837b60edf7c8b1293db50cf017500c4680f7b709a8a87556",
+      "versionId": "7a0760cca675e39f522b90dcc06aecd81e1a10837ac910267e1d52ff00e22230",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T12:41:00.300Z",
+          "fileName": "content/docs/cli/meta.zh-TW.json",
+          "postProcessHash": "29e9d0fd881d035b4eabc8279b4287e634cb74fc1503f41d282b50fe8149932f"
+        }
+      },
+      "fileName": "content/docs/cli/meta.json"
+    },
+    {
+      "fileId": "0872bb9d699d266fba3d1a1b3898a2161392fbddf3a9b84d6af1ecf7b75c9fe7",
+      "versionId": "a3d35810a0554f624c2e37a9f07616a28c72766a0bfc71d48667b9e847317092",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T12:41:00.300Z",
+          "fileName": "content/docs/graphql/meta.zh-TW.json",
+          "postProcessHash": "e49d01b5c22326a0f9e0a04c1eeb1b6eb175745e25f7ccf1c12088d1630d910a"
+        }
+      },
+      "fileName": "content/docs/graphql/meta.json"
+    },
+    {
+      "fileId": "d284d9dd1c2482437e8270a5f43051f9059406ad49b89e739d496d04315a599e",
+      "versionId": "debf19ea057fa801d5e7f49f94659ebe222d6abefc560c0334f39b10742cfbea",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T12:41:00.301Z",
+          "fileName": "content/docs/headless/meta.zh-TW.json",
+          "postProcessHash": "02fb8cd539a812f637efdbeb0b99a6ae8e2b729c0a236e8864d7095edb81b272"
+        }
+      },
+      "fileName": "content/docs/headless/meta.json"
+    },
+    {
+      "fileId": "ac94b7d4331ac813ca9ba031ac5ef9550a23f77e43c22903004c34b9060e1793",
+      "versionId": "ad85a8f20cdebf8489cdc3808e8cb04d99b33abbcb26910e4ab917693fb9fd1a",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T12:41:00.302Z",
+          "fileName": "content/docs/mdx/meta.zh-TW.json",
+          "postProcessHash": "fdb44a078a7ecb9e0f5689a246593189244e701170e7f461abdc4ab9cfbb962a"
+        }
+      },
+      "fileName": "content/docs/mdx/meta.json"
+    },
+    {
+      "fileId": "4f297fd349dffca419afeaa75965af86452f398b9942c356759f43e4b944d50a",
+      "versionId": "359b26c2e2fbab179b6fe301f97bc413766bc86e0391a93e09ea5b0b31e6697d",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T12:41:00.302Z",
+          "fileName": "content/docs/openapi/meta.zh-TW.json",
+          "postProcessHash": "72ed691b4f595ea120a7367ce29c08ea26c7069745b1a6c4c3701f989539afa8"
+        }
+      },
+      "fileName": "content/docs/openapi/meta.json"
+    },
+    {
+      "fileId": "4069afbe1e2768c7cb0ec7a4369785cd16ddeb467b57d9fc93b65de79be64618",
+      "versionId": "e740af8a934e11e42cb9c935992508b51b4498bac771b8ee6ef7a5b10c988a28",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T12:41:00.303Z",
+          "fileName": "content/docs/ui/meta.zh-TW.json",
+          "postProcessHash": "6e02b6ab218fc236a4e1963ecc3da7b7df8dd5f555d8bf311b9bf9a11bda6fd3"
+        }
+      },
+      "fileName": "content/docs/ui/meta.json"
+    },
+    {
+      "fileId": "d13afc78a8e53b7b9dc83f95c4f048572c6a27967e02075de9adc94a7d7da39d",
+      "versionId": "9c87b30485304e1877781260a7fd79e67a00964fb5c6a37001716aab99046a92",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T12:41:00.303Z",
+          "fileName": "content/docs/headless/components/meta.zh-TW.json",
+          "postProcessHash": "993d3530ff99924a9b8f6384d7c91585cdb4126c57885e3ebb4c21d4bdd9bef0"
+        }
+      },
+      "fileName": "content/docs/headless/components/meta.json"
+    },
+    {
+      "fileId": "7676a1408e831f03dfc7f626aa22345ff881025b30da1f3b20c2432238e294ed",
+      "versionId": "caea5c8b158fc04b5ff4ebb01e2d082ab136b502e514dad33cff7f1b538f006a",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T12:41:00.304Z",
+          "fileName": "content/docs/headless/mdx/meta.zh-TW.json",
+          "postProcessHash": "6ca22e3db1883fb8eab1570609f8a4f1844dd5f387231478e9e5689f3df08ab3"
+        }
+      },
+      "fileName": "content/docs/headless/mdx/meta.json"
+    },
+    {
+      "fileId": "29aaa76fde6fc9c3054e252a895e72c50f0f7e8b4e607bdf2d2cc896e85d23db",
+      "versionId": "5c4118f28a7d5fb258b68bcf0ca745c825dc7ef4a0daffa16f687d6b9e81d9f9",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T12:41:00.304Z",
+          "fileName": "content/docs/headless/utils/meta.zh-TW.json",
+          "postProcessHash": "dc594d3cb7ed195cff005514d9edf037f94db773624a223657a0726f76320876"
+        }
+      },
+      "fileName": "content/docs/headless/utils/meta.json"
+    },
+    {
+      "fileId": "ab7ff882dd876052c55e933eb5ed6df455b62a424ef53eec4ae7860480e132f0",
+      "versionId": "c07b4b191e539a6b41633969290825f1441d9c340f4206b25d0d9fe4d3b68fd0",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T12:41:00.305Z",
+          "fileName": "content/docs/ui/layouts/meta.zh-TW.json",
+          "postProcessHash": "709335c5e470d8bfec79384c2b7c014e573e960f568e1cec9ea252741a43be21"
+        }
+      },
+      "fileName": "content/docs/ui/layouts/meta.json"
+    },
+    {
+      "fileId": "1336d7ccb72c5b2000c08c7be25b15811bb52e0f81e0a85e9b59e6de44fdd82d",
+      "versionId": "0ae090a107e645faf4cc6b083930baa2f408c050c3370350fce6f707e16b9fb8",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.402Z",
+          "fileName": "content/docs/asyncapi/index.zh-TW.mdx",
+          "postProcessHash": "ecbd380c12739e663c4a5f067a742d31f1ca70bcd1a9b60851d8feeea949e348"
+        }
+      },
+      "fileName": "content/docs/asyncapi/index.mdx"
+    },
+    {
+      "fileId": "ce365eeff664aa2bcd6570fd27c9a17ee9eb0c758434a059dac19d1be26aff6e",
+      "versionId": "296eababdc0fa46572a29969e952344bb3a6176504cbb6bfe9c84f18d43fd3b2",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.422Z",
+          "fileName": "content/docs/cli/preview.zh-TW.mdx",
+          "postProcessHash": "f35f5cece6f803165c03fc95be053dd534775269b384d1473fb6c70d88d5438a"
+        }
+      },
+      "fileName": "content/docs/cli/preview.mdx"
+    },
+    {
+      "fileId": "2d1cea19da625cd13dde56109aa799b1e9240223c281f7e477985ddd1c4fbde0",
+      "versionId": "bc6c0fa91f0f8d2e9d860bd84ce71e97322e8e02a13b5a7284224d79d7f56b97",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.416Z",
+          "fileName": "content/docs/graphql/index.zh-TW.mdx",
+          "postProcessHash": "1b957c07b156d444c5cce2c0004c6788b5adc2b57b2a3e8286609bedf2a6132d"
+        }
+      },
+      "fileName": "content/docs/graphql/index.mdx"
+    },
+    {
+      "fileId": "4bc2d0b6935cf0d88e641bb0c0967bb74dc848f85575260d57e267e4217c2563",
+      "versionId": "b2589a9710101f03d945f20bd2c8703e169977682be681ea103c6bd1bb5f6ce7",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.412Z",
+          "fileName": "content/docs/headless/page-tree.zh-TW.mdx",
+          "postProcessHash": "df124453dc82c9df1bdb8b9b7e629083d357a2e67022fbb9e3c0ccacc4566b66"
+        }
+      },
+      "fileName": "content/docs/headless/page-tree.mdx"
+    },
+    {
+      "fileId": "03d66e1d3c067fc12feefb18f7dac223c9e58b1624c471bd2af39a1d5035811b",
+      "versionId": "facfa756539b769c210bd78c1a0c130184d88518980db7a4785644ecd786673e",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.420Z",
+          "fileName": "content/docs/mdx/async.zh-TW.mdx",
+          "postProcessHash": "e5cfa5fdfc9e0636bc3a25392675cc9cb8aa16c25f36c8bb99646786326e1857"
+        }
+      },
+      "fileName": "content/docs/mdx/async.mdx"
+    },
+    {
+      "fileId": "95d63ad281674545dea9819fbc9f2ac5f0d31edc593bcb2647f789711f79a394",
+      "versionId": "0d6ed618fa270bf6624d2681995418155578cfb66d66935026308de7cd9fa58a",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.402Z",
+          "fileName": "content/docs/mdx/last-modified.zh-TW.mdx",
+          "postProcessHash": "040057e6211d8446f786516b835195f3213e47e007fa4e66184905ad79b722f7"
+        }
+      },
+      "fileName": "content/docs/mdx/last-modified.mdx"
+    },
+    {
+      "fileId": "9d481c39524683796ff3880448bc5311c46ea900219cda9374163b2099ad6859",
+      "versionId": "9109e36dd059816c12afe73d1276412a9b1d55c932721206d6339938d7a95b52",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.397Z",
+          "fileName": "content/docs/mdx/performance.zh-TW.mdx",
+          "postProcessHash": "fe01b7535cd7867472af823fc906982aa190be4003a46b5adbdd1bb67a6e47f0"
+        }
+      },
+      "fileName": "content/docs/mdx/performance.mdx"
+    },
+    {
+      "fileId": "f42cf1e0c705ee599ddea8b399cd8b7639d1d814af7f9dea07601c78552d2a54",
+      "versionId": "4142a7e6f512874173513ecbd21d10c6ae45759d87ad351c4ad3f4fa99654608",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.398Z",
+          "fileName": "content/docs/mdx/typegen.zh-TW.mdx",
+          "postProcessHash": "0079dab911aebb6ba43242c994bc4b6c57a3793aa81544bd55b0800335ba7344"
+        }
+      },
+      "fileName": "content/docs/mdx/typegen.mdx"
+    },
+    {
+      "fileId": "921bcf627ea2bd8d45c053ca00d9657b847df23c529e669151014cbc79e09738",
+      "versionId": "34ad418527b8c9b192220cd39ede3880d193e66999d7815dce828fa2f97abe68",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.408Z",
+          "fileName": "content/docs/mdx/workspace.zh-TW.mdx",
+          "postProcessHash": "5b5f15f8e33cb4368f36ca6790d78fd0926ffd90e55d42033ad0c09314312f8d"
+        }
+      },
+      "fileName": "content/docs/mdx/workspace.mdx"
+    },
+    {
+      "fileId": "498e0a334a52a8e5b5be0dc92b31b3a18def4be216233a733b73948ea271fa5e",
+      "versionId": "387ebd8633d34fb45f8def7012dd17e0175b57729d2b45c7d6e74bb74f75d5df",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.401Z",
+          "fileName": "content/docs/openapi/index.zh-TW.mdx",
+          "postProcessHash": "c7747af5c85934b5c89b78f6b39afad7ef8ba35f34abacb0383d1b8f12e26329"
+        }
+      },
+      "fileName": "content/docs/openapi/index.mdx"
+    },
+    {
+      "fileId": "5d6a1628c4a243625058397934e26181fafc3c93f7413ed8dff4d973d28f6f7e",
+      "versionId": "7a340f7b447c0a06570983d782b88ce2a54323ee6977666362a37825a43fe8bc",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.415Z",
+          "fileName": "content/docs/ui/component-library.zh-TW.mdx",
+          "postProcessHash": "49e1b1940d6abfdd8f3f210de7b43c23f328695aa4fb86664e93f046aa91ff4a"
+        }
+      },
+      "fileName": "content/docs/ui/component-library.mdx"
+    },
+    {
+      "fileId": "a39f7572559f14633f5901bad1b9a6deb8f56e6ecad812f3f789ba73ec2988d7",
+      "versionId": "a4337c32d9ac28e031d6e4ceeb1ea5c5d024ee4f5c27fa3e85ad3472b58dbc27",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.402Z",
+          "fileName": "content/docs/ui/index.zh-TW.mdx",
+          "postProcessHash": "f472e7033642bbb6c7c6e5c3058b4628976e30a6d8794dc0cee5a8f25aeafec9"
+        }
+      },
+      "fileName": "content/docs/ui/index.mdx"
+    },
+    {
+      "fileId": "2fe6b60705921b8b1ba7ef84cde3c63decb4b5a5c41daf4797b2b8bd4291d43c",
+      "versionId": "ddc9b0042aea06a3c35ba855ae2cb77bc30596a726fe4c08fb7ab8ad504d44b3",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.421Z",
+          "fileName": "content/docs/ui/search.zh-TW.mdx",
+          "postProcessHash": "f51ccb0367df5096b09d24942a6bef6268742cba54d7d28aee2023f367f9495e"
+        }
+      },
+      "fileName": "content/docs/ui/search.mdx"
+    },
+    {
+      "fileId": "c02a078833b39068e7ab2820ae67f67dbb162b58d3e599a400a1132c29c849fd",
+      "versionId": "d9beafa4ff6c7c4e543ecef52ddd13d5c139a45f10b234f86b476294ae0f332a",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.417Z",
+          "fileName": "content/docs/ui/theme.zh-TW.mdx",
+          "postProcessHash": "ace2739581445e3168913af3cd7d2813690897d02eb37266d6f2e6628681520b"
+        }
+      },
+      "fileName": "content/docs/ui/theme.mdx"
+    },
+    {
+      "fileId": "4f32f43386129fb057cc472704d7b9429256d35099bc74488dbfa22c1fde0cb3",
+      "versionId": "574f5720716d0c20f2eb389b6ccf5ef9470f21344351d6f02c3387a9824053bc",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.422Z",
+          "fileName": "content/docs/ui/translations.zh-TW.mdx",
+          "postProcessHash": "8389852c252398afd123bc01c4fc944cba959fa83583dd3a8ab7fbd2564e5b3f"
+        }
+      },
+      "fileName": "content/docs/ui/translations.mdx"
+    },
+    {
+      "fileId": "205ee6cd52a9fe9d249f17a19fcf3bebcf5581c551d1ff7298b0a6774dc61b2f",
+      "versionId": "04fba8a52210f8ac6fa2ea17fa065110a965285348b3b2a4c0701c9ec9f6090b",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.419Z",
+          "fileName": "content/docs/(framework)/[framework]/comparisons.zh-TW.mdx",
+          "postProcessHash": "32f122b6a2c22f33e0b104649a5910d44082b1f9322f512825b782b392952e80"
+        }
+      },
+      "fileName": "content/docs/(framework)/[framework]/comparisons.mdx"
+    },
+    {
+      "fileId": "f41f67e14a385b5e2c1008a5689e672e5528dbdd8c9677ae07a4bc046dc0b3d2",
+      "versionId": "fa2b8ebc8b64c7ccfee483941dd1831dda0027b17899fe26e84d3af5a59fd648",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.422Z",
+          "fileName": "content/docs/(framework)/[framework]/editor.zh-TW.mdx",
+          "postProcessHash": "843b16384e6638c4770f2bbec7c63791b7a85134b32a5418de966de2bc0170eb"
+        }
+      },
+      "fileName": "content/docs/(framework)/[framework]/editor.mdx"
+    },
+    {
+      "fileId": "105e1f2e57cb5ada9054b5723db50b836c374dd7bc39ef9d803358e4fb688a27",
+      "versionId": "cd1a29677cdaebb143b7b723a6daa51e0f7e17fb238c3a9ce93bafbc219011cb",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.410Z",
+          "fileName": "content/docs/(framework)/[framework]/navigation.zh-TW.mdx",
+          "postProcessHash": "a8c0b9ec5674892f99749546b40c829db45439de3bf6846c98fdf2e4639e49fd"
+        }
+      },
+      "fileName": "content/docs/(framework)/[framework]/navigation.mdx"
+    },
+    {
+      "fileId": "23b2587c82ce914a5dc477131f3c41a299092a4290a4de7132e956e358ccd7bd",
+      "versionId": "b5d59b93116004efa412ed9c226562a937cfe6c8aff91e96a0eb90273991831d",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.414Z",
+          "fileName": "content/docs/headless/components/index.zh-TW.mdx",
+          "postProcessHash": "a58e67f682379166ca2a347b71230de33996fcbb9e874806377df3376c28636e"
+        }
+      },
+      "fileName": "content/docs/headless/components/index.mdx"
+    },
+    {
+      "fileId": "d088a7c7d1a8c8bbeca233e84ec59a5336ff75fbeeed5a9912614e5f40f80564",
+      "versionId": "63955acd8a7f3ba2bdc8d4859209826d848f75fcc80f3f9bf373a4994505de02",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.421Z",
+          "fileName": "content/docs/headless/components/link.zh-TW.mdx",
+          "postProcessHash": "919b632e3d7b66d0e30dee2ed2cce2ad421232b4f97e6de78dc403e34b57d0f8"
+        }
+      },
+      "fileName": "content/docs/headless/components/link.mdx"
+    },
+    {
+      "fileId": "ce965cfac3caa5f59d5eabbb48f9877e6c566c28feaaadff950872ec103497d9",
+      "versionId": "e8a6db7bb37571d08544247a37a184f4617301e16b75eeff9adf3a357c435a4a",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.392Z",
+          "fileName": "content/docs/headless/components/toc.zh-TW.mdx",
+          "postProcessHash": "24f1714a684d2e408456800ecfdb9a17424c7582b6c38ddcbe49cee07d26fe7a"
+        }
+      },
+      "fileName": "content/docs/headless/components/toc.mdx"
+    },
+    {
+      "fileId": "2abb9a5b68ea00c06e185f86e50c8c220b40b59e6d54a6c9755d742ca2b99b97",
+      "versionId": "5805f9db6df847079748ffddab2fa225f65abc034f97dc585c7a2febb7a843da",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.405Z",
+          "fileName": "content/docs/headless/content-collections/index.zh-TW.mdx",
+          "postProcessHash": "1aab2735eea831d6d26376ee5faea1cf9463df7ee6372ae91e3ad63db678429f"
+        }
+      },
+      "fileName": "content/docs/headless/content-collections/index.mdx"
+    },
+    {
+      "fileId": "c49b737d75a93e50e55fe5648207d6932d584d04aa888fcbe55223bdfec6ccdb",
+      "versionId": "dcc1f5fd43d43d6d7ec81e452c439f4510e1c49c25dbcfdb4ba2c5bdd05482f0",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.415Z",
+          "fileName": "content/docs/headless/internationalization/config.zh-TW.mdx",
+          "postProcessHash": "7a2033d732cc693dcbd3cea44a59f84aefe220444900f9aaae838f2a7f399765"
+        }
+      },
+      "fileName": "content/docs/headless/internationalization/config.mdx"
+    },
+    {
+      "fileId": "e417cc1cf3a68a6a195f940ebd0c02963818c5017c6267189dd71284161d470f",
+      "versionId": "65f5e8fc8f197c7481f076a8e8be44eb3e621ff3314d3eaf0ce71d30993d0ed8",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.393Z",
+          "fileName": "content/docs/headless/mdx/index.zh-TW.mdx",
+          "postProcessHash": "1cc8fa5405649ef9922775dd7a36e68a0fb7a992e0596f61cfcf08271b08faba"
+        }
+      },
+      "fileName": "content/docs/headless/mdx/index.mdx"
+    },
+    {
+      "fileId": "06432734b80c77174ae9fa11c02aa8e32c009ffdd701e399691c7b3bf7d83b03",
+      "versionId": "bc7ed1a8f0b9b79f35b975d5ebb3780190ef113d6c7d9278ce5d122bf44ae4ad",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.407Z",
+          "fileName": "content/docs/headless/search/index.zh-TW.mdx",
+          "postProcessHash": "09a3b7d14fba082b8c4f4dd1124cfd24100ee02b70d23fbc45de43f624ee0052"
+        }
+      },
+      "fileName": "content/docs/headless/search/index.mdx"
+    },
+    {
+      "fileId": "de9bded6b694c5219ff1530fb23d429a64bacb45f30a40f32ef23f303b82f2d7",
+      "versionId": "df10da86067f35018df2b8aab339b821ad1249bb4982bf43c14c5d6054e279c5",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.416Z",
+          "fileName": "content/docs/headless/search/trieve.zh-TW.mdx",
+          "postProcessHash": "06c15462d76ab696a0a62582302f08214cfb9a20add7948b8e54c2738cd15890"
+        }
+      },
+      "fileName": "content/docs/headless/search/trieve.mdx"
+    },
+    {
+      "fileId": "9b737c4bdd311bf2bff75dd7cfb378a3b8f29445b208ec0c5428e7f5ef931134",
+      "versionId": "a5e832f70249f9e2c5e22fabf6b342c80f8e02c43b475ccc9eb430057d50d98b",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.423Z",
+          "fileName": "content/docs/headless/source-api/plugins.zh-TW.mdx",
+          "postProcessHash": "6fb14c85b7c7123fa401d975de404ec9e82f235c9f8c6194c97b07b90ffcfbf4"
+        }
+      },
+      "fileName": "content/docs/headless/source-api/plugins.mdx"
+    },
+    {
+      "fileId": "542a2b4cf3eb42eda9532ecf24ba4fea419084f3bfdf6b2a0a9e64c5d7dab8a4",
+      "versionId": "f255a9d034ae0e3e0c56fdd951c767b4ac3c4e82bc2199eebec0f59a68c14958",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.417Z",
+          "fileName": "content/docs/headless/utils/get-toc.zh-TW.mdx",
+          "postProcessHash": "9ada4a27d128c36c0c37c79f14d3f52e36da62580f7d42783f8273b82c0e6e02"
+        }
+      },
+      "fileName": "content/docs/headless/utils/get-toc.mdx"
+    },
+    {
+      "fileId": "0fa38636dff39df08aff374ed29e1168ea2c829651d8ac865d29aa0c3c603ee5",
+      "versionId": "d0b72cb09de8dca851523ba180147c79ef95039d0dcbe0e0719eb13e023ca406",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.395Z",
+          "fileName": "content/docs/headless/utils/git-last-edit.zh-TW.mdx",
+          "postProcessHash": "397a5b9d11808580a9da2da36c84df839301c108f4ac985f76a652e112614100"
+        }
+      },
+      "fileName": "content/docs/headless/utils/git-last-edit.mdx"
+    },
+    {
+      "fileId": "6629e72489884f427138affaefa9523c1265577e414d00769309606a736ddcf4",
+      "versionId": "f9231de5f26f9695a2aaf783b8f84694962d1692d363327963d23531dabfe3fe",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.418Z",
+          "fileName": "content/docs/headless/utils/index.zh-TW.mdx",
+          "postProcessHash": "dac68dbd95565d5b7e0a17eb5cc9042a442aa2f9df5d9e22d86de44e82c10a33"
+        }
+      },
+      "fileName": "content/docs/headless/utils/index.mdx"
+    },
+    {
+      "fileId": "ee625013ce1fd2d608b680c0e1ef1194c36aee73f830343d8d8cf8b46fffd8f8",
+      "versionId": "8a03f3a1e3b73208dab18ced922aa081bac3fe21cb5d7b96268a40324b814229",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.423Z",
+          "fileName": "content/docs/headless/utils/mcp.zh-TW.mdx",
+          "postProcessHash": "2a10103806493566a64ca0677537dcfda91ed2d66151d92bbe07cfa141308883"
+        }
+      },
+      "fileName": "content/docs/headless/utils/mcp.mdx"
+    },
+    {
+      "fileId": "a7317036995ab769dc07d512c1789efa0eb8ced3e82b708ee2d752a5903b0de8",
+      "versionId": "e46a9e61bb323f9dd607b02513c5d33b2e0f5ebf86166296dca1425459607b7d",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.409Z",
+          "fileName": "content/docs/headless/utils/page-tree.zh-TW.mdx",
+          "postProcessHash": "11cd35914712444e161d439e695e778ec655a06570bdae8f4ae2774b346d2e19"
+        }
+      },
+      "fileName": "content/docs/headless/utils/page-tree.mdx"
+    },
+    {
+      "fileId": "546d9d60ad686d41708c5c14bb2a815ea6ab3dca323d968fbab62fe3ca340b81",
+      "versionId": "e65ab848de4a2c8b2299d91eaa797449e253c421eedda2dd27f90bb505d501b8",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.420Z",
+          "fileName": "content/docs/mdx/(integrations)/next.zh-TW.mdx",
+          "postProcessHash": "b87f20a725201010af7b8ae5b5f06a5da89208c0a690d62ab87724e98e0d2c9e"
+        }
+      },
+      "fileName": "content/docs/mdx/(integrations)/next.mdx"
+    },
+    {
+      "fileId": "8b1df7ad07987d522af5b33a6c4f6ebb66aacfb830b7ba05ce98a93cec0a9292",
+      "versionId": "986a8bf68a83b92d4bad8a2498b3156d6e3a92a315ad3c50b660ae21bd73ff9b",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.413Z",
+          "fileName": "content/docs/mdx/entry/dynamic.zh-TW.mdx",
+          "postProcessHash": "8f7798c9c294c37b6df2964b2e306d78fd2c005dde4824b16de6687ccf061d58"
+        }
+      },
+      "fileName": "content/docs/mdx/entry/dynamic.mdx"
+    },
+    {
+      "fileId": "9b9e99361d31eed7a17f710333d5b7292dc4b688995c14a5c52e1ec7eb7dcf54",
+      "versionId": "935854fe4313aede6f2bd359d9da12e616b58b6c89ca968092a75321f36b0f81",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.420Z",
+          "fileName": "content/docs/mdx/entry/index.zh-TW.mdx",
+          "postProcessHash": "b72db5ff0b529e911e8c2b64a5cc07ab23e3c602fe7e843bd62f9d105a9f18d8"
+        }
+      },
+      "fileName": "content/docs/mdx/entry/index.mdx"
+    },
+    {
+      "fileId": "2ac02c5d132835849a892e255a80085ae029b497f561fc916771dc75cebbfcd8",
+      "versionId": "a9a7d4d41a21d527a00640d05cfab98521f06b73e56883ac10a505ccafa406d7",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.401Z",
+          "fileName": "content/docs/mdx/entry/server.zh-TW.mdx",
+          "postProcessHash": "6171716f1670f9d84e6eec1e41a08ff2a2bbe8fb426d2347cef015474be72d2f"
+        }
+      },
+      "fileName": "content/docs/mdx/entry/server.mdx"
+    },
+    {
+      "fileId": "67309c41240a4bf483e6bc3af9a331d798cb92e30b6873b3bed13fd25913b54b",
+      "versionId": "87693fcdc5cda66f7a24da63c99b432dd0c4e0b65a95ec2df57fc41ed755bb63",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.404Z",
+          "fileName": "content/docs/ui/components/accordion.zh-TW.mdx",
+          "postProcessHash": "b7c421b9ed396df1024e0c75e196494a638f4044bfda41f68395e1016c7ae3ad"
+        }
+      },
+      "fileName": "content/docs/ui/components/accordion.mdx"
+    },
+    {
+      "fileId": "4326e43abd30f4711e363d396570c5181f5a66bde7f3e097184ae6457f4116c9",
+      "versionId": "085e60dad6d7a8c1d903b350eacf36e55fc62a6980684e7345652bd99332a9e2",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.418Z",
+          "fileName": "content/docs/ui/components/auto-type-table.zh-TW.mdx",
+          "postProcessHash": "b978cb48ef98c459ad45d30cbe0e7f419a8dfa3ce0bd3266422b2d812f5dcba9"
+        }
+      },
+      "fileName": "content/docs/ui/components/auto-type-table.mdx"
+    },
+    {
+      "fileId": "6c316cc237ec6d319c53a306d32fef21a49fab85895ee1610eae8bdf32eab64e",
+      "versionId": "513422b17874f3d36926180a509a6525c92c93cdcc2e5ff7d92b85d28ddd6f39",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.406Z",
+          "fileName": "content/docs/ui/components/banner.zh-TW.mdx",
+          "postProcessHash": "c3c0555a004afeeb101cc4c4f8b2ff17e5f167a9c3b084f57eb2d7a5e51ca9ea"
+        }
+      },
+      "fileName": "content/docs/ui/components/banner.mdx"
+    },
+    {
+      "fileId": "c3fdc80edb588fdac48e59a0033a87665b97c37e5994176234430651ec313ed9",
+      "versionId": "eb4a2858745fe5c0be76446683ec5f8e861d5f72e711a90c80ec9b80d5ea98dc",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.404Z",
+          "fileName": "content/docs/ui/components/codeblock.zh-TW.mdx",
+          "postProcessHash": "4d6e161e77b2effe45deae6530ea924cc7ed0b882bfe30760d489fc2e6375126"
+        }
+      },
+      "fileName": "content/docs/ui/components/codeblock.mdx"
+    },
+    {
+      "fileId": "4baa72e0ccc2e121211f1ffa9271e735582bdbfcbdce657d0072527fe92502b9",
+      "versionId": "ea161fcc984e18a9553ebe46c52e75efa956088f7f910f0ebce5743ae7477cb4",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.407Z",
+          "fileName": "content/docs/ui/components/dynamic-codeblock.zh-TW.mdx",
+          "postProcessHash": "3e8e994ede4d7c37a9d942489d6d9d61efb80dbd8d63e15f0eb59be420c019a7"
+        }
+      },
+      "fileName": "content/docs/ui/components/dynamic-codeblock.mdx"
+    },
+    {
+      "fileId": "5031667c4f380e10699e5467e02719fe7c01ece62ec700d860e60d378e47f84a",
+      "versionId": "a1e2cfadfa21eaad495b3bc42977c0f7c1a56dce9ab59bf3141c2337015bc66b",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.405Z",
+          "fileName": "content/docs/ui/components/github-info.zh-TW.mdx",
+          "postProcessHash": "4d9fe2f801eafc5a8fb6a4ed5552448c1dd969cf895cdc6d1dc6c808729ec739"
+        }
+      },
+      "fileName": "content/docs/ui/components/github-info.mdx"
+    },
+    {
+      "fileId": "9790f945e7544663478b0618e599c69e33208b33bd078cdc79448d3957a14526",
+      "versionId": "b1a5ce49505466ec7b4bbf05a0c4d15fd007489584029513833478d405a7d58e",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.403Z",
+          "fileName": "content/docs/ui/components/image-zoom.zh-TW.mdx",
+          "postProcessHash": "ab6beb0d52d872fa02a86ca02ed813d9a9d7848776f73a28320ccbd56ce3638e"
+        }
+      },
+      "fileName": "content/docs/ui/components/image-zoom.mdx"
+    },
+    {
+      "fileId": "258b1378febec55389120024acdfbd1dd0b6831ccc8f3d15497e1333cb7918fa",
+      "versionId": "223de62f1b40e48fe4ed8b14738ef26a5fe6ff8de74f36c4e1b371423cd17c46",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.419Z",
+          "fileName": "content/docs/ui/components/steps.zh-TW.mdx",
+          "postProcessHash": "8776b3881cc6aa05665895d36fe9a245ca1548b67b88ec04062e300c40f26cf3"
+        }
+      },
+      "fileName": "content/docs/ui/components/steps.mdx"
+    },
+    {
+      "fileId": "67cfa2b2a8fe21414ed5d934f1776e63a4623bfe0345fa361312851f8e7025c7",
+      "versionId": "81787a0de321a84aa3c0ce903c12d64404f35835ee2eed39eeeaaca75db90d1e",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.396Z",
+          "fileName": "content/docs/ui/components/tabs.zh-TW.mdx",
+          "postProcessHash": "70226987a78176ef13080470c680f9bc27beccf0d0c0c3ed4ad5414ee14c70d4"
+        }
+      },
+      "fileName": "content/docs/ui/components/tabs.mdx"
+    },
+    {
+      "fileId": "eee7b4ab07b3ae5627580ae47f8291ad823f08de8a622b2408bd323f0f566f9a",
+      "versionId": "08ecaf2f408c949a4c31eb4fc24a0039fa1b62557f4c878176b86e7a39dacf31",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.409Z",
+          "fileName": "content/docs/ui/components/type-table.zh-TW.mdx",
+          "postProcessHash": "714f440ffa7ed0a00f739d7cbdbe4f1acea3ee003d97a45340ed90c6df8787ba"
+        }
+      },
+      "fileName": "content/docs/ui/components/type-table.mdx"
+    },
+    {
+      "fileId": "ca07a32f478fc6c096f86a1fbe738c7781bc566e40dbc3751d4392d3e8e1d740",
+      "versionId": "0aa7943263b8929f767e0c592e47d387edb4fd9149f7046a8a5d588d079413b6",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.410Z",
+          "fileName": "content/docs/ui/layouts/flux.zh-TW.mdx",
+          "postProcessHash": "885b1186e5973780d4e3ce003be36b9e045480a047c68c34dfcbd05fc6a9ec69"
+        }
+      },
+      "fileName": "content/docs/ui/layouts/flux.mdx"
+    },
+    {
+      "fileId": "6e7d09e0db19b2efebcb052a3279cd5c81449e69da7df46a904cdb50a7bac96f",
+      "versionId": "f2ccbabe48268faf2ca6313ecaa675c89634d4241057073bb7b6f7cd5cf8a695",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.415Z",
+          "fileName": "content/docs/ui/layouts/glass.zh-TW.mdx",
+          "postProcessHash": "68c178afa5bc3cfcf7319f124ab30b3367e9b87e2056d7c85be0e21b7d97d0a2"
+        }
+      },
+      "fileName": "content/docs/ui/layouts/glass.mdx"
+    },
+    {
+      "fileId": "89ee2d28210c519456564358c8536affc7c4d027e9b302ad345cb26070675b53",
+      "versionId": "ba9c96eb642b781db288a80468feaa7edcae887250561a1233fdb6e206ea3fba",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.410Z",
+          "fileName": "content/docs/ui/layouts/home-layout.zh-TW.mdx",
+          "postProcessHash": "ed3e182571a5c5f98dd48a8b6debe92b6486b03ae77d911fc47f8f9f469ea5cd"
+        }
+      },
+      "fileName": "content/docs/ui/layouts/home-layout.mdx"
+    },
+    {
+      "fileId": "ae06216a88996351b92598d9f8521c72f91d7f8e1449d9bdde252cd095ad699b",
+      "versionId": "126267df6559852a6bc6bed9c77b952dd6eae9df0d0265b5c3fe8d12a3451c7e",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.414Z",
+          "fileName": "content/docs/ui/layouts/index.zh-TW.mdx",
+          "postProcessHash": "bdd2f0c116c937013619827f8c6709f6a09e2702683150d5007c5d62a30c9f15"
+        }
+      },
+      "fileName": "content/docs/ui/layouts/index.mdx"
+    },
+    {
+      "fileId": "848ee30ec4c253754b55bdefb4c28b109ee3a3ce015e77891c069a643754e5a6",
+      "versionId": "ed5c0a04d06d32fb11578294e7249ed9345cec5f4f0eb8f77a66cd7f665645f7",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.425Z",
+          "fileName": "content/docs/ui/layouts/links.zh-TW.mdx",
+          "postProcessHash": "35987b62510b3ae07a57ec2935c01d557d90281e1f227c60f6dc2975ac5118f1"
+        }
+      },
+      "fileName": "content/docs/ui/layouts/links.mdx"
+    },
+    {
+      "fileId": "c354fc1dd0066204e16ee81dc306991c350b1c255f4ef92f907870fc10454e82",
+      "versionId": "ba11089cf421d640621cd26c56dfc2c4d37c2725b244c2b1a1dce8873d092f31",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.422Z",
+          "fileName": "content/docs/ui/layouts/nav.zh-TW.mdx",
+          "postProcessHash": "a14f7c44a5f92484c169ba88d8dfe29cddf58623416ad689dd4e6be052dba248"
+        }
+      },
+      "fileName": "content/docs/ui/layouts/nav.mdx"
+    },
+    {
+      "fileId": "c90ec09ab08263d8216f9c13497eb41aab92c55ecbfc0a748d2e825759ae8445",
+      "versionId": "8444cde9936a7f976a6586d4dfbf657c207413a2909eec284475eeccb2565ab6",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.420Z",
+          "fileName": "content/docs/ui/layouts/notebook.zh-TW.mdx",
+          "postProcessHash": "31f679e9eb466992ba7ccb11b5783cc77f22429c134114182d3916e9ebddcbf0"
+        }
+      },
+      "fileName": "content/docs/ui/layouts/notebook.mdx"
+    },
+    {
+      "fileId": "81788efd8f3abbd792b5cfb59bcb884dc20eb7288bb946d3ef55bde8e2b6e93a",
+      "versionId": "19df12167cd6a609118e3384a9c663d2c6cb5e5af6710117bb80f22d03fce5a3",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.421Z",
+          "fileName": "content/docs/ui/layouts/spacious.zh-TW.mdx",
+          "postProcessHash": "41dd3c2f36f108c16e3b02ad15e7ba773f7073310d6a25c69a8d93e1ee5c8ed7"
+        }
+      },
+      "fileName": "content/docs/ui/layouts/spacious.mdx"
+    },
+    {
+      "fileId": "8a6bb9a32816c63b28101d616870a3a4ef94a5a9c6ae3a4f44a50cc5123a4028",
+      "versionId": "907a260cd282d12b9b2465144db59db5ce16502d40833804c48be5c86dc48f94",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.419Z",
+          "fileName": "content/docs/(framework)/[framework]/community/fumadocs-page-history.zh-TW.mdx",
+          "postProcessHash": "402fc46b45deffa5f8877d94cd34a36db98b7632a42c3bffafdf2e62a03d43e2"
+        }
+      },
+      "fileName": "content/docs/(framework)/[framework]/community/fumadocs-page-history.mdx"
+    },
+    {
+      "fileId": "d047c645c9da1c5084ab9d1dbd85086bd75cfe7c975c7afa6f32e9a89596fd3f",
+      "versionId": "11e2b9557a3b6554f5894759a176ed75affff1d30e01679e872e8cc1ebef1968",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.406Z",
+          "fileName": "content/docs/(framework)/[framework]/guides/customize-ui.zh-TW.mdx",
+          "postProcessHash": "a343c96c09b2c1c8326f798cedcb6e08f2c1f58d5a0ac81821a281941127c26a"
+        }
+      },
+      "fileName": "content/docs/(framework)/[framework]/guides/customize-ui.mdx"
+    },
+    {
+      "fileId": "1d1a717ae2e02047924bfe2777c809ecb9deb8ebf5a1e63c9205868ae0b1ea95",
+      "versionId": "bdadc0aea9c09d1efdf71e0fb77d926fcedc9371d89e59c4415dcb3da05b09cf",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.421Z",
+          "fileName": "content/docs/(framework)/[framework]/guides/export-pdf.zh-TW.mdx",
+          "postProcessHash": "a677ef7145a7832e4ed869746e306f0f13bcd37365600f4f463b586c0dfaa282"
+        }
+      },
+      "fileName": "content/docs/(framework)/[framework]/guides/export-pdf.mdx"
+    },
+    {
+      "fileId": "18fd38a9551b87cc1da64ab5c9567819e7ca49391fc6bb2750d2a9a2594360b5",
+      "versionId": "0feac875d77418d0294b237e0cf4e5e87868e947cff30ea285fb67f3219f29e2",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.412Z",
+          "fileName": "content/docs/(framework)/[framework]/guides/index.zh-TW.mdx",
+          "postProcessHash": "74c5988500b358a59b4e0d34e5e5099cc9a85fd8c226dfcd426657f02d9fc91e"
+        }
+      },
+      "fileName": "content/docs/(framework)/[framework]/guides/index.mdx"
+    },
+    {
+      "fileId": "23be91a6417a296b3e9e89b359e17c2b89a5a15f0c8066b2f685adae7c7496cd",
+      "versionId": "64952cffc5b00e58f95d249f5a54e5a569a3060067909ac92a79d9ba9267c417",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.416Z",
+          "fileName": "content/docs/(framework)/[framework]/search/algolia.zh-TW.mdx",
+          "postProcessHash": "b034f99ed3e904184d50d1a3be251112ce5ede703e5a31580ca8e4da70555d94"
+        }
+      },
+      "fileName": "content/docs/(framework)/[framework]/search/algolia.mdx"
+    },
+    {
+      "fileId": "49a6fe68e99e6da08b70e960860b584736bec319e33d6ec2a41435fba7384227",
+      "versionId": "3b6265a874a3531ef98e5f5aa0d646995dded2c08c213045877123c1dfe79d5c",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.422Z",
+          "fileName": "content/docs/(framework)/[framework]/search/index.zh-TW.mdx",
+          "postProcessHash": "4aaedd5a631c076182006deb1f43885d595c757e76e004e15d43f2b42dc2a4a2"
+        }
+      },
+      "fileName": "content/docs/(framework)/[framework]/search/index.mdx"
+    },
+    {
+      "fileId": "ee7e5f78b0dbf78f7847d447b28ed538f796db1df6d6a8ab2b4164ba99934102",
+      "versionId": "ddd267e21563078d68059ee3cd3df587e3b88d0ef376f3c769b92e420ace0666",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.405Z",
+          "fileName": "content/docs/(framework)/[framework]/search/meilisearch.zh-TW.mdx",
+          "postProcessHash": "618ddc6f7f74518b1f061a7aad4f3771c5418b268943dd3ffc7f27bb4f51ecce"
+        }
+      },
+      "fileName": "content/docs/(framework)/[framework]/search/meilisearch.mdx"
+    },
+    {
+      "fileId": "636fa1c3e5026fb1f9edb029c16fa525ae72f8a25223c7befe99322e007ed82c",
+      "versionId": "eddad505ced6e197fbb6d60d3d6fb12358427e59c9dd8607c8e103f11375f388",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.417Z",
+          "fileName": "content/docs/(framework)/[framework]/search/mixedbread.zh-TW.mdx",
+          "postProcessHash": "5a35cda7bf8c28ffb0552dc6961149607e7c2942415f50e7953d576a8484f9c5"
+        }
+      },
+      "fileName": "content/docs/(framework)/[framework]/search/mixedbread.mdx"
+    },
+    {
+      "fileId": "745b22e0e5b131bcb15dc9acfff0969f5a5c46bdf32dc25c64d8555d1be9e717",
+      "versionId": "26516c7363163913445b400cfddd8d9dcc4891b8283761b87c32b27d72d991b6",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.410Z",
+          "fileName": "content/docs/(framework)/[framework]/search/orama-cloud.zh-TW.mdx",
+          "postProcessHash": "0f7a0c889054601c089e7d69b5a46ccf5926fe93484940499a1fc53e5f87e575"
+        }
+      },
+      "fileName": "content/docs/(framework)/[framework]/search/orama-cloud.mdx"
+    },
+    {
+      "fileId": "81bd7f777ce3cfc9d5b919e930c201bf88f95d5d369d874f76dd66b2227abcd9",
+      "versionId": "a1e38d5ef986b03ae5ecfbda0552ec5247de79064cb0c1fbd88da02913616460",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.419Z",
+          "fileName": "content/docs/(framework)/[framework]/search/typesense.zh-TW.mdx",
+          "postProcessHash": "859aabc45ea48157b1b7e0c1694c8031d03913bfcad234644ea514793b1d41d6"
+        }
+      },
+      "fileName": "content/docs/(framework)/[framework]/search/typesense.mdx"
+    },
+    {
+      "fileId": "59a655d4545f06abdb052972ad761c48adf6bce8669613a294f5130ef54e1515",
+      "versionId": "5fd8831ac4aaf0ad670336605fd19510c78d29cc9cc6681c5a95685d3af86ed5",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.414Z",
+          "fileName": "content/docs/mdx/(integrations)/loader/index.zh-TW.mdx",
+          "postProcessHash": "ae7035f640ed53ae369e55f7321513b680ef1962e958841f38bf489fecf41b89"
+        }
+      },
+      "fileName": "content/docs/mdx/(integrations)/loader/index.mdx"
+    },
+    {
+      "fileId": "f807945d80ecd628388557364925bc1c040952921aacd78147072e1cf6421639",
+      "versionId": "3fc3113416e29a65309738b14d87cbb7ce34294a6b246aad39e1c949d903c33c",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.409Z",
+          "fileName": "content/docs/mdx/(integrations)/loader/node.zh-TW.mdx",
+          "postProcessHash": "47dbc89f3ae4b6a5456873bae47fa9ae8605a15a0ee4bd0c59e26a6d2e382f77"
+        }
+      },
+      "fileName": "content/docs/mdx/(integrations)/loader/node.mdx"
+    },
+    {
+      "fileId": "ba80591f88acdc41ab70c36e3810cac640fd00c609955a2bbbfed5ce50adcdc1",
+      "versionId": "254a9eeca638ba6e5173ad675009db3cc53ade6c991eb1226df4aa89903c3a5c",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.403Z",
+          "fileName": "content/docs/(framework)/[framework]/integrations/asyncapi/headless.zh-TW.mdx",
+          "postProcessHash": "781d0fba3bfac4d9d8c0b0e1c115166e33b6428f888229ea91f7bd75cb54cc06"
+        }
+      },
+      "fileName": "content/docs/(framework)/[framework]/integrations/asyncapi/headless.mdx"
+    },
+    {
+      "fileId": "cb2c47705d1b5ae10ac958e5e97aa4592aeb0d889ea4a32f1164ec5cb9f35135",
+      "versionId": "59639e19af7e907d008a03bfeedb26ca82257ab0a02b1ceeb77bf7918ec18597",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.424Z",
+          "fileName": "content/docs/(framework)/[framework]/integrations/content/index.zh-TW.mdx",
+          "postProcessHash": "84cb03b6d20542fe0b4544f297db743fa8d44806df8bb35d5d9987f45ca82d1f"
+        }
+      },
+      "fileName": "content/docs/(framework)/[framework]/integrations/content/index.mdx"
+    },
+    {
+      "fileId": "3758e9ae9b477f8be5da805f9cf9ec5e78df7184b7c75b48f86c36310d707622",
+      "versionId": "8d9d862769e25140f208c5331b2daa9ad62ce1ac7a482c77a531ed7fc4817af0",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.405Z",
+          "fileName": "content/docs/(framework)/[framework]/integrations/graphql/headless.zh-TW.mdx",
+          "postProcessHash": "4ff500bc061921b998c427a4a61bd083d0640da1579482048630ed7bb9474e37"
+        }
+      },
+      "fileName": "content/docs/(framework)/[framework]/integrations/graphql/headless.mdx"
+    },
+    {
+      "fileId": "6359e016a1cab18adcba6ede95a58b36b679bc3b6ee8a44fc496e49f7ed40432",
+      "versionId": "437dfa454e998c3b09edac9e50f91202d3da88b6acdb6717367e8a10b8e6b9f3",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.416Z",
+          "fileName": "content/docs/(framework)/[framework]/integrations/openapi/standalone.zh-TW.mdx",
+          "postProcessHash": "43db3da37a0ab2277774682a001462228afa4f70c62328e6d7e20bdb6c395370"
+        }
+      },
+      "fileName": "content/docs/(framework)/[framework]/integrations/openapi/standalone.mdx"
+    },
+    {
+      "fileId": "1de1b7a7ab16aff61d7545967318cb90baad8a094212dd18b13ae423035d2a35",
+      "versionId": "02b494a1455cd718d7282b665fee29e1838436dfadd8eabed64c8ea03fb92dc9",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.403Z",
+          "fileName": "content/docs/(framework)/[framework]/search/.tag-filter.zh-TW.mdx",
+          "postProcessHash": "14c641113f701f72c665da499caca093b879ab6dbcdb97539217e9a2c2120c35"
+        }
+      },
+      "fileName": "content/docs/(framework)/[framework]/search/.tag-filter.mdx"
+    },
+    {
+      "fileId": "d848e4607e7cc3b943bc0fc559195534f016718e87efb745056d5633b9c4d2d2",
+      "versionId": "4005e8b60758fab3637d100fce2299122a17b200f8c5fb15db08fb016b653ea0",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.402Z",
+          "fileName": "content/docs/headless/mdx/remark-mdx-files.zh-TW.mdx",
+          "postProcessHash": "11424a4b29d80c8e8dacae6195f9ea59e0fa70812b25981b2b3e7870ca85b8b0"
+        }
+      },
+      "fileName": "content/docs/headless/mdx/remark-mdx-files.mdx"
+    },
+    {
+      "fileId": "a2fea787e846f41f78a0349dffe793a1005659f1ddfc42d68a15740aa778fc17",
+      "versionId": "47c8e4eb69591dc3723e06a4ed4682e0665372edec9a23fde51f8768f36292dd",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.400Z",
+          "fileName": "content/docs/headless/mdx/remark-show.zh-TW.mdx",
+          "postProcessHash": "592ee5693fcfeefe42d857d1b8d3ff7c9bf4db94fcd32810a3fdb73b290785e9"
+        }
+      },
+      "fileName": "content/docs/headless/mdx/remark-show.mdx"
+    },
+    {
+      "fileId": "8c37e900dc3db6bb9081724a1faa7ff7a549146fbea4d67515da9a435203935d",
+      "versionId": "03856b40e33878dedc4d8242159896b7b514c15443b82b8c8cef17b542d66bd7",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.422Z",
+          "fileName": "content/docs/headless/mdx/rehype-code.zh-TW.mdx",
+          "postProcessHash": "1884067c38975805d26d1f55c1f9855c34fa345ac6e8e46429744194429bb2c2"
+        }
+      },
+      "fileName": "content/docs/headless/mdx/rehype-code.mdx"
+    },
+    {
+      "fileId": "1658861a98911a12ff4c1613156252c28a210cd5fa5db5edfb2462708b34d372",
+      "versionId": "b4e15c6d790fb1545424828fc462bc446ebcb7ac02880e47c8c6374ff3938cfe",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.415Z",
+          "fileName": "content/docs/(framework)/[framework]/search/flexsearch.zh-TW.mdx",
+          "postProcessHash": "8081930f851423b4d01510bf3d59522c92bb8ba14cb5aebc8248732123c199bb"
+        }
+      },
+      "fileName": "content/docs/(framework)/[framework]/search/flexsearch.mdx"
+    },
+    {
+      "fileId": "d9772a063cf18f61d4072870ba032c51f48a5b2eaab412c82e02e56fb343ce9f",
+      "versionId": "e365a95da7f508edffcba6f79d7bed87924e1b9ec25981f166c1b4d2bce94fd7",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.408Z",
+          "fileName": "content/docs/(framework)/[framework]/markdown/typescript.zh-TW.mdx",
+          "postProcessHash": "c631a1527d60c04300aa58860819719131bd77e07a11c7a597273d5ce3c32425"
+        }
+      },
+      "fileName": "content/docs/(framework)/[framework]/markdown/typescript.mdx"
+    },
+    {
+      "fileId": "8ca3c4f7f193431cd7c147d2fed597291666a7e13f881c91b1d3bee0e26a2962",
+      "versionId": "a868aff0fbbd2233b8232f90b6af4ee9b339149853d430d8c1a57d187c236f82",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.424Z",
+          "fileName": "content/docs/(framework)/[framework]/search/.shared.zh-TW.mdx",
+          "postProcessHash": "c1a7cda9ed13a11e48442935a4b64df9d8ae32079d07921f11371a232cdd8a4a"
+        }
+      },
+      "fileName": "content/docs/(framework)/[framework]/search/.shared.mdx"
+    },
+    {
+      "fileId": "8a7ca55edc13e8663d21e871ff0759110801f4a3b0f19c78cadce14b80f06502",
+      "versionId": "f930b80f3ed9fc404fd840e7bdd64f9bb43acdc82c2c07de344f31445cc78439",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.413Z",
+          "fileName": "content/docs/mdx/index.zh-TW.mdx",
+          "postProcessHash": "cbe4e8a296d69fbbf384356bd81aeab486169aff539bc3f003fdda363555be24"
+        }
+      },
+      "fileName": "content/docs/mdx/index.mdx"
+    },
+    {
+      "fileId": "4fa473f00402f6dab090db60f8d066ea4395f0552fd562f57e386e6865a51eac",
+      "versionId": "00a45030175ae432a1ea5a085faf6e1bb5426e4c0eece56c60f67dd2150bcb16",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.420Z",
+          "fileName": "content/docs/headless/search/flexsearch.zh-TW.mdx",
+          "postProcessHash": "6b8ac2e28bcd69f847c692980a62464067d71349435532457987ff92132fea82"
+        }
+      },
+      "fileName": "content/docs/headless/search/flexsearch.mdx"
+    },
+    {
+      "fileId": "c41074eb715f7ca38e7dc5dc8cc3a7a47ec760813ffa86d2b718db6a7c105cb1",
+      "versionId": "534c001f916a89747d9bd579d6e1a7b4f790354ebd34490207180176d4723c30",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.400Z",
+          "fileName": "content/docs/headless/mdx/install.zh-TW.mdx",
+          "postProcessHash": "c44a6124d4cfa9193e82f13cf674c5c44bc616eb283960dc13735341de42e402"
+        }
+      },
+      "fileName": "content/docs/headless/mdx/install.mdx"
+    },
+    {
+      "fileId": "1e8be803df4e1ae775eb342832c8b85e83ef2500c1f4965e8557a87e189e4fa7",
+      "versionId": "4c99998a8bc27681776c6b0862a068eddedcf3b68d1761884c46ee59a6ce3a2d",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.404Z",
+          "fileName": "content/docs/headless/search/algolia.zh-TW.mdx",
+          "postProcessHash": "af3038c25fb1229fb93a6edd7fee111043ca44d63863b2f9e4447cdb901acbc4"
+        }
+      },
+      "fileName": "content/docs/headless/search/algolia.mdx"
+    },
+    {
+      "fileId": "b6c1b272d141f063e2180259c2ec6de13c1af4914c747c99ecf83f48bfb442a0",
+      "versionId": "a40999aee9f92a8333966ba4b6dc2a37493b89489a5f59436ffa7852e5ff5fbf",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.407Z",
+          "fileName": "content/docs/(framework)/[framework]/page-conventions.zh-TW.mdx",
+          "postProcessHash": "816a6270f84ae86ec6d8334c1d8a88f7f318fad84fb71d6f09e6208ba68b03e8"
+        }
+      },
+      "fileName": "content/docs/(framework)/[framework]/page-conventions.mdx"
+    },
+    {
+      "fileId": "30afe965a71b64d7cf3bb77892864905441f48122806ce05a98993a15f41d9cf",
+      "versionId": "8b20df08ca49351a58d0fad09f46c5d7084e19e674873e633396a47e6e37f3c9",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.403Z",
+          "fileName": "content/docs/headless/mdx/remark-steps.zh-TW.mdx",
+          "postProcessHash": "406ad7cbd15ce3fdbd01f41d8be947b9c3c234a135ceef1f8d53d7b3b46c14f1"
+        }
+      },
+      "fileName": "content/docs/headless/mdx/remark-steps.mdx"
+    },
+    {
+      "fileId": "79e8f0a5b45853b499dc36c475a12a85f2172b63150e8514eea6aac5fb3aa204",
+      "versionId": "a99ed58b6707e12cf42acbd3eea574748b118c155095dee30509ef747668b664",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.426Z",
+          "fileName": "content/docs/(framework)/[framework]/integrations/content/python.zh-TW.mdx",
+          "postProcessHash": "61c91df43fc50b9d93191f15ed9e5efc053c0e883ce194d11128273457917354"
+        }
+      },
+      "fileName": "content/docs/(framework)/[framework]/integrations/content/python.mdx"
+    },
+    {
+      "fileId": "3b5d940a730762e957cffacf200eceab9e34fbb7261b3f3e8e5a418e907b3319",
+      "versionId": "755754e28ac3913c55014edcc7cb369337d706ba2ce20f0abd27766f7c6d626b",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.419Z",
+          "fileName": "content/docs/(framework)/[framework]/integrations/og/next.zh-TW.mdx",
+          "postProcessHash": "83a7ab5d166076d557104b590c512bf40824f7cfcb364cf59f94617321d0144f"
+        }
+      },
+      "fileName": "content/docs/(framework)/[framework]/integrations/og/next.mdx"
+    },
+    {
+      "fileId": "1ca7256e1ec584816ccc05c36b7abf255bb50d90492891c2fc0f488c70045175",
+      "versionId": "f9cc333310bbcdd11223eb27ed3f87b59919fb702ff1bab5bfbff9cc3220190a",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.418Z",
+          "fileName": "content/docs/headless/mdx/remark-include.zh-TW.mdx",
+          "postProcessHash": "71780f173c8cdd097d37092c008d4894d03eace98042e3f00d107ecfab28b660"
+        }
+      },
+      "fileName": "content/docs/headless/mdx/remark-include.mdx"
+    },
+    {
+      "fileId": "620a536761584dd97cd3fa01200c2bb671880bff308423894ca2e44d8403324b",
+      "versionId": "9fddb22112e9017f5d849ec913334009da32a4e2dd2ca25e4cad47941c59452f",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.395Z",
+          "fileName": "content/docs/headless/search/mixedbread.zh-TW.mdx",
+          "postProcessHash": "70daca412d480945fb1617c995e28d3972c4038bc897244365909f04295a7510"
+        }
+      },
+      "fileName": "content/docs/headless/search/mixedbread.mdx"
+    },
+    {
+      "fileId": "717367a8768481d5e14593814ab697d0bfb8bf9f12c8c276294d72d7206d75c3",
+      "versionId": "03defbdd2fb5d10b4104f0cdbc55159e9fa52df0547072b33f49e5efe21c7882",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.418Z",
+          "fileName": "content/docs/mdx/(integrations)/vite.zh-TW.mdx",
+          "postProcessHash": "4d05b6b46b5f8bbdf3b16cf1df5695ff867500a80be44b47d675cc4210ad8e57"
+        }
+      },
+      "fileName": "content/docs/mdx/(integrations)/vite.mdx"
+    },
+    {
+      "fileId": "5fbeab69b18ebc43d26d24d4b3e32ab23bb9f066a0b523385c706faa0fe4f5ec",
+      "versionId": "ea28ca64597842ca2de5f6239619ff342f7fdb2b4c06b524df503a018ce3b6e8",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T13:42:22.457Z",
+          "fileName": "content/docs/(framework)/[framework]/meta.zh-TW.ts",
+          "postProcessHash": "66075fbf8fda7f45f776b5533a659b93d3ed1acfec875be3e52e83d80dbaab1b"
+        }
+      },
+      "fileName": "content/docs/(framework)/[framework]/meta.ts"
+    },
+    {
+      "fileId": "6e43172ae093cac9b7ef3a6e4245fbced854b443a06f88dfe2dd29f4a02aa523",
+      "versionId": "c548aa73762c42eb2575911ca95ff97de62e8d2a18d7a9e13eda058dd0e7e63a",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.414Z",
+          "fileName": "content/docs/headless/mdx/remark-image.zh-TW.mdx",
+          "postProcessHash": "aab2c668d4b5780cb88840c94cca297c4786199895e18510b5abd6607512989e"
+        }
+      },
+      "fileName": "content/docs/headless/mdx/remark-image.mdx"
+    },
+    {
+      "fileId": "0c8136183f5f351ffa72bb89a4221bc1e1d827694c545741090ab4f77a638d4d",
+      "versionId": "624930d47f10c43be98f2789a7d2749e6e3349c4bdcec099fdb215793b9cf889",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.423Z",
+          "fileName": "content/docs/(framework)/[framework]/integrations/changelog.zh-TW.mdx",
+          "postProcessHash": "b9e6c83f45db55a1cdfce75cdee1f6316c54b99546db7b6240dd5b77f21d335b"
+        }
+      },
+      "fileName": "content/docs/(framework)/[framework]/integrations/changelog.mdx"
+    },
+    {
+      "fileId": "e8c787e3afaaf214fcfdc1026b139678cce7b80f2e2c98e0495033271d2c964f",
+      "versionId": "93ab6adfbc1e50482ba5ac9f22338e75ec7b7408ae47ce84fb2ebccda3d156ec",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.409Z",
+          "fileName": "content/docs/headless/page-conventions.zh-TW.mdx",
+          "postProcessHash": "ae7429af6b8302dce0303c81a971512c3b8751c5399667506484f99f49ca1098"
+        }
+      },
+      "fileName": "content/docs/headless/page-conventions.mdx"
+    },
+    {
+      "fileId": "6e5d4fba0f4a61d2923eaec8c27b8c372fca6097fb9573d2a5043f24521bf4da",
+      "versionId": "70ee4b9e2b47fe2f586dbdceeab9fea2ae66f4e355fcc7dced82379ec9b3f24c",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.416Z",
+          "fileName": "content/docs/mdx/entry/import.zh-TW.mdx",
+          "postProcessHash": "403d7f3ea73983d4565cb2152db9af0411122c9a98d0d4ac67711639c431449c"
+        }
+      },
+      "fileName": "content/docs/mdx/entry/import.mdx"
+    },
+    {
+      "fileId": "ff9d30abe4a9dcfa88f71a303743ce2e805da8f7f70e248a645833effda089ff",
+      "versionId": "46170fab4fd0e800da5bbcc74762bd6e80a1326da19be1d83908b3a444949a00",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.412Z",
+          "fileName": "content/docs/mdx/(integrations)/loader/bun.zh-TW.mdx",
+          "postProcessHash": "1362cff2e96edcc33b5a45d64cf5781172625d3d6cbbaa3dba2e778c396636bb"
+        }
+      },
+      "fileName": "content/docs/mdx/(integrations)/loader/bun.mdx"
+    },
+    {
+      "fileId": "2eecb92f607a41db883ac4c23fc2b8281e37a18baa1549f1314ad22394b2d9c3",
+      "versionId": "cfd39cb8ce9439a4ee2fc358997de70c82a6a771b6a5c261ca415fa2330dd192",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.415Z",
+          "fileName": "content/docs/(framework)/[framework]/index.zh-TW.mdx",
+          "postProcessHash": "afcd530f153f851213df9f3479bbb3038728f760cc6a36464078e7c088046051"
+        }
+      },
+      "fileName": "content/docs/(framework)/[framework]/index.mdx"
+    },
+    {
+      "fileId": "0793b288a0cffe5f3f33d2c0756d26666bf0056bd4988f1a7d9a951b3402ef13",
+      "versionId": "4591581077d9fb8e53d8962a27f9739de76f3438dbe1b16521aa6c86c816da6e",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.411Z",
+          "fileName": "content/docs/ui/components/inline-toc.zh-TW.mdx",
+          "postProcessHash": "b09cb03fcd052128542e8683788c3c7cbe91a20b7285cf34d87b98da536a5297"
+        }
+      },
+      "fileName": "content/docs/ui/components/inline-toc.mdx"
+    },
+    {
+      "fileId": "e50a5b725e56fa82fd4054b43f4bf5a6513139bee6a3a631585416836509d48a",
+      "versionId": "13d2a412f2a66635451660104cd4bf7450ada5e764f34063e2619db806366c3c",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.403Z",
+          "fileName": "content/docs/headless/mdx/remark-llms.zh-TW.mdx",
+          "postProcessHash": "f1f026446304aa3a4a068da63f13aa07ab2055c43bb83d0aa8207000b17e51a0"
+        }
+      },
+      "fileName": "content/docs/headless/mdx/remark-llms.mdx"
+    },
+    {
+      "fileId": "c6588e14eb2fb758d23146111deb220619b5335f0ce5eaf2f7ccfef52cceb830",
+      "versionId": "7d9977266155beac14b043e6d4dbaa4d339cc81615aace5147daa7ca2d4dc681",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.409Z",
+          "fileName": "content/docs/headless/source-api/index.zh-TW.mdx",
+          "postProcessHash": "416b80259d32f922e5bbc48824752f5b0a7008cc4656124248cd8ce1dbf6fb0a"
+        }
+      },
+      "fileName": "content/docs/headless/source-api/index.mdx"
+    },
+    {
+      "fileId": "c707f86448ad3781abdf69ed5f86e1f7c044066efe82fbd694e33c8266774bd6",
+      "versionId": "c2bc3095ab523d42496d82a6d9ac41a215f9c990a9792a88cf4970218a6cf97e",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.411Z",
+          "fileName": "content/docs/mdx/macro.zh-TW.mdx",
+          "postProcessHash": "70d489b1daa53583457c739273063ac582787aace4c2e841c5dfe1d2b87bf226"
+        }
+      },
+      "fileName": "content/docs/mdx/macro.mdx"
+    },
+    {
+      "fileId": "8667e2dbd4f255915eb9cdede34d25af2e4977b7450007251f4651fb7fbbc0e0",
+      "versionId": "9c724e7c9127395a4d0e8156e6b73fe87be940827480ee276ae5e755d5384498",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.421Z",
+          "fileName": "content/docs/ui/layouts/page.zh-TW.mdx",
+          "postProcessHash": "e16893d989ae2ceb0c8645be719aeb70c97c475e6351c0711cd9f9e242430c57"
+        }
+      },
+      "fileName": "content/docs/ui/layouts/page.mdx"
+    },
+    {
+      "fileId": "2167f529af1c4e869729cef08c6fce08b6e53fb10adbdca886438f7e7c298b0e",
+      "versionId": "5d034994131943abdf7d132e41941d08ef388f51876171e98d9ac499c92ea8ba",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.409Z",
+          "fileName": "content/docs/(framework)/[framework]/integrations/content/custom.zh-TW.mdx",
+          "postProcessHash": "a5ab2dede9d1fdd7f160b978a6697f08882fa737a6c31969a68337aea0897c81"
+        }
+      },
+      "fileName": "content/docs/(framework)/[framework]/integrations/content/custom.mdx"
+    },
+    {
+      "fileId": "1937050eba8788f621e322c3593d7ad6a6e3e8e1777c9b17fd6ac6fd524557fe",
+      "versionId": "9d7d7b14ef143fde44da6e92ab1ce8a803b74e5b3a178e4cf929bd490c38fc85",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.427Z",
+          "fileName": "content/docs/(framework)/[framework]/integrations/openapi/index.zh-TW.mdx",
+          "postProcessHash": "615a74d1b4aa62befc9fefce574c546c08f33ace24d9f37ba2cb8acb2b59e23e"
+        }
+      },
+      "fileName": "content/docs/(framework)/[framework]/integrations/openapi/index.mdx"
+    },
+    {
+      "fileId": "889cf1dc78515cde5cc89214646e303e0a0e8f334c86708d295ca3d80ec0b9d4",
+      "versionId": "449529c9939f87cc2ff37c229b2e282dc47222b5bbdc215e62731ae18fb9ec41",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.405Z",
+          "fileName": "content/docs/ui/layouts/docs.zh-TW.mdx",
+          "postProcessHash": "43ea1d07ed8578305cb5f713a83d9fdb4eda27393631fe1dea31cdc32a2f4376"
+        }
+      },
+      "fileName": "content/docs/ui/layouts/docs.mdx"
+    },
+    {
+      "fileId": "bf8f4bcf8682a83f9b341f91db58f5b74826f817e41772252647b2fa22813795",
+      "versionId": "d69564897c40bd326bb085fb130916d379069d7df3a6a0cc64139d82cecf0f92",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.413Z",
+          "fileName": "content/docs/headless/search/orama-cloud.zh-TW.mdx",
+          "postProcessHash": "0d699ae70da1f7827754ad40d903187c5cff408cbef0205d906280f6487a3816"
+        }
+      },
+      "fileName": "content/docs/headless/search/orama-cloud.mdx"
+    },
+    {
+      "fileId": "726516a2f5183b795f96cf592ecb441b993f392eafcdf42d24ee4a90de1b674d",
+      "versionId": "52119e175a0c38c9c84634fef52b4bfc5eac129ad98349285da0aee8da1d562e",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.410Z",
+          "fileName": "content/docs/ui/layouts/root-provider.zh-TW.mdx",
+          "postProcessHash": "4c88ecbc721b303c4acb0598d3e8e0102ee416aaf5c4efbf8178a5e762dd3147"
+        }
+      },
+      "fileName": "content/docs/ui/layouts/root-provider.mdx"
+    },
+    {
+      "fileId": "cc17f3bf1fe82c48086b6680dfb48eaf5175129eb297422a274257fa8b83e065",
+      "versionId": "b95d5a6f449ff76ac02aa1e000cdc7d28dcb9a49d7090386b4802b9af71864f0",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.396Z",
+          "fileName": "content/docs/headless/search/orama.zh-TW.mdx",
+          "postProcessHash": "fc934ea4a2f19afe7275d3640f3f011d27d2c77db30a2787ec0a23f2d567d899"
+        }
+      },
+      "fileName": "content/docs/headless/search/orama.mdx"
+    },
+    {
+      "fileId": "dd4a4e2e443bc87d6a434657bbad8fcab6f7ae0ae5240efffaecab8a5010f9f2",
+      "versionId": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T12:41:00.328Z",
+          "fileName": "content/docs/(framework)/[framework]/search/meta.zh-TW.json",
+          "postProcessHash": "4232c210d54a6edc019dd36aaf0b61be4b6794abc3ad29e24f730a6653e2a1f1"
+        }
+      },
+      "fileName": "content/docs/(framework)/[framework]/search/meta.json"
+    },
+    {
+      "fileId": "a9f9faa51bcfd8d00f83ab917350c60b9252c285ba4acbe65050fc2481d5e233",
+      "versionId": "3bda03b00ac430966b7695bba237a69217719650fc070d2f9adcec8166fb5dc6",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.407Z",
+          "fileName": "content/docs/headless/utils/negotiation.zh-TW.mdx",
+          "postProcessHash": "32b451ce1a40c9cddf2c2732bca5e5b09544b335b42d2ba624155dd0f913d63a"
+        }
+      },
+      "fileName": "content/docs/headless/utils/negotiation.mdx"
+    },
+    {
+      "fileId": "d31fee3ca000fc58f67d5af00c45e667d637ca0e482c57aeffbd068df0825e7d",
+      "versionId": "de1f5b43ab4c78bfd434033723c45105149929af3cd644d4e4e9c8d06d28b872",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.428Z",
+          "fileName": "content/docs/(framework)/[framework]/integrations/story/headless.zh-TW.mdx",
+          "postProcessHash": "7167c5beb069b999bc2a3ca634b0d57b7ca9a6a28dbefc3488f25bdfaacd9b65"
+        }
+      },
+      "fileName": "content/docs/(framework)/[framework]/integrations/story/headless.mdx"
+    },
+    {
+      "fileId": "7ed9c150f0e9e4ab438076a89096dfd7359496a209c1ce8220f66abf85e68777",
+      "versionId": "55c3a56837a5306872865cbfd7b288185e500a8275a2b0078f701194874ec9f2",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.391Z",
+          "fileName": "content/docs/ui/components/graph-view.zh-TW.mdx",
+          "postProcessHash": "aee26cea5efb9b78d60b362820c2e957855e2fec3257eccbf3d77a4f2737ca16"
+        }
+      },
+      "fileName": "content/docs/ui/components/graph-view.mdx"
+    },
+    {
+      "fileId": "747afb22e9f74f9ee142566b04bd14a57f05b9edfd58de8c5a7979effcff3ffd",
+      "versionId": "6065fef7acc4e3a0270cd4310e48463ed06d50902ef9e87cf9e216487f988837",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.404Z",
+          "fileName": "content/docs/headless/components/breadcrumb.zh-TW.mdx",
+          "postProcessHash": "a9c04f5dee2e2ede81f44331ff153544665f82833c1a9fdbe802e084aed10ad4"
+        }
+      },
+      "fileName": "content/docs/headless/components/breadcrumb.mdx"
+    },
+    {
+      "fileId": "4365208566cec387488cd9bcfb20d73cc5d1309dfdda0bb8f7c69764d706b4e9",
+      "versionId": "9e6ed638f1b0472a763646965154469d1512d1b4d4ff40b6b2d3f8caab33d86d",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.417Z",
+          "fileName": "content/docs/headless/utils/markdown.zh-TW.mdx",
+          "postProcessHash": "0d5c67640bad415c17a2f844e60b861fd53455d09288cbb89164d6e13fc41174"
+        }
+      },
+      "fileName": "content/docs/headless/utils/markdown.mdx"
+    },
+    {
+      "fileId": "4ab18854389f58fe1bf89f6f7b28678371f0fde4397dac60ca37e2c0ae350cc5",
+      "versionId": "f7c2deb3b1a81613687bfcda58a44ef29f1a05fc5b9c91b24d9b7f6490374331",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.406Z",
+          "fileName": "content/docs/mdx/include.zh-TW.mdx",
+          "postProcessHash": "9eb3a58af4e947881422a16ad8a9beea51f9d74483c3187f72b382ed1b9b799d"
+        }
+      },
+      "fileName": "content/docs/mdx/include.mdx"
+    },
+    {
+      "fileId": "30bc2109e618f58562bc6e9c25521a4fe4feb36b40fa6f5464169a5459cbab54",
+      "versionId": "640c2c31e9739c4e52caba8f0234fd3c6f7236f3063dbfba30716dd056c8fbaa",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.416Z",
+          "fileName": "content/docs/(framework)/[framework]/markdown/mermaid.zh-TW.mdx",
+          "postProcessHash": "fc177ebc51698f5e5fe0ce996464c6c6950982f9081b7ab8d0f30e1371ae5cc7"
+        }
+      },
+      "fileName": "content/docs/(framework)/[framework]/markdown/mermaid.mdx"
+    },
+    {
+      "fileId": "3ed7aa032d10bf9de1821927be9d38efcd4d57c7f3a5a8e83ffb4c2476621d68",
+      "versionId": "313a5c3b67c2cf87072deb0adf11e5a6efe82395e91e965ff8a5336f28286373",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.419Z",
+          "fileName": "content/docs/mdx/global.zh-TW.mdx",
+          "postProcessHash": "1ae1b217602da80a07f9c1972810744a9044b2e7cd9a9e8e90fe08c8912638fa"
+        }
+      },
+      "fileName": "content/docs/mdx/global.mdx"
+    },
+    {
+      "fileId": "916677830ca5afd92c05fd43363f8f588e43d35c988b5cced6e988fe5a533961",
+      "versionId": "fc84f4370eaa3dd2af673513bf87f3f7f44336c1abb6b129ec5a0b00b97b8b41",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.404Z",
+          "fileName": "content/docs/(framework)/[framework]/search/custom.zh-TW.mdx",
+          "postProcessHash": "713bb316d6b7c3e43f6779d305b522be8e61c34002c0fdc081baf8a4ecc8c314"
+        }
+      },
+      "fileName": "content/docs/(framework)/[framework]/search/custom.mdx"
+    },
+    {
+      "fileId": "d629917fc1fd379aa8db086ac292a6e582ab06cdceb95523cf22123a842a97c7",
+      "versionId": "3f4c495c1214977425d358c61557bed39c66d89cbdb440e6272c8e8b94674220",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.418Z",
+          "fileName": "content/docs/(framework)/[framework]/integrations/content/mdx-remote.zh-TW.mdx",
+          "postProcessHash": "06a77e14fce47493bda63cd80bc6af1555dad23401908ce5c972b4507e24e89e"
+        }
+      },
+      "fileName": "content/docs/(framework)/[framework]/integrations/content/mdx-remote.mdx"
+    },
+    {
+      "fileId": "50f0a707d00ac7331703a63d2ac16b870cbe22985eb5c9200db8b4c7e97b5a4a",
+      "versionId": "322c9d78cf1b9e52e6c1d3a9e093287794b6f51aadbaee5f4bbabd666cd2afaf",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.426Z",
+          "fileName": "content/docs/(framework)/[framework]/integrations/asyncapi/index.zh-TW.mdx",
+          "postProcessHash": "79033011729fa2c3d87e281f5501bd500c97f4a2293b0441918f234a9c459275"
+        }
+      },
+      "fileName": "content/docs/(framework)/[framework]/integrations/asyncapi/index.mdx"
+    },
+    {
+      "fileId": "72926e259591f2ccfeb93af82174096c37b82676146198c45037778778eb1b21",
+      "versionId": "4fcff09ababbf97698aecd7a6852dc70ab32e4797252f27f4960c893ba7a3bd1",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.423Z",
+          "fileName": "content/docs/mdx/collections.zh-TW.mdx",
+          "postProcessHash": "c5532829a70f26130f657e03937eb1e99373a3917aaaeaaab05fadcea76ecb79"
+        }
+      },
+      "fileName": "content/docs/mdx/collections.mdx"
+    },
+    {
+      "fileId": "eb121f52814db0e332c4d8b4d72eff5de69475c12d6cc34b93b8cb768c625236",
+      "versionId": "75387ba7d1e2fc4a519e4895fbc1dd0f2d37403fbbafcea146bd0cbfb5496b49",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.427Z",
+          "fileName": "content/docs/(framework)/[framework]/integrations/story/index.zh-TW.mdx",
+          "postProcessHash": "bbfbdb4d65075b611267c880e1a729e30b48328728c884b72e423719dc97aadc"
+        }
+      },
+      "fileName": "content/docs/(framework)/[framework]/integrations/story/index.mdx"
+    },
+    {
+      "fileId": "8760d13f78824113ca5351dc5b6d7025dc4097505fe774bd638fbafebe03f574",
+      "versionId": "38748d95ea543bb4b87388f039ac008344c0290df766506f52d36dca3b1656de",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.415Z",
+          "fileName": "content/docs/(framework)/[framework]/markdown/index.zh-TW.mdx",
+          "postProcessHash": "05eb5c0d7bb24ac11e0653ccdfd2445fbee0fc25355b21c5bef5f0de7168309d"
+        }
+      },
+      "fileName": "content/docs/(framework)/[framework]/markdown/index.mdx"
+    },
+    {
+      "fileId": "b910d7d64cd46a859d0f64c325ba843f90a1132edebb1db26d85bea323b6c354",
+      "versionId": "3f28257447f237826a475ccc8a0a1363ac7815cfba386d858c3bd11f46479553",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.407Z",
+          "fileName": "content/docs/headless/mdx/remark-admonition.zh-TW.mdx",
+          "postProcessHash": "1bd1ed9c2621fd7ffeb698d16d384b9dd53c0665774b8db19e5c84732a2b5f83"
+        }
+      },
+      "fileName": "content/docs/headless/mdx/remark-admonition.mdx"
+    },
+    {
+      "fileId": "d0350f4a8b19d4c1906f5d40e93c7bf677368841b72dde600f7e47e844a93092",
+      "versionId": "fb0b6efcd2adcab66a6fb29e3e590ff211745059adbf30502d576a74cee6e7cf",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T12:41:00.330Z",
+          "fileName": "content/docs/(framework)/meta.zh-TW.json",
+          "postProcessHash": "d16311f28202098322dfc6c46e4544c4b65bc410bf969ee486cb53f36d130ec6"
+        }
+      },
+      "fileName": "content/docs/(framework)/meta.json"
+    },
+    {
+      "fileId": "f0dd14007a2f19e0887a20489fec4418d68160fa7d542e1dcf86845c18e61955",
+      "versionId": "1a215c4e1ee2c8c8a04f1ed9e02a8dd93717fa0c7700a394d66a4df053eaf90e",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.406Z",
+          "fileName": "content/docs/headless/internationalization/middleware.zh-TW.mdx",
+          "postProcessHash": "4632cc856e11fdba2813fc73997a5040a1b7c57aa8f419bc4aeaa4decefec36b"
+        }
+      },
+      "fileName": "content/docs/headless/internationalization/middleware.mdx"
+    },
+    {
+      "fileId": "c524f809eefcf82002b49a3f8cbd1d67bf50b90ac4321f87e0b8419dfccb5135",
+      "versionId": "060c8415f2cf5218ddc01705d479c957b12f14edd8ab0070aa1eadf5a4ced035",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.425Z",
+          "fileName": "content/docs/(framework)/[framework]/integrations/content/obsidian.zh-TW.mdx",
+          "postProcessHash": "e498d1308648abffc7cf7ce7cb8290cb599d63e6997595f177f59ea314fc9d64"
+        }
+      },
+      "fileName": "content/docs/(framework)/[framework]/integrations/content/obsidian.mdx"
+    },
+    {
+      "fileId": "07835a4278efcfcd1754c9b45829b37f1bd0de7fda4da0cc5de1639440ad8e63",
+      "versionId": "2946b3830588c40da0c9f4c761f0259924317d6041e355007de04cc52bfd855c",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.426Z",
+          "fileName": "content/docs/(framework)/[framework]/integrations/openapi/server.zh-TW.mdx",
+          "postProcessHash": "5760afd57a30cd8ccff761e7520007d8ee07b69a1952d2aa96b503dddcc58c0c"
+        }
+      },
+      "fileName": "content/docs/(framework)/[framework]/integrations/openapi/server.mdx"
+    },
+    {
+      "fileId": "53b61c993739dd2a3e35acfbd7453a08f42ffd74933aefc9b0a1c59cff7f4307",
+      "versionId": "41331c59069b3f840d401b98257dac3bad61571152e6bea605981e30a4ee5b37",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.412Z",
+          "fileName": "content/docs/headless/utils/shiki.zh-TW.mdx",
+          "postProcessHash": "1ee9ef0cc1aabbf8ffe1310358a4f7e5a533ca5a9a7aa732f3465d4a8366fb5f"
+        }
+      },
+      "fileName": "content/docs/headless/utils/shiki.mdx"
+    },
+    {
+      "fileId": "b7a30c98c04af6d50f8b4ecc261771247935e9823bc43e36122c0f7e67f8219f",
+      "versionId": "63e12d2dd4d5b209d93599e727ff7d90bf2b4ecb776c04771f37c56fa0e0cd7c",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.424Z",
+          "fileName": "content/docs/(framework)/[framework]/integrations/openapi/api-page.zh-TW.mdx",
+          "postProcessHash": "dff8227e5a5b0dc75683fcfaa6057b615f5adb76c0e749a0036ca2655fda7970"
+        }
+      },
+      "fileName": "content/docs/(framework)/[framework]/integrations/openapi/api-page.mdx"
+    },
+    {
+      "fileId": "ff938e31d86ed9beba17b1e6e089437fdc20e4156909678e3ad60d82e1eeb8a3",
+      "versionId": "b79f684d0cc450bad130ea1a2a15d06cc6a4c66e1a59546f9e344db975956bef",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.414Z",
+          "fileName": "content/docs/(framework)/[framework]/integrations/og/index.zh-TW.mdx",
+          "postProcessHash": "42f0c42bf98920c0aa51b2986f958932091a6f8c15b60fa4285d32e5ab1ede20"
+        }
+      },
+      "fileName": "content/docs/(framework)/[framework]/integrations/og/index.mdx"
+    },
+    {
+      "fileId": "bc40379e5603185f804a3bd1aab671030b5740d0ae92a59c41b82e207754bdc0",
+      "versionId": "632b99062813a70e650b4b29ee24386971c9378aa00eb73f49e7d46860c369ee",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.412Z",
+          "fileName": "content/docs/headless/search/meilisearch.zh-TW.mdx",
+          "postProcessHash": "cb1dd866fe1f4e5647d2bc9c3269468eedf3c50ac807c9a62ea98dd53b1a7b24"
+        }
+      },
+      "fileName": "content/docs/headless/search/meilisearch.mdx"
+    },
+    {
+      "fileId": "675fd024bc366fdd290026bfe4fc0f361b1d478f36b533cb61753ffc2e7c0426",
+      "versionId": "56c3e43555cb9fbe91f3599613e5262854bd39b23377ca6de956a5433bd1a516",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.413Z",
+          "fileName": "content/docs/(framework)/[framework]/integrations/openapi/headless.zh-TW.mdx",
+          "postProcessHash": "053acfea85da7204a2593dd2b1711f77e3e8af2bf88a41f221b7055702a244f7"
+        }
+      },
+      "fileName": "content/docs/(framework)/[framework]/integrations/openapi/headless.mdx"
+    },
+    {
+      "fileId": "9088c3239dde119339cb0b674a4816b9eafb207c7861e8ba7d15fd7ee669df3f",
+      "versionId": "9f380f3070a7d7e99487cf773e8d65a3c474e36b013e10caa2db2adcedfdb5e8",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.412Z",
+          "fileName": "content/docs/(framework)/[framework]/markdown/twoslash.zh-TW.mdx",
+          "postProcessHash": "dc7cae8badd56874051a2e0bbc54c94c3363f62b6af2d2cf1b64236780761f1d"
+        }
+      },
+      "fileName": "content/docs/(framework)/[framework]/markdown/twoslash.mdx"
+    },
+    {
+      "fileId": "97c6274e2948443e8d2515c3e057e9dc8b06ca6fc9eabea09dbf65da78d704d9",
+      "versionId": "691d54c8f4ed73a6bc4dd839277a7908c2a8d045e3d6473d29c36b5f8ed700ed",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.401Z",
+          "fileName": "content/docs/headless/mdx/remark-npm.zh-TW.mdx",
+          "postProcessHash": "e233ea35666dc2feccc6eef07a6e379830bf98766c2a164652028c17a82fa752"
+        }
+      },
+      "fileName": "content/docs/headless/mdx/remark-npm.mdx"
+    },
+    {
+      "fileId": "37747e8bd2e103697a9ead25e21d0bd63d5823a0940308f5e1e6615d51448d55",
+      "versionId": "a5291ed24eed9a7bf57b29d0acb77fba6042b9403966259db64ed124b1fa91eb",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.427Z",
+          "fileName": "content/docs/(framework)/[framework]/integrations/openapi/generate-files.zh-TW.mdx",
+          "postProcessHash": "cc9b83480374ca60ef185e5a71740b2fec56b89adf93c14712032818211d97a1"
+        }
+      },
+      "fileName": "content/docs/(framework)/[framework]/integrations/openapi/generate-files.mdx"
+    },
+    {
+      "fileId": "83bc31ebab5e224126b97520a6921f2b44e08f48d8f858bfc98dcffef92fc73f",
+      "versionId": "b01c8445e4a4e5cdb9214c08a70db6912f8096827ed0afc5f9316bb83bdba761",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.423Z",
+          "fileName": "content/docs/headless/mdx/remark-ts2js.zh-TW.mdx",
+          "postProcessHash": "68207613e72378bd863a2fe208850fd62e5e39c73b655dc1e7b1571ff9f2d729"
+        }
+      },
+      "fileName": "content/docs/headless/mdx/remark-ts2js.mdx"
+    },
+    {
+      "fileId": "599c05f4c5b6d6bbf82b3ee7a76fed23502d413c5d2647c5d6ab9fe663412a30",
+      "versionId": "b365e3c883820d26c1e25322266f24c5a80bad1eb6d5f851cd99a989e178a923",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.428Z",
+          "fileName": "content/docs/(framework)/[framework]/integrations/content/notion.zh-TW.mdx",
+          "postProcessHash": "5ef2ce492a56a773af85091aaf17a08e9032a3cfd5dc73f6a1a59adf987dd0d8"
+        }
+      },
+      "fileName": "content/docs/(framework)/[framework]/integrations/content/notion.mdx"
+    },
+    {
+      "fileId": "67b0bbdae90453c85521e6ee1c751be5cbe9419a5087c2d75672cee1d7bfab60",
+      "versionId": "f645067bee9c601d9200a03279dd52917519c2bd40986967f3db207cf770628b",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.417Z",
+          "fileName": "content/docs/mdx/entry/browser.zh-TW.mdx",
+          "postProcessHash": "31924aa826d284cb32a940a5beb594292b65fbbb05cfd8e7d45b76b828a712b7"
+        }
+      },
+      "fileName": "content/docs/mdx/entry/browser.mdx"
+    },
+    {
+      "fileId": "ad13d85594f707c6294fc53140b10d0ee9f4aa3d653641cee9779f09b19e48cd",
+      "versionId": "a8bb4386eb6b3a739794341d61beeb5c63344f9c1538ec6738af76e96f3ca7ae",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.425Z",
+          "fileName": "content/docs/(framework)/[framework]/markdown/validate-links.zh-TW.mdx",
+          "postProcessHash": "f8f26ed60bee28d14897dbe7c7b43fb65e24e603b43e5853acac78ba070e2fb5"
+        }
+      },
+      "fileName": "content/docs/(framework)/[framework]/markdown/validate-links.mdx"
+    },
+    {
+      "fileId": "f4f3fff8d5bff23b87b49df63a37a4f2c38e33237eba62fe7cc31ea824f91279",
+      "versionId": "dd3ce44381834f934e384943aa3f2fbfceb6b33e9cb8471c1dce8e602f6a1920",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.408Z",
+          "fileName": "content/docs/headless/mdx/headings.zh-TW.mdx",
+          "postProcessHash": "9c46b9c2388aad897b146d66573bccc7a40fd9b3539cc2bb331b80ef51bcec97"
+        }
+      },
+      "fileName": "content/docs/headless/mdx/headings.mdx"
+    },
+    {
+      "fileId": "5dee82e7131b79a66ad9e0398707e9740a7b25d49b8eefd4798510b4c0dea579",
+      "versionId": "4001181beb3f4a7cd76b54a3bea5963b473378bb2c463a8e22c386f74eceb0ff",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.393Z",
+          "fileName": "content/docs/ui/components/files.zh-TW.mdx",
+          "postProcessHash": "19202c72c88b46bd3efc0c8829cc7bac613d1875e0d9a326b51f96c5ff5ac083"
+        }
+      },
+      "fileName": "content/docs/ui/components/files.mdx"
+    },
+    {
+      "fileId": "15516367fae9dd78088b8e6cccc60965149ef53347dce6820e9c67bcedbdb92e",
+      "versionId": "d8cb4c09954c2e3986a356e74ab9a8428e8422f7bee1a6d30f912373a6a98912",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.424Z",
+          "fileName": "content/docs/(framework)/[framework]/integrations/graphql/server.zh-TW.mdx",
+          "postProcessHash": "d50d83990c1d2ccc140b1c1e33e62aa74b7badf24b23006abb1ce5cda8b5123f"
+        }
+      },
+      "fileName": "content/docs/(framework)/[framework]/integrations/graphql/server.mdx"
+    },
+    {
+      "fileId": "5f8704b63912ca47ed512e4197db076e499747a690017df7cb439ac8a50add5e",
+      "versionId": "034037a170da8847e433fa9028dd8c619f70fb16405f12caaf2c15622165baef",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.406Z",
+          "fileName": "content/docs/cli/create-fumadocs-app.zh-TW.mdx",
+          "postProcessHash": "0c5a1c456146e29618df981371c3554e90714f56c7cd5d45c5cd49bfe88b0be0"
+        }
+      },
+      "fileName": "content/docs/cli/create-fumadocs-app.mdx"
+    },
+    {
+      "fileId": "45af0a377d4ae41c97269b1b851656c914e8718429a851b180d9413ee2744a39",
+      "versionId": "21ae319b91538b914e949dce52fbcbf9d227fd19e9760e42057abd824628f9bc",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.418Z",
+          "fileName": "content/docs/headless/search/typesense.zh-TW.mdx",
+          "postProcessHash": "958b4c5a5348e34b5420ee54c364bf6886dd99c57a783ec2c1c272518d3dd38a"
+        }
+      },
+      "fileName": "content/docs/headless/search/typesense.mdx"
+    },
+    {
+      "fileId": "787f58bbefbdbbfab628ab84e8a26058725313b75f702baaa73be200366288fb",
+      "versionId": "35941a3a2fa8bab5cc1e87c36572d283f1f50aeb934b5d343bf3eac5052424f3",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.411Z",
+          "fileName": "content/docs/headless/index.zh-TW.mdx",
+          "postProcessHash": "22410314520d7078aee9d75808babe10d36d2bf89c6582d2b038bbc14b77fcb8"
+        }
+      },
+      "fileName": "content/docs/headless/index.mdx"
+    },
+    {
+      "fileId": "8274966022f537688b8cda1138de5370d0d72740cf6ea39c792c39fc0a2087bf",
+      "versionId": "17497fef55d4bdddba138a97d5815a473078e3357f3dfb700ab414003fe8f75f",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.407Z",
+          "fileName": "content/docs/cli/index.zh-TW.mdx",
+          "postProcessHash": "319100945d75458c122c9452ddcb5945ff13148c713c1bd443fa65dd255090af"
+        }
+      },
+      "fileName": "content/docs/cli/index.mdx"
+    },
+    {
+      "fileId": "edbbf49625cd7f7050b7ea2d0a17c1ef31b988683f5c95dcd3adbed4be3f6cc2",
+      "versionId": "aa576b141f8a9f6fcbb6032539d28ac1f46be85d8465150b4ba7619d1c435b9d",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.422Z",
+          "fileName": "content/docs/(framework)/[framework]/integrations/content/sanity.zh-TW.mdx",
+          "postProcessHash": "d437c2b083ced8fd45afd7e018ca79446b3ba8553cf09ff2431c5abea5608483"
+        }
+      },
+      "fileName": "content/docs/(framework)/[framework]/integrations/content/sanity.mdx"
+    },
+    {
+      "fileId": "debcddde8bdf7262b03f65c19a0f2a87f7a2bbaa66d978726736dee4e384f562",
+      "versionId": "04395256741d72f51035ee910342910354130eeb932d4d4886d47962a0c149d1",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.427Z",
+          "fileName": "content/docs/(framework)/[framework]/integrations/blog.zh-TW.mdx",
+          "postProcessHash": "c18b0af8558f367f4a4d87f8ae317fb247c6c6921d3fab23049ded866e74038b"
+        }
+      },
+      "fileName": "content/docs/(framework)/[framework]/integrations/blog.mdx"
+    },
+    {
+      "fileId": "f7bd548e859ba4916251df7db985ee6d56c00a0f80639404db7b3177974998f9",
+      "versionId": "7589026eee9a3010cd8c027ffb90abddc58867fff974e29727203a3ef72cff43",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.408Z",
+          "fileName": "content/docs/ui/components/index.zh-TW.mdx",
+          "postProcessHash": "5422c469f982c5134fb46fccf6ad17209a35f282ca9852f3bf047931eff8fc83"
+        }
+      },
+      "fileName": "content/docs/ui/components/index.mdx"
+    },
+    {
+      "fileId": "3199ab489850eeb860337eae537f086b56ff54d236f5361856b6ea6d29e70c95",
+      "versionId": "abedc01c97e7768094d30288f1a52150b2525a7ec423751ec734f2e14c25558d",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.417Z",
+          "fileName": "content/docs/(framework)/[framework]/markdown/math.zh-TW.mdx",
+          "postProcessHash": "e3a25597df5c5537ea1b3d668d26fd586511ed1cb4d16ecd949ace4bd1c5ca7f"
+        }
+      },
+      "fileName": "content/docs/(framework)/[framework]/markdown/math.mdx"
+    },
+    {
+      "fileId": "2aa5d576269347dca836ce5edbe39cef6a2c299765a84f481f91c0956fde793c",
+      "versionId": "8fd0294be401252db46fed2dfb8ea549af21f77a2deba663d9b1649fd9409118",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.424Z",
+          "fileName": "content/docs/(framework)/[framework]/community/asyntai.zh-TW.mdx",
+          "postProcessHash": "3512054a878ccb92d7d18ecf23577da27e1bd76f01ab1863675ca613f58f297f"
+        }
+      },
+      "fileName": "content/docs/(framework)/[framework]/community/asyntai.mdx"
+    },
+    {
+      "fileId": "48d4f98754b50b2adde93c58690e15e75b657d0a495c1dc9931088820f092686",
+      "versionId": "2a0c0d9a869074018b74c1c71929e319e1c97bf1d8245302ce73806ce5903ba9",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.417Z",
+          "fileName": "content/docs/headless/source-api/source.zh-TW.mdx",
+          "postProcessHash": "328e055cd2f66d7ae035b195c0eb5a2590657fc3f257163448378c46d1667d54"
+        }
+      },
+      "fileName": "content/docs/headless/source-api/source.mdx"
+    },
+    {
+      "fileId": "749b0b5f320b06184d6283883910f2914121bd0956843b724f8b47aca1a3d5de",
+      "versionId": "bc64ddba547f51e11ee97cda0b2e62b8fe70ad0f6baea6c9d9fc60f74fdb00c0",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.410Z",
+          "fileName": "content/docs/headless/mdx/structure.zh-TW.mdx",
+          "postProcessHash": "68d6f55a70525e46fb843bdca05d3cfc55bf1e779edb829d6214f98140c46463"
+        }
+      },
+      "fileName": "content/docs/headless/mdx/structure.mdx"
+    },
+    {
+      "fileId": "cd7faf2fe077743e40808d1dff09e0304620f5a3602b817b536e8f0cf505d130",
+      "versionId": "56682fa01da5381fe46fb1e66cc7fd99d75785c86144c1fa78179d2c66de1c9f",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.423Z",
+          "fileName": "content/docs/(framework)/[framework]/integrations/asyncapi/api-page.zh-TW.mdx",
+          "postProcessHash": "6d92783e65712e4c4a173a1d504c9f47ede55a6ab10efe076f165d729acb2b54"
+        }
+      },
+      "fileName": "content/docs/(framework)/[framework]/integrations/asyncapi/api-page.mdx"
+    },
+    {
+      "fileId": "8130d09fd43b6ef13cda8bdcdd95d8ffdfde90dfcafc85d550fa03894735d319",
+      "versionId": "499db69d37d6fb4f4a39acf6562a8baf43beece5031ee5d6c203014cf8fde631",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.414Z",
+          "fileName": "content/docs/headless/mdx/stringification.zh-TW.mdx",
+          "postProcessHash": "9aecc80ad649b04d39d4ef04d2862b6767483f7379ee2051eb5e482ba6f2d920"
+        }
+      },
+      "fileName": "content/docs/headless/mdx/stringification.mdx"
+    },
+    {
+      "fileId": "77300bd0f2bd1f11a09233ad678d7b5c3e1d9f682cc12d73df9e350547dc2fa9",
+      "versionId": "58087d7cb15cf84bb806eb052322af73ffe33693ea3de833378722ed05c306dc",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.426Z",
+          "fileName": "content/docs/(framework)/[framework]/community/privatus-analytics.zh-TW.mdx",
+          "postProcessHash": "7e63a48039d0790d33e967d2d5c13965c1f1921dfe6a83f2c0c31f378c1004a4"
+        }
+      },
+      "fileName": "content/docs/(framework)/[framework]/community/privatus-analytics.mdx"
+    },
+    {
+      "fileId": "906caeed4479a0a012b83f84ffd085879c80b5dcf89ca16ac4f3f9992074c7e1",
+      "versionId": "5146fc61d006c6a67f5ca7799605f99055e95097484d602dd995ea72dd79c24f",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.412Z",
+          "fileName": "content/docs/(framework)/[framework]/what-is-fumadocs.zh-TW.mdx",
+          "postProcessHash": "0acaa3ba229dd13c0069c1b65c0abc5808a7e23dbe5cdea2696e0bc80c222393"
+        }
+      },
+      "fileName": "content/docs/(framework)/[framework]/what-is-fumadocs.mdx"
+    },
+    {
+      "fileId": "8007078a2a8847266faed1fdfc2f183d0951ce2be9cf6f75173208d17900fe94",
+      "versionId": "af0585ecd556a52c7a0768b962e2e3a1c354a4b6b4307078a72b720edc738a7d",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.424Z",
+          "fileName": "content/docs/(framework)/[framework]/guides/rss.zh-TW.mdx",
+          "postProcessHash": "8a962cd2290a43598bfccbd63f11681b57c7675dff797de38e9eb37e6bf4ec51"
+        }
+      },
+      "fileName": "content/docs/(framework)/[framework]/guides/rss.mdx"
+    },
+    {
+      "fileId": "7cd0555d6b60599336ac1d48981041fbea37da3b8c25d05a7ec22cb549d3c11d",
+      "versionId": "00978d9046838ae760ffd4df8ec85e5ca63553601bcf0e77cd3184a1e87f6881",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.427Z",
+          "fileName": "content/docs/(framework)/[framework]/integrations/feedback.zh-TW.mdx",
+          "postProcessHash": "aa2016e6a45f037c45e9b1bafcef44e78663e72eba401330cbd21cb3b11bd531"
+        }
+      },
+      "fileName": "content/docs/(framework)/[framework]/integrations/feedback.mdx"
+    },
+    {
+      "fileId": "76b6effaba4f349f4337a70f4cc39e667394ae58fac980feae069c38a5bddf73",
+      "versionId": "7a650c8b8bf3d3aa95dc354526f737a9afde7821c482d42ed668874e41193216",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.406Z",
+          "fileName": "content/docs/(framework)/[framework]/guides/export-epub.zh-TW.mdx",
+          "postProcessHash": "b1dff99aa4190a2238f02b396e613bceace02600256c5a3a23ba7784247d385b"
+        }
+      },
+      "fileName": "content/docs/(framework)/[framework]/guides/export-epub.mdx"
+    },
+    {
+      "fileId": "ae8a9ee546b06c392e0b8049cf691d8af49c17052bb32943910b04eac415a64f",
+      "versionId": "8f5f99964475467890e3de175f8d2c610201ad9e55b1ebef1dc368b130515551",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.423Z",
+          "fileName": "content/docs/(framework)/[framework]/guides/access-control.zh-TW.mdx",
+          "postProcessHash": "c82b044e4dde3fcf08a3b0d6d7d07b70dfc63adc601996dd7491032da0599573"
+        }
+      },
+      "fileName": "content/docs/(framework)/[framework]/guides/access-control.mdx"
+    },
+    {
+      "fileId": "bee685520e5149b06c32cce74a503bc53e1df37727dcabac4b2948159b56ee92",
+      "versionId": "5e21243939f7d2271a47f1edeb166d09cc1e539a7091931c5567e6802e1d4fa0",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.425Z",
+          "fileName": "content/docs/(framework)/[framework]/deploying/index.zh-TW.mdx",
+          "postProcessHash": "db646a9bd4694dd56a4dd511a7225b360bc14a31097a554ce74bcf909f739ddd"
+        }
+      },
+      "fileName": "content/docs/(framework)/[framework]/deploying/index.mdx"
+    },
+    {
+      "fileId": "345888461bbbd5b0f42c375af881312af457c00f42932fb99a6869201106f3ab",
+      "versionId": "b5cb30e961ffd92546b66070c9a696c9064a0551693530e65203cc724cb88411",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.428Z",
+          "fileName": "content/docs/(framework)/[framework]/integrations/graphql/index.zh-TW.mdx",
+          "postProcessHash": "7c4bf1be90ae2e254be2e72ed9839669413ecf28c364653acae8ab0a8dafb03c"
+        }
+      },
+      "fileName": "content/docs/(framework)/[framework]/integrations/graphql/index.mdx"
+    },
+    {
+      "fileId": "24ad1de2a0cce8d196663041c6606e510879f525969cce970dcd85e8e682e1d3",
+      "versionId": "0db91f30cfe595ca76951105b1f49a438cd0a977655fd38965b223d7c4d3149c",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.420Z",
+          "fileName": "content/docs/mdx/mdx.zh-TW.mdx",
+          "postProcessHash": "488d2691cf66538cb771ce113685e40ee9845140a9149a33e77eb8a1da1fc066"
+        }
+      },
+      "fileName": "content/docs/mdx/mdx.mdx"
+    },
+    {
+      "fileId": "19766f5e33562094bd4129e46c398bdd18dd482753face7f0b320931fd72fee0",
+      "versionId": "89d42ad3513183a1bd633a48c795b3bc4ba64da97aaa89c078192e263101ff8c",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.428Z",
+          "fileName": "content/docs/(framework)/[framework]/integrations/content/satteri-local-md.zh-TW.mdx",
+          "postProcessHash": "2d1da482fc878feada9f1f99409524b184f26b37c605aee0ce9ced174741dcda"
+        }
+      },
+      "fileName": "content/docs/(framework)/[framework]/integrations/content/satteri-local-md.mdx"
+    },
+    {
+      "fileId": "bda0efd7879bafa9edd7203f66115bea8b0a36b152c7567fda068e9396f6657c",
+      "versionId": "08f32a282f8b89a135569aaeb01ad6bbfd144a584492afa771b86424e1e6e480",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.413Z",
+          "fileName": "content/docs/(framework)/index.zh-TW.mdx",
+          "postProcessHash": "cc53b0041b3e370a328729f7980a8b43e1f9bcc9093bc257b3c2f070bffa98b0"
+        }
+      },
+      "fileName": "content/docs/(framework)/index.mdx"
+    },
+    {
+      "fileId": "61a8d2c176d8463f4b024c9468fa5103e254f3c6ff9fee67042bcbe06b5b59da",
+      "versionId": "1c74cdba2b413d5801c299872f1211c501ccc178b894a024a2cf59e8e86c71b5",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.421Z",
+          "fileName": "content/docs/(framework)/[framework]/search/orama.zh-TW.mdx",
+          "postProcessHash": "8c4ba1e802eec14def417ce27445b83c1d6da85dcede96cf276824c5d7f141bf"
+        }
+      },
+      "fileName": "content/docs/(framework)/[framework]/search/orama.mdx"
+    },
+    {
+      "fileId": "8a4da9c55ac245fa96f13ead2ce16addf911f601215411fc127b51debfbae45d",
+      "versionId": "6926744da8ade04186bcf81a2bdf16f76d391179f06c766033280c0eaca55641",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.408Z",
+          "fileName": "content/docs/(framework)/[framework]/integrations/asyncapi/server.zh-TW.mdx",
+          "postProcessHash": "0e5fbdad2bf28752e53fdd5421edf9987713c4716d60bd4fa0c78505817940ad"
+        }
+      },
+      "fileName": "content/docs/(framework)/[framework]/integrations/asyncapi/server.mdx"
+    },
+    {
+      "fileId": "0d7a0da828eb2aaed0a8600bde45cbda0d4c1ac43716c68c07bd844befd40d5d",
+      "versionId": "65a71ff0d8a6f02923f8f8fd6458b6f84a92669a92a2d1d615b417f90af828c4",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.424Z",
+          "fileName": "content/docs/(framework)/[framework]/integrations/graphql/api-page.zh-TW.mdx",
+          "postProcessHash": "767730a96f6504e4e00c062926fd433f11b5109bd8e5dd77d278e87b4e92e68a"
+        }
+      },
+      "fileName": "content/docs/(framework)/[framework]/integrations/graphql/api-page.mdx"
+    },
+    {
+      "fileId": "4e1e4692ace91aab83b381dcd161440c39763a4c32fe302c6d559cad23f69fbe",
+      "versionId": "5bb9e75da1f315ee93197ecdec127d9673e65729c8aa686e4e58c7da67e546ee",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.426Z",
+          "fileName": "content/docs/(framework)/[framework]/integrations/og/takumi.zh-TW.mdx",
+          "postProcessHash": "445851a3baa94df828b5bde690ce991f8866152b29545623b00279b889499f55"
+        }
+      },
+      "fileName": "content/docs/(framework)/[framework]/integrations/og/takumi.mdx"
+    },
+    {
+      "fileId": "4eb1016bcba27b87363c5793277ca4634b0b0d0834091f9981cd1e06b67e6304",
+      "versionId": "3319f3adc27029ee2005a2d66829f91de89bf42b0237869d5505ac51c4253e56",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.428Z",
+          "fileName": "content/docs/(framework)/[framework]/integrations/llms.zh-TW.mdx",
+          "postProcessHash": "a5f21ac86ca42d3bcc829221a532a7207ab7bd17eb1e5aa1afc037f6646ea4ea"
+        }
+      },
+      "fileName": "content/docs/(framework)/[framework]/integrations/llms.mdx"
+    },
+    {
+      "fileId": "73f7ab020826ee0d538989619fc760ce73c8c557e0e65872be1809a5e27f4708",
+      "versionId": "1ff5fd290c8ba840212657145e8ffe52653b92fb516f7bfe5b3a65a72464a57e",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.425Z",
+          "fileName": "content/docs/(framework)/[framework]/integrations/asyncapi/generate-files.zh-TW.mdx",
+          "postProcessHash": "985cec5b927bb57b1220d1a02c7546a2cf9f505d2d6a2c7d4ab0f2246086c5c5"
+        }
+      },
+      "fileName": "content/docs/(framework)/[framework]/integrations/asyncapi/generate-files.mdx"
+    },
+    {
+      "fileId": "db13498c11d1bea68fedb1e404fc44242b1c647d9efcba907da54151bf7bffea",
+      "versionId": "0baded475df66c0eb8241b1ef7e1d3b0ea01d570540d90d829b2ef81a83c8c37",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.404Z",
+          "fileName": "content/docs/(framework)/[framework]/internationalization.zh-TW.mdx",
+          "postProcessHash": "6afcbd5482195e3c72ce05061dae980208a98014debc7537a5b0c946f593b5c9"
+        }
+      },
+      "fileName": "content/docs/(framework)/[framework]/internationalization.mdx"
+    },
+    {
+      "fileId": "837223c7970b79cf1ef297e384a720c1d6841766708986524ac8b3e3d3297019",
+      "versionId": "04130e700e8a1e9f81945fad5f40d38b3be62fbaebe6632e6bd04a8dddcc1b70",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.420Z",
+          "fileName": "content/docs/(framework)/[framework]/manual-installation.zh-TW.mdx",
+          "postProcessHash": "d80b476775eeabbf098ab440f2e890f058e10a94d2fe50f3fd38a89c22bff21b"
+        }
+      },
+      "fileName": "content/docs/(framework)/[framework]/manual-installation.mdx"
+    },
+    {
+      "fileId": "d628024d3ff4084df643c7fab86fb3ed119e3b313fcdfc672333957d278eb609",
+      "versionId": "4dd406585771cdce217c59f3af81968a6de77a0782b5cdf71a85ec8f4eb78792",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.427Z",
+          "fileName": "content/docs/(framework)/[framework]/deploying/static.zh-TW.mdx",
+          "postProcessHash": "3f7eea31e8bcdb77efd7e92e1fe49ad52729ee5971c2991db426828bfe1e20b2"
+        }
+      },
+      "fileName": "content/docs/(framework)/[framework]/deploying/static.mdx"
+    },
+    {
+      "fileId": "536a1acb884614bd5046a9b11e4bb7a51eab9791766c2af333ef5f1c642f08e0",
+      "versionId": "be199e175bcb06b5c1596521c08f95f3bb4d00289119337321f5470316fcffdb",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.429Z",
+          "fileName": "content/docs/(framework)/[framework]/integrations/content/local-md.zh-TW.mdx",
+          "postProcessHash": "e31d021ee1fe20a269980c1abfd78d1befa6b19533ad60961109bcdcbb41f564"
+        }
+      },
+      "fileName": "content/docs/(framework)/[framework]/integrations/content/local-md.mdx"
+    },
+    {
+      "fileId": "0489e76b0ba66fb1494c747137b059e62909ddee66b34351b233130e42dd22ad",
+      "versionId": "34c0cd306304018b35debb82e361ad3bf088ebe2b729501199b6ccfcc1e2da85",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.425Z",
+          "fileName": "content/docs/(framework)/[framework]/integrations/content/local-html.zh-TW.mdx",
+          "postProcessHash": "8e0c3a14a606d7ed64a16264d6b127c2e6aada027a3f647eff5c2851be09909a"
+        }
+      },
+      "fileName": "content/docs/(framework)/[framework]/integrations/content/local-html.mdx"
+    },
+    {
+      "fileId": "b2a7878a4681601df0ae2d8e280742296ce1e6223ebfed664127c1c9495c64db",
+      "versionId": "d4f3d0e82c5f9363fd06a5399a8b0371148af1eff0ace58dd5919feecc78471d",
+      "translations": {
+        "zh-TW": {
+          "updatedAt": "2026-11-14T14:48:56.422Z",
+          "fileName": "content/docs/(framework)/[framework]/upgrade.zh-TW.mdx",
+          "postProcessHash": "a51b30e4d54e4c0a562e1a0975517e9011ee7478b4607724d9ef5e0e41e9618d"
+        }
+      },
+      "fileName": "content/docs/(framework)/[framework]/upgrade.mdx"
+    }
+  ]
+}

@@ -1,0 +1,76 @@
+---
+title: 橫幅
+description: 為您的網站加入橫幅
+preview: banner
+---
+
+<Installation name="banner" />
+
+## 使用方式 [#usage]
+
+將此元素放在根版面配置的最上方，可用來顯示公告。
+
+```tsx
+import { Banner } from 'fumadocs-ui/components/banner';
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en">
+      <body>
+        {/* [!code ++] */}
+        <Banner>Hello World</Banner>
+        {children}
+      </body>
+    </html>
+  );
+}
+```
+
+### 變體 [#variant]
+
+變更預設的變體。
+
+```tsx
+import { Banner } from 'fumadocs-ui/components/banner';
+
+<Banner variant="rainbow">Hello World</Banner>;
+
+// 自訂顏色
+<Banner
+  variant="rainbow"
+  rainbowColors={[
+    'rgba(255,100,0, 0.5)',
+    'rgba(255,100,0, 0.5)',
+    'transparent',
+    'rgba(255,100,0, 0.5)',
+    'transparent',
+    'rgba(255,100,0, 0.5)',
+    'transparent',
+  ]}
+>
+  Hello World
+</Banner>;
+```
+
+### 變更版面配置 [#change-layout]
+
+預設情況下，橫幅會使用 `style` 標籤來調整 Fumadocs 的版面配置 (例如縮減側邊欄的高度) 。
+您可以透過以下方式停用此行為：
+
+```tsx
+import { Banner } from 'fumadocs-ui/components/banner';
+
+<Banner changeLayout={false}>Hello World</Banner>;
+```
+
+### 關閉 [#close]
+
+若要讓使用者可以關閉橫幅，請為橫幅設定一個 ID。
+
+```tsx
+import { Banner } from 'fumadocs-ui/components/banner';
+
+<Banner id="hello-world">Hello World</Banner>;
+```
+
+狀態會自動保存。

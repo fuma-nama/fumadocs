@@ -1,0 +1,273 @@
+---
+title: 集合
+description: 應用程式內容資料的集合
+---
+
+## 定義集合 [#define-collections]
+
+定義集合即可解析特定的一組檔案。本頁範例會在 `source.config.ts` 中定義集合，而 [Macro API](/docs/mdx/macro) 則是在 `lib/source.ts` 中定義，可用的選項大致相同。
+
+```ts
+import { defineCollections } from 'fumadocs-mdx/config';
+import { z } from 'zod';
+
+export const blog = defineCollections({
+  type: 'doc',
+  dir: './content/blog',
+  schema: z.object({
+    // schema
+  }),
+  // 其他選項
+});
+```
+
+### `type` [#type]
+
+集合可接受的類型。
+
+```ts
+import { defineCollections } from 'fumadocs-mdx/config';
+
+// 只掃描 meta 檔案
+export const metaFiles = defineCollections({
+  type: 'meta',
+  // 選項
+});
+```
+
+* `type: meta`
+
+  接受 JSON／YAML 檔案，以及具有預設匯出 (default export) 的程式碼模組 (`meta.ts` 或 `meta.js`) 。請參閱 [Meta](/docs/page-conventions#meta)。可用選項：
+
+  <auto-type-table path="./props.ts" name="MetaCollection" />
+
+* `type: doc`
+
+  Markdown／MDX 文件。可用選項：
+
+  <auto-type-table path="./props.ts" name="DocCollection" />
+
+### `schema` [#schema]
+
+用於驗證檔案資料的 schema (`doc` 類型驗證 frontmatter，`meta` 類型則驗證檔案內容) 。
+
+```ts
+import { defineCollections } from 'fumadocs-mdx/config';
+import { z } from 'zod';
+
+export const blog = defineCollections({
+  type: 'doc',
+  dir: './content/blog',
+  schema: z.object({
+    name: z.string(),
+  }),
+});
+```
+
+> 支援與 [Standard Schema](https://standardschema.dev) 相容的函式庫，包括 Zod。
+
+請注意，驗證會在建置時執行，因此輸出必須可序列化。
+您也可以傳入一個函式，它會接收轉換上下文 (transform context) 。
+
+```ts
+import { defineCollections } from 'fumadocs-mdx/config';
+import { z } from 'zod';
+
+export const blog = defineCollections({
+  type: 'doc',
+  dir: './content/blog',
+  schema: (ctx) => {
+    return z.object({
+      name: z.string(),
+      testPath: z.string().default(
+        // 檔案的絕對路徑
+        ctx.path,
+      ),
+    });
+  },
+});
+```
+
+### `mdxOptions` [#mdxoptions]
+
+針對以 unified 編譯的集合，在集合層級自訂 MDX 選項。
+
+> 此 API 僅適用於 `doc` 類型。
+
+```ts title="source.config.ts"
+import { defineCollections } from 'fumadocs-mdx/config';
+
+export const blog = defineCollections({
+  type: 'doc',
+  dir: './content/blog',
+  mdxOptions: {
+    // MDX 選項
+  },
+});
+```
+
+這是刻意的設計：此做法會移除全域設定與 Fumadocs MDX 所套用的所有預設設定，讓您能完全掌控 MDX 選項。
+
+您可以使用 [`applyMdxPreset`](/docs/mdx/mdx) 來套用 MDX 預設組合。
+
+```ts title="source.config.ts"
+import { applyMdxPreset, defineCollections } from 'fumadocs-mdx/config';
+
+export const blog = defineCollections({
+  type: 'doc',
+  dir: './content/blog',
+  mdxOptions: applyMdxPreset({
+    // 擴充預設組合
+  }),
+});
+```
+
+### `compiler` [#compiler]
+
+> 此 API 僅適用於 `doc` 類型。
+
+改用 [Sätteri](/docs/mdx/mdx#satteri) 取代 unified 來編譯此集合，並傳入 `satteriOptions` 來取代 `mdxOptions`。
+
+```ts title="source.config.ts"
+import { defineCollections } from 'fumadocs-mdx/config';
+
+export const blog = defineCollections({
+  type: 'doc',
+  dir: './content/blog',
+  compiler: 'satteri',
+  // 選填，預設為全域的 `satteriOptions`
+  satteriOptions: {
+    // Sätteri 選項
+  },
+});
+```
+
+與 `mdxOptions` 不同，集合層級的 `satteriOptions` 會保留內建的預設組合，除非您傳入 `preset: 'minimal'`。它會直接取代全域的 `satteriOptions`，而不會與其合併。
+
+### `postprocess` [#postprocess]
+
+> 此 API 僅適用於 `doc` 類型。
+
+您可以使用 `postprocess` API 將建置時期的資訊傳遞到執行階段。
+
+* #### `includeProcessedMarkdown` [#includeprocessedmarkdown]
+
+  匯出由 [Remark LLMs](/docs/headless/mdx/remark-llms) 產生的文件 Markdown。可傳入 `true` 或其選項。
+
+  ```ts tab="docs"
+  import { defineDocs } from 'fumadocs-mdx/config';
+
+  export default defineDocs({
+    docs: {
+      postprocess: {
+        // [!code ++]
+        includeProcessedMarkdown: true,
+      },
+    },
+  });
+  ```
+
+  ```ts tab="doc"
+  import { defineCollections } from 'fumadocs-mdx/config';
+
+  export const blog = defineCollections({
+    type: 'doc',
+    postprocess: {
+      // [!code ++]
+      includeProcessedMarkdown: true,
+    },
+  });
+  ```
+
+  可透過 `getText('processed')` 讀取，例如從 `loader()` 讀取：
+
+  ```ts
+  import { source } from '@/lib/source';
+
+  const page = source.getPage('...');
+  console.log(await page.data.getText('processed'));
+  ```
+
+* #### `valueToExport` [#valuetoexport]
+
+  部分 remark 外掛會將輸出儲存在 `vfile.data` (編譯時期的記憶體) 中，您的程式碼無法存取這些資料。
+
+  您可以指定要納入的屬性名稱，這些屬性會轉換為 ESM 匯出，讓您在匯入 MDX 檔案時存取。
+
+  ```ts tab="docs"
+  import { defineDocs } from 'fumadocs-mdx/config';
+
+  export default defineDocs({
+    docs: {
+      postprocess: {
+        // [!code ++]
+        valueToExport: ['dataName'],
+      },
+    },
+  });
+  ```
+
+  ```ts tab="doc"
+  import { defineCollections } from 'fumadocs-mdx/config';
+
+  export const blog = defineCollections({
+    type: 'doc',
+    postprocess: {
+      // [!code ++]
+      valueToExport: ['dataName'],
+    },
+  });
+  ```
+
+## 定義 Docs [#define-docs]
+
+為 Fumadocs 定義一個集合。
+
+```ts
+import { defineDocs } from 'fumadocs-mdx/config';
+
+export const docs = defineDocs({
+  dir: '/my/content/dir',
+  docs: {
+    // 選填，`doc` 集合的選項
+  },
+  meta: {
+    // 選填，`meta` 集合的選項
+  },
+});
+```
+
+### `dir` [#dir]
+
+請在 `defineDocs` 中自訂內容目錄，而不是針對個別集合設定：
+
+```ts
+import { defineDocs } from 'fumadocs-mdx/config';
+
+export const docs = defineDocs({
+  dir: 'content/guides',
+});
+```
+
+### `schema` [#schema-1]
+
+您可以擴充 `docs` 與 `meta` 的預設 Zod 4 schema。
+
+```ts
+import { defineDocs } from 'fumadocs-mdx/config';
+import { metaSchema, pageSchema } from 'fumadocs-core/source/schema';
+import { z } from 'zod';
+
+export const docs = defineDocs({
+  docs: {
+    schema: pageSchema.extend({
+      index: z.boolean().default(false),
+    }),
+  },
+  meta: {
+    schema: metaSchema.extend({
+      // 其他屬性
+    }),
+  },
+});
+```

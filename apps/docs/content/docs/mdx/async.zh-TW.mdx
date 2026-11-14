@@ -1,0 +1,115 @@
+---
+title: 延遲載入
+description: 為集合輸出設定延遲載入。
+---
+
+## 簡介 [#introduction]
+
+預設情況下，所有 Markdown 與 MDX 檔案都必須先經過預先編譯，開發伺服器也同樣受此限制。
+
+對於大型文件網站，這可能會拉長開發伺服器的啟動時間。您可以為 doc 集合啟用 Async 或 Dynamic 模式來改善這個問題。
+
+## Async 模式 [#async-mode]
+
+Async 模式會透過非同步匯入來產生集合的輸出。
+
+```ts tab="Docs Collection"
+import { defineDocs } from 'fumadocs-mdx/config';
+
+export const docs = defineDocs({
+  dir: 'content/docs',
+  docs: {
+    // [!code ++]
+    async: true,
+  },
+});
+```
+
+```ts tab="Doc Collection"
+import { defineCollections } from 'fumadocs-mdx/config';
+
+export const doc = defineCollections({
+  type: 'doc',
+  dir: 'content/docs',
+  // [!code ++]
+  async: true,
+});
+```
+
+視您使用的打包工具 (bundler) 而定，這可能會大幅縮短開發伺服器的編譯時間。
+
+<Callout title="Next.js 使用者">
+  Turbopack 目前不支援延遲打包 (lazy bundling) ，因此 Async 模式只會提升伺服器
+  效能。
+</Callout>
+
+## Dynamic 模式 [#dynamic-mode]
+
+Dynamic 模式會進行**隨需編譯**，再於執行階段執行編譯結果。
+
+建議安裝 `shiki`，並將其設為外部依賴 (externalize) ：
+
+```npm
+npm i shiki
+```
+
+在集合中啟用 Dynamic 模式，例如：
+
+```ts tab="Docs Collection"
+import { defineDocs } from 'fumadocs-mdx/config';
+
+export const docs = defineDocs({
+  dir: 'content/docs',
+  docs: {
+    // [!code ++]
+    dynamic: true,
+  },
+});
+```
+
+```ts tab="Doc Collection"
+import { defineCollections } from 'fumadocs-mdx/config';
+
+export const doc = defineCollections({
+  type: 'doc',
+  dir: 'content/docs',
+  // [!code ++]
+  dynamic: true,
+});
+```
+
+接著，請參考 [Dynamic Entry](/docs/mdx/entry/dynamic)，改從 dynamic entry 存取集合。
+
+<Callout title="限制" type="warn">
+  Dynamic 模式在 MDX 功能上有一些限制。
+
+  * **MDX 檔案中不可使用 import/export。** MDX 元件請改由 `components` prop 傳入。
+  * **圖片必須以 URL 引用 (例如 `/images/test.png`) 。** 請勿使用 `./image.png` 這類**檔案路徑**。請將圖片放在 `public` 資料夾中，並以 URL 引用。
+</Callout>
+
+## 使用方式 [#usage]
+
+您仍可在 `page` 物件上取得 frontmatter 屬性，但需要呼叫非同步函式 `load()`，才能載入編譯後的內容 (及其匯出項目) 。
+
+例如：
+
+```tsx title="page.tsx"
+import { source } from '@/lib/source';
+import { getMDXComponents } from '@/components/mdx';
+
+const page = source.getPage(['...']);
+
+if (page) {
+  // 可直接存取 frontmatter 屬性
+  console.log(page.data);
+
+  // Markdown 內容需透過 await 載入
+  const { body: MdxContent, toc } = await page.data.load();
+
+  console.log(toc);
+
+  return <MdxContent components={getMDXComponents()} />;
+}
+```
+
+使用 Async 或 Dynamic 模式時，強烈建議您改用第三方服務來實作搜尋，這類服務通常更擅長處理大量需要建立索引的內容。

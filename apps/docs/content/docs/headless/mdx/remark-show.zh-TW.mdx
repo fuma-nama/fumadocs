@@ -1,0 +1,27 @@
+---
+title: Remark Show
+description: 根據條件顯示內容。
+---
+
+## 使用方式 [#usage]
+
+Remark Show 是用於 [`<show>`](/docs/markdown#show) 語法的 remark 外掛。Fumadocs MDX、`@fumadocs/astro` 與[本機 Markdown](/docs/integrations/content/local-md) 皆預設啟用此外掛。
+
+當 `when` 運算式為 true 時，`<show>` 會算繪其內容。運算式會在頁面算繪時求值，因此可以讀取頁面的 props，例如[路徑參數](/docs/headless/page-conventions#path-params)。缺少 `when` 的 `<show>` 會導致編譯失敗。
+
+## 頁面資料 [#page-data]
+
+未算繪的內容同樣不會納入頁面資料，包括目錄、[標題 ID](/docs/headless/mdx/headings#headings-with-expressions)、[結構化資料](/docs/headless/mdx/structure)以及[處理後的 Markdown](/docs/headless/mdx/remark-llms)。
+
+<Callout type="warn">
+  這些資料來自 Rehype 目錄、Remark Structure 與 Remark LLMs。若未使用 Fumadocs MDX，它們會在編譯時期、
+  尚未對任何條件求值前就產生資料，因此含有 `<show>` 的文件
+  會編譯失敗。若使用自訂內容來源，請啟用[執行時期輸出](/docs/headless/source-api/source#runtime-outputs)。
+</Callout>
+
+## 步驟與頁籤群組 [#steps-and-tab-groups]
+
+`<show>` 可以包住一個[步驟](/docs/headless/mdx/remark-steps)，或[頁籤群組](/docs/markdown#tab-groups)中的一個程式碼區塊。請參閱[範例](/docs/markdown#show)。
+
+* 在您的外掛清單中，將 Remark Show 放在 Remark 步驟與 `remarkCodeTab` 之前。
+* 請在 `<show>` 外至少保留一個步驟或一個頁籤，否則每個 `<show>` 都會各自形成獨立的步驟或頁籤群組。

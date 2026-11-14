@@ -1,0 +1,45 @@
+---
+title: 目錄
+description: 目錄
+---
+
+可追蹤目前所在標題並自動捲動的目錄。
+
+## 使用方式 [#usage]
+
+```tsx
+import * as Base from 'fumadocs-core/toc';
+
+return (
+  <Base.AnchorProvider>
+    <Base.ScrollProvider>
+      <Base.TOCItem />
+      <Base.TOCItem />
+    </Base.ScrollProvider>
+  </Base.AnchorProvider>
+);
+```
+
+### Anchor Provider [#anchor-provider]
+
+透過 Intersection Observer API 追蹤目前作用中的錨點。
+
+<auto-type-table path="../props.ts" name="AnchorProviderProps" />
+
+### Scroll Provider [#scroll-provider]
+
+將捲動容器捲動至目前作用中的錨點。
+
+<auto-type-table path="../props.ts" name="ScrollProviderProps" />
+
+### 目錄項目 [#toc-item]
+
+用於跳轉至目標錨點的錨點項目。
+
+| 資料屬性          | 值             | 說明       |
+| ------------- | ------------- | -------- |
+| `data-active` | `true, false` | 錨點是否為作用中 |
+
+## 範例 [#example]
+
+<include>./toc-example.tsx</include>

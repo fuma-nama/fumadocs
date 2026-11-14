@@ -1,0 +1,62 @@
+---
+title: 伺服器進入點
+description: 從伺服器端存取集合的輸出。
+---
+
+## 使用方式 [#usage]
+
+雖然您可以直接從入口檔案存取集合，但我們建議搭配 [`loader()`](/docs/headless/source-api#output) 一起使用。
+
+```ts tab="Docs (Meta + Doc)"
+import { docs } from 'collections/server';
+import { loader } from 'fumadocs-core/source';
+
+// 原始集合
+console.log(docs);
+
+export const source = loader({
+  baseUrl: '/docs',
+  source: docs.toFumadocsSource(),
+});
+```
+
+```ts tab="Doc"
+import { blogPosts } from 'collections/server';
+import { toFumadocsSource } from 'fumadocs-mdx/runtime/server';
+import { loader } from 'fumadocs-core/source';
+
+// 原始集合
+console.log(blogPosts);
+
+export const blog = loader({
+  baseUrl: '/blog',
+  source: toFumadocsSource(blogPosts, []),
+});
+```
+
+## 範例 [#examples]
+
+```tsx
+import { source } from '@/lib/source';
+
+const page = source.getPage(['slugs']);
+
+if (page) {
+  // 存取頁面資料 [!code highlight:2]
+  console.log(page.data);
+
+  // 也可以存取 frontmatter 屬性 [!code highlight:2]
+  console.log(page.data.title);
+}
+```
+
+若要算繪頁面 (在 RSC 中) ，請將 `page.data.body` 當作元件使用。
+
+```tsx
+import { getMDXComponents } from '@/components/mdx';
+
+const MDX = page.data.body;
+
+// 透過 `components` prop 設定您的 MDX 元件
+return <MDX components={getMDXComponents()} />;
+```

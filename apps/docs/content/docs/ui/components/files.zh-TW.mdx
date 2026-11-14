@@ -1,0 +1,100 @@
+---
+title: 檔案
+description: 在您的文件中顯示檔案結構
+preview: 'files'
+---
+
+<Installation name="files" />
+
+## 使用方式 [#usage]
+
+請以 `Files` 包住檔案元件。您可以在 MDX 內容中使用它，也可以將它當作一般的 React.js 元件使用。
+
+```mdx title="content.mdx"
+import { File, Folder, Files } from 'fumadocs-ui/components/files';
+
+<Files>
+  <Folder name="app" defaultOpen>
+    <File name="layout.tsx" />
+    <File name="page.tsx" />
+    <File name="global.css" />
+  </Folder>
+  <Folder name="components">
+    <File name="button.tsx" />
+    <File name="tabs.tsx" />
+    <File name="dialog.tsx" />
+  </Folder>
+  <File name="package.json" />
+</Files>
+```
+
+### 檔案 [#file]
+
+<auto-type-table cwd path="content/docs/ui/props.ts" name="FileProps" />
+
+### 資料夾 [#folder]
+
+<auto-type-table cwd path="content/docs/ui/props.ts" name="FolderProps" />
+
+## Remark 外掛 [#remark-plugin]
+
+[`remark-mdx-files`](/docs/headless/mdx/remark-mdx-files) 是一個 remark 外掛，可提供額外的功能與語法。
+
+```ts tab="unified" title="source.config.ts"
+import { remarkMdxFiles } from 'fumadocs-core/mdx-plugins/remark-mdx-files';
+import { defineConfig } from 'fumadocs-mdx/config';
+
+export default defineConfig({
+  mdxOptions: {
+    // [!code ++]
+    remarkPlugins: [remarkMdxFiles],
+  },
+});
+```
+
+```ts tab="Sätteri" title="source.config.ts"
+import { remarkMdxFiles } from '@fumadocs/satteri/remark-mdx-files';
+import { defineConfig, defineDocs } from 'fumadocs-mdx/config';
+
+export const docs = defineDocs({
+  docs: {
+    compiler: 'satteri',
+  },
+});
+
+export default defineConfig({
+  satteriOptions: {
+    // [!code ++]
+    mdastPlugins: [remarkMdxFiles()],
+  },
+});
+```
+
+### CodeBlock 語法 [#codeblock-syntax]
+
+它會將 `files` 程式碼區塊轉換為 `<Files />` 元件，例如：
+
+````md title="content.md"
+```files
+project
+├── src
+│   ├── index.js
+│   └── utils
+│       └── helper.js
+├── package.json
+```
+````
+
+### `<auto-files>` [#auto-files]
+
+根據 glob 模式產生 `<Files />` 元件。
+
+```mdx title="content.mdx"
+<auto-files dir="./my-dir" pattern="**/*.{ts,tsx}" />
+
+<auto-files dir="./my-dir" pattern="**/*.{ts,tsx}" defaultOpenAll />
+```
+
+<Callout type="warn">
+  請勿將不受信任的值傳入 `dir`，因為它能列出您電腦上任何目錄中的檔案。
+</Callout>

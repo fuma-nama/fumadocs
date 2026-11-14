@@ -1,0 +1,74 @@
+---
+title: 程式碼區塊（Dynamic）
+description: 同時支援程式碼語法突顯的程式碼區塊
+preview: dynamicCodeBlock
+---
+
+## 使用方式 [#usage]
+
+### 用戶端元件 [#client-component]
+
+```tsx
+import { DynamicCodeBlock } from 'fumadocs-ui/components/dynamic-codeblock';
+
+export function MyComp() {
+  const code = `console.log("Hello World")`;
+
+  return <DynamicCodeBlock lang="ts" code={code} />;
+}
+```
+
+與 MDX 的 [`CodeBlock`](/docs/ui/components/codeblock) 元件不同，這是一個用戶端元件，不需要 MDX 也能使用。
+它會使用 Shiki 對程式碼進行語法突顯，並透過預設元件進行算繪。
+
+功能：
+
+* 採用 React.js 19 Suspense。
+* 可在伺服器端預先算繪。
+* 在瀏覽器端延遲載入語言與主題。
+
+#### 選項 [#options]
+
+```tsx
+import { DynamicCodeBlock } from 'fumadocs-ui/components/dynamic-codeblock';
+
+<DynamicCodeBlock
+  lang="ts"
+  code='console.log("Hello World")'
+  options={{
+    themes: {
+      light: 'github-light',
+      dark: 'github-dark',
+    },
+    components: {
+      // 覆寫元件（例如 `pre` 和 `code`）
+    },
+    // 其他 Shiki 選項
+  }}
+/>;
+```
+
+### 伺服器元件 [#server-component]
+
+如需伺服器元件的對應版本，您可以使用 RSC 版本：
+
+```tsx
+import { ServerCodeBlock } from 'fumadocs-ui/components/codeblock.rsc';
+
+<ServerCodeBlock
+  lang="ts"
+  code='console.log("Hello World")'
+  themes={{
+    light: 'github-light',
+    dark: 'github-dark',
+  }}
+  components={
+    {
+      // 覆寫元件（例如 `pre` 和 `code`）
+    }
+  }
+  // 其他 Shiki 選項
+/>;
+```
+
+若要使用自訂的語法突顯器，請參閱 [語法突顯器](/docs/headless/utils/shiki#usage)。

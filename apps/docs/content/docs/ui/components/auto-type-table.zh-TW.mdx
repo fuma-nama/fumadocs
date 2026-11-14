@@ -1,0 +1,160 @@
+---
+title: Auto Type Table
+description: 自動產生的型別表格
+---
+
+<Wrapper>
+  <auto-type-table
+    id="example"
+    name="AutoTypeTableExample"
+    type="export interface AutoTypeTableExample {
+
+/**
+* Markdown syntax like links, `code` are supported.
+* See https://fumadocs.dev/docs/ui/components/type-table
+**/
+name: boolean | null;
+
+/**
+* @param name - user name.
+* @param allowNull - is null value allowed.
+* @returns user ID
+**/
+fn: (name: string, allowNull?: boolean) => string
+
+/**
+* We love Shiki.
+*
+* ```ts
+* console.log(&#x22;Hello World, powered by Shiki&#x22;);
+* ```
+* @default { a: &#x22;test&#x22; }
+*/
+options?: Partial<{ a: unknown }>;
+
+}"
+  />
+</Wrapper>
+
+<Callout title="僅限伺服器元件" type="warn">
+  此元件無法在用戶端元件中使用，請改用[建置時期 MDX 整合](/docs/markdown/typescript#mdx-integration)。
+</Callout>
+
+此元件會根據 TypeScript 定義，為您的文件產生型別表格。
+
+## 使用方式 [#usage]
+
+```npm
+npm i fumadocs-typescript
+```
+
+初始化 TypeScript 編譯器，並將它加入為 MDX 元件。
+
+```tsx title="components/mdx.tsx"
+import defaultComponents from 'fumadocs-ui/mdx';
+import type { MDXComponents } from 'mdx/types';
+import { createGenerator, createFileSystemGeneratorCache } from 'fumadocs-typescript';
+import { AutoTypeTable, type AutoTypeTableProps } from 'fumadocs-typescript/ui';
+
+const generator = createGenerator({
+  // 設定快取，在 Vercel 等無伺服器平台上必須設定
+  cache: createFileSystemGeneratorCache('.next/fumadocs-typescript'),
+});
+
+export function getMDXComponents(components?: MDXComponents) {
+  return {
+    ...defaultComponents,
+    // [!code ++]
+    AutoTypeTable: (props: Partial<AutoTypeTableProps>) => (
+      <AutoTypeTable {...props} generator={generator} />
+    ),
+    ...components,
+  } satisfies MDXComponents;
+}
+```
+
+您現在可以在 MDX 內容中使用 `<AutoTypeTable />`。
+
+更多用法請參閱 [TypeScript DocGen](/docs/markdown/typescript)。
+
+### 從檔案讀取 [#from-file]
+
+它接受指向 TypeScript 檔案的 `path` prop，以及用來指定匯出型別名稱的 `name`。
+
+```ts title="path/to/file.ts"
+export interface MyInterface {
+  name: string;
+}
+```
+
+```mdx title="content.mdx"
+<AutoTypeTable path="./path/to/file.ts" name="MyInterface" />
+```
+
+此路徑是相對於您的專案目錄 (`cwd`) 。由於 `AutoTypeTable` 是 React 伺服器元件，無法存取 MDX 檔案路徑這類建置時期的資訊。
+
+### 從型別產生 [#from-type]
+
+您可以直接指定要產生的型別，不需要實際的 TypeScript 檔案。
+
+```mdx title="content.mdx"
+<AutoTypeTable type="{ hello: string }" />
+```
+
+若有提供 `path`，它會與該 TypeScript 檔案共用相同的上下文。
+
+```ts title="file.ts"
+export type A = { hello: string };
+```
+
+```mdx title="content.mdx"
+<AutoTypeTable path="file.ts" type="A & { world: string }" />
+```
+
+當 `type` 包含多行時，必須加上 export 陳述式並提供 `name` prop。
+
+```mdx title="content.mdx"
+<AutoTypeTable
+  path="file.ts"
+  name="B"
+  type={`
+import { ReactNode } from "react"
+export type B = ReactNode | { world: string }
+`}
+/>
+```
+
+### 函式 [#functions]
+
+請注意，這裡只接受物件型別。若要傳入函式，請改將其包裝在物件中。
+
+```ts
+export interface MyInterface {
+  myFn: (input: string) => void;
+}
+```
+
+## TypeScript 編譯器 [#typescript-compiler]
+
+它在底層使用 [Typescript Compiler API](https://github.com/microsoft/TypeScript/wiki/Using-the-Compiler-API) 擷取型別資訊，並會載入目前工作目錄中的 `tsconfig.json` 檔案。
+
+您可以透過 [`createGenerator()`](/docs/markdown/typescript) 變更編譯器設定。
+
+```ts
+import { createGenerator, createFileSystemGeneratorCache } from 'fumadocs-typescript';
+
+const generator = createGenerator({
+  tsconfigPath: './tsconfig.json',
+  // 解析相對路徑時所用的基準目錄（通常為 cwd）
+  basePath: './',
+  // 其他選項…
+});
+```
+
+### 檔案系統 [#file-system]
+
+此元件依賴檔案系統，因此引用它的頁面必須在**建置時**產生。若在 無伺服器 執行階段算繪此元件，可能會發生問題。
+
+## 參考資料 [#references]
+
+<auto-type-table cwd path="content/docs/ui/props.ts" name="AutoTypeTableProps" />

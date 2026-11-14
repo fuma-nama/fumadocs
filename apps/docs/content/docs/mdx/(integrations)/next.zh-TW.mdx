@@ -1,0 +1,79 @@
+---
+title: Next.js
+description: 在 Next.js 中使用 Fumadocs MDX
+---
+
+## 設定 [#setup]
+
+為您的 Next.js 應用程式設定 Fumadocs MDX。
+
+<section id="setup-section">
+  <div className="fd-steps [&_h3]:fd-step">
+    ### 安裝 &#91;#installation&#93;
+
+    ```npm
+    npm i fumadocs-mdx fumadocs-core @types/mdx
+    ```
+
+    在 Next.js 設定中加入外掛：
+
+    ```js title="next.config.mjs"
+    import { createMDX } from 'fumadocs-mdx/next';
+
+    /** @type {import('next').NextConfig} */
+    const config = {
+      reactStrictMode: true,
+    };
+
+    // [!code ++:4]
+    const withMDX = createMDX();
+
+    // [!code highlight]
+    export default withMDX(config);
+    ```
+
+    <Callout title="僅支援 ESM" type="warn">
+      Fumadocs MDX 僅支援 ESM，建議使用 `next.config.mjs`，以確保 ESM 解析正確。
+
+      若要使用 TypeScript 設定檔，則需搭配 Node.js 原生 TypeScript 解析器，詳情請參閱 [Next.js 文件](https://nextjs.org/docs/app/api-reference/config/typescript#using-nodejs-native-typescript-resolver-for-nextconfigts)。
+    </Callout>
+
+    ### 與 Fumadocs 整合 &#91;#integrate-with-fumadocs&#93;
+
+    建立 `lib/source.ts` 檔案：
+
+    ```ts title="lib/source.ts"
+    import { defineDocs } from 'fumadocs-mdx/macro';
+    import { loader } from 'fumadocs-core/source';
+
+    const docs = defineDocs({
+      dir: 'content/docs',
+    });
+
+    export const source = loader({
+      baseUrl: '/docs',
+      source: docs.toFumadocsSource(),
+    });
+    ```
+
+    ### 完成 &#91;#done&#93;
+
+    現在您可以在 `content/docs` 資料夾中撰寫內容了。
+  </div>
+</section>
+
+## 下一步 [#what-is-next]
+
+<Cards>
+  <Card title="Macro API" href="/docs/mdx/macro">
+    使用 `fumadocs-mdx/macro` 在您的應用程式模組中定義集合。
+  </Card>
+
+  <Card title="Config API" href="/docs/mdx/collections">
+    在 `source.config.ts` 中定義集合，並透過產生的進入點檔案存取內容。
+  </Card>
+
+  <Card title="延遲載入" href="/docs/mdx/async">
+    遇到效能瓶頸了嗎？不妨試試延遲載入。
+  </Card>
+</Cards>

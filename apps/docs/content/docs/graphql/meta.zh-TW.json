@@ -1,0 +1,10 @@
+{
+  "title": "GraphQL 範例",
+  "description": "Fumadocs GraphQL 示範",
+  "root": true,
+  "icon": "Hexagon",
+  "pages": [
+    "index",
+    "...(generated)"
+  ]
+}

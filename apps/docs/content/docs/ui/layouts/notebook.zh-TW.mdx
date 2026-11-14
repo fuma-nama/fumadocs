@@ -1,0 +1,103 @@
+---
+title: Notebook 版面配置
+description: 文件版面配置的精簡版本
+---
+
+import { notebook } from './layouts.story';
+
+[`<DocsLayout />`](/docs/ui/layouts/docs) 的精簡版本。
+
+<notebook.WithControl />
+
+<Customization />
+
+## 使用方式 [#usage]
+
+使用 `fumadocs-ui/layouts/notebook` 啟用 Notebook 版面配置。
+
+```tsx title="layout.tsx"
+import { DocsLayout } from 'fumadocs-ui/layouts/notebook'; // [!code highlight]
+import { baseOptions } from '@/lib/layout.shared';
+import { source } from '@/lib/source';
+import type { ReactNode } from 'react';
+
+export default function Layout({ children }: { children: ReactNode }) {
+  return (
+    <DocsLayout {...baseOptions()} tree={source.getPageTree()}>
+      {children}
+    </DocsLayout>
+  );
+}
+```
+
+也請記得一併更新頁面中的匯入：
+
+```tsx title="page.tsx"
+import { ... } from 'fumadocs-ui/layouts/docs/page'; // [!code --]
+import { ... } from 'fumadocs-ui/layouts/notebook/page'; // [!code ++]
+```
+
+## 設定 [#configurations]
+
+選項皆繼承自[文件版面配置](/docs/ui/layouts/docs)，但有些許差異：
+
+* 無法替換側邊欄／導覽列，因為 Notebook 版面配置的設計比預設版面配置更具既定風格。
+* 提供額外的選項 (請見下方) 。
+
+### 頁籤模式 [#tab-mode]
+
+設定[版面配置頁籤](/docs/ui/layouts/docs#layout-tabs)的樣式。如何新增版面配置頁籤，請參閱連結中的文件。
+
+![Notebook](/docs/notebook-tab-mode.png)
+
+```tsx title="layout.tsx"
+import { DocsLayout } from 'fumadocs-ui/layouts/notebook';
+import { baseOptions } from '@/lib/layout.shared';
+import { source } from '@/lib/source';
+import type { ReactNode } from 'react';
+
+export default function Layout({ children }: { children: ReactNode }) {
+  return (
+    <DocsLayout
+      {...baseOptions()}
+      tabMode="navbar" // [!code ++]
+      tree={source.getPageTree()}
+    >
+      {children}
+    </DocsLayout>
+  );
+}
+```
+
+### 導覽模式 [#nav-mode]
+
+設定導覽列的樣式。
+
+以下範例使用[頁籤模式](#tab-mode) `navbar` 及導覽模式 `top`：
+
+![Notebook](/docs/notebook-nav-mode.png)
+
+```tsx title="layout.tsx"
+import { DocsLayout } from 'fumadocs-ui/layouts/notebook';
+import { baseOptions } from '@/lib/layout.shared';
+import { source } from '@/lib/source';
+import type { ReactNode } from 'react';
+
+export default function Layout({ children }: { children: ReactNode }) {
+  const { nav, ...base } = baseOptions();
+
+  return (
+    <DocsLayout
+      {...base}
+      nav={{ ...nav, mode: 'top' }} // [!code ++]
+      tree={source.getPageTree()}
+    >
+      {children}
+    </DocsLayout>
+  );
+}
+```
+
+### AI 聊天 [#ai-chat]
+
+與[文件版面配置](/docs/ui/layouts/docs#ai-chat)相同。

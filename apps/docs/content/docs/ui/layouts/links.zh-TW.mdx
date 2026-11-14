@@ -1,0 +1,239 @@
+---
+title: 版面配置連結
+description: 適用於所有版面配置的導覽設定。
+---
+
+## 概覽 [#overview]
+
+Fumadocs 可讓您透過 `links` prop 在版面配置中加入導覽連結，例如連結到您的「作品展示」頁面。
+
+<div className="not-prose grid gap-2 *:border max-sm:*:last:hidden sm:grid-cols-[2fr_1fr]">
+  <>![Nav](/docs/nav-layout-home.png)</>
+
+  <>![Nav](/docs/nav-layout-docs.png)</>
+</div>
+
+```tsx tab="All" title="lib/layout.shared.tsx"
+import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
+
+export function baseOptions(): BaseLayoutProps {
+  return {
+    links: [], // [!code ++]
+  };
+}
+```
+
+```tsx tab="Docs Layout" title="app/docs/layout.tsx"
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+import { baseOptions } from '@/lib/layout.shared';
+import { source } from '@/lib/source';
+import type { ReactNode } from 'react';
+
+export default function Layout({ children }: { children: ReactNode }) {
+  return (
+    <DocsLayout
+      {...baseOptions()}
+      tree={source.getPageTree()}
+      links={[]} // [!code highlight]
+    >
+      {children}
+    </DocsLayout>
+  );
+}
+```
+
+```tsx tab="Home Layout" title="app/(home)/layout.tsx"
+import { HomeLayout } from 'fumadocs-ui/layouts/home';
+import { baseOptions } from '@/lib/layout.shared';
+import type { ReactNode } from 'react';
+
+export default function Layout({ children }: { children: ReactNode }) {
+  return (
+    <HomeLayout
+      {...baseOptions()}
+      links={[]} // [!code highlight]
+    >
+      {children}
+    </HomeLayout>
+  );
+}
+```
+
+所有支援的項目如下：
+
+### 連結項目 [#link-item]
+
+導覽至某個 URL/href 的連結，也可以是外部連結。
+
+```tsx title="lib/layout.shared.tsx"
+import { BookIcon } from 'lucide-react';
+import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
+
+export function baseOptions(): BaseLayoutProps {
+  return {
+    links: [
+      {
+        icon: <BookIcon />,
+        text: 'Blog',
+        url: '/blog',
+        // 次要項目在導覽列上會以不同方式顯示
+        secondary: false,
+      },
+    ],
+  };
+}
+```
+
+#### 啟用模式 [#active-mode]
+
+項目被標記為啟用狀態的條件。
+
+| 模式           | 說明                                |
+| ------------ | --------------------------------- |
+| `url`        | 瀏覽指定的 URL 時                       |
+| `nested-url` | 瀏覽該 URL 及其子頁面 (例如 `/blog/post`) 時 |
+| `none`       | 永不啟用                              |
+
+```tsx title="lib/layout.shared.tsx"
+import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
+
+export function baseOptions(): BaseLayoutProps {
+  return {
+    links: [
+      {
+        text: 'Blog',
+        url: '/blog',
+        active: 'nested-url',
+      },
+    ],
+  };
+}
+```
+
+### 圖示項目 [#icon-item]
+
+與連結項目相同，但會顯示為圖示按鈕。
+圖示項目預設為次要項目。
+
+```tsx title="lib/layout.shared.tsx"
+import { BookIcon } from 'lucide-react';
+import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
+
+export function baseOptions(): BaseLayoutProps {
+  return {
+    links: [
+      {
+        type: 'icon',
+        label: 'Visit Blog', // `aria-label`
+        icon: <BookIcon />,
+        text: 'Blog',
+        url: '/blog',
+      },
+    ],
+  };
+}
+```
+
+### 自訂項目 [#custom-item]
+
+顯示自訂元件。
+
+```tsx title="lib/layout.shared.tsx"
+import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
+
+export function baseOptions(): BaseLayoutProps {
+  return {
+    links: [
+      {
+        type: 'custom',
+        children: <Button variant="primary">Login</Button>,
+        secondary: true,
+      },
+    ],
+  };
+}
+```
+
+### GitHub URL [#github-url]
+
+另外也提供了快捷方式，可用來新增 GitHub 儲存庫的連結項目。
+
+```tsx twoslash title="lib/layout.shared.tsx"
+import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
+
+export function baseOptions(): BaseLayoutProps {
+  return {
+    githubUrl: 'https://github.com',
+  };
+}
+```
+
+### 一般選單 [#normal-menu]
+
+包含多個連結項目的選單。
+
+```tsx title="lib/layout.shared.tsx"
+import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
+
+export function baseOptions(): BaseLayoutProps {
+  return {
+    links: [
+      {
+        type: 'menu',
+        text: 'Guide',
+        items: [
+          {
+            text: 'Getting Started',
+            description: 'Learn to use Fumadocs',
+            url: '/docs',
+          },
+        ],
+      },
+    ],
+  };
+}
+```
+
+### 導覽選單 [#navigation-menu]
+
+在首頁版面配置中，您可以在導覽列加入導覽選單 (具備完整動畫效果) 。
+
+![Nav](/docs/nav-layout-menu.png)
+
+```tsx title="app/(home)/layout.tsx"
+import { baseOptions } from '@/lib/layout.shared';
+import type { ReactNode } from 'react';
+import { HomeLayout } from 'fumadocs-ui/layouts/home';
+import {
+  NavbarMenu,
+  NavbarMenuContent,
+  NavbarMenuLink,
+  NavbarMenuTrigger,
+} from 'fumadocs-ui/layouts/home/navbar';
+
+export default function Layout({ children }: { children: ReactNode }) {
+  return (
+    <HomeLayout
+      {...baseOptions()}
+      links={[
+        {
+          type: 'custom',
+          // 只會顯示在導覽列，不會顯示在行動版選單
+          on: 'nav',
+          children: (
+            <NavbarMenu>
+              <NavbarMenuTrigger>Documentation</NavbarMenuTrigger>
+              <NavbarMenuContent>
+                <NavbarMenuLink href="/docs">Hello World</NavbarMenuLink>
+              </NavbarMenuContent>
+            </NavbarMenu>
+          ),
+        },
+        // 其他項目
+      ]}
+    >
+      {children}
+    </HomeLayout>
+  );
+}
+```

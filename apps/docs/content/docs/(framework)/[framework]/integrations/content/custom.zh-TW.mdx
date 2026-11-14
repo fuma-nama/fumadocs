@@ -1,0 +1,126 @@
+---
+title: 自行打造
+description: 為 Fumadocs 打造專屬的內容來源。
+---
+
+## 簡介 [#introduction]
+
+實作自訂內容來源有兩種方式：
+
+### 使用載入器 API [#using-loader-api]
+
+載入器 API 提供類似檔案系統的介面，可用來整合不同的內容來源。
+
+詳情請參閱[載入器 API `source`](/docs/headless/source-api/source)。
+
+### 使用低階 API [#using-low-level-api]
+
+若需要更完整的控制權，您可以直接使用較低階的 API。
+
+#### 頁面樹 [step] [#page-tree]
+
+您可以直接將頁面樹寫死在程式碼中，也可以撰寫程式碼來產生頁面樹。
+請參閱[頁面樹的定義](/docs/headless/page-tree)。
+
+在您的文件版面配置中，將頁面樹傳入 `DocsLayout`：
+
+```tsx title="layout.tsx"
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+import type { ReactNode } from 'react';
+
+export default function Layout({ children }: { children: ReactNode }) {
+  return (
+    <DocsLayout
+      // [!code ++:5]
+      tree={
+        {
+          // 您自己的頁面樹
+        }
+      }
+    >
+      {children}
+    </DocsLayout>
+  );
+}
+```
+
+頁面樹就像是更聰明的「側邊欄項目」，UI 中的各種導覽元素 (例如頁尾) 都會參照它。
+
+#### 頁面內容 [step] [#page-content]
+
+文件頁面的邏輯也相同：
+
+* 定義路徑參數 (`slugs`) 。
+* 依據路徑參數取得頁面內容。
+* 算繪內容 (於 `DocsPage` 元件內) 。
+
+您可能還需要目錄，可以自行產生，或使用 [`getTableOfContents`](/docs/headless/utils/get-toc) 工具函式產生 (僅限 Markdown/MDX) 。
+
+接著在您框架的文件路由中算繪：
+
+```tsx title="components/docs-page.tsx"
+import { DocsPage, DocsBody } from 'fumadocs-ui/layouts/docs/page';
+import { getPage } from './my-content-source';
+
+export function Page({ slugs }: { slugs: string[] }) {
+  const page = getPage(slugs);
+  // 請使用您所用框架的 API 回傳 404
+  if (!page) return null;
+
+  return (
+    <DocsPage toc={page.tableOfContents}>
+      <DocsBody>{page.render()}</DocsBody>
+    </DocsPage>
+  );
+}
+```
+
+#### 預先算繪 [step] [#pre-rendering]
+
+預先算繪頁面 (尤其是經常造訪的頁面) ，以縮短初始載入時間。
+
+<show when={props.framework === 'next'}>
+  定義 [`generateStaticParams`](https://nextjs.org/docs/app/api-reference/functions/generate-static-params) 函式，以填入動態路由與 catch-all 路由。
+</show>
+
+<show when={props.framework === 'react-router'}>
+  在 `react-router.config.ts` 的 `prerender` 中回傳路徑。
+</show>
+
+<show when={props.framework === 'tanstack-start'}>
+  啟用 `tanstackStart()` Vite 外掛的 `prerender` 選項。
+</show>
+
+<show when={props.framework === 'waku'}>
+  從頁面匯出的 `getConfig` 回傳 `staticPaths`。
+</show>
+
+<show when={props.framework === 'astro'}>
+  從頁面的 `getStaticPaths()` 回傳參數。
+</show>
+
+從遠端來源預先算繪頁面時，請務必最佳化建置階段的重複讀取。
+例如，若您透過 GitHub API 擷取內容，建議先將儲存庫內容 clone 到本機，再進行預先算繪。
+
+```text tab="Before"
+/docs/* -> GET github.com
+/docs/introduction -> GET github.com
+/docs/my-page -> GET github.com
+Error: API Ratelimit
+```
+
+```text tab="After"
+開始 -> git clone
+/docs/* -> ls
+/docs/introduction -> 讀取檔案
+/docs/my-page -> 讀取檔案
+```
+
+#### 文件搜尋 [step] [#document-search]
+
+由於您的內容不一定是 Markdown/MDX，這部分可能會比較棘手。
+若是 Markdown 和 MDX，使用內建的 [Search API](/docs/headless/search/orama) 搭配搜尋索引，已足以應付大多數使用情境。
+若非如此，您就必須自行實作。
+
+我們推薦使用 Orama 或 Algolia Search 等第三方解決方案。它們比內建的 Search API 更有彈性，也更容易與遠端來源整合。
+Fumadocs 提供多種[搜尋整合](/docs/headless/search)。

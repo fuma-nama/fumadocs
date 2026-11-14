@@ -1,0 +1,75 @@
+---
+title: Remark 步驟
+description: 從標題產生步驟
+---
+
+## 使用方式 [#usage]
+
+Remark 步驟是一個 remark 外掛，請將它加入您的設定：
+
+```ts tab="unified" title="source.config.ts"
+import { defineConfig } from 'fumadocs-mdx/config';
+import { remarkSteps } from 'fumadocs-core/mdx-plugins/remark-steps';
+
+export default defineConfig({
+  mdxOptions: {
+    remarkPlugins: [remarkSteps],
+  },
+});
+```
+
+```ts tab="Sätteri" title="source.config.ts"
+import { defineConfig, defineDocs } from 'fumadocs-mdx/config';
+import { remarkSteps } from '@fumadocs/satteri/remark-steps';
+
+export const docs = defineDocs({
+  docs: { compiler: 'satteri' },
+});
+
+export default defineConfig({
+  satteriOptions: {
+    mdastPlugins: [remarkSteps()],
+  },
+});
+```
+
+### 輸入 [#input]
+
+建立步驟標題：
+
+```md tab="Using Tag"
+# Heading 1 [step]
+
+## Sub Heading 1 [step]
+
+## Sub Heading 2 [step]
+
+# Heading 2 [step]
+```
+
+```md tab="Using Number"
+# 1. Heading 1
+
+## 1. Sub Heading 1
+
+## 2. Sub Heading 2
+
+# 2. Heading 2
+```
+
+### 輸出 [#output]
+
+此外掛應會產生以下結構。
+
+```mdx
+<div className="fd-steps">
+  <div className="fd-step">
+    # Heading 1
+    <div className="fd-steps">
+      <div className="fd-step">## Sub Heading 1</div>
+      <div className="fd-step">## Sub Heading 2</div>
+    </div>
+  </div>
+  <div className="fd-step"># Heading 2</div>
+</div>
+```

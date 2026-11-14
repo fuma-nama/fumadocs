@@ -1,0 +1,155 @@
+---
+title: 使用指南
+description: 自動化設定流程並安裝元件的 CLI 工具。
+---
+
+## 安裝 [#installation]
+
+初始化 CLI 的設定檔：
+
+```package-install
+npx @fumadocs/cli
+```
+
+您可以在設定檔中變更元件的輸出路徑。
+
+### 初始化 [#init]
+
+在現有的應用程式中設定 Fumadocs，支援 Next.js、React Router、TanStack Start、Waku 和 Astro。
+
+```package-install
+npx @fumadocs/cli init
+```
+
+為了避免與您的應用程式衝突，文件頁面會放在專屬的路由群組中 (例如 Next.js 上的 `app/(docs)`) ，並使用各自的 provider 與版面配置；搜尋 API 等路由處理常式則比照[範例](https://github.com/fuma-nama/fumadocs/tree/dev/examples)。現有檔案只會做少量修改：
+
+* 在您的框架設定中加入 Fumadocs MDX 外掛。
+* 在您的全域 CSS 中加入 Fumadocs UI 樣式。
+* 在根版面配置的 `<html>` 元素上加入 `suppressHydrationWarning`，以支援主題切換。
+* 在 `.gitignore` 中加入 `.source`。
+
+傳入 `--i18n` 即可設定[國際化](/docs/internationalization)：文件路由會加上語系區段 (若路由器支援，預設語系可省略) ，並新增 `lib/i18n.ts` 設定檔；在 Next.js 上還會新增一個僅作用於文件路由的代理伺服器。其他功能則沿用您專案的 i18n 設定。
+
+覆寫檔案前會先詢問您；傳入 `--yes` 可略過提示，傳入 `--no-install` 則只會將相依套件寫入 `package.json`。
+
+### 功能 [#features]
+
+在您的專案中設定某項功能後，系統會自動安裝所需的元件與路由，並將其整合至您的應用程式。
+
+```package-install
+npx @fumadocs/cli feature ai --provider openrouter
+```
+
+| 功能         | 說明                                                                            |
+| ---------- | ----------------------------------------------------------------------------- |
+| `docs`     | 設定 Fumadocs，與 `init` 相同。                                                      |
+| `ai`       | [詢問 AI](/docs/integrations/llms#ask-ai) 對話方塊，`--provider`。                    |
+| `llms`     | [LLM 路由](/docs/integrations/llms)：`llms.txt`、`llms-full.txt` 以及各頁面的 Markdown。 |
+| `mcp`      | 用於搜尋與閱讀文件的 [MCP 伺服器](/docs/integrations/llms#mcp-server)。                     |
+| `webmcp`   | 供瀏覽器中 AI 代理使用的 [WebMCP](/docs/integrations/llms#webmcp) 工具 (實驗性功能) 。          |
+| `og`       | 使用 Takumi 或 next/og (僅限 Next.js) 產生 Open Graph 圖片，`--engine`。                 |
+| `search`   | 第三方[搜尋解決方案](/docs/search)，`--provider`。                                       |
+| `feedback` | 文件頁面上的[意見回饋](/docs/integrations/feedback)元件。                                  |
+| `epub`     | 用於[匯出 EPUB](/docs/guides/export-epub) 的路由。                                    |
+| `lint`     | 設定 ESLint (僅限 Next.js) 、Biome 或 Oxlint，`--linter`。                            |
+
+功能會依您的專案設定自動調整：
+
+* 搭配 [Macro API](/docs/mdx/macro) 或 `source.config.ts` 的 Fumadocs MDX；其他內容來源無法使用 `llms`、`mcp` 與 `epub`。
+* 文件的 `baseUrl`、`src/` 目錄、`next.config.ts`、i18n、靜態匯出與 SPA 模式。
+* 使用檔案式路由的 React Router：會改為輸出需要註冊的路由。
+* 使用 `@fumadocs/astro` 集合的 Astro：無法使用 `ai`，而 `mcp` 與 `epub` 需要轉接器。
+
+路由路徑會定義在 `lib/shared.ts` 的常數中。
+
+請查看說明以了解可用選項：
+
+```package-install
+npx @fumadocs/cli feature -h
+```
+
+### 元件 [#components]
+
+選擇並安裝元件。
+
+```package-install
+npx @fumadocs/cli add
+```
+
+您可以直接傳入元件名稱。
+
+```package-install
+npx @fumadocs/cli add banner files
+```
+
+#### 背後的原理是什麼？ [#how-the-magic-works]
+
+CLI 會從 Fumadocs registry (`https://fumadocs.dev/registry`) 取得最新版本的元件。
+因此，您安裝的元件一定是最新版本。
+
+此外，CLI 也會轉換匯入路徑。
+請務必使用最新版本的 CLI。
+
+> 此設計深受 Shadcn UI 啟發。
+
+### 自訂 [#customize]
+
+以簡單的方式自訂 Fumadocs 版面配置。
+
+```package-install
+npx @fumadocs/cli customize
+```
+
+它會將版面配置安裝到 `layouts`，並將您路由檔案中的匯入改為指向該版面配置。
+
+### Shadcn UI [#shadcn-ui]
+
+在含有 `components.json` 的專案中，CLI 會沿用 Shadcn UI 的別名，並且：
+
+* 安裝 `shadcn` 預設組合，讓 Fumadocs UI 套用您的主題色彩。
+* 重複使用您 `ui` 目錄中的 `button`、`popover` 與 `collapsible`，因為它們與 Shadcn UI 的 API 相同。
+* 從您的 `utils` 別名匯入 `cn`。
+
+只有在您尚未擁有這些元件時，才會安裝 Fumadocs 提供的版本。
+
+### 樹狀結構 [#tree]
+
+透過終端機執行 `tree` 指令，為 Fumadocs UI 的 `Files` 元件產生檔案樹。
+
+```package-install
+npx @fumadocs/cli tree ./my-dir ./output.tsx
+```
+
+您也可以輸出 MDX 檔案：
+
+```package-install
+npx @fumadocs/cli tree ./my-dir ./output.mdx
+```
+
+詳細資訊請參閱說明：
+
+```package-install
+npx @fumadocs/cli tree -h
+```
+
+#### 輸出範例 [#example-output]
+
+```tsx title="output.tsx"
+import { File, Folder, Files } from 'fumadocs-ui/components/files';
+
+export default (
+  <Files>
+    <Folder name="app">
+      <File name="layout.tsx" />
+      <File name="page.tsx" />
+      <File name="global.css" />
+    </Folder>
+    <Folder name="components">
+      <File name="button.tsx" />
+      <File name="tabs.tsx" />
+      <File name="dialog.tsx" />
+    </Folder>
+    <File name="package.json" />
+  </Files>
+);
+```
