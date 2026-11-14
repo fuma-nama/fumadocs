@@ -203,3 +203,46 @@ test('serializes matrix path parameters', () => {
   expect(encode({ a: 1, b: 2 }, true)).toBe(';a=1;b=2');
   expect(encode({ a: 1, b: 2 }, false)).toBe(';id=a,1,b,2');
 });
+
+test('percent-encodes path parameter values but not their delimiters', () => {
+  const encode = (value: unknown, style?: 'simple' | 'label' | 'matrix', explode = false) =>
+    encodeRequestData(
+      { method: 'get', path: { id: value }, query: {}, header: {}, cookie: {} },
+      defaultAdapters,
+      [{ name: 'id', in: 'path', style, explode }],
+    ).path.id.value;
+
+  expect(encode('report#1')).toBe('report%231');
+  expect(encode('a/b?c d%')).toBe('a%2Fb%3Fc%20d%25');
+  expect(encode(['a b', 'c/d'])).toBe('a%20b,c%2Fd');
+  expect(encode({ 'k y': 'a,b' }, 'simple', true)).toBe('k%20y=a%2Cb');
+  expect(encode(['a b', 'c'], 'label', true)).toBe('.a%20b.c');
+  expect(encode('a;b', 'matrix')).toBe(';id=a%3Bb');
+  expect(encode({ x: 'a=b' }, 'matrix', true)).toBe(';x=a%3Db');
+  expect(encode(JSON.parse('{"__proto__":"x","ok":"y"}'))).toBe('__proto__,x,ok,y');
+
+  const json = encodeRequestData(
+    { method: 'get', path: { id: { a: '/' } }, query: {}, header: {}, cookie: {} },
+    defaultAdapters,
+    [{ name: 'id', in: 'path', content: { 'application/json': {} } }],
+  ).path.id.value;
+  expect(decodeURIComponent(json)).toBe(JSON.stringify({ a: '/' }));
+  expect(json).not.toMatch(/[/{}"]/);
+});
+
+test('sends a path parameter with reserved characters to the right URL', () => {
+  const data = encodeRequestData(
+    {
+      method: 'get',
+      path: { name: 'report#1' },
+      query: { q: 'a&b' },
+      header: { 'X-Name': 'a/b c' },
+      cookie: {},
+    },
+    defaultAdapters,
+  );
+
+  expect(pathnameFromRequest('/files/{name}', data)).toBe('/files/report%231?q=a%26b');
+  // headers are not part of the URL
+  expect(data.header['X-Name'].value).toBe('a/b c');
+});
