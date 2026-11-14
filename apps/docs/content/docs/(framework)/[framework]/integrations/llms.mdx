@@ -77,9 +77,9 @@ With `getSource`, `index()` and `indexNode()` return a promise instead of a stri
 
 The CLI serves these files for AI agents:
 
-- `/llms.txt`: an index of every page, linked to its Markdown, followed by the `llms-full.txt` of each section.
+- `/llms.txt`: an index of every page, linked to its Markdown, with each section linked to its `llms-full.txt`.
 - `/llms-full.txt`: the content of every page.
-- `<dir>/llms-full.txt`: the pages under a URL directory with two or more pages, like `/docs/ui/llms-full.txt`, so agents can read large docs one section at a time.
+- `<dir>/llms-full.txt`: the pages of a section, like `/docs/ui/llms-full.txt`, so agents can read large docs one section at a time. Sections are the root folders of the page tree.
 - `<page>.md`: the Markdown of a page, like `/docs/ui.md`, and `/index.md` for `/`.
 
 To leave pages out of the files, like drafts, pass `filter`. `llms.txt` still lists them, linked to their HTML page:
@@ -91,11 +91,12 @@ export const docsLlms = llms(source, {
 });
 ```
 
-To choose which directories have their own `llms-full.txt`, pass `section`. It replaces the default rule, here with one file per top-level directory, like `/docs/ui`:
+To choose the sections, pass `section`. It receives a page tree folder and returns `true` for a section, or the path of its file:
 
 ```ts title="lib/source.ts"
 export const docsLlms = llms(source, {
-  section: (dir, pages) => pages.length > 1 && dir.split('/').length === 3,
+  // every folder with an index page
+  section: (folder) => folder.index !== undefined,
   renderPage: async (page) => `# ${page.data.title}\n\n${await page.data.getText('processed')}`,
 });
 ```
