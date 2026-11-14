@@ -58,7 +58,8 @@ Fumadocs runs on Next.js and Waku (RSC), React Router and TanStack Start (with a
 
 ## Internationalization
 
-- Every UI string goes through `useTranslations({ note })` from `@fuma-translate/react`, e.g. `t('Close Banner', { note: 'aria-label' })`. The build regenerates `src/.translations/{index.ts,keys.json}` in each UI package; commit them in both packages.
+- Every UI string goes through `useTranslations({ note })` from `@fuma-translate/react`, e.g. `t('Close Banner', { note: 'aria-label' })`. Its translation key is the string followed by every note, like `Close Banner(banner)(aria-label)`. The build writes each package's keys to the gitignored `src/.translations/`.
+- Adding, changing or removing a UI string changes its key, so update every preset in `packages/language/src` (`zh-cn.ts`, `zh-tw.ts`) in the same change: translate the new key and delete the old one. CI runs `pnpm --filter @fumadocs/language types:check` against the built packages, and it fails on a key that no package uses anymore. It reports only the first stale key per preset, so compare the presets with the generated `src/.translations/keys.json` of each package.
 - Routing features must handle `fumadocs-core/i18n` setups: every `hideLocale` mode, the locale in generated URLs (search, Markdown, OG images, sitemaps) and per-locale page trees. Check against `examples/i18n`, `react-router-i18n`, `tanstack-start-i18n`, `waku-i18n` and `astro-i18n`.
 
 ## Accessibility
