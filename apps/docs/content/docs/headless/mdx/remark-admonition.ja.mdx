@@ -1,0 +1,92 @@
+---
+title: Remark Admonition
+description: Fumadocs で Admonition を使用する
+---
+
+Docusaurus には [Admonition 構文](https://docusaurus.io/docs/markdown-features/admonitions)があります。
+Docusaurus から移行する場合は、この remark プラグインを有効にすると Admonition 構文を使用できるようになります。
+
+## 使い方 [#usage]
+
+ディレクティブ構文が必要です。unified を使用している場合は、`remark-directive` をインストールしてください。
+
+```package-install
+remark-directive
+```
+
+Sätteri は `directive` 機能でディレクティブをパースします。この機能は Fumadocs MDX ではデフォルトで有効になっています。
+
+```ts tab="unified" title="source.config.ts"
+import remarkDirective from 'remark-directive';
+import { remarkDirectiveAdmonition } from 'fumadocs-core/mdx-plugins';
+import { defineConfig } from 'fumadocs-mdx/config';
+
+export default defineConfig({
+  mdxOptions: {
+    remarkPlugins: [remarkDirective, remarkDirectiveAdmonition],
+  },
+});
+```
+
+```ts tab="Sätteri" title="source.config.ts"
+import { remarkDirectiveAdmonition } from '@fumadocs/satteri/remark-directive-admonition';
+import { defineConfig, defineDocs } from 'fumadocs-mdx/config';
+
+export const docs = defineDocs({
+  docs: { compiler: 'satteri' },
+});
+
+export default defineConfig({
+  satteriOptions: {
+    mdastPlugins: [remarkDirectiveAdmonition()],
+  },
+});
+```
+
+### 例 [#example]
+
+```md tab="Input"
+:::tip[This is a `title`]
+
+Hello World
+
+:::
+
+:::warning
+
+Hello World
+
+:::
+```
+
+```mdx tab="Output"
+<CalloutContainer type='info'>
+  <CalloutTitle>This is a `title`</CalloutTitle>
+  <CalloutDescription>
+
+    Hello World
+
+  </CalloutDescription>
+</CalloutContainer>
+
+<CalloutContainer type='warning'>
+  <CalloutDescription>
+
+    Hello World
+
+  </CalloutDescription>
+</CalloutContainer>
+```
+
+### 使用するタイミング [#when-to-use]
+
+代わりに MDX の JSX 構文を使用することを強くおすすめします。
+JSX 構文のほうが柔軟性が高く、エディターによっては MDX ファイルで IntelliSense も利用できます。
+
+```mdx
+<Callout type='warn'>
+
+Hello World
+
+</Callout>
+```

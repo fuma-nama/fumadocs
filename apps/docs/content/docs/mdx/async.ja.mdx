@@ -1,0 +1,114 @@
+---
+title: 遅延読み込み
+description: コレクションの出力に対して遅延読み込みを設定します。
+---
+
+## はじめに [#introduction]
+
+デフォルトでは、すべての Markdown ファイルと MDX ファイルを事前にコンパイルする必要があります。この制約は開発サーバーにも同様に当てはまります。
+
+そのため、大規模なドキュメントサイトでは開発サーバーの起動に時間がかかる場合があります。これを改善するには、doc コレクションで非同期モードまたは動的モードを有効にできます。
+
+## 非同期モード [#async-mode]
+
+非同期モードでは、非同期インポートを使ってコレクションの出力を生成します。
+
+```ts tab="Docs Collection"
+import { defineDocs } from 'fumadocs-mdx/config';
+
+export const docs = defineDocs({
+  dir: 'content/docs',
+  docs: {
+    // [!code ++]
+    async: true,
+  },
+});
+```
+
+```ts tab="Doc Collection"
+import { defineCollections } from 'fumadocs-mdx/config';
+
+export const doc = defineCollections({
+  type: 'doc',
+  dir: 'content/docs',
+  // [!code ++]
+  async: true,
+});
+```
+
+使用するバンドラーによっては、開発サーバーでのコンパイル時間を大幅に短縮できる場合があります。
+
+<Callout title="Next.js の場合">
+  現時点では Turbopack が遅延バンドルに対応していないため、非同期モードで改善されるのはサーバーのパフォーマンスのみです。
+</Callout>
+
+## 動的モード [#dynamic-mode]
+
+動的モードでは、**オンデマンドでコンパイル**を行い、その出力をランタイムで実行します。
+
+`shiki` をインストールし、外部化(externalize)しておくことを推奨します。
+
+```npm
+npm i shiki
+```
+
+次のように、コレクションで動的モードを有効にします。
+
+```ts tab="Docs Collection"
+import { defineDocs } from 'fumadocs-mdx/config';
+
+export const docs = defineDocs({
+  dir: 'content/docs',
+  docs: {
+    // [!code ++]
+    dynamic: true,
+  },
+});
+```
+
+```ts tab="Doc Collection"
+import { defineCollections } from 'fumadocs-mdx/config';
+
+export const doc = defineCollections({
+  type: 'doc',
+  dir: 'content/docs',
+  // [!code ++]
+  dynamic: true,
+});
+```
+
+次に、[Dynamic Entry](/docs/mdx/entry/dynamic) の手順に従い、動的エントリからコレクションにアクセスするよう変更してください。
+
+<Callout title="制約" type="warn">
+  動的モードでは、MDX の機能にいくつかの制限があります。
+
+  * **MDX ファイル内では import/export を使用できません。** MDX コンポーネントは、代わりに `components` prop で渡してください。
+  * **画像は URL で参照する必要があります(例: `/images/test.png`)。** `./image.png` のような**ファイルパス**は使用しないでください。画像は `public` フォルダーに配置し、URL で参照してください。
+</Callout>
+
+## 使い方 [#usage]
+
+フロントマターのプロパティは引き続き `page` オブジェクトから参照できますが、コンパイル済みのコンテンツ (およびそのエクスポート) を読み込むには、非同期関数 `load()` を呼び出す必要があります。
+
+例:
+
+```tsx title="page.tsx"
+import { source } from '@/lib/source';
+import { getMDXComponents } from '@/components/mdx';
+
+const page = source.getPage(['...']);
+
+if (page) {
+  // フロントマターのプロパティはそのまま利用できます
+  console.log(page.data);
+
+  // Markdown コンテンツの取得には await が必要です
+  const { body: MdxContent, toc } = await page.data.load();
+
+  console.log(toc);
+
+  return <MdxContent components={getMDXComponents()} />;
+}
+```
+
+非同期モードまたは動的モードを使用する場合は、検索の実装にサードパーティのサービスを利用することを強く推奨します。こうしたサービスは一般に、インデックス対象となる大量のコンテンツをより適切に処理できます。

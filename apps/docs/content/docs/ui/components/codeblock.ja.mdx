@@ -1,0 +1,80 @@
+---
+title: コードブロック
+description: Shiki でハイライトされたコードブロックを表示します
+---
+
+<Wrapper>
+  <div className="bg-fd-background rounded-lg prose-no-margin">
+    ```js title="config.js"
+    import createMDX from 'fumadocs-mdx/config';
+
+    const withMDX = createMDX();
+
+    // [!code word:config]
+    /** @type {import('next').NextConfig} */
+    const config = {
+      // [!code highlight]
+      reactStrictMode: true, // [!code highlight]
+    }; // [!code highlight]
+
+    export default withMDX(config);
+    ```
+  </div>
+</Wrapper>
+
+<Installation name="codeblock" />
+
+これは、[Rehype Code](/docs/headless/mdx/rehype-code) と組み合わせて、ハイライトされたコードブロックを表示するための **MDX コンポーネント**です。
+コードブロックの書き方については、[Markdown](/docs/markdown#codeblock) を参照してください。
+
+主な機能:
+
+* コピーボタン
+* タイトルとアイコンのカスタマイズ
+
+> ランタイムでシンタックスハイライトを行うコンポーネントをお探しの場合は、[Dynamic Code Block](/docs/ui/components/dynamic-codeblock) を参照してください。
+
+## 使い方 [#usage]
+
+pre 要素を、コードブロックのラッパーとして機能する `<CodeBlock />` で囲みます。
+
+```tsx title="components/mdx.tsx"
+import defaultComponents from 'fumadocs-ui/mdx';
+import type { MDXComponents } from 'mdx/types';
+import { CodeBlock, Pre } from 'fumadocs-ui/components/codeblock';
+
+export function getMDXComponents(components?: MDXComponents) {
+  return {
+    ...defaultComponents,
+    // HTML の `ref` 属性は `forwardRef` と競合します
+    pre: ({ ref: _ref, ...props }) => (
+      <CodeBlock {...props}>
+        <Pre>{props.children}</Pre> {/* [!code highlight] */}
+      </CodeBlock>
+    ),
+    ...components,
+  } satisfies MDXComponents;
+}
+```
+
+### 背景を保持する [#keep-background]
+
+Shiki が生成した背景色を使用します。
+
+```tsx
+import { Pre, CodeBlock } from 'fumadocs-ui/components/codeblock';
+
+<CodeBlock keepBackground {...props}>
+  <Pre>{props.children}</Pre>
+</CodeBlock>;
+```
+
+### アイコン [#icons]
+
+`CodeBlock` コンポーネントに `icon` prop を渡すと、カスタムアイコンを指定できます。
+
+デフォルトでは、アイコンはカスタムの Shiki トランスフォーマーによって挿入されます。
+
+```js title="config.js"
+console.log('js');
+```

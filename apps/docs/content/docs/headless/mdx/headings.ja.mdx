@@ -1,0 +1,143 @@
+---
+title: 見出し
+description: ドキュメント内の見出しを処理します
+---
+
+## Remark Heading [#remark-heading]
+
+見出しにIDを付与するremarkプラグインです。Fumadocs MDXではデフォルトで有効になっています。オプションは`remarkHeadingOptions`で指定します。
+
+### カスタム ID [#custom-heading-id]
+
+`[#slug]` で見出しの ID をカスタマイズできます。
+
+```md
+# heading [#slug]
+```
+
+無効にするには、次のようにします。
+
+```ts tab="unified" title="source.config.ts"
+import { defineConfig } from 'fumadocs-mdx/config';
+
+export default defineConfig({
+  mdxOptions: {
+    remarkHeadingOptions: {
+      customId: false,
+    },
+  },
+});
+```
+
+```ts tab="Sätteri" title="source.config.ts"
+import { defineConfig, defineDocs } from 'fumadocs-mdx/config';
+
+export const docs = defineDocs({
+  docs: { compiler: 'satteri' },
+});
+
+export default defineConfig({
+  satteriOptions: {
+    remarkHeadingOptions: {
+      customId: false,
+    },
+  },
+});
+```
+
+### 目次の抽出 [#extract-toc]
+
+デフォルトでは、ドキュメントの見出し(目次)も抽出し、`TOCItemType` の配列 `toc` としてファイルデータに格納します。
+Fumadocs MDX では `generateToc: false` でこの機能を無効化し、代わりに [Rehype TOC](#rehype-toc) を使って目次をエクスポートしています。
+
+<auto-type-table path="../props.ts" name="TOCItemType" />
+
+### 式を含む見出し [#headings-with-expressions]
+
+Fumadocs MDX では、見出しに式が含まれている場合や、見出しが [`<show>`](/docs/markdown#show) の中にある場合、その ID はレンダリング後のテキストから生成されます:
+
+```mdx
+## Deploy on {props.framework}
+```
+
+`framework: 'astro'` の場合、ID は `deploy-on-astro` になります。ID が重複すると `-1` のようなサフィックスが付きますが、レンダリングされない見出しは重複としてカウントされません。
+
+これには `rehypeHeading` プラグインが必要です。このプラグインは、Fumadocs MDX によって独自の rehype プラグインの後に追加されます。このプラグインがない場合、Remark Heading はソーステキストから ID を生成するため、`deploy-on-propsframework` のようになります。
+
+### カスタムスラッグ [#custom-slugs]
+
+カスタムの `slug` 関数は、式を含む見出しであっても、ソーステキストから ID を生成します。独自のスラッガーでレンダリング後のテキストを使用するには、モジュールから `createHeadingIds()` をエクスポートします。
+
+```ts title="lib/heading.ts"
+import { createHeadingIds as create } from 'fumadocs-core/mdx-plugins/remark-heading.runtime';
+
+export const createHeadingIds: typeof create = (ids) =>
+  // ページごとに呼び出されるため、slugger で重複を数えられます
+  create(ids, () => (text) => text.toLowerCase().replaceAll(' ', '_'));
+```
+
+次に、`slugImportSource` にそのモジュールを指定します。MDX の `jsxImportSource` で指定する JSX ランタイムと同じく、このモジュールはコンパイル後のページからインポートされるため、パッケージ名またはインポートエイリアスを使用してください。
+
+```ts tab="unified" title="source.config.ts"
+import { defineConfig } from 'fumadocs-mdx/config';
+
+export default defineConfig({
+  mdxOptions: {
+    remarkHeadingOptions: {
+      slug: (_root, _heading, text) => text.toLowerCase().replaceAll(' ', '_'),
+      slugImportSource: '@/lib/heading',
+    },
+  },
+});
+```
+
+```ts tab="Sätteri" title="source.config.ts"
+import { defineConfig, defineDocs } from 'fumadocs-mdx/config';
+
+export const docs = defineDocs({
+  docs: { compiler: 'satteri' },
+});
+
+export default defineConfig({
+  satteriOptions: {
+    remarkHeadingOptions: {
+      slug: (_heading, text) => text.toLowerCase().replaceAll(' ', '_'),
+      slugImportSource: '@/lib/heading',
+    },
+  },
+});
+```
+
+expression を含む最初の見出しより前にある見出しには引き続き `slug` 関数が使用されるため、両者の結果が一致するようにしてください。
+
+## Rehype TOC [#rehype-toc]
+
+目次をエクスポートする rehype プラグインです。Remark Heading とは異なり、見出しタイトル内の JSX ノードを保持します。
+
+Fumadocs MDX ではデフォルトで有効になっています。Sätteri を使用する場合は、`rehypeTocOptions` でオプションを渡してください。
+
+### 出力 [#output]
+
+Markdown ドキュメントの場合：
+
+```md
+## Hello `code`
+```
+
+このプラグインは、目次を `toc` としてエクスポートします。
+
+```jsx
+export const toc = [
+  {
+    title: (
+      <>
+        Hello <code>code</code>
+      </>
+    ),
+    depth: 2,
+    url: '#hello-code',
+  },
+];
+```
+
+Fumadocs MDX では、`page.data.toc` にはページの props によってレンダリングされる見出しのみが含まれます。カスタムのコンテンツソースでも、[ランタイム出力](/docs/headless/source-api/source#runtime-outputs)を使えば同じことができます。

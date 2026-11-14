@@ -1,0 +1,321 @@
+---
+title: ローダー API
+description: コンテンツソースを統一されたインターフェースに変換します
+---
+
+## 機能 [#what-it-does]
+
+`loader()` は、Fumadocs をさまざまなコンテンツソースと統合するためのインターフェースを提供します。
+
+* [ページのスラッグとページツリー](/docs/headless/page-conventions)を生成します。
+* 各ページに URL を割り当てます。
+* コンテンツを扱うための便利なユーティリティを提供します。
+
+<Callout type="warn" title="重要な注意点">
+  - `loader()` はサーバーサイドの API です。ビルド時に動作する特殊な仕組みではなく、ブラウザで使える API でもありません。
+  - インメモリストレージを使用し、ファイルはコンテンツソースから渡されます。
+</Callout>
+
+## 使い方 [#usage]
+
+Fumadocs MDX などのコンテンツソースと組み合わせて使用できます。詳しくは [`source`](/docs/headless/source-api/source) を参照してください。
+
+```ts
+import { loader } from 'fumadocs-core/source';
+import { docs } from 'collections/server';
+
+export const source = loader({
+  source: docs.toFumadocsSource(),
+  baseUrl: '/docs',
+});
+```
+
+### URL [#url]
+
+ベースURLを上書きしたり、各ページのURLを生成する関数を指定したりできます。
+
+```ts
+import { loader } from 'fumadocs-core/source';
+
+loader({
+  baseUrl: '/docs',
+  // または関数でカスタマイズすることもできます
+  url(slugs, locale) {
+    if (locale) return '/' + [locale, 'docs', ...slugs].join('/');
+    return '/' + ['docs', ...slugs].join('/');
+  },
+});
+```
+
+### スラッグ [#slugs]
+
+ページファイルからスラッグを生成するカスタム関数を定義できます。
+
+```ts
+import { loader } from 'fumadocs-core/source';
+
+loader({
+  slugs(file, next) {
+    console.log(file.path, file.data);
+    // `next()` を使うと、デフォルトのスラッグを基に生成できます
+    if (file.path.startsWith('blog/')) return ['blog', ...next()];
+    // または、`undefined` を返すとデフォルト値にフォールバックします
+    return ['my', 'slug'];
+  },
+});
+```
+
+### アイコン [#icons]
+
+ページファイルとメタファイルで指定された [icon](/docs/headless/page-conventions#icons) プロパティを読み込みます。
+
+```ts
+import { loader } from 'fumadocs-core/source';
+import { icons } from 'lucide-react';
+import { createElement } from 'react';
+
+loader({
+  icon(icon) {
+    if (!icon) {
+      // ここでデフォルトのアイコンを設定することもできます
+      return;
+    }
+
+    if (icon in icons) return createElement(icons[icon as keyof typeof icons]);
+  },
+});
+```
+
+### I18n [#i18n]
+
+`i18n` の設定をローダーに渡します。
+
+```ts title="lib/source.ts"
+import { i18n } from '@/lib/i18n';
+import { loader } from 'fumadocs-core/source';
+
+export const source = loader({
+  i18n, // [!code highlight]
+});
+```
+
+i18n を有効にすると、ローダーはロケールごとにページツリーを生成します。
+
+ページの翻訳が存在しない場合は、[`fallbackLanguage`](/docs/headless/internationalization/config#fallback-language) にフォールバックします。
+
+## 出力 [#output]
+
+コンテンツローダーのインスタンスを出力します。
+
+### ページの取得 [#get-page]
+
+スラッグを指定してページを取得します。
+
+```ts
+import { source } from '@/lib/source';
+
+source.getPage(['slug', 'of', 'page']);
+
+// i18n を使用する場合
+source.getPage(['slug', 'of', 'page'], 'locale');
+```
+
+#### カスタム props [#custom-props]
+
+読者が選択したバージョンなど、ページのコンテンツに props を渡せます。コンテンツ側では、[パスパラメーター](/docs/headless/page-conventions#path-params)と同じように `props` として受け取ります：
+
+```ts
+import { source } from '@/lib/source';
+
+const page = source.getPage(['slug', 'of', 'page'], {
+  props: { version: 'v2' },
+  // i18n を使う場合
+  language: 'locale',
+});
+```
+
+ページデータは、コンテンツや目次を含め、これらの props から生成されます。MDX コンポーネントも props として扱われます。処理済みの Markdown で独自のコンポーネントをレンダリングするには、これらを渡してください。
+
+```ts
+import { getMDXComponents } from '@/components/mdx';
+
+const page = source.getPage(['slug', 'of', 'page'], {
+  props: { components: getMDXComponents() },
+});
+const markdown = await page.data.getText('processed');
+```
+
+<Callout title="補足">
+  検索ルートと LLM ルートは `getPages()` からページを読み込みますが、これらのページが持つのはパスの params だけです。検索や LLM に認識させたいバリアントは、パスの param として定義する必要があります。
+</Callout>
+
+### ページの取得 [#get-pages]
+
+指定したロケールで利用可能なページの一覧を取得します。
+
+```ts
+import { source } from '@/lib/source';
+
+// すべてのロケールから取得
+source.getPages();
+
+// 特定のロケールから取得
+source.getPages('locale');
+```
+
+### ページツリー [#page-tree]
+
+```ts
+import { source } from '@/lib/source';
+
+// i18n なしの場合
+source.getPageTree();
+
+// i18n ありの場合
+source.getPageTree('locale');
+```
+
+### ノードから取得する [#get-from-node]
+
+ページツリーのノードには、元のファイルパスへの参照が含まれています。
+ツリーのノードから、元のページファイルやメタファイルを取得できます。
+
+```ts
+import { source } from '@/lib/source';
+
+source.getNodePage(pageNode);
+source.getNodeMeta(folderNode);
+```
+
+### Params [#params]
+
+ページを事前レンダリングするために、全ページのパスパラメータを生成します。
+生成されるパラメータ名は `slug: string[]` と `lang: string`(i18n 使用時のみ)です。
+
+```ts tab="Next.js" title="app/docs/[[...slug]]/page.tsx"
+import { source } from '@/lib/source';
+
+export function generateStaticParams() {
+  return source.generateParams();
+}
+```
+
+```ts tab="Waku" title="src/pages/docs/[...slugs].tsx"
+import { source } from '@/lib/source';
+
+export async function getConfig() {
+  const pages = source
+    .generateParams()
+    .map((item) => (item.lang ? [item.lang, ...item.slug] : item.slug));
+
+  return {
+    render: 'static' as const,
+    staticPaths: pages,
+  } as const;
+}
+```
+
+```astro tab="Astro" title="src/pages/docs/[...slug].astro"
+---
+import type { GetStaticPaths } from 'astro';
+import { source } from '@/lib/source';
+
+export const prerender = true;
+
+export const getStaticPaths = (() => {
+  return source.getPages().map((page) => ({
+    params: { slug: decodeURI(page.slugs.join('/')) || undefined },
+    props: { page },
+  }));
+}) satisfies GetStaticPaths;
+---
+```
+
+React Router と TanStack Start は URL 単位でプリレンダリングを行うため、代わりに `source.getPages()` の `url` を列挙してください。
+
+### 言語エントリ [#language-entries]
+
+利用可能な言語と、各言語のページを取得します。
+
+```ts
+import { source } from '@/lib/source';
+
+// 言語 -> ページ
+const entries = source.getLanguages();
+```
+
+## クライアント API [#client-api]
+
+ローダー API は RSC 環境での利用に最適です。RSC 環境では、サーバーとクライアントの境界を越えて JSX ノードを渡せます。
+
+RSC 以外の環境向けには、軽量なシリアライズレイヤーが用意されています。
+
+```ts tab="Server"
+import { source } from '@/lib/source';
+
+// ローダーデータを渡す箇所
+async function loader() {
+  const pageTree = source.getPageTree();
+
+  return {
+    pageTree: await source.serializePageTree(pageTree),
+  };
+}
+```
+
+```tsx tab="Client"
+import { useFumadocsLoader } from 'fumadocs-core/source/client';
+
+function MyComponent() {
+  // `useLoaderData()` でローダーデータを受け取ります（React フレームワークが提供）
+  const { pageTree, ...data } = useFumadocsLoader(useLoaderData());
+
+  // あとはレンダリングするだけです（例: Fumadocs UI を使用）
+  return <DocsLayout tree={pageTree}>...</DocsLayout>;
+}
+```
+
+## 動的ローダー [#dynamic-loader]
+
+`dynamicLoader()` は、コンテンツソースに再検証のための追加機能を提供します。[動的ソース](/docs/headless/source-api/source#dynamic-source)と組み合わせて使用してください。
+
+```ts
+import { dynamicLoader } from 'fumadocs-core/source';
+import { createMySource } from './my-source';
+
+const source = dynamicLoader(createMySource(), {
+  baseUrl: '/docs',
+});
+
+export async function getSource() {
+  return source.get();
+}
+```
+
+`await source.get()` を呼び出すと、通常のコンテンツローダーオブジェクトが返されます。
+
+```ts
+const docs = await getSource();
+
+const page = docs.getPage(['...']);
+```
+
+### 再検証 [#revalidation]
+
+動的ソースはローダーによってキャッシュされます。
+
+ソースの内容が時間とともに変わる場合は、`invalidate()` を呼び出してキャッシュをクリアするか、`revalidate()` を呼び出してキャッシュを更新してください。
+
+```ts
+source.invalidate();
+
+await source.revalidate();
+```
+
+[マルチソース](/docs/headless/source-api/source#multiple-sources)構成では、特定のソースだけを無効化または再検証できます。
+
+```ts
+source.invalidate('docs');
+
+await source.revalidate('docs');
+```

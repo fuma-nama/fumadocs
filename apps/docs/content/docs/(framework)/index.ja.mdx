@@ -1,0 +1,70 @@
+---
+title: はじめに
+description: React 向けのドキュメントフレームワーク
+icon: SquareBookmark
+---
+
+import { CpuIcon, PanelsTopLeftIcon, DatabaseIcon, TerminalIcon } from 'lucide-react';
+import { FrameworkLogo } from '@/components/framework-logo';
+
+<AgentInstructions />
+
+Fumadocs <span className="text-fd-muted-foreground text-sm">(Foo-ma docs)</span> は、高速かつ柔軟で、お使いの React フレームワークにシームレスに組み込めるよう設計された**ドキュメントフレームワーク**です。
+複数のレイヤーで構成されています。
+
+<Cards>
+  <Card icon={<CpuIcon className="text-purple-300" />} title="Fumadocs Core" href="/docs/headless">
+    ドキュメント検索、コンテンツソースのアダプター、Markdown 拡張機能など、ロジックの大部分を担います。
+  </Card>
+
+  <Card icon={<PanelsTopLeftIcon className="text-blue-300" />} title="Fumadocs UI" href="/docs/ui">
+    Fumadocs のデフォルトテーマです。ドキュメントサイト向けの美しいデザインとインタラクティブなコンポーネントを提供します。
+  </Card>
+
+  <Card icon={<DatabaseIcon />} title="コンテンツソース">
+    コンテンツの取得元です。CMS のほか、[Fumadocs MDX](/docs/mdx)(公式のコンテンツソース)のようなローカルデータレイヤーを利用できます。
+  </Card>
+
+  <Card icon={<TerminalIcon />} title="Fumadocs CLI" href="/docs/cli">
+    UI コンポーネントのインストールや各種作業の自動化を行うコマンドラインツールです。レイアウトのカスタマイズに役立ちます。
+  </Card>
+</Cards>
+
+<Callout title="さらに詳しく知りたい方へ">
+  詳しい紹介記事「[What is Fumadocs](/docs/what-is-fumadocs)」をご覧ください。
+</Callout>
+
+## フレームワークの選択 [#choosing-a-framework]
+
+ガイドはフレームワークごとに用意されています。アプリで使用しているフレームワークを選択してください。新規プロジェクトの場合は Next.js をおすすめします。
+
+<Cards>
+  <Card icon={<FrameworkLogo framework="next" />} title="Next.js（推奨）" href="/docs/next">
+    高機能で成熟したフレームワークで、新規プロジェクトの標準的な選択肢です。
+  </Card>
+
+  <Card icon={<FrameworkLogo framework="react-router" />} title="React Router" href="/docs/react-router">
+    React Router アプリ向けです。SPA モードでは、サイトを CDN 上で静的にホスティングできます。
+  </Card>
+
+  <Card icon={<FrameworkLogo framework="tanstack-start" />} title="TanStack Start" href="/docs/tanstack-start">
+    TanStack Start アプリ向けです。SPA モードでは、サイトを CDN 上で静的にホスティングできます。
+  </Card>
+
+  <Card icon={<FrameworkLogo framework="waku" />} title="Waku" href="/docs/waku">
+    高速かつシンプルな、サーバーコンポーネントに対応した Vite ベースの React フレームワークです。
+  </Card>
+
+  <Card icon={<FrameworkLogo framework="astro" />} title="Astro" href="/docs/astro">
+    Astro サイト向けです。コンテンツコレクションを利用でき、MDX を React アイランドとしてレンダリングします。
+  </Card>
+</Cards>
+
+<Callout title="よりシンプルな DX で Fumadocs を試す">
+  [Fumapress](https://press.fumadocs.dev) は、Fumadocs をベースに、より多くの機能を管理するサイトジェネレーターです。
+
+  * 自動ルーティング、`llms.txt`、MCP などの基本機能を備えています。
+  * Vite ([Waku](https://waku.gg)) をベースにしています。
+
+  独自の React フレームワークの使用が前提となりますが、その分より優れた DX を提供します。
+</Callout>

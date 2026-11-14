@@ -1,0 +1,34 @@
+---
+title: Node.js
+description: Node.js ランタイムでコンテンツにアクセスします。
+---
+
+## セットアップ [#setup]
+
+テンプレートの `lib/source.ts` には、Node.js では解決できない拡張子なしのインポートやパスエイリアスが含まれています。そのため、スクリプトは [tsx](https://tsx.is) などの TypeScript ランナーで実行してください。
+
+```ts title="scripts/example.ts"
+import { register } from 'fumadocs-mdx/node';
+
+// Node.js ローダーを登録
+register();
+
+// コンテンツへのアクセス
+const { source } = await import('../lib/source');
+console.log(source.getPages());
+```
+
+```npm
+npx tsx scripts/example.ts
+```
+
+ローダーはESモジュールのみを変換します。`lib/source.ts` がESモジュールとして読み込まれるように、`package.json` で `"type": "module"` を設定してください。この設定はパッケージ内のすべての `.js` ファイルに適用されるため、`next.config.js` のようなCommonJSファイルは先にESMへ変換しておいてください。
+
+`register()` 関数には次のオプションを指定できます。
+
+```ts
+register({
+  configPath: '...',
+  // ...
+});
+```

@@ -1,0 +1,38 @@
+---
+title: インライン目次
+description: ドキュメントにインライン目次を追加します
+preview: inlineTOC
+---
+
+<Installation name="inline-toc" />
+
+## 使い方 [#usage]
+
+MDX コンテンツ内で使用できます。Fumadocs MDX の MDX ファイルでは、`toc` エクスポートはページの props を受け取る関数になります。
+
+```mdx title="content.mdx"
+import { InlineTOC } from 'fumadocs-ui/components/inline-toc';
+
+<InlineTOC items={toc(props)}>Table of Contents</InlineTOC>
+```
+
+または、すべてのページに追加することもできます。
+
+```tsx title="page.tsx"
+import { DocsPage } from 'fumadocs-ui/layouts/docs/page';
+import { InlineTOC } from 'fumadocs-ui/components/inline-toc';
+
+export default function Page() {
+  // ...
+  return (
+    <DocsPage>
+      {/* [!code ++] */}
+      <InlineTOC items={page.data.toc}>Table of Contents</InlineTOC>
+    </DocsPage>
+  );
+}
+```
+
+## リファレンス [#reference]
+
+<auto-type-table cwd path="content/docs/ui/props.ts" name="InlineTOCProps" />

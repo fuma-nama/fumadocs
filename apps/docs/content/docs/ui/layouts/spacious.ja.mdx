@@ -1,0 +1,153 @@
+---
+title: Spacious レイアウト
+description: Docs レイアウトよりも余白を広くとったバージョン
+---
+
+import { spacious } from './layouts.story';
+
+[`<DocsLayout />`](/docs/ui/layouts/docs) よりもゆったりとしたバージョンです。ページはサイドバーの横にあるインセットパネル内に配置され、ページ単位のアクションはパネルの上部に表示されます。
+
+<spacious.WithControl />
+
+<Callout title="Base UI のみ">
+  Spacious レイアウトは、Fumadocs UI の Base UI 版 (`@fumadocs/base-ui`) でのみ利用できます。
+</Callout>
+
+<Customization />
+
+## 使い方 [#usage]
+
+`fumadocs-ui/layouts/spacious` を使用して、Spacious レイアウトを有効にします。
+
+```tsx title="layout.tsx"
+import { DocsLayout } from 'fumadocs-ui/layouts/spacious'; // [!code highlight]
+import { baseOptions } from '@/lib/layout.shared';
+import { source } from '@/lib/source';
+import type { ReactNode } from 'react';
+
+export default function Layout({ children }: { children: ReactNode }) {
+  return (
+    <DocsLayout {...baseOptions()} tree={source.getPageTree()}>
+      {children}
+    </DocsLayout>
+  );
+}
+```
+
+ページの import も忘れずに更新してください。
+
+```tsx title="page.tsx"
+import { ... } from 'fumadocs-ui/layouts/docs/page'; // [!code --]
+import { ... } from 'fumadocs-ui/layouts/spacious/page'; // [!code ++]
+```
+
+### スタイル [#styles]
+
+Glass レイアウトと同様に、Spacious レイアウトのスタイルは CSS プリセットに**含まれていない**ため、このレイアウトを使用しない限り余分なコストはかかりません。Tailwind CSS ファイルでインポートしてください。
+
+```css title="Tailwind CSS"
+@import 'tailwindcss';
+/* [!code ++] */
+@import 'fumadocs-ui/css/generated/spacious.css';
+@import 'fumadocs-ui/css/neutral.css';
+@import 'fumadocs-ui/css/preset.css';
+```
+
+<Callout title="注意事項">
+  * Spacious レイアウトは**クライアントコンポーネント**のため、サーバーコンポーネントからシリアライズできない props を渡すことはできません。
+  * デスクトップでは、ウィンドウではなくパネル内でページがスクロールします。
+</Callout>
+
+## 設定 [#configurations]
+
+オプションは [Docs レイアウト](/docs/ui/layouts/docs) から継承されますが、以下の点が若干異なります。
+
+* `sidebar` オプションは `defaultOpenLevel` と `prefetch` のみを受け付けます。サイドバーは常に折りたたみ可能です。
+* 追加のオプションがあります(後述)。
+
+### レイアウトタブ [#layout-tabs]
+
+[レイアウトタブ](/docs/ui/layouts/docs#layout-tabs)は `tabs` prop で設定します。追加方法はリンク先のドキュメントを参照してください。タブはサイドバー上部のドロップダウンに表示されます。
+
+```tsx title="layout.tsx"
+import { DocsLayout } from 'fumadocs-ui/layouts/spacious';
+import { baseOptions } from '@/lib/layout.shared';
+import { source } from '@/lib/source';
+import type { ReactNode } from 'react';
+
+export default function Layout({ children }: { children: ReactNode }) {
+  return (
+    <DocsLayout
+      {...baseOptions()}
+      tabs={
+        {
+          // タブをカスタマイズ
+        }
+      }
+      tree={source.getPageTree()}
+    >
+      {children}
+    </DocsLayout>
+  );
+}
+```
+
+### AIチャット [#ai-chat]
+
+レイアウトに **AIに質問** を表示するには、開閉状態と変更ハンドラーを含む `aiChat` オブジェクトを渡します。
+
+`panel` オプションを指定すると、チャットパネルのレンダリングはレイアウト側で行われます。幅の広い画面ではページの横にドッキングされ(目次はページヘッダー内に移動します)、小さい画面ではページの上にフローティング表示されます。
+
+```tsx title="layout.tsx"
+'use client';
+import { DocsLayout } from 'fumadocs-ui/layouts/spacious';
+import { useState } from 'react';
+
+export function Layout({ children }) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <DocsLayout
+      // [!code ++:5]
+      aiChat={{
+        open,
+        onOpenChange: setOpen,
+        panel: <MyChat />,
+      }}
+      // ...
+    >
+      {children}
+    </DocsLayout>
+  );
+}
+```
+
+### スロット [#slots]
+
+Spacious レイアウトでは、共通のスロット(`navTitle`、`themeSwitch`、`searchTrigger`、`languageSelect`)に加えて、各パーツを上書きするための `slots` オプションが用意されています。
+
+| スロット      | 説明                                                         |
+| --------- | ---------------------------------------------------------- |
+| `header`  | モバイル表示時のナビゲーションバーです。                                       |
+| `sidebar` | サイドバー一式です。`provider`、`main`(デスクトップ)、`drawer`(モバイル)で構成されます。 |
+| `actions` | ページ右上のアクションです。言語切り替えやオプションメニューなどが含まれます。                    |
+
+```tsx title="layout.tsx"
+import { DocsLayout } from 'fumadocs-ui/layouts/spacious';
+
+<DocsLayout
+  slots={{
+    actions: MyActions, // [!code ++]
+  }}
+  // ...
+/>;
+```
+
+## Docs Page [#docs-page]
+
+ページコンポーネントは [Docs Page](/docs/ui/layouts/page) とほぼ同じですが、いくつか違いがあります。
+
+* 目次はデフォルトで `block` スタイルになります。
+* `tableOfContentPopover` では、ページヘッダー内の目次ドロップダウンと、モバイル表示時の目次バーを設定します。
+* `slots.toc` には、ページヘッダー内のドロップダウン用に `dropdown` コンポーネントを渡せます。
+* `container` スロットはありません。

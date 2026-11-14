@@ -1,0 +1,171 @@
+---
+title: インクルード
+description: 他のファイルのコンテンツを再利用します。
+---
+
+## 使い方 [#usage]
+
+Fumadocs MDX では、unified と Sätteri のどちらを使用する場合でも、[Remark Include](/docs/headless/mdx/remark-include) が常に有効になっています。
+
+### コンテンツ [#content]
+
+別の Markdown/MDX ファイルのコンテンツを表示するには、`<include>` タグにそのファイルのパスを、インクルード元のファイルからの相対パスで指定します。
+
+```mdx tab="MDX"
+<include>./another.mdx</include>
+```
+
+```md tab="Markdown"
+::include[./another.mdx]
+```
+
+<Callout type="warn">
+  信頼できないパスを `<include>` に渡さないでください。`.env` など、マシン上のあらゆるファイルが埋め込まれるおそれがあります。
+</Callout>
+
+<Callout title="Markdown の場合">
+  Markdown (`.md`) ファイルでは JSX 構文を使用できません。代わりにディレクティブ構文を使用してください。
+  Sätteri はデフォルトでディレクティブを解析します。unified を使用する場合は、remark プラグインの `remark-directive` を追加してください。
+
+  ```ts title="source.config.ts"
+  import { defineConfig } from 'fumadocs-mdx/config';
+  import remarkDirective from 'remark-directive';
+
+  export default defineConfig({
+    mdxOptions: {
+      // [!code ++]
+      remarkPlugins: [remarkDirective],
+    },
+  });
+  ```
+
+  HTML コメントや HTML コンテンツを扱うには、`rehype-raw` も必要になる場合があります。
+</Callout>
+
+### CodeBlock [#codeblock]
+
+その他の種類のファイルは、コードブロックとして表示されます。
+
+```mdx tab="MDX"
+<include>./script.ts</include>
+
+<include lang="md" meta='title="lib.md"'>
+  page.md
+</include>
+```
+
+```md tab="Markdown"
+::include[./script.ts]
+
+::include[page.md]{lang=md meta='title="lib.md"'}
+```
+
+コンテンツの一部の領域のみをインクルードすることもできます。
+
+```ts title="code.ts"
+export function fn() {
+  //#region a
+  console.log('one');
+  //#endregion
+}
+```
+
+```mdx tab="MDX"
+<include>./code.ts#a</include>
+```
+
+```md tab="Markdown"
+::include[./code.ts#a]
+```
+
+### `cwd` [#cwd]
+
+相対パスを、現在のファイルではなく cwd を基準に解決します。
+
+```mdx tab="MDX"
+<include cwd lang="tsx" meta='title="lib.ts"'>
+  ./script.ts
+</include>
+```
+
+```md tab="Markdown"
+::include[./script.ts]{cwd lang=tsx meta='title="lib.ts"'}
+```
+
+## 抽出 [#extraction]
+
+コンテンツファイルを参照する際は、ドキュメントの一部だけをインクルードすることもできます。
+
+### セクション [#section]
+
+`<section />` タグで囲みます：
+
+```mdx tab="a.mdx"
+## Hello World
+
+<section id="test">This is included</section>
+
+This is not included.
+```
+
+```mdx tab="b.mdx"
+`a.mdx` のコンテンツをインクルードします：
+
+<include>a.mdx#test</include>
+```
+
+Markdown の場合：
+
+```md tab="a.md"
+## Hello World
+
+:::section{#test}
+This is included
+:::
+
+This is not included.
+```
+
+```md tab="b.md"
+`a.mdx` のコンテンツをインクルードします:
+
+::include[a.md#test]
+```
+
+### 見出し [#heading]
+
+特定の見出し配下のコンテンツをインクルードします。
+
+```mdx tab="a.mdx"
+## Included Section
+
+ここに表示されます！
+
+## Not Included
+
+適当なテキストです。
+```
+
+```mdx tab="b.mdx"
+見出し配下のコンテンツ:
+
+<include>a.mdx#included-section</include>
+```
+
+Markdown の場合:
+
+```md tab="a.md"
+## Included Section
+
+I'm here!
+
+## Not Included
+
+Some random text.
+```
+
+```md tab="b.md"
+見出しの下のコンテンツ：
+
+::include[a.mdx#included-section]
+```

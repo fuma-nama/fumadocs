@@ -1,0 +1,113 @@
+---
+title: デプロイ
+description: Fumadocs アプリをデプロイする
+---
+
+import { frameworkName } from '@/lib/framework';
+
+## 概要 [#overview]
+
+Fumadocs アプリは、他の {frameworkName(props.framework)} アプリと同じ方法でデプロイできます。
+
+<show when={props.framework === 'next'}>
+  [Next.js のデプロイガイド](https://nextjs.org/docs/app/getting-started/deploying)を参照してください。
+</show>
+
+<show when={props.framework === 'react-router'}>
+  [React Router のデプロイガイド](https://reactrouter.com/start/framework/deploying)を参照してください。
+</show>
+
+<show when={props.framework === 'tanstack-start'}>
+  [TanStack Start のホスティングガイド](https://tanstack.com/start/latest/docs/framework/react/guide/hosting)を参照してください。
+</show>
+
+<show when={props.framework === 'waku'}>
+  [Waku のデプロイガイド](https://waku.gg/#deployment)を参照してください。
+</show>
+
+<show when={props.framework === 'astro'}>
+  [Astro のデプロイガイド](https://docs.astro.build/en/guides/deploy/)を参照してください。
+</show>
+
+CDN でホスティングできる静的サイトとして出力する方法については、[静的ビルド](/docs/deploying/static)を参照してください。
+
+<show when={props.framework === 'next'}>
+  ## Cloudflare [#cloudflare]
+
+  Fumadocs は Edge ランタイムでは動作しません。代わりに [OpenNext](https://opennext.js.org/cloudflare) を使用してデプロイしてください。
+
+  ## Docker [#docker]
+
+  この Dockerfile は公式の [Next.js Dockerfile Example](https://github.com/vercel/next.js/blob/canary/examples/with-docker/Dockerfile) をもとにしたもので、Next.js の設定で `output: 'standalone'` を指定する必要があります。
+
+  ```zsh title="Dockerfile"
+  # syntax=docker.io/docker/dockerfile:1
+
+  FROM node:24-alpine AS base
+
+  # 必要な場合にのみ依存関係をインストール
+  FROM base AS deps
+  # libc6-compat が必要になる理由は https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine を確認してください。
+  RUN apk add --no-cache libc6-compat
+  WORKDIR /app
+
+  # 使用するパッケージマネージャーに応じて依存関係をインストール
+  COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* .npmrc* ./
+  RUN \
+    if [ -f yarn.lock ]; then yarn --frozen-lockfile; \
+    elif [ -f package-lock.json ]; then npm ci; \
+    elif [ -f pnpm-lock.yaml ]; then corepack enable pnpm && pnpm i --frozen-lockfile; \
+    else echo "Lockfile not found." && exit 1; \
+    fi
+
+
+  # 必要な場合にのみソースコードを再ビルド
+  FROM base AS builder
+  WORKDIR /app
+  COPY --from=deps /app/node_modules ./node_modules
+  COPY . .
+
+  # Next.js は一般的な使用状況に関する完全に匿名のテレメトリデータを収集します。
+  # 詳細はこちら: https://nextjs.org/telemetry
+  # ビルド時のテレメトリを無効にする場合は、次の行のコメントを外してください。
+  # ENV NEXT_TELEMETRY_DISABLED=1
+
+  RUN \
+    if [ -f yarn.lock ]; then yarn run build; \
+    elif [ -f package-lock.json ]; then npm run build; \
+    elif [ -f pnpm-lock.yaml ]; then corepack enable pnpm && pnpm run build; \
+    else echo "Lockfile not found." && exit 1; \
+    fi
+
+  # 本番用イメージ。すべてのファイルをコピーして next を実行
+  FROM base AS runner
+  WORKDIR /app
+
+  ENV NODE_ENV=production
+  # 実行時のテレメトリを無効にする場合は、次の行のコメントを外してください。
+  # ENV NEXT_TELEMETRY_DISABLED=1
+
+  RUN addgroup --system --gid 1001 nodejs
+  RUN adduser --system --uid 1001 nextjs
+
+  COPY --from=builder /app/public ./public
+
+  # 出力トレースを自動的に活用してイメージサイズを削減
+  # https://nextjs.org/docs/advanced-features/output-file-tracing
+  COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+  COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+
+  USER nextjs
+
+  EXPOSE 3000
+
+  ENV PORT=3000
+
+  # server.js は next build によって standalone 出力から生成されます
+  # https://nextjs.org/docs/pages/api-reference/config/next-config-js/output
+  ENV HOSTNAME="0.0.0.0"
+  CMD ["node", "server.js"]
+  ```
+
+  `package.json` の `postinstall` で `fumadocs-mdx` を実行している場合、このスクリプトは設定をバンドルするため、`deps` ステージで `next.config.*`、`source.config.ts`、およびそこからインポートしているローカルファイルもコピーしてください。
+</show>

@@ -1,0 +1,88 @@
+---
+title: ページツリー
+description: ページツリーの構造について説明します。
+---
+
+ページツリーは、すべてのナビゲーションリンクと、区切りやフォルダーなどの項目を表すツリー構造です。
+
+ページツリーはクライアントに送信され、サイドバーやパンくずリストなどのナビゲーション要素から参照されます。
+そのため、機密データやサイズの大きいデータをページツリーに含めないでください。
+
+<Callout title="注意">
+  ページツリーには、設計上、すべてのページとフォルダーに関する必要最小限の情報のみが含まれます。
+
+  関数などのシリアライズできないデータは、ページツリーに渡せません。
+</Callout>
+
+## 規約 [#conventions]
+
+ページツリーの型定義をインポートできます。ページツリーをハードコードしたり生成したりする場合に役立ちます。
+
+```ts
+import type * as PageTree from 'fumadocs-core/page-tree';
+
+const tree: PageTree.Root = {
+  // props
+};
+```
+
+一部のノードには `$ref` プロパティが含まれていますが、これは内部用のものであり、ハードコードする場合には使用しません。
+
+### Root [#root]
+
+ページツリーの初期ルートです。
+
+<auto-type-table path="props.ts" name="PageTreeRoot" />
+
+### Page [#page]
+
+リンクを表すノードです。
+
+```json
+{
+  "type": "page",
+  "name": "Quick Start",
+  "url": "/docs"
+}
+```
+
+> 外部 URL も使用できます。
+
+<auto-type-table path="props.ts" name="PageTreeItem" />
+
+### フォルダー [#folder]
+
+複数の子ノードを含むノードです。
+
+```json
+{
+    "type": "folder",
+    "name": "Guide",
+    "index": {
+        "type": "page",
+        ...
+    }
+    "children": [
+        ...
+    ]
+}
+```
+
+<auto-type-table path="props.ts" name="PageTreeFolder" />
+
+### セパレーター [#separator]
+
+アイテムの間に表示するラベルです。
+
+```json
+{
+  "type": "separator",
+  "name": "Components"
+}
+```
+
+<auto-type-table path="props.ts" name="PageTreeSeparator" />
+
+## アイコン [#icons]
+
+アイコンは `ReactElement` で、ページとフォルダーに設定できます。

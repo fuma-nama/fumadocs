@@ -1,0 +1,92 @@
+---
+title: MDX ファイルのインポート
+description: MDX ファイルを直接インポートする方法です。
+---
+
+## はじめに [#introduction]
+
+MDX ファイルは JavaScript にコンパイルされ、次のようなエクスポートを持ちます。
+
+* `default`: メインのコンポーネント。
+* `frontmatter`: フロントマターのデータ。
+* remark/rehype プラグインによって生成されるその他のプロパティ。
+
+そのため、MDX ファイルはページとして使えるほか、インポートしてコンポーネントとして使うこともできます。
+
+### コンポーネントとして使用する [#using-as-component]
+
+コンポーネントとしてインポートすることもできます。
+
+```tsx title="app/my-page.tsx"
+import MyPage from '@/content/page.mdx';
+import { getMDXComponents } from '@/components/mdx';
+
+export default function Page() {
+  return (
+    <div className="prose">
+      {/* MDX コンポーネントを渡してレンダリングします */}
+      <MyPage components={getMDXComponents()} />
+    </div>
+  );
+}
+```
+
+### ページとして使用する [#using-as-page]
+
+Next.js では、app ディレクトリ配下に新しいページを作成する際、`page.tsx` の代わりに `page.mdx` を使用できます。
+
+```mdx tab="app/my-page/page.mdx"
+---
+title: My Page
+---
+
+export { default } from '@/components/layouts/page';
+
+# Hello World
+
+This is my page.
+```
+
+```tsx tab="components/layouts/page.tsx"
+import type { ComponentProps } from 'react';
+
+export default function Content(props: ComponentProps<'main'>) {
+  return (
+    <main className="px-8 py-12">
+      <article className="prose">{props.children}</article>
+    </main>
+  );
+}
+```
+
+デフォルトでは **MDX コンポーネント**が含まれていないため、自分で指定する必要があります。
+
+```tsx tab="components/mdx.tsx"
+import defaultMdxComponents from 'fumadocs-ui/mdx';
+import type { MDXComponents } from 'mdx/types';
+
+export function getMDXComponents(components?: MDXComponents) {
+  return {
+    ...defaultMdxComponents, // Fumadocs UI 用
+    ...components,
+  } satisfies MDXComponents;
+}
+
+// MDX コンポーネントを返す `useMDXComponents()` をエクスポートします
+export const useMDXComponents = getMDXComponents; // [!code ++]
+```
+
+```ts tab="source.config.ts"
+import { defineConfig } from 'fumadocs-mdx/config';
+
+export default defineConfig({
+  mdxOptions: {
+    // 上記の `components/mdx.tsx` をインポートするためのパス [!code ++:2]
+    providerImportSource: '@/components/mdx',
+  },
+});
+```
+
+<Callout title="その他のフレームワークの場合">
+  React Router、TanStack Start、Waku では、代わりに MDX ファイルをコンポーネントとしてインポートし、ページ内で使用してください。
+</Callout>

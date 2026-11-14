@@ -1,0 +1,102 @@
+---
+title: Vite
+description: Vite で Fumadocs MDX を使用する
+---
+
+## セットアップ [#setup]
+
+このプラグインは React Router、TanStack Start、Waku などの Vite アプリで動作します。Next.js については[専用のセットアップ手順](/docs/mdx/next)を参照してください。Astro では Fumadocs MDX を使用せず、[`@fumadocs/astro`](/docs/astro/manual-installation) と Astro 独自のコンテンツコレクションを組み合わせて使用します。
+
+<div className="fd-steps [&_h3]:fd-step">
+  ### インストール [#installation]
+
+  ```npm
+  npm i fumadocs-mdx fumadocs-core @types/mdx
+  ```
+
+  Vite プラグインを追加します。
+
+  ```ts tab="React Router" title="vite.config.ts"
+  import { defineConfig } from 'vite';
+  import { reactRouter } from '@react-router/dev/vite';
+  import { fumadocsMdx } from 'fumadocs-mdx/vite';
+
+  export default defineConfig({
+    plugins: [
+      fumadocsMdx(), // [!code ++]
+      reactRouter(),
+    ],
+  });
+  ```
+
+  ```ts tab="TanStack Start" title="vite.config.ts"
+  import { defineConfig } from 'vite';
+  import { tanstackStart } from '@tanstack/react-start/plugin/vite';
+  import react from '@vitejs/plugin-react';
+  import { fumadocsMdx } from 'fumadocs-mdx/vite';
+
+  export default defineConfig({
+    plugins: [
+      fumadocsMdx(), // [!code ++]
+      tanstackStart(),
+      react(),
+    ],
+  });
+  ```
+
+  ```ts tab="Waku" title="waku.config.ts"
+  import { type Config, defineConfig } from 'waku/config';
+  import { fumadocsMdx } from 'fumadocs-mdx/vite';
+  import type { UserConfig } from 'vite';
+
+  export default defineConfig({
+    vite: {
+      plugins: [
+        // [!code ++]
+        fumadocsMdx(),
+      ],
+      resolve: {
+        tsconfigPaths: true,
+      },
+    } satisfies UserConfig as Config['vite'],
+  });
+  ```
+
+  ### Fumadocs との統合 [#integrate-with-fumadocs]
+
+  `lib/source.ts` ファイルを作成します。
+
+  ```ts title="lib/source.ts"
+  import { defineDocs } from 'fumadocs-mdx/macro';
+  import { loader } from 'fumadocs-core/source';
+
+  const docs = defineDocs({
+    dir: 'content/docs',
+  });
+
+  export const source = loader({
+    baseUrl: '/docs',
+    source: docs.toFumadocsSource(),
+  });
+  ```
+
+  ### 完了 [#done]
+
+  これで `content/docs` フォルダーにコンテンツを書けるようになりました。
+</div>
+
+## 次のステップ [#what-is-next]
+
+<Cards>
+  <Card title="Macro API" href="/docs/mdx/macro">
+    `fumadocs-mdx/macro` を使って、アプリのモジュール内でコレクションを定義します。
+  </Card>
+
+  <Card title="Config API" href="/docs/mdx/collections">
+    `source.config.ts` でコレクションを定義し、生成されたエントリーファイルを利用します。
+  </Card>
+
+  <Card title="遅延読み込み" href="/docs/mdx/async">
+    パフォーマンスのボトルネックでお困りですか？遅延読み込みをお試しください。
+  </Card>
+</Cards>

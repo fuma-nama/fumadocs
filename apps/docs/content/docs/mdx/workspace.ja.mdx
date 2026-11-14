@@ -1,0 +1,100 @@
+---
+title: ワークスペース
+description: 複数のワークスペースで Fumadocs MDX を使用します。
+---
+
+## 概要 [#overview]
+
+Fumadocs MDX における **ワークスペース** (Workspace) とは、独自の設定とコンテンツを持つ独立したプロジェクトのことです。
+
+<Files>
+  <Folder name="my-workspace" defaultOpen>
+    <Folder name="content/docs" defaultOpen>
+      <File name="index.mdx" />
+
+      <File name="test.mdx" />
+    </Folder>
+
+    <File name="source.config.ts" />
+  </Folder>
+
+  <Folder name="content/docs" defaultOpen>
+    <File name="welcome.mdx" />
+  </Folder>
+
+  <File name="source.config.ts" />
+</Files>
+
+<Callout title="補足">
+  Fumadocs MDX のワークスペースは、パッケージマネージャーでいう従来のワークスペースに限定されません。
+
+  独自の `package.json` は不要で、設定ファイルさえあれば十分です。
+</Callout>
+
+ワークスペースを定義するには、次の設定を追加します。
+
+```ts title="source.config.ts"
+import { defineConfig } from 'fumadocs-mdx/config';
+
+export default defineConfig({
+  workspaces: {
+    'my-workspace': {
+      dir: 'my-workspace',
+      config: await import('./my-workspace/source.config.ts'),
+    },
+  },
+});
+```
+
+ワークスペース内でコンテンツを記述する際は、次の点に注意してください。
+
+* `cwd` は**現在のワークスペースのディレクトリ**を指します。
+* 設定は継承されません。ワークスペースは常に互いに独立しています。
+
+開発サーバーを起動するかビルドを実行すると、すべてのワークスペースのコレクションエントリが生成されます。
+
+### コレクションへのアクセス [#accessing-collections]
+
+ワークスペースで生成されたファイルには、`.source/{workspace}/*` からアクセスできます。例：
+
+```ts title="lib/source.ts"
+import { docs } from 'collections/my-workspace/server';
+```
+
+> ルートワークスペースの出力先は変わりません。
+
+Fumadocsで[マルチソース](/docs/headless/source-api/source#multiple-sources)を統合するには、次のようにします。
+
+```ts title="lib/source.ts"
+import { loader } from 'fumadocs-core/source';
+import { docs } from 'collections/server';
+import * as MyWorkspace from 'collections/my-workspace/server';
+
+export const source = loader(
+  {
+    root: docs.toFumadocsSource(),
+    'my-workspace': MyWorkspace.docs.toFumadocsSource(),
+  },
+  {
+    baseUrl: '/docs',
+  },
+);
+```
+
+## 使用するタイミング [#when-to-use]
+
+構成によっては、それぞれ独自のコンテンツディレクトリを持つ Fumadocs MDX の設定が複数存在する場合があります。
+
+ワークスペースを使用すると、それらを 1 つの Fumadocs MDX 設定に統合し、各ワークスペースのすべてのコレクションにアクセスできます。
+
+これは、コンテンツを複数のリポジトリに分けて管理するようなユースケースで特に重要です。簡略化した構成例は次のとおりです。
+
+* メインのドキュメントリポジトリを $A$、その他のリポジトリを $T&#95;n$ とします
+* 各リポジトリ $T&#95;n$ について:
+  * $T&#95;n$ は $A$ を git サブモジュールとして含みます。
+  * $T&#95;n$ は独自の設定ファイル `source.config.ts` を定義し、単独で動作します。
+  * $T&#95;n$ のコンテンツにコミットされると、GitHub Actions (または CI) がトリガーされ、$A$ で新しいデプロイが作成されます。
+* $A$ でデプロイがトリガーされると:
+  * Fumadocs MDX は各 $T&#95;n$ をワークスペースとして扱います。
+  * 各ワークスペースは、`collections/{repo}/server` のように独自のコレクションエントリを生成します。
+  * Fumadocs の `loader()` が複数のソースを 1 つに統合します。

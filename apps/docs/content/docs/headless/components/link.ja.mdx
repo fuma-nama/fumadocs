@@ -1,0 +1,33 @@
+---
+title: Link
+description: 外部リンクを処理する Link コンポーネント
+---
+
+お使いの React フレームワークの Link コンポーネント(例: `next/link`)をラップし、ドキュメント内の外部リンクを自動的に処理するコンポーネントです。~
+外部 URL を検出すると、Link コンポーネントの代わりに `<a>` を使用します。
+
+`rel` プロパティは自動的に生成されます。
+
+## 使い方 [#usage]
+
+`<a>` と同じように使用できます。
+
+```mdx
+import Link from 'fumadocs-core/link';
+
+<Link href="/docs/components">Click Me</Link>
+```
+
+### 外部リンク [#external]
+
+`external` propを渡すと、URLを強制的に外部リンクとして扱えます。
+
+### 動的な href [#dynamic-hrefs]
+
+`dynamic-link` をインポートすると、動的な href を有効にできます。
+
+```mdx
+import { DynamicLink } from 'fumadocs-core/dynamic-link';
+
+<DynamicLink href="/[lang]/components">Click Me</DynamicLink>
+```

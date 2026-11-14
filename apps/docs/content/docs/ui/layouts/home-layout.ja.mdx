@@ -1,0 +1,28 @@
+---
+title: ホームレイアウト
+description: その他のページで共通して使用するレイアウト
+---
+
+import { home } from './layouts.story';
+
+ナビゲーションバーのみで構成されるレイアウトです。
+
+<home.WithControl />
+
+<Customization />
+
+## 使い方 [#usage]
+
+ほかのページ全体にわたって、ナビゲーションバーと検索ダイアログを追加します。
+
+```tsx title="/app/(home)/layout.tsx"
+import { HomeLayout } from 'fumadocs-ui/layouts/home';
+import { baseOptions } from '@/lib/layout.shared';
+import type { ReactNode } from 'react';
+
+export default function Layout({ children }: { children: ReactNode }) {
+  return <HomeLayout {...baseOptions()}>{children}</HomeLayout>;
+}
+```
+
+[`links`](/docs/ui/layouts/links) オプションと [`nav`](/docs/ui/layouts/nav) オプションの詳細は、各ドキュメントを参照してください。

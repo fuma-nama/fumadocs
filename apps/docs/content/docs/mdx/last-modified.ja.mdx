@@ -1,0 +1,39 @@
+---
+title: 最終更新日時
+description: ドキュメントの最終更新日時を出力します
+---
+
+## 使い方 [#usage]
+
+設定ファイルからプラグインを追加できます。
+
+<Callout type="warning" title="デフォルトでは Git が使用されます">
+  ローカルの Git 履歴を利用するため、マシンに Git がインストールされていること、また**リポジトリがシャロークローンされていないこと**を確認してください。
+</Callout>
+
+```ts title="source.config.ts"
+import { defineConfig } from 'fumadocs-mdx/config';
+import lastModified from 'fumadocs-mdx/plugins/last-modified';
+
+export default defineConfig({
+  // [!code ++]
+  plugins: [lastModified()],
+});
+```
+
+### プロパティへのアクセス [#access-the-property]
+
+これにより、各ドキュメントで `lastModified` プロパティ (`Date` 型) がエクスポートされるようになります。
+
+```ts
+import { source } from '@/lib/source';
+
+const page = source.getPage(['...']);
+
+console.log(page.data.lastModified);
+// または遅延読み込みを使う場合
+const { lastModified } = await page.data.load();
+console.log(lastModified);
+```
+
+[`<DocsPage />`](/docs/ui/layouts/page#last-updated-time) などの UI で表示できます。

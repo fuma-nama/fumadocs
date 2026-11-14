@@ -1,0 +1,59 @@
+---
+title: 最終更新日時
+description: GitHub リポジトリにあるファイルの最終編集日時を取得します。
+---
+
+## 使い方 [#usage]
+
+リポジトリ名とファイルのパスを渡してください。
+
+```ts
+import { getGithubLastEdit } from 'fumadocs-core/content/github';
+
+const time = await getGithubLastEdit({
+  owner: 'fuma-nama',
+  repo: 'fumadocs',
+  // 例: "content/docs/index.mdx"
+  path: `content/docs/${page.path}`,
+});
+```
+
+### Github トークン [#github-token]
+
+開発モードでは、レート制限にすぐ達してしまう可能性があります。そのため、
+レート制限を引き上げるには Github トークンを渡してください。
+
+詳しくは
+[Authenticating to the REST API](https://docs.github.com/en/rest/overview/authenticating-to-the-rest-api) を参照してください。
+
+```ts
+import { getGithubLastEdit } from 'fumadocs-core/content/github'
+
+ const time = await getGithubLastEdit({
+    ...,
+    token: `Bearer ${process.env.GIT_TOKEN}`
+  })
+```
+
+なお、その機能が不要であれば、開発モードではこの手順を省略できます。
+
+```ts
+process.env.NODE_ENV === 'development'? null : getGithubLastEdit(...)
+```
+
+### GitHub のベース URL のカスタマイズ [#custom-github-base-url]
+
+`https://api.github.com` 以外の URL で GitHub インスタンスにアクセスする必要がある場合は、次のようにベース URL を上書きできます。
+
+```ts
+import { getGithubLastEdit } from 'fumadocs-core/content/github';
+
+const time = await getGithubLastEdit({
+  owner: 'your-org',
+  repo: 'your-repo',
+  path: `content/docs/${page.path}`,
+  baseUrl: 'https://api.octocorp.ghe.com', // カスタムの GitHub API URL
+});
+```
+
+`baseUrl` パラメーターを指定しない場合、デフォルトで `'https://api.github.com'` が使用されます。

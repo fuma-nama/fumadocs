@@ -1,0 +1,688 @@
+---
+title: ローカル Markdown
+description: ローカルの Markdown コンテンツを扱うためのコンテンツソースです。
+---
+
+## はじめに [#introduction]
+
+`@fumadocs/local-md` は、ローカルの Markdown/MDX ファイル向けのコンテンツソースです。設計上バンドラーを使用しないため、ランタイムのみで完結して動作します。
+
+[MDX Remote](/docs/integrations/content/mdx-remote) と比べると、ローカルファイルに特化している分、パイプラインのより多くの部分(フロントマター、meta ファイル、検索インデックスの作成)を担います。
+
+<show when={props.framework !== 'astro'}>
+  [Fumadocs MDX](/docs/mdx) と比べると、型生成やバンドラーなしで動作しますが、ビルド時の画像最適化は無効になります。
+</show>
+
+<show when={props.framework === 'astro'}>
+  Astro のコンテンツコレクションと比べると、バンドラーを介さずランタイムでコンテンツをコンパイルするため、ビルド時の画像最適化は無効になります。
+</show>
+
+### 制限事項 [#limitations]
+
+* ビルド時の画像最適化には対応していません。
+* MDX ファイル内ではインポート/エクスポートを使用できませんが、レンダリング時にコンポーネントを渡すことはできます。
+
+## セットアップ [#setup]
+
+パッケージをインストールします。
+
+```package-install
+@fumadocs/local-md shiki
+```
+
+> `shiki` をインストールしているのは、バンドラーで外部化する必要があるためです。
+
+`localMd` インスタンスを作成し、Fumadocs に接続します。
+
+```ts title="lib/source.ts"
+import { dynamicLoader } from 'fumadocs-core/source';
+import { localMd } from '@fumadocs/local-md';
+
+const docs = localMd({
+  dir: 'content/docs',
+  // オプション
+});
+
+const docsLoader = dynamicLoader(docs.dynamicSource(), {
+  baseUrl: '/docs',
+});
+
+export async function getSource() {
+  return docsLoader.get();
+}
+```
+
+### スキーマ [#schema]
+
+`frontmatterSchema` と `metaSchema` を渡すと、バリデーションに使用するスキーマをカスタマイズできます。
+
+```ts title="lib/source.ts"
+import { localMd } from '@fumadocs/local-md';
+import { pageSchema, metaSchema } from 'fumadocs-core/source/schema';
+
+const docs = localMd({
+  dir: 'content/docs',
+  frontmatterSchema: pageSchema.extend({
+    // ...
+  }),
+  metaSchema: metaSchema.extend({
+    // ...
+  }),
+});
+```
+
+## 使い方 [#usage]
+
+`getSource()` は通常の[コンテンツローダー](/docs/headless/source-api)を返します。各ページには `page.data.load()` があり、ページをコンパイルしてレンダラーを返します。
+
+<show when={props.framework === 'next' || props.framework === 'waku'}>
+  ページ内でレンダリングします。
+</show>
+
+<show when={props.framework === 'react-router' || props.framework === 'tanstack-start'}>
+  ローダーでシリアライズし、クライアントでレンダリングします。
+</show>
+
+<show when={props.framework === 'astro'}>
+  ページでシリアライズし、React アイランドでレンダリングします。
+</show>
+
+<show when={props.framework === 'next'}>
+  ```tsx tab="app/docs/layout.tsx"
+  import { getSource } from '@/lib/source';
+  import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+
+  export default async function Layout({ children }: LayoutProps<'/docs'>) {
+    const source = await getSource();
+
+    return <DocsLayout tree={source.getPageTree()}>{children}</DocsLayout>;
+  }
+  ```
+
+  ```tsx tab="app/docs/[[...slug]]/page.tsx"
+  import { notFound } from 'next/navigation';
+  import { DocsBody, DocsPage, DocsTitle } from 'fumadocs-ui/layouts/docs/page';
+  import { getSource } from '@/lib/source';
+  import { getMDXComponents } from '@/components/mdx';
+
+  export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
+    const params = await props.params;
+    const source = await getSource();
+    const page = source.getPage(params.slug);
+    if (!page) notFound();
+
+    const { render } = await page.data.load();
+    const { body, toc } = await render(getMDXComponents());
+
+    return (
+      <DocsPage toc={toc}>
+        <DocsTitle>{page.data.title}</DocsTitle>
+        <DocsBody>{body}</DocsBody>
+      </DocsPage>
+    );
+  }
+  ```
+</show>
+
+<show when={props.framework === 'react-router'}>
+  ```tsx title="app/routes/docs.tsx"
+  import type { Route } from './+types/docs';
+  import { useMemo } from 'react';
+  import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+  import { DocsBody, DocsPage, DocsTitle } from 'fumadocs-ui/layouts/docs/page';
+  import { useFumadocsLoader } from 'fumadocs-core/source/client';
+  import { rendererFromSerialized } from '@fumadocs/local-md/client';
+  import { getSource } from '@/lib/source';
+  import { useMDXComponents } from '@/components/mdx';
+
+  export async function loader({ params }: Route.LoaderArgs) {
+    const source = await getSource();
+    const page = source.getPage(params['*'].split('/').filter((v) => v.length > 0));
+    if (!page) throw new Response('Not found', { status: 404 });
+
+    const { serialize } = await page.data.load();
+    return {
+      title: page.data.title,
+      // 構文木（クライアントでレンダリングされます）
+      render: serialize(),
+      pageTree: await source.serializePageTree(source.getPageTree()),
+    };
+  }
+
+  export default function Page({ loaderData }: Route.ComponentProps) {
+    const { title, render, pageTree } = useFumadocsLoader(loaderData);
+    const renderer = useMemo(() => rendererFromSerialized(render), [render]);
+    const { body, toc } = renderer.renderSync(useMDXComponents());
+
+    return (
+      <DocsLayout tree={pageTree}>
+        <DocsPage toc={toc}>
+          <DocsTitle>{title}</DocsTitle>
+          <DocsBody>{body}</DocsBody>
+        </DocsPage>
+      </DocsLayout>
+    );
+  }
+  ```
+</show>
+
+<show when={props.framework === 'tanstack-start'}>
+  ```tsx title="src/routes/docs/$.tsx"
+  import { createFileRoute, notFound } from '@tanstack/react-router';
+  import { createServerFn } from '@tanstack/react-start';
+  import { useMemo } from 'react';
+  import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+  import { DocsBody, DocsPage, DocsTitle } from 'fumadocs-ui/layouts/docs/page';
+  import { useFumadocsLoader } from 'fumadocs-core/source/client';
+  import { rendererFromSerialized } from '@fumadocs/local-md/client';
+  import type { MarkdownRendererSerializedOptions } from '@fumadocs/local-md';
+  import { getSource } from '@/lib/source';
+  import { useMDXComponents } from '@/components/mdx';
+
+  // server function の戻り値に対する型レベルのチェックでは構文木を検証できないため、
+  // シリアライズ可能な型として登録します（`@tanstack/router-core` を解決できない場合はインストールしてください）
+  declare module '@tanstack/router-core' {
+    interface SerializableExtensions {
+      fumadocsMarkdownRenderer: MarkdownRendererSerializedOptions;
+    }
+  }
+
+  export const Route = createFileRoute('/docs/$')({
+    component: Page,
+    loader: ({ params }) => serverLoader({ data: params._splat?.split('/') ?? [] }),
+  });
+
+  const serverLoader = createServerFn({
+    method: 'GET',
+  })
+    .validator((slugs: string[]) => slugs)
+    .handler(async ({ data: slugs }) => {
+      const source = await getSource();
+      const page = source.getPage(slugs);
+      if (!page) throw notFound();
+
+      const { serialize } = await page.data.load();
+      return {
+        title: page.data.title,
+        // 構文木（クライアント側でレンダリングされます）
+        render: serialize(),
+        pageTree: await source.serializePageTree(source.getPageTree()),
+      };
+    });
+
+  function Page() {
+    const { title, render, pageTree } = useFumadocsLoader(Route.useLoaderData());
+    const renderer = useMemo(() => rendererFromSerialized(render), [render]);
+    const { body, toc } = renderer.renderSync(useMDXComponents());
+
+    return (
+      <DocsLayout tree={pageTree}>
+        <DocsPage toc={toc}>
+          <DocsTitle>{title}</DocsTitle>
+          <DocsBody>{body}</DocsBody>
+        </DocsPage>
+      </DocsLayout>
+    );
+  }
+  ```
+</show>
+
+<show when={props.framework === 'waku'}>
+  ```tsx tab="src/pages/docs/_layout.tsx"
+  import type { ReactNode } from 'react';
+  import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+  import { getSource } from '@/lib/source';
+
+  export default async function Layout({ children }: { children: ReactNode }) {
+    const source = await getSource();
+
+    return <DocsLayout tree={source.getPageTree()}>{children}</DocsLayout>;
+  }
+  ```
+
+  ```tsx tab="src/pages/docs/[...slugs].tsx"
+  import type { PageProps } from 'waku/router';
+  import { unstable_notFound } from 'waku/router/server';
+  import { DocsBody, DocsPage, DocsTitle } from 'fumadocs-ui/layouts/docs/page';
+  import { getSource } from '@/lib/source';
+  import { getMDXComponents } from '@/components/mdx';
+
+  export default async function Page({ slugs }: PageProps<'/docs/[...slugs]'>) {
+    const source = await getSource();
+    const page = source.getPage(slugs);
+    if (!page) unstable_notFound();
+
+    const { render } = await page.data.load();
+    const { body, toc } = await render(getMDXComponents());
+
+    return (
+      <DocsPage toc={toc}>
+        <DocsTitle>{page.data.title}</DocsTitle>
+        <DocsBody>{body}</DocsBody>
+      </DocsPage>
+    );
+  }
+
+  export async function getConfig() {
+    const source = await getSource();
+    return {
+      render: 'static',
+      staticPaths: source.generateParams().map((item) => item.slug),
+    } as const;
+  }
+  ```
+</show>
+
+<show when={props.framework === 'astro'}>
+  ```astro tab="src/pages/docs/[...slug].astro"
+  ---
+  import type { GetStaticPaths, InferGetStaticPropsType } from 'astro';
+  import Layout from '@/layouts/Layout.astro';
+  import { Docs } from '@/components/docs';
+  import { getSource } from '@/lib/source';
+
+  export const prerender = true;
+
+  export const getStaticPaths = (async () => {
+    const source = await getSource();
+    return source.getPages().map((page) => ({
+      params: { slug: decodeURI(page.slugs.join('/')) || undefined },
+      props: { page },
+    }));
+  }) satisfies GetStaticPaths;
+
+  type Props = InferGetStaticPropsType<typeof getStaticPaths>;
+
+  const { page } = Astro.props;
+  const source = await getSource();
+  const pageTree = await source.serializePageTree(source.getPageTree());
+  const { serialize } = await page.data.load();
+  ---
+
+  <Layout title={page.data.title}>
+    <Docs
+      client:load
+      pathname={Astro.url.pathname}
+      params={Astro.params}
+      tree={pageTree}
+      title={page.data.title}
+      render={serialize()}
+    />
+  </Layout>
+  ```
+
+  ```tsx tab="src/components/docs.tsx"
+  import { useMemo } from 'react';
+  import { type SerializedPageTree, useFumadocsLoader } from 'fumadocs-core/source/client';
+  import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+  import { DocsBody, DocsPage, DocsTitle } from 'fumadocs-ui/layouts/docs/page';
+  import { rendererFromSerialized } from '@fumadocs/local-md/client';
+  import type { MarkdownRendererSerializedOptions } from '@fumadocs/local-md';
+  import { Provider, type ProviderProps } from '@/components/provider';
+  import { getMDXComponents } from '@/components/mdx';
+
+  export interface DocsProps extends ProviderProps {
+    tree: SerializedPageTree;
+    title: string;
+    // アイランド内でレンダリングされる構文木
+    render: MarkdownRendererSerializedOptions;
+  }
+
+  export function Docs({ tree, title, render, ...props }: DocsProps) {
+    const data = useFumadocsLoader({ tree });
+    const renderer = useMemo(() => rendererFromSerialized(render), [render]);
+    const { body, toc } = renderer.renderSync(getMDXComponents());
+
+    return (
+      <Provider {...props}>
+        <DocsLayout tree={data.tree}>
+          <DocsPage toc={toc}>
+            <DocsTitle>{title}</DocsTitle>
+            <DocsBody>{body}</DocsBody>
+          </DocsPage>
+        </DocsLayout>
+      </Provider>
+    );
+  }
+  ```
+</show>
+
+### インクルード [#include]
+
+[`<include>`](/docs/mdx/include) はデフォルトで有効になっています。
+
+```mdx title="content/docs/page.mdx"
+<include>../shared/note.md</include>
+```
+
+Markdown ファイルでは、`remark-directive` を設定したうえで `::include[../shared/note.md]` ディレクティブを使用します。
+
+```ts title="lib/source.ts"
+import remarkDirective from 'remark-directive';
+
+const docs = localMd({
+  dir: 'content/docs',
+  mdOptions: { remarkPlugins: [remarkDirective] },
+});
+```
+
+### ホットリロード [#hot-reload]
+
+`@fumadocs/local-md` はランタイムにファイルを読み込むため、デフォルトではファイルの変更は監視されません。
+
+<show when={props.framework === 'next'}>
+  開発中は、同梱の開発サーバーをアプリと並行して実行してください。開発サーバーは単一のプロセスでファイルを監視し、変更を WebSocket 経由でブロードキャストするため、Next.js が複数のワーカーを実行する場合でも動作します。
+
+  ```json title="package.json"
+  {
+    "scripts": {
+      "dev": "local-md dev -- next dev"
+    }
+  }
+  ```
+
+  ソースを開発サーバーに接続します。
+
+  ```ts title="lib/source.ts"
+  import { watchWithDevServer } from '@fumadocs/local-md/dev/ws';
+
+  if (process.env.NODE_ENV === 'development') {
+    void watchWithDevServer(docs);
+  }
+  ```
+
+  コマンドが環境変数経由で URL を公開するため、設定は不要です。サーバーを自分で起動する場合は URL を明示的に渡してください。ポートを変更するには `-p` を使用します。
+
+  ```ts
+  void watchWithDevServer(docs, { url: 'ws://127.0.0.1:8000/_fumadocs_local_md' });
+  ```
+
+  これによりサーバー上のソースは無効化されますが、ブラウザ側では Next.js がレンダリング済みのページを保持したままです。ページも更新されるように、ルートレイアウトで `<DevClient />` をレンダリングしてください。
+
+  ```tsx title="app/layout.tsx"
+  import { DevClient } from '@fumadocs/local-md/dev/react-client';
+
+  export function RootLayout({ children }) {
+    return (
+      <RootProvider>
+        {/* [!code ++] */}
+        <DevClient />
+        {children}
+      </RootProvider>
+    );
+  }
+  ```
+</show>
+
+<show when={props.framework !== 'next'}>
+  開発中は、Vite プラグインが Vite のファイルウォッチャーを通じてソースを無効化するため、追加のプロセスやポートは不要です。設定にプラグインを追加し、ソースを接続してください。
+
+  <show when={props.framework === 'react-router' || props.framework === 'tanstack-start'}>
+    ```ts tab="vite.config.ts"
+    import { defineConfig } from 'vite';
+    import { localContentPlugin } from '@fumadocs/local-md/dev/vite';
+
+    export default defineConfig({
+      plugins: [localContentPlugin()],
+    });
+    ```
+  </show>
+
+  <show when={props.framework === 'waku'}>
+    ```ts tab="waku.config.ts"
+    import { defineConfig } from 'waku/config';
+    import { localContentPlugin } from '@fumadocs/local-md/dev/vite';
+
+    export default defineConfig({
+      vite: {
+        plugins: [localContentPlugin()],
+      },
+    });
+    ```
+  </show>
+
+  <show when={props.framework === 'astro'}>
+    ```js tab="astro.config.mjs"
+    import { defineConfig } from 'astro/config';
+    import { localContentPlugin } from '@fumadocs/local-md/dev/vite';
+
+    export default defineConfig({
+      vite: {
+        plugins: [localContentPlugin()],
+      },
+    });
+    ```
+  </show>
+
+  ```ts tab="lib/source.ts"
+  import { watchWithVite } from '@fumadocs/local-md/dev/vite';
+
+  if (import.meta.env.DEV) {
+    watchWithVite(docs);
+  }
+  ```
+
+  コンテンツファイルはモジュールグラフの外にあるため、プラグインはコンテンツディレクトリを Vite のウォッチャーに追加します。無効化されるモジュールがないので、プラグインは代わりにブラウザをリロードします。リロードを自分で制御したい場合は、`localContentPlugin({ reload: false })` を渡してください。
+</show>
+
+Markdown や MDX ファイル (それらがインクルードするファイルを含む) が変更されると、ソースがリロードされます。独自のウォッチャーを組み込む場合は、`docs.dir` と `docs.onDependency()` に渡されたファイルを監視し、ファイルの変更時に `docs.invalidateFile(path)` を呼び出してください。
+
+<show when={props.framework === 'tanstack-start'}>
+  ### Nitro [#nitro]
+
+  Nitro でデプロイする場合は、Vite の設定に次の 2 つの変更を加えてください。
+
+  ```ts title="vite.config.ts"
+  import { defineConfig } from 'vite';
+  import { nitro } from 'nitro/vite';
+
+  export default defineConfig({
+    plugins: [
+      // Nitro は Shiki の Wasm インポートをバンドルできません。Shiki のデフォルトのエントリーはバイナリをインライン化しています
+      nitro({ wasm: false }),
+    ],
+    resolve: {
+      alias: [
+        // Nitro はこの shim の `require('react')` を残すため、ランタイムで 2 つ目の React が読み込まれてしまいます
+        { find: /^use-sync-external-store\/shim$/, replacement: 'react' },
+      ],
+    },
+  });
+  ```
+</show>
+
+### JavaScript エンジン [#javascript-engine]
+
+MDX ファイル(`*.mdx`)は `new Function` で実行されるため、`eval()` が禁止されている環境(Cloudflare Workers など)では動作しません。
+
+Markdown ファイル(`*.md`)は `eval()` を使わずに構文木からレンダリングされます。プラグインが生成した JSX は、組み込みの仮想 JavaScript エンジンで評価されます。このエンジンは `rendererOptions.executor` で差し替えられます。
+
+<Callout type="warn">
+  信頼できない MDX ファイルは `dir` に置かないでください。アプリ内で JavaScript として実行されます。
+</Callout>
+
+### 再検証を無効にする [#disable-revalidation]
+
+`staticSource()` は、再検証を行わない一度きりのスナップショットを返します。`dynamicLoader()` ではなく `loader()` と組み合わせて使用します：
+
+```ts title="lib/source.ts"
+import { loader } from 'fumadocs-core/source';
+import { localMd } from '@fumadocs/local-md';
+
+const docs = localMd({
+  dir: 'content/docs',
+});
+
+export const source = loader(await docs.staticSource(), {
+  baseUrl: '/docs',
+});
+```
+
+<show when={props.framework !== 'astro'}>
+  ## Fumadocs MDX からの移行 [#migration-from-fumadocs-mdx]
+
+  移行するには、Fumadocs MDX のセットアップを `@fumadocs/local-md` のセットアップに置き換えます。
+
+  ### 移行前 [#before]
+
+  <show when={props.framework === 'next'}>
+    ```ts tab="source.config.ts"
+    import { defineDocs, defineConfig } from 'fumadocs-mdx/config';
+
+    export const docs = defineDocs({
+      dir: 'content/docs',
+    });
+
+    export default defineConfig();
+    ```
+
+    ```ts tab="lib/source.ts"
+    import { docs } from 'collections/server';
+    import { loader } from 'fumadocs-core/source';
+
+    export const source = loader({
+      baseUrl: '/docs',
+      source: docs.toFumadocsSource(),
+    });
+    ```
+  </show>
+
+  <show when={props.framework !== 'next'}>
+    ```ts title="lib/source.ts"
+    import { loader } from 'fumadocs-core/source';
+    import { defineDocs } from 'fumadocs-mdx/macro';
+
+    const docs = defineDocs({
+      dir: 'content/docs',
+    });
+
+    export const source = loader({
+      baseUrl: '/docs',
+      source: docs.toFumadocsSource(),
+    });
+    ```
+  </show>
+
+  ### 移行後 [#after]
+
+  ```ts title="lib/source.ts"
+  import { dynamicLoader } from 'fumadocs-core/source';
+  import { localMd } from '@fumadocs/local-md';
+
+  const docs = localMd({
+    dir: 'content/docs',
+  });
+
+  const docsLoader = dynamicLoader(docs.dynamicSource(), {
+    baseUrl: '/docs',
+  });
+
+  export async function getSource() {
+    return docsLoader.get();
+  }
+  ```
+
+  続いて、次の作業を行います。
+
+  <show when={props.framework === 'next'}>
+    * `source.config.ts` を削除します。
+    * `next.config.mjs` から `createMDX()` を削除します。
+    * `collections/server` のインポートを、`localMd()` から作成したローダーに置き換えます。
+    * [ホットリロード](#hot-reload)を設定します。
+
+    最後に、`source` オブジェクトを参照している箇所を `getSource()` を使うように書き換えます。
+
+    ```tsx title="app/docs/layout.tsx"
+    import { getSource } from '@/lib/source';
+    import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+
+    export default async function Layout({ children }: LayoutProps<'/docs'>) {
+      // [!code --]
+      return <DocsLayout tree={source.getPageTree()}>{children}</DocsLayout>;
+
+      // [!code ++:2]
+      const docs = await getSource();
+      return <DocsLayout tree={docs.getPageTree()}>{children}</DocsLayout>;
+    }
+    ```
+  </show>
+
+  <show when={props.framework !== 'next'}>
+    * Vite の設定から `fumadocsMdx()` を削除します。
+    * [ホットリロード](#hot-reload)を設定します。
+
+    <show when={props.framework === 'waku'}>
+      最後に、`source` オブジェクトを参照している箇所を `getSource()` を使うように書き換えます。
+
+      ```tsx title="src/pages/docs/_layout.tsx"
+      import type { ReactNode } from 'react';
+      import { getSource } from '@/lib/source';
+      import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+
+      export default async function Layout({ children }: { children: ReactNode }) {
+        // [!code --]
+        return <DocsLayout tree={source.getPageTree()}>{children}</DocsLayout>;
+
+        // [!code ++:2]
+        const docs = await getSource();
+        return <DocsLayout tree={docs.getPageTree()}>{children}</DocsLayout>;
+      }
+      ```
+    </show>
+
+    <show when={props.framework !== 'waku'}>
+      最後に、ローダーなどで `source` オブジェクトを参照している箇所を `getSource()` を使うように書き換えます。
+
+      ```ts
+      import { getSource } from '@/lib/source';
+
+      // [!code ++]
+      const source = await getSource();
+      const page = source.getPage(slugs);
+      ```
+    </show>
+  </show>
+
+  ページデータの API も変わります。
+
+  ```tsx tab="移行前"
+  const page = source.getPage(['...']);
+
+  // タイトルと説明
+  page.data.title;
+
+  // カスタムのフロントマタープロパティ
+  page.data.full;
+
+  // getText() API
+  await page.data.getText('processed');
+
+  // コンパイル済みのプロパティ:
+  page.data.structuredData;
+  page.data.toc;
+  return (
+    <div>
+      <page.data.body components={{}} />
+    </div>
+  );
+  ```
+
+  ```tsx tab="移行後"
+  const page = docs.getPage(['...']);
+
+  // タイトルと説明（変更なし）
+  page.data.title;
+
+  // カスタムのフロントマタープロパティ
+  page.data.frontmatter.full;
+
+  // getText() API はないため、代わりに data.content を使用します
+  console.log(page.data.content);
+
+  // コンパイル済みのプロパティ:
+  const structuredData = await page.data.structuredData();
+  const { toc, body } = await (await page.data.load()).render(mdxComponents);
+
+  return <div>{body}</div>;
+  ```
+</show>

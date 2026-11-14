@@ -1,0 +1,16 @@
+{
+  "$schema": "../../../../.source/json-schema/docs.meta.json",
+  "pages": [
+    "---設定---",
+    "links",
+    "nav",
+    "---コンポーネント---",
+    "docs",
+    "flux",
+    "glass",
+    "home-layout",
+    "notebook",
+    "spacious",
+    "..."
+  ]
+}

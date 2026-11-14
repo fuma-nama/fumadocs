@@ -1,0 +1,141 @@
+---
+title: 自動型テーブル
+description: TypeScript の型定義からドキュメントを生成します
+---
+
+## 使い方 [#usage]
+
+```package-install
+fumadocs-typescript
+```
+
+### UI との統合 [#ui-integration]
+
+`AutoTypeTable` コンポーネントが用意されています。詳しくは[自動型テーブル](/docs/ui/components/auto-type-table)を参照してください。
+
+### MDX との統合 [#mdx-integration]
+
+`remarkAutoTypeTable` は remark プラグインです。設定に追加してください。
+
+```ts title="source.config.ts" tab="unified"
+import {
+  remarkAutoTypeTable,
+  createGenerator,
+  createFileSystemGeneratorCache,
+} from 'fumadocs-typescript';
+import { defineConfig } from 'fumadocs-mdx/config';
+
+const generator = createGenerator({
+  // 推奨: キャッシュ用のディレクトリを指定します
+  cache: createFileSystemGeneratorCache('.cache/fumadocs-typescript'),
+});
+
+export default defineConfig({
+  mdxOptions: {
+    remarkPlugins: [[remarkAutoTypeTable, { generator }]],
+  },
+});
+```
+
+```ts title="source.config.ts" tab="Sätteri"
+import { createGenerator, createFileSystemGeneratorCache } from 'fumadocs-typescript';
+import { remarkAutoTypeTable } from '@fumadocs/satteri/remark-auto-type-table';
+import { defineConfig, defineDocs } from 'fumadocs-mdx/config';
+
+const generator = createGenerator({
+  // 推奨: キャッシュ用のディレクトリを指定してください
+  cache: createFileSystemGeneratorCache('.cache/fumadocs-typescript'),
+});
+
+export const docs = defineDocs({
+  docs: {
+    compiler: 'satteri',
+  },
+});
+
+export default defineConfig({
+  satteriOptions: {
+    mdastPlugins: [remarkAutoTypeTable({ generator })],
+  },
+});
+```
+
+これにより、`auto-type-table` コンポーネントを利用できるようになります。
+
+[自動型テーブル](/docs/ui/components/auto-type-table)と同じように使用できますが、次のルールが追加されます。
+
+* 属性の値は文字列である必要があります。
+* `path` には、MDX ファイル自体からの相対パスを指定します。
+* MDX コンポーネントに [`TypeTable`](/docs/ui/components/type-table) も追加する必要があります。
+
+```ts title="path/to/file.ts"
+export interface MyInterface {
+  name: string;
+}
+```
+
+```mdx title="page.mdx"
+<auto-type-table path="./path/to/file.ts" name="MyInterface" />
+```
+
+<Callout type="warn">
+  信頼できない値を `path` に渡さないでください。マシン上の任意の TypeScript ファイルが読み取られるおそれがあります。
+</Callout>
+
+## アノテーション [#annotations]
+
+### 非表示にする [#hide]
+
+フィールドに `@internal` TSDoc タグを付けると、そのフィールドを非表示にできます。
+
+```ts
+interface MyInterface {
+  /**
+   * @internal
+   */
+  cache: number;
+}
+```
+
+### 簡略化された型 [#simplified-type]
+
+TSDoc の `@remarks` タグを使用すると、型の簡略名を指定できます。
+
+```ts
+interface MyInterface {
+  /**
+   * @remarks `timestamp` API から返されます。 // [!code highlight]
+   */
+  time: number;
+}
+```
+
+これにより、`time` プロパティの型が `timestamp` として表示されます。
+
+### 完全な型 [#full-type]
+
+`@fumadocsType` TSDoc タグを使用すると、型の完全な名前を指定できます。
+
+```ts
+interface MyInterface {
+  /**
+   * @fumadocsType `MyBeautifulClient` // [!code highlight]
+   */
+  client: MyClient;
+}
+```
+
+### Type Href [#type-href]
+
+型テーブルと組み合わせて使用すると、プロパティから他の場所へリンクできます。
+
+型テーブルはアンカー ID を自動で生成するため、それを使って別の型テーブルへリンクできます。
+
+```ts
+interface MyInterface {
+  /**
+   * @fumadocsHref #type-table-temp.ts-MyClass-test
+   */
+  client: MyClient;
+}
+```

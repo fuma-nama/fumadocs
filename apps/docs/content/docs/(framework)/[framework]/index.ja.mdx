@@ -1,0 +1,262 @@
+---
+title: クイックスタート
+description: Fumadocs を使ってみる
+icon: Rocket
+---
+
+import { frameworkName } from '@/lib/framework';
+
+<AgentInstructions framework={props.framework} />
+
+## 用語 [#terminology]
+
+**Markdown/MDX:** Markdown は、書式付きテキストを作成するためのマークアップ言語です。Fumadocs は Markdown と MDX(Markdown のスーパーセット)をネイティブにサポートしています。
+
+**[Bun](https://bun.sh):** JavaScript ランタイムです。本ガイドではスクリプトの実行に使用します。Node.js を使いたい場合は、代わりに [unrun](https://gugustinette.github.io/unrun/guide/getting-started.html#cli) をお試しください。
+
+より詳細なカスタマイズを行うには、React.js の基本的な知識があると役立ちます。
+
+## 自動インストール [#automatic-installation]
+
+Node.js 22 以上が必要です。
+
+```npm
+npm create fumadocs-app
+```
+
+使用する組み込みテンプレートについて、次の項目を選択するよう求められます。
+
+* **フレームワーク**: Next.js、React Router、TanStack Start、Waku、Astro
+* **コンテンツソース**: Fumadocs MDX、または Astro のコンテンツコレクション
+
+新しい Fumadocs アプリが初期化され、以下の機能がデフォルトで設定されます。
+
+* [LLM 連携](/docs/integrations/llms)
+* [動的なメタデータ画像](/docs/integrations/og)
+
+<Callout title="既存のコードベースに導入する場合">
+  [手動インストール](/docs/manual-installation)ガイドに従って導入できます。
+</Callout>
+
+### さあ、始めましょう！ [#enjoy]
+
+docs フォルダーに最初の MDX ファイルを作成しましょう。
+
+```mdx title="content/docs/index.mdx"
+---
+title: Hello World
+---
+
+## Yo what's up
+```
+
+開発モードでアプリを起動します。
+
+```npm
+npm run dev
+```
+
+<show when={props.framework === 'react-router'}>
+  http://localhost:5173/docs を開くと、ページを確認できます。
+</show>
+
+<show when={props.framework === 'astro'}>
+  http://localhost:4321/docs を開くと、ページを確認できます。
+</show>
+
+<show when={props.framework === 'next' || props.framework === 'tanstack-start' || props.framework === 'waku'}>
+  http://localhost:3000/docs を開くと、ページを確認できます。
+</show>
+
+## よくある質問 [#faq]
+
+よくある疑問とその回答をまとめています。
+
+<Accordions>
+  <Accordion id="upgrade-fumadocs" title="APIが見つからない、またはバグによるエラーが発生する場合は?">
+    お探しのAPIや修正は、新しいバージョンで提供されている可能性があります。[Fumadocsをアップグレード](/docs/upgrade)してから、もう一度お試しください。
+  </Accordion>
+
+  <Accordion id="change-base-url" title="ドキュメントのベースルートを変更するにはどうすればよいですか?">
+    ルーティングは {frameworkName(props.framework)} が処理します。まず、docs ルートを移動します (`/docs/*` -&gt; `/info/*`) 。
+
+    <show when={props.framework === 'next'}>
+      ルートの名前を変更します。
+
+      <Files>
+        <Folder name="app/docs" defaultOpen className="opacity-50" disabled>
+          <File name="layout.tsx" />
+        </Folder>
+
+        <Folder name="app/info" defaultOpen>
+          <File name="layout.tsx" />
+        </Folder>
+      </Files>
+
+      または、ルートグループを使用して `/docs/*` を `/*` に変更することもできます。
+
+      <Files>
+        <Folder name="app/(docs)" defaultOpen>
+          <File name="layout.tsx" />
+        </Folder>
+      </Files>
+    </show>
+
+    <show when={props.framework === 'react-router'}>
+      ```ts title="app/routes.ts"
+      import { route, type RouteConfig } from '@react-router/dev/routes';
+
+      export default [
+        route('info/*', 'routes/docs.tsx'), // [!code highlight]
+        // ...
+      ] satisfies RouteConfig;
+      ```
+    </show>
+
+    <show when={props.framework === 'tanstack-start'}>
+      `src/routes/docs/$.tsx` を `src/routes/info/$.tsx` に移動します。
+    </show>
+
+    <show when={props.framework === 'waku' || props.framework === 'astro'}>
+      `src/pages/docs` を `src/pages/info` に移動します。
+    </show>
+
+    最後に、`source.ts` でページのベース URL を更新します。
+
+    ```ts title="lib/source.ts"
+    import { loader } from 'fumadocs-core/source';
+
+    export const source = loader({
+      baseUrl: '/info', // 新しい値に変更 [!code highlight]
+    });
+    ```
+
+    テンプレートでは、この値は `lib/shared.ts` 内で `docsRoute` として定義されています。Markdown のリンクにも反映されるよう、こちらで変更してください。
+  </Accordion>
+
+  <Accordion id="multi-docs" title="複数のドキュメントサイトを実装するにはどうすればよいですか?">
+    [レイアウトタブ](/docs/ui/layouts/docs#layout-tabs)の使用をおすすめします。
+  </Accordion>
+
+  <show when={props.framework === 'next' || props.framework === 'astro'}>
+    <Accordion id="custom-layout-docs-page" title="Docs レイアウトを使わずに /docs 内にページを作成するには？">
+      <show when={props.framework === 'next'}>
+        Next.js App Router でレイアウトを管理する場合と同様に、まずコンテンツディレクトリ (`/content/docs`) から元の MDX ファイルを削除します。
+        これにより、ページの重複によるエラーを防げます。
+
+        次に、Docs レイアウトの配下にない別のルートグループにページを追加します。
+
+        たとえば、`/docs/test` を置き換える場合は次のようになります。
+
+        <Files>
+          <File name="(home)/docs/test/page.tsx" />
+
+          <Folder name="docs" defaultOpen>
+            <File name="layout.tsx" />
+
+            <File name="[[...slug]]/page.tsx" />
+          </Folder>
+        </Files>
+
+        `/docs` を置き換える場合は、catch-all ルートを省略不可の形式に変更する必要があります。
+
+        <Files>
+          <File name="(home)/docs/page.tsx" />
+
+          <Folder name="docs" defaultOpen>
+            <File name="layout.tsx" />
+
+            <File name="[...slug]/page.tsx" />
+          </Folder>
+        </Files>
+      </show>
+
+      <show when={props.framework === 'astro'}>
+        `Docs` アイランドを使用しない独立した `.astro` ページを `src/pages/docs/` に作成します。同じ URL が重複しないよう、`content/docs` から対応する MDX ファイルを削除してください。
+      </show>
+    </Accordion>
+  </show>
+
+  <show when={props.framework === 'react-router' || props.framework === 'tanstack-start' || props.framework === 'waku'}>
+    <Accordion id="vite-context-error" title="React コンテキストでエラーが発生する場合">
+      Vite には事前バンドルに関する不可解な問題があります ([#3910](https://github.com/vitejs/vite/issues/3910)) 。
+      Fumadocs を事前バンドルの対象から除外し、`noExternal` に追加してください。
+
+      ```ts title="vite.config.ts"
+      import { defineConfig } from 'vite';
+
+      export default defineConfig({
+        resolve: {
+          // 必要に応じて Fumadocs の他の依存パッケージも追加します
+          noExternal: ['fumadocs-core', 'fumadocs-ui', 'fumadocs-openapi', '@fumadocs/base-ui'],
+        },
+      });
+      ```
+    </Accordion>
+  </show>
+
+  <show when={props.framework === 'next'}>
+    <Accordion id="node-issues" title="Node.js の既知の問題">
+      次のような Turbopack のエラーが発生する場合:
+
+      ```
+      JSON file not found: FileSystemPath { ... path: "lib/locales/sources/file.json.json" }
+      ```
+
+      多くの場合、`require(esm)` がサポートされていないことが原因です ([#3312](https://github.com/fuma-nama/fumadocs/issues/3312)) 。Node.js 22 以上にアップグレードしてください。
+
+      Node.js 23.1 で、本番ビルド時に次のエラーが発生する場合:
+
+      ```
+      Could not find a production build in the '.next' directory.
+      ```
+
+      これは既知の問題です ([#1021](https://github.com/fuma-nama/fumadocs/issues/1021) を参照) 。Node.js を 23.6.0 以上にアップグレードすると解決できます。
+    </Accordion>
+
+    <Accordion id="dynamic-route" title="動的ルートを使用していますが、パフォーマンスに問題はありませんか？">
+      Next.js では、`generateStaticParams` が設定されていると、動的ルートが静的ルートに変換されます。
+      そのため、静的ページと同等の速度で動作します。
+
+      [静的エクスポートを有効にする](/docs/deploying/static)と、静的なビルド出力を得ることもできます。
+    </Accordion>
+  </show>
+</Accordions>
+
+## さらに詳しく [#learn-more]
+
+初めての方もご安心ください。ご質問はいつでも歓迎しています。
+
+わかりにくい点があれば、[Github Discussion](https://github.com/fuma-nama/fumadocs/discussions) でフィードバックをお寄せください！
+
+### コンテンツの執筆 [#writing-content]
+
+ドキュメントを執筆する際は、以下を必ずお読みください。
+
+<Cards>
+  <Card href="/docs/markdown" title="Markdown">
+    Fumadocs には、コンテンツ執筆に役立つ追加機能が用意されています。
+  </Card>
+
+  <Card href="/docs/navigation" title="ナビゲーション">
+    ナビゲーション構造をカスタマイズする方法を説明します。
+  </Card>
+
+  <Card href="/docs/page-conventions" title="ページスラッグとページツリー">
+    コンテンツを整理する方法を説明します。
+  </Card>
+
+  <Card href="/docs/ui/components" title="コンポーネント" description="ドキュメントの充実に使える、利用可能なコンポーネントの一覧です" />
+</Cards>
+
+### 特殊な要件 [#special-needs]
+
+<Cards>
+  <Card href="/docs/deploying/static" title="静的エクスポートの設定" description="ドキュメントで静的エクスポートを有効にする方法を説明します" />
+
+  <Card href="/docs/internationalization" title="国際化" description="i18n を有効にする方法を説明します" />
+
+  <Card href="/docs/ui/theme" title="カラーテーマ" description="Fumadocs UI にテーマを追加します" />
+
+  <Card href="/docs/ui/layouts" title="レイアウト" description="Fumadocs UI のレイアウトをカスタマイズします" />
+</Cards>

@@ -1,0 +1,62 @@
+---
+title: サーバーエントリー
+description: サーバー側でコレクションの出力にアクセスする方法です。
+---
+
+## 使い方 [#usage]
+
+エントリーファイルからコレクションに直接アクセスすることもできますが、[`loader()`](/docs/headless/source-api#output) と組み合わせて使うことをおすすめします。
+
+```ts tab="Docs (Meta + Doc)"
+import { docs } from 'collections/server';
+import { loader } from 'fumadocs-core/source';
+
+// 生のコレクション
+console.log(docs);
+
+export const source = loader({
+  baseUrl: '/docs',
+  source: docs.toFumadocsSource(),
+});
+```
+
+```ts tab="Doc"
+import { blogPosts } from 'collections/server';
+import { toFumadocsSource } from 'fumadocs-mdx/runtime/server';
+import { loader } from 'fumadocs-core/source';
+
+// 生のコレクション
+console.log(blogPosts);
+
+export const blog = loader({
+  baseUrl: '/blog',
+  source: toFumadocsSource(blogPosts, []),
+});
+```
+
+## 使用例 [#examples]
+
+```tsx
+import { source } from '@/lib/source';
+
+const page = source.getPage(['slugs']);
+
+if (page) {
+  // ページデータにアクセス [!code highlight:2]
+  console.log(page.data);
+
+  // フロントマターのプロパティも利用できます [!code highlight:2]
+  console.log(page.data.title);
+}
+```
+
+ページを (RSC で) レンダリングするには、`page.data.body` をコンポーネントとして使用します。
+
+```tsx
+import { getMDXComponents } from '@/components/mdx';
+
+const MDX = page.data.body;
+
+// `components` prop で MDX コンポーネントを設定します
+return <MDX components={getMDXComponents()} />;
+```

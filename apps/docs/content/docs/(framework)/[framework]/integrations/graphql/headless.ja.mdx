@@ -1,0 +1,250 @@
+---
+title: ヘッドレス
+description: UI を含まない、GraphQL ページの状態とロジック。
+---
+
+## 概要 [#overview]
+
+`@fumadocs/graphql/ui` 以外はすべてヘッドレスです。
+
+| パス                             | モジュール                                |
+| ------------------------------ | ------------------------------------ |
+| `@fumadocs/graphql`            | ページ：SDL から構築したスキーマ、クロスリンク、独自のコンポーネント |
+| `@fumadocs/graphql/operation`  | オペレーション：フィールド、タイトル、ディレクティブ、サンプル      |
+| `@fumadocs/graphql/type-docs`  | 名前付き型：種別、ディレクティブ、関連、使用箇所             |
+| `@fumadocs/graphql/playground` | プレイグラウンドの状態、オペレーションやサブスクリプションの送信     |
+
+## ページ [#page]
+
+`createGraphQLRenderer()` はコンポーネントを受け取り、`<GraphQLPage />` を返します。`<GraphQLPage />` は、生成されたページの props を受け取ります。
+
+```tsx title="components/api-page.tsx"
+'use client';
+import { type CodeBlockProps, createGraphQLRenderer } from '@fumadocs/graphql';
+import { Operation } from '@/components/my-operation';
+import { TypeDocs } from '@/components/my-type';
+
+export const GraphQLPage = createGraphQLRenderer({
+  components: {
+    Operation,
+    TypeDocs,
+    // `root` はフィールド形式のルート、または `Query.orders()` のようなスキーマ座標です
+    SchemaUI: ({ client, root }) => (
+      <pre>{`${client.name}: ${typeof root === 'string' ? root : root.type}`}</pre>
+    ),
+    CodeBlock({ lang, code }: CodeBlockProps) {
+      return (
+        <pre>
+          <code className={`language-${lang}`}>{code}</code>
+        </pre>
+      );
+    },
+  },
+});
+```
+
+| コンポーネント     | レンダリング対象                                     |
+| ----------- | -------------------------------------------- |
+| `Operation` | ページ内の各オペレーション ([Operation](#operation) を参照)  |
+| `TypeDocs`  | ページ内の各名前付き型 ([Type](#type) を参照)              |
+| `SchemaUI`  | 型、引数、フィールドの詳細                                |
+| `Layout`    | 任意。レンダリングされた項目をラップします                        |
+
+事前生成されたページの[クロスリンク](/docs/integrations/graphql/api-page#cross-linking)を上書きするには、`typeLinks` と `operationLinks` を渡してください。
+
+### フック [#hooks]
+
+ページ配下のコンポーネントは、これらのフックでページの状態を読み取れます。
+
+| フック                            | 戻り値                                            |
+| ------------------------------ | ---------------------------------------------- |
+| `useGraphQL()`                 | ビルド済みの `schema`、その `sdl`、ページのリンクと例             |
+| `useComponents()`              | ページに渡されたコンポーネント                                |
+| `useTypeLink(name)`            | 指定した名前の型のページ URL。リンクがない場合は `undefined`         |
+| `useOperationLink(kind, name)` | オペレーションのページ URL                                |
+| `useRenderContext()`           | `playground` や `codeUsages` などのページのレンダリングオプション |
+
+オペレーションを独自にレンダリングするには、`createGraphQLRenderer()` の代わりに `<GraphQLProvider sdl={sdl} components={...} />` をマウントしてください。
+
+## オペレーション [#operation]
+
+`<OperationProvider />` は、オペレーションの詳細情報を導き出します。
+
+```tsx title="components/my-operation.tsx"
+'use client';
+import { useComponents } from '@fumadocs/graphql';
+import {
+  OperationProvider,
+  type PageOperationProps,
+  useOperation,
+} from '@fumadocs/graphql/operation';
+
+export function Operation({ kind, name }: PageOperationProps) {
+  return (
+    <OperationProvider kind={kind} name={name}>
+      <Content />
+    </OperationProvider>
+  );
+}
+
+function Content() {
+  const { title, field, examples, selected, select } = useOperation();
+  const { CodeBlock, SchemaUI } = useComponents();
+  const example = examples.at(selected);
+
+  return (
+    <>
+      <h2>{title}</h2>
+      {field.args.map((arg) => (
+        <SchemaUI
+          key={arg.name}
+          client={{ name: arg.name, rootId: arg.name }}
+          root={{ type: arg.type }}
+        />
+      ))}
+      {examples.map((item, i) => (
+        <button key={i} onClick={() => select(i)}>
+          {item.name ?? 'Example'}
+        </button>
+      ))}
+      {example && <CodeBlock lang="graphql" code={example.query} />}
+    </>
+  );
+}
+```
+
+`examples` は、[`examples` オプション](/docs/integrations/graphql/server#examples)で指定したもの、または自動生成されたものです。`selected` は、サンプルカードやプレイグラウンドなど、プロバイダー配下のすべての要素で共有されます。
+
+<auto-type-table path="props.ts" name="OperationInfo" />
+
+<auto-type-table path="props.ts" name="OperationExample" />
+
+## 型 [#type]
+
+`<TypeProvider />` は、名前付きの型の詳細情報を導出します。
+
+```tsx title="components/my-type.tsx"
+'use client';
+import { useComponents } from '@fumadocs/graphql';
+import { type PageTypeProps, TypeProvider, useNamedType } from '@fumadocs/graphql/type-docs';
+
+export function TypeDocs({ name }: PageTypeProps) {
+  return (
+    <TypeProvider name={name}>
+      <Content />
+    </TypeProvider>
+  );
+}
+
+function Content() {
+  const { name, kind, type, relations } = useNamedType();
+  const { SchemaUI } = useComponents();
+
+  return (
+    <>
+      <h2>
+        {name} ({kind})
+      </h2>
+      {relations.usages.returnedBy.map((op) => (
+        <span key={`${op.kind}:${op.name}`}>{op.name}</span>
+      ))}
+      <SchemaUI client={{ name, rootId: name, as: 'body' }} root={{ type }} />
+    </>
+  );
+}
+```
+
+<auto-type-table path="props.ts" name="NamedTypeInfo" />
+
+`relations` は、その型とスキーマ内の他の要素との関係を表します。
+
+| リレーション          | 内容                            |
+| --------------- | ----------------------------- |
+| `implements`    | その型が実装するインターフェース              |
+| `unions`        | その型を含むユニオン (オブジェクトの場合)        |
+| `implementedBy` | その型を実装するオブジェクト (インターフェースの場合)  |
+| `possibleTypes` | ユニオンのメンバー                     |
+| `usages`        | スキーマ内でその型が使用されている箇所           |
+
+<auto-type-table path="props.ts" name="TypeUsages" />
+
+## プレイグラウンド [#playground]
+
+`usePlayground()` は、`<OperationProvider />` 配下にあるオペレーションのプレイグラウンドを保持します。プレイグラウンドは、ページの [`playground` オプション](/docs/integrations/graphql/api-page#playground)で設定します。
+
+```tsx title="components/my-playground.tsx"
+'use client';
+import { StfProvider, useFieldValue } from '@fumari/stf';
+import { useOperation } from '@fumadocs/graphql/operation';
+import { usePlayground } from '@fumadocs/graphql/playground';
+
+export function MyPlayground() {
+  const { field } = useOperation();
+  const { stf, open, url, changeUrl, query, setQuery, send, isSending, response } = usePlayground();
+
+  return (
+    // 開くと、前回アクセス時のエンドポイントとヘッダーが復元されます
+    <details onToggle={(e) => e.currentTarget.open && open()}>
+      <summary>Try it</summary>
+      <input value={url} onChange={(e) => changeUrl(e.target.value)} />
+      <textarea value={query} onChange={(e) => setQuery(e.target.value)} />
+      <StfProvider value={stf}>
+        {field.args.map((arg) => (
+          <Variable key={arg.name} name={arg.name} />
+        ))}
+      </StfProvider>
+      <button disabled={isSending} onClick={send}>
+        Send
+      </button>
+      {response?.result.type === 'response' && <pre>{response.result.body}</pre>}
+    </details>
+  );
+}
+
+function Variable({ name }: { name: string }) {
+  const [value, setValue] = useFieldValue(['variables', name]);
+
+  return (
+    <input
+      aria-label={name}
+      value={String(value ?? '')}
+      onChange={(e) => setValue(e.target.value)}
+    />
+  );
+}
+```
+
+サブスクリプションでは、`send()` と `response` の代わりに `subscribe()`、`stop()`、`status`、`log` を使用します。
+
+<auto-type-table path="props.ts" name="Playground" />
+
+| エクスポート                                | 役割                                                                           |
+| ------------------------------------- | ---------------------------------------------------------------------------- |
+| `useRequestValues()`                  | `<StfProvider />` 配下のフォームが送信する `variables` と `headers` を返します。フォームの編集内容に追従します |
+| `executeGraphQL(request)`             | クエリまたはミューテーションを HTTP POST で送信します。デフォルトの `fetcher` です                         |
+| `subscribeGraphQL(request, handlers)` | サブスクリプションを開始し、停止用の関数を返します                                                    |
+| `inputTypeToJsonSchema(type)`         | 入力型の JSON Schema を返します。変数のフォームに使用します                                         |
+
+`subscribeGraphQL()` は、[`subscriptionUrl`](/docs/integrations/graphql/api-page#subscriptions) と同様に、URL スキームに応じてプロトコルを選択します。
+
+```ts
+import { subscribeGraphQL } from '@fumadocs/graphql/playground';
+
+const stop = subscribeGraphQL(
+  {
+    url: 'wss://api.example.com/graphql',
+    query: 'subscription { orderUpdated(id: "1") { status } }',
+    headers: {},
+  },
+  {
+    onNext: (result) => console.log(result),
+    onError: (error) => console.error(error.type),
+    onComplete: () => console.log('completed'),
+  },
+);
+
+// 呼び出し後はどのハンドラーも呼ばれません
+stop();
+```
+
+<auto-type-table path="props.ts" name="SubscriptionHandlers" />

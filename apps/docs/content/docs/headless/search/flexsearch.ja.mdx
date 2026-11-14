@@ -1,0 +1,290 @@
+---
+title: FlexSearch
+description: 高速で軽量なドキュメント検索
+---
+
+## セットアップ [#setup]
+
+```npm
+npm install flexsearch
+```
+
+```npm
+npm install @types/flexsearch -D
+```
+
+### ソースから作成する [#from-source]
+
+ソースオブジェクトからサーバーを作成します。
+
+```ts tab="Next.js" title="app/api/search/route.ts"
+import { source } from '@/lib/source';
+import { flexsearchFromSource } from 'fumadocs-core/search/flexsearch';
+
+export const { GET } = flexsearchFromSource(source);
+```
+
+```ts tab="React Router" title="app/routes/search.ts"
+import type { Route } from './+types/search';
+import { flexsearchFromSource } from 'fumadocs-core/search/flexsearch';
+import { source } from '@/lib/source';
+
+const server = flexsearchFromSource(source);
+
+export async function loader({ request }: Route.LoaderArgs) {
+  return server.GET(request);
+}
+```
+
+```ts tab="TanStack Start" title="src/routes/api/search.ts"
+import { createFileRoute } from '@tanstack/react-router';
+import { flexsearchFromSource } from 'fumadocs-core/search/flexsearch';
+import { source } from '@/lib/source';
+
+const server = flexsearchFromSource(source);
+
+export const Route = createFileRoute('/api/search')({
+  server: {
+    handlers: {
+      GET: async ({ request }) => server.GET(request),
+    },
+  },
+});
+```
+
+```ts tab="Waku" title="src/pages/_api/api/search.ts"
+import { source } from '@/lib/source';
+import { flexsearchFromSource } from 'fumadocs-core/search/flexsearch';
+
+export const { GET } = flexsearchFromSource(source);
+```
+
+```ts tab="Astro" title="src/pages/api/search.ts"
+import type { APIRoute } from 'astro';
+import { flexsearchFromSource } from 'fumadocs-core/search/flexsearch';
+import { source } from '@/lib/source';
+
+// リクエストごとにレンダリングするため、アダプターが必要です
+export const prerender = false;
+
+const server = flexsearchFromSource(source);
+
+export const GET: APIRoute = ({ request }) => server.GET(request);
+```
+
+### 検索インデックスから [#from-search-indexes]
+
+検索インデックスからサーバーを作成します。各インデックスには `structuredData` フィールドが必要です。
+
+通常、これはコンテンツソース(例: Fumadocs MDX)から提供されます。[Remark Structure](/docs/headless/mdx/structure) プラグインを使って、Markdown/MDX ドキュメントから抽出することもできます。
+
+`flexsearchFromSource()` の代わりに、これを検索ルートから配信します:
+
+```ts
+import { source } from '@/lib/source';
+import { flexsearch } from 'fumadocs-core/search/flexsearch';
+
+const server = flexsearch({
+  indexes: source.getPages().map((page) => ({
+    title: page.data.title!,
+    description: page.data.description,
+    url: page.url,
+    id: page.url,
+    structuredData: page.data.structuredData,
+  })),
+});
+```
+
+### ドキュメントの検索 [#searching-documents]
+
+ドキュメントは次の方法で検索できます。
+
+* **Fumadocs UI**: 標準でサポートされています。詳しくは[検索 UI](/docs/search/flexsearch)を参照してください。
+* **検索クライアント**:
+
+```ts twoslash
+import { useFetchSearch } from 'fumadocs-core/search/client';
+
+const { search, onSearchChange, isLoading, data } = useFetchSearch();
+```
+
+<auto-type-table type="import(&#x22;fumadocs-core/search/client/fetch&#x22;).FetchOptions" />
+
+## 設定 [#configurations]
+
+### タグフィルター [#tag-filter]
+
+タグで検索結果を絞り込めます。このドキュメントのような複数ドキュメント構成を実装する際に便利です。
+
+```ts
+import { source } from '@/lib/source';
+import { flexsearchFromSource } from 'fumadocs-core/search/flexsearch';
+
+const server = flexsearchFromSource(source, {
+  buildIndex(page) {
+    return {
+      title: page.data.title!,
+      description: page.data.description,
+      url: page.url,
+      id: page.url,
+      structuredData: page.data.structuredData,
+      // page.slugs[0] など、任意の値を指定します [!code ++:2]
+      tag: '<value>',
+    };
+  },
+});
+```
+
+次に、検索クライアントを更新します。
+
+* **Fumadocs UI**: 検索 UI で[タグフィルター](/docs/search/flexsearch#tag-filter)を設定します。
+* **検索クライアント**: `useFetchSearch()` にタグを渡します。
+
+```ts
+import { useFetchSearch } from 'fumadocs-core/search/client';
+
+const { search, onSearchChange, isLoading, data } = useFetchSearch({
+  tag: '<value>', // [!code ++]
+});
+```
+
+### 静的モード [#static-export]
+
+静的サイトに対応するには、検索サーバーの `staticGET` を使用し、ルートを静的ルートにするか、事前レンダリングするようにしてください。
+
+```ts tab="Next.js" title="app/api/search/route.ts"
+import { source } from '@/lib/source';
+import { flexsearchFromSource } from 'fumadocs-core/search/flexsearch';
+
+// 静的にキャッシュ [!code highlight:3]
+export const revalidate = false;
+export const { staticGET: GET } = flexsearchFromSource(source);
+```
+
+```ts tab="React Router" title="app/routes/search.ts"
+// このルートが `react-router.config.ts` でプリレンダリングされるよう設定してください。
+export async function loader() {
+  // [!code highlight]
+  return server.staticGET();
+}
+```
+
+```ts tab="TanStack Start" title="src/routes/api/search.ts"
+import { createFileRoute } from '@tanstack/react-router';
+
+export const Route = createFileRoute('/api/search')({
+  server: {
+    handlers: {
+      // [!code highlight]
+      GET: async () => server.staticGET(),
+    },
+  },
+});
+```
+
+```ts tab="TanStack Start" title="vite.config.ts"
+import { tanstackStart } from '@tanstack/react-start/plugin/vite';
+import { defineConfig } from 'vite';
+
+export default defineConfig({
+  plugins: [
+    tanstackStart({
+      prerender: {
+        enabled: true,
+      },
+      // [!code ++:2] 検索インデックスをプリレンダリングします
+      pages: [{ path: '/api/search' }],
+    }),
+  ],
+});
+```
+
+```ts tab="Waku" title="src/pages/_api/api/search.ts"
+import { source } from '@/lib/source';
+import { flexsearchFromSource } from 'fumadocs-core/search/flexsearch';
+
+// [!code highlight]
+export const { staticGET: GET } = flexsearchFromSource(source);
+
+// 静的にキャッシュ [!code highlight:4]
+export const getConfig = async () => ({
+  render: 'static',
+});
+```
+
+```ts tab="Astro" title="src/pages/api/search.ts"
+import type { APIRoute } from 'astro';
+import { flexsearchFromSource } from 'fumadocs-core/search/flexsearch';
+import { source } from '@/lib/source';
+
+const server = flexsearchFromSource(source);
+
+// デフォルトでプリレンダリングされます [!code highlight]
+export const GET: APIRoute = () => server.staticGET();
+```
+
+> `staticGET` は `flexsearch()` でも利用できます。
+
+続いて、検索クライアントを更新します。
+
+* **Fumadocs UI**: 検索 UI で[静的クライアント](/docs/search/flexsearch#static)を使用します。
+
+* **検索クライアント**: クライアントのアダプターを変更します。
+
+  ```ts
+  import { useFlexsearchStatic } from 'fumadocs-core/search/client/flexsearch-static';
+
+  const { search, onSearchChange, isLoading, data } = useFlexsearchStatic({
+    // 任意: tag と locale を渡す
+    tag,
+  });
+  ```
+
+  <auto-type-table type="import(&#x22;fumadocs-core/search/client/flexsearch-static&#x22;).FlexsearchStaticOptions" />
+
+<Callout type="warn" title="注意">
+  静的検索では、クライアントがエクスポートされた検索インデックスをダウンロードする必要があります。
+  大規模なドキュメントサイトでは、その負荷が大きくなる場合があります。
+
+  そのような場合は、Orama Cloud や Algolia などのクラウドソリューションの利用をおすすめします。
+</Callout>
+
+## 国際化 [#internationalization]
+
+Flexsearch は、英語以外の言語でも特別な設定なしで動作しますが、ロケールごとに Flexsearch のオプションを指定すると、検索結果の精度を高められます。
+
+```ts tab="From Source"
+import { source } from '@/lib/source';
+import { flexsearchFromSource } from 'fumadocs-core/search/flexsearch';
+import { Charset } from 'flexsearch';
+
+const server = flexsearchFromSource(source, {
+  localeMap: {
+    // [locale]: Flexsearch のオプション [!code ++:2]
+    jp: { encoder: Charset.CJK },
+  },
+});
+```
+
+```ts tab="From Search Indexes"
+import { source } from '@/lib/source';
+import { flexsearchI18n } from 'fumadocs-core/search/flexsearch';
+import { i18n } from '@/lib/i18n';
+import { Charset } from 'flexsearch';
+
+const server = flexsearchI18n({
+  i18n, // [!code ++]
+  localeMap: {
+    // [locale]: Flexsearch のオプション [!code ++:2]
+    jp: { encoder: Charset.CJK },
+  },
+  indexes: source.getPages().map((page) => ({
+    title: page.data.title!,
+    description: page.data.description,
+    structuredData: page.data.structuredData,
+    id: page.url,
+    url: page.url,
+    locale: page.locale!,
+  })),
+});
+```

@@ -1,0 +1,143 @@
+---
+title: 静的ビルド
+description: Fumadocs で静的サイトを出力します。
+---
+
+import { frameworkName } from '@/lib/framework';
+
+## セットアップ [#setup]
+
+<show when={props.framework !== 'astro'}>
+  Fumadocs はデフォルトでサーバーファーストのアプローチを採用しているため、稼働中のサーバーが必要です。
+  {frameworkName(props.framework)} を設定すれば、静的ビルドを出力できます。
+</show>
+
+<show when={props.framework === 'astro'}>
+  Astro はデフォルトで静的サイトを出力します(`output: 'static'`)。ドキュメントのルートには `export const prerender = true` が設定されているため、サーバー出力用のアダプターを追加しても静的なまま維持されます。
+</show>
+
+静的ビルドにはサーバーが存在しないため、次の機能は動作しません。
+
+* 検索サーバー。代わりに[静的検索](#search)を使用してください。
+* [AIに質問](/docs/integrations/llms#ask-ai)。チャットルートから AI モデルを呼び出す必要があるためです。
+* [MCP サーバー](/docs/integrations/llms#mcp-server)。
+
+<show when={props.framework === 'next'}>
+  また、`proxy.ts` も実行されないため、ロケールへの [i18n リダイレクト](/docs/internationalization#middleware)は行われず、[`Accept` ヘッダーに応じた Markdown](/docs/integrations/llms#accept) の配信も行われません。
+</show>
+
+<show when={props.framework === 'react-router' || props.framework === 'tanstack-start' || props.framework === 'waku'}>
+  また、ミドルウェアも実行されないため、[`Accept` ヘッダーに応じた Markdown](/docs/integrations/llms#accept) の配信も行われません。
+</show>
+
+### 検索 [step] [#search]
+
+#### 組み込み検索 [#built-in-search]
+
+1. [検索サーバーを設定します](/docs/headless/search/orama#static-export)。
+2. [検索 UI/クライアントを設定します](/docs/search/orama#static)。
+
+設定が完了すると、検索インデックスがアプリに静的に保存され、検索処理はブラウザ側で行われるようになります。
+
+#### クラウドソリューション [#cloud-solutions]
+
+検索機能はリモートサーバーで動作するため、静的エクスポートでも追加の設定なしで利用できます。
+
+### デプロイ [step] [#deployment]
+
+<show when={props.framework === 'next'}>
+  静的エクスポートを有効にすると、Node.js サーバーなしで動作する静的 HTML サイトを出力できます。
+
+  ```js title="next.config.mjs"
+  /**
+   * @type {import('next').NextConfig}
+   */
+  const nextConfig = {
+    output: 'export',
+
+    // 任意: リンクを `/me` -> `/me/` に変更し、`/me.html` ではなく `/me/index.html` として出力します
+    // trailingSlash: true,
+
+    // 任意: `/me` -> `/me/` への自動リダイレクトを無効にし、`href` をそのまま保持します
+    // skipTrailingSlashRedirect: true,
+  };
+  ```
+
+  制限事項と詳細については、[Next.js のドキュメント](https://nextjs.org/docs/app/guides/static-exports)を参照してください。
+</show>
+
+<show when={props.framework === 'react-router'}>
+  SPA モードでは、`build/client` ディレクトリを静的サイトとして配信できます。
+
+  <Callout type="warning" title="プリレンダリングを忘れずに">
+    SPA モードでは、サーバーサイドのローダーをすべてプリレンダリングする必要があります。
+
+    詳細については、[React Router のドキュメント](https://reactrouter.com/how-to/spa)を参照してください。
+  </Callout>
+
+  ```ts title="react-router.config.ts"
+  import type { Config } from '@react-router/dev/config';
+  import { glob } from 'node:fs/promises';
+  import { createGetUrl, getSlugs } from 'fumadocs-core/source';
+
+  const getUrl = createGetUrl('/docs');
+
+  export default {
+    // SSR を無効化 [!code highlight:2]
+    ssr: false,
+
+    // [!code ++:9]
+    async prerender({ getStaticPaths }) {
+      const paths: string[] = [...getStaticPaths()];
+
+      for await (const entry of glob('**/*.{md,mdx}', { cwd: 'content/docs' })) {
+        paths.push(getUrl(getSlugs(entry)));
+      }
+
+      return paths;
+    },
+  } satisfies Config;
+  ```
+</show>
+
+<show when={props.framework === 'tanstack-start'}>
+  SPA モードとプリレンダリングを設定します。詳細については、[SPA Mode](https://tanstack.com/start/latest/docs/framework/react/guide/spa-mode) を参照してください。
+
+  ```ts title="vite.config.ts"
+  import { tanstackStart } from '@tanstack/react-start/plugin/vite';
+  import { defineConfig } from 'vite';
+
+  export default defineConfig({
+    plugins: [
+      // ...その他のプラグイン
+      tanstackStart({
+        spa: {
+          enabled: true,
+          // TanStack Router がページを自動的にクロールします [!code ++:4]
+          prerender: {
+            enabled: true,
+          },
+          // UI 上に表示されない隠れたパスがある場合は、明示的に追加できます。 [!code highlight:6]
+          pages: [
+            {
+              path: '/docs/test',
+            },
+          ],
+        },
+      }),
+    ],
+  });
+  ```
+</show>
+
+<show when={props.framework === 'waku'}>
+  すべてのページが `static` レンダリングモードで設定されていれば、Waku はサイトを静的に配信できます。
+
+  詳細については、[Deployment](https://waku.gg/#deployment) を参照してください。
+</show>
+
+<show when={props.framework === 'astro'}>
+  検索 API は `staticGET()` を使用しているため、静的出力にも含まれます。
+
+  詳細については、[Astro Deployment](https://docs.astro.build/en/guides/deploy/) を参照してください。
+</show>

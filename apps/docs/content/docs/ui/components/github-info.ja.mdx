@@ -1,0 +1,50 @@
+---
+title: GitHub 情報
+description: GitHub リポジトリの情報を表示します
+preview: githubInfo
+---
+
+<Installation name="github-info" />
+
+## 使い方 [#usage]
+
+```tsx
+import { GithubInfo } from 'fumadocs-ui/components/github-info';
+
+export function MyComp() {
+  return (
+    <GithubInfo
+      owner="fuma-nama"
+      repo="fumadocs"
+      // 自分の GitHub アクセストークン(省略可)
+      token={process.env.GITHUB_TOKEN}
+    />
+  );
+}
+```
+
+`links` オプションを使用して、Docs レイアウトに追加することをおすすめします。
+
+```tsx title="app/docs/layout.tsx"
+import { DocsLayout, type DocsLayoutProps } from 'fumadocs-ui/layouts/notebook';
+import { baseOptions } from '@/lib/layout.shared';
+import { source } from '@/lib/source';
+import { GithubInfo } from 'fumadocs-ui/components/github-info';
+
+function docsOptions(): DocsLayoutProps {
+  return {
+    ...baseOptions(),
+    tree: source.getPageTree(),
+    links: [
+      {
+        type: 'custom',
+        children: <GithubInfo owner="fuma-nama" repo="fumadocs" />,
+      },
+    ],
+  };
+}
+
+export default function Layout({ children }: { children: React.ReactNode }) {
+  return <DocsLayout {...docsOptions()}>{children}</DocsLayout>;
+}
+```

@@ -1,0 +1,67 @@
+---
+title: Remark Files
+description: コードブロックからファイルを生成します。
+---
+
+## はじめに [#introduction]
+
+このプラグインは、次のようなコードブロックを受け取ります。
+
+````md
+```files
+project
+├── src
+│   ├── index.js
+│   └── utils
+│       └── helper.js
+├── package.json
+```
+````
+
+これを次のように変換します。
+
+```mdx
+<Files>
+  <Folder name="project" defaultOpen>
+    <Folder name="src" defaultOpen>
+      <File name="index.js" />
+      <Folder name="utils" defaultOpen>
+        <File name="helper.js" />
+      </Folder>
+    </Folder>
+    <File name="package.json" />
+  </Folder>
+</Files>
+```
+
+## セットアップ [#setup]
+
+Remark Files は remark プラグインです。設定ファイルに追加してください。
+
+```ts tab="unified" title="source.config.ts"
+import { remarkMdxFiles } from 'fumadocs-core/mdx-plugins';
+import { defineConfig } from 'fumadocs-mdx/config';
+
+export default defineConfig({
+  mdxOptions: {
+    remarkPlugins: [remarkMdxFiles],
+  },
+});
+```
+
+```ts tab="Sätteri" title="source.config.ts"
+import { remarkMdxFiles } from '@fumadocs/satteri/remark-mdx-files';
+import { defineConfig, defineDocs } from 'fumadocs-mdx/config';
+
+export const docs = defineDocs({
+  docs: { compiler: 'satteri' },
+});
+
+export default defineConfig({
+  satteriOptions: {
+    mdastPlugins: [remarkMdxFiles()],
+  },
+});
+```
+
+また、MDX コンポーネント `<Files />`、`<Folder />`、`<File />` が定義済みであることを確認してください。

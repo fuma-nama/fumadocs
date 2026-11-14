@@ -1,0 +1,98 @@
+---
+title: ナビゲーション
+description: サイドバーのページを整理したり、外部リソースへのリンクを追加したり、ドキュメントを複数のバージョンで公開したりする方法を説明します。
+---
+
+import { LinkIcon, PanelLeftDashed } from 'lucide-react';
+
+## 概要 [#overview]
+
+**Fumadocs UI** には、コンテンツを表示するためのさまざまなレイアウトが用意されています。ナビゲーションの設定はレイアウトで指定できます。
+
+<Cards>
+  <Card icon={<LinkIcon />} title="レイアウトのリンク" href="/docs/ui/layouts/links">
+    レイアウトに **ナビゲーションリンク** を表示します。
+
+    ショーケースや料金ページなど、よく使うリソースへのリンクを置くのに便利です。
+  </Card>
+
+  <Card icon={<PanelLeftDashed />} title="サイドバーの項目" href="/docs/ui/layouts/docs#sidebar-items">
+    サイドバーには、すべてのドキュメントページへのリンクがレンダリングされます。
+
+    内部的には、ナビゲーション構造の表現に **ページツリー** が使われています。
+  </Card>
+</Cards>
+
+## バージョン管理 [#versioning]
+
+古いリリースのドキュメントが必要な読者のために、複数のバージョンを公開しておくことができます。バージョンを同じサイトで共有するか、バージョンごとに個別にデプロイするかを選択してください。
+
+| 方法                             | 適したケース                                  |
+| ------------------------------ | --------------------------------------- |
+| [ルートタイプ](#root-type)           | ドキュメントの一部だけをバージョン管理し、各バージョンを同じサイト内に置く場合 |
+| [完全なバージョン管理](#full-versioning) | Web サイト全体をバージョン管理し、バージョンごとに個別にデプロイする場合  |
+
+### ルートタイプ [#root-type]
+
+バージョンごとにフォルダーを作成し、`meta.json` でそれぞれを同じタイプのルートフォルダーとして指定します。
+
+<Files>
+  <Folder name="content/docs" defaultOpen>
+    <Folder name="v1" defaultOpen>
+      <File name="meta.json" />
+
+      <File name="index.mdx" />
+
+      <File name="getting-started.mdx" />
+
+      <File name="legacy-api.mdx" />
+    </Folder>
+
+    <Folder name="v2" defaultOpen>
+      <File name="meta.json" />
+
+      <File name="index.mdx" />
+
+      <File name="getting-started.mdx" />
+    </Folder>
+  </Folder>
+</Files>
+
+```json tab="v1/meta.json"
+{
+  "title": "1.0.0",
+  "root": "version"
+}
+```
+
+```json tab="v2/meta.json"
+{
+  "title": "2.0.0",
+  "root": "version"
+}
+```
+
+サイドバーには開いているバージョンのコンテンツのみが表示され、Docs レイアウトにはバージョンを切り替えるためのドロップダウンがレンダリングされます。各バージョンは `title` で表示されます。
+切り替えても現在の位置は保持され、別のバージョンの同じページに移動します。そのページが存在しない場合は、そのバージョンのインデックスページに移動します。
+
+| ページ                        | 2.0.0 に切り替えた場合             |
+| -------------------------- | -------------------------- |
+| `/docs/v1/getting-started` | `/docs/v2/getting-started` |
+| `/docs/v1/legacy-api`      | `/docs/v2`(インデックスページ)      |
+
+<Callout title="補足">
+  タイプ名(`"version"`)には任意の値を指定できます。この値はタイプを識別するためだけに使われ、同じ親の下にある同じ
+  タイプのルートフォルダー同士は、互いに切り替えることができます。
+</Callout>
+
+### 完全なバージョン管理 [#full-versioning]
+
+https://v14.fumadocs.dev (Fumadocs v14) や https://fumadocs.dev (最新の Fumadocs) のように、Web サイト全体をバージョン管理したい場合もあります。
+
+ドキュメントのバージョンごとに Git ブランチを作成し (例: `v2`)、`v2.my-site.com` のような別のサブドメインに独立したアプリとしてデプロイできます。
+
+必要に応じて、ドキュメントから他のバージョンへのリンクを設置することもできます。
+この方式には、部分的なバージョン管理と比べて次のような利点があります。
+
+* メンテナンスが容易: 開発を進めたり依存関係をアップグレードしたりしても、古いドキュメントやブランチには影響しません。
+* 一貫性の向上: ドキュメント自体だけでなく、ランディングページ (およびその他のページ) もバージョン管理されます。

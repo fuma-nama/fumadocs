@@ -1,0 +1,245 @@
+---
+title: アクセス制御
+description: コンテンツへのアクセスを制限します。
+---
+
+import { frameworkName } from '@/lib/framework';
+
+## 概要 [#overview]
+
+Fumadocs は柔軟に設計されているため、アクセス制御も簡単に実装できます。
+
+## ローダー API [#loader-api]
+
+[`loader()`](/docs/headless/source-api) API を使用している場合は、ローダーを必要に応じて作成し、コンテンツソースのファイルをフィルタリングすることで、アクセスできるコンテンツを制限できます。
+
+<show when={props.framework !== 'astro'}>
+  たとえば、Fumadocs MDX を使った次の設定では、フロントマターに `permission: public` が指定された MDX ファイルのみを表示します。
+
+  ```ts title="lib/source.ts"
+  import { docs } from 'collections/server';
+  import { loader, update } from 'fumadocs-core/source';
+
+  const filteredSource = update(docs.toFumadocsSource())
+    .files((files) =>
+      files.filter((file) => {
+        // meta ファイル（例: `meta.json`）は残す
+        if (file.type === 'meta') return true;
+
+        // ファイルデータにアクセス（型安全）
+        return file.data.permission === 'public';
+      }),
+    )
+    .build();
+
+  export const source = loader(filteredSource, {
+    baseUrl: '/docs',
+  });
+  ```
+
+  より複雑な構成の場合は、`source` をファクトリー関数にすることもできます。
+
+  ```ts title="lib/source.ts"
+  import { docs } from 'collections/server';
+  import { loader, update } from 'fumadocs-core/source';
+
+  // キャッシュなし。実際のユースケースではインメモリでキャッシュすることをおすすめします。
+  export function createSource(permission: 'public' | 'admin') {
+    const filteredSource = update(docs.toFumadocsSource())
+      .files((files) =>
+        files.filter((file) => {
+          if (file.type === 'meta') return true;
+
+          return file.data.permission === permission;
+        }),
+      )
+      .build();
+
+    return loader(filteredSource, {
+      baseUrl: '/docs',
+    });
+  }
+  ```
+</show>
+
+<show when={props.framework === 'astro'}>
+  たとえば、次の設定では、フロントマターに `permission: public` が指定されたページのみを表示します。
+
+  ```ts title="src/lib/source.ts"
+  import { getCollection } from 'astro:content';
+  import { loader, update } from 'fumadocs-core/source';
+  import { toFumadocsSource } from '@fumadocs/astro/source';
+
+  const filteredSource = update(
+    toFumadocsSource(await getCollection('docs'), await getCollection('meta')),
+  )
+    .files((files) =>
+      files.filter((file) => {
+        // meta ファイル（例: `meta.json`）は残す
+        if (file.type === 'meta') return true;
+
+        return file.data.permission === 'public';
+      }),
+    )
+    .build();
+
+  export const source = loader(filteredSource, {
+    baseUrl: '/docs',
+  });
+  ```
+
+  より複雑な構成の場合は、`source` をファクトリー関数にすることもできます。
+
+  ```ts title="src/lib/source.ts"
+  import { getCollection } from 'astro:content';
+  import { loader, update } from 'fumadocs-core/source';
+  import { toFumadocsSource } from '@fumadocs/astro/source';
+
+  const pages = await getCollection('docs');
+  const metas = await getCollection('meta');
+
+  // キャッシュなし。実際のユースケースではインメモリでキャッシュすることをおすすめします。
+  export function createSource(permission: 'public' | 'admin') {
+    const filteredSource = update(toFumadocsSource(pages, metas))
+      .files((files) =>
+        files.filter((file) => {
+          if (file.type === 'meta') return true;
+
+          return file.data.permission === permission;
+        }),
+      )
+      .build();
+
+    return loader(filteredSource, {
+      baseUrl: '/docs',
+    });
+  }
+  ```
+</show>
+
+次に、ユーザーごとにソースを作成します。
+
+```ts
+// [!code --]
+import { source } from '@/lib/source';
+// [!code ++:4]
+import { createSource } from '@/lib/source';
+
+const user = await getUser();
+const source = createSource(user.permission);
+
+const page = source.getPage(params.slugs);
+```
+
+### 利点 [#advantages]
+
+このアプローチの特長は、レンダリング段階やビルド時ではなく、**入力の段階でアクセスを制限する**点です。
+
+これにより、柔軟性を損なうことなく、保護されたコンテンツを完全に除外できます。
+
+## カスタム実装 [#custom-implementation]
+
+ローダー API を使わない場合は、ルートやミドルウェアなど、{frameworkName(props.framework)} 側でアクセス制御を実装します。
+
+たとえば、特定のページへのアクセスを制限するには次のようにします。
+
+<show when={props.framework === 'next'}>
+  ```tsx title="app/docs/[[...slug]]/page.tsx"
+  import { notFound } from 'next/navigation';
+  import { source } from '@/lib/source';
+
+  export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
+    const params = await props.params;
+    const user = await getUser();
+    const page = source.getPage(params.slug);
+
+    if (!page) notFound();
+    if (page.data.permission !== user.permission) notFound();
+
+    // ページをレンダリング...
+  }
+  ```
+</show>
+
+<show when={props.framework === 'react-router'}>
+  ```tsx title="app/routes/docs.tsx"
+  import type { Route } from './+types/docs';
+  import { source } from '@/lib/source';
+
+  export async function loader({ params, request }: Route.LoaderArgs) {
+    const user = await getUser(request);
+    const page = source.getPage(params['*'].split('/').filter((v) => v.length > 0));
+
+    if (!page) throw new Response('Not found', { status: 404 });
+    if (page.data.permission !== user.permission) throw new Response('Not found', { status: 404 });
+
+    // ページデータを返す...
+  }
+  ```
+</show>
+
+<show when={props.framework === 'tanstack-start'}>
+  ```tsx title="src/routes/docs/$.tsx"
+  import { notFound } from '@tanstack/react-router';
+  import { createServerFn } from '@tanstack/react-start';
+  import { source } from '@/lib/source';
+
+  const serverLoader = createServerFn({ method: 'GET' })
+    .validator((slugs: string[]) => slugs)
+    .handler(async ({ data: slugs }) => {
+      const user = await getUser();
+      const page = source.getPage(slugs);
+
+      if (!page) throw notFound();
+      if (page.data.permission !== user.permission) throw notFound();
+
+      // ページデータを返す...
+    });
+  ```
+</show>
+
+<show when={props.framework === 'waku'}>
+  ```tsx title="src/pages/docs/[...slugs].tsx"
+  import type { PageProps } from 'waku/router';
+  import { unstable_notFound } from 'waku/router/server';
+  import { source } from '@/lib/source';
+
+  export default async function Page({ slugs }: PageProps<'/docs/[...slugs]'>) {
+    const user = await getUser();
+    const page = source.getPage(slugs);
+
+    if (!page) unstable_notFound();
+    if (page.data.permission !== user.permission) unstable_notFound();
+
+    // ページをレンダリング...
+  }
+
+  // リクエストごとにレンダリング（静的ページはユーザー情報なしでビルドされるため）
+  export const getConfig = async () => ({ render: 'dynamic' }) as const;
+  ```
+</show>
+
+<show when={props.framework === 'astro'}>
+  ```astro title="src/pages/docs/[...slug].astro"
+  ---
+  import { source } from '@/lib/source';
+
+  // リクエストごとにレンダリング（アダプターが必要）
+  export const prerender = false;
+
+  const slugs = Astro.params.slug?.split('/').filter((v) => v.length > 0) ?? [];
+  const user = await getUser(Astro.request);
+  const page = source.getPage(slugs);
+
+  if (!page || page.data.permission !== user.permission) {
+    return Astro.rewrite('/404');
+  }
+  ---
+
+  <!-- ページをレンダリング... -->
+  ```
+</show>
+
+なお、ページツリー (サイドバーの項目) 、検索、Markdown ルートなどの細かな部分は、ご自身で管理する必要があります。
+
+この方法は最も柔軟性が高い反面、Fumadocs はアクセス制御に関与しません。セットアップにも手間がかかるため、実装する際は {frameworkName(props.framework)} のドキュメントを参照してください。

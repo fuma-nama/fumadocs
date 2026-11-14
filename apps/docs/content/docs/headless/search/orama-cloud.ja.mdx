@@ -1,0 +1,88 @@
+---
+title: Orama Cloud
+description: Orama Cloud との連携
+---
+
+まず、Orama Cloud でアカウントを作成してください。
+
+## REST API [#rest-api]
+
+REST API 連携では、ドキュメント側からインデックスをアップロードする必要があります。
+
+1. Orama Cloud のダッシュボードで、**REST API** データソースを使用する新しいプロジェクトを作成します。
+
+   認証情報は `.env.local` などに保存します (`NEXT_PUBLIC_` は、Vite 系フレームワークでは `VITE_`、Astro では `PUBLIC_` になります) 。
+
+   ```dotenv
+   NEXT_PUBLIC_ORAMA_DATASOURCE_ID="Rest API data source ID"
+   NEXT_PUBLIC_ORAMA_PROJECT_ID="project ID"
+   NEXT_PUBLIC_ORAMA_API_KEY="public API key"
+
+   ORAMA_PRIVATE_API_KEY="private API key"
+   ```
+
+2. `static.json` ルートを事前レンダリングしてビルド時に検索インデックスをエクスポートし、ビルドのたびにスクリプトで Orama Cloud に同期します。
+
+   <feature>search/orama-cloud</feature>
+
+   `build` スクリプトはビルドのたびに同期を行うため、デプロイ先のプラットフォームにも同じ環境変数を設定してください。
+
+### 検索クライアント [#search-client]
+
+クライアント側でドキュメントを検索するには、次の方法を検討してください。
+
+* [Fumadocs UI の検索ダイアログ](/docs/search/orama-cloud)を使用する。
+
+* Fumadocs の組み込みフックを使用して、独自の検索 UI を作成する。
+
+  ```ts
+  import { useOramaCloudSearch } from 'fumadocs-core/search/client';
+  import { OramaCloud } from '@orama/core';
+
+  const orama = new OramaCloud({
+    projectId: process.env.NEXT_PUBLIC_ORAMA_PROJECT_ID,
+    apiKey: process.env.NEXT_PUBLIC_ORAMA_API_KEY,
+  });
+
+  const params = {
+    // 任意の検索パラメーター
+  };
+
+  const { search, onSearchChange, isLoading, data } = useOramaCloudSearch({
+    client: orama,
+    params,
+  });
+  ```
+
+* Orama の検索クライアントを直接使用する。
+
+## Web Crawler [#web-crawler]
+
+1. ダッシュボードで Crawler データソースを作成し、「Documentation」プリセットを使って適切に設定してください。
+2. ダッシュボードから認証情報をコピーしてください。
+
+### 検索クライアント [#search-client-1]
+
+REST API 連携の場合と同じですが、`index` は必ず `crawler` に設定してください。
+
+```ts
+import { useOramaCloudSearch } from 'fumadocs-core/search/client';
+import { OramaCloud } from '@orama/core';
+
+const orama = new OramaCloud({
+  projectId: '<project id>',
+  apiKey: '<read only api key>',
+});
+
+const params = {
+  // 検索パラメータ(任意)
+};
+
+const { search, onSearchChange, isLoading, data } = useOramaCloudSearch({
+  index: 'crawler',
+  client: orama,
+  params,
+});
+```
+
+Fumadocs UI でも同様です。

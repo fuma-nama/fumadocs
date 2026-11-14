@@ -1,0 +1,31 @@
+---
+title: コレクションへのアクセス
+description: エントリーファイルからコレクションの出力にアクセスします。
+icon: FileUp
+---
+
+## 概要 [#overview]
+
+設定ファイルでコレクションを定義すると、コレクションのエントリーは、アプリからアクセスできる JavaScript ファイルにコンパイルされます。
+
+コンパイル自体は Fumadocs MDX のバンドラー/ランタイムプラグインが行いますが、それとは別に、コレクションの出力にアクセスするための**エントリーファイル**も生成されます。
+
+コレクションをアプリのモジュール内で定義したい場合は、[Macro API](/docs/mdx/macro) を参照してください。
+
+### エントリーファイル [#entry-files]
+
+コレクションの出力は出力ディレクトリ配下に生成され、エントリーファイルからアクセスできます。
+
+<Files>
+  <Folder name=".source" defaultOpen>
+    <File name="server.ts" />
+
+    <File name="browser.ts" />
+
+    <File name="dynamic.ts" />
+  </Folder>
+</Files>
+
+出力にアクセスする方法の一覧は、以下を参照してください。
+
+<DocsCategory />

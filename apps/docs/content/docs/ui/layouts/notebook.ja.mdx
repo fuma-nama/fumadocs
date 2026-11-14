@@ -1,0 +1,103 @@
+---
+title: Notebook レイアウト
+description: Docs レイアウトのコンパクト版
+---
+
+import { notebook } from './layouts.story';
+
+[`<DocsLayout />`](/docs/ui/layouts/docs) のコンパクト版です。
+
+<notebook.WithControl />
+
+<Customization />
+
+## 使い方 [#usage]
+
+`fumadocs-ui/layouts/notebook` を使用して Notebook レイアウトを有効にします。
+
+```tsx title="layout.tsx"
+import { DocsLayout } from 'fumadocs-ui/layouts/notebook'; // [!code highlight]
+import { baseOptions } from '@/lib/layout.shared';
+import { source } from '@/lib/source';
+import type { ReactNode } from 'react';
+
+export default function Layout({ children }: { children: ReactNode }) {
+  return (
+    <DocsLayout {...baseOptions()} tree={source.getPageTree()}>
+      {children}
+    </DocsLayout>
+  );
+}
+```
+
+ページの import も忘れずに更新してください。
+
+```tsx title="page.tsx"
+import { ... } from 'fumadocs-ui/layouts/docs/page'; // [!code --]
+import { ... } from 'fumadocs-ui/layouts/notebook/page'; // [!code ++]
+```
+
+## 設定 [#configurations]
+
+オプションは [Docs レイアウト](/docs/ui/layouts/docs) から継承されますが、いくつか違いがあります。
+
+* サイドバーやナビゲーションバーは置き換えられません。Notebook レイアウトは、デフォルトのレイアウトよりも構成が固定されています。
+* 追加のオプションがあります(以下を参照)。
+
+### タブモード [#tab-mode]
+
+[レイアウトタブ](/docs/ui/layouts/docs#layout-tabs)のスタイルを設定します。レイアウトタブの追加方法については、リンク先のドキュメントを参照してください。
+
+![Notebook](/docs/notebook-tab-mode.png)
+
+```tsx title="layout.tsx"
+import { DocsLayout } from 'fumadocs-ui/layouts/notebook';
+import { baseOptions } from '@/lib/layout.shared';
+import { source } from '@/lib/source';
+import type { ReactNode } from 'react';
+
+export default function Layout({ children }: { children: ReactNode }) {
+  return (
+    <DocsLayout
+      {...baseOptions()}
+      tabMode="navbar" // [!code ++]
+      tree={source.getPageTree()}
+    >
+      {children}
+    </DocsLayout>
+  );
+}
+```
+
+### ナビゲーションモード [#nav-mode]
+
+ナビゲーションバーのスタイルを設定します。
+
+以下は、[タブモード](#tab-mode)を `navbar`、ナビゲーションモードを `top` にした場合の例です。
+
+![Notebook](/docs/notebook-nav-mode.png)
+
+```tsx title="layout.tsx"
+import { DocsLayout } from 'fumadocs-ui/layouts/notebook';
+import { baseOptions } from '@/lib/layout.shared';
+import { source } from '@/lib/source';
+import type { ReactNode } from 'react';
+
+export default function Layout({ children }: { children: ReactNode }) {
+  const { nav, ...base } = baseOptions();
+
+  return (
+    <DocsLayout
+      {...base}
+      nav={{ ...nav, mode: 'top' }} // [!code ++]
+      tree={source.getPageTree()}
+    >
+      {children}
+    </DocsLayout>
+  );
+}
+```
+
+### AI チャット [#ai-chat]
+
+[Docs レイアウト](/docs/ui/layouts/docs#ai-chat)と同じです。

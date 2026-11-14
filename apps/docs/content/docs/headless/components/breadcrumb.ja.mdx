@@ -1,0 +1,68 @@
+---
+title: パンくずリスト
+description: 画面上部に表示されるナビゲーションコンポーネント
+---
+
+ドキュメントにパンくずリストを実装するためのフックです。指定されたページツリーをもとに、ページのパンくずリストの項目を返します。
+
+> フォルダーにインデックスページがある場合は、そのページが項目として使用されます。
+
+## 使い方 [#usage]
+
+`useBreadcrumb` フックがエクスポートされています。
+
+```ts twoslash
+declare const tree: any;
+// ---cut---
+import { useBreadcrumb } from 'fumadocs-core/breadcrumb';
+// または、お使いの React フレームワークが提供するフック
+import { usePathname } from 'fumadocs-core/framework';
+
+const pathname = usePathname();
+const items = useBreadcrumb(pathname, tree);
+//    ^?
+```
+
+### 例 [#example]
+
+スタイルを適用した例です。Fumadocs の `usePathname()` と `Link` は、各フレームワークの[フレームワークプロバイダー](/docs/headless#installation)を使用することで、どのフレームワークでも動作します。
+
+```tsx
+'use client';
+import { usePathname } from 'fumadocs-core/framework';
+import { useBreadcrumb } from 'fumadocs-core/breadcrumb';
+import type { PageTree } from 'fumadocs-core/page-tree';
+import { Fragment } from 'react';
+import { ChevronRight } from 'lucide-react';
+import Link from 'fumadocs-core/link';
+
+export function Breadcrumb({ tree }: { tree: PageTree.Root }) {
+  const pathname = usePathname();
+  const items = useBreadcrumb(pathname, tree);
+
+  if (items.length === 0) return null;
+
+  return (
+    <div className="-mb-3 flex flex-row items-center gap-1 text-sm font-medium text-fd-muted-foreground">
+      {items.map((item, i) => (
+        <Fragment key={i}>
+          {i !== 0 && <ChevronRight className="size-4 shrink-0 rtl:rotate-180" />}
+          {item.url ? (
+            <Link href={item.url} className="truncate hover:text-fd-accent-foreground">
+              {item.name}
+            </Link>
+          ) : (
+            <span className="truncate">{item.name}</span>
+          )}
+        </Fragment>
+      ))}
+    </div>
+  );
+}
+```
+
+サーバーコンポーネント内で `tree` prop にページツリーを渡すと使用できます。
+
+### パンくずリストの項目 [#breadcrumb-item]
+
+<auto-type-table path="../props.ts" name="BreadcrumbItem" />

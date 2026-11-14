@@ -1,0 +1,48 @@
+---
+title: ZBSearch(デフォルト)
+description: ZBSearch を基盤とするデフォルトの検索エンジンです。
+---
+
+## 概要 [#overview]
+
+Fumadocs では、[ZBSearch 検索エンジン](/docs/headless/search/orama)が標準で設定されています。
+
+検索は、サーバー上で動作する API エンドポイント経由で行われます。静的サイトの場合は、静的にキャッシュされた JSON ファイルを利用して検索します。
+
+## セットアップ [#setup]
+
+検索ダイアログを作成します。
+
+<Tabs items={['fetch (default)', 'static']}>
+  <Tab>
+    <show when={props.framework !== 'astro'}>
+      デフォルトの検索ダイアログはこのクライアントを使用しています。ダイアログをカスタマイズするには、次のように作り直してください。
+    </show>
+
+    <show when={props.framework === 'astro'}>
+      検索ルートをリクエストごとにレンダリングする場合に使用します。この場合はアダプターが必要です。
+    </show>
+
+    <include meta="title=&#x22;components/search.tsx&#x22;">fetch.tsx</include>
+  </Tab>
+
+  <Tab id="static">
+    <show when={props.framework !== 'astro'}>
+      静的サイトでは、検索サーバーで[静的モード](/docs/headless/search/orama#static-export)を設定したうえで、`static` クライアントを使用してください。
+    </show>
+
+    <show when={props.framework === 'astro'}>
+      Astro のセットアップでは、デフォルトで `static` クライアントを使用し、検索サーバー側は[静的モード](/docs/headless/search/orama#static-export)で動作します。
+    </show>
+
+    <include meta="title=&#x22;components/search.tsx&#x22;">./static.tsx</include>
+  </Tab>
+</Tabs>
+
+<include>.shared.ja.mdx</include>
+
+### タグフィルター [#tag-filter]
+
+必要に応じて、検索結果をタグで絞り込むためのUIを追加できます。検索サーバーで[タグフィルター](/docs/headless/search/orama#tag-filter)を設定したうえで、以下を追加してください。
+
+<include>.tag-filter.ja.mdx</include>

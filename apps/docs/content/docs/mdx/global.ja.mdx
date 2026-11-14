@@ -1,0 +1,70 @@
+---
+title: グローバルオプション
+description: Fumadocs MDX のカスタマイズ
+---
+
+すべてのコレクションに適用される MDX プラグインなど、Fumadocs MDX のグローバルオプションは、プロジェクトルートの `source.config.ts` に記述します。このファイルは省略可能で、`lib/source.ts` で [Macro API](/docs/mdx/macro) を使って定義したコレクションでも機能します。
+
+## グローバルオプション [#global-options]
+
+```ts title="source.config.ts"
+import { defineConfig } from 'fumadocs-mdx/config';
+
+export default defineConfig({
+  // グローバルオプション
+});
+```
+
+<auto-type-table path="./props.ts" name="GlobalConfig" />
+
+### MDX オプション [#mdx-options]
+
+コレクションの[デフォルトプリセット](/docs/mdx/mdx)をカスタマイズします。`mdxOptions` は unified でコンパイルされるコレクションに、`satteriOptions` は `compiler: 'satteri'` を指定したコレクションに適用されます。
+
+```ts tab="unified" title="source.config.ts"
+import { defineConfig } from 'fumadocs-mdx/config';
+import { myPlugin } from './remark-plugin';
+
+export default defineConfig({
+  mdxOptions: {
+    // 順序が重要な場合
+    remarkPlugins: (v) => [myPlugin, ...v],
+  },
+});
+```
+
+```ts tab="Sätteri" title="source.config.ts"
+import { defineConfig } from 'fumadocs-mdx/config';
+import { myPlugin } from './mdast-plugin';
+
+export default defineConfig({
+  satteriOptions: {
+    // 順序が重要な場合
+    mdastPlugins: (v) => [myPlugin(), ...v],
+  },
+});
+```
+
+または、minimal プリセットを使用する場合は次のとおりです。
+
+```ts tab="unified" title="source.config.ts"
+import { defineConfig } from 'fumadocs-mdx/config';
+
+export default defineConfig({
+  mdxOptions: {
+    preset: 'minimal',
+    // この場合、MDX プロセッサーのオプションのみを受け付けます
+  },
+});
+```
+
+```ts tab="Sätteri" title="source.config.ts"
+import { defineConfig } from 'fumadocs-mdx/config';
+
+export default defineConfig({
+  satteriOptions: {
+    preset: 'minimal',
+    // この場合、Sätteri のコンパイルオプションのみを受け付けます
+  },
+});
+```

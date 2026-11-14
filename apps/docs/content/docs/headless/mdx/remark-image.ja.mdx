@@ -1,0 +1,141 @@
+---
+title: Remark Image
+description: 画像にサイズ属性を追加します。
+---
+
+画像要素に `width` 属性と `height` 属性を追加する remark プラグインです。これらの属性は、Next.js をはじめとする一部のフレームワークで画像最適化 (Image Optimization) を行うために必要です。
+
+## 使い方 [#usage]
+
+Fumadocs MDX ではデフォルトで有効になっています。オプションは `remarkImageOptions` で指定できます。オプションは unified と Sätteri のどちらでも共通です。
+
+サポート対象:
+
+* ローカル画像
+* 外部 URL
+* Next.js の静的インポート
+
+### 仕組み [#how-it-works]
+
+`useImport` を使用すると、ローカル画像は**静的インポート**に変換され、バンドラーで処理されます。Fumadocs MDX では、`dynamic` コレクションを除いてこの機能が有効です。
+Next.js では組み込みの画像ローダーがこれらを処理し、Next.js Image の `placeholder` オプションにも対応しています。
+
+それ以外の場合は、ファイルシステムまたは HTTP リクエストで画像を取得し、そのサイズを求めます。
+
+<Callout type="warn">
+  信頼できない画像 URL は渡さないでください。画像はコンパイル時に取得され、プライベートホストも例外ではありません。外部画像をスキップするには `external: false` を設定してください。
+</Callout>
+
+### オプション [#options]
+
+<auto-type-table path="../props.ts" name="RemarkImageOptions" />
+
+### 例: インポートを含む場合 [#example-with-imports]
+
+```mdx
+![Hello](/hello.png)
+![Test](https://example.com/image.png)
+```
+
+出力結果:
+
+```mdx
+import HelloImage from './public/hello.png';
+
+<img alt="Hello" src={HelloImage} />
+<img alt="Test" src="https://example.com/image.png" width="1980" height="1080" />
+```
+
+なお、`./public/hello.png` は public ディレクトリ内の画像を指します。
+
+### 例: インポートを使用しない場合 [#example-without-imports]
+
+Next.js では、ローカル画像の静的インポートを無効にできます。
+
+```ts tab="unified" title="source.config.ts"
+import { defineConfig } from 'fumadocs-mdx/config';
+
+export default defineConfig({
+  mdxOptions: {
+    remarkImageOptions: {
+      useImport: false,
+    },
+  },
+});
+```
+
+```ts tab="Sätteri" title="source.config.ts"
+import { defineConfig, defineDocs } from 'fumadocs-mdx/config';
+
+export const docs = defineDocs({
+  docs: { compiler: 'satteri' },
+});
+
+export default defineConfig({
+  satteriOptions: {
+    remarkImageOptions: {
+      useImport: false,
+    },
+  },
+});
+```
+
+```mdx
+![Hello](/hello.png)
+![Test](https://example.com/image.png)
+```
+
+出力結果:
+
+```mdx
+<img alt="Hello" src="/hello.png" width="1980" height="1080" />
+<img alt="Test" src="https://example.com/image.png" width="1980" height="1080" />
+```
+
+### 例: 相対パス [#example-relative-paths]
+
+`useImport` を有効にすると、相対パスでローカル画像を参照できます。
+
+```mdx
+![Hello](./hello.png)
+```
+
+`useImport` を無効にした状態で使用すると**動作しない**点に注意してください。
+Next.js は、コード内でインポートされていない画像を公開アセットに追加しません。
+public ディレクトリ内の画像は、相対パスを使わずにそのまま参照できます。
+
+### 例: public ディレクトリ [#example-public-directory]
+
+public ディレクトリのパスをカスタマイズします。
+
+```ts tab="unified" title="source.config.ts"
+import { defineConfig } from 'fumadocs-mdx/config';
+import path from 'node:path';
+
+export default defineConfig({
+  mdxOptions: {
+    remarkImageOptions: {
+      publicDir: path.join(process.cwd(), 'dir'),
+    },
+  },
+});
+```
+
+```ts tab="Sätteri" title="source.config.ts"
+import { defineConfig, defineDocs } from 'fumadocs-mdx/config';
+import path from 'node:path';
+
+export const docs = defineDocs({
+  docs: { compiler: 'satteri' },
+});
+
+export default defineConfig({
+  satteriOptions: {
+    remarkImageOptions: {
+      publicDir: path.join(process.cwd(), 'dir'),
+    },
+  },
+});
+```
+
+`publicDir` には、`https://my-cdn.com/images` のようなベース URL も指定できます。

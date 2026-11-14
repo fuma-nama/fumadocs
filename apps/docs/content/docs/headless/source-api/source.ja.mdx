@@ -1,0 +1,244 @@
+---
+title: ソース
+description: ローダー API で使用するソースを設定します
+---
+
+## 概要 [#overview]
+
+コンテンツローダーは、`source` インターフェースを介してさまざまなコンテンツソースを受け付けます。
+
+### 複数のソース [#multiple-sources]
+
+単一のソースではなく、ソースオブジェクトを `Record` 形式でまとめて渡してください。
+
+```ts
+import { loader } from 'fumadocs-core/source';
+import { blog, docs } from 'collections/server';
+import { lucideIconsPlugin } from 'fumadocs-core/source/lucide-icons';
+
+export const source = loader(
+  {
+    docs: docs.toFumadocsSource(),
+    openapi: blog.toFumadocsSource(),
+  },
+  {
+    baseUrl: '/docs',
+  },
+);
+```
+
+各ソースに固有のプロパティにアクセスするには、次のようにします。
+
+```ts
+const page = source.getPage(['...']);
+
+if (page.type === 'docs') {
+  console.log(page.data);
+} else {
+  console.log(page.data);
+}
+```
+
+### 静的ソース [#static-source]
+
+独自のコンテンツソースを組み込むには、`StaticSource` オブジェクトを作成します。
+
+ローダー API はファイルシステムに依存しないため、ファイルパスには `file.mdx` や `content/file.mdx` のような仮想パスしか使用できません。`./file.mdx` や `D://content/file.mdx` は使用できません。
+
+```ts twoslash
+import type { StaticSource } from 'fumadocs-core/source';
+
+export function createMySource(): StaticSource<{
+  metaData: { title: string; pages: string[] }; // カスタム型
+  pageData: { title: string; description?: string }; // カスタム型
+}> {
+  return {
+    files: [
+      {
+        type: 'page',
+        path: 'folder/index.mdx',
+        data: {
+          title: 'Hello World',
+          // ...
+        },
+      },
+      {
+        type: 'meta',
+        path: 'meta.json',
+        data: {
+          title: 'Docs',
+          pages: ['folder'],
+          // ...
+        },
+      },
+    ],
+  };
+}
+```
+
+[i18n](/docs/headless/internationalization/config) を使用する場合、ファイル側で `locale` を指定しない限り、ファイルの言語はパスから判別されます。
+
+### 動的ソース [#dynamic-source]
+
+再検証に対応したコンテンツソースの場合は、代わりに `DynamicSource` を返してください。
+
+```ts
+import type { DynamicSource } from 'fumadocs-core/source';
+
+export function createMySource(): DynamicSource<{
+  metaData: { title: string; pages: string[] };
+  pageData: { title: string; description?: string };
+}> {
+  return {
+    async files() {
+      return [
+        {
+          type: 'page',
+          path: 'folder/index.mdx',
+          data: {
+            title: 'Hello World',
+          },
+        },
+        {
+          type: 'meta',
+          path: 'meta.json',
+          data: {
+            title: 'Docs',
+            pages: ['folder'],
+          },
+        },
+      ];
+    },
+    configure(loader) {
+      // ソース側からローダーを再検証できます。例:
+      onMyEvent(() => {
+        void loader.revalidate();
+      });
+    },
+  };
+}
+```
+
+動的ソースは [`dynamicLoader()`](/docs/headless/source-api#dynamic-loader) でしか利用できません。
+
+## パスパラメーター [#path-params]
+
+ソースで[パスパラメーター](/docs/headless/page-conventions#path-params)をサポートするには、`[framework]/deploy.mdx` のようなファイルを1つの仮想ファイルとして渡します。ローダーは値ごとにページを生成し、各ページのデータには `dataAt()` の戻り値を使用します。`dataAt()` がない場合は `data` を使用します。メタファイルも同様に扱われます。
+
+```ts twoslash
+import type { StaticSource } from 'fumadocs-core/source';
+
+const files: StaticSource['files'] = [
+  {
+    type: 'page',
+    path: '[framework]/deploy.mdx',
+    data: { title: 'Deploy' },
+    dataAt: (params) => ({ title: `Deploy on ${params.framework}` }),
+  },
+  {
+    type: 'meta',
+    path: '[framework]/meta.json',
+    data: { staticParams: [{ framework: 'waku' }, { framework: 'astro' }] },
+    dataAt: (params) => ({ title: params.framework }),
+  },
+];
+```
+
+### params の一覧取得 [#listing-params]
+
+コード内のフロントマターのように、各値のデータをローダーより先に解決できるよう、`getStaticParams()` は同じルールに従って params を一覧取得します。ストレージ内にあるメタファイルの `staticParams` を、拡張子を除いたパスをもとに読み込みます。
+
+```ts twoslash
+import { getStaticParams, type Params } from 'fumadocs-core/source';
+
+declare const frontmatter: { staticParams?: Params[] };
+declare const metaFiles: Map<string, { staticParams?: Params[] }>;
+// ---cut---
+const params = getStaticParams('[framework]/deploy.mdx', {
+  staticParams: frontmatter.staticParams,
+  readStaticParams: (path) => metaFiles.get(path)?.staticParams,
+});
+```
+
+値を列挙するものがない場合は `undefined` を返します。その場合、ファイルはリテラルなパスに対応する1つのページになります。
+
+### カスタム props [#custom-props]
+
+[カスタム props](/docs/headless/source-api#custom-props) をサポートするため、`dataAt()` は第2引数でカスタム props を受け取ります。このとき渡されるページデータは、ローダープラグイン適用後のものです。params とカスタム props に応じてレンダリングしたデータを返してください。
+
+```tsx twoslash
+import type { StaticSource } from 'fumadocs-core/source';
+
+declare function pageAt(props: object): { title: string };
+// ---cut---
+const files: StaticSource['files'] = [
+  {
+    type: 'page',
+    path: '[framework]/deploy.mdx',
+    data: pageAt({}),
+    dataAt: (params, custom) =>
+      custom ? { ...custom.data, ...pageAt({ ...params, ...custom.props }) } : pageAt(params),
+  },
+];
+```
+
+`dataAt()` を持たないページでは、カスタム props は無視されます。
+
+### ランタイム出力 [#runtime-outputs]
+
+ソースが MDX をコンパイルする場合は、各ファイルのコンパイルを一度だけにし、ページの props をそのコンテンツに渡してください。同じ props で目次、検索レコード、Markdown を生成するには、次の設定を行います。
+
+* コンパイルするファイルの data に `unstable_runtimeOutputs: true` を設定します。Sätteri の場合は、コンパイルオプションの `data` に設定します。
+* 最後の rehype プラグインとして `rehypeHeading` を追加し、レンダリングされたテキストから[見出し ID](/docs/headless/mdx/headings#headings-with-expressions) を生成します。
+
+```ts
+import { VFile } from 'vfile';
+
+const file = new VFile({
+  path: '[framework]/deploy.mdx',
+  value: source,
+  data: { unstable_runtimeOutputs: true },
+});
+```
+
+この場合、プラグインは値ではなく関数をエクスポートします。たとえば、[Rehype TOC](/docs/headless/mdx/headings#rehype-toc) の `toc` や [Remark LLMs](/docs/headless/mdx/remark-llms) の `_markdown` コンポーネントがこれに該当します。これらは各ページの props を渡して呼び出します。
+
+```tsx twoslash
+import type { StaticSource } from 'fumadocs-core/source';
+import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
+import type { TOCItemType } from 'fumadocs-core/toc';
+import { renderToMarkdown } from 'fumadocs-core/server';
+import type { MDXContent, MDXProps } from 'mdx/types';
+
+declare const compiled: {
+  default: MDXContent;
+  toc: (props: object) => TOCItemType[];
+  _markdown: MDXContent;
+};
+declare const file: { data: { structuredData: StructuredData } };
+// ---cut---
+const { default: Content, toc, _markdown: Markdown } = compiled;
+
+function pageAt(props: object) {
+  return {
+    title: 'Deploy',
+    body: (own: MDXProps) => <Content {...props} {...own} />,
+    toc: toc(props),
+    getMarkdown: () => renderToMarkdown(<Markdown {...props} />),
+    structuredData: file.data.structuredData,
+  };
+}
+
+const files: StaticSource['files'] = [
+  {
+    type: 'page',
+    path: '[framework]/deploy.mdx',
+    data: pageAt({}),
+    dataAt: (params) => pageAt(params),
+  },
+];
+```
+
+検索に使う場合は、[Remark Structure](/docs/headless/mdx/structure) のレコードをエクスポートからではなく `file.data.structuredData` から読み取ってください。これらのレコードにはすべての `<show>` 分岐が含まれ、式も元のソーステキストのまま保持されます。
+
+`unstable_` プレフィックスは、その API が今後変更される可能性があることを示しています。このフラグを指定しない場合、Rehype TOC、Remark Structure、Remark LLMs のいずれかが実行されると、[`<show>`](/docs/markdown#show) を含むドキュメントはコンパイルに失敗します。

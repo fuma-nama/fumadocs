@@ -1,0 +1,182 @@
+---
+title: Tabs
+description: Base UI で構築された Tabs コンポーネントです。値の永続化や共有値などの機能も備えています。
+preview: tabs
+---
+
+import { UrlBar } from './tabs.client';
+
+<Installation name="tabs" />
+
+## 使い方 [#usage]
+
+MDX コンポーネントを追加します。
+
+```tsx title="components/mdx.tsx"
+import defaultMdxComponents from 'fumadocs-ui/mdx';
+import * as TabsComponents from 'fumadocs-ui/components/tabs';
+import type { MDXComponents } from 'mdx/types';
+
+export function getMDXComponents(components?: MDXComponents) {
+  return {
+    ...defaultMdxComponents,
+    ...TabsComponents, // [!code ++]
+    ...components,
+  } satisfies MDXComponents;
+}
+```
+
+あとは、MDX コンテンツ内で使用します。
+
+```mdx title="content.mdx"
+<Tabs items={['Javascript', 'Rust']}>
+  <Tab value="Javascript">Javascript is weird</Tab>
+  <Tab value="Rust">Rust is fast</Tab>
+</Tabs>
+```
+
+<Tabs items={['Javascript', 'Rust']}>
+  <Tab value="Javascript">Javascript はクセが強いです</Tab>
+  <Tab value="Rust">Rust は高速です</Tab>
+</Tabs>
+
+### `value` を指定しない場合 [#without-value]
+
+`value` を指定しない場合は、子要素のインデックスから判別されます。再レンダリング時にエラーが発生する可能性があるため、タブが変化しうる場合は推奨されません。
+
+```mdx
+import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
+
+<Tabs items={['Javascript', 'Rust']}>
+  <Tab>Javascript is weird</Tab>
+  <Tab>Rust is fast</Tab>
+</Tabs>
+```
+
+<Tabs items={['Javascript', 'Rust']}>
+  <Tab>Javascript は奇妙です</Tab>
+  <Tab>Rust は高速です</Tab>
+</Tabs>
+
+### 共有値 [#shared-value]
+
+`groupId` プロパティを渡すと、同じ
+ID を持つすべてのタブで値を共有できます。
+
+```mdx
+<Tabs groupId="language" items={['Javascript', 'Rust']}>
+  <Tab value="Javascript">Javascript is weird</Tab>
+  <Tab value="Rust">Rust is fast</Tab>
+</Tabs>
+```
+
+### 永続化 [#persistent]
+
+`groupId` を指定すると、選択された値は `sessionStorage` に一時的に保存されます。
+
+値を永続化するには、`persist` prop を指定します。値は
+グループ ID をストレージキーとして `localStorage` に保存されます。
+
+```mdx
+<Tabs groupId="language" items={['Javascript', 'Rust']} persist>
+  <Tab value="Javascript">Javascript is weird</Tab>
+  <Tab value="Rust">Rust is fast</Tab>
+</Tabs>
+```
+
+### デフォルト値 [#default-value]
+
+`defaultIndex` を渡すと、デフォルト値を設定できます。
+
+```mdx
+<Tabs items={['Javascript', 'Rust']} defaultIndex={1}>
+  <Tab value="Javascript">Javascript is weird</Tab>
+  <Tab value="Rust">Rust is fast</Tab>
+</Tabs>
+```
+
+### タブへのリンク [#link-to-tab]
+
+特定のタブにリンクするには、HTML の `id` 属性を使用します。
+
+```mdx
+<Tabs items={['Javascript', 'Rust', 'C++']}>
+  <Tab value="Javascript">Javascript is weird</Tab>
+  <Tab value="Rust">Rust is fast</Tab>
+  <Tab id="tab-cpp" value="C++">
+    `Hello World`
+  </Tab>
+</Tabs>
+```
+
+URL にハッシュ `#tab-cpp` を追加してページを再読み込みすると、C++ タブがアクティブになります。
+
+<Tabs items={['Javascript', 'Rust', 'C++']}>
+  <Tab value="Javascript">Javascript は癖が強い</Tab>
+  <Tab value="Rust">Rust は高速</Tab>
+
+  <Tab id="tab-cpp" value="C++">
+    `Hello World`
+  </Tab>
+</Tabs>
+
+また、`Tabs` コンポーネントの `updateAnchor` プロパティを `true` に設定すると、
+新しいタブを選択するたびに URL ハッシュが自動的に更新されます。
+
+```mdx
+<Tabs items={['Javascript', 'Rust', 'C++']} updateAnchor>
+  <Tab id="tab-js" value="Javascript">
+    Javascript is weird
+  </Tab>
+  <Tab id="tab-rs" value="Rust">
+    Rust is fast
+  </Tab>
+  <Tab id="tab-cpp" value="C++">
+    `Hello World`
+  </Tab>
+</Tabs>
+```
+
+<UrlBar />
+
+<Tabs items={['Hello', 'World']} updateAnchor>
+  <Tab id="tab-hello" value="Hello">
+    こんにちは！
+  </Tab>
+
+  <Tab id="tab-world" value="World">
+    世界！
+  </Tab>
+</Tabs>
+
+## 高度な使い方 [#advanced-usage]
+
+プリミティブな形で使用することもできます。
+
+```mdx
+<Tabs defaultValue="npm">
+  <TabsList>
+    <TabsTrigger value="npm">
+      <NpmIcon />
+      npm
+    </TabsTrigger>
+  </TabsList>
+  <TabsContent value="npm">Hello World</TabsContent>
+</Tabs>
+```
+
+<Tabs defaultValue="npm">
+  <TabsList>
+    <TabsTrigger value="npm">
+      <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <title>npm</title>
+
+        <path fill="currentColor" d="M1.763 0C.786 0 0 .786 0 1.763v20.474C0 23.214.786 24 1.763 24h20.474c.977 0 1.763-.786 1.763-1.763V1.763C24 .786 23.214 0 22.237 0zM5.13 5.323l13.837.019-.009 13.836h-3.464l.01-10.382h-3.456L12.04 19.17H5.113z" />
+      </svg>
+
+      npm
+    </TabsTrigger>
+  </TabsList>
+
+  <TabsContent value="npm">Hello World</TabsContent>
+</Tabs>

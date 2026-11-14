@@ -1,0 +1,152 @@
+---
+title: はじめに
+description: Fumadocs の公式コンテンツソースである Fumadocs MDX を紹介します。
+icon: SquareBookmark
+---
+
+## はじめに [#introduction]
+
+Fumadocs MDX は、Content Collections と同様に、コンテンツを型安全なデータに変換するツールです。
+
+本格的な CMS ではなく、React フレームワーク向けのコンテンツ処理レイヤーです。ブログ記事などのコンテンツの管理にも利用できます。
+
+### Collection とは？ [#what-is-a-collection]
+
+**Collection** とは、特定の種類のファイルをまとめたものです。アプリ内で [Macro API](/docs/mdx/macro) を使って定義できます。
+
+```ts title="lib/source.ts"
+import { defineDocs } from 'fumadocs-mdx/macro';
+import { loader } from 'fumadocs-core/source';
+
+const docs = defineDocs({
+  dir: 'content/docs',
+});
+
+export const source = loader({
+  baseUrl: '/docs',
+  source: docs.toFumadocsSource(),
+});
+```
+
+利用できるコレクションは次のとおりです。
+
+<Tabs items={["doc", "meta", 'docs']}>
+  <Tab value="doc">
+    Markdown &amp; MDX ファイルを React コンポーネントにコンパイルします。**目次**などの便利なプロパティも利用できます。
+
+    ```ts
+    import { defineCollections } from 'fumadocs-mdx/macro';
+
+    export const test = defineCollections({
+      type: 'doc',
+      dir: 'content/docs',
+    });
+    ```
+  </Tab>
+
+  <Tab value="meta">
+    YAML/JSON ファイルをデータの配列に変換します。
+
+    ```ts
+    import { defineCollections } from 'fumadocs-mdx/macro';
+
+    export const test = defineCollections({
+      type: 'meta',
+      dir: 'content/docs',
+    });
+    ```
+  </Tab>
+
+  <Tab value="docs">
+    `meta` コレクションと `doc` コレクションを組み合わせたもので、Fumadocs を使う際に必要です。
+
+    ```ts
+    import { defineDocs } from 'fumadocs-mdx/macro';
+
+    export const docs = defineDocs({
+      dir: 'content/docs',
+      docs: {
+        // `doc` コレクションのオプション
+      },
+      meta: {
+        // `meta` コレクションのオプション
+      },
+    });
+    ```
+  </Tab>
+</Tabs>
+
+たとえば、`doc` コレクションは次のような `.md` および `.mdx` ファイルを変換します。
+
+<Files>
+  <Folder name="folder" defaultOpen>
+    <File name="ui.md" />
+  </Folder>
+
+  <File name="hello.md" />
+
+  <File name="index.mdx" />
+
+  <File name="meta.json" className="opacity-50 cursor-not-allowed" aria-disabled />
+</Files>
+
+[Config API](/docs/mdx/collections) を使って `source.config.ts` でコレクションを定義することもできます。この場合、エントリーファイルは `.source` 配下に生成されます。
+
+## インストール [#installation]
+
+使用する環境に合わせて Fumadocs MDX を設定してください。
+
+<Cards>
+  <Card title="Next.js" href="/docs/mdx/next">
+    Next.js で Fumadocs MDX を使用する
+  </Card>
+
+  <Card title="Vite" href="/docs/mdx/vite">
+    Vite で Fumadocs MDX を使用する
+  </Card>
+
+  <Card title="ランタイムローダー" href="/docs/mdx/loader">
+    JavaScript ランタイムで Fumadocs MDX を使用する
+  </Card>
+</Cards>
+
+## よくある質問 [#faq]
+
+### 組み込みプロパティ [#built-in-properties]
+
+以下のプロパティは、MDX ファイルからデフォルトでエクスポートされます。
+
+| プロパティ                 | 説明                   |
+| --------------------- | -------------------- |
+| `frontmatter`         | フロントマター              |
+| `toc`                 | 目次                   |
+| `structuredData`      | 構造化データ。検索の実装に便利です    |
+| `extractedReferences` | `hrefs` の参照の解析に使用します |
+
+### フロントマターのカスタマイズ [#customize-frontmatter]
+
+[`schema`](/docs/mdx/collections#schema-1) オプションでバリデーションスキーマを渡すと、フロントマターを検証し、その出力プロパティを定義できます。
+
+MDX ページでは、[フロントマターをコードで](/docs/markdown#frontmatter)エクスポートすることもできます。エクスポートした値は YAML フロントマターを上書きする形でマージされ、その結果がコレクションのスキーマで検証されます。
+
+```mdx title="content/docs/index.mdx"
+---
+title: Introduction
+---
+
+import { version } from '../../package.json';
+
+export const frontmatter = {
+  description: `The docs of v${version}.`,
+};
+```
+
+このエクスポートはビルド時に実行されます。ページのインポートや、同じブロック内でそれより前に記述されたエクスポートは使用できますが、ページのコンテンツやコンポーネントは使用できません。`staticParams` は YAML フロントマターに記述したままにしてください。ローダーはエクスポートが実行される前にこの値を読み取るためです。
+
+### コンパイラのカスタマイズ [#customize-compiler]
+
+Fumadocs MDX は、[MDX Compiler](https://mdxjs.com/packages/mdx) を通じて unified で MDX ファイルを JavaScript ファイルにコンパイルします。
+
+コレクションごとに、代わりに [Sätteri](/docs/mdx/mdx#satteri) でコンパイルすることもできます。どちらにも、プラグインと設定のデフォルトプリセットが用意されています。
+
+コンパイラは[グローバル設定](/docs/mdx/global#mdx-options)または[コレクション設定](/docs/mdx/collections#mdxoptions)でカスタマイズできます。

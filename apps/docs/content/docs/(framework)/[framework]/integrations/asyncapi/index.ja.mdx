@@ -1,0 +1,529 @@
+---
+title: AsyncAPI
+description: AsyncAPI スキーマからドキュメントを生成します。
+---
+
+## セットアップ [#setup]
+
+必要なパッケージをインストールします。
+
+```npm
+npm i @fumadocs/asyncapi shiki
+```
+
+### スタイルの生成 [#generate-styles]
+
+次の行を追加してください。
+
+```css title="Tailwind CSS"
+@import 'tailwindcss';
+@import 'fumadocs-ui/css/neutral.css';
+@import 'fumadocs-ui/css/preset.css';
+/* [!code ++] */
+@import '@fumadocs/asyncapi/css/preset.css';
+```
+
+### プラグインの設定 [#configure-plugin]
+
+AsyncAPI サーバーインスタンスと `<AsyncAPIPage />` コンポーネントを作成します。
+
+```ts tab="lib/asyncapi.ts"
+import { createAsyncAPI } from '@fumadocs/asyncapi/server';
+
+// 注: これはサーバーサイド専用の API です
+export const asyncapi = createAsyncAPI({
+  // AsyncAPI スキーマ。外部 URL を指定することもできます。
+  input: ['./asyncapi.yaml'],
+});
+```
+
+```tsx tab="components/api-page.tsx"
+'use client';
+import { createAsyncAPIPage } from '@fumadocs/asyncapi/ui';
+
+export const AsyncAPIPage = createAsyncAPIPage();
+```
+
+各オプションの詳細については、[`createAsyncAPI()`](/docs/integrations/asyncapi/server) と [`createAsyncAPIPage()`](/docs/integrations/asyncapi/api-page) を参照してください。
+
+### ページを生成する [#generate-pages]
+
+[`loader()`](/docs/headless/source-api/source) に `staticSource()` を渡します。これにより、ファイルを書き出さずにページを生成できます。
+
+<show when={props.framework === 'react-router' || props.framework === 'tanstack-start'}>
+  `staticSource()` はファイルを読み込むため、`source.ts` はサーバー専用になります。クライアントのコードから import できるよう、`docs` を `collections.ts` に移動してください。
+</show>
+
+<show when={props.framework === 'next'}>
+  ```ts title="lib/source.ts"
+  import { loader } from 'fumadocs-core/source';
+  import { defineDocs } from 'fumadocs-mdx/macro';
+  import { asyncapi } from '@/lib/asyncapi'; // [!code ++]
+
+  const docs = defineDocs({
+    dir: 'content/docs',
+  });
+
+  export const source = loader(
+    // [!code ++:6]
+    {
+      docs: docs.toFumadocsSource(),
+      asyncapi: await asyncapi.staticSource({
+        baseDir: 'asyncapi',
+      }),
+    },
+    {
+      baseUrl: '/docs',
+      // [!code ++:2] 任意: ページツリーの各ページアイテムにメッセージの方向を追加します
+      plugins: [asyncapi.loaderPlugin()],
+    },
+  );
+  ```
+</show>
+
+<show when={props.framework === 'react-router'}>
+  ```ts tab="app/lib/source.ts"
+  import { loader } from 'fumadocs-core/source';
+  import { defineDocs } from 'fumadocs-mdx/macro'; // [!code --]
+  // [!code ++:2]
+  import { docs } from '@/lib/collections';
+  import { asyncapi } from '@/lib/asyncapi';
+
+  // [!code --:6]
+  export const docs = defineDocs({
+    dir: 'content/docs',
+    docs: {
+      async: true,
+    },
+  });
+
+  // `staticSource()` がファイルを読み込むため、サーバー専用になりました [!code ++]
+  export const source = loader(
+    // [!code ++:6]
+    {
+      docs: docs.toFumadocsSource(),
+      asyncapi: await asyncapi.staticSource({
+        baseDir: 'asyncapi',
+      }),
+    },
+    {
+      baseUrl: '/docs',
+      // [!code ++:2] 任意: ページツリーの各ページアイテムにメッセージの方向を追加します
+      plugins: [asyncapi.loaderPlugin()],
+    },
+  );
+  ```
+
+  ```ts tab="app/lib/collections.ts"
+  import { defineDocs } from 'fumadocs-mdx/macro';
+
+  export const docs = defineDocs({
+    dir: 'content/docs',
+    docs: {
+      async: true,
+    },
+  });
+  ```
+</show>
+
+<show when={props.framework === 'tanstack-start'}>
+  ```ts tab="src/lib/source.ts"
+  import { loader } from 'fumadocs-core/source';
+  import { defineDocs } from 'fumadocs-mdx/macro'; // [!code --]
+  // [!code ++:2]
+  import { docs } from '@/lib/collections';
+  import { asyncapi } from '@/lib/asyncapi';
+
+  // [!code --:6]
+  export const docs = defineDocs({
+    dir: 'content/docs',
+    docs: {
+      async: true,
+    },
+  });
+
+  // `staticSource()` がファイルを読み込むため、サーバー専用になりました [!code ++]
+  export const source = loader(
+    // [!code ++:6]
+    {
+      docs: docs.toFumadocsSource(),
+      asyncapi: await asyncapi.staticSource({
+        baseDir: 'asyncapi',
+      }),
+    },
+    {
+      baseUrl: '/docs',
+      // [!code ++:2] 任意: ページツリーの各ページアイテムにメッセージの方向を追加します
+      plugins: [asyncapi.loaderPlugin()],
+    },
+  );
+  ```
+
+  ```ts tab="src/lib/collections.ts"
+  import { defineDocs } from 'fumadocs-mdx/macro';
+
+  export const docs = defineDocs({
+    dir: 'content/docs',
+    docs: {
+      async: true,
+    },
+  });
+  ```
+</show>
+
+<show when={props.framework === 'waku'}>
+  ```ts title="src/lib/source.ts"
+  import { loader } from 'fumadocs-core/source';
+  import { defineDocs } from 'fumadocs-mdx/macro';
+  import { asyncapi } from '@/lib/asyncapi'; // [!code ++]
+
+  const docs = defineDocs({
+    dir: 'content/docs',
+  });
+
+  export const source = loader(
+    // [!code ++:6]
+    {
+      docs: docs.toFumadocsSource(),
+      asyncapi: await asyncapi.staticSource({
+        baseDir: 'asyncapi',
+      }),
+    },
+    {
+      baseUrl: '/docs',
+      // [!code ++:2] 任意: ページツリーの各ページアイテムにメッセージの方向を追加します
+      plugins: [asyncapi.loaderPlugin()],
+    },
+  );
+  ```
+</show>
+
+<show when={props.framework === 'astro'}>
+  ```ts title="src/lib/source.ts"
+  import { getCollection } from 'astro:content';
+  import { loader } from 'fumadocs-core/source';
+  import { toFumadocsSource } from '@fumadocs/astro/source';
+  import { asyncapi } from '@/lib/asyncapi'; // [!code ++]
+
+  export const source = loader(
+    // [!code ++:6]
+    {
+      docs: toFumadocsSource(await getCollection('docs'), await getCollection('meta')),
+      asyncapi: await asyncapi.staticSource({
+        baseDir: 'asyncapi',
+      }),
+    },
+    {
+      baseUrl: '/docs',
+      // [!code ++:2] 任意: ページツリー内の各ページアイテムにメッセージの方向を追加します
+      plugins: [asyncapi.loaderPlugin()],
+    },
+  );
+  ```
+</show>
+
+`staticSource()` は、デフォルトでオペレーションごとに1ページを生成します。カスタマイズ方法については[ページの生成](/docs/integrations/asyncapi/generate-files)を参照してください。
+
+**`source` のページは、`docs` と `asyncapi` の2種類になりました。** LLM 向けのテキストを返す箇所など、`source` を使用しているすべての箇所を更新してください。
+
+```ts
+import { llms } from 'fumadocs-core/source';
+import { source } from '@/lib/source';
+
+export const docsLlms = llms(source, {
+  renderPage: async (page) => {
+    // [!code ++:3]
+    if (page.type === 'asyncapi') {
+      return `# ${page.data.title}\n\n${await page.data.getText('processed')}`;
+    }
+
+    // 以下は既存の処理...
+  },
+});
+```
+
+<show when={props.framework !== 'astro'}>
+  docs ページで `<AsyncAPIPage />` を使用して、AsyncAPI ページをレンダリングします。
+</show>
+
+<show when={props.framework === 'astro'}>
+  AsyncAPI ページは専用のアイランドでレンダリングします。このアイランドでは、`<AsyncAPIPage />` を Docs レイアウトでラップします。
+</show>
+
+<show when={props.framework === 'next'}>
+  ```tsx title="app/docs/[[...slug]]/page.tsx"
+  import { AsyncAPIPage } from '@/components/api-page'; // [!code ++]
+
+  export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
+    const params = await props.params;
+    const page = source.getPage(params.slug);
+    if (!page) notFound();
+
+    // [!code ++:10]
+    if (page.type === 'asyncapi') {
+      return (
+        <DocsPage full>
+          <DocsTitle>{page.data.title}</DocsTitle>
+          <DocsBody>
+            <AsyncAPIPage {...page.data.getAsyncAPIPageProps()} />
+          </DocsBody>
+        </DocsPage>
+      );
+    }
+
+    // ...
+  }
+  ```
+</show>
+
+<show when={props.framework === 'react-router'}>
+  ```tsx title="app/routes/docs.tsx"
+  import { docs, source } from '@/lib/source'; // [!code --]
+  // [!code ++:3]
+  import { docs } from '@/lib/collections';
+  import { source } from '@/lib/source';
+  import { AsyncAPIPage } from '@/components/api-page';
+
+  export async function loader({ params }: Route.LoaderArgs) {
+    const slugs = params['*'].split('/').filter((v) => v.length > 0);
+    const page = source.getPage(slugs);
+    if (!page) throw new Response('Not found', { status: 404 });
+
+    // [!code ++:9]
+    const pageTree = await source.serializePageTree(source.getPageTree());
+    if (page.type === 'asyncapi') {
+      return {
+        type: 'asyncapi' as const,
+        title: page.data.title,
+        props: page.data.getAsyncAPIPageProps(),
+        pageTree,
+      };
+    }
+
+    return { type: 'docs' as const, path: page.path, pageTree }; // [!code highlight]
+  }
+
+  export default function Page({ loaderData }: Route.ComponentProps) {
+    const data = useFumadocsLoader(loaderData);
+
+    return (
+      <DocsLayout {...baseOptions()} tree={data.pageTree}>
+        {/* [!code ++:8] */}
+        {data.type === 'asyncapi' && (
+          <DocsPage full>
+            <DocsTitle>{data.title}</DocsTitle>
+            <DocsBody>
+              <AsyncAPIPage {...data.props} />
+            </DocsBody>
+          </DocsPage>
+        )}
+        {/* [!code highlight] */}
+        {data.type === 'docs' && <Content path={data.path} />}
+      </DocsLayout>
+    );
+  }
+  ```
+</show>
+
+<show when={props.framework === 'tanstack-start'}>
+  ```tsx title="src/routes/docs/$.tsx"
+  import { docs, source } from '@/lib/source'; // [!code --]
+  // [!code ++:4]
+  import { docs } from '@/lib/collections';
+  import { source } from '@/lib/source';
+  import { AsyncAPIPage } from '@/components/api-page';
+  import type { AsyncAPI } from '@fumadocs/asyncapi';
+
+  // [!code ++:7]
+  // サーバー関数の戻り値に対する型レベルのチェックでは AsyncAPI ドキュメントを検証できないため、
+  // シリアライズ可能な型として登録します (`@tanstack/router-core` が解決できない場合はインストールしてください)
+  declare module '@tanstack/router-core' {
+    interface SerializableExtensions {
+      asyncapiDocument: AsyncAPI.AsyncAPIObject;
+    }
+  }
+
+  export const Route = createFileRoute('/docs/$')({
+    component: Page,
+    loader: async ({ params }) => {
+      const slugs = params._splat?.split('/') ?? [];
+      const data = await serverLoader({ data: slugs });
+      if (data.type === 'docs') await docs.getPage(data.path)?.preload(); // [!code highlight]
+      return data;
+    },
+  });
+
+  const serverLoader = createServerFn({
+    method: 'GET',
+  })
+    .validator((slugs: string[]) => slugs)
+    .handler(async ({ data: slugs }) => {
+      const page = source.getPage(slugs);
+      if (!page) throw notFound();
+
+      // [!code ++:9]
+      const pageTree = await source.serializePageTree(source.getPageTree());
+      if (page.type === 'asyncapi') {
+        return {
+          type: 'asyncapi',
+          title: page.data.title,
+          props: page.data.getAsyncAPIPageProps(),
+          pageTree,
+        };
+      }
+
+      return { type: 'docs', path: page.path, pageTree }; // [!code highlight]
+    });
+
+  function Page() {
+    const data = useFumadocsLoader(Route.useLoaderData());
+
+    return (
+      <DocsLayout {...baseOptions()} tree={data.pageTree}>
+        {/* [!code ++:8] */}
+        {data.type === 'asyncapi' && (
+          <DocsPage full>
+            <DocsTitle>{data.title}</DocsTitle>
+            <DocsBody>
+              <AsyncAPIPage {...data.props} />
+            </DocsBody>
+          </DocsPage>
+        )}
+        <Suspense>
+          {/* [!code highlight] */}
+          {data.type === 'docs' && <Content path={data.path} />}
+        </Suspense>
+      </DocsLayout>
+    );
+  }
+  ```
+</show>
+
+<show when={props.framework === 'waku'}>
+  ```tsx title="src/pages/docs/[...slugs].tsx"
+  import { AsyncAPIPage } from '@/components/api-page'; // [!code ++]
+
+  export default function Page({ slugs }: PageProps<'/docs/[...slugs]'>) {
+    const page = source.getPage(slugs);
+    if (!page) unstable_notFound();
+
+    // [!code ++:10]
+    if (page.type === 'asyncapi') {
+      return (
+        <DocsPage full>
+          <DocsTitle>{page.data.title}</DocsTitle>
+          <DocsBody>
+            <AsyncAPIPage {...page.data.getAsyncAPIPageProps()} />
+          </DocsBody>
+        </DocsPage>
+      );
+    }
+
+    // ...
+  }
+  ```
+</show>
+
+<show when={props.framework === 'astro'}>
+  ```astro tab="src/pages/docs/[...slug].astro"
+  ---
+  import type { GetStaticPaths, InferGetStaticPropsType } from 'astro';
+  import Layout from '@/layouts/Layout.astro';
+  import { Docs } from '@/components/docs';
+  import { AsyncAPIDocs } from '@/components/asyncapi-docs'; // [!code ++]
+  import { source } from '@/lib/source';
+
+  export const prerender = true;
+
+  export const getStaticPaths = (() => {
+    return source.getPages().map((page) => ({
+      params: { slug: decodeURI(page.slugs.join('/')) || undefined },
+      props: { page },
+    }));
+  }) satisfies GetStaticPaths;
+
+  type Props = InferGetStaticPropsType<typeof getStaticPaths>;
+
+  const { page } = Astro.props;
+  const pageTree = await source.serializePageTree(source.getPageTree());
+  ---
+
+  {/* [!code ++:13] */}
+  {page.type === 'asyncapi' && (
+    <Layout title={page.data.title ?? 'My App'}>
+      <AsyncAPIDocs
+        client:load
+        pathname={Astro.url.pathname}
+        params={Astro.params}
+        tree={pageTree}
+        title={page.data.title}
+        props={page.data.getAsyncAPIPageProps()}
+      />
+    </Layout>
+  )}
+  ```
+
+  ```tsx tab="src/components/asyncapi-docs.tsx"
+  import { type SerializedPageTree, useFumadocsLoader } from 'fumadocs-core/source/client';
+  import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+  import { DocsBody, DocsPage, DocsTitle } from 'fumadocs-ui/layouts/docs/page';
+  import { AsyncAPIPage } from '@/components/api-page';
+  import { Provider, type ProviderProps } from '@/components/provider';
+  import { baseOptions } from '@/lib/layout.shared';
+  import type { AsyncAPIPageProps } from '@fumadocs/asyncapi/ui';
+
+  export function AsyncAPIDocs({
+    tree,
+    title,
+    props,
+    ...rest
+  }: ProviderProps & { tree: SerializedPageTree; title?: string; props: AsyncAPIPageProps }) {
+    const data = useFumadocsLoader({ tree });
+
+    return (
+      <Provider {...rest}>
+        <DocsLayout {...baseOptions()} tree={data.tree}>
+          <DocsPage full>
+            <DocsTitle>{title}</DocsTitle>
+            <DocsBody>
+              <AsyncAPIPage {...props} />
+            </DocsBody>
+          </DocsPage>
+        </DocsLayout>
+      </Provider>
+    );
+  }
+  ```
+</show>
+
+<Callout type="warn" title="移行が完了していることを確認してください">
+  次に進む前に、型チェックを実行してください。
+
+  ```npm
+  npm run types:check
+  ```
+</Callout>
+
+MDX ファイルをコンテンツディレクトリに書き出したい場合は、[MDX ファイル](/docs/integrations/asyncapi/generate-files#mdx-files)を参照してください。
+
+## 機能 [#features]
+
+公式の AsyncAPI インテグレーションは AsyncAPI 3 をサポートしており、以下を提供します。
+
+* 読者から見たメッセージの方向、オペレーションのサーバーとチャンネルのアドレス
+* メッセージとそのペイロードおよびヘッダーのスキーマ(Avro、Protobuf、RAML のスキーマを含む)
+* メッセージの例(ドキュメントに記載されたもの、またはスキーマから生成したもの)
+* リクエストと応答、相関 ID
+* セキュリティスキーム(OAuth 2.0 フローや SASL メカニズムを含む)
+* 選択したサーバーについて、バインディングから取得したプロトコルの詳細
+* WebSocket、Server-Sent Events、カスタムトランスポートに対応したプレイグラウンド(テキストメッセージとバイナリメッセージの両方に対応)
+* WebSocket、MQTT、Kafka、AMQP、NATS 向けの JavaScript と Python のコードサンプル
+* ペイロードとヘッダーの TypeScript 型定義
+* LLM 向けのページの Markdown
+* トレイト
+
+AsyncAPI 2 のドキュメントは `npx @asyncapi/cli convert` で変換できます。
+
+### デモ [#demo]
+
+[AsyncAPI のサンプル](/docs/asyncapi)をご覧ください。

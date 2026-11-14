@@ -1,0 +1,166 @@
+---
+title: 検索 UI
+description: ドキュメント検索用の UI
+---
+
+## 概要 [#overview]
+
+検索 UI は [`<RootProvider />`](/docs/ui/layouts/root-provider) でカスタマイズできます。
+
+```tsx title="app/layout.tsx"
+import { RootProvider } from 'fumadocs-ui/provider/<framework>';
+import type { ReactNode } from 'react';
+import { SearchDialog } from '@/components/my-search-dialog';
+
+export default function Layout({ children }: { children: ReactNode }) {
+  return (
+    <html>
+      <body>
+        <RootProvider
+          // [!code highlight:4]
+          search={{
+            enabled: false, // 検索を完全に無効化
+            SearchDialog, // 検索ダイアログを置き換え
+          }}
+        >
+          {children}
+        </RootProvider>
+      </body>
+    </html>
+  );
+}
+```
+
+### ホットキー [#hot-keys]
+
+検索ダイアログを開くホットキーはカスタマイズできます。デフォルトは <kbd>⌘</kbd> <kbd>K</kbd> または <kbd>Ctrl</kbd> <kbd>K</kbd> です。
+
+```tsx
+import { RootProvider } from 'fumadocs-ui/provider/<framework>';
+
+<RootProvider
+  search={{
+    hotKey: [
+      {
+        display: 'K',
+        key: 'k', // キーコード、またはキーが押されたかどうかを判定する関数
+      },
+    ],
+  }}
+>
+  {children}
+</RootProvider>;
+```
+
+### リファレンス [#references]
+
+すべてのオプションの一覧です。
+
+<auto-type-table cwd path="content/docs/ui/props.ts" name="SearchProps" />
+
+## カスタム UI [#custom-ui]
+
+Fumadocs UI は、高度な用途向けに低レベルの `<SearchDialog />` コンポーネントも提供しています。これを使って独自の検索ダイアログを作成し、デフォルトの検索ダイアログと置き換えることができます。
+
+```tsx twoslash
+'use client';
+import React from 'react';
+import { useFetchSearch } from 'fumadocs-core/search/client';
+import {
+  SearchDialog,
+  SearchDialogClose,
+  SearchDialogContent,
+  SearchDialogHeader,
+  SearchDialogFooter,
+  SearchDialogIcon,
+  SearchDialogInput,
+  SearchDialogList,
+  SearchDialogOverlay,
+  type SharedProps,
+} from 'fumadocs-ui/components/dialog/search';
+import { useI18n } from 'fumadocs-ui/contexts/i18n';
+
+export default function DefaultSearchDialog(props: SharedProps) {
+  const { locale } = useI18n(); // (任意) i18n 対応用
+  const search = useFetchSearch({
+    locale,
+  });
+
+  return (
+    <SearchDialog {...search} {...props}>
+      <SearchDialogOverlay />
+      <SearchDialogContent>
+        <SearchDialogHeader>
+          <SearchDialogIcon />
+          <SearchDialogInput />
+          <SearchDialogClose />
+        </SearchDialogHeader>
+        <SearchDialogList />
+      </SearchDialogContent>
+      <SearchDialogFooter>{/* フッターの要素 */}</SearchDialogFooter>
+    </SearchDialog>
+  );
+}
+```
+
+### コンテンツレンダラー [#content-renderer]
+
+検索アイテムの Markdown コンテンツを独自にレンダリングしたい場合は、`renderMarkdown` を渡してください。
+
+```tsx title="components/search.tsx"
+<SearchDialogList
+  // [!code highlight:8]
+  Item={(props) => (
+    <SearchDialogListItem
+      {...props}
+      renderMarkdown={(text) => {
+        // ...
+      }}
+    />
+  )}
+/>
+```
+
+### テーブル [#tables]
+
+結果に含まれるテーブルのレンダリング方法をカスタマイズできます。カスタムの `Table` は、行を自前でレンダリングします。
+
+```tsx title="components/search.tsx"
+<SearchDialogList
+  // カードを使わずに行を表示
+  Table={({ table, Item, onSelect }) =>
+    table.rows.map((row) => (
+      <Fragment key={row.id}>{Item({ item: row, onClick: () => onSelect(row) })}</Fragment>
+    ))
+  }
+/>
+```
+
+### ハイライト [#highlights]
+
+検索クエリに一致した箇所は [CSS Custom Highlight API](https://developer.mozilla.org/en-US/docs/Web/API/CSS_Custom_Highlight_API) でハイライトされます。スタイルは `::highlight(fd-search)` で指定してください。
+
+```css title="global.css"
+::highlight(fd-search) {
+  color: var(--color-fd-primary-foreground);
+  background-color: var(--color-fd-primary);
+}
+```
+
+`<SearchDialogList />` は、`<SearchDialog />` の `data` に含まれるクエリをハイライトします。`data` がない場合は、検索入力の内容をハイライトします。
+
+検索結果を独自にレンダリングする場合は、`useHighlightQuery()` を使用してハイライトしてください。
+
+```tsx title="components/search-result.tsx"
+'use client';
+import { useHighlightQuery } from 'fumadocs-core/search/client';
+import type { ReactNode } from 'react';
+
+export function SearchResult({ query, children }: { query: string; children: ReactNode }) {
+  const ref = useHighlightQuery(query);
+
+  return <div ref={ref}>{children}</div>;
+}
+```
+
+`data-highlight-ignore` が指定された要素(コンポーネントのバッジなど)内のテキストはハイライトされません。

@@ -1,0 +1,12 @@
+---
+title: Remark Include
+description: 他のファイルのコンテンツを再利用します。
+---
+
+## 使い方 [#usage]
+
+Remark Include は remark プラグインです。Fumadocs MDX では、unified と Sätteri のどちらでもデフォルトで有効になっています。構文については[インクルード](/docs/mdx/include)を参照してください。
+
+パスはコンパイル対象のファイルを基準とした相対パスです。unified では、`getProcessor` を渡さない限り、インクルードされた Markdown および MDX ファイルは現在のプロセッサーでパースされます。Fumadocs MDX はこのオプションを渡すため、各ファイルはそれぞれのフォーマットに応じてパースされます。
+
+<auto-type-table type="import('fumadocs-core/mdx-plugins/remark-include').RemarkIncludeOptions" />

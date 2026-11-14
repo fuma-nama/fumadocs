@@ -1,0 +1,16 @@
+---
+title: ミドルウェア
+description: i18n ルーティングを実装するための Next.js のプロキシ
+---
+
+## セットアップ [#setup]
+
+ユーザーを適切なロケールにリダイレクトします。この動作は設定ファイル `i18n.ts` でカスタマイズできます。
+
+これは Next.js のプロキシです。React Router、TanStack Start、Waku、Astro でのセットアップについては、[国際化](/docs/internationalization)を参照してください。
+
+<include cwd meta="title=&#x22;proxy.ts&#x22;">
+  ../../examples/i18n/proxy.ts
+</include>
+
+> `hideLocale` を有効にすると、`NextResponse.rewrite` を使用してロケールのプレフィックスを非表示にします。
