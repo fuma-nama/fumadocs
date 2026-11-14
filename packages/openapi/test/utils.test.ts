@@ -2,6 +2,7 @@ import { describe, expect, test } from 'vitest';
 import { pathnameFromRequest } from '@/requests/generators';
 import { defaultAdapters } from '@/requests/media/adapter';
 import { encodeRequestData } from '@/requests/media/encode';
+import { cookieString } from '@/requests/string-utils';
 import type { RequestData } from '@/requests/types';
 
 describe('URL utilities', () => {
@@ -245,4 +246,31 @@ test('sends a path parameter with reserved characters to the right URL', () => {
   expect(pathnameFromRequest('/files/{name}', data)).toBe('/files/report%231?q=a%26b');
   // headers are not part of the URL
   expect(data.header['X-Name'].value).toBe('a/b c');
+});
+
+test('serializes cookie parameters by their style', () => {
+  const cookie = (value: unknown, style?: 'form' | 'cookie', explode?: boolean) =>
+    cookieString(
+      encodeRequestData(
+        { method: 'get', path: {}, query: {}, header: {}, cookie: { color: value } },
+        defaultAdapters,
+        [{ name: 'color', in: 'cookie', style, explode }],
+      ).cookie,
+    );
+  const list = ['blue', 'black', 'brown'];
+  const rgb = { R: 100, G: 200, B: 150 };
+
+  // https://spec.openapis.org/oas/v3.2.0.html#style-examples
+  for (const style of ['form', 'cookie'] as const) {
+    expect(cookie('blue', style)).toBe('color=blue');
+    expect(cookie(list, style, false)).toBe('color=blue,black,brown');
+    expect(cookie(rgb, style, false)).toBe('color=R,100,G,200,B,150');
+  }
+  expect(cookie(list)).toBe('color=blue&color=black&color=brown');
+  expect(cookie(rgb)).toBe('R=100&G=200&B=150');
+  expect(cookie(list, 'cookie')).toBe('color=blue; color=black; color=brown');
+  expect(cookie(rgb, 'cookie')).toBe('R=100; G=200; B=150');
+
+  expect(cookie(['a b', 'c;d'])).toBe('color=a%20b&color=c%3Bd');
+  expect(cookie('Hello%2C world!', 'cookie')).toBe('color=Hello%2C world!');
 });

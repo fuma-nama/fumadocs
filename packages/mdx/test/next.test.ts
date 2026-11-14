@@ -21,4 +21,12 @@ describe('Next.js config', () => {
     // the meta loader derives its JSON output format from `type`
     expect(rule.loaders[0]?.options).toMatchObject({ type: 'turbopack' });
   });
+
+  test('never runs the macro on node_modules in Turbopack, like in webpack', () => {
+    const config = createMDX({ macro: { include: ['**/source.ts'] } })();
+    const rule = config.turbopack?.rules?.['**/source.ts'] as { condition?: unknown };
+
+    // `foreign` is Turbopack's condition for code in node_modules
+    expect(rule.condition).toMatchObject({ all: expect.arrayContaining([{ not: 'foreign' }]) });
+  });
 });

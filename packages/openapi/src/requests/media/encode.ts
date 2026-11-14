@@ -238,26 +238,31 @@ function serializeCookieParameter(
   // write output
   output: Record<string, EncodedParameter>,
 ) {
-  const { explode = true } = field;
+  const { name, style, explode = true } = field;
+  // `style: cookie` takes values as given, `form` (the default) percent-encodes them
+  const encode = style === 'cookie' ? String : (v: unknown) => encodeURIComponent(String(v));
 
-  // form
-  if (Array.isArray(value)) {
-    output[field.name!] = {
-      value: explode ? value.map((v) => `${field.name}=${v}`).join('&') : value.join(','),
+  if (typeof value !== 'object') {
+    output[name!] = { value: encode(value) };
+  } else if (!explode) {
+    output[name!] = {
+      value: Array.isArray(value)
+        ? value.map(encode).join(',')
+        : Object.entries(value)
+            .map(([k, v]) => `${encode(k)},${encode(v)}`)
+            .join(','),
     };
-  } else if (typeof value === 'object' && explode) {
-    for (const [k, v] of Object.entries(value)) {
-      output[k] = {
-        value: String(v),
-      };
-    }
-  } else if (typeof value === 'object') {
-    output[field.name!] = {
-      value: Object.entries(value).flat().join(','),
-    };
+  } else if (style === 'cookie' && !Array.isArray(value)) {
+    for (const [k, v] of Object.entries(value)) output[k] = { value: encode(v) };
   } else {
-    output[field.name!] = {
-      value: String(value),
-    };
+    // each cookie is written as `name=value`, so the pairs after the first go into its value
+    const [first, ...rest]: [string, unknown][] = Array.isArray(value)
+      ? value.map((v) => [name!, v])
+      : Object.entries(value).map(([k, v]) => [encode(k), v]);
+    if (!first) return;
+
+    let out = encode(first[1]);
+    for (const [k, v] of rest) out += `${style === 'cookie' ? '; ' : '&'}${k}=${encode(v)}`;
+    output[first[0]] = { value: out };
   }
 }

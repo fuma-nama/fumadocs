@@ -148,6 +148,22 @@ export function csharpRawString(str: string): string {
   return `${quotes}\n${str}\n${quotes}`;
 }
 
+const rubyEscapes: Record<string, string> = {
+  '\\': '\\\\',
+  '"': '\\"',
+  '#': '\\#',
+  '\n': '\\n',
+  '\r': '\\r',
+  '\t': '\\t',
+  '\0': '\\u{0}',
+};
+
+/** a Ruby single-quoted string, double-quoted with escapes for the CRs and NULs it can't show */
+export function rubyString(str: string): string {
+  if (/[\r\0]/.test(str)) return `"${str.replace(/[\\"#\n\r\t\0]/g, (c) => rubyEscapes[c]!)}"`;
+  return `'${str.replace(/[\\']/g, '\\$&')}'`;
+}
+
 /** single quotes keep the string literal, each `'` closes them to add an escaped quote */
 export function shellQuote(str: string): string {
   return `'${str.replaceAll("'", `'\\''`)}'`;

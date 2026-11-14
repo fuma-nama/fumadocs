@@ -107,7 +107,6 @@ test('llms: files', async () => {
     '/docs/misc/note.md',
     '/docs/api.md',
     '/docs/api/get.md',
-    '/docs/api/llms.txt',
     '/docs/api/llms-full.txt',
   ]);
 });
@@ -175,12 +174,13 @@ test('llms: section', async () => {
 
   await expect(output.files()).resolves.toEqual(
     expect.arrayContaining([
-      '/docs/guide/llms.txt',
       '/docs/guide/llms-full.txt',
       '/docs/reference/llms.txt',
       '/docs/reference/llms-full.txt',
     ]),
   );
+  // only a collapsed section has its own `llms.txt`
+  await expect(output.files()).resolves.not.toContain('/docs/guide/llms.txt');
   await expect(output.files()).resolves.not.toContain('/docs/misc/llms-full.txt');
 
   const index = await text('/llms.txt');

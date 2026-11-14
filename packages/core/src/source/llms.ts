@@ -35,10 +35,10 @@ export interface LLMsConfig<Page = unknown> {
   filter?: (page: Page) => boolean;
 
   /**
-   * The folders that are sections, with their own `<asPath>/llms.txt` and `<asPath>/llms-full.txt`, root folders by default.
+   * The folders that are sections, with their own `<asPath>/llms-full.txt`, root folders by default.
    *
    * - `asPath`: the path the section is served as, by default the URL of the folder's index page, or the URL directory of its pages.
-   * - `collapse`: list the section in the parent `llms.txt` as one link to its own `llms.txt`, instead of its pages.
+   * - `collapse`: list the section in the parent `llms.txt` as one link to its own `<asPath>/llms.txt`, instead of its pages.
    */
   section?: (
     folder: PageTree.Folder,
@@ -78,7 +78,7 @@ export interface LLMsWithPages<
    * The paths of the files for agents, for static output:
    *
    * - `/llms.txt` and `/llms-full.txt`: every page, linked to its `.md` file, and sections linked to their files.
-   * - `<asPath>/llms.txt` and `<asPath>/llms-full.txt`: the same for a section, see `section`.
+   * - `<asPath>/llms-full.txt`: the pages of a section, and `<asPath>/llms.txt` for a collapsed one, see `section`.
    * - `<page>.md`: a page, `/index.md` for `/`.
    *
    * @param lang - only the pages of a language, required when URLs don't have the locale (`hideLocale: 'always'`)
@@ -276,13 +276,13 @@ export function llms<C extends LoaderConfig = LoaderConfig>(
   function sections(loader: LoaderOutput<C>, lang?: string) {
     const out = new Map<
       string,
-      { folder: PageTree.Folder; pages: Page[]; ctx: RenderContext<C> }
+      { folder: PageTree.Folder; collapse?: boolean; pages: Page[]; ctx: RenderContext<C> }
     >();
     const visit = (node: PageTree.Node, ctx: RenderContext<C>) => {
       if (node.type !== 'folder') return;
       const scope = sectionOf(node, ctx);
       if (scope && !out.has(scope.url))
-        out.set(scope.url, { folder: node, pages: scope.pages, ctx });
+        out.set(scope.url, { folder: node, collapse: scope.collapse, pages: scope.pages, ctx });
       for (const child of node.children) visit(child, ctx);
     };
 
@@ -321,7 +321,9 @@ export function llms<C extends LoaderConfig = LoaderConfig>(
     const scope = sections(loader, lang).get(url);
     if (!scope) return;
     if (name === '/llms-full.txt') return renderPages(scope.pages);
-    return formatTree(scope.folder, { ...scope.ctx, markdown: true }, `${url}/llms-full.txt`);
+    // a section without `collapse` is listed in the parent `llms.txt`
+    if (scope.collapse)
+      return formatTree(scope.folder, { ...scope.ctx, markdown: true }, `${url}/llms-full.txt`);
   }
 
   return {
@@ -338,8 +340,10 @@ export function llms<C extends LoaderConfig = LoaderConfig>(
         const pages = getPages(loader, lang);
         const out = new Set(['/llms.txt', '/llms-full.txt']);
         for (const page of pages) out.add(markdownPath(page.url));
-        for (const url of sections(loader, lang).keys())
-          out.add(`${url}/llms.txt`).add(`${url}/llms-full.txt`);
+        for (const [url, { collapse }] of sections(loader, lang)) {
+          if (collapse) out.add(`${url}/llms.txt`);
+          out.add(`${url}/llms-full.txt`);
+        }
         return Array.from(out);
       });
     },

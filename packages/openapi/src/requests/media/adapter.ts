@@ -4,9 +4,10 @@ import {
   javaTextBlock,
   jsTemplateLiteral,
   pythonString,
+  rubyString,
   rustString,
 } from 'shared-api/codegen';
-import { inputToString, toSearchParams } from '@/requests/string-utils';
+import { formFields, inputToString, toSearchParams } from '@/requests/string-utils';
 import type { RequestData } from '@/requests/types';
 import { resolveMediaAdapter } from './resolve-adapter';
 // @ts-expect-error -- untyped
@@ -169,20 +170,20 @@ export const defaultAdapters = {
     },
     generateExample(data, ctx) {
       const s: string[] = [];
-      const fields: [key: string, value: string][] = [];
-      for (const [key, value] of Object.entries(data.body as object)) {
-        if (value != null) fields.push([JSON.stringify(key), inputToString(value)]);
-      }
+      const fields = formFields(data.body).map(([key, value]) => [JSON.stringify(key), value]);
 
+      // a key repeats for each item of an array
       switch (ctx.lang) {
         case 'js':
           s.push('const body = new FormData();');
-          for (const [key, value] of fields) s.push(`body.set(${key}, ${JSON.stringify(value)})`);
+          for (const [key, value] of fields)
+            s.push(`body.append(${key}, ${JSON.stringify(value)})`);
           break;
         case 'python':
-          s.push('body = {');
-          for (const [key, value] of fields) s.push(`  ${key}: (None, ${JSON.stringify(value)}),`);
-          s.push('}');
+          s.push('body = [');
+          for (const [key, value] of fields)
+            s.push(`  (${key}, (None, ${JSON.stringify(value)})),`);
+          s.push(']');
           break;
         case 'go': {
           const { addImport } = ctx as GoContext;
@@ -268,5 +269,7 @@ function str(
       return `var body = new StringContent(${csharpRawString(text)}, Encoding.UTF8, "${mediaType}");`;
     case 'rust':
       return `let body = ${rustString(text)};`;
+    case 'ruby':
+      return `body = ${rubyString(text)}`;
   }
 }

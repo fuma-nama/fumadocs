@@ -1,5 +1,5 @@
 import { shellQuote } from 'shared-api/codegen';
-import { inputToString } from '@/requests/string-utils';
+import { formFields, inputToString } from '@/requests/string-utils';
 import { resolveMediaType } from '@/requests/media/resolve-adapter';
 import type { CodeUsageGenerator } from '@/requests/generators';
 
@@ -20,10 +20,8 @@ export const curl: CodeUsageGenerator = {
 
     const type = data.bodyMediaType && resolveMediaType(data.bodyMediaType, mediaAdapters);
     if (data.body && type === 'multipart/form-data') {
-      if (typeof data.body !== 'object') throw new Error('[CURL] request body must be an object.');
-
-      for (const [key, value] of Object.entries(data.body)) {
-        s.push(`-F ${shellQuote(`${key}=${inputToString(value)}`)}`);
+      for (const [key, value] of formFields(data.body)) {
+        s.push(`-F ${shellQuote(`${key}=${value}`)}`);
       }
     } else if (data.body && type) {
       s.push(`-H 'Content-Type: ${data.bodyMediaType}'`);

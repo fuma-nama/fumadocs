@@ -1,6 +1,6 @@
 const body = new FormData();
-body.set("name", "Mars")
-body.set("image", "@mars.jpg")
+body.append("name", "Mars")
+body.append("image", "@mars.jpg")
 
 fetch("http://localhost:8080/hello_world?search=ai", {
   method: "POST",
