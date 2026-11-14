@@ -3,9 +3,10 @@ import { isMarkdownPreferred, rewritePath } from 'fumadocs-core/negotiation';
 
 const { rewrite: rewriteLLM } = rewritePath('/docs{/*path}', '/llms.mdx/docs{/*path}.md');
 const { rewrite: rewriteMd } = rewritePath('/docs{/*path}.md{x}', '/llms.mdx/docs{/*path}.md');
-const { rewrite: rewriteFull } = rewritePath(
-  '/docs{/*path}/llms-full.txt',
-  '/llms.mdx/docs{/*path}/llms-full.txt',
+// the `llms.txt` and `llms-full.txt` of sections
+const { rewrite: rewriteText } = rewritePath(
+  '/docs{/*path}/:file.txt',
+  '/llms.mdx/docs{/*path}/:file.txt',
 );
 
 /** generated API pages have no Markdown, they keep their HTML */
@@ -23,7 +24,7 @@ export const config = {
 
 export default function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const result = rewriteMd(pathname) || rewriteFull(pathname);
+  const result = rewriteMd(pathname) || rewriteText(pathname);
   if (result) {
     return NextResponse.rewrite(new URL(result, request.nextUrl));
   }
