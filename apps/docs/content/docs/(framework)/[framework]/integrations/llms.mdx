@@ -79,7 +79,7 @@ The CLI serves these files for AI agents:
 
 - `/llms.txt`: an index of every page, linked to its Markdown, with each section linked to its files.
 - `/llms-full.txt`: the content of every page.
-- `<url>/llms.txt` and `<url>/llms-full.txt`: the index and the pages of a section, like `/docs/ui/llms-full.txt`, so agents can read large docs one section at a time. Sections are the root folders of the page tree.
+- `<path>/llms.txt` and `<path>/llms-full.txt`: the index and the pages of a section, like `/docs/ui/llms-full.txt`, so agents can read large docs one section at a time. Sections are the root folders of the page tree.
 - `<page>.md`: the Markdown of a page, like `/docs/ui.md`, and `/index.md` for `/`.
 
 To leave pages out of the files, like drafts, pass `filter`. `llms.txt` still lists them, linked to their HTML page:
@@ -91,7 +91,7 @@ export const docsLlms = llms(source, {
 });
 ```
 
-To choose the sections, pass `section`. It receives a page tree folder and returns whether it's a section, or its options: `url` for the URL of its files, and `collapse` to list it in `llms.txt` as one link to its own `llms.txt`, which keeps `llms.txt` short on large sites:
+To choose the sections, pass `section`. It receives a page tree folder and returns whether it's a section, or its options: `asPath` for the path it's served as, and `collapse` to list it in `llms.txt` as one link to its own `llms.txt`, which keeps `llms.txt` short on large sites:
 
 ```ts title="lib/source.ts"
 export const docsLlms = llms(source, {

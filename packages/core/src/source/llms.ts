@@ -35,15 +35,15 @@ export interface LLMsConfig<Page = unknown> {
   filter?: (page: Page) => boolean;
 
   /**
-   * The folders that are sections, with their own `<url>/llms.txt` and `<url>/llms-full.txt`, root folders by default.
+   * The folders that are sections, with their own `<asPath>/llms.txt` and `<asPath>/llms-full.txt`, root folders by default.
    *
-   * - `url`: the URL of the section, by default the URL of the folder's index page, or the URL directory of its pages.
+   * - `asPath`: the path the section is served as, by default the URL of the folder's index page, or the URL directory of its pages.
    * - `collapse`: list the section in the parent `llms.txt` as one link to its own `llms.txt`, instead of its pages.
    */
   section?: (
     folder: PageTree.Folder,
     ctx: Context,
-  ) => boolean | { url?: string; collapse?: boolean };
+  ) => boolean | { asPath?: string; collapse?: boolean };
 }
 
 export interface LLMs<IndexOutput extends Awaitable<string> = Awaitable<string>> {
@@ -78,7 +78,7 @@ export interface LLMsWithPages<
    * The paths of the files for agents, for static output:
    *
    * - `/llms.txt` and `/llms-full.txt`: every page, linked to its `.md` file, and sections linked to their files.
-   * - `<url>/llms.txt` and `<url>/llms-full.txt`: the same for a section, see `section`.
+   * - `<asPath>/llms.txt` and `<asPath>/llms-full.txt`: the same for a section, see `section`.
    * - `<page>.md`: a page, `/index.md` for `/`.
    *
    * @param lang - only the pages of a language, required when URLs don't have the locale (`hideLocale: 'always'`)
@@ -261,8 +261,8 @@ export function llms<C extends LoaderConfig = LoaderConfig>(
     };
     visit(folder);
     if (pages.length === 0) return;
-    const { url, collapse } = typeof value === 'object' ? value : {};
-    if (url) return { url, collapse, pages };
+    const { asPath, collapse } = typeof value === 'object' ? value : {};
+    if (asPath) return { url: asPath, collapse, pages };
 
     let common = folder.index?.url ?? pages[0].url;
     for (const page of pages) {

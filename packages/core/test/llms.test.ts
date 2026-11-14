@@ -167,9 +167,9 @@ test('llms: filter', async () => {
 test('llms: section', async () => {
   const output = llms(guideDocs, {
     renderPage: renderTitle,
-    // folders with an index page, and the root folder at another URL, collapsed
+    // folders with an index page, and the root folder served as another path, collapsed
     section: (folder) =>
-      folder.root ? { url: '/docs/reference', collapse: true } : folder.index !== undefined,
+      folder.root ? { asPath: '/docs/reference', collapse: true } : folder.index !== undefined,
   });
   const text = async (path: string) => (await output.serve(path))!.text();
 
