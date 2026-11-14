@@ -7,6 +7,12 @@ import { getPageComponents } from '@/components/mdx/page';
 export const docsLlms = llms(source, {
   // generated API pages have no Markdown
   filter: (page) => page.type === 'docs',
+  section: (folder) => {
+    // the frameworks have the same pages, `llms.txt` lists each as one line
+    if (folder.root === 'framework') return { collapse: true };
+    // every folder, except the Framework group which has every framework
+    return !folder.children.some((child) => child.type === 'folder' && child.root);
+  },
   renderPage: async (page) => {
     page = source.getPage(page.slugs, { props: { components: getPageComponents(page) } }) ?? page;
     if (page.type !== 'docs' || !('getText' in page.data)) return '';

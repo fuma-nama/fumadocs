@@ -43,7 +43,7 @@ export const docsLlms = llms(${ref}, {
   prefix
     ? `
   // link to the files under \`${prefix}\`
-  renderUrl: (item) => (/^\\/.*(\\.md|\\/llms-full\\.txt)$/.test(item.url) ? \`${prefix}\${item.url}\` : item.url),`
+  renderUrl: (item) => (/^\\/.*\\.(md|txt)$/.test(item.url) ? \`${prefix}\${item.url}\` : item.url),`
     : ''
 }
 });`;
@@ -175,10 +175,10 @@ export const nextRewrites = (docsRoute: string, i18n: boolean) => {
       source: `${lang}${docsRoute}/:path*.md`,
       destination: `${lang}/llms.mdx${docsRoute}/:path*.md`,
     },
-    // sections like `/cn/llms-full.txt` are outside the docs
+    // the files of sections, like `/cn/llms-full.txt` outside the docs
     {
-      source: `${lang}${i18n ? '' : docsRoute}/:path*/llms-full.txt`,
-      destination: `${lang}/llms.mdx${i18n ? '' : docsRoute}/:path*/llms-full.txt`,
+      source: `${lang}${i18n ? '' : docsRoute}/:path*.txt`,
+      destination: `${lang}/llms.mdx${i18n ? '' : docsRoute}/:path*.txt`,
     },
   ];
 };
@@ -206,7 +206,7 @@ export function templates(
       { segments: ['llms-full.txt'] },
       { segments: ['{$}.md'] },
       { segments: [docsRoute, '{$}.md'], locale: true },
-      { segments: [docsRoute, '{$}llms-full.txt'], locale: true },
+      { segments: [docsRoute, '{$}.txt'], locale: true },
     ];
     // sections outside the docs, like `/cn/llms-full.txt`
     if (i18n) routes.push({ segments: ['{$}llms-full.txt'] });
