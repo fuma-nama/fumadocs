@@ -41,8 +41,9 @@ export const docs: Feature<{ i18n: boolean }> = {
   async apply(ctx, options) {
     const { project } = ctx;
     const { baseDir, packageJson, config, framework } = project;
-    // Waku has no optional route segments, the locale is always in the URL
-    const i18n = project.i18n ?? (options.i18n ? { optionalLocale: framework !== 'waku' } : null);
+    // the locale is always in the URL: Waku has no optional route segments, a static Next.js site has no proxy to rewrite URLs
+    const optionalLocale = framework !== 'waku' && !(framework === 'next' && project.static);
+    const i18n = project.i18n ?? (options.i18n ? { optionalLocale } : null);
     const providerProps: string[] = [];
     if (project.static) providerProps.push('search={{ SearchDialog }}');
     if ('next-themes' in (packageJson.dependencies ?? {}))
@@ -90,7 +91,7 @@ export const docs: Feature<{ i18n: boolean }> = {
     if (i18n) await ctx.write('content/docs/index.cn.mdx', sampleContentCn);
     if (framework === 'astro') await configureCollections(ctx);
     else await ctx.append('.gitignore', ['.source']);
-    if (i18n && framework === 'next') await configureProxy(ctx);
+    if (i18n && framework === 'next' && !project.static) await configureProxy(ctx);
 
     await configureBundler(ctx);
     await configureCss(ctx);
