@@ -3,11 +3,7 @@ import { isMarkdownPreferred, rewritePath } from 'fumadocs-core/negotiation';
 
 const { rewrite: rewriteLLM } = rewritePath('/docs{/*path}', '/llms.mdx/docs{/*path}.md');
 const { rewrite: rewriteMd } = rewritePath('/docs{/*path}.md{x}', '/llms.mdx/docs{/*path}.md');
-// the `llms.txt` and `llms-full.txt` of sections
-const { rewrite: rewriteText } = rewritePath(
-  '/docs{/*path}/:file.txt',
-  '/llms.mdx/docs{/*path}/:file.txt',
-);
+const { rewrite: rewriteText } = rewritePath('/docs{/*path}.txt', '/llms.mdx/docs{/*path}.txt');
 
 /** generated API pages have no Markdown, they keep their HTML */
 const apiPage = /^\/docs\/(?:openapi|asyncapi|graphql)\/./;

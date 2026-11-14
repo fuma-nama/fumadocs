@@ -12,8 +12,8 @@ const config = {
         destination: '/llms.mdx/docs/:path*.md',
       },
       {
-        source: '/docs/:path*/:file(llms|llms-full).txt',
-        destination: '/llms.mdx/docs/:path*/:file.txt',
+        source: '/docs/:path*.txt',
+        destination: '/llms.mdx/docs/:path*.txt',
       },
     ];
   },
