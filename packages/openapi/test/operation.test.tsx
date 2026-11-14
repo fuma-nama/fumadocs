@@ -211,6 +211,45 @@ test('skips response examples without a value', async () => {
   expect(tabs[0].examples?.map((example) => example.sample)).toEqual([{ id: '1' }, { id: '2' }]);
 });
 
+test('generated response examples leave out writeOnly properties, like the response schema', async () => {
+  let tabs: ResponseTab[] = [];
+
+  await render(
+    '/museum-hours',
+    'get',
+    function Harness() {
+      tabs = useResponseExamples();
+      return null;
+    },
+    ({ operation, pathItem }) => ({
+      operation: {
+        ...operation,
+        responses: {
+          '200': {
+            description: 'ok',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  required: ['id', 'email', 'password'],
+                  properties: {
+                    id: { type: 'string', readOnly: true },
+                    email: { type: 'string' },
+                    password: { type: 'string', writeOnly: true },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      pathItem,
+    }),
+  );
+
+  expect(Object.keys(tabs[0].examples?.[0].sample as object)).toEqual(['id', 'email']);
+});
+
 test('renders request bodies of unsupported media types', async () => {
   let info: OperationInfo;
   let curl: string | undefined;
