@@ -17,6 +17,7 @@ import { Route as ApiSearchRouteImport } from './routes/api/search'
 import { Route as DocsSplatRouteImport } from './routes/docs/$'
 import { Route as DocsChar123Char125DotmdRouteImport } from './routes/docs/{$}[.]md'
 import { Route as DocsChar123Char125llmsFullDottxtRouteImport } from './routes/docs/{$}llms-full[.]txt'
+import { Route as DocsChar123Char125llmsDottxtRouteImport } from './routes/docs/{$}llms[.]txt'
 import { Route as OgDocsSplatRouteImport } from './routes/og/docs/$'
 
 const IndexRoute = IndexRouteImport.update({
@@ -60,6 +61,12 @@ const DocsChar123Char125llmsFullDottxtRoute =
     path: '/docs/{$}llms-full.txt',
     getParentRoute: () => rootRouteImport,
   } as any)
+const DocsChar123Char125llmsDottxtRoute =
+  DocsChar123Char125llmsDottxtRouteImport.update({
+    id: '/docs/{$}llms.txt',
+    path: '/docs/{$}llms.txt',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const OgDocsSplatRoute = OgDocsSplatRouteImport.update({
   id: '/og/docs/$',
   path: '/og/docs/$',
@@ -75,6 +82,7 @@ export interface FileRoutesByFullPath {
   '/docs/$': typeof DocsSplatRoute
   '/docs/{$}.md': typeof DocsChar123Char125DotmdRoute
   '/docs/{$}llms-full.txt': typeof DocsChar123Char125llmsFullDottxtRoute
+  '/docs/{$}llms.txt': typeof DocsChar123Char125llmsDottxtRoute
   '/og/docs/$': typeof OgDocsSplatRoute
 }
 export interface FileRoutesByTo {
@@ -86,6 +94,7 @@ export interface FileRoutesByTo {
   '/docs/$': typeof DocsSplatRoute
   '/docs/{$}.md': typeof DocsChar123Char125DotmdRoute
   '/docs/{$}llms-full.txt': typeof DocsChar123Char125llmsFullDottxtRoute
+  '/docs/{$}llms.txt': typeof DocsChar123Char125llmsDottxtRoute
   '/og/docs/$': typeof OgDocsSplatRoute
 }
 export interface FileRoutesById {
@@ -98,6 +107,7 @@ export interface FileRoutesById {
   '/docs/$': typeof DocsSplatRoute
   '/docs/{$}.md': typeof DocsChar123Char125DotmdRoute
   '/docs/{$}llms-full.txt': typeof DocsChar123Char125llmsFullDottxtRoute
+  '/docs/{$}llms.txt': typeof DocsChar123Char125llmsDottxtRoute
   '/og/docs/$': typeof OgDocsSplatRoute
 }
 export interface FileRouteTypes {
@@ -111,6 +121,7 @@ export interface FileRouteTypes {
     | '/docs/$'
     | '/docs/{$}.md'
     | '/docs/{$}llms-full.txt'
+    | '/docs/{$}llms.txt'
     | '/og/docs/$'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -122,6 +133,7 @@ export interface FileRouteTypes {
     | '/docs/$'
     | '/docs/{$}.md'
     | '/docs/{$}llms-full.txt'
+    | '/docs/{$}llms.txt'
     | '/og/docs/$'
   id:
     | '__root__'
@@ -133,6 +145,7 @@ export interface FileRouteTypes {
     | '/docs/$'
     | '/docs/{$}.md'
     | '/docs/{$}llms-full.txt'
+    | '/docs/{$}llms.txt'
     | '/og/docs/$'
   fileRoutesById: FileRoutesById
 }
@@ -145,6 +158,7 @@ export interface RootRouteChildren {
   DocsSplatRoute: typeof DocsSplatRoute
   DocsChar123Char125DotmdRoute: typeof DocsChar123Char125DotmdRoute
   DocsChar123Char125llmsFullDottxtRoute: typeof DocsChar123Char125llmsFullDottxtRoute
+  DocsChar123Char125llmsDottxtRoute: typeof DocsChar123Char125llmsDottxtRoute
   OgDocsSplatRoute: typeof OgDocsSplatRoute
 }
 
@@ -206,6 +220,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DocsChar123Char125llmsFullDottxtRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/docs/{$}llms.txt': {
+      id: '/docs/{$}llms.txt'
+      path: '/docs/{$}llms.txt'
+      fullPath: '/docs/{$}llms.txt'
+      preLoaderRoute: typeof DocsChar123Char125llmsDottxtRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/og/docs/$': {
       id: '/og/docs/$'
       path: '/og/docs/$'
@@ -225,6 +246,7 @@ const rootRouteChildren: RootRouteChildren = {
   DocsSplatRoute: DocsSplatRoute,
   DocsChar123Char125DotmdRoute: DocsChar123Char125DotmdRoute,
   DocsChar123Char125llmsFullDottxtRoute: DocsChar123Char125llmsFullDottxtRoute,
+  DocsChar123Char125llmsDottxtRoute: DocsChar123Char125llmsDottxtRoute,
   OgDocsSplatRoute: OgDocsSplatRoute,
 }
 export const routeTree = rootRouteImport
