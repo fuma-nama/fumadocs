@@ -141,9 +141,9 @@ test('llms: renderUrl of files', async () => {
     renderUrl: (item) => `https://example.com${item.url}`,
   });
 
-  expect(await (await output.serve('/llms.txt'))!.text()).toContain(
-    '[Setup](https://example.com/docs/guide/setup.md)',
-  );
+  const text = await (await output.serve('/llms.txt'))!.text();
+  expect(text).toContain('[Setup](https://example.com/docs/guide/setup.md)');
+  expect(text).toContain('[/docs/guide](https://example.com/docs/guide/llms-full.txt)');
   expect(output.index()).toContain('[Setup](https://example.com/docs/guide/setup)');
 });
 

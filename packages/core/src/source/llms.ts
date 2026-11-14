@@ -20,7 +20,7 @@ export interface LLMsConfig<Page = unknown> {
     ctx: Context,
   ) => string;
   /**
-   * The URL of a link, in files `item.url` is the path of the `.md` file of the page.
+   * The URL of a link, in files `item.url` is the path of the file it links to, like the `.md` file of a page.
    */
   renderUrl?: (item: PageTree.Item, ctx: Context) => string;
 
@@ -223,17 +223,21 @@ export function llms<C extends LoaderConfig = LoaderConfig>(
     path: string,
     lang?: string,
   ): Promise<string | undefined> {
-    const pages = getPages(loader, lang);
     if (path === '/llms.txt') {
       let text = formatIndex({ loader, lang, markdown: true });
-      const dirs = sections(pages);
+      const dirs = sections(getPages(loader, lang));
       if (dirs.size > 0) text += '\n\n## Sections\n';
-      for (const dir of dirs.keys()) text += `\n- [${dir}](${dir}/llms-full.txt)`;
+      for (const dir of dirs.keys()) {
+        const item: PageTree.Item = { type: 'page', name: dir, url: `${dir}/llms-full.txt` };
+        text += `\n- ${formatMarkdownLink(dir, config.renderUrl?.(item, { lang }) ?? item.url)}`;
+      }
       return text;
     }
-    if (path === '/llms-full.txt') return renderPages(pages);
+    if (path === '/llms-full.txt') return renderPages(getPages(loader, lang));
     if (path.endsWith('/llms-full.txt')) {
-      const dirPages = sections(pages).get(path.slice(0, -'/llms-full.txt'.length));
+      const dirPages = sections(getPages(loader, lang)).get(
+        path.slice(0, -'/llms-full.txt'.length),
+      );
       return dirPages && renderPages(dirPages);
     }
     if (path.endsWith('.md')) {
@@ -262,8 +266,10 @@ export function llms<C extends LoaderConfig = LoaderConfig>(
     async serve(path, lang) {
       const loader = await resolveLoader();
       // generated URLs are URI encoded, routers may pass paths decoded
+      const encoded = encodeURI(path);
       const text =
-        (await renderFile(loader, path, lang)) ?? (await renderFile(loader, encodeURI(path), lang));
+        (await renderFile(loader, path, lang)) ??
+        (encoded === path ? undefined : await renderFile(loader, encoded, lang));
       if (text === undefined) return;
 
       return new Response(text, {
