@@ -323,7 +323,11 @@ Create the following files:
   ../../examples/react-router-min/app/routes/search.ts
 </include>
 
-In [RSC mode](https://reactrouter.com/how-to/react-server-components), the docs route exports a `ServerComponent` instead of a loader and a page component. The server component passes `source.getPageTree()` to the layout and renders `page.data.body`. See the [RSC example](https://github.com/fuma-nama/fumadocs/tree/dev/examples/react-router-rsc).
+In [RSC mode](https://reactrouter.com/how-to/react-server-components), the docs route exports a `ServerComponent` instead of a loader and a page component:
+
+<include cwd meta='title="app/routes/docs.tsx"'>
+  ../../examples/react-router-rsc/app/routes/docs.tsx
+</include>
 
 </show>
 

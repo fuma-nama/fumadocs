@@ -120,6 +120,6 @@ ENV HOSTNAME="0.0.0.0"
 CMD ["node", "server.js"]
 ```
 
-When `postinstall` in your `package.json` runs `fumadocs-mdx`, also copy `source.config.ts` in the `deps` stage, because the script reads it.
+When `postinstall` in your `package.json` runs `fumadocs-mdx`, also copy `source.config.ts` and `next.config.*` in the `deps` stage, because the script reads them.
 
 </show>

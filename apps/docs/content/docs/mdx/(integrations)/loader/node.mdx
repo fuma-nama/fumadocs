@@ -22,7 +22,7 @@ console.log(source.getPages());
 npx tsx scripts/example.ts
 ```
 
-The loader only transforms ES modules. Set `"type": "module"` in your `package.json`, so `lib/source.ts` loads as one.
+The loader only transforms ES modules. Set `"type": "module"` in your `package.json`, so `lib/source.ts` loads as one. It applies to every `.js` file of the package, so convert CommonJS files like `next.config.js` to ESM first.
 
 The `register()` function accepts options:
 
