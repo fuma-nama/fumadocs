@@ -14,10 +14,10 @@ preload = ["./scripts/preload.ts"]
 ```ts tab="scripts/preload.ts"
 import { createMdxPlugin } from 'fumadocs-mdx/bun';
 
-Bun.plugin(createMdxPlugin());
+await Bun.plugin(createMdxPlugin());
 ```
 
-It will add support for loading MDX/meta files on runtime.
+It will add support for loading MDX/meta files on runtime. The plugin sets up asynchronously, so `await` it. Otherwise your script imports `lib/source.ts` before the plugin is ready, and the [Macro API](/docs/mdx/macro) throws an error.
 
 Now running any script with Bun, you can access your content files directly.
 

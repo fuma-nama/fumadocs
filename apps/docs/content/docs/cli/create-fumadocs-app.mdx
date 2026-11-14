@@ -13,18 +13,18 @@ It asks for the template and features to configure, you can also pass them as op
 
 ### Options
 
-| Option              | Description                                                                                        |
-| ------------------- | -------------------------------------------------------------------------------------------------- |
-| `--template <name>` | The template to use, see [Templates](#templates).                                                  |
-| `--src`             | (Next.js only) Use the `src/` directory.                                                           |
-| `--linter <name>`   | Configure a linter: `eslint` (Next.js only), `oxlint` or `biome`.                                  |
-| `--search <name>`   | Search solution: `orama` (default, local search) or `orama-cloud`.                                 |
-| `--og-image <name>` | OG image: `next-og` (Next.js only) or `takumi`, others use Takumi.                                 |
-| `--ai-chat <name>`  | AI chat: `openrouter`, `llmgateway` or `inkeep`, not available on static, SPA and Astro templates. |
-| `--install`         | Install dependencies automatically.                                                                |
-| `--no-git`          | Skip Git repository initialization.                                                                |
-| `--pm <name>`       | Package manager: `npm`, `pnpm`, `yarn` or `bun`, detected from how the CLI is invoked.             |
-| `-y, --yes`         | Skip prompts, use defaults for options not specified.                                              |
+| Option              | Description                                                                                                                              |
+| ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `--template <name>` | The template to use, see [Templates](#templates).                                                                                        |
+| `--src`             | (Next.js only) Use the `src/` directory.                                                                                                 |
+| `--linter <name>`   | Configure a linter: `eslint` (Next.js only), `oxlint` or `biome`.                                                                        |
+| `--search <name>`   | Search solution: `orama` (default, local search), `orama-cloud`, `algolia`, `meilisearch`, `typesense` or `mixedbread` (needs a server). |
+| `--og-image <name>` | OG image: `next-og` (Next.js only) or `takumi`, others use Takumi.                                                                       |
+| `--ai-chat <name>`  | AI chat: `openrouter`, `llmgateway` or `inkeep`, not available on static, SPA and Astro templates.                                       |
+| `--install`         | Install dependencies automatically.                                                                                                      |
+| `--no-git`          | Skip Git repository initialization.                                                                                                      |
+| `--pm <name>`       | Package manager: `npm`, `pnpm`, `yarn` or `bun`, detected from how the CLI is invoked.                                                   |
+| `-y, --yes`         | Skip prompts, use defaults for options not specified.                                                                                    |
 
 ### Templates
 
@@ -48,6 +48,8 @@ npx create-fumadocs-app@latest my-docs --template +next+fuma-docs-mdx --install 
 ```
 
 Options you didn't specify use their defaults: no linter, local search, no AI chat. It fails when the target directory already exists and is not empty.
+
+The templates have no i18n option. To add i18n to the new project, follow [Internationalization](/docs/internationalization).
 
 ## Programmatic API
 

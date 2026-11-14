@@ -20,6 +20,24 @@ Astro outputs a static site by default (`output: 'static'`). Docs routes set `ex
 
 </show>
 
+These features need a server, so they don't run in a static build:
+
+- The search server (use [static search](#search) instead).
+- [Ask AI](/docs/integrations/llms#ask-ai), whose chat route calls the AI model.
+- The [MCP server](/docs/integrations/llms#mcp-server).
+
+<show when={props.framework === 'next'}>
+
+The proxy (`proxy.ts`) doesn't run either, so [i18n](/docs/internationalization#middleware) can't redirect to a locale, and pages can't serve [Markdown for the `Accept` header](/docs/integrations/llms#accept).
+
+</show>
+
+<show when={props.framework === 'react-router' || props.framework === 'tanstack-start' || props.framework === 'waku'}>
+
+Middleware doesn't run either, so pages can't serve [Markdown for the `Accept` header](/docs/integrations/llms#accept).
+
+</show>
+
 ### Search [step]
 
 #### Built-in Search

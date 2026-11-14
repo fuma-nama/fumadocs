@@ -11,6 +11,7 @@ export default ({ framework }: { framework: Framework }) => ({
     'what-is-fumadocs',
     'comparisons',
     'manual-installation',
+    'upgrade',
     'guides',
     '---Writing---',
     'page-conventions',

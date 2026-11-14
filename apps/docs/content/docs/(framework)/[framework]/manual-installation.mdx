@@ -63,7 +63,7 @@ Install the packages:
 <show when={props.framework !== 'astro'}>
 
 ```npm
-npm i fumadocs-core fumadocs-ui
+npm i fumadocs-core fumadocs-ui@npm:@fumadocs/base-ui
 ```
 
 </show>
@@ -71,10 +71,12 @@ npm i fumadocs-core fumadocs-ui
 <show when={props.framework === 'astro'}>
 
 ```npm
-npm i fumadocs-core fumadocs-ui @fumadocs/astro @astrojs/react react react-dom @types/mdx
+npm i fumadocs-core fumadocs-ui@npm:@fumadocs/base-ui @fumadocs/astro @astrojs/react react react-dom @types/mdx
 ```
 
 </show>
+
+Like the templates, it installs `fumadocs-ui` as an alias to `@fumadocs/base-ui`, the [Base UI](/docs/ui/component-library) version of Fumadocs UI. To use Radix UI instead, install the `fumadocs-ui` package itself.
 
 ### Styles
 
@@ -320,6 +322,8 @@ Create the following files:
 <include cwd meta='tab="app/routes/search.ts"'>
   ../../examples/react-router-min/app/routes/search.ts
 </include>
+
+In [RSC mode](https://reactrouter.com/how-to/react-server-components), the docs route exports a `ServerComponent` in place of the loader and the page component. It passes `source.getPageTree()` to the layout and renders `page.data.body` on the server. See the [RSC example](https://github.com/fuma-nama/fumadocs/tree/dev/examples/react-router-rsc).
 
 </show>
 
