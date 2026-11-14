@@ -1,3 +1,9 @@
+## @fumadocs/satteri@0.8.1
+
+### Unique heading IDs next to custom IDs
+
+- Headings after a custom `[#id]` no longer reuse it as their ID.
+
 ## @fumadocs/satteri@0.8.0
 
 ### Path params at runtime

@@ -1,3 +1,13 @@
+## @fumadocs/language@0.2.21
+
+### Chinese translations of AI chat
+
+- `zhTW()` and `zhCN()` translate `@fumadocs/ai-chat`.
+
+### Japanese language pack
+
+- `ja()` from `@fumadocs/language/ja` translates Fumadocs UI and its integrations into Japanese.
+
 ## @fumadocs/language@0.2.20
 
 ### Playground translations

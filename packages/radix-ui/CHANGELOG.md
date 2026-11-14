@@ -1,3 +1,9 @@
+## fumadocs-ui@16.19.3
+
+### Code Blocks are No Longer Region Landmarks
+
+- The scroll area of `CodeBlock` stays focusable but no longer has `role="region"` without a name, so pages with several code blocks no longer repeat unnamed region landmarks.
+
 ## fumadocs-ui@16.19.0
 
 ### Search Dialog Close Button Name
