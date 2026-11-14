@@ -9,17 +9,7 @@
     {
       "name": "Code",
       "locale": null,
-      "value": "Keep code identifiers, file paths, package names, commands, options, props and component names exactly as written, also in prose, except the paths of included pages (see Includes). In code blocks, translate only comments, and keep annotations like `[!code highlight]` and `// @noErrors` unchanged."
-    },
-    {
-      "name": "Includes",
-      "locale": null,
-      "value": "Every `.mdx` file is translated too, the translation of `page.mdx` is `page.<locale>.mdx`, like `page.zh-TW.mdx` for zh-TW. In the content of an `<include>` tag outside code blocks, a path to an `.mdx` file names its translation: `<include>./guide.mdx</include>` becomes `<include>./guide.zh-TW.mdx</include>`, and `<include>.shared.mdx#setup</include>` becomes `<include>.shared.zh-TW.mdx#setup</include>`. Keep includes of other files, like `./code.ts`, as written."
-    },
-    {
-      "name": "Heading IDs",
-      "locale": null,
-      "value": "End every heading of the translation with ` [#id]`, the ID of the heading it translates, so links to it keep working. When the source heading ends with `[#id]`, keep that ID. Otherwise make the ID from the text of the source heading, like GitHub does: leave out a leading step number (`1. `, `2. ` and so on) and the `[step]` marker, and the backticks of code; lowercase it; remove every character except letters, digits, spaces, `-` and `_`; then replace each space with `-`, so `includeOperations / includeTypes` becomes `includeoperations--includetypes`. IDs are unique in a file: when headings of the file make the same ID, the first keeps it, the second gets `-1`, the third `-2`, and so on, even when they are far apart. So a file with two `## Schema` headings has `[#schema]` and then `[#schema-1]`. For example, `## Getting Started` becomes `## 開始使用 [#getting-started]`, `### Install [step]` becomes `### 安裝 [step] [#install]`, and `## `loader()` API` becomes `## `loader()` API [#loader-api]`."
+      "value": "Keep code identifiers, file paths, package names, commands, options, props and component names exactly as written, also in prose. In code blocks, translate only comments, and keep annotations like `[!code highlight]` and `// @noErrors` unchanged."
     }
   ],
   "entries": [

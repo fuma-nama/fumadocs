@@ -2,46 +2,5 @@
   "$schema": "https://assets.gtx.dev/config-schema.json",
   "projectId": "prj_cm03crou5n4242qhu4nm1vf9",
   "defaultLocale": "en",
-  "locales": [
-    "zh-TW"
-  ],
-  "files": {
-    "mdx": {
-      "include": [
-        "content/docs/**/*.mdx",
-        "content/docs/**/.*.mdx"
-      ],
-      "exclude": [
-        "content/docs/**/*.[locales].mdx"
-      ],
-      "transform": {
-        "match": "^(.*)\\.mdx$",
-        "replace": "$1.{locale}.mdx"
-      }
-    },
-    "json": {
-      "include": [
-        "content/docs/**/meta.json"
-      ],
-      "transform": "*.[locale].json"
-    },
-    "ts": {
-      "include": [
-        "content/docs/**/meta.ts"
-      ],
-      "transform": "*.[locale].ts"
-    }
-  },
-  "options": {
-    "jsonSchema": {
-      "**/meta.json": {
-        "include": [
-          "$.title",
-          "$.description",
-          "$.pages[?(@.startsWith('---'))]"
-        ]
-      }
-    },
-    "saveLocal": true
-  }
+  "locales": ["zh-TW"]
 }
