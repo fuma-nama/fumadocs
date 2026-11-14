@@ -1,7 +1,7 @@
 import { docsLlms } from '@/lib/source';
 
 export async function GET() {
-  return (await docsLlms.serve('/llms-full.txt'))!;
+  return new Response(await docsLlms.full());
 }
 
 export async function getConfig() {

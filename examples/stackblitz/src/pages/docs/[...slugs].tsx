@@ -11,14 +11,14 @@ import {
 } from 'fumadocs-ui/layouts/docs/page';
 import { unstable_notFound } from 'waku/router/server';
 import { getMDXComponents } from '@/components/mdx';
-import { getPageImageUrl, gitConfig } from '@/lib/shared';
+import { getPageImageUrl, getPageMarkdownUrl, gitConfig } from '@/lib/shared';
 
 export default function Page({ slugs }: PageProps<'/docs/[...slugs]'>) {
   const page = source.getPage(slugs);
   if (!page) unstable_notFound();
 
   const MDX = page.data.body;
-  const markdownUrl = `/llms.mdx${page.url}.md`;
+  const markdownUrl = getPageMarkdownUrl(page).url;
   return (
     <DocsPage toc={page.data.toc}>
       <meta property="og:image" content={getPageImageUrl(page).url} />
