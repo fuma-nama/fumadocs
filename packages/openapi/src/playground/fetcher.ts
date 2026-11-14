@@ -1,5 +1,6 @@
 import { safeParse } from 'fast-content-type-parse';
 import type { RequestData } from '@/requests/types';
+import { cookieString } from '@/requests/string-utils';
 import type { MediaAdapter } from '@/requests/media/adapter';
 import { resolveMediaAdapter } from '@/requests/media/resolve-adapter';
 import type { Awaitable } from '@/types';
@@ -114,15 +115,12 @@ export function createBrowserFetcher(
 
       // cookies
       if (proxyUrl && proxyForwardCookie) {
-        const encoded = Object.entries(data.cookie)
-          .map(([k, v]) => `${k}=${encodeURIComponent(v.value)}`)
-          .join('; ');
-        requestUrl.searchParams.set('cookie', encoded);
+        requestUrl.searchParams.set('cookie', cookieString(data.cookie));
         requestInit.credentials = 'omit';
       } else {
         for (const key in data.cookie) {
           const param = data.cookie[key];
-          const segs: string[] = [`${key}=${encodeURIComponent(param.value)}`];
+          const segs: string[] = [`${key}=${param.value}`];
 
           if (proxyUrl && requestUrl.origin !== window.location.origin)
             segs.push(`domain=${requestUrl.host}`);
