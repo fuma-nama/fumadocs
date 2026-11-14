@@ -219,6 +219,7 @@ test('percent-encodes path parameter values but not their delimiters', () => {
   expect(encode(['a b', 'c'], 'label', true)).toBe('.a%20b.c');
   expect(encode('a;b', 'matrix')).toBe(';id=a%3Bb');
   expect(encode({ x: 'a=b' }, 'matrix', true)).toBe(';x=a%3Db');
+  expect(encode(JSON.parse('{"__proto__":"x","ok":"y"}'))).toBe('__proto__,x,ok,y');
 
   const json = encodeRequestData(
     { method: 'get', path: { id: { a: '/' } }, query: {}, header: {}, cookie: {} },

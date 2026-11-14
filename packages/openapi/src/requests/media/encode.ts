@@ -98,12 +98,10 @@ function serializeSimple(value: NonNullable<unknown>, explode: boolean): string 
 /** the delimiters a style adds stay literal, so only the members are encoded (RFC 6570) */
 function encodePathMembers(value: NonNullable<unknown>): NonNullable<unknown> {
   if (Array.isArray(value)) return value.map((item) => encodeURIComponent(String(item)));
-  if (typeof value === 'object') {
-    const out: Record<string, string> = {};
-    for (const [k, v] of Object.entries(value))
-      out[encodeURIComponent(k)] = encodeURIComponent(String(v));
-    return out;
-  }
+  if (typeof value === 'object')
+    return Object.fromEntries(
+      Object.entries(value).map(([k, v]) => [encodeURIComponent(k), encodeURIComponent(String(v))]),
+    );
   return encodeURIComponent(String(value));
 }
 
