@@ -6,7 +6,7 @@ import {
   pythonString,
   rustString,
 } from 'shared-api/codegen';
-import { inputToString } from '@/requests/string-utils';
+import { inputToString, toSearchParams } from '@/requests/string-utils';
 import type { RequestData } from '@/requests/types';
 import { resolveMediaAdapter } from './resolve-adapter';
 // @ts-expect-error -- untyped
@@ -108,21 +108,9 @@ export const defaultAdapters = {
   },
   'application/x-www-form-urlencoded': {
     encode(data) {
-      if (typeof data.body !== 'object')
-        throw new Error(`Input value must be object, received: ${typeof data.body}`);
-
-      const params = new URLSearchParams();
-      for (const key in data.body) {
-        params.set(key, String(data.body[key as keyof object]));
-      }
-
-      return params;
+      return toSearchParams(data.body);
     },
     generateExample(data, ctx) {
-      if (ctx.lang === 'js') {
-        return `const body = new URLSearchParams(${JSON.stringify(data.body, null, 2)})`;
-      }
-
       return str(data.body, 'application/x-www-form-urlencoded', ctx);
     },
   },

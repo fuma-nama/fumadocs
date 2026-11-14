@@ -81,4 +81,30 @@ describe('Code Sample Generators', () => {
       expect(curl.generate({ ...data, bodyMediaType }, context)).toContain(`-d '{\n  "id": "id",`);
     }
   });
+
+  test('form urlencoded bodies send the same fields in every language as the playground', () => {
+    const form = {
+      ...data,
+      method: 'post',
+      body: {
+        name: 'Rex',
+        age: 0,
+        vaccinated: false,
+        nickname: '',
+        owner: null,
+        tags: ['a', 'b'],
+        meta: { a: 1 },
+      },
+      bodyMediaType: 'application/x-www-form-urlencoded',
+    } satisfies typeof data;
+    const encoded =
+      'name=Rex&age=0&vaccinated=false&nickname=&tags=a&tags=b&meta=%7B%22a%22%3A1%7D';
+
+    expect(defaultAdapters['application/x-www-form-urlencoded'].encode(form).toString()).toBe(
+      encoded,
+    );
+    for (const generator of [go, curl, python, javascript, csharp, java, rust]) {
+      expect(generator.generate(form, context)).toContain(encoded);
+    }
+  });
 });
