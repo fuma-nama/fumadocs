@@ -20,8 +20,4 @@ test('get_page: URLs of search results', async () => {
   await expect(tools.get('get_page')!({ url: '/docs/nested/page#heading' })).resolves.toEqual({
     content: [{ type: 'text', text: '# Page' }],
   });
-  // the links of `llms.txt`
-  await expect(tools.get('get_page')!({ url: '/docs/nested/page.md' })).resolves.toEqual({
-    content: [{ type: 'text', text: '# Page' }],
-  });
 });

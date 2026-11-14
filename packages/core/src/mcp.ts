@@ -56,9 +56,8 @@ export function registerSourceTools<C extends LoaderConfig>(
     },
     async ({ url }) => {
       const loader = typeof source === 'function' ? await source() : source;
-      // search results have the hash of a heading, `llms.txt` links the `.md` file
-      const path = url.replace(/[?#].*$/, '').replace(/\.md$/, '');
-      const page = loader.getPageByUrl(path === '/index' ? '/' : path);
+      // search results have the hash of a heading
+      const page = loader.getPageByUrl(url.replace(/[?#].*$/, ''));
       if (!page)
         return {
           content: [{ type: 'text', text: `page not found: ${url}` }],

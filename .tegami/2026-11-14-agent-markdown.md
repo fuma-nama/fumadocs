@@ -11,5 +11,5 @@ packages:
 - `llms.txt` from `serve()` links pages to their Markdown.
 - The `filter` option leaves pages out of `full()` and the files.
 - Components without a Markdown form keep their MDX tag name in processed Markdown, also in production builds.
-- The `get_page` MCP tool accepts the `.md` URLs of `llms.txt`, and URLs with a hash or query like the URLs of search results.
+- The `get_page` MCP tool accepts URLs with a hash or query, like the URLs of search results.
 - Auto type tables show the full type of each prop in Markdown.
