@@ -99,10 +99,22 @@ export interface GeneratorOptions extends TypescriptConfig {
 export function createGenerator(options: GeneratorOptions = {}) {
   const cache = options?.cache ? options.cache : null;
   let instance: Project | Promise<Project> | undefined = options?.project;
+  let idle: ReturnType<typeof setTimeout> | undefined;
 
   function getProject() {
+    clearTimeout(idle);
     if (instance) return instance;
     return (instance = createProject(options));
+  }
+
+  // bundlers keep loader workers for the whole build: stop the TypeScript process once no table comes for a second,
+  // not after each table, as the tables of a page come one after another
+  function release() {
+    if (options.project) return;
+    idle = setTimeout(() => {
+      void Promise.resolve(instance).then((project) => project?.close());
+      instance = undefined;
+    }, 1000).unref();
   }
 
   return {
@@ -160,6 +172,7 @@ export function createGenerator(options: GeneratorOptions = {}) {
           );
         }
       }
+      release();
 
       if (cache && cacheKey) {
         await cache.write(cacheKey, out);

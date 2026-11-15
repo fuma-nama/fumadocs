@@ -1,5 +1,26 @@
 import { type LoaderPlugin, loader } from 'fumadocs-core/source';
-import { lucideIconsPlugin } from 'fumadocs-core/source/lucide-icons';
+import {
+  Book,
+  Building,
+  CircleArrowUp,
+  CircleQuestionMark,
+  Cuboid,
+  FileUp,
+  Hexagon,
+  House,
+  Library,
+  Palette,
+  PanelsTopLeft,
+  Pencil,
+  Rocket,
+  Scale,
+  Search,
+  Shapes,
+  SquareBookmark,
+  Terminal,
+  Wrench,
+  type LucideIcon,
+} from 'lucide-react';
 import { openapi } from '@/lib/openapi';
 import { asyncapi } from '../asyncapi';
 import { graphql } from '../graphql';
@@ -104,6 +125,7 @@ const docs = defineDocs({
                   }),
                 {
                   inline: 'tailing-curly-colon',
+                  tokens: 'html',
                   transformers: [
                     ...(rehypeCodeDefaultOptions().transformers ?? []),
                     transformerTwoslash({
@@ -184,7 +206,7 @@ const blog = defineCollections({
                 contentHighlighter.override({
                   shikiTransformers: [...transformers, transformerEscape()],
                 }),
-              { inline: 'tailing-curly-colon' },
+              { inline: 'tailing-curly-colon', tokens: 'html' },
             ),
           ],
       remarkCodeTabOptions: {
@@ -210,6 +232,29 @@ const agents = defineCollections({
     includeProcessedMarkdown: { headingIds: false },
   },
 });
+
+// the Lucide icons of content: looking up any name, as `lucideIconsPlugin()` does, compiles every icon of Lucide
+const icons: Record<string, LucideIcon> = {
+  Book,
+  Building,
+  CircleArrowUp,
+  CircleQuestionMark,
+  Cuboid,
+  FileUp,
+  Hexagon,
+  House,
+  Library,
+  Palette,
+  PanelsTopLeft,
+  Pencil,
+  Rocket,
+  Scale,
+  Search,
+  Shapes,
+  SquareBookmark,
+  Terminal,
+  Wrench,
+};
 
 export const source = loader(
   {
@@ -239,10 +284,15 @@ export const source = loader(
     baseUrl: '/docs',
     i18n,
     // the logos of frameworks, Lucide icons otherwise
-    icon: (icon) => (isFramework(icon) ? <FrameworkLogo framework={icon} /> : icon),
+    icon(icon) {
+      if (!icon) return;
+      if (isFramework(icon)) return <FrameworkLogo framework={icon} />;
+      const Icon = icons[icon];
+      if (Icon) return <Icon />;
+      console.warn(`Unknown icon: ${icon}, add it to the icons of lib/source.`);
+    },
     plugins: [
       pageTreeCodeTitles(),
-      lucideIconsPlugin(),
       openapi.loaderPlugin(),
       asyncapi.loaderPlugin(),
       graphql.loaderPlugin(),

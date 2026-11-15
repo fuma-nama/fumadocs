@@ -15,6 +15,11 @@ export interface Project {
    * @param files - absolute file path to content
    */
   load(files: Map<string, string>): TsProject;
+
+  /**
+   * Stop the TypeScript process.
+   */
+  close(): void;
 }
 
 export function createProject(tsconfigPath: string): Project {
@@ -62,6 +67,10 @@ export function createProject(tsconfigPath: string): Project {
       }
 
       return snapshot.getProject(id!)!;
+    },
+    close() {
+      api.close();
+      snapshot = undefined;
     },
   };
 }

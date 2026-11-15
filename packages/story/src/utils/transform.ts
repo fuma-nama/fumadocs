@@ -182,6 +182,8 @@ export function createStoryTransformer(mode: Mode, tsconfigPath: string): StoryT
         for (const request of batch.values()) request.reject(error);
       }
     }
+    project?.close();
+    project = undefined;
     running = false;
   }
 

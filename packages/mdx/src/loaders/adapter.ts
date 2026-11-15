@@ -166,7 +166,12 @@ export function toWebpack(loader: Loader): WebpackLoader {
       if (result === null) {
         callback(undefined, source);
       } else {
-        callback(undefined, result.code, result.map as string);
+        // without a map, the bundler maps the code to itself and keeps another copy of it
+        callback(
+          undefined,
+          result.code,
+          (result.map ?? { version: 3, sources: [], names: [], mappings: '' }) as string,
+        );
       }
     } catch (error) {
       if (error instanceof ValidationError) {

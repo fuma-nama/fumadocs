@@ -504,6 +504,15 @@ export function createTwoslasher(options: TwoslasherOptions = {}): Twoslasher {
         results.set(block.key, { refs: block.refs, error });
       }
     }
+    if (pending.size === 0) release();
+  }
+
+  function release() {
+    api?.close();
+    snapshot = undefined;
+    api = undefined;
+    configs.clear();
+    files = new Map();
   }
 
   function twoslasher(code: string, extension = 'ts'): TwoslashReturn {

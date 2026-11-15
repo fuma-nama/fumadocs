@@ -58,4 +58,29 @@ describe('@fumadocs/satteri', () => {
     expect(code).toContain('--shiki-light');
     expect(code).toContain('title: "a.js"');
   });
+
+  it('compiles the tokens of a line as HTML', async () => {
+    const source = '```js title="a.js"\nconst a = 1;\n```';
+    const compile = async (tokens?: 'jsx' | 'html') => {
+      const options = await applySatteriPreset({
+        rehypeCodeOptions: false,
+        hastPlugins: [
+          rehypeCodeFromHighlighter(
+            ({ transformers }) => createHighlights({ shikiTransformers: transformers }),
+            { tokens },
+          ),
+        ],
+      })('bundler');
+      return (await compileMdx({ source, filePath: '/tmp/code.mdx', options })).code;
+    };
+
+    const jsx = await compile();
+    const html = await compile('html');
+    expect(jsx).not.toContain('dangerouslySetInnerHTML');
+    expect(html).toContain('dangerouslySetInnerHTML');
+    expect(html).toContain('<span style=\\"--shiki-');
+    expect(html).toContain('className: "line"');
+    expect(html).toContain('title: "a.js"');
+    expect(html.length).toBeLessThan(jsx.length);
+  });
 });

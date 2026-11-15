@@ -1,7 +1,13 @@
 import { jsx, toJs } from 'estree-util-to-js';
-import type { Element, Nodes, Root, RootContent } from 'hast';
+import type { Element, ElementContent, Nodes, Root, RootContent } from 'hast';
 import { defaultHandlers, type Handle, toEstree } from 'hast-util-to-estree';
-import { defineHastPlugin, type MdastNode, type MdastVisitorContext } from 'satteri';
+import {
+  defineHastPlugin,
+  hastToHtml,
+  type MdastNode,
+  type MdastVisitorContext,
+  type MdxJsxTextElementHast,
+} from 'satteri';
 import type { Program } from 'estree-jsx';
 import { parse as parseCode } from 'yuku-parser';
 import type {
@@ -14,6 +20,7 @@ import {
   type CodeOutputOptions,
 } from '../../shared/code-output';
 import { createStringifier, type PositionedNode } from './stringifier';
+import type { HighlightCompileOptions } from './rehype-code';
 
 /**
  * Flatten a node's text content by walking it in JavaScript.
@@ -139,6 +146,49 @@ function normalizeProperties(node: RootContent | Root) {
   }
 }
 
+/** tokens of the highlighter, other elements in code may be MDX components */
+function isToken(node: ElementContent): boolean {
+  if (node.type === 'text') return true;
+  return node.type === 'element' && node.tagName === 'span' && node.children.every(isToken);
+}
+
+/** a line of tokens as their HTML, React renders the same DOM */
+function lineToHtml(line: Element): MdxJsxTextElementHast | undefined {
+  const { className, ...rest } = line.properties;
+  if (!className || Object.keys(rest).length > 0 || !line.children.every(isToken)) return;
+
+  return {
+    type: 'mdxJsxTextElement',
+    name: line.tagName,
+    attributes: [
+      {
+        type: 'mdxJsxAttribute',
+        name: 'className',
+        value: Array.isArray(className) ? className.join(' ') : String(className),
+      },
+      {
+        type: 'mdxJsxAttribute',
+        name: 'dangerouslySetInnerHTML',
+        value: {
+          type: 'mdxJsxAttributeValueExpression',
+          value: `{__html:${JSON.stringify(hastToHtml(line.children))}}`,
+        },
+      },
+    ],
+    children: [],
+  };
+}
+
+function linesToHtml(node: RootContent | Root) {
+  if (node.type === 'element' && node.tagName === 'code') {
+    node.children = node.children.map(
+      (line) => (line.type === 'element' && lineToHtml(line)) || line,
+    );
+  } else if ('children' in node) {
+    for (const child of node.children) linesToHtml(child);
+  }
+}
+
 function elementClasses(element: Element): string[] {
   const className = element.properties.className as string[] | string;
   if (Array.isArray(className)) return className.map(String);
@@ -165,7 +215,7 @@ function shouldSkipHighlight(element: Element) {
 export function highlightPlugin(
   name: string,
   transformer: ReturnType<typeof rehypeCodeFromHighlighter>,
-  inline: RehypeCodeFromHighlighterOptions['inline'],
+  { inline, tokens }: Pick<RehypeCodeFromHighlighterOptions, 'inline'> & HighlightCompileOptions,
 ) {
   return defineHastPlugin({
     name,
@@ -188,6 +238,7 @@ export function highlightPlugin(
         // not highlighted, replacing it with itself still costs a re-encode in Sätteri
         if (next === element) return;
         normalizeProperties(next);
+        if (tokens === 'html') linesToHtml(next);
         if (next.type !== 'root') ctx.replaceNode(element, next);
         else if (next.children.length > 0) ctx.replaceNode(element, next.children);
       },

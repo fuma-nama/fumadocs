@@ -13,12 +13,24 @@ import { highlightPlugin } from './utils';
 export type { RehypeCodeOptions } from 'fumadocs-core/mdx-plugins/rehype-code';
 export type { RehypeCodeFromHighlighterOptions } from 'fumadocs-core/mdx-plugins/rehype-code.core';
 
-export function rehypeCode(options?: Partial<RehypeCodeOptions>) {
-  return highlightPlugin(
-    'rehype-code',
-    createRehypeCodeTransformer.call({} as never, options),
-    options?.inline,
-  );
+export interface HighlightCompileOptions {
+  /**
+   * Compile the tokens of a highlighted line as JSX elements, or as their HTML: compiled MDX is about half the size,
+   * but the `span` of MDX components no longer applies to tokens.
+   *
+   * @defaultValue 'jsx'
+   */
+  tokens?: 'jsx' | 'html';
+}
+
+export function rehypeCode({
+  tokens,
+  ...options
+}: Partial<RehypeCodeOptions> & HighlightCompileOptions = {}) {
+  return highlightPlugin('rehype-code', createRehypeCodeTransformer.call({} as never, options), {
+    inline: options.inline,
+    tokens,
+  });
 }
 
 /**
@@ -26,11 +38,10 @@ export function rehypeCode(options?: Partial<RehypeCodeOptions>) {
  */
 export function rehypeCodeFromHighlighter(
   highlighter: Highlighter | ((options: { transformers: ShikiTransformer[] }) => Highlighter),
-  options?: RehypeCodeFromHighlighterOptions,
+  { tokens, ...options }: RehypeCodeFromHighlighterOptions & HighlightCompileOptions = {},
 ) {
-  return highlightPlugin(
-    'rehype-code',
-    createHighlighterTransformer(highlighter, options),
-    options?.inline,
-  );
+  return highlightPlugin('rehype-code', createHighlighterTransformer(highlighter, options), {
+    inline: options.inline,
+    tokens,
+  });
 }
