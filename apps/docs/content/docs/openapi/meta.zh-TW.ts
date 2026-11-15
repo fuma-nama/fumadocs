@@ -1,0 +1,9 @@
+import { Shapes } from 'lucide-static';
+
+export default {
+  title: 'OpenAPI 範例',
+  description: 'Fumadocs OpenAPI 示範',
+  root: true,
+  icon: Shapes,
+  pages: ['index', '...(generated)'],
+};

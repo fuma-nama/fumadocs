@@ -1,28 +1,31 @@
 ---
 title: 簡介
 description: 開始使用核心函式庫
-icon: SquareBookmark
 ---
+
+import { SquareBookmark } from 'lucide-static';
+
+export const frontmatter = { icon: SquareBookmark };
 
 ## 這是什麼？ [#what-is-this]
 
-Fumadocs Core 提供伺服器端函式與無頭式元件，讓您在 Next.js、React Router、TanStack Start、Waku 與 Astro 等 React.js 框架上建置文件。
+Fumadocs Core 提供伺服器端函式與無頭式元件，讓您在 Next.js、React Router、TanStack Start、Waku 和 Astro 等 React.js 框架上建立文件。
 
 * [搜尋](/docs/headless/search)
 * Breadcrumb、側邊欄、目錄元件
 * Remark/Rehype 外掛
-* 供 AI 代理搜尋與閱讀文件的 [MCP 工具](/docs/headless/utils/mcp)
-* [其他工具](/docs/headless/utils)
+* [MCP 工具](/docs/headless/utils/mcp)：讓 AI 代理搜尋與閱讀文件
+* [其他工具函式](/docs/headless/utils)
 
 <Callout title="提示">
-  它不需搭配 Fumadocs UI 即可使用，換句話說，它是無頭式的。
+  它不需搭配 Fumadocs UI 也能使用，換句話說，它是無頭式的。
 
-  如果您是初學者，或只有一般使用需求，請使用 [Fumadocs UI](/docs/ui)。
+  初學者或一般使用情境，建議使用 [Fumadocs UI](/docs/ui)。
 </Callout>
 
 ## 安裝 [#installation]
 
-請安裝核心套件。個別整合可能需要額外的相依套件，詳見各整合的指南。
+請安裝核心套件。部分整合可能需要額外的相依套件，詳見各整合的指南。
 
 ```package-install
 fumadocs-core
@@ -35,7 +38,7 @@ import type { ReactNode } from 'react';
 import { NextProvider } from 'fumadocs-core/framework/next';
 
 export function RootLayout({ children }: { children: ReactNode }) {
-  // 若您使用的是 Fumadocs UI，請改用 `<RootProvider />`
+  // 若您使用 Fumadocs UI，請改用 `<RootProvider />`
   return <NextProvider>{children}</NextProvider>;
 }
 ```
@@ -72,7 +75,7 @@ import { navigate } from 'astro:transitions/client';
 import type { ReactNode } from 'react';
 import { AstroProvider } from 'fumadocs-core/framework/astro';
 
-// 此元件會在 React island 中算繪，請從 Astro 頁面傳入 pathname 與 params。
+// 於 React island 內算繪時，請從 Astro 頁面傳入 pathname 與 params。
 export function Root({
   pathname,
   params,
@@ -95,11 +98,11 @@ export function Root({
 <Cards>
   <Card title="Breadcrumb" href="/docs/headless/components/breadcrumb" description="位於畫面頂端的導覽元件" />
 
-  <Card title="目錄" href="/docs/headless/components/toc" description="可追蹤目前作用中錨點的目錄" />
+  <Card title="目錄" href="/docs/headless/components/toc" description="可偵測目前作用中錨點的目錄" />
 
   <Card title="Source API" href="/docs/headless/source-api" description="處理內容來源的統一介面" />
 
   <Card title="搜尋" href="/docs/headless/search" description="實作文件搜尋功能" />
 
-  <Card title="MCP" href="/docs/headless/utils/mcp" description="讓 AI 代理能探索頁面、讀取 Markdown 內容並進行搜尋" />
+  <Card title="MCP" href="/docs/headless/utils/mcp" description="向 AI 代理提供頁面探索、Markdown 內容與搜尋功能" />
 </Cards>

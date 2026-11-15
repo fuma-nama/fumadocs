@@ -1,0 +1,9 @@
+import { PanelsTopLeft } from 'lucide-static';
+
+export default {
+  title: 'Fumadocs UI',
+  description: '預設主題',
+  icon: PanelsTopLeft,
+  root: true,
+  pages: ['---簡介---', 'index', 'component-library', 'theme', '---參考資料---', '...'],
+};

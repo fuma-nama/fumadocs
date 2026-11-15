@@ -1,15 +1,16 @@
 ---
 title: 手動インストール
-icon: Wrench
 ---
 
 import { frameworks } from '@/lib/framework';
+import { Wrench } from 'lucide-static';
 
 export const frontmatter = {
+  icon: Wrench,
   description: `既存の${frameworks.find((item) => item.value === props.framework)?.name}プロジェクトにFumadocsを追加します。`,
 };
 
-[Fumadocs CLI](/docs/cli#init) を使って自動でセットアップすることもできます。
+[Fumadocs CLI](/docs/cli#init) にセットアップを任せることもできます。
 
 ```npm
 npx @fumadocs/cli init
@@ -35,15 +36,15 @@ npx @fumadocs/cli init
 
 <show when={props.framework !== 'astro'}>
   <Callout title="補足">
-    Fumadocs は、[Content Collections](/docs/headless/content-collections) やヘッドレス CMS など、ほかのコンテンツソースにも対応しています。
+    Fumadocs は、[Content Collections](/docs/headless/content-collections) やヘッドレス CMS など、他のコンテンツソースにも対応しています。
   </Callout>
 </show>
 
 <show when={props.framework === 'astro'}>
-  * Node.js 22.23.4 以降(Astro の要件)
+  * Node.js 22.23.4 以降 (Astro の要件) 
   * Tailwind CSS 4
 
-  このガイドでは、コンテンツソースとして Astro の content collections を使用します。`@fumadocs/astro` は content collections を Fumadocs でコンパイルし、その MDX を React アイランドとしてレンダリングします。
+  このガイドでは、コンテンツソースとして Astro の content collections を使用します。`@fumadocs/astro` はこれを Fumadocs でコンパイルし、MDX を React アイランドとしてレンダリングします。
 </show>
 
 ## はじめに [#getting-started]
@@ -62,7 +63,7 @@ npx @fumadocs/cli init
   ```
 </show>
 
-テンプレートと同様に、このコマンドでは `fumadocs-ui` を、Fumadocs UI の [Base UI](/docs/ui/component-library) 版である `@fumadocs/base-ui` のエイリアスとしてインストールします。Radix UI を使う場合は、エイリアスなしで `fumadocs-ui` をインストールしてください。
+テンプレートと同様に、このコマンドでは `fumadocs-ui` を `@fumadocs/base-ui` (Fumadocs UI の [Base UI](/docs/ui/component-library) 版) のエイリアスとしてインストールします。Radix UI を使用する場合は、エイリアスなしで `fumadocs-ui` をインストールしてください。
 
 ### スタイル [#styles]
 
@@ -96,7 +97,7 @@ Tailwind CSS ファイルに以下を追加します。
     return (
       <html lang="en" suppressHydrationWarning>
         <body
-          // 必須のスタイル [!code ++:2]
+          // 必要なスタイル [!code ++:2]
           className="flex flex-col min-h-screen"
         >
           <RootProvider>{children}</RootProvider>
@@ -220,7 +221,7 @@ Tailwind CSS ファイルに以下を追加します。
     ../../examples/astro-min/src/content.config.ts
   </include>
 
-  コレクションから Fumadocs のソースを作成します。
+  定義したコレクションから Fumadocs のソースを作成します。
 
   <include cwd meta="title=&#x22;src/lib/source.ts&#x22;">
     ../../examples/astro-min/src/lib/source.ts
@@ -232,7 +233,7 @@ Tailwind CSS ファイルに以下を追加します。
 ### ルート [#routes]
 
 <show when={props.framework === 'next' || props.framework === 'waku'}>
-  レイアウトで共有するオプションを1つのファイルにまとめます。
+  レイアウトで共通して使うオプションを1つのファイルにまとめます。
 </show>
 
 <show when={props.framework === 'next'}>
@@ -260,7 +261,7 @@ Tailwind CSS ファイルに以下を追加します。
 </show>
 
 <show when={props.framework === 'react-router'}>
-  ルートを更新します。
+  ルート定義を更新します。
 
   ```ts title="app/routes.ts"
   import { type RouteConfig, index, route } from '@react-router/dev/routes';
@@ -291,7 +292,7 @@ Tailwind CSS ファイルに以下を追加します。
     ../../examples/react-router-min/app/routes/search.ts
   </include>
 
-  [RSC モード](https://reactrouter.com/how-to/react-server-components)では、docs ルートはローダーとページコンポーネントの代わりに `ServerComponent` をエクスポートします。
+  [RSC モード](https://reactrouter.com/how-to/react-server-components)では、docs ルートはローダーとページコンポーネントではなく、`ServerComponent` をエクスポートします。
 
   <include cwd meta="title=&#x22;app/routes/docs.tsx&#x22;">
     ../../examples/react-router-rsc/app/routes/docs.tsx
@@ -343,7 +344,7 @@ Tailwind CSS ファイルに以下を追加します。
 </show>
 
 <show when={props.framework === 'astro'}>
-  次のファイルを作成します。
+  以下のファイルを作成します。
 
   <include cwd meta="tab=&#x22;src/components/mdx.tsx&#x22;">
     ../../examples/astro-min/src/components/mdx.tsx
@@ -382,7 +383,7 @@ Tailwind CSS ファイルに以下を追加します。
 
 ### 完了 [#finish]
 
-開発サーバーを起動し、`content/docs` にドキュメントを作成してください。
+開発サーバーを起動して、`content/docs` にドキュメントを書きましょう。
 
 ```mdx title="content/docs/index.mdx"
 ---

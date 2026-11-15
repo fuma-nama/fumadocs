@@ -1,18 +1,21 @@
 ---
 title: 元件庫
-description: 底層的無頭式元件庫。
-icon: Library
+description: 底層所使用的無頭式元件庫。
 ---
+
+import { Library } from 'lucide-static';
+
+export const frontmatter = { icon: Library };
 
 ## 概覽 [#overview]
 
-Fumadocs UI 同時支援 [Base UI](https://base-ui.com) 與 [Radix UI](https://radix-ui.com/primitives)，並預設使用 Base UI。
+Fumadocs UI 同時支援 [Base UI](https://base-ui.com) 與 [Radix UI](https://radix-ui.com/primitives)，預設使用 Base UI。
 
 若您使用 Fumadocs CLI 自訂元件，設定方式可能會有所不同。
 
 ### Base UI [#base-ui]
 
-Base UI 是預設的元件庫。若您採用手動安裝，請將 `fumadocs-ui` 設為 `@fumadocs/base-ui` 套件的別名：
+Base UI 是預設的元件庫。若您選擇手動安裝，請將 `fumadocs-ui` 設定為 `@fumadocs/base-ui` 套件的別名：
 
 ```json title="package.json"
 {

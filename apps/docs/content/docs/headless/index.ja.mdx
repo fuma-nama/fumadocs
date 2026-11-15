@@ -1,15 +1,18 @@
 ---
 title: はじめに
 description: コアライブラリの導入ガイド
-icon: SquareBookmark
 ---
+
+import { SquareBookmark } from 'lucide-static';
+
+export const frontmatter = { icon: SquareBookmark };
 
 ## Fumadocs Core とは [#what-is-this]
 
 Fumadocs Core は、Next.js、React Router、TanStack Start、Waku、Astro などの React.js フレームワークでドキュメントを構築するための、サーバーサイド関数とヘッドレスコンポーネントを提供します。
 
 * [検索](/docs/headless/search)
-* パンくずリスト、サイドバー、目次コンポーネント
+* パンくずリスト、サイドバー、目次のコンポーネント
 * Remark/Rehype プラグイン
 * AIエージェントがドキュメントを検索・閲覧するための [MCP ツール](/docs/headless/utils/mcp)
 * [その他のユーティリティ](/docs/headless/utils)
@@ -22,7 +25,7 @@ Fumadocs Core は、Next.js、React Router、TanStack Start、Waku、Astro な�
 
 ## インストール [#installation]
 
-コアパッケージをインストールしてください。インテグレーションによっては追加の依存関係が必要になります。詳しくは各ガイドを参照してください。
+コアパッケージをインストールします。インテグレーションによっては追加の依存関係が必要になる場合があり、それらは各インテグレーションのガイドに記載されています。
 
 ```package-install
 fumadocs-core
@@ -72,7 +75,7 @@ import { navigate } from 'astro:transitions/client';
 import type { ReactNode } from 'react';
 import { AstroProvider } from 'fumadocs-core/framework/astro';
 
-// React アイランド内でレンダリングされます。Astro ページから pathname と params を渡してください。
+// React アイランド内でレンダリングされるため、Astro ページから pathname と params を渡します。
 export function Root({
   pathname,
   params,
@@ -90,16 +93,16 @@ export function Root({
 }
 ```
 
-APIとコンポーネントの詳細は以下をご覧ください。
+APIとコンポーネントの一覧です:
 
 <Cards>
   <Card title="パンくずリスト" href="/docs/headless/components/breadcrumb" description="画面上部に表示されるナビゲーションコンポーネント" />
 
-  <Card title="目次" href="/docs/headless/components/toc" description="アクティブなアンカーを監視する機能を備えた目次" />
+  <Card title="目次" href="/docs/headless/components/toc" description="アクティブなアンカーを監視する目次" />
 
   <Card title="Source API" href="/docs/headless/source-api" description="コンテンツソースを扱うための統一インターフェース" />
 
   <Card title="検索" href="/docs/headless/search" description="ドキュメント検索を実装します" />
 
-  <Card title="MCP" href="/docs/headless/utils/mcp" description="ページの探索、Markdownコンテンツ、検索機能をAIエージェントに提供します" />
+  <Card title="MCP" href="/docs/headless/utils/mcp" description="ページの検出、Markdownコンテンツ、検索をAIエージェントに公開します" />
 </Cards>

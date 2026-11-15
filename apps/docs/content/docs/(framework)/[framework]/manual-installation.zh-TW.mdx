@@ -1,15 +1,16 @@
 ---
 title: 手動安裝
-icon: Wrench
 ---
 
 import { frameworks } from '@/lib/framework';
+import { Wrench } from 'lucide-static';
 
 export const frontmatter = {
+  icon: Wrench,
   description: `將 Fumadocs 加入現有的 ${frameworks.find((item) => item.value === props.framework)?.name} 專案。`,
 };
 
-您也可以使用 [Fumadocs CLI](/docs/cli#init) 自動完成設定：
+您也可以讓 [Fumadocs CLI](/docs/cli#init) 自動為您完成設定：
 
 ```npm
 npx @fumadocs/cli init
@@ -62,7 +63,7 @@ npx @fumadocs/cli init
   ```
 </show>
 
-與範本相同，此指令會將 `fumadocs-ui` 安裝為 `@fumadocs/base-ui` 的別名，也就是 Fumadocs UI 的 [Base UI](/docs/ui/component-library) 版本。若要使用 Radix UI 版本，請直接安裝 `fumadocs-ui`，不要使用別名。
+與範本相同，此指令會將 `fumadocs-ui` 安裝為 `@fumadocs/base-ui` 的別名，也就是 Fumadocs UI 的 [Base UI](/docs/ui/component-library) 版本。若要改用 Radix UI，請直接安裝 `fumadocs-ui`，不要設定別名。
 
 ### 樣式 [#styles]
 
@@ -76,7 +77,7 @@ npx @fumadocs/cli init
 ```
 
 <show when={props.framework === 'next'}>
-  > Fumadocs UI 沒有預設字型，請從 `next/font` 中選擇一款。
+  > Fumadocs UI 沒有預設字型，請從 `next/font` 挑選一個。
 </show>
 
 <show when={props.framework !== 'astro'}>
@@ -220,19 +221,19 @@ npx @fumadocs/cli init
     ../../examples/astro-min/src/content.config.ts
   </include>
 
-  從您的集合建立 Fumadocs 來源：
+  根據您的集合建立 Fumadocs 來源：
 
   <include cwd meta="title=&#x22;src/lib/source.ts&#x22;">
     ../../examples/astro-min/src/lib/source.ts
   </include>
 
-  若要在同一個 `loader()` 中與其他來源合併使用，請將 `{ baseDir }` 作為 `toFumadocsSource()` 的第三個引數傳入，讓其檔案放在指定目錄下。
+  若要在同一個 `loader()` 中與其他來源合併，請將 `{ baseDir }` 作為 `toFumadocsSource()` 的第三個引數傳入，讓其檔案放在指定目錄下。
 </show>
 
 ### 路由 [#routes]
 
 <show when={props.framework === 'next' || props.framework === 'waku'}>
-  請將各版面配置共用的選項放在同一個檔案中：
+  請將版面配置的共用選項放在同一個檔案中：
 </show>
 
 <show when={props.framework === 'next'}>
@@ -240,7 +241,7 @@ npx @fumadocs/cli init
     ../../examples/next-min/lib/layout.shared.tsx
   </include>
 
-  請建立下列檔案：
+  請建立以下檔案：
 
   <include cwd meta="tab=&#x22;components/mdx.tsx&#x22;">
     ../../examples/next-min/components/mdx.tsx
@@ -273,7 +274,7 @@ npx @fumadocs/cli init
   ] satisfies RouteConfig;
   ```
 
-  請建立下列檔案：
+  請建立以下檔案：
 
   <include cwd meta="tab=&#x22;app/components/mdx.tsx&#x22;">
     ../../examples/react-router-min/app/components/mdx.tsx
@@ -291,7 +292,7 @@ npx @fumadocs/cli init
     ../../examples/react-router-min/app/routes/search.ts
   </include>
 
-  在 [RSC 模式](https://reactrouter.com/how-to/react-server-components)下，docs 路由會匯出 `ServerComponent`，而不是 loader 函式與頁面元件：
+  在 [RSC 模式](https://reactrouter.com/how-to/react-server-components)下，docs 路由匯出的是 `ServerComponent`，而不是載入器與頁面元件：
 
   <include cwd meta="title=&#x22;app/routes/docs.tsx&#x22;">
     ../../examples/react-router-rsc/app/routes/docs.tsx
@@ -299,7 +300,7 @@ npx @fumadocs/cli init
 </show>
 
 <show when={props.framework === 'tanstack-start'}>
-  請建立下列檔案：
+  請建立以下檔案：
 
   <include cwd meta="tab=&#x22;src/components/mdx.tsx&#x22;">
     ../../examples/tanstack-start-min/src/components/mdx.tsx
@@ -323,7 +324,7 @@ npx @fumadocs/cli init
     ../../examples/waku/src/lib/layout.shared.tsx
   </include>
 
-  請建立下列檔案：
+  請建立以下檔案：
 
   <include cwd meta="tab=&#x22;src/components/mdx.tsx&#x22;">
     ../../examples/waku/src/components/mdx.tsx
@@ -378,7 +379,7 @@ npx @fumadocs/cli init
   </include>
 </show>
 
-搜尋路由採用 ZBSearch，設定方式請參閱[文件搜尋](/docs/headless/search)。
+搜尋路由使用 ZBSearch，設定方式請參閱[文件搜尋](/docs/headless/search)。
 
 ### 完成 [#finish]
 

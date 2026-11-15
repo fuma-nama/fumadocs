@@ -1,12 +1,15 @@
 ---
 title: アップグレード
-description: Fumadocs パッケージを最新バージョンに更新します。
-icon: CircleArrowUp
+description: Fumadocs のパッケージを最新バージョンに更新します。
 ---
 
-Fumadocs のパッケージはすべてまとめてアップグレードしてください。Fumadocs UI は、同時にリリースされたバージョンと完全に一致する `fumadocs-core` をピア依存関係として必要とします。
+import { CircleArrowUp } from 'lucide-static';
 
-以下のコマンドは、すべての `fumadocs-*` および `@fumadocs/*` パッケージをアップグレードします。また、テンプレートで使用されている `fumadocs-ui` から `@fumadocs/base-ui` へのエイリアスもそのまま維持されます。
+export const frontmatter = { icon: CircleArrowUp };
+
+Fumadocs のパッケージはすべてまとめてアップグレードしてください。Fumadocs UI は、同時にリリースされた `fumadocs-core` の特定のバージョンをピア依存関係として指定しています。
+
+以下のコマンドは、すべての `fumadocs-*` および `@fumadocs/*` パッケージをアップグレードし、テンプレートで使用している `fumadocs-ui` から `@fumadocs/base-ui` へのエイリアスはそのまま維持します。
 
 ```bash tab="npm"
 npx npm-check-updates -u "fumadocs-*" "@fumadocs/*" && npm install
@@ -24,16 +27,16 @@ npx npm-check-updates -u "fumadocs-*" "@fumadocs/*" && yarn install
 bun update --latest "fumadocs-*" "@fumadocs/*"
 ```
 
-`yarn up` を使うとエイリアスが Radix UI 版の `fumadocs-ui` に置き換えられてしまうため、Yarn のコマンドでは npm-check-updates を使用しています。
+`yarn up` ではエイリアスが Radix UI 版の `fumadocs-ui` に置き換えられてしまうため、Yarn のコマンドでは npm-check-updates を使用しています。
 
 ## メジャーバージョン [#major-versions]
 
-メジャーバージョンをまたいでアップグレードする際は、該当するバージョンのリリースノートを確認してください。
+メジャーバージョンをまたいでアップグレードする場合は、該当バージョンのリリースノートを確認してください。
 
 * [Fumadocs 16](/blog/v16): 15.2 から非推奨となっていた API を削除し、`fumadocs-core/server` のエクスポートを個別のモジュールに移動しました。また、React 19.2 が必要になりました。
 * [Fumadocs 15](/blog/v15): スタイルを Tailwind CSS v4 に移行しました。
 
 <show when={props.framework !== 'astro'}>
-  - [Fumadocs MDX 15](/blog/mdx-v15): `fumadocs-core` 16.7.0 以降{props.framework === 'next' && <>、および ESM 形式の `next.config`</>}が必要になりました。
-  - [Fumadocs MDX 14](/blog/mdx-v14): 生成される `.source` フォルダーを、サーバー用、ブラウザー用、動的読み込み用の各エントリーに分割しました。
+  - [Fumadocs MDX 15](/blog/mdx-v15): `fumadocs-core` 16.7.0 以降{props.framework === 'next' && <>、および ESM 形式の `next.config`</>}が必要です。
+  - [Fumadocs MDX 14](/blog/mdx-v14): 生成される `.source` フォルダーを、サーバー用、ブラウザー用、動的の各エントリーに分割しました。
 </show>

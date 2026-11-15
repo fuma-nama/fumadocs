@@ -1,18 +1,20 @@
 ---
 title: 主題
 description: 為 Fumadocs UI 新增主題
-icon: Palette
 ---
 
 import { WidthTrigger } from './theme.client';
+import { Palette } from 'lucide-static';
+
+export const frontmatter = { icon: Palette };
 
 ## 概覽 [#overview]
 
-Fumadocs UI 透過 Tailwind CSS 預設集加入專屬的色彩、動畫與工具類別。
+Fumadocs UI 透過 Tailwind CSS preset 加入專屬的色彩、動畫與工具類別。
 
 ### 設定 [#setup]
 
-僅支援 Tailwind CSS v4，此預設組合也會將 Fumadocs UI 本身加入來源：
+僅支援 Tailwind CSS v4，此 preset 也會一併將 Fumadocs UI 本身加入 source：
 
 ```css title="Tailwind CSS"
 @import 'tailwindcss';
@@ -20,7 +22,7 @@ Fumadocs UI 透過 Tailwind CSS 預設集加入專屬的色彩、動畫與工具
 @import 'fumadocs-ui/css/preset.css';
 ```
 
-若您使用 **Shadcn UI**，可以改用 `shadcn` 預設樣式。Fumadocs UI 會沿用您 Shadcn UI 主題中的色彩。
+若您使用 **Shadcn UI**，可以改用 `shadcn` 預設樣式，Fumadocs UI 會直接沿用您 Shadcn UI 主題的色彩。
 
 ```css
 @import 'tailwindcss';
@@ -28,12 +30,12 @@ Fumadocs UI 透過 Tailwind CSS 預設集加入專屬的色彩、動畫與工具
 @import 'fumadocs-ui/css/preset.css';
 ```
 
-詳情請參閱[色彩](#colors)。
+詳細資訊請參閱[色彩](#colors)。
 
 ### Preflight 變更 [#preflight-changes]
 
-使用 Tailwind CSS 外掛或預先建置的樣式表時，預設的邊框、文字與背景
-顏色都會隨之改變。
+使用 Tailwind CSS 外掛或預先建置的樣式表後，預設的邊框、文字與背景
+顏色會隨之改變。
 
 ### 淺色／深色模式 [#lightdark-modes]
 
@@ -45,7 +47,7 @@ Fumadocs 透過 [`next-themes`](https://github.com/pacocoursey/next-themes) 支�
 
 支援 RTL (由右至左) 版面配置。
 
-若要啟用 RTL，請在 body 與 root provider 上將 `dir` prop 設為 `rtl`。
+若要啟用 RTL，請將 body 與 root provider 的 `dir` prop 設為 `rtl`。
 
 ```tsx
 import { RootProvider } from 'fumadocs-ui/provider/<framework>';
@@ -76,7 +78,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
 
 ### 色彩 [#colors]
 
-內建多種色彩主題，您可以挑選自己喜歡的一種。
+Fumadocs 內建多種預設配色，您可以挑選喜歡的一款。
 
 ```css
 @import 'fumadocs-ui/css/<theme>.css';
@@ -129,7 +131,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   </Tab>
 </Tabs>
 
-此設計系統的靈感來自 [Shadcn UI](https://ui.shadcn.com)，您也可以透過 [CSS／主題變數](https://tailwindcss.com/docs/theme)自訂顏色。
+此設計系統的靈感源自 [Shadcn UI](https://ui.shadcn.com)，您也可以透過 [CSS／主題變數](https://tailwindcss.com/docs/theme)自訂色彩。
 
 ```css title="global.css"
 @theme {
@@ -173,9 +175,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
 
 ### 排版 [#typography]
 
-我們內建了一個外掛，從 [Tailwind CSS Typography](https://tailwindcss.com/docs/typography-plugin) fork 而來。
+我們內建了一個從 [Tailwind CSS Typography](https://tailwindcss.com/docs/typography-plugin) 分支 (fork) 而來的外掛。
 
-此外掛提供 `prose` class，以及可用來自訂樣式的變體。
+此外掛提供 `prose` 類別，以及用來自訂樣式的各種變體。
 
 ```tsx
 <div className="prose">
@@ -183,15 +185,15 @@ export default function RootLayout({ children }: { children: ReactNode }) {
 </div>
 ```
 
-將 `prose-sm` 或 `prose-xs` 與 `prose` 搭配使用，即可套用 `text-sm` 或 `text-xs` 的字級與行高，字重也會經過視覺校正：
+將 `prose-sm` 或 `prose-xs` 與 `prose` 搭配使用，即可套用 `text-sm` 或 `text-xs` 的字型大小與行高，並搭配經過視覺校正的字重：
 
 ```tsx
 <div className="prose prose-sm">...</div>
 ```
 
-> 此外掛專為搭配 Fumadocs UI 的 MDX 元件而設計，可能會與 `@tailwindcss/typography` 產生衝突。
+> 此外掛專為搭配 Fumadocs UI 的 MDX 元件而設計，因此可能會與 `@tailwindcss/typography` 發生衝突。
 >
-> 若您需要改用 `@tailwindcss/typography` 而非預設外掛，請[設定 `className` 選項](https://github.com/tailwindlabs/tailwindcss-typography/blob/main/README.md#changing-the-default-class-name)以避免衝突。
+> 若您需要改用 `@tailwindcss/typography` 取代預設外掛，請[設定 `className` 選項](https://github.com/tailwindlabs/tailwindcss-typography/blob/main/README.md#changing-the-default-class-name)以避免衝突。
 >
 > ```sass
 > @import 'tailwindcss';

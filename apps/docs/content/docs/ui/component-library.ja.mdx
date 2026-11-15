@@ -1,14 +1,17 @@
 ---
 title: コンポーネントライブラリ
 description: 基盤となるヘッドレスコンポーネントライブラリです。
-icon: Library
 ---
+
+import { Library } from 'lucide-static';
+
+export const frontmatter = { icon: Library };
 
 ## 概要 [#overview]
 
 Fumadocs UI は [Base UI](https://base-ui.com) と [Radix UI](https://radix-ui.com/primitives) の両方をサポートしており、デフォルトでは Base UI を使用します。
 
-Fumadocs CLI でコンポーネントをカスタマイズする場合は、設定が異なることがあります。
+Fumadocs CLI を使ってコンポーネントをカスタマイズする場合は、設定が異なることがあります。
 
 ### Base UI [#base-ui]
 
@@ -34,7 +37,7 @@ Fumadocs CLI では、これが `uiLibrary` のデフォルト値です：
 
 ### Radix UI [#radix-ui]
 
-`fumadocs-ui` パッケージを直接インストールすると、Radix UI を使用できます：
+`fumadocs-ui` パッケージを直接インストールすると、Radix UI を使用できます。
 
 ```json title="package.json"
 {
@@ -44,7 +47,7 @@ Fumadocs CLI では、これが `uiLibrary` のデフォルト値です：
 }
 ```
 
-Fumadocs CLI の場合は、`cli.json` 設定ファイルで次のように設定します。
+Fumadocs CLI を使う場合は、`cli.json` で設定してください。
 
 ```json title="cli.json"
 {

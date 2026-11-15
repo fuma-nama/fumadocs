@@ -1,16 +1,22 @@
 ---
 title: 比較
 description: Fumadocs 與其他現有框架有何不同？
-icon: Scale
 ---
+
+import { Scale } from 'lucide-static';
+
+export const frontmatter = { icon: Scale };
 
 ## Nextra [#nextra]
 
-Fumadocs 深受 Nextra 啟發，例如路由慣例 (Routing Conventions) ，這也是 Fumadocs 同樣有 `meta.json` 的原因。
+Fumadocs 深受 Nextra 啟發，例如路由慣例 (Routing Conventions) 。這也是為什麼
+Fumadocs 同樣有 `meta.json`。
 
-Nextra 比 Fumadocs 更具主見 (opinionated) ，因此在 Nextra 中只需編輯設定檔即可完成的事，在 Fumadocs 中您必須手動設定。
+Nextra 比 Fumadocs 更具主觀設計 (opinionated) ，也因此在 Fumadocs 中，您需要手動設定更多項目，
+而不是單純編輯一個設定檔就好。
 
-如果您希望對各方面擁有更多掌控權，例如將其整合至現有的程式碼庫，或實作進階路由，Fumadocs 會是絕佳的選擇。
+如果您希望對各方面擁有更多掌控權，例如將其整合進既有的程式碼庫，或實作進階路由，
+Fumadocs 會是很好的選擇。
 
 ### 功能比較表 [#feature-table]
 
@@ -38,7 +44,7 @@ Nextra 比 Fumadocs 更具主見 (opinionated) ，因此在 Nextra 中只需編�
 | 功能                  | Fumadocs | Nextra |
 | ------------------- | -------- | ------ |
 | OpenAPI 整合          | 是        | 否      |
-| 產生 TypeScript 文件    | 是        | 否      |
+| TypeScript 文件產生     | 是        | 否      |
 | TypeScript Twoslash | 是        | 是      |
 
 ## Mintlify [#mintlify]
@@ -46,23 +52,23 @@ Nextra 比 Fumadocs 更具主見 (opinionated) ，因此在 Nextra 中只需編�
 Mintlify 是一項文件服務。與 Fumadocs 相比，它雖然提供免費方案，但並非完全免費，也不是開源軟體。
 
 Fumadocs 的功能不如 Mintlify 強大，例如 Mintlify 的 OpenAPI 整合就是一例。
-身為 Fumadocs 的作者，如果您對目前建置文件的方式感到滿意，我並不建議您從 Mintlify 改用 Fumadocs。
-不過，對於所有想打造精美文件的 React.js 開發者來說，我相信 Fumadocs 都是合適的工具。
+身為 Fumadocs 的作者，如果您對目前建構文件的方式感到滿意，我並不建議您從 Mintlify 改用 Fumadocs。
+不過，我相信對所有想打造精美文件的 React.js 開發者而言，Fumadocs 都是合適的工具。
 
 ## Docusaurus [#docusaurus]
 
-Docusaurus 是一套以 React.js 為基礎的強大框架，
-透過外掛與自訂主題，提供許多實用又酷炫的功能。
+Docusaurus 是一個以 React.js 為基礎的強大框架，透過外掛與自訂主題，提供許多
+很棒的功能。
 
-### 較低的複雜度 [#lower-complexity]
+### 複雜度較低 [#lower-complexity]
 
-由於 Fumadocs 是為了與 React 框架整合而設計，您可能需要對 React.js 有更深入的了解才能上手。
+由於 Fumadocs 是為了與 React 框架整合而設計，您可能需要對 React.js 有較多了解才能上手。
 相對地，Fumadocs 的可自訂性也更高。
 
-如果您只需要簡單的文件網站，且不需要任何框架專屬的功能，Docusaurus 可能是更好的選擇。
+若只是建置簡單的文件網站，而且不需要任何框架專屬的功能，Docusaurus 可能是更好的選擇。
 
 ### 外掛 [#plugins]
 
-您可以透過外掛輕鬆實現許多功能，Docusaurus 的生態系確實更為龐大，並由眾多貢獻者共同維護。
+透過外掛，您可以輕鬆實現許多功能；Docusaurus 的生態系確實更為龐大，且有眾多貢獻者共同維護。
 
-相較之下，Fumadocs 的彈性讓您能夠自行實作這些功能，但可能需要花較多時間調整，才能達到滿意的效果。
+相較之下，Fumadocs 的彈性讓您能夠自行實作這些功能，但可能需要花更多時間調整，才能達到您滿意的效果。
