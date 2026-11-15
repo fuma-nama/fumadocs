@@ -1,0 +1,25 @@
+import { Cuboid } from 'lucide-static';
+
+export default {
+  title: 'Fumadocs Core',
+  description: '無頭式函式庫',
+  icon: Cuboid,
+  root: true,
+  pages: [
+    '---指南---',
+    'index',
+    'search',
+    '---API 參考資料---',
+    'page-tree',
+    'internationalization',
+    'components',
+    'utils',
+    'mdx',
+    '---來源---',
+    'source-api',
+    'page-conventions',
+    'content-collections/index',
+    'contentlayer',
+    'custom-source',
+  ],
+};

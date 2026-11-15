@@ -1,16 +1,19 @@
 ---
 title: はじめに
 description: Fumadocs の公式コンテンツソースである Fumadocs MDX を紹介します。
-icon: SquareBookmark
 ---
+
+import { SquareBookmark } from 'lucide-static';
+
+export const frontmatter = { icon: SquareBookmark };
 
 ## はじめに [#introduction]
 
 Fumadocs MDX は、Content Collections と同様に、コンテンツを型安全なデータに変換するツールです。
 
-本格的な CMS ではなく、React フレームワーク向けのコンテンツ処理レイヤーです。ブログ記事などのコンテンツの管理にも利用できます。
+完全な CMS ではなく、React フレームワーク向けのコンテンツ処理レイヤーです。ブログ記事などのコンテンツの管理にも使用できます。
 
-### Collection とは？ [#what-is-a-collection]
+### Collection とは? [#what-is-a-collection]
 
 **Collection** とは、特定の種類のファイルをまとめたものです。アプリ内で [Macro API](/docs/mdx/macro) を使って定義できます。
 
@@ -28,7 +31,7 @@ export const source = loader({
 });
 ```
 
-利用できるコレクションは次のとおりです。
+利用可能なコレクション:
 
 <Tabs items={["doc", "meta", 'docs']}>
   <Tab value="doc">
@@ -58,7 +61,7 @@ export const source = loader({
   </Tab>
 
   <Tab value="docs">
-    `meta` コレクションと `doc` コレクションを組み合わせたもので、Fumadocs を使う際に必要です。
+    `meta` コレクションと `doc` コレクションを組み合わせたもので、Fumadocs で必要になります。
 
     ```ts
     import { defineDocs } from 'fumadocs-mdx/macro';
@@ -76,7 +79,7 @@ export const source = loader({
   </Tab>
 </Tabs>
 
-たとえば、`doc` コレクションは次のような `.md` および `.mdx` ファイルを変換します。
+たとえば、`doc` コレクションは `.md` ファイルと `.mdx` ファイルを変換します。
 
 <Files>
   <Folder name="folder" defaultOpen>
@@ -94,19 +97,19 @@ export const source = loader({
 
 ## インストール [#installation]
 
-使用する環境に合わせて Fumadocs MDX を設定してください。
+Fumadocs MDX は以下の環境で設定できます。
 
 <Cards>
   <Card title="Next.js" href="/docs/mdx/next">
-    Next.js で Fumadocs MDX を使用する
+    Next.js で Fumadocs MDX を使用する方法です。
   </Card>
 
   <Card title="Vite" href="/docs/mdx/vite">
-    Vite で Fumadocs MDX を使用する
+    Vite で Fumadocs MDX を使用する方法です。
   </Card>
 
   <Card title="ランタイムローダー" href="/docs/mdx/loader">
-    JavaScript ランタイムで Fumadocs MDX を使用する
+    JavaScript ランタイムで Fumadocs MDX を使用する方法です。
   </Card>
 </Cards>
 
@@ -114,20 +117,20 @@ export const source = loader({
 
 ### 組み込みプロパティ [#built-in-properties]
 
-以下のプロパティは、MDX ファイルからデフォルトでエクスポートされます。
+以下のプロパティは、デフォルトで MDX ファイルからエクスポートされます。
 
 | プロパティ                 | 説明                   |
 | --------------------- | -------------------- |
 | `frontmatter`         | フロントマター              |
 | `toc`                 | 目次                   |
-| `structuredData`      | 構造化データ。検索の実装に便利です    |
+| `structuredData`      | 構造化データ (検索の実装に便利です)  |
 | `extractedReferences` | `hrefs` の参照の解析に使用します |
 
 ### フロントマターのカスタマイズ [#customize-frontmatter]
 
 [`schema`](/docs/mdx/collections#schema-1) オプションでバリデーションスキーマを渡すと、フロントマターを検証し、その出力プロパティを定義できます。
 
-MDX ページでは、[フロントマターをコードで](/docs/markdown#frontmatter)エクスポートすることもできます。エクスポートした値は YAML フロントマターを上書きする形でマージされ、その結果がコレクションのスキーマで検証されます。
+MDX ページでは、[フロントマターをコード内で](/docs/markdown#frontmatter)エクスポートすることもできます。エクスポートした値は YAML フロントマターを上書きする形でマージされ、その結果がコレクションのスキーマで検証されます。
 
 ```mdx title="content/docs/index.mdx"
 ---
@@ -145,8 +148,8 @@ export const frontmatter = {
 
 ### コンパイラのカスタマイズ [#customize-compiler]
 
-Fumadocs MDX は、[MDX Compiler](https://mdxjs.com/packages/mdx) を通じて unified で MDX ファイルを JavaScript ファイルにコンパイルします。
+Fumadocs MDX は、[MDX Compiler](https://mdxjs.com/packages/mdx) を介し、unified を使って MDX ファイルを JavaScript ファイルにコンパイルします。
 
-コレクションごとに、代わりに [Sätteri](/docs/mdx/mdx#satteri) でコンパイルすることもできます。どちらにも、プラグインと設定のデフォルトプリセットが用意されています。
+コレクションごとに、代わりに [Sätteri](/docs/mdx/mdx#satteri) でコンパイルすることもできます。どちらにも、プラグインと設定をまとめたデフォルトのプリセットが用意されています。
 
-コンパイラは[グローバル設定](/docs/mdx/global#mdx-options)または[コレクション設定](/docs/mdx/collections#mdxoptions)でカスタマイズできます。
+コンパイラは [Global Config](/docs/mdx/global#mdx-options) または [Collection Config](/docs/mdx/collections#mdxoptions) でカスタマイズできます。

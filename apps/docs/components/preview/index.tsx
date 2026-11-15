@@ -9,7 +9,6 @@ import { TypeTable } from 'fumadocs-ui/components/type-table';
 import { type ReactNode } from 'react';
 import { Wrapper } from './wrapper';
 import { GithubInfo } from 'fumadocs-ui/components/github-info';
-import { cacheLife } from 'next/cache';
 import { owner, repo } from '@/lib/github';
 import {
   Banner,
@@ -237,10 +236,7 @@ export function banner(): ReactNode {
   );
 }
 
-// cached for its stars, like the default revalidate of `GithubInfo` on Next.js
-export async function githubInfo() {
-  'use cache';
-  cacheLife({ revalidate: 60 });
+export function githubInfo() {
   return (
     <Wrapper>
       <GithubInfo

@@ -1,0 +1,29 @@
+import { Pencil } from 'lucide-static';
+
+export default {
+  title: 'Fumadocs MDX',
+  description: '公式コンテンツソース',
+  icon: Pencil,
+  root: true,
+  pages: [
+    '---ガイド---',
+    'index',
+    'performance',
+    'page',
+    'entry',
+    'macro',
+    '---連携---',
+    '...(integrations)',
+    '---設定---',
+    'collections',
+    'global',
+    'mdx',
+    'plugin',
+    '---機能---',
+    'include',
+    'last-modified',
+    'manifest',
+    'async',
+    '...',
+  ],
+};

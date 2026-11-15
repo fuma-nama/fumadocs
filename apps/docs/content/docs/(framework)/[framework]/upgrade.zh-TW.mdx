@@ -1,12 +1,15 @@
 ---
 title: 升級
 description: 將 Fumadocs 套件更新至最新版本。
-icon: CircleArrowUp
 ---
 
-請同時升級所有 Fumadocs 套件。Fumadocs UI 會將其發布時搭配的 `fumadocs-core` 確切版本列為 peer dependency。
+import { CircleArrowUp } from 'lucide-static';
 
-以下指令會升級所有 `fumadocs-*` 與 `@fumadocs/*` 套件，並保留範本所使用、指向 `@fumadocs/base-ui` 的 `fumadocs-ui` 別名：
+export const frontmatter = { icon: CircleArrowUp };
+
+請一併升級所有 Fumadocs 套件。Fumadocs UI 將 `fumadocs-core` 設為 peer dependency，且版本必須與其發布時所搭配的版本完全一致。
+
+以下指令會升級所有 `fumadocs-*` 與 `@fumadocs/*` 套件，並保留範本所使用的 `fumadocs-ui` 別名 (指向 `@fumadocs/base-ui`) ：
 
 ```bash tab="npm"
 npx npm-check-updates -u "fumadocs-*" "@fumadocs/*" && npm install
@@ -24,16 +27,16 @@ npx npm-check-updates -u "fumadocs-*" "@fumadocs/*" && yarn install
 bun update --latest "fumadocs-*" "@fumadocs/*"
 ```
 
-Yarn 的指令改用 npm-check-updates，因為 `yarn up` 會把別名替換成 Radix UI 版本的 `fumadocs-ui`。
+Yarn 指令改用 npm-check-updates，因為 `yarn up` 會把別名替換成 Radix UI 版本的 `fumadocs-ui`。
 
 ## 主要版本 [#major-versions]
 
-若升級時跨越某個主要版本，請先閱讀該版本的發行說明：
+升級跨越主要版本時，請閱讀該版本的發行說明：
 
-* [Fumadocs 16](/blog/v16)：移除自 15.2 起已棄用的 API，將 `fumadocs-core/server` 的匯出移至各個專屬模組，並要求 React 19.2。
+* [Fumadocs 16](/blog/v16)：移除自 15.2 起已棄用的 API，將 `fumadocs-core/server` 的匯出移至各自對應的模組，並需要 React 19.2。
 * [Fumadocs 15](/blog/v15)：將樣式遷移至 Tailwind CSS v4。
 
 <show when={props.framework !== 'astro'}>
-  - [Fumadocs MDX 15](/blog/mdx-v15)：需要 `fumadocs-core` 16.7.0 以上版本{props.framework === 'next' && <>，且 `next.config` 須為 ESM 格式</>}。
-  - [Fumadocs MDX 14](/blog/mdx-v14)：將產生的 `.source` 資料夾拆分為伺服器、瀏覽器與 dynamic 進入點。
+  - [Fumadocs MDX 15](/blog/mdx-v15)：需要 `fumadocs-core` 16.7.0 或更新版本{props.framework === 'next' && <>，以及 ESM 格式的 `next.config`</>}。
+  - [Fumadocs MDX 14](/blog/mdx-v14)：將產生的 `.source` 資料夾拆分為 server、browser 與 dynamic 三個進入點。
 </show>

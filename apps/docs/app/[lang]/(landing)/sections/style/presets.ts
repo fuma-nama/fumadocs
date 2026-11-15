@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { readFile } from 'node:fs/promises';
 import { THEMES, type ThemeId } from './data';
 
 const DIR = './node_modules/fumadocs-ui/css';
@@ -72,12 +72,14 @@ export interface InkTable {
 }
 
 /** the real tokens of every preset, read from `fumadocs-ui/css` (traced for `/` in next.config) */
-export function loadInks(): InkTable {
-  const defaults = parse(readFileSync(`${DIR}/lib/default-colors.css`, 'utf8'));
+export async function loadInks(): Promise<InkTable> {
+  const defaults = parse(await readFile(`${DIR}/lib/default-colors.css`, 'utf8'));
   const names = Object.keys(defaults.light);
+  // read together, filled in preset order: the page's payload is the same every build
+  const files = await Promise.all(THEMES.map((theme) => readFile(`${DIR}/${theme}.css`, 'utf8')));
   const inks = {} as Record<ThemeId, Ink>;
   for (let i = 0; i < THEMES.length; i++) {
-    const preset = parse(readFileSync(`${DIR}/${THEMES[i]}.css`, 'utf8'));
+    const preset = parse(files[i]);
     const light: string[] = [];
     const dark: string[] = [];
     for (const name of names) {

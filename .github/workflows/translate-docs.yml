@@ -29,8 +29,9 @@ jobs:
           node-version: 24
           cache: 'pnpm'
 
+      # the builds of UI packages compile their translations with `packages/shared`
       - name: Install Dependencies
-        run: pnpm i --frozen-lockfile --filter docs...
+        run: pnpm i --frozen-lockfile --filter docs... --filter shared
 
       - name: Build packages
         run: pnpm run build --filter=@fumadocs/satteri

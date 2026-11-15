@@ -1,20 +1,23 @@
 ---
 title: 存取集合
-description: 透過進入點檔案存取集合的輸出結果。
-icon: FileUp
+description: 透過進入點檔案存取集合的輸出內容。
 ---
+
+import { FileUp } from 'lucide-static';
+
+export const frontmatter = { icon: FileUp };
 
 ## 概覽 [#overview]
 
 在設定檔中定義集合後，集合項目會編譯成應用程式可存取的 JavaScript 檔案。
 
-編譯工作由 Fumadocs MDX 的打包工具／執行階段外掛負責，此外它也會產生**進入點檔案**，讓您存取集合的輸出結果。
+編譯工作雖然由 Fumadocs MDX 的打包工具／執行階段外掛負責，但它也會產生**進入點檔案**，讓您存取集合的輸出內容。
 
-如果您偏好改在應用程式模組中定義集合，請參閱 [Macro API](/docs/mdx/macro)。
+如果您偏好在應用程式模組中定義集合，請參閱 [Macro API](/docs/mdx/macro)。
 
 ### 進入點檔案 [#entry-files]
 
-集合的輸出會產生在輸出目錄中，您可以透過進入點檔案存取這些輸出。
+集合的輸出會產生在輸出目錄中，您可以透過進入點檔案存取。
 
 <Files>
   <Folder name=".source" defaultOpen>
@@ -26,6 +29,6 @@ icon: FileUp
   </Folder>
 </Files>
 
-以下列出存取輸出的各種方式。
+以下列出可用來存取輸出的各種方式。
 
 <DocsCategory />

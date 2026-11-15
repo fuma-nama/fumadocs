@@ -70,7 +70,3 @@ export default async function RootLayout({ params, children }: LayoutProps<'/[la
     </html>
   );
 }
-
-export function generateStaticParams() {
-  return i18n.languages.map((lang) => ({ lang }));
-}

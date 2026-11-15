@@ -4,7 +4,7 @@ packages:
   - examples/*
   - '!examples/stackblitz'
 minimumReleaseAgeExclude:
-  - '@fumari/sponsors@0.1.0'
+  - '@fumari/sponsors@0.1.0 || 0.1.3 || 0.1.4'
   - 'fuma-translate'
   - '@fuma-translate/*'
   - react-router
@@ -80,3 +80,5 @@ catalog:
 # the docs lint passes the Rolldown plugin of fumadocs-mdx to unrun, both need the same Rolldown
 overrides:
   unrun>rolldown: 'catalog:'
+patchedDependencies:
+  next@16.4.6: patches/next@16.4.6.patch

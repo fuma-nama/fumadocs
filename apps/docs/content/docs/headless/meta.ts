@@ -1,0 +1,25 @@
+import { Cuboid } from 'lucide-static';
+
+export default {
+  title: 'Fumadocs Core',
+  description: 'The headless library',
+  icon: Cuboid,
+  root: true,
+  pages: [
+    '---Guide---',
+    'index',
+    'search',
+    '---API References---',
+    'page-tree',
+    'internationalization',
+    'components',
+    'utils',
+    'mdx',
+    '---Sources---',
+    'source-api',
+    'page-conventions',
+    'content-collections/index',
+    'contentlayer',
+    'custom-source',
+  ],
+};

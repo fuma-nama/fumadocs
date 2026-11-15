@@ -1,0 +1,25 @@
+diff --git a/dist/export/index.js b/dist/export/index.js
+index 5fb63998343cd749f26c5722589675bd34b1c917..87f947a7ddb69af84bd32c684c20d81f85cdaf28 100644
+--- a/dist/export/index.js
++++ b/dist/export/index.js
+@@ -517,15 +517,13 @@ async function exportAppImpl(dir, options, span, staticWorker) {
+         // Calculate the number of workers needed to ensure each batch has at least
+         // minPageCountPerBatch pages.
+         const numWorkers = Math.min(options.numWorkers, Math.ceil(exportPaths.length / minPageCountPerBatch));
+-        // Calculate the page count per batch based on the number of workers.
+-        const pageCountPerBatch = Math.ceil(exportPaths.length / numWorkers);
++        // The pages of a route are next to each other and routes differ in cost: deal the pages out in turn, so that
++        // every worker gets its part of each route instead of one worker rendering the most expensive one (vercel/next.js#101655).
+         const batches = Array.from({
+             length: numWorkers
+-        }, (_, i)=>exportPaths.slice(i * pageCountPerBatch, (i + 1) * pageCountPerBatch));
+-        // Distribute remaining pages.
+-        const remainingPages = exportPaths.slice(numWorkers * pageCountPerBatch);
+-        remainingPages.forEach((page, index)=>{
+-            batches[index % batches.length].push(page);
++        }, ()=>[]);
++        exportPaths.forEach((page, index)=>{
++            batches[index % numWorkers].push(page);
+         });
+         return (await Promise.all(batches.map(async (batch)=>worker.exportPages({
+                 buildId,

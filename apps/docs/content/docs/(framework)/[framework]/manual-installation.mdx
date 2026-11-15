@@ -1,11 +1,12 @@
 ---
 title: Manual Installation
-icon: Wrench
 ---
 
 import { frameworks } from '@/lib/framework';
+import { Wrench } from 'lucide-static';
 
 export const frontmatter = {
+  icon: Wrench,
   description: `Add Fumadocs to an existing ${frameworks.find((item) => item.value === props.framework)?.name} project.`,
 };
 

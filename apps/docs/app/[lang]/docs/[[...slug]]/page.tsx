@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { type ReactNode, Suspense } from 'react';
+import type { ReactNode } from 'react';
 import * as Preview from '@/components/preview';
 import { createMetadata, getPageImageUrl } from '@/lib/metadata';
 import { source } from '@/lib/source';
@@ -15,11 +15,10 @@ import {
 } from 'fumadocs-ui/layouts/spacious/page';
 import { getPageComponents } from '@/components/mdx/page';
 import { AsyncAPIPageLazy, GraphQLPageLazy, OpenAPIPageLazy } from './lazy';
-import { SponsorsMarquee } from '@fumari/sponsors';
+import { SponsorsMarquee } from '@fumari/sponsors/client';
 import { frameworks, isFramework } from '@/lib/framework';
 import { notFound, redirect } from 'next/navigation';
 import { i18n } from '@/lib/i18n';
-import { connection } from 'next/server';
 
 function PreviewRenderer({ preview }: { preview: string }): ReactNode {
   if (preview && preview in Preview) {
@@ -30,12 +29,7 @@ function PreviewRenderer({ preview }: { preview: string }): ReactNode {
   return null;
 }
 
-// rendered per request into the static page: a regenerated page never matches its build output, revalidating
-// it would write every page again after each deploy
-async function Sponsors() {
-  await connection();
-  return <SponsorsMarquee />;
-}
+export const revalidate = false;
 
 export default async function Page(props: PageProps<'/[lang]/docs/[[...slug]]'>) {
   const params = await props.params;
@@ -56,11 +50,9 @@ export default async function Page(props: PageProps<'/[lang]/docs/[[...slug]]'>)
 
   const pageProps = {
     tableOfContent: {
-      footer: (
-        <Suspense>
-          <Sponsors />
-        </Suspense>
-      ),
+      // fetched in the browser: a server fetch would make every page revalidate, and a regenerated page never
+      // matches its build output, so each one would be written again after every deploy
+      footer: <SponsorsMarquee />,
     },
   } satisfies Partial<DocsPageProps>;
 

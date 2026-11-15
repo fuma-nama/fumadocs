@@ -1,18 +1,20 @@
 ---
 title: テーマ
 description: Fumadocs UI にテーマを追加する
-icon: Palette
 ---
 
 import { WidthTrigger } from './theme.client';
+import { Palette } from 'lucide-static';
+
+export const frontmatter = { icon: Palette };
 
 ## 概要 [#overview]
 
-Fumadocs UI は、Tailwind CSS のプリセットによって独自のカラー、アニメーション、ユーティリティを追加します。
+Fumadocs UI は、Tailwind CSS のプリセットを通じて独自のカラー、アニメーション、ユーティリティを追加します。
 
 ### セットアップ [#setup]
 
-サポートされているのは Tailwind CSS v4 のみです。プリセットには Fumadocs UI 自体のソースも含まれます:
+サポートしているのは Tailwind CSS v4 のみです。プリセットには Fumadocs UI 自体のソースも含まれます。
 
 ```css title="Tailwind CSS"
 @import 'tailwindcss';
@@ -20,7 +22,7 @@ Fumadocs UI は、Tailwind CSS のプリセットによって独自のカラー�
 @import 'fumadocs-ui/css/preset.css';
 ```
 
-**Shadcn UI** を使用している場合は、代わりに `shadcn` プリセットを使用できます。Fumadocs UI は Shadcn UI のテーマの色をそのまま使用します。
+**Shadcn UI** を使用している場合は、代わりに `shadcn` プリセットを使用できます。Fumadocs UI には Shadcn UI のテーマの色が適用されます。
 
 ```css
 @import 'tailwindcss';
@@ -30,13 +32,13 @@ Fumadocs UI は、Tailwind CSS のプリセットによって独自のカラー�
 
 詳しくは[カラー](#colors)を参照してください。
 
-### Preflight の変更 [#preflight-changes]
+### Preflight による変更 [#preflight-changes]
 
-Tailwind CSS プラグインまたはビルド済みのスタイルシートを使用すると、ボーダー、テキスト、背景のデフォルトの色が変更されます。
+Tailwind CSS プラグインまたはビルド済みのスタイルシートを使用すると、デフォルトのボーダー色、テキスト色、背景色が変更されます。
 
 ### ライト/ダークモード [#lightdark-modes]
 
-Fumadocs は [`next-themes`](https://github.com/pacocoursey/next-themes) を使用してライト/ダークモードをサポートしています。`next-themes` は Root Provider に含まれています。
+Fumadocs は [`next-themes`](https://github.com/pacocoursey/next-themes) を使ってライト/ダークモードをサポートしています。`next-themes` は Root Provider に組み込まれています。
 
 詳しくは [Root Provider](/docs/ui/layouts/root-provider#theme-provider) を参照してください。
 
@@ -44,7 +46,7 @@ Fumadocs は [`next-themes`](https://github.com/pacocoursey/next-themes) を使�
 
 RTL (右から左) レイアウトに対応しています。
 
-RTL を有効にするには、body 要素とルートプロバイダーの `dir` prop を `rtl` に設定してください。
+RTL を有効にするには、body とルートプロバイダーの `dir` prop を `rtl` に設定してください。
 
 ```tsx
 import { RootProvider } from 'fumadocs-ui/provider/<framework>';
@@ -75,7 +77,7 @@ CSS 変数を使って、Docs レイアウトの最大幅をカスタマイズ�
 
 ### カラー [#colors]
 
-多数のプリセットが標準で用意されているので、お好みのものを選んで使用できます。
+多数のプリセットが標準で用意されているので、お好みのものを選択できます。
 
 ```css
 @import 'fumadocs-ui/css/<theme>.css';
@@ -128,7 +130,7 @@ CSS 変数を使って、Docs レイアウトの最大幅をカスタマイズ�
   </Tab>
 </Tabs>
 
-このデザインシステムは [Shadcn UI](https://ui.shadcn.com) をベースにしています。[CSS/テーマ変数](https://tailwindcss.com/docs/theme)で色をカスタマイズすることもできます。
+このデザインシステムは [Shadcn UI](https://ui.shadcn.com) を参考にしています。[CSS/テーマ変数](https://tailwindcss.com/docs/theme)で色をカスタマイズすることもできます。
 
 ```css title="global.css"
 @theme {
@@ -172,9 +174,9 @@ CSS 変数を使って、Docs レイアウトの最大幅をカスタマイズ�
 
 ### タイポグラフィ [#typography]
 
-[Tailwind CSS Typography](https://tailwindcss.com/docs/typography-plugin) をフォークした組み込みプラグインを提供しています。
+[Tailwind CSS Typography](https://tailwindcss.com/docs/typography-plugin) をフォークした組み込みプラグインを用意しています。
 
-このプラグインは `prose` クラスと、それをカスタマイズするためのバリアントを追加します。
+このプラグインは、`prose` クラスと、それをカスタマイズするためのバリアントを追加します。
 
 ```tsx
 <div className="prose">
@@ -182,15 +184,15 @@ CSS 変数を使って、Docs レイアウトの最大幅をカスタマイズ�
 </div>
 ```
 
-`prose` と併せて `prose-sm` または `prose-xs` を使用すると、`text-sm` または `text-xs` と同じフォントサイズと行の高さが適用され、フォントウェイトも見た目に合わせて調整されます：
+`prose` と併せて `prose-sm` または `prose-xs` を使用すると、`text-sm` または `text-xs` のフォントサイズと行の高さが適用され、フォントの太さも見た目に合わせて調整されます。
 
 ```tsx
 <div className="prose prose-sm">...</div>
 ```
 
-> このプラグインは Fumadocs UI の MDX コンポーネントと組み合わせて使うことを前提としているため、`@tailwindcss/typography` と競合する場合があります。
+> このプラグインは Fumadocs UI の MDX コンポーネントと組み合わせて使うことを前提としており、`@tailwindcss/typography` と競合する可能性があります。
 >
-> デフォルトのプラグインではなく `@tailwindcss/typography` を使う必要がある場合は、競合を避けるために [`className` オプションを設定](https://github.com/tailwindlabs/tailwindcss-typography/blob/main/README.md#changing-the-default-class-name)してください。
+> デフォルトのプラグインではなく `@tailwindcss/typography` を使いたい場合は、競合を避けるために [`className` オプションを設定](https://github.com/tailwindlabs/tailwindcss-typography/blob/main/README.md#changing-the-default-class-name)してください。
 >
 > ```sass
 > @import 'tailwindcss';

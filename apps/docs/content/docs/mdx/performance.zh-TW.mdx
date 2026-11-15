@@ -1,34 +1,37 @@
 ---
 title: 效能
 description: Fumadocs MDX 的效能
-icon: Rocket
 ---
+
+import { Rocket } from 'lucide-static';
+
+export const frontmatter = { icon: Rocket };
 
 ## 概覽 [#overview]
 
-Fumadocs MDX 是一個打包工具外掛，換句話說，它的效能瓶頸取決於底層的打包工具，上限也相對較高。
+Fumadocs MDX 是一個打包工具外掛，換句話說，它的效能上限較高，實際瓶頸取決於底層的打包工具。
 
-以 Turbopack 和 Vite 等常見的打包工具來說，它足以應付擁有將近 500 個以上 MDX 檔案的大型文件網站，幾乎能滿足所有使用情境。
+以 Turbopack 和 Vite 等常見的打包工具來說，它足以應付擁有將近 500+ 個 MDX 檔案的大型文件網站，幾乎能滿足所有使用情境。
 
-由於 Fumadocs MDX 是搭配您的打包工具運作，您可以在 MDX 檔案中匯入任何檔案，包括用戶端元件。
+由於 Fumadocs MDX 與您的打包工具搭配運作，您可以在 MDX 檔案中匯入任何檔案，包括用戶端元件。
 這帶來了極高的彈性，並確保所有內容預設都經過最佳化。
 
 ### 開發伺服器 [#development-server]
 
-分為兩類：
+分為兩種類型：
 
-* **Lazy**：像 Vite 這類 bundler，以及 Node.js 與 Bun 等執行階段端的載入器，可以在模組被請求時 (例如呼叫 `await import()` 時) 按需編譯 MDX 檔案，因此開發伺服器的效能不太會受到 MDX 檔案數量影響。
+* **Lazy**：Vite 等打包工具，以及 Node.js 和 Bun 等執行階段端的載入器，可以在請求模組時 (例如呼叫 `await import()` 時) 按需編譯 MDX 檔案，因此開發伺服器的效能不太會受到 MDX 檔案數量影響。
 
-  不過，請務必啟用 [延遲載入](/docs/mdx/async)，延遲編譯才會生效。
+  不過，請務必啟用[延遲載入](/docs/mdx/async)，延遲編譯才會生效。
 
-* **Precompiled**：Webpack 與 Turbopack 在開發模式下不支援延遲編譯，所有 MDX 檔案都必須事先編譯。視需要預先編譯的 MDX 檔案數量而定，開發伺服器可能會變慢。
+* **Precompiled**：Webpack 和 Turbopack 在開發模式下不支援延遲編譯，所有 MDX 檔案都必須事先編譯。視需要預先編譯的 MDX 檔案數量而定，開發伺服器可能會變慢。
 
-  雖然這是 bundler 層級的限制，但若您在意速度問題，我們建議改用 [本機 Markdown](/docs/integrations/content/local-md)。它會略過 bundler 層，在執行階段載入並編譯 MDX 檔案。詳情請參閱連結中的介紹。
+  雖然這是打包工具層級的限制，但如果您在意速度問題，我們建議改用[本機 Markdown](/docs/integrations/content/local-md)。它會略過打包工具層，在執行階段載入並編譯 MDX 檔案。詳情請參閱連結中的介紹。
 
 ### 圖片最佳化 [#image-optimization]
 
 Fumadocs MDX 會透過 [Remark Image](/docs/headless/mdx/remark-image) 將圖片解析為靜態匯入。
-因此，您的圖片會依據所使用的 React 框架自動最佳化 (例如 Next.js Image API) 。
+因此，圖片會依您所使用的 React 框架自動進行最佳化 (例如 Next.js Image API) 。
 
 ```mdx
 ![Hello](./hello.png)
@@ -50,24 +53,24 @@ import HelloImage from './hello.png';
 
 ### 正式環境建置 [#production-build]
 
-在正式環境建置中，最耗時的部分通常是 TypeScript docgen (沒有 tsgo 時，TypeScript 編譯器相當慢) ，以及所有 MDX 檔案各自零碎的處理工作累加起來的時間。
+在正式環境建置中，最耗時的部分通常是 TypeScript docgen (沒有 tsgo 時，TypeScript 編譯器相當緩慢) ，以及所有 MDX 檔案各自零碎的處理工作累加起來的開銷。
 
-在沒有快取的情況下，大量 MDX 檔案可能會導致建置期間的記憶體用量極高。原因如下：
+在沒有快取的情況下，大量 MDX 檔案可能會在建置期間造成極高的記憶體用量，原因如下：
 
-* MDX 檔案編譯成 JavaScript 後，打包工具還得再打包輸出的 JavaScript 檔案。
-* 即使每個 MDX 檔案的編譯時間微不足道，累加起來仍可能相當緩慢。例如約 2500 個檔案，假設每個檔案需要 25ms，冷建置最多會花上 62.5 秒。
+* MDX 檔案編譯成 JavaScript 之後，打包工具還得再打包輸出的 JavaScript 檔案。
+* 即使單一 MDX 檔案的編譯時間微不足道，累加起來仍可能相當可觀。例如約 2500 個檔案，假設每個檔案需要 25ms，冷建置最多將耗時 62.5 秒。
 
 主要的解決方式是改為隨需編譯，讓內容只在收到請求時才載入。
 
 #### 本機 Markdown [#local-markdown]
 
-如開發伺服器一節所建議，[本機 Markdown](/docs/integrations/content/local-md) 是不錯的替代方案，它完全在執行階段運作，無須額外的編譯工作。
+如開發伺服器一節所建議，[本機 Markdown](/docs/integrations/content/local-md) 是不錯的替代方案：它完全在執行階段運作，不需要額外的編譯步驟。
 
 #### 遠端來源 [#remote-source]
 
-透過遠端內容載入，建立您的自訂內容來源。
+建立自訂的內容來源，並以遠端方式載入內容。
 
-如果您的內容來源不需要預先編譯內容檔案，就能在 SSG 時依需求處理這些檔案，進而**提升建置速度。**
-不過，您將無法運用建置時期的最佳化 (例如打包) 。
+如果您的內容來源不需要預先編譯內容檔案，便可透過 SSG 依需求處理這些檔案，進而**提升建置速度。**
+不過，這樣就無法運用建置時期的最佳化 (例如打包) 。
 
 如需實作自訂來源，請參閱[自訂來源](/docs/integrations/content/custom)。

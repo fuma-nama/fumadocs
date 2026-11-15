@@ -1,0 +1,9 @@
+import { Shapes } from 'lucide-static';
+
+export default {
+  title: 'AsyncAPI Example',
+  description: 'A demo for Fumadocs AsyncAPI',
+  root: true,
+  icon: Shapes,
+  pages: ['index', '...(generated)'],
+};
