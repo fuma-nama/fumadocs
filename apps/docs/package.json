@@ -3,9 +3,8 @@
   "version": "0.1.75",
   "private": true,
   "scripts": {
-    "build": "pnpm build:pre && next build && pnpm build:post",
+    "build": "pnpm build:pre && next build",
     "build:pre": "node ./scripts/pre-build.ts",
-    "build:post": "node ./scripts/post-build.ts",
     "translate": "node ./scripts/translate.ts",
     "types:check": "next typegen && tsc --noEmit",
     "clean": "rimraf .next",
@@ -70,7 +69,6 @@
     "@fumadocs/cli": "workspace:*",
     "@modelcontextprotocol/server": "^2.4.0",
     "@next/bundle-analyzer": "16.4.6",
-    "@next/env": "16.4.6",
     "@tailwindcss/postcss": "^4.3.5",
     "@types/d3-force": "^3.0.10",
     "@types/hast": "^3.0.5",
