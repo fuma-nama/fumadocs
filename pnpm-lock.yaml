@@ -1733,9 +1733,9 @@ importers:
       fumadocs-ui:
         specifier: workspace:@fumadocs/base-ui@*
         version: link:../../packages/base-ui
-      lucide-static:
+      lucide-react:
         specifier: ^1.71.0
-        version: 1.71.0
+        version: 1.71.0(@types/react@19.3.0)(react@19.3.1)
       react:
         specifier: ^19.3.1
         version: 19.3.1
@@ -12924,9 +12924,6 @@ packages:
     peerDependenciesMeta:
       '@types/react':
         optional: true
-
-  lucide-static@1.71.0:
-    resolution: {integrity: sha512-yUXCvkMCNlqZI72Oco8+FjFwTcPI0Xz5qPZuqYXKP/8BU928hKT0Q4/m+R0e1I44kqEfCz1pd2J7iQ8jTZQEuA==}
 
   magic-string@0.30.21:
     resolution: {integrity: sha512-vd2F4YUyEXKGcLHoq+TEyCjxueSeHnFxyyjNp80yg0XV4vUhnDer/lvvlqM/arB5bXQN5K2/3oinyCRyx8T2CQ==}
@@ -24851,8 +24848,6 @@ snapshots:
       react: 19.3.1
     optionalDependencies:
       '@types/react': 19.3.0
-
-  lucide-static@1.71.0: {}
 
   magic-string@0.30.21:
     dependencies:
