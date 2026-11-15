@@ -106,12 +106,14 @@ function localize(file: string, source: string, translated: string, locale: stri
   return translated;
 }
 
+/** in code, the string literals of the title, description and separators of `pages` */
+const codeLabels = /(\b(?:title|description): '|'---)(.+?)(---'|')/g;
+
 /** the labels of a meta file: its title, description and separators */
 function getLabels(file: string, source: string): Record<string, string> {
   const labels: Record<string, string> = {};
-  // in code, only the separators of `pages`
   if (file.endsWith('.ts'))
-    for (const [, value] of source.matchAll(/'---(.+?)---'/g)) labels[value] = value;
+    for (const [, , value] of source.matchAll(codeLabels)) labels[value] = value;
   else {
     const meta = JSON.parse(source) as { title?: string; description?: string; pages?: string[] };
     if (meta.title) labels.title = meta.title;
@@ -126,7 +128,10 @@ function getLabels(file: string, source: string): Record<string, string> {
 
 function setLabels(file: string, source: string, labels: Record<string, string>): string {
   if (file.endsWith('.ts'))
-    return source.replace(/'---(.+?)---'/g, (_, value: string) => `'---${labels[value]}---'`);
+    return source.replace(
+      codeLabels,
+      (_, open: string, value: string, close: string) => open + labels[value] + close,
+    );
   const meta = JSON.parse(source) as { title?: string; description?: string; pages?: string[] };
   if (labels.title) meta.title = labels.title;
   if (labels.description) meta.description = labels.description;

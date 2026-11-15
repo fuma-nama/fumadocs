@@ -1,10 +1,12 @@
 ---
 title: Quick Start
 description: Getting Started with Fumadocs
-icon: Rocket
 ---
 
 import { frameworkName } from '@/lib/framework';
+import { Rocket } from 'lucide-static';
+
+export const frontmatter = { icon: Rocket };
 
 <AgentInstructions framework={props.framework} />
 

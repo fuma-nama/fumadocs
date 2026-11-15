@@ -6,6 +6,7 @@ import { googleFonts } from 'takumi-js/helpers';
 export interface GenerateProps {
   title: ReactNode;
   description?: ReactNode;
+  locale?: string;
 }
 
 const font = readFile('./lib/og/JetBrainsMono-Regular.ttf').then((data) => ({
@@ -35,7 +36,8 @@ export async function getImageResponseOptions(locale?: string): Promise<ImageRes
   };
 }
 
-export function generate({ title, description }: GenerateProps) {
+export function generate({ title, description, locale }: GenerateProps) {
+  const localeFont = locale && localeFonts[locale];
   const siteName = 'Fumadocs';
   const primaryTextColor = 'rgb(240,240,240)';
   const logo = (
@@ -62,7 +64,8 @@ export function generate({ title, description }: GenerateProps) {
         height: '100%',
         color: 'white',
         backgroundColor: 'rgb(10,10,10)',
-        fontFamily: 'JetBrainsMono, Noto Sans TC, Noto Sans JP',
+        // Han characters and punctuation differ between the Chinese and Japanese fonts, and a renderer keeps the fonts of earlier images
+        fontFamily: localeFont ? `JetBrainsMono, ${localeFont}` : 'JetBrainsMono',
       }}
     >
       <div
