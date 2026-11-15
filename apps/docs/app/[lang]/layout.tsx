@@ -47,6 +47,9 @@ const mono = JetBrains_Mono({
   subsets: ['latin'],
 });
 
+// every page is static: an unlisted path waits for its render, so `notFound()` keeps the 404 status
+export const ensureStatic = 'navigation';
+
 export const viewport: Viewport = {
   themeColor: [
     { media: '(prefers-color-scheme: dark)', color: '#0A0A0A' },
@@ -69,4 +72,8 @@ export default async function RootLayout({ params, children }: LayoutProps<'/[la
       </Body>
     </html>
   );
+}
+
+export function generateStaticParams() {
+  return i18n.languages.map((lang) => ({ lang }));
 }

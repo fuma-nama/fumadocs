@@ -87,8 +87,12 @@ export function getPosts(pages: BlogPage[], authors: Record<string, BlogAuthor> 
     posts.push(post);
   }
 
-  const now = Date.now();
-  return posts.sort((a, b) => (b.date?.getTime() ?? now) - (a.date?.getTime() ?? now));
+  // undated posts come first
+  return posts.sort(
+    (a, b) =>
+      (b.date?.getTime() ?? Number.MAX_SAFE_INTEGER) -
+      (a.date?.getTime() ?? Number.MAX_SAFE_INTEGER),
+  );
 }
 
 /** the post of `url`, and the posts published right after (`newer`) and before (`older`) it */

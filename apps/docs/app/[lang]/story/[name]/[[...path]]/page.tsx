@@ -5,9 +5,6 @@ import * as stories from '@/content/docs/ui/layouts/layouts.story';
 import { StoryNavigation } from './navigation';
 import { i18n } from '@/lib/i18n';
 
-// the frame navigates to the other paths of a story
-export const dynamicParams = true;
-
 export const metadata: Metadata = {
   robots: { index: false },
 };

@@ -4,8 +4,7 @@ import { generate as MetadataImage, getImageResponseOptions } from './generate';
 import { ImageResponse } from 'takumi-js/response';
 import { getPageImageUrl } from '@/lib/metadata';
 import { i18n } from '@/lib/i18n';
-
-export const revalidate = false;
+import { cacheLife } from 'next/cache';
 
 export async function GET(_req: Request, { params }: RouteContext<'/og/[...slug]'>) {
   const { slug } = await params;
@@ -14,10 +13,20 @@ export async function GET(_req: Request, { params }: RouteContext<'/og/[...slug]
   const page = source.getPage(slug.slice(lang ? 1 : 0, -1), lang);
   if (!page) notFound();
 
-  return new ImageResponse(
-    <MetadataImage title={page.data.title} description={page.data.description} />,
-    await getImageResponseOptions(page.locale),
+  return new Response(await render(page.data.title, page.data.description, page.locale), {
+    headers: { 'Content-Type': 'image/webp' },
+  });
+}
+
+// rendering is async, the cache lets the images prerender
+async function render(title?: string, description?: string, locale?: string) {
+  'use cache';
+  cacheLife({ revalidate: Infinity });
+  const response = new ImageResponse(
+    <MetadataImage title={title} description={description} />,
+    await getImageResponseOptions(locale),
   );
+  return new Uint8Array(await response.arrayBuffer());
 }
 
 export function generateStaticParams(): {

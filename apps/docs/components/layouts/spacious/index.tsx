@@ -38,6 +38,8 @@ export async function Spacious({ params, children }: LayoutProps<'/[lang]/docs'>
         // just icon items
         links={linkItems.filter((item) => item.type === 'icon')}
         tabs={tabs}
+        // the next page is likely one of the sidebar, other links prefetch only the App Shell of their route
+        sidebar={{ prefetch: true }}
       >
         {children}
       </ClientSpaciousLayout>

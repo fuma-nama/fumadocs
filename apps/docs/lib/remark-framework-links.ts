@@ -14,8 +14,9 @@ import { defaultFramework } from './framework.ts';
 const dir = path.resolve('content/docs/(framework)/[framework]');
 export const frameworkPages = new Set<string>();
 for (const file of readdirSync(dir)) {
-  if (!file.startsWith('.') && file !== 'index.mdx' && file !== 'meta.ts')
-    frameworkPages.add(file.replace(/\.mdx$/, ''));
+  const name = file.replace(/\.mdx$/, '');
+  // translations are `<page>.<locale>.mdx`, besides `meta.ts` and dot files
+  if (!name.includes('.') && name !== 'index') frameworkPages.add(name);
 }
 
 /** the URL of a link to a page of `[framework]` in a framework, like `/docs/next/search` for `/docs/search` */

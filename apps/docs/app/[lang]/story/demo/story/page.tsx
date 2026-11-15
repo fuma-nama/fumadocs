@@ -1,4 +1,4 @@
-import { readFile } from 'node:fs/promises';
+import { readFileSync } from 'node:fs';
 import { ServerCodeBlock } from '@/components/server-codeblock';
 import { story } from '@/content/docs/(framework)/[framework]/integrations/story/client.story';
 
@@ -9,10 +9,8 @@ const DIR = 'content/docs/(framework)/[framework]/integrations/story';
  * defines it beside them once there is room.
  */
 export default async function Page() {
-  const [definition, page] = await Promise.all([
-    readFile(`${DIR}/client.story.tsx`, 'utf8'),
-    readFile(`${DIR}/index.mdx`, 'utf8'),
-  ]);
+  const definition = readFileSync(`${DIR}/client.story.tsx`, 'utf8');
+  const page = readFileSync(`${DIR}/index.mdx`, 'utf8');
   // the lines at the top of the docs page that import the story and render it
   const usage: string[] = [];
   for (const line of page.split('\n')) {

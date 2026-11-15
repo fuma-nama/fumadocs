@@ -19,6 +19,7 @@ import { SponsorsMarquee } from '@fumari/sponsors';
 import { frameworks, isFramework } from '@/lib/framework';
 import { notFound, redirect } from 'next/navigation';
 import { i18n } from '@/lib/i18n';
+import { cacheLife } from 'next/cache';
 
 function PreviewRenderer({ preview }: { preview: string }): ReactNode {
   if (preview && preview in Preview) {
@@ -29,7 +30,12 @@ function PreviewRenderer({ preview }: { preview: string }): ReactNode {
   return null;
 }
 
-export const revalidate = false;
+// cached: a re-render of the page gives the same output, the marquee stays in its static HTML
+async function Sponsors() {
+  'use cache';
+  cacheLife({ revalidate: 3600 });
+  return <SponsorsMarquee />;
+}
 
 export default async function Page(props: PageProps<'/[lang]/docs/[[...slug]]'>) {
   const params = await props.params;
@@ -50,7 +56,7 @@ export default async function Page(props: PageProps<'/[lang]/docs/[[...slug]]'>)
 
   const pageProps = {
     tableOfContent: {
-      footer: <SponsorsMarquee />,
+      footer: <Sponsors />,
     },
   } satisfies Partial<DocsPageProps>;
 

@@ -4,8 +4,6 @@ import { getBreadcrumbItems } from 'fumadocs-core/breadcrumb';
 import { getSection } from '@/lib/source/navigation';
 import { i18n } from '@/lib/i18n';
 
-export const revalidate = false;
-
 export async function GET(): Promise<Response> {
   const pages = source.getPages(i18n.defaultLanguage);
   const promises = pages.map(async (page) => {

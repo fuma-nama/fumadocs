@@ -12,6 +12,12 @@ const withAnalyzer = createBundleAnalyzer({
 
 const config: NextConfig = {
   reactStrictMode: true,
+  cacheComponents: true,
+  partialPrefetching: true,
+  experimental: {
+    // pages read their params outside `<Suspense>`: a link that prefetches only the App Shell waits for the page instead of showing a placeholder
+    instantInsights: { validationLevel: 'manual-warning' },
+  },
   logging: {
     fetches: {
       fullUrl: true,
@@ -66,8 +72,8 @@ const config: NextConfig = {
         permanent: true,
       },
       {
-        source: `/docs/:page(${pages})/:path*`,
-        destination: `/docs/${defaultFramework}/:page/:path*`,
+        source: `/docs/:path((?:${pages})(?:/.*)?)`,
+        destination: `/docs/${defaultFramework}/:path`,
         permanent: false,
       },
       // Markdown versions, see `proxy.ts`

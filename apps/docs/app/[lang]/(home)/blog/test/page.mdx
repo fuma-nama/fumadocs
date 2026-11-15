@@ -1,7 +1,7 @@
-export default function withArticle(props) {
+export default function withArticle({ children }) {
   return (
-    <main {...props} className="w-full max-w-[1400px] mx-auto px-4 py-12">
-      <article className="prose">{props.children}</article>
+    <main className="w-full max-w-[1400px] mx-auto px-4 py-12">
+      <article className="prose">{children}</article>
     </main>
   );
 }
