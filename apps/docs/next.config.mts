@@ -12,12 +12,6 @@ const withAnalyzer = createBundleAnalyzer({
 
 const config: NextConfig = {
   reactStrictMode: true,
-  cacheComponents: true,
-  partialPrefetching: true,
-  experimental: {
-    // pages read their params outside `<Suspense>`: a link that prefetches only the App Shell waits for the page instead of showing a placeholder
-    instantInsights: { validationLevel: 'manual-warning' },
-  },
   logging: {
     fetches: {
       fullUrl: true,

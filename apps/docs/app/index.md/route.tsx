@@ -1,16 +1,11 @@
 import { renderRoute } from 'fumadocs-core/server';
 import Page from '@/app/[lang]/(landing)/page';
-import { cacheLife } from 'next/cache';
 
 // the counters in it, like the page
-async function render() {
-  'use cache';
-  cacheLife({ revalidate: 86400 });
-  return renderRoute(<Page />);
-}
+export const revalidate = 86400;
 
 export async function GET() {
-  return new Response(await render(), {
+  return new Response(await renderRoute(<Page />), {
     headers: { 'Content-Type': 'text/markdown; charset=utf-8' },
   });
 }

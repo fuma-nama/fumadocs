@@ -3,6 +3,8 @@ import { source } from '@/lib/source';
 import { defaultFramework } from '@/lib/framework';
 import { i18n } from '@/lib/i18n';
 
+export const revalidate = false;
+
 export async function GET() {
   const pages: Promise<string>[] = [];
   for (const page of source.getPages(i18n.defaultLanguage)) {

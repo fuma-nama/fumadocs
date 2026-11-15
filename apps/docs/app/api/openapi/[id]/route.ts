@@ -1,15 +1,7 @@
 import { openapi } from '@/lib/openapi';
-import { cacheLife } from 'next/cache';
 
 export async function GET(_req: Request, { params }: RouteContext<'/api/openapi/[id]'>) {
-  return Response.json(await getBundled((await params).id));
-}
-
-// loading the schema is async, the cache lets the response prerender
-async function getBundled(id: string) {
-  'use cache';
-  cacheLife({ revalidate: Infinity });
-  return (await openapi.getSchema(id)).bundled;
+  return Response.json((await openapi.getSchema((await params).id)).bundled);
 }
 
 export async function generateStaticParams() {

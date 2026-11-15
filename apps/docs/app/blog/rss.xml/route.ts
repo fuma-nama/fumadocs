@@ -2,18 +2,12 @@ import { Feed } from 'feed';
 import { blogAuthors, blogLoader } from '@/lib/source';
 import { getPosts } from '@/lib/blog';
 import { NextResponse } from 'next/server';
-import { cacheLife } from 'next/cache';
+
+export const revalidate = false;
 
 const baseUrl = 'https://fumadocs.dev';
 
-export async function GET() {
-  return new NextResponse(await rss());
-}
-
-// `Feed` stamps the current time, the cache lets the feed prerender
-async function rss(): Promise<string> {
-  'use cache';
-  cacheLife({ revalidate: Infinity });
+export function GET() {
   const feed = new Feed({
     title: 'Fumadocs Blog',
     id: `${baseUrl}/blog`,
@@ -38,5 +32,5 @@ async function rss(): Promise<string> {
     });
   }
 
-  return feed.rss2();
+  return new NextResponse(feed.rss2());
 }

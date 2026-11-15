@@ -2,18 +2,8 @@ import { notFound } from 'next/navigation';
 import { githubReleases } from '@fumadocs/changelog/github';
 import { ChangelogPagination, ChangelogTimeline } from '@/components/changelog';
 import { createMetadata } from '@/lib/metadata';
-import { cacheLife } from 'next/cache';
 
-async function getReleases(page: number) {
-  'use cache';
-  cacheLife({ revalidate: 3600 });
-  return githubReleases({
-    owner: 'fuma-nama',
-    repo: 'fumadocs',
-    token: process.env.GITHUB_TOKEN,
-    page,
-  });
-}
+export const revalidate = 3600;
 
 export const metadata = createMetadata({
   title: 'Changelog',
@@ -28,7 +18,12 @@ export default async function Page(props: PageProps<'/[lang]/changelog/[[...page
   const page = segments.length === 0 ? 1 : Number(segments[0]);
   if (segments.length > 1 || !Number.isInteger(page) || page < 1) notFound();
 
-  const { entries, nextPage } = await getReleases(page);
+  const { entries, nextPage } = await githubReleases({
+    owner: 'fuma-nama',
+    repo: 'fumadocs',
+    token: process.env.GITHUB_TOKEN,
+    page,
+  });
   if (entries.length === 0) notFound();
 
   return (
