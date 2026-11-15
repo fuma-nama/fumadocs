@@ -1,14 +1,15 @@
+import { cacheLife } from 'next/cache';
 import { fetchContributors } from '@/lib/get-contributors';
 import { owner, repo } from '@/lib/github';
 
-const revalidate = 86400;
-
 async function getJson<T>(url: string): Promise<T | undefined> {
+  'use cache';
+  cacheLife({ revalidate: 86400 });
   const headers = new Headers();
   if (url.startsWith('https://api.github.com') && process.env.GITHUB_TOKEN)
     headers.set('Authorization', `Bearer ${process.env.GITHUB_TOKEN}`);
 
-  const response = await fetch(url, { headers, next: { revalidate } }).catch(() => undefined);
+  const response = await fetch(url, { headers }).catch(() => undefined);
   if (!response?.ok) return;
   return (await response.json().catch(() => undefined)) as T | undefined;
 }
@@ -27,7 +28,9 @@ export async function getDownloads(): Promise<number | undefined> {
   return data?.downloads;
 }
 
-export function getContributorCount(): Promise<number | undefined> {
+export async function getContributorCount(): Promise<number | undefined> {
+  'use cache';
+  cacheLife({ revalidate: 86400 });
   return fetchContributors(owner, repo).then(
     (contributors) => contributors.length,
     () => undefined,

@@ -36,8 +36,6 @@ interface GitHubRequestOptions {
 const tagCommitCache = new Map<string, string | null>();
 const deploymentCache = new Map<string, VercelDeployment | null>();
 
-export const revalidate = false;
-
 export async function GET(request: Request): Promise<Response> {
   const url = new URL(request.url);
   const version = url.searchParams.get('version');

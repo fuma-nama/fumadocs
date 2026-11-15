@@ -1,9 +1,20 @@
 import { source } from '@/lib/source';
 import { exportEpub } from 'fumadocs-epub';
-
-export const revalidate = false;
+import { cacheLife } from 'next/cache';
 
 export async function GET(): Promise<Response> {
+  return new Response(await epub(), {
+    headers: {
+      'Content-Type': 'application/epub+zip',
+      'Content-Disposition': 'attachment; filename="fumadocs-docs.epub"',
+    },
+  });
+}
+
+// zipping is async, the cache lets the file prerender
+async function epub() {
+  'use cache';
+  cacheLife({ revalidate: Infinity });
   const buffer = await exportEpub({
     source,
     getMarkdown(page) {
@@ -14,10 +25,5 @@ export async function GET(): Promise<Response> {
     description: 'Documentation for Fumadocs - the React.js documentation framework',
     cover: '/og.png',
   });
-  return new Response(new Uint8Array(buffer), {
-    headers: {
-      'Content-Type': 'application/epub+zip',
-      'Content-Disposition': 'attachment; filename="fumadocs-docs.epub"',
-    },
-  });
+  return new Uint8Array(buffer);
 }

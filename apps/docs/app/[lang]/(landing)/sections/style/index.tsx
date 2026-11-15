@@ -30,7 +30,7 @@ export async function Style() {
     `;
   }
 
-  const table = await loadInks();
+  const table = loadInks();
   // the desk's cables in its first pose settle here, once: the browser takes their shape
   const ropes = hangRopes(FIRST_POSE);
   // the long title's claims carry it on in its light voice, a line each after a lit lamp of the

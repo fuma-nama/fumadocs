@@ -12,6 +12,8 @@ const withAnalyzer = createBundleAnalyzer({
 
 const config: NextConfig = {
   reactStrictMode: true,
+  cacheComponents: true,
+  partialPrefetching: false,
   logging: {
     fetches: {
       fullUrl: true,

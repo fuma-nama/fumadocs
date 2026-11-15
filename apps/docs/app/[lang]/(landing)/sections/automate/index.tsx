@@ -1,3 +1,4 @@
+import { cacheLife } from 'next/cache';
 import type { ReactNode } from 'react';
 import { asMarkdown } from 'fumadocs-core/server';
 import { Card, Cards } from 'fumadocs-ui/components/card';
@@ -70,6 +71,8 @@ function bound(text: string): string {
 
 /** the page's Markdown for agents, its props as a list read from the type, a deprecated one marked */
 async function markdown(source: string): Promise<ReactNode> {
+  'use cache';
+  cacheLife({ revalidate: Infinity });
   const [docs] = await generator.generateTypeTable({ type: source, name: TYPE_NAME });
   const lines: ReactNode[] = [];
   for (const entry of docs.entries) {
@@ -165,6 +168,8 @@ function image(version: string, changed = false): ReactNode {
 
 /** the props table the docs generate from the type, its tables resolved here so each keeps its key */
 async function table(source: string): Promise<ReactNode> {
+  'use cache';
+  cacheLife({ revalidate: Infinity });
   const tables = await AutoTypeTable({
     generator,
     highlighter: apiHighlighter,

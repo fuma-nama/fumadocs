@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import type { ReactNode } from 'react';
+import { type ReactNode, Suspense } from 'react';
 import * as Preview from '@/components/preview';
 import { createMetadata, getPageImageUrl } from '@/lib/metadata';
 import { source } from '@/lib/source';
@@ -19,6 +19,7 @@ import { SponsorsMarquee } from '@fumari/sponsors';
 import { frameworks, isFramework } from '@/lib/framework';
 import { notFound, redirect } from 'next/navigation';
 import { i18n } from '@/lib/i18n';
+import { connection } from 'next/server';
 
 function PreviewRenderer({ preview }: { preview: string }): ReactNode {
   if (preview && preview in Preview) {
@@ -29,7 +30,12 @@ function PreviewRenderer({ preview }: { preview: string }): ReactNode {
   return null;
 }
 
-export const revalidate = false;
+// rendered per request into the static page: a regenerated page never matches its build output, revalidating
+// it would write every page again after each deploy
+async function Sponsors() {
+  await connection();
+  return <SponsorsMarquee />;
+}
 
 export default async function Page(props: PageProps<'/[lang]/docs/[[...slug]]'>) {
   const params = await props.params;
@@ -50,8 +56,11 @@ export default async function Page(props: PageProps<'/[lang]/docs/[[...slug]]'>)
 
   const pageProps = {
     tableOfContent: {
-      // fetched at build: a runtime render never matches the build output, so revalidating would rewrite every page
-      footer: <SponsorsMarquee fetchOptions={{ cache: 'force-cache' }} />,
+      footer: (
+        <Suspense>
+          <Sponsors />
+        </Suspense>
+      ),
     },
   } satisfies Partial<DocsPageProps>;
 
