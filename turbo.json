@@ -1,11 +1,6 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "globalEnv": [
-    "GITHUB_APP_PRIVATE_KEY",
-    "GITHUB_APP_ID",
-    "GITHUB_TOKEN",
-    "INKEEP_API_KEY"
-  ],
+  "globalEnv": ["GITHUB_APP_PRIVATE_KEY", "GITHUB_APP_ID", "GITHUB_TOKEN", "INKEEP_API_KEY"],
   "ui": "stream",
   "tasks": {
     "build": {
