@@ -491,7 +491,7 @@ function AuthScheme({ scheme, scopes }: { scheme: SecuritySchemeObject; scopes: 
         )}
       </div>
       {(scheme.description || scopes.length > 0 || configUrl) && (
-        <div className="mt-1 prose-no-margin text-fd-muted-foreground">
+        <div className="mt-1 wrap-break-word prose-no-margin text-fd-muted-foreground">
           {scheme.description && <Markdown md={scheme.description} />}
           {configUrl && (
             <p>

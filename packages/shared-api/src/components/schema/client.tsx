@@ -611,7 +611,7 @@ function SchemaDescription({
   if (!description && infoTags.length === 0) return null;
 
   return (
-    <div className={cn('flex flex-col gap-2 text-fd-muted-foreground', className)}>
+    <div className={cn('flex flex-col gap-2 wrap-break-word text-fd-muted-foreground', className)}>
       {description && <div className="prose-no-margin">{description}</div>}
       {infoTags.length > 0 && (
         <div className="flex flex-wrap gap-1.5">
@@ -652,7 +652,7 @@ function SchemaDescription({
                 {tag.prose ? (
                   <div className="prose-xs prose-no-margin min-w-0 flex-1">{tag.value}</div>
                 ) : (
-                  <code className="not-prose min-w-0 wrap-break-word">{tag.value}</code>
+                  <code className="not-prose min-w-0">{tag.value}</code>
                 )}
               </div>
             );
