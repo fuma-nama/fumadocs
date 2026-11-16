@@ -30,6 +30,7 @@ import type { Drawer } from '@base-ui/react';
 
 export interface DocsSlots extends BaseSlots {
   header: FC<HeaderProps>;
+  skipToContent: FC | false;
   sidebar: {
     main: FC<SidebarProps>;
     provider: FC<SidebarProviderProps>;
@@ -88,6 +89,7 @@ export function DocsLayout(props: DocsLayoutProps) {
   const slots: DocsSlots = {
     ...baseSlots,
     header: defaultSlots.header ?? Header,
+    skipToContent: defaultSlots.skipToContent ?? SkipToContent,
     sidebar: defaultSlots.sidebar ?? {
       drawer: SidebarDrawer,
       drawerHandle,
@@ -119,7 +121,7 @@ export function DocsLayout(props: DocsLayoutProps) {
               gridTemplate: `"left left-margin main right-margin right" 1fr / var(--fd-left-width) ${leftSpace} 1fr minmax(calc(50% - var(--fd-main-width)/2 - var(--fd-right-width) + min(${leftSpace}, 0px)), auto) var(--fd-right-width)`,
             }}
           >
-            <SkipToContent />
+            {slots.skipToContent && <slots.skipToContent />}
             <slots.sidebar.drawer />
             <slots.sidebar.main />
             <slots.header />

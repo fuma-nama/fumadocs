@@ -300,6 +300,24 @@ import { DocsLayout } from 'fumadocs-ui/layouts/docs';
 <DocsLayout sidebar={{ prefetch: false }} />;
 ```
 
+### Skip Link
+
+The layout renders a visually hidden "Skip to Content" link before the header, pointing to the page content (`#nd-page`).
+Replace it with your own component, for example when your page has another `id`, or pass `false` to omit it:
+
+```tsx
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+
+<DocsLayout
+  slots={{
+    skipToContent: false, // [!code ++]
+  }}
+  // ...
+/>;
+```
+
+Notebook, Glass and Spacious layouts accept the same slot.
+
 ### The Layout System
 
 Handling layout is challenging, Fumadocs UI needed an approach that is:

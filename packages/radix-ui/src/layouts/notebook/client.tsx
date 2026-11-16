@@ -27,6 +27,7 @@ import { Header } from './slots/header';
 export interface DocsSlots extends BaseSlots {
   container: FC<ComponentProps<'div'>>;
   header: FC<ComponentProps<'header'>>;
+  skipToContent: FC | false;
   sidebar: {
     provider: FC<SidebarProviderProps>;
     root: FC<SidebarProps>;
@@ -89,6 +90,7 @@ export function LayoutBody(
   const slots: DocsSlots = {
     ...baseSlots,
     header: defaultSlots?.header ?? Header,
+    skipToContent: defaultSlots?.skipToContent ?? SkipToContent,
     container: defaultSlots?.container ?? Container,
     sidebar: defaultSlots?.sidebar ?? {
       provider: SidebarProvider,
@@ -121,7 +123,7 @@ export function LayoutBody(
           collapsible={sidebarProps.collapsible}
         >
           <slots.container {...containerProps}>
-            <SkipToContent />
+            {slots.skipToContent && <slots.skipToContent />}
             {navEnabled && <slots.header />}
             <slots.sidebar.root {...sidebarProps} />
             {children}

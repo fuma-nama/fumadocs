@@ -28,6 +28,7 @@ import { HeaderActions } from './slots/actions';
 
 export interface DocsSlots extends BaseSlots {
   header: FC<ComponentProps<'header'>>;
+  skipToContent: FC | false;
   /**
    * The actions at the top right of page panel
    */
@@ -87,6 +88,7 @@ export function DocsLayout(props: DocsLayoutProps) {
   const slots: DocsSlots = {
     ...baseSlots,
     header: customSlots.header ?? Header,
+    skipToContent: customSlots.skipToContent ?? SkipToContent,
     actions: customSlots.actions ?? HeaderActions,
     sidebar: customSlots.sidebar ?? {
       provider: SidebarProvider,
@@ -109,7 +111,7 @@ export function DocsLayout(props: DocsLayoutProps) {
 "sidebar main right" 1fr / var(--fd-sidebar-col) minmax(0, 1fr) auto`,
             }}
           >
-            <SkipToContent />
+            {slots.skipToContent && <slots.skipToContent />}
             <slots.sidebar.main />
             <slots.header />
             {children}

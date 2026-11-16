@@ -130,11 +130,12 @@ export function Layout({ children }) {
 
 Spacious layout exposes a `slots` option to override its parts, in addition to the shared slots (`navTitle`, `themeSwitch`, `searchTrigger`, `languageSelect`).
 
-| Slot      | Description                                                                        |
-| --------- | ---------------------------------------------------------------------------------- |
-| `header`  | The navbar on mobile.                                                              |
-| `sidebar` | The sidebar system: `provider`, `main` (desktop) and `drawer` (mobile).            |
-| `actions` | The actions at the top right of page, like the language switcher and options menu. |
+| Slot            | Description                                                                        |
+| --------------- | ---------------------------------------------------------------------------------- |
+| `header`        | The navbar on mobile.                                                              |
+| `sidebar`       | The sidebar system: `provider`, `main` (desktop) and `drawer` (mobile).            |
+| `actions`       | The actions at the top right of page, like the language switcher and options menu. |
+| `skipToContent` | The skip link, or `false` to omit it.                                              |
 
 ```tsx title="layout.tsx"
 import { DocsLayout } from 'fumadocs-ui/layouts/spacious';
