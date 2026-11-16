@@ -1,33 +1,27 @@
 core:changelogs:
-  - content: "---\npackages:\n  fumadocs-ui:\n    type: patch\n  \"@fumadocs/base-ui\":\n    type: patch\n---\n\n### Code Blocks are No Longer Region Landmarks\n\n- The scroll area of `CodeBlock` stays focusable but no longer has `role=\"region\"` without a name, so pages with several code blocks no longer repeat unnamed region landmarks.\n"
-    filename: 2026-11-14-codeblock-region.md
+  - content: "---\npackages:\n  fumadocs-openapi:\n    type: patch\n  \"@fumadocs/asyncapi\":\n    type: patch\n  \"@fumadocs/graphql\":\n    type: patch\n---\n\n### Long paths and strings in API pages\n\n- A long field path in the playground truncates its middle crumbs and keeps Unset and Remove in reach, instead of widening the form under the request panel.\n- Long unbroken strings in descriptions wrap inside property cards, security scheme cards, playground panels and field info popovers.\n"
+    filename: 2026-11-16-long-strings-in-api-ui.md
     v: 0.0.0
-  - content: "---\npackages:\n  fumadocs-core:\n    type: patch\n  \"@fumadocs/satteri\":\n    type: patch\n---\n\n### Unique heading IDs next to custom IDs\n\n- Headings after a custom `[#id]` no longer reuse it as their ID.\n"
-    filename: 2026-11-14-custom-heading-ids.md
+  - content: "---\npackages:\n  fumadocs-mdx:\n    type: patch\n---\n\n### Smaller builds of MDX pages\n\n- The webpack/Turbopack loader no longer returns a source map of its own generated code, which cut about 1 GB of build memory on a large site.\n"
+    filename: 2026-11-15-mdx-loader-source-map.md
     v: 0.0.0
-  - content: "---\npackages:\n  fumadocs-core:\n    type: patch\n---\n\n### `usePathname()` During TanStack Router Navigations\n\n- Components that mount or hydrate while TanStack Router loads the next page get the pathname of the current page, like the components that were already mounted, instead of the next page's.\n"
-    filename: 2026-11-14-tanstack-pathname.md
+  - content: "---\npackages:\n  \"@fumadocs/satteri\":\n    type: patch\n---\n\n### Compile highlighted lines as HTML\n\n- `rehypeCode()` and `rehypeCodeFromHighlighter()` accept `tokens: 'html'`, which compiles the tokens of a highlighted line to HTML instead of an element per token: compiled MDX is about half the size.\n"
+    filename: 2026-11-15-satteri-html-tokens.md
     v: 0.0.0
-  - content: "---\npackages:\n  fumadocs-core:\n    type: patch\n---\n\n### Flexsearch builds each locale on its first search\n\n- `flexsearchFromSource()` and `flexsearchI18n()` build the index of a locale when it is first searched, instead of every locale on the first request.\n"
-    filename: 2026-11-15-flexsearch-locale-index.md
-    v: 0.0.0
-  - content: "---\npackages:\n  \"@fumadocs/language\":\n    type: patch\n---\n\n### Chinese translations of AI chat\n\n- `zhTW()` and `zhCN()` translate `@fumadocs/ai-chat`.\n"
-    filename: 2026-11-14-language-ai-chat.md
-    v: 0.0.0
-  - content: "---\npackages:\n  \"@fumadocs/language\":\n    type: patch\n---\n\n### Japanese language pack\n\n- `ja()` from `@fumadocs/language/ja` translates Fumadocs UI and its integrations into Japanese.\n"
-    filename: 2026-11-14-language-ja.md
+  - content: "---\npackages:\n  fumadocs-twoslash:\n    type: patch\n  fumadocs-typescript:\n    type: patch\n  \"@fumadocs/story\":\n    type: patch\n---\n\n### Stop TypeScript processes when idle\n\n- Twoslash, type tables and story transforms stop their TypeScript process once they have no pending work, instead of keeping it until the build ends.\n"
+    filename: 2026-11-15-typescript-idle-process.md
     v: 0.0.0
 core:packages:
   - id: npm:@fumadocs/ai-chat
     updated: false
   - id: npm:@fumadocs/astro
     updated: false
-  - id: npm:@fumadocs/asyncapi
-    updated: false
   - changelogIds:
-      - 2026-11-14-codeblock-region.md
-    id: npm:@fumadocs/base-ui
+      - 2026-11-16-long-strings-in-api-ui.md
+    id: npm:@fumadocs/asyncapi
     updated: true
+  - id: npm:@fumadocs/base-ui
+    updated: false
   - id: npm:@fumadocs/basehub
     updated: false
   - id: npm:@fumadocs/changelog
@@ -38,12 +32,8 @@ core:packages:
     updated: false
   - id: npm:@fumadocs/content-collections
     updated: false
-  - changelogIds:
-      - 2026-11-14-custom-heading-ids.md
-      - 2026-11-14-tanstack-pathname.md
-      - 2026-11-15-flexsearch-locale-index.md
-    id: npm:fumadocs-core
-    updated: true
+  - id: npm:fumadocs-core
+    updated: false
   - id: npm:create-fumadocs-app
     updated: true
   - id: npm:create-fumadocs-versions
@@ -52,47 +42,48 @@ core:packages:
     updated: false
   - id: npm:fumadocs-epub
     updated: false
-  - id: npm:@fumadocs/graphql
-    updated: false
+  - changelogIds:
+      - 2026-11-16-long-strings-in-api-ui.md
+    id: npm:@fumadocs/graphql
+    updated: true
   - id: npm:@fumari/image-size
     updated: false
   - id: npm:@fumadocs/json-schema
     updated: false
+  - id: npm:@fumadocs/language
+    updated: false
   - id: npm:@fumadocs/local-content
     updated: false
-  - changelogIds:
-      - 2026-11-14-language-ai-chat.md
-      - 2026-11-14-language-ja.md
-    id: npm:@fumadocs/language
-    updated: true
   - id: npm:@fumadocs/local-html
     updated: false
   - id: npm:@fumadocs/local-md
     updated: false
-  - id: npm:fumadocs-mdx
+  - changelogIds:
+      - 2026-11-15-mdx-loader-source-map.md
+    id: npm:fumadocs-mdx
+    updated: true
+  - id: npm:@fumadocs/mdx-remote
     updated: false
   - id: npm:@fumadocs/notion
     updated: false
-  - id: npm:@fumadocs/mdx-remote
-    updated: false
   - id: npm:fumadocs-obsidian
     updated: false
-  - id: npm:fumadocs-openapi
-    updated: false
+  - changelogIds:
+      - 2026-11-16-long-strings-in-api-ui.md
+    id: npm:fumadocs-openapi
+    updated: true
   - id: npm:@fumadocs/openapi-standalone
     updated: false
   - id: npm:fumadocs-preview
     updated: false
   - id: npm:fumadocs-python
     updated: false
-  - changelogIds:
-      - 2026-11-14-codeblock-region.md
-    id: npm:fumadocs-ui
-    updated: true
+  - id: npm:fumadocs-ui
+    updated: false
   - id: npm:@fumadocs/sanity
     updated: false
   - changelogIds:
-      - 2026-11-14-custom-heading-ids.md
+      - 2026-11-15-satteri-html-tokens.md
     id: npm:@fumadocs/satteri
     updated: true
   - id: npm:@fumadocs/shadcn
@@ -101,14 +92,20 @@ core:packages:
     updated: false
   - id: npm:@fumari/stf
     updated: false
-  - id: npm:@fumadocs/story
-    updated: false
+  - changelogIds:
+      - 2026-11-15-typescript-idle-process.md
+    id: npm:@fumadocs/story
+    updated: true
   - id: npm:@fumadocs/tailwind
     updated: false
-  - id: npm:fumadocs-twoslash
-    updated: false
-  - id: npm:fumadocs-typescript
-    updated: false
+  - changelogIds:
+      - 2026-11-15-typescript-idle-process.md
+    id: npm:fumadocs-twoslash
+    updated: true
+  - changelogIds:
+      - 2026-11-15-typescript-idle-process.md
+    id: npm:fumadocs-typescript
+    updated: true
   - id: npm:@fumadocs/vite
     updated: false
 npm:packages:
@@ -129,13 +126,13 @@ npm:packages:
   - id: npm:@fumadocs/graphql
   - id: npm:@fumari/image-size
   - id: npm:@fumadocs/json-schema
-  - id: npm:@fumadocs/local-content
   - id: npm:@fumadocs/language
+  - id: npm:@fumadocs/local-content
   - id: npm:@fumadocs/local-html
   - id: npm:@fumadocs/local-md
   - id: npm:fumadocs-mdx
-  - id: npm:@fumadocs/notion
   - id: npm:@fumadocs/mdx-remote
+  - id: npm:@fumadocs/notion
   - id: npm:fumadocs-obsidian
   - id: npm:fumadocs-openapi
   - id: npm:@fumadocs/openapi-standalone
@@ -153,24 +150,15 @@ npm:packages:
   - id: npm:fumadocs-typescript
   - id: npm:@fumadocs/vite
   - id: npm:docs
-  - id: npm:example-astro
-  - id: npm:example-astro-i18n
-  - id: npm:example-astro-min
   - id: npm:example-asyncapi
   - id: npm:example-base-ui
-  - id: npm:example-content-collections
   - id: npm:example-graphql
   - id: npm:example-i18n
-  - id: npm:example-marble-cms
   - id: npm:example-next
-  - id: npm:example-next-local-html
-  - id: npm:example-next-local-md
   - id: npm:example-next-min
   - id: npm:example-next-shadcn
   - id: npm:example-next-static
-  - id: npm:example-obsidian
   - id: npm:example-openapi
-  - id: npm:example-python
   - id: npm:example-react-router
   - id: npm:example-react-router-i18n
   - id: npm:example-react-router-min
@@ -178,7 +166,6 @@ npm:packages:
   - id: npm:example-react-router-spa
   - id: npm:example-tanstack-start
   - id: npm:example-tanstack-start-i18n
-  - id: npm:example-tanstack-start-local-md
   - id: npm:example-tanstack-start-min
   - id: npm:example-tanstack-start-openapi
   - id: npm:example-tanstack-start-spa
