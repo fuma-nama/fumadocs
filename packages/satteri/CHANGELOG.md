@@ -1,3 +1,9 @@
+## @fumadocs/satteri@0.8.2
+
+### Compile highlighted lines as HTML
+
+- `rehypeCode()` and `rehypeCodeFromHighlighter()` accept `tokens: 'html'`, which compiles the tokens of a highlighted line to HTML instead of an element per token: compiled MDX is about half the size.
+
 ## @fumadocs/satteri@0.8.1
 
 ### Unique heading IDs next to custom IDs

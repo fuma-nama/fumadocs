@@ -1,3 +1,9 @@
+## fumadocs-mdx@15.6.3
+
+### Smaller builds of MDX pages
+
+- The webpack/Turbopack loader no longer returns a source map of its own generated code, which cut about 1 GB of build memory on a large site.
+
 ## fumadocs-mdx@15.6.2
 
 ### Setup for AI agents
