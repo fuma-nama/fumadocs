@@ -1,7 +1,7 @@
 import type { HastPluginInput, HastVisitorContext } from 'satteri';
 import type { Element, ElementContent } from 'hast';
-import { esmScope, handleTag, jsxToSource, parse } from '@/utils';
-import { componentsCode, jsxComponents, listCode, type ListEntry } from '../../shared/code-output';
+import { esmScope, handleTag, jsxToSource } from '@/utils';
+import { componentsCode, listCode, type ListEntry } from '../../shared/code-output';
 import { textParts } from '../../shared/heading-id';
 import { isStaticOutput, showConditions } from '../../shared/show';
 import { stepNumberCode } from '../../shared/steps';
@@ -117,8 +117,7 @@ export function rehypeToc({ exportToc = true }: RehypeTocOptions = {}): HastPlug
           if (typeof noToc === 'string') return;
           let titleCode: string;
           if (resolved.as === 'esm') {
-            titleCode = jsxToSource({ type: 'root', children });
-            if (/<[A-Z_$]/.test(titleCode)) jsxComponents(parse(titleCode), components);
+            titleCode = jsxToSource({ type: 'root', children }, components);
           } else {
             // titles in data are text
             let dynamic = false;

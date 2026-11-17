@@ -16,6 +16,7 @@ import type {
 } from 'fumadocs-core/mdx-plugins/rehype-code.core';
 import {
   createCodeOutput as createSharedCodeOutput,
+  jsxComponents,
   moduleScope,
   type CodeOutputOptions,
 } from '../../shared/code-output';
@@ -60,21 +61,26 @@ const element: Handle = (node: JsxElement, state) =>
         if (attr.type === 'mdxJsxExpressionAttribute')
           return { ...attr, data: { estree: parse(`({${attr.value}})`) } };
         if (typeof attr.value !== 'object' || !attr.value) return attr;
-        return { ...attr, value: { ...attr.value, data: { estree: parse(attr.value.value) } } };
+        const estree = parse(`(${attr.value.value})`);
+        return { ...attr, value: { ...attr.value, data: { estree } } };
       }),
     },
     state,
   );
 
-/** Sätteri's MDX expressions have no estree, parsed from their code */
-const expression: Handle = (node: { type: 'mdxTextExpression'; value: string }, state) =>
-  defaultHandlers.mdxTextExpression({ ...node, data: { estree: parse(node.value) } }, state);
+/** Sätteri's MDX expressions have no estree, parsed as the JSX they are: an expression of comments is empty */
+const expression: Handle = (node: { value: string }) => {
+  const [statement] = parse(`<>{${node.value}}</>`).body;
+  if (statement.type === 'ExpressionStatement' && statement.expression.type === 'JSXFragment')
+    return statement.expression.children[0];
+};
 
 /** raw HTML of Markdown is kept as text */
 const raw: Handle = (node: { value: string }, state) =>
   defaultHandlers.text({ type: 'text', value: node.value }, state);
 
-export function jsxToSource(hast: Nodes): string {
+/** the JSX code of a tree, `components` gets the components that it refers to */
+export function jsxToSource(hast: Nodes, components?: Set<string>): string {
   const estree = toEstree(hast, {
     elementAttributeNameCase: 'react',
     handlers: {
@@ -84,6 +90,7 @@ export function jsxToSource(hast: Nodes): string {
       raw,
     },
   });
+  if (components) jsxComponents(estree, components);
   const source = toJs(estree, { handlers: jsx }).value.trim();
   return source.endsWith(';') ? source.slice(0, -1) : source;
 }

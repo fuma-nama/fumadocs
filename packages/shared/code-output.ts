@@ -22,7 +22,7 @@ interface KeptElement {
 }
 
 /** Markdown and its parts from code, branches and elements hold their content */
-type Chunk = string | Value | ((Branch | KeptElement) & { children: Chunk[] });
+type Chunk = string | Value | ((Branch | KeptElement) & { children?: Chunk[] });
 
 export interface CodeNode {
   type: string;
@@ -63,7 +63,7 @@ export interface CodeOutputOptions<N> {
   keep?: (node: N) => boolean;
   /** create the stringifier of the output, `expression` marks the code of its replacements */
   stringifier: (expression: (code: string, fallback: string) => string) => CodeStringifier<N>;
-  /** parse code with JSX */
+  /** parse a JSX expression */
   parse: (code: string) => object;
   /** the code of a string, JSON by default */
   literal?: (text: string) => string;
@@ -88,11 +88,6 @@ export function createCodeOutput<N extends CodeNode>({
   literal = JSON.stringify,
 }: CodeOutputOptions<N>) {
   const parts: (Value | Branch | KeptElement)[] = [];
-  /** the components that the code refers to in JSX: kept elements, and the JSX in authored code */
-  const components = new Set<string>();
-  const readJsx = (code: string) => {
-    if (code.includes('<')) jsxComponents(parse(code), components);
-  };
   const mark = (part: Value) => `\0${parts.push(part) - 1}\0`;
   const wrap = (part: Branch | KeptElement, content: string) => {
     const i = parts.push(part) - 1;
@@ -135,27 +130,28 @@ export function createCodeOutput<N extends CodeNode>({
     return root;
   }
 
-  /** see {@link componentsCode}, of the components of the code */
+  /**
+   * See {@link componentsCode}, of the components that the parts refer to: kept elements, and the JSX in authored
+   * code. The parts are parsed as the JSX they are in the output, where an expression of comments is valid.
+   */
   const declare = (scope: () => ReadonlySet<string>, from: string) =>
-    componentsCode(components, scope, from);
+    componentsCode(
+      jsxComponents(parts.length > 0 && parse(`<>${chunksToJsx(parts, literal)}</>`)),
+      scope,
+      from,
+    );
 
   /** the JSX element of a component, with the code of its attributes */
   function component(node: N): KeptElement | undefined {
     const { name } = node;
     if (typeof name !== 'string' || !componentNameRegex.test(name)) return;
-    components.add(name);
     let open = `<${name}`;
     for (const attr of node.attributes as JsxAttributes) {
-      if (attr.type === 'mdxJsxExpressionAttribute') {
-        open += ` {${attr.value}}`;
-        readJsx(`({${attr.value}})`);
-      } else if (attr.value == null) open += ` ${attr.name}`;
+      if (attr.type === 'mdxJsxExpressionAttribute') open += ` {${attr.value}}`;
+      else if (attr.value == null) open += ` ${attr.name}`;
       else if (typeof attr.value === 'string')
         open += ` ${attr.name}={${JSON.stringify(attr.value)}}`;
-      else {
-        open += ` ${attr.name}={${attr.value.value}}`;
-        readJsx(`(${attr.value.value}\n)`);
-      }
+      else open += ` ${attr.name}={${attr.value.value}}`;
     }
     return { open, name, inline: node.type === 'mdxJsxTextElement' };
   }
@@ -196,17 +192,15 @@ export function createCodeOutput<N extends CodeNode>({
       else if (type === 'mdxJsxFlowElement' || type === 'mdxJsxTextElement') element(node);
       else if (type === 'mdxTextExpression' || type === 'mdxFlowExpression') {
         if (isStatic) return;
-        const code = node.value as string;
         const position = s.range(node);
         s.replace(
           node,
           mark({
-            code,
+            code: node.value as string,
             fallback: position ? s.source.slice(position.start, position.end) : '',
             inline: type === 'mdxTextExpression',
           }),
         );
-        readJsx(`(${code}\n)`);
       } else if (target === 'search') {
         if (type === 'link' || type === 'linkReference') s.replace(node, (s) => s.inner(node));
         else if (type === 'image' || type === 'imageReference') s.replace(node, '');
@@ -296,18 +290,23 @@ export function componentsCode(
   return names && `const { ${names}} = ${from};`;
 }
 
-/** the components that a program refers to in JSX, like MDX: the first name of a tag that isn't an HTML element */
-export function jsxComponents(node: unknown, out: Set<string>): void {
-  if (typeof node !== 'object' || node === null) return;
+/**
+ * The components that parsed code refers to in JSX, like MDX: the name of a tag that isn't an HTML element, or the
+ * object of a member tag like `<a.B>`.
+ */
+export function jsxComponents(node: unknown, out = new Set<string>()): Set<string> {
+  if (typeof node !== 'object' || node === null) return out;
   let { type, name } = node as {
     type?: string;
     name?: { type: string; name: string; object?: never };
   };
   if (type === 'JSXOpeningElement') {
+    const member = name?.object !== undefined;
     while (name?.object) name = name.object;
-    if (name?.type === 'JSXIdentifier' && !/^[a-z]/.test(name.name)) out.add(name.name);
+    if (name?.type === 'JSXIdentifier' && (member || !/^[a-z]/.test(name.name))) out.add(name.name);
   }
   for (const key in node) jsxComponents((node as Record<string, unknown>)[key], out);
+  return out;
 }
 
 interface EsmNode {
@@ -377,11 +376,12 @@ function chunksToJsx(chunks: Chunk[], literal: (text: string) => string): string
     else if ('code' in chunk)
       out += chunk.inline ? `<span>{${chunk.code}}</span>` : `{${chunk.code}}`;
     else if ('when' in chunk)
-      out += `{(${chunk.when}) ? <>${chunksToJsx(chunk.children, literal)}</> : null}`;
+      out += `{(${chunk.when}) ? <>${chunksToJsx(chunk.children ?? [], literal)}</> : null}`;
     else {
       const { open, name, inline, children } = chunk;
-      const element =
-        children.length > 0 ? `${open}>${chunksToJsx(children, literal)}</${name}>` : `${open} />`;
+      const element = children?.length
+        ? `${open}>${chunksToJsx(children, literal)}</${name}>`
+        : `${open} />`;
       out += inline ? `<span>${element}</span>` : element;
     }
   }

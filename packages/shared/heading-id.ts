@@ -1,4 +1,4 @@
-import { and, type CodeNode, type CodeOutput } from './code-output';
+import { and, componentsCode, jsxComponents, type CodeNode, type CodeOutput } from './code-output';
 import { showCondition } from './show';
 
 /** a custom ID at the end of heading text, like `[#id]` */
@@ -60,10 +60,21 @@ export function headingIdCode(runtime = headingRuntime) {
       entries.push(test ? `${test} ? ${id} : ""` : id);
       if (dynamic) return `_headingIds(props)[${entries.length - 1}]`;
     },
-    /** the ESM code that the IDs from code read */
-    get esm(): string | undefined {
-      if (dynamic)
-        return `import { createHeadingIds as _createHeadingIds } from ${JSON.stringify(runtime)};\nexport const _headingIds = _createHeadingIds((props, _slug) => [${entries.join(', ')}]);`;
+    /**
+     * The ESM code that the IDs from code read. It declares the components of authored code, see
+     * {@link componentsCode}: only strings and numbers are text, so the components don't have to be there.
+     *
+     * @param parse - parse a JSX expression
+     */
+    esm(parse: (code: string) => object, scope: () => ReadonlySet<string>): string | undefined {
+      if (!dynamic) return;
+      const list = `[${entries.join(', ')}]`;
+      const declaration = componentsCode(
+        jsxComponents(parse(list)),
+        scope,
+        'props.components ?? {}',
+      );
+      return `import { createHeadingIds as _createHeadingIds } from ${JSON.stringify(runtime)};\nexport const _headingIds = _createHeadingIds((props, _slug) => {\n${declaration}\nreturn ${list};\n});`;
     },
   };
 }

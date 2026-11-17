@@ -36,8 +36,13 @@ export async function renderStructuredData(
   return toStructuredData(list, rendered);
 }
 
-/** every MDX component is the name of its tag */
-const tags = new Proxy({}, { get: (_, name) => name });
+/** the type of every MDX component is named after its tag, and has the ones of its member tags like `<Tabs.Tab>` */
+const tag = (name: string): object =>
+  new Proxy(
+    {},
+    { get: (_, key) => (key === 'displayName' ? name : tag(`${name}.${String(key)}`)) },
+  );
+const tags = new Proxy({}, { get: (_, key) => tag(String(key)) });
 
 /**
  * Read the structured data of a page for its props without rendering it: components don't run, they stay as HTML tags
@@ -69,7 +74,7 @@ function toText(node: ReactNode): string {
   const { type } = node as { type: string | { displayName?: string; name?: string } };
   const name = typeof type === 'string' ? type : (type.displayName ?? type.name);
   // fragments and HTML elements are their content
-  if (!name || /^[a-z]/.test(name)) return inner;
+  if (!name || /^[a-z][^.]*$/.test(name)) return inner;
 
   return toHtmlTag(name, props, inner);
 }

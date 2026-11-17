@@ -8,7 +8,11 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import * as server from 'fumadocs-core/server';
 import * as headingRuntime from 'fumadocs-core/mdx-plugins/remark-heading.runtime';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
-import { renderStructuredData, type StructuredRecords } from '../../shared/structured-data';
+import {
+  readStructuredData,
+  renderStructuredData,
+  type StructuredRecords,
+} from '../../shared/structured-data';
 import { compileMdx } from '@/compile';
 import { applySatteriPreset } from '@/preset';
 import { remarkInclude } from '@/remark-include';
@@ -61,9 +65,59 @@ After the branch.
 ## Setup
 </show>
 
-## Notes {/* draft */}
+{/* by <author@example.com> */}
+
+## Notes {/* draft <Badge> */}
 
 ## Mode <show when={props.framework === "waku"}>Waku</show>`;
+
+test('Runtime outputs: the components of authored code are MDX components', async () => {
+  const options = await applySatteriPreset({
+    data: { unstable_runtimeOutputs: true },
+    mdastPlugins: [remarkLlms()],
+  })('runtime');
+  const { code } = await compileMdx({
+    source: `## Use {<Badge>new</Badge>} <Badge style={{ color: "red" }}>beta</Badge> {{ a: "v" }.a}
+
+Text {<kit.Tag>x</kit.Tag>} <Kept icon={<Icon />} {...{ extra: <Extra /> }} />
+`,
+    filePath: '/tmp/doc.mdx',
+    environment: 'runtime',
+    options,
+  });
+  const page = (await new AsyncFunction('opts', code)(scope)) as {
+    default: FC<object>;
+    toc: (props: object) => { url: string; title: ReactNode }[];
+    structuredData: StructuredRecords;
+    _markdown: FC<object>;
+  };
+  const tag: FC<{ children?: ReactNode }> = (props) => createElement('b', null, props.children);
+  const props = {
+    components: { Badge: tag, kit: { Tag: tag }, Kept: tag, Icon: tag, Extra: tag },
+  };
+
+  expect(renderToStaticMarkup(createElement(page.default, props))).toBe(
+    '<h2 id="use--beta-v">Use <b>new</b> <b>beta</b> v</h2>\n<p>Text <b>x</b> <b></b></p>',
+  );
+  const titles = (props: object) =>
+    page.toc(props).map((item) => [item.url, renderToStaticMarkup(item.title)]);
+  expect(titles(props)).toEqual([['#use--beta-v', 'Use <b>new</b> <b>beta</b> v']]);
+  // without the MDX components, a component of a title is its content
+  expect(titles({})).toEqual([['#use--beta-v', 'Use new beta v']]);
+  // a member tag reads its component from its object, in the MDX components or not
+  for (const components of [props.components, undefined]) {
+    expect(await renderStructuredData(page.structuredData, { components })).toEqual({
+      headings: [{ id: 'use--beta-v', content: 'Use <Badge>new</Badge> <Badge>beta</Badge> v' }],
+      contents: [{ heading: 'use--beta-v', content: 'Text <kit.Tag>x</kit.Tag> <Kept />' }],
+    });
+  }
+  expect(readStructuredData(page.structuredData, {}).contents[0].content).toBe(
+    'Text <kit.Tag>x</kit.Tag> <Kept />',
+  );
+  await expect(server.renderToMarkdown(createElement(page._markdown, props))).resolves.toBe(
+    '## Use <Badge>new</Badge> <Badge>beta</Badge> v [#use--beta-v]\n\nText <kit.Tag>x</kit.Tag> <Kept />',
+  );
+});
 
 test('Remark Show: branches and expressions render from code in every output', async () => {
   const options = await applySatteriPreset({
@@ -128,6 +182,8 @@ test('Remark Show: branches and expressions render from code in every output', a
   expect(astro.markdown).toContain('Astro only.');
   expect(waku.markdown).not.toContain('Astro only.');
   expect(waku.markdown).not.toMatch(/\n{3,}/);
+  // an expression of comments renders nothing
+  expect(waku.markdown).not.toContain('author@example.com');
   // a branch in a list item keeps its prefixes, the whitespace after a branch goes with it
   expect(waku.markdown).toContain('2. Waku, on two\n   lines.');
   expect(astro.markdown).toContain('2. Astro.');

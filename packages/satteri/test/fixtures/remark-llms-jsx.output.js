@@ -31,7 +31,7 @@ export const toc = [{
 import { asMarkdown as _asMarkdown, jsxComponents as _jsxComponents } from "fumadocs-core/server";
 export function _markdown(props) {
     if (!_asMarkdown()) return null;
-    const { Badge, Callout, Tabs } = _jsxComponents(props.components);
+    const { Badge, Tabs, Callout } = _jsxComponents(props.components);
     return _jsxs(_Fragment, { children: [
         "## Hello World [#hello-world]\n\nContent with ",
         _jsx("span", { children: _jsx(Badge, {

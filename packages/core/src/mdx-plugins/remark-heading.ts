@@ -5,7 +5,7 @@ import type { Transformer } from 'unified';
 import type { ExpressionStatement, JSXElement } from 'estree-jsx';
 import { toEstree } from 'hast-util-to-estree';
 import type { TOCItemType } from '@/toc';
-import { flattenNode, toEsm, walk } from '@/mdx-plugins/utils';
+import { esmScope, flattenNode, parse, toEsm, walk } from '@/mdx-plugins/utils';
 import { walkBranches } from '../../../shared/show';
 import { headingIdCode, headingIdRegex } from '../../../shared/heading-id';
 
@@ -112,7 +112,8 @@ export function remarkHeading({
       return 'skip';
     });
 
-    if (ids.esm) root.children.unshift(toEsm(ids.esm));
+    const esm = ids.esm(parse, esmScope(root));
+    if (esm) root.children.unshift(toEsm(esm));
     if (generateToc) file.data.toc = toc;
   };
 }
