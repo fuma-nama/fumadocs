@@ -1,3 +1,9 @@
+## fumadocs-ui@16.19.4
+
+### Fix the skip link when `DocsPage` has an `id`
+
+- `DocsPage` keeps `id="nd-page"`, so the layout's "Skip to Content" link always reaches the page.
+
 ## fumadocs-ui@16.19.3
 
 ### Code Blocks are No Longer Region Landmarks
