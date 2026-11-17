@@ -3,9 +3,9 @@ title: Rehype Code
 description: 程式碼語法突顯器
 ---
 
-Fumadocs 所使用的語法突顯器，為 [`@shikijs/rehype`](https://shiki.style/packages/rehype) 的包裝。
+[`@shikijs/rehype`](https://shiki.style/packages/rehype) 的封裝，而 `@shikijs/rehype` 正是 Fumadocs 所使用的語法突顯器。
 
-它會將原始的 `<pre />` 程式碼區塊轉換成已語法突顯的程式碼區塊：
+它會將原始的 `<pre />` 程式碼區塊轉換為已套用語法突顯的程式碼區塊：
 
 ````md tab="Input"
 ```ts
@@ -25,7 +25,7 @@ console.log('Hello World');
 
 ## 使用方式 [#usage]
 
-Rehype Code 是一個 rehype 外掛，Fumadocs MDX 預設會啟用它。您可以透過 `rehypeCodeOptions` 傳入選項：
+Rehype Code 是一個 rehype 外掛，Fumadocs MDX 預設已啟用。您可以透過 `rehypeCodeOptions` 傳入選項：
 
 ```ts tab="unified" title="source.config.ts"
 import { defineConfig } from 'fumadocs-mdx/config';
@@ -63,7 +63,7 @@ export default defineConfig({
 
 ### 語法突顯器 [#highlighter]
 
-此外掛使用 Shiki。`rehypeCodeFromHighlighter` 則可改用其他[語法突顯器](/docs/headless/utils/shiki) (例如 Highlights) ，並接受 Shiki 以外的選項。請傳入一個函式，搭配此外掛的 transformer 建立語法突顯器。
+此外掛使用 Shiki。若改用 `rehypeCodeFromHighlighter`，則可搭配其他[語法突顯器](/docs/headless/utils/shiki) (例如 Highlights) ，並使用 Shiki 以外的選項。請傳入一個函式，利用此外掛的 transformer 建立語法突顯器。
 
 請停用預設外掛，再加入此外掛：
 
@@ -108,7 +108,7 @@ export default defineConfig({
 
 ### Meta [#meta]
 
-它會解析 `title` meta 字串，並以屬性的形式加到 `pre` 元素上。
+它會解析 `title` meta 字串，並將其以屬性形式加到 `pre` 元素上。
 
 ````mdx tab="Input"
 ```js title="Title"
@@ -120,7 +120,7 @@ console.log('Hello');
 <pre title="Title">...</pre>
 ```
 
-您可以透過 `filterMetaString` 選項，在處理 meta 字串之前先進行過濾。
+您可以使用 `filterMetaString` 選項，在處理 meta 字串之前先進行篩選。
 
 ### 行內程式碼 [#inline-code]
 
@@ -136,15 +136,15 @@ const rehypeCodeOptions: RehypeCodeOptions = {
 ```
 
 ```md title="Syntax"
-這是經過語法突顯的行內程式碼： `console.log("hello world"){:js}`.
+這是經過語法突顯的行內程式碼：`console.log("hello world"){:js}`.
 ```
 
-這是一段經過語法突顯的行內程式碼：`console.log("hello world"){:js}`。
+這是經過語法突顯的行內程式碼：`console.log("hello world"){:js}`。
 
 ### 圖示 [#icon]
 
-此外掛會根據語言的 meta 字串，自動加入 `icon` 屬性。
-其值為 HTML 字串，您可以透過 React 的 `dangerouslySetInnerHTML` 加以算繪。
+此外掛會根據語言的 meta 字串自動加上 `icon` 屬性。
+該屬性為 HTML 字串，您可以透過 React 的 `dangerouslySetInnerHTML` 將其算繪出來。
 
 ````md tab="Input"
 ```ts
@@ -158,6 +158,38 @@ console.log('This should shows the logo of TypeScript');
 
 您可以透過 `icon` 選項停用或自訂圖示。
 
+### 未知語言 [#unknown-languages]
+
+若程式碼區塊使用了 Shiki 不支援的語言，會導致建置失敗。若要改用其他語言進行語法突顯，請設定 `fallbackLanguage`：
+
+```ts tab="unified" title="source.config.ts"
+import { defineConfig } from 'fumadocs-mdx/config';
+
+export default defineConfig({
+  mdxOptions: {
+    rehypeCodeOptions: {
+      fallbackLanguage: 'plaintext',
+    },
+  },
+});
+```
+
+```ts tab="Sätteri" title="source.config.ts"
+import { defineConfig, defineDocs } from 'fumadocs-mdx/config';
+
+export const docs = defineDocs({
+  docs: { compiler: 'satteri' },
+});
+
+export default defineConfig({
+  satteriOptions: {
+    rehypeCodeOptions: {
+      fallbackLanguage: 'plaintext',
+    },
+  },
+});
+```
+
 ### 更多選項 [#more-options]
 
-這些選項繼承自 [Shiki](https://shiki.style)，其他選項請參閱 Shiki 的說明文件。
+這些選項繼承自 [Shiki](https://shiki.style)，其他選項請參閱 Shiki 的文件。

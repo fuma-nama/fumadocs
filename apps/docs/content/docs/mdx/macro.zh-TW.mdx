@@ -5,7 +5,7 @@ description: 使用 fumadocs-mdx/macro 在您的應用程式中定義集合。
 
 ## 概覽 [#overview]
 
-透過 `fumadocs-mdx/macro`，您可以直接在應用程式模組中宣告集合。
+透過 `fumadocs-mdx/macro`，直接在您的應用程式模組中宣告集合。
 
 打包工具 (或執行階段載入器) 會將 `defineDocs` / `defineCollections` 編譯為內容檔案的匯入陳述式。
 
@@ -43,13 +43,38 @@ export const blogSource = loader({
 });
 ```
 
-集合選項與 [config API](/docs/mdx/collections) 大致相同。
+集合選項大致與 [config API](/docs/mdx/collections) 相同。
 
 使用巨集定義集合時，您仍可保留 `source.config.ts`，用來設定[全域選項](/docs/mdx/global)與外掛。
 
+### Monorepo [#monorepos]
+
+若要在多個應用程式之間共用集合，請在工作區套件中宣告這些集合。`dir` 的路徑是相對於匯入該集合的應用程式而言，因此每個應用程式都會載入各自的內容。
+
+```ts tab="packages/content/index.ts"
+import { defineCollections } from 'fumadocs-mdx/macro';
+import { pageSchema } from 'fumadocs-core/source/schema';
+
+export const blog = defineCollections({
+  type: 'doc',
+  dir: 'content/blog',
+  schema: pageSchema,
+});
+```
+
+```ts tab="apps/web/lib/source.ts"
+import { loader } from 'fumadocs-core/source';
+import { blog } from '@acme/content';
+
+export const blogSource = loader({
+  baseUrl: '/blog',
+  source: blog.toFumadocsSource(),
+});
+```
+
 ### 瀏覽器 [#browser]
 
-巨集集合也能在瀏覽器中使用。只要在用戶端元件中匯入集合，再透過 `body` 算繪項目即可，不需要[用戶端載入器](/docs/mdx/entry/browser)。
+巨集集合同樣可以在瀏覽器中使用。只要在用戶端元件中匯入集合，再透過 `body` 算繪項目即可，不需要[用戶端載入器](/docs/mdx/entry/browser)。
 
 ```tsx
 import { docs } from '@/lib/source';
@@ -69,11 +94,11 @@ export default function Page({ path }: { path: string }) {
 }
 ```
 
-若頁面使用[路徑參數](/docs/page-conventions#path-params)，請從載入器傳入其參數：`docs.getPage(page.path, page.params)`。
+若頁面使用了[路徑參數](/docs/page-conventions#path-params)，請從載入器傳入其參數：`docs.getPage(page.path, page.params)`。
 
 <Callout type="warn">
-  瀏覽器會執行您匯入 `docs` 的來源模組的完整內容。若您的 `loader()` 包含僅限伺服器端的
-  來源 (例如 `openapi.staticSource()`) ，請將集合定義在另一個模組中 (例如
+  瀏覽器會執行您匯入 `docs` 的那個模組的全部內容。若您的 `loader()` 含有僅限伺服器的
+  來源 (例如 `openapi.staticSource()`) ，請在另一個模組中定義集合 (例如
   `lib/collections.ts`) ，再從該模組匯入。
 </Callout>
 
@@ -81,9 +106,9 @@ export default function Page({ path }: { path: string }) {
 
 啟用 [`async`](/docs/mdx/async) 後，只有 frontmatter 會預先打包，內容則會隨需擷取。
 
-`body` 的運作方式相同，只是它會暫停 (suspend) ，直到內容可用為止。以下兩個額外的方法可控制此行為：
+`body` 的運作方式相同，只是它會先暫停 (suspend) ，直到內容就緒為止。另有兩個方法可以控制這個行為：
 
-* `preload()` 會在算繪前先載入內容，讓 `body` 算繪時無須暫停。請在您的路由載入器中呼叫它。
+* `preload()` 會在算繪前先載入內容，讓 `body` 算繪時不必暫停。請在您的路由載入器中呼叫它。
 * `load()` 會回傳已載入的內容，例如 `toc`。它的 promise 會被快取，因此您可以在算繪期間呼叫它。
 
 ```tsx
@@ -116,7 +141,7 @@ export default function Page({ path }: { path: string }) {
 
 ## 設定 [#configuration]
 
-Macro API 預設為啟用。傳入 `macro` 可限制哪些模組能使用它，傳入 `false` 則可停用。若使用 React Router 或 TanStack Start，請將其傳給 Vite 外掛。
+Macro API 預設為啟用。傳入 `macro` 可限制哪些模組能使用它，傳入 `false` 則會將其停用。若使用 React Router 或 TanStack Start，請將其傳給 Vite 外掛。
 
 ```js tab="Next.js" title="next.config.mjs"
 import { createMDX } from 'fumadocs-mdx/next';
@@ -172,13 +197,13 @@ register({
 });
 ```
 
-預設情況下，所有 JS/TS 模組都會納入處理 (`node_modules` 一律排除) 。若您希望轉換只套用於特定路徑，請縮小 `include` 的範圍。
+預設情況下，所有 JS/TS 模組都會納入處理 (`node_modules` 一律排除) 。若您只想讓轉換套用在特定路徑上，請縮小 `include` 的範圍。
 
 ### 限制 [#constraints]
 
 巨集呼叫會以靜態方式編譯，請留意以下規則：
 
-* 每個呼叫都必須指派給頂層的 `const` (變數名稱用來識別集合) ：
+* 將每個呼叫指派給頂層的 `const` (集合由變數名稱識別) ：
 
   ```ts
   // ✓
@@ -190,7 +215,7 @@ register({
   }
   ```
 
-* 會影響內容打包方式的選項 (`dir`、`files`、`async`) 必須能被靜態分析 (即字串／布林值字面值) 。動態邏輯請改放在 `schema` 或 `mdxOptions` 等選項中。
+* 會影響內容打包方式的選項 (`dir`、`files`、`async`) 必須能夠靜態分析 (即字串／布林常值) 。動態邏輯請改放在 `schema` 或 `mdxOptions` 等選項中。
 
 * Macro API 目前尚不支援 [`dynamic`](/docs/mdx/async#dynamic-mode) 集合。如需延遲載入，建議改用 [`async`](/docs/mdx/async)。
 

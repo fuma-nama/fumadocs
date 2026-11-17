@@ -107,22 +107,24 @@ image: /blog/hello-world.png
 ---
 ```
 
-| フィールド     | 説明                               |
-| --------- | -------------------------------- |
-| `date`    | 公開日です。投稿はこの日付順に並べ替えられます          |
-| `tags`    | タグごとに `/blog/tags` 配下にページが作成されます |
-| `authors` | 著者のキーです。未登録のキーは著者名として扱われます       |
-| `image`   | カバー画像の URL です。投稿のカードに表示されます      |
+| フィールド     | 説明                                 |
+| --------- | ---------------------------------- |
+| `date`    | 公開日です。投稿はこの日付順に並べられます              |
+| `tags`    | 各タグには `/blog/tags` 配下に専用のページが作られます |
+| `authors` | 著者のキーです。未登録のキーは著者名として扱われます         |
+| `image`   | カバー画像の URL です。投稿のカードに表示されます        |
+
+投稿には下書き用のフィールドがありません。未完成の投稿が公開されないよう、`content/drafts` など `content/blog` の外に置いてください。
 
 <show when={props.framework === 'next'}>
   <Callout title="リモート画像">
-    カバー画像とアバターは `next/image` でレンダリングされます。`images.remotePatterns` で画像のホストを許可してください。
+    カバー画像とアバターは `next/image` でレンダリングされます。画像のホストを `images.remotePatterns` で許可してください。
   </Callout>
 </show>
 
 ## ページ [#pages]
 
-`getPosts()` は、ページの著者とタグを解決したうえで、新しい順に返します。返されたページは、[Home Layout](/docs/ui/layouts/home-layout) 配下のルートでレンダリングしてください。
+`getPosts()` は、各ページの著者とタグを解決したうえで、ページを新しい順に返します。取得したページは、[Home Layout](/docs/ui/layouts/home-layout) 配下のルートでレンダリングしてください。
 
 ### 投稿 [#posts]
 
@@ -270,7 +272,7 @@ image: /blog/hello-world.png
 
 ### 投稿 [#post]
 
-`findPost()` は、投稿とその前後の投稿 (新しい投稿と古い投稿) をまとめて取得します。`toc` を指定すると、目次と共有ボタンを含むフローティングパネルが表示されます。
+`findPost()` は、投稿とあわせて、その前後の新しい投稿と古い投稿を取得します。`toc` を渡すと、目次と共有ボタンを含むフローティングパネルが表示されます。
 
 <show when={props.framework === 'next'}>
   ```tsx title="app/(home)/blog/[slug]/page.tsx"
@@ -586,7 +588,7 @@ image: /blog/hello-world.png
 
 ### タグ [#tags]
 
-`getTags()` を使うと、すべてのタグを一覧表示できます。
+`getTags()` で、すべてのタグを一覧表示します。
 
 <show when={props.framework === 'next'}>
   ```tsx title="app/(home)/blog/tags/page.tsx"
@@ -740,7 +742,7 @@ image: /blog/hello-world.png
   ```
 </show>
 
-また、特定のタグが付いた投稿は `getTagPosts()` で表示できます。存在しないタグの場合、この関数は `undefined` を返します。
+続いて、タグごとの投稿を `getTagPosts()` で表示します。この関数は、存在しないタグに対しては `undefined` を返します。
 
 <show when={props.framework === 'next'}>
   ```tsx title="app/(home)/blog/tags/[tag]/page.tsx"
@@ -768,6 +770,8 @@ image: /blog/hello-world.png
     return getTags(getPosts(blogSource.getPages())).map((tag) => ({ tag: tag.slug }));
   }
   ```
+
+  `output: 'export'` を使用している場合、`generateStaticParams()` が params を1つも返さないと Next.js のビルドが失敗します。そのため、このルートはタグ付きの投稿を作成してから追加してください。
 </show>
 
 <show when={props.framework === 'react-router'}>
@@ -937,9 +941,9 @@ image: /blog/hello-world.png
 
 ## 国際化 [#internationalization]
 
-`getPosts()` には、`blogSource.getPages(lang)` のように特定のロケールのページを渡してください。
+`blogSource.getPages(lang)` のように、特定のロケールのページを `getPosts()` に渡してください。
 
-タグページのURLは `lib/blog.ts` の `getBlogUrl` によって生成されます。ローダーのURLと一致させるには、`getBlogUrl` に i18n の設定を渡してください。
+タグページの URL は `lib/blog.ts` の `getBlogUrl` で生成されます。ローダーの URL と一致させるには、i18n の設定を `getBlogUrl` に渡してください。
 
 ```ts title="lib/blog.ts"
 import { i18n } from '@/lib/i18n';
