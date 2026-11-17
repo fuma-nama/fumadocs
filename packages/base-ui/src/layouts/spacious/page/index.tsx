@@ -129,7 +129,6 @@ export function DocsPage({
           </header>
           <div className="flex flex-1 items-start px-4 md:min-h-0 md:pt-(--fd-header-height) md:px-[max(--spacing(6),calc((100%-var(--fd-page-width)-var(--fd-toc-width))/2))] md:overflow-y-auto md:overscroll-y-contain md:scrollbar-thin md:scrollbar-gutter-stable md:[--fd-docs-height:calc(var(--fd-layout-height)-var(--spacing)*4-2px-var(--fd-header-height))]">
             <article
-              id="nd-page"
               data-full={full}
               className={cn(
                 'flex flex-col gap-4 w-full min-w-0 max-w-(--fd-page-width) pt-6 pb-8',
@@ -137,6 +136,7 @@ export function DocsPage({
                 className,
               )}
               {...props}
+              id="nd-page"
             >
               {breadcrumbEnabled && (
                 <slots.breadcrumb
