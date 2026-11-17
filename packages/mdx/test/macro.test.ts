@@ -14,7 +14,7 @@ import { macroFilter } from '@/bun';
 import { docs as macroDocs, docsAsync as macroDocsAsync } from '@/runtime/macro';
 import { loader } from 'fumadocs-core/source';
 import { createMdxLoader } from '@/loaders/mdx';
-import { buildConfig } from '@/config/build';
+import { buildCollection, buildConfig } from '@/config/build';
 import { createCore } from '@/core';
 import type * as fixture from './fixtures/macro/source';
 import type { ExtractedReference } from '@/loaders/mdx/remark-postprocess';
@@ -59,6 +59,23 @@ describe('transform', () => {
 
     expect(result).not.toBeNull();
     await expect(result!.code).toMatchFileSnapshot('./fixtures/macro-import.output.ts');
+  });
+
+  test('`!` patterns of files exclude content', async () => {
+    const code = `import { defineCollections } from 'fumadocs-mdx/macro';
+const blog = defineCollections({ type: 'doc', dir: 'content/blog', files: ['**/*.mdx', '!drafts/**'] });`;
+    const file = path.join(root, 'lib/source.ts');
+
+    const vite = await transformMacroModule({ code, file, root, target: 'vite' });
+    expect(vite!.code).toContain('["./**/*.mdx","!./drafts/**"]');
+
+    const collection = buildCollection(
+      'blog',
+      { type: 'doc', dir: 'content/blog', files: ['**/*.mdx', '!drafts/**'] },
+      root,
+    );
+    expect(collection.hasFile(path.join(root, 'content/blog/post.mdx'))).toBe(true);
+    expect(collection.hasFile(path.join(root, 'content/blog/drafts/post.mdx'))).toBe(false);
   });
 
   test('config target retains only macro dependencies', async () => {
@@ -200,44 +217,49 @@ describe('options', () => {
   });
 
   test('webpack/node matcher covers project files but never node_modules', () => {
-    const matcher = createMacroMatcher(resolveMacroOptions(undefined)!);
+    const matcher = createMacroMatcher('/app', resolveMacroOptions(undefined)!);
 
-    for (const file of ['lib/source/index.tsx', 'a.js', 'deep/nested/mod.mts']) {
+    for (const file of ['/app/lib/source/index.tsx', '/app/a.js', '/app/deep/nested/mod.mts']) {
       expect(matcher(file), file).toBe(true);
     }
 
     // regression: `basename: true` must not reach the exclude patterns, or
     // `**/node_modules/**` stops matching and every dependency is transformed
     for (const file of [
-      'node_modules/foo/index.js',
-      'packages/a/node_modules/b/index.ts',
-      'readme.md',
+      '/app/node_modules/foo/index.js',
+      '/app/packages/a/node_modules/b/index.ts',
+      '/app/readme.md',
     ]) {
       expect(matcher(file), file).toBe(false);
     }
   });
 
   test('slash-less include patterns still match at any depth', () => {
-    const matcher = createMacroMatcher(resolveMacroOptions({ include: '*.source.ts' })!);
+    const matcher = createMacroMatcher('/app', resolveMacroOptions({ include: '*.source.ts' })!);
 
-    expect(matcher('lib/deep/x.source.ts')).toBe(true);
-    expect(matcher('node_modules/foo/x.source.ts')).toBe(false);
-    expect(matcher('lib/other.ts')).toBe(false);
+    expect(matcher('/app/lib/deep/x.source.ts')).toBe(true);
+    expect(matcher('/app/node_modules/foo/x.source.ts')).toBe(false);
+    expect(matcher('/app/lib/other.ts')).toBe(false);
   });
 
-  test('bun filter matches project files by default and never node_modules', () => {
-    const root = '/app';
-    const filter = macroFilter(root, resolveMacroOptions(undefined)!);
+  test('modules outside of root match by their relative path', () => {
+    const matcher = createMacroMatcher('/repo/apps/web', resolveMacroOptions(undefined)!);
 
+    expect(matcher('/repo/packages/content/src/index.ts')).toBe(true);
+    // hoisted dependencies
+    expect(matcher('/repo/node_modules/foo/index.js')).toBe(false);
+  });
+
+  test('bun filter matches modules, never node_modules', () => {
     for (const file of [
       '/app/lib/source.ts',
       '/app/a.tsx',
       '/app/deep/nested/mod.mjs',
-      '/app/src/x.js',
+      '/packages/content/src/index.ts',
       // the import query used by the bun evaluator must still match
       '/app/lib/source.ts?fd-macro-eval=token',
     ]) {
-      expect(filter.test(file), file).toBe(true);
+      expect(macroFilter.test(file), file).toBe(true);
     }
 
     for (const file of [
@@ -245,9 +267,8 @@ describe('options', () => {
       '/app/packages/x/node_modules/foo/index.ts',
       '/app/readme.md',
       '/app/styles.css',
-      '/other/lib/source.ts',
     ]) {
-      expect(filter.test(file), file).toBe(false);
+      expect(macroFilter.test(file), file).toBe(false);
     }
   });
 });
@@ -399,10 +420,38 @@ export const other = defineDocs({ dir: '${dir}' });`,
     }
   });
 
-  test('reject module paths outside of root', async () => {
-    await expect(() => collector.resolve('../outside/source.ts#docs')).rejects.toThrowError(
-      /points outside of the project root/,
+  test('modules outside of root, like workspace packages', async () => {
+    // a workspace package with its own dependency, which has a bundler-only export condition
+    const pkg = path.join(outDir, 'workspace/content');
+    const dep = path.join(pkg, 'node_modules/dep');
+    await fs.mkdir(dep, { recursive: true });
+    await fs.writeFile(
+      path.join(dep, 'package.json'),
+      JSON.stringify({ exports: { module: './bundler.mjs', default: './node.mjs' } }),
     );
+    await fs.writeFile(path.join(dep, 'bundler.mjs'), `export default 'bundler';`);
+    await fs.writeFile(path.join(dep, 'node.mjs'), `export default 'node';`);
+    await fs.writeFile(
+      path.join(pkg, 'index.ts'),
+      `import { defineDocs } from 'fumadocs-mdx/macro';
+import format from 'dep';
+
+export const docs = defineDocs({ dir: 'content/docs', docs: { mdxOptions: { format } } });`,
+    );
+
+    const app = path.join(outDir, 'workspace/app');
+    const appCollector = new MacroCollector({
+      root: app,
+      outDir,
+      isDev: false,
+      evaluator: createNodeEvaluator({ root: app, outDir }),
+    });
+    const { collection } = await appCollector.resolve('../content/index.ts#docs');
+    if (collection.type !== 'docs') throw new Error('expected docs');
+
+    // `dir` is relative to the app that loads the collection
+    expect(collection.dir).toBe(path.join(app, 'content/docs'));
+    expect(collection.docs.mdxOptions).toEqual({ format: 'node' });
   });
 
   test('reject ids without a collection name', async () => {

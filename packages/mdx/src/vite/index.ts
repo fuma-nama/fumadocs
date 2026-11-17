@@ -11,7 +11,13 @@ import path from 'node:path';
 import fs from 'node:fs/promises';
 import { mdxLoaderGlob, metaLoaderGlob } from '@/loaders';
 import type { MacroEvaluator } from '@/macro/eval';
-import { MacroModuleId, resolveMacroOptions, type MacroPluginOption } from '@/macro/options';
+import {
+  createMacroMatcher,
+  MacroModuleId,
+  NodeModulesRegex,
+  resolveMacroOptions,
+  type MacroPluginOption,
+} from '@/macro/options';
 import type { GlobalConfig } from '@/config';
 import type { PluginApi } from '@vitejs/plugin-rsc';
 
@@ -52,9 +58,6 @@ function createMacroEvaluator(root: string, resolve: UserConfig['resolve']): Mac
 export interface PluginOptions extends Pick<CoreOptions, 'configPath' | 'outDir' | 'plugins'> {
   /**
    * Configure the macro API (`fumadocs-mdx/macro`), or `false` to disable it.
-   *
-   * `macro.include` is passed to the
-   * [`id` filter](https://vite.dev/guide/api-plugin#hook-filters) of the transform hook.
    */
   macro?: MacroPluginOption;
 
@@ -157,15 +160,17 @@ export default function mdx(
 
         if (macroOptions) {
           const root = core.root;
+          const matcher = createMacroMatcher(root, macroOptions);
 
           macroPlugin.transform = {
             order: 'pre',
             filter: {
-              id: { include: macroOptions.include, exclude: macroOptions.exclude },
+              id: { exclude: NodeModulesRegex },
               code: MacroModuleId,
             },
             async handler(code, id) {
               const [file] = id.split('?', 2);
+              if (!matcher(file)) return;
               const { transformMacroModule } = await import('@/macro/transform');
               const result = await transformMacroModule({
                 code,

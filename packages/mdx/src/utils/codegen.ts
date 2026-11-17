@@ -164,7 +164,8 @@ function stringifyQuery(query: GlobImportOptions['query'] = {}): string {
 /**
  * convert into POSIX & relative file paths, such that Vite can accept it.
  */
-function normalizeViteGlobPath(file: string) {
+function normalizeViteGlobPath(file: string): string {
+  if (file.startsWith('!')) return `!${normalizeViteGlobPath(file.slice(1))}`;
   file = slash(file);
   if (file.startsWith('./')) return file;
   if (file.startsWith('/')) return `.${file}`;

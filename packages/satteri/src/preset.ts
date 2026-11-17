@@ -23,7 +23,7 @@ export type DefaultSatteriOptions = Omit<MdxCompileOptions, 'mdastPlugins' | 'ha
   remarkImageOptions?: RemarkImageOptions | false;
   remarkCodeTabOptions?: RemarkCodeTabOptions | false;
   remarkNpmOptions?: RemarkNpmOptions | false;
-  rehypeCodeOptions?: RehypeCodeOptions | false;
+  rehypeCodeOptions?: Partial<RehypeCodeOptions> | false;
   rehypeTocOptions?: RehypeTocOptions;
   /**
    * KaTeX rendering, applied only when the `math` feature is enabled. Pass

@@ -22,7 +22,7 @@ export type DefaultMDXOptions = Omit<
   remarkImageOptions?: Plugins.RemarkImageOptions | false;
   remarkCodeTabOptions?: Plugins.RemarkCodeTabOptions | false;
   remarkNpmOptions?: Plugins.RemarkNpmOptions | false;
-  rehypeCodeOptions?: Plugins.RehypeCodeOptions | false;
+  rehypeCodeOptions?: Partial<Plugins.RehypeCodeOptions> | false;
 };
 
 function pluginOption(

@@ -118,6 +118,8 @@ image: /blog/hello-world.png
 | `authors` | Keys of your authors, unknown keys are names |
 | `image`   | Cover image URL, shown on the cards of posts |
 
+Posts have no draft field. Keep unfinished posts outside `content/blog`, like in `content/drafts`, so they aren't published.
+
 <show when={props.framework === 'next'}>
 
 <Callout title="Remote images">
@@ -805,6 +807,8 @@ export function generateStaticParams() {
   return getTags(getPosts(blogSource.getPages())).map((tag) => ({ tag: tag.slug }));
 }
 ```
+
+With `output: 'export'`, Next.js fails the build when `generateStaticParams()` returns no params, so add this route once a post has tags.
 
 </show>
 
