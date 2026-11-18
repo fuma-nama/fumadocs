@@ -65,11 +65,12 @@ export function createContentStorageBuilder(loaderConfig: ResolvedLoaderConfig) 
       let locale: string;
       let rest: string;
       if (i18n.parser === 'dir') {
-        // `{locale}/file.ext`
-        const slash = path.indexOf('/');
-        if (slash <= 0) return [path];
-        locale = path.slice(0, slash);
-        rest = path.slice(slash + 1);
+        // `{locale}/file.ext`, at the root or under the base directory of a source
+        const segments = path.split('/');
+        const at = segments.findIndex((segment) => segment === '$' || langSet.has(segment));
+        if (at === -1 || at === segments.length - 1) return [path];
+        [locale] = segments.splice(at, 1);
+        rest = segments.join('/');
       } else {
         // `file.{locale}.ext`
         const ext = path.lastIndexOf('.');
