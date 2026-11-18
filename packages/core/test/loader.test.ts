@@ -460,8 +460,9 @@ test('Internationalized Routing: `dir` parser with `baseDir`', () => {
           { type: 'page', path: 'cn/guide/extra.mdx', data: { title: 'Extra' } },
         ],
       },
-      // a folder named like a language below the root is a folder of the content
+      // a base directory, or a folder below the root, named like a language is a folder of the content
       api: {
+        baseDir: 'cn',
         files: [{ type: 'page', path: 'api/cn/reference.mdx', data: { title: 'Reference' } }],
       },
     },
@@ -472,9 +473,9 @@ test('Internationalized Routing: `dir` parser with `baseDir`', () => {
       .getPages(locale)
       .map((page) => page.url)
       .sort();
-  expect(urls('en')).toStrictEqual(['/en/api/cn/reference', '/en/docs']);
+  expect(urls('en')).toStrictEqual(['/en/cn/api/cn/reference', '/en/docs']);
   expect(urls('cn')).toStrictEqual(['/cn/docs', '/cn/docs/guide/extra']);
-  expect(result.getPage(['docs'], 'cn')?.path).toBe('cn/docs/index.mdx');
+  expect(result.getPage(['docs'], 'cn')?.path).toBe('docs/cn/index.mdx');
   expect(result.getPageTree('cn').children[0].name).toBe('Docs CN');
 });
 

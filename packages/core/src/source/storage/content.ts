@@ -1,14 +1,7 @@
 import { FileSystem } from '@/source/storage/file-system';
 import { basename, dirname, extname, normalize } from '@/source/path';
 import type { ResolvedLoaderConfig } from '../loader';
-import {
-  isStaticSource,
-  MetaData,
-  PageData,
-  type Params,
-  type StaticSource,
-  type VirtualFile,
-} from '../source';
+import { isStaticSource, MetaData, PageData, type Params, type StaticSource } from '../source';
 import { fillParams, getStaticParams, isDynamicPath, segmentNames } from '../static-params';
 
 export type ContentStorage<
@@ -109,20 +102,13 @@ export function createContentStorageBuilder(loaderConfig: ResolvedLoaderConfig) 
   const metaDataAt = new Map<ContentStorageMetaFile, (params: Params) => MetaData>();
 
   function scan(type: string | undefined, source: StaticSource) {
-    // the `dir` parser reads the language from the first folder, so `baseDir` goes after it
-    const pathOf = (file: VirtualFile): string => {
-      if (!source.baseDir) return normalize(file.path);
-      const [rest, locale] =
-        i18n?.parser === 'dir' && !file.locale ? parser(normalize(file.path)) : [file.path];
-      return normalize(
-        locale ? `${locale}/${source.baseDir}/${rest}` : `${source.baseDir}/${file.path}`,
-      );
-    };
     const staticParams = new Map<string, Params[] | undefined>();
     const readStaticParams = (path: string) => staticParams.get(path);
     for (const inputFile of source.files) {
       if (inputFile.type !== 'meta') continue;
-      const path = pathOf(inputFile);
+      const path = normalize(
+        source.baseDir ? `${source.baseDir}/${inputFile.path}` : inputFile.path,
+      );
       staticParams.set(
         path.slice(0, path.length - extname(path).length),
         inputFile.data.staticParams,
@@ -131,7 +117,9 @@ export function createContentStorageBuilder(loaderConfig: ResolvedLoaderConfig) 
 
     for (const inputFile of source.files) {
       let file: ContentStorageMetaFile | ContentStoragePageFile;
-      const path = pathOf(inputFile);
+      const path = normalize(
+        source.baseDir ? `${source.baseDir}/${inputFile.path}` : inputFile.path,
+      );
       let files: ContentStorageFile[] | undefined;
 
       if (inputFile.type === 'page') {
@@ -161,8 +149,12 @@ export function createContentStorageBuilder(loaderConfig: ResolvedLoaderConfig) 
         if (inputFile.dataAt) metaDataAt.set(file, inputFile.dataAt);
       }
 
-      const [storageKey, locale = i18n ? i18n.defaultLanguage : EmptyLang] =
-        i18n && inputFile.locale ? [path, inputFile.locale] : parser(path);
+      // the locale is in the file's own path: `baseDir` comes before the folder of the `dir` parser
+      const [key, locale = i18n ? i18n.defaultLanguage : EmptyLang] =
+        i18n && inputFile.locale
+          ? [inputFile.path, inputFile.locale]
+          : parser(normalize(inputFile.path));
+      const storageKey = normalize(source.baseDir ? `${source.baseDir}/${key}` : key);
       if (files) for (const item of files) add(storageKey, locale, item);
       else add(storageKey, locale, file);
     }
