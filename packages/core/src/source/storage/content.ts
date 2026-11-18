@@ -102,13 +102,13 @@ export function createContentStorageBuilder(loaderConfig: ResolvedLoaderConfig) 
   const metaDataAt = new Map<ContentStorageMetaFile, (params: Params) => MetaData>();
 
   function scan(type: string | undefined, source: StaticSource) {
+    const inBaseDir = (path: string) =>
+      normalize(source.baseDir ? `${source.baseDir}/${path}` : path);
     const staticParams = new Map<string, Params[] | undefined>();
     const readStaticParams = (path: string) => staticParams.get(path);
     for (const inputFile of source.files) {
       if (inputFile.type !== 'meta') continue;
-      const path = normalize(
-        source.baseDir ? `${source.baseDir}/${inputFile.path}` : inputFile.path,
-      );
+      const path = inBaseDir(inputFile.path);
       staticParams.set(
         path.slice(0, path.length - extname(path).length),
         inputFile.data.staticParams,
@@ -117,9 +117,7 @@ export function createContentStorageBuilder(loaderConfig: ResolvedLoaderConfig) 
 
     for (const inputFile of source.files) {
       let file: ContentStorageMetaFile | ContentStoragePageFile;
-      const path = normalize(
-        source.baseDir ? `${source.baseDir}/${inputFile.path}` : inputFile.path,
-      );
+      const path = inBaseDir(inputFile.path);
       let files: ContentStorageFile[] | undefined;
 
       if (inputFile.type === 'page') {
@@ -149,8 +147,12 @@ export function createContentStorageBuilder(loaderConfig: ResolvedLoaderConfig) 
         if (inputFile.dataAt) metaDataAt.set(file, inputFile.dataAt);
       }
 
-      const [storageKey, locale = i18n ? i18n.defaultLanguage : EmptyLang] =
-        i18n && inputFile.locale ? [path, inputFile.locale] : parser(path);
+      // the locale is in the path of the file itself: `baseDir` places the file after it is read
+      const [localized, locale = i18n ? i18n.defaultLanguage : EmptyLang] =
+        i18n && inputFile.locale
+          ? [inputFile.path, inputFile.locale]
+          : parser(normalize(inputFile.path));
+      const storageKey = inBaseDir(localized);
       if (files) for (const item of files) add(storageKey, locale, item);
       else add(storageKey, locale, file);
     }

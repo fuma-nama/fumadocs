@@ -441,6 +441,40 @@ test('Internationalized Routing: locale of virtual files', () => {
   expect(result.getPageTree('cn').children[0].name).toBe('API');
 });
 
+test('Internationalized Routing: `dir` parser with `baseDir`', () => {
+  const result = loader({
+    baseUrl: '/',
+    i18n: {
+      languages: ['en', 'cn'],
+      defaultLanguage: 'en',
+      fallbackLanguage: null,
+      parser: 'dir',
+    },
+    source: {
+      docs: {
+        baseDir: 'docs',
+        files: [
+          { type: 'page', path: 'en/index.mdx', data: { title: 'Home' } },
+          { type: 'page', path: 'cn/index.mdx', data: { title: 'Home CN' } },
+          { type: 'page', path: 'cn/guide/extra.mdx', data: { title: 'Extra' } },
+        ],
+      },
+      blog: {
+        baseDir: 'blog',
+        files: [{ type: 'page', path: 'en/hello.mdx', data: { title: 'Hello' } }],
+      },
+    },
+  });
+
+  const urls = (locale: string) =>
+    result
+      .getPages(locale)
+      .map((page) => page.url)
+      .sort();
+  expect(urls('en')).toStrictEqual(['/en/blog/hello', '/en/docs']);
+  expect(urls('cn')).toStrictEqual(['/cn/docs', '/cn/docs/guide/extra']);
+});
+
 test('Internationalized Routing: `none` parser', () => {
   const result = loader({
     baseUrl: '/',
