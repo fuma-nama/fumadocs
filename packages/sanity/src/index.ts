@@ -7,7 +7,6 @@ import type { PortableTextBlock } from '@portabletext/react';
 import type { SlugValue } from '@sanity/types';
 import type { QueryParams, SanityClient } from '@sanity/client';
 import { renderToc } from './client';
-import path from 'node:path';
 
 export type SanityOptions<Doc extends BaseDoc = BaseDoc> =
   | GenericSanityOptions<Doc>
@@ -87,12 +86,11 @@ export function createSanitySource<Doc extends BaseDoc>(
 
   function toVirtualFile(file: ShallowDoc<Doc>): SanityVirtualFile {
     const slugs = file.slug?.current?.split('/').filter((v) => v.length > 0) ?? [];
-    let filePath = generatePath
+    const filePath = generatePath
       ? generatePath(file)
       : slugs.length === 0
         ? 'index.mdx'
         : `${slugs.join('/')}.mdx`;
-    if (baseDir) filePath = path.join(baseDir, filePath);
 
     return {
       type: 'page',
@@ -155,6 +153,7 @@ export function createSanitySource<Doc extends BaseDoc>(
 
   return {
     cache: useNextCache ? 'custom' : 'memory',
+    baseDir,
     async files() {
       const data = await sanityFetch<ShallowDoc<Doc>[]>(
         `*[_type == $docType]{ _id, _type, _updatedAt, title, slug, description }`,

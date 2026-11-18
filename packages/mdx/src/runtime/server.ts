@@ -2,7 +2,6 @@ import {
   type MetaData,
   type PageData,
   type Params,
-  PathUtils,
   type Source,
   type VirtualFile,
 } from 'fumadocs-core/source';
@@ -234,7 +233,6 @@ export function toFumadocsSource<
   pageData: Page;
   metaData: Meta;
 }> {
-  const baseDir = options?.baseDir;
   const files: VirtualFile<{
     pageData: Page;
     metaData: Meta;
@@ -243,7 +241,7 @@ export function toFumadocsSource<
   for (const entry of pages) {
     files.push({
       type: 'page',
-      path: baseDir ? PathUtils.joinPath(baseDir, entry.info.path) : entry.info.path,
+      path: entry.info.path,
       absolutePath: entry.info.fullPath,
       data: entry,
       dataAt: (params, custom) =>
@@ -256,16 +254,14 @@ export function toFumadocsSource<
   for (const entry of metas) {
     files.push({
       type: 'meta',
-      path: baseDir ? PathUtils.joinPath(baseDir, entry.info.path) : entry.info.path,
+      path: entry.info.path,
       absolutePath: entry.info.fullPath,
       data: entry,
       dataAt: metaAt(entry),
     });
   }
 
-  return {
-    files,
-  };
+  return { files, baseDir: options?.baseDir };
 }
 
 /** the data of a meta file in each folder of its params, see the meta loader */

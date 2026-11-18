@@ -2,6 +2,7 @@ import { afterAll, beforeAll, describe, expect, test } from 'vitest';
 import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
+import { loader } from 'fumadocs-core/source';
 import { createLocalSource, type ContentIntegration } from '@/index';
 
 let dir: string;
@@ -69,9 +70,13 @@ describe('createLocalSource', () => {
 
   test('applies baseDir to virtual paths', async () => {
     const source = createLocalSource({ dir, integration: integration() });
-    const { files } = await source.staticSource({ baseDir: 'docs' });
+    const pages = loader({
+      source: await source.staticSource({ baseDir: 'docs' }),
+      baseUrl: '/',
+    }).getPages();
 
-    expect(files.every((file) => file.path.startsWith(`docs${path.sep}`))).toBe(true);
+    expect(pages.length).toBeGreaterThan(0);
+    expect(pages.every((page) => page.path.startsWith('docs/'))).toBe(true);
   });
 
   test('reuses virtual file objects until a file is invalidated', async () => {

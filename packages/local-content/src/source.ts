@@ -63,21 +63,20 @@ export function createLocalSource<Page extends PageData, Meta extends MetaData>(
   const dataCache = new WeakMap<ParsedFile<Page, Meta>, Map<string, Page | Meta>>();
   const storage = createStorage(config);
 
-  async function createFiles({ baseDir }: SourceOptions = {}): Promise<LocalVirtualFile[]> {
+  async function createFiles(): Promise<LocalVirtualFile[]> {
     const files = await storage.getFiles();
-    const mount = (file: string) => (baseDir ? path.join(baseDir, file) : file);
-    // params come from the mounted paths, like the loader reads them
+    // the params of a dynamic file come from the meta files of its folders, as the loader reads them
     const metaParams = new Map<string, Params[] | undefined>();
     for (const { file, parsed } of files)
       if (parsed.type === 'meta')
-        metaParams.set(mount(file.slice(0, -path.extname(file).length)), parsed.data.staticParams);
+        metaParams.set(file.slice(0, -path.extname(file).length), parsed.data.staticParams);
 
     return Promise.all(
       files.map(async ({ file, parsed }) => {
         let v = fileCache.get(parsed);
         if (!v) {
           const location = {
-            path: mount(file),
+            path: file,
             absolutePath: path.resolve(config.dir, file),
           };
           v =
@@ -125,14 +124,15 @@ export function createLocalSource<Page extends PageData, Meta extends MetaData>(
     dynamicSource(options) {
       return {
         cache: 'custom',
-        files: () => createFiles(options),
+        baseDir: options?.baseDir,
+        files: () => createFiles(),
         invalidate() {
           storage.clearCache();
         },
       };
     },
     async staticSource(options) {
-      return { files: await createFiles(options) };
+      return { files: await createFiles(), baseDir: options?.baseDir };
     },
     async devServer(url) {
       const { watchWithDevServer } = await import('./dev/ws');

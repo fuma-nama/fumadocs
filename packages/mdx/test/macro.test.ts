@@ -634,6 +634,28 @@ describe('runtime', () => {
     expect(source.files).toHaveLength(2);
   });
 
+  test('docs collection with `baseDir` and the `dir` parser', async () => {
+    const entry = (title: string) => ({
+      default: () => null,
+      toc: () => [],
+      structuredData: () => [],
+      frontmatter: { title },
+    });
+    const collection = await macroDocs({
+      base: 'content/docs',
+      entries: { './en/index.mdx': entry('Home'), './cn/index.mdx': entry('Home CN') },
+      meta: {},
+    });
+    const source = loader({
+      source: collection.toFumadocsSource({ baseDir: 'docs' }),
+      baseUrl: '/',
+      i18n: { languages: ['en', 'cn'], defaultLanguage: 'en', parser: 'dir' },
+    });
+
+    expect(source.getPages('en').map((page) => page.url)).toEqual(['/en/docs']);
+    expect(source.getPages('cn').map((page) => page.url)).toEqual(['/cn/docs']);
+  });
+
   test('async docs collection handle', async () => {
     let loads = 0;
     const compiled = {

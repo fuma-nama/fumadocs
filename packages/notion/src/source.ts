@@ -8,7 +8,6 @@ import {
 } from '@notionhq/client';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins';
 import type { DynamicSource, MetaData, PageData, VirtualFile } from 'fumadocs-core/source';
-import path from 'node:path';
 import { blocksToStructuredData, richTextToPlainText, type NotionBlock } from './blocks';
 import { cache } from 'react';
 
@@ -116,7 +115,7 @@ export function createNotion({
           : info.slugs.length === 0
             ? 'index.mdx'
             : `${info.slugs.join('/')}.mdx`;
-        const filePath = resolveVirtualPath(options.baseDir, generatedPath);
+        const filePath = resolveVirtualPath(generatedPath);
         const duplicate = seenPaths.get(filePath);
         if (duplicate) {
           throw new Error(
@@ -148,6 +147,7 @@ export function createNotion({
       }
 
       return {
+        baseDir: options.baseDir,
         async files() {
           const pages: PageObjectResponse[] = [];
           let cursor: string | null | undefined;
@@ -356,13 +356,12 @@ function slugify(value: string): string {
     .replaceAll(/^-|-$/g, '');
 }
 
-function resolveVirtualPath(baseDir: string | undefined, generatedPath: string): string {
+function resolveVirtualPath(generatedPath: string): string {
   const normalized = generatedPath.replaceAll('\\', '/').replace(/^\/+/, '');
   if (!normalized || normalized.split('/').some((part) => part === '..')) {
     throw new Error(`[@fumadocs/notion] Invalid virtual path: ${generatedPath}`);
   }
-
-  return baseDir ? path.posix.join(baseDir.replaceAll('\\', '/'), normalized) : normalized;
+  return normalized;
 }
 
 function getPageIcon(page: PageObjectResponse): string | undefined {
