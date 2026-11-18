@@ -3,6 +3,6 @@ packages:
   'fumadocs-core': patch
 ---
 
-### Fix `baseDir` with the `dir` parser
+### Fix the `dir` parser under a base directory
 
-- The loader reads the locale of a file from its own path, so a source with `baseDir` keeps its languages with `parser: 'dir'`.
+- The `dir` parser finds the folder of a language under the base directory of a source, like `docs/en/page.mdx`.

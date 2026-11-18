@@ -459,9 +459,9 @@ test('Internationalized Routing: `dir` parser with `baseDir`', () => {
           { type: 'page', path: 'cn/guide/extra.mdx', data: { title: 'Extra' } },
         ],
       },
+      // a source that places its files itself, like `toFumadocsSource({ baseDir })` of Fumadocs MDX
       blog: {
-        baseDir: 'blog',
-        files: [{ type: 'page', path: 'en/hello.mdx', data: { title: 'Hello' } }],
+        files: [{ type: 'page', path: 'blog/en/hello.mdx', data: { title: 'Hello' } }],
       },
     },
   });
