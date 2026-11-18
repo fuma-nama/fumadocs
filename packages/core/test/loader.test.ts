@@ -454,14 +454,15 @@ test('Internationalized Routing: `dir` parser with `baseDir`', () => {
       docs: {
         baseDir: 'docs',
         files: [
+          { type: 'meta', path: 'cn/meta.json', data: { title: 'Docs CN' } },
           { type: 'page', path: 'en/index.mdx', data: { title: 'Home' } },
           { type: 'page', path: 'cn/index.mdx', data: { title: 'Home CN' } },
           { type: 'page', path: 'cn/guide/extra.mdx', data: { title: 'Extra' } },
         ],
       },
-      // a source that places its files itself, like `toFumadocsSource({ baseDir })` of Fumadocs MDX
-      blog: {
-        files: [{ type: 'page', path: 'blog/en/hello.mdx', data: { title: 'Hello' } }],
+      // a folder named like a language below the root is a folder of the content
+      api: {
+        files: [{ type: 'page', path: 'api/cn/reference.mdx', data: { title: 'Reference' } }],
       },
     },
   });
@@ -471,8 +472,10 @@ test('Internationalized Routing: `dir` parser with `baseDir`', () => {
       .getPages(locale)
       .map((page) => page.url)
       .sort();
-  expect(urls('en')).toStrictEqual(['/en/blog/hello', '/en/docs']);
+  expect(urls('en')).toStrictEqual(['/en/api/cn/reference', '/en/docs']);
   expect(urls('cn')).toStrictEqual(['/cn/docs', '/cn/docs/guide/extra']);
+  expect(result.getPage(['docs'], 'cn')?.path).toBe('cn/docs/index.mdx');
+  expect(result.getPageTree('cn').children[0].name).toBe('Docs CN');
 });
 
 test('Internationalized Routing: `none` parser', () => {

@@ -1,7 +1,14 @@
 import { FileSystem } from '@/source/storage/file-system';
 import { basename, dirname, extname, normalize } from '@/source/path';
 import type { ResolvedLoaderConfig } from '../loader';
-import { isStaticSource, MetaData, PageData, type Params, type StaticSource } from '../source';
+import {
+  isStaticSource,
+  MetaData,
+  PageData,
+  type Params,
+  type StaticSource,
+  type VirtualFile,
+} from '../source';
 import { fillParams, getStaticParams, isDynamicPath, segmentNames } from '../static-params';
 
 export type ContentStorage<
@@ -65,12 +72,11 @@ export function createContentStorageBuilder(loaderConfig: ResolvedLoaderConfig) 
       let locale: string;
       let rest: string;
       if (i18n.parser === 'dir') {
-        // `{locale}/file.ext`, at the root or under the base directory of a source
-        const segments = path.split('/');
-        const at = segments.findIndex((segment) => segment === '$' || langSet.has(segment));
-        if (at === -1 || at === segments.length - 1) return [path];
-        [locale] = segments.splice(at, 1);
-        rest = segments.join('/');
+        // `{locale}/file.ext`
+        const slash = path.indexOf('/');
+        if (slash <= 0) return [path];
+        locale = path.slice(0, slash);
+        rest = path.slice(slash + 1);
       } else {
         // `file.{locale}.ext`
         const ext = path.lastIndexOf('.');
@@ -103,13 +109,20 @@ export function createContentStorageBuilder(loaderConfig: ResolvedLoaderConfig) 
   const metaDataAt = new Map<ContentStorageMetaFile, (params: Params) => MetaData>();
 
   function scan(type: string | undefined, source: StaticSource) {
+    // the `dir` parser reads the language from the first folder, so `baseDir` goes after it
+    const pathOf = (file: VirtualFile): string => {
+      if (!source.baseDir) return normalize(file.path);
+      const [rest, locale] =
+        i18n?.parser === 'dir' && !file.locale ? parser(normalize(file.path)) : [file.path];
+      return normalize(
+        locale ? `${locale}/${source.baseDir}/${rest}` : `${source.baseDir}/${file.path}`,
+      );
+    };
     const staticParams = new Map<string, Params[] | undefined>();
     const readStaticParams = (path: string) => staticParams.get(path);
     for (const inputFile of source.files) {
       if (inputFile.type !== 'meta') continue;
-      const path = normalize(
-        source.baseDir ? `${source.baseDir}/${inputFile.path}` : inputFile.path,
-      );
+      const path = pathOf(inputFile);
       staticParams.set(
         path.slice(0, path.length - extname(path).length),
         inputFile.data.staticParams,
@@ -118,9 +131,7 @@ export function createContentStorageBuilder(loaderConfig: ResolvedLoaderConfig) 
 
     for (const inputFile of source.files) {
       let file: ContentStorageMetaFile | ContentStoragePageFile;
-      const path = normalize(
-        source.baseDir ? `${source.baseDir}/${inputFile.path}` : inputFile.path,
-      );
+      const path = pathOf(inputFile);
       let files: ContentStorageFile[] | undefined;
 
       if (inputFile.type === 'page') {
