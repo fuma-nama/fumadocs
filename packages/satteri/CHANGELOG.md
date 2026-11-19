@@ -1,3 +1,10 @@
+## @fumadocs/satteri@0.8.4
+
+### Clearer error for unknown code languages
+
+- Rehype Code names the unknown language of a code block and suggests `fallbackLanguage`.
+- Sätteri accepts `rehypeCodeOptions` without `themes`, the defaults fill in the rest.
+
 ## @fumadocs/satteri@0.8.3
 
 ### Fix authored code in outputs rendered at runtime
