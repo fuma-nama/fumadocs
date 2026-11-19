@@ -5,22 +5,22 @@ description: OpenAPI のサーバーインスタンスです。
 
 ## OpenAPI Server [#openapi-server]
 
-Fumadocs OpenAPI のメイン設定です。
+Fumadocs OpenAPI のメインとなる設定です。
 
-> ブラウザ環境から参照しないでください。
+> ブラウザ環境からは参照しないでください。
 
 ### `input` [#input]
 
-読み込む OpenAPI スキーマです。
+読み込み元となるOpenAPIスキーマです。
 
 * ファイルパス
-* 外部 URL
-* 関数 (後述) 
+* 外部URL
+* 関数(後述)
 
-読み込めるのはここに指定したスキーマのみです。それ以外の ID を `getSchema()` に渡したり、ページでプリロードしたりするとエラーがスローされます。
+読み込めるのはここに指定したスキーマのみです。それ以外のIDを `getSchema()` に渡したり、ページでプリロードしたりするとエラーがスローされます。
 
 <Callout type="warn">
-  信頼できないスキーマを `input` に渡さないでください。スキーマ内の `$ref` によって、ローカルファイルが読み取られたり、プライベートホストを含む任意の URL がフェッチされたりする可能性があります。
+  信頼できないスキーマを `input` に渡さないでください。スキーマ内の `$ref` によってローカルファイルが読み取られたり、プライベートホストを含む任意のURLへフェッチされたりする可能性があります。
 </Callout>
 
 ```ts tab="Basic"
@@ -47,20 +47,20 @@ export const openapi = createOpenAPI({
 
 ## ドキュメントを一度だけ読み込む [#loading-documents-once]
 
-ページは props でドキュメント全体を受け取るため、ページの読み込み、ナビゲーション、プリフェッチのたびにドキュメントが再送信されます。ドキュメントが大きい場合は、props に含めないようにしてください。
+ページは props でドキュメント全体を受け取るため、ページの読み込み、ナビゲーション、プリフェッチのたびにドキュメントが再送信されます。ドキュメントが大きい場合は、props から除外してください。
 
 ```ts title="lib/openapi.ts"
 import { createOpenAPI } from 'fumadocs-openapi/server';
 
 export const openapi = createOpenAPI({
-  // ID は URL に含まれるため、URL セーフにしてください
+  // ID は URL に含まれるため、URL セーフな値にしてください
   input: { museum: './museum.yaml' },
   includeDocument: false, // [!code ++]
 });
 ```
 
 <show when={props.framework !== 'tanstack-start'}>
-  `loadDocument` を渡すと、各ドキュメントの読み込みがブラウザセッションごとに1回で済みます。この関数はサーバーレンダリング時にも実行されます:
+  `loadDocument` を渡すと、各ドキュメントがブラウザセッションごとに1回だけ読み込まれるようになります。この関数はサーバーレンダリング時にも実行されます。
 </show>
 
 <show when={props.framework === 'next'}>
@@ -72,7 +72,7 @@ export const openapi = createOpenAPI({
   export const OpenAPIPage = createOpenAPIPage({
     async loadDocument(id) {
       if (typeof window === 'undefined') {
-        // ブラウザはページと同時にダウンロードを開始します
+        // ブラウザがページと同時にダウンロードを開始する
         preload(`/api/openapi/${id}`, { as: 'fetch', crossOrigin: 'anonymous' });
         const { openapi } = await import('@/lib/openapi');
         return (await openapi.getSchema(id)).bundled;
@@ -92,7 +92,7 @@ export const openapi = createOpenAPI({
   export const OpenAPIPage = createOpenAPIPage({
     async loadDocument(id) {
       if (import.meta.env.SSR) {
-        // ブラウザはページと同時にダウンロードを開始します
+        // ブラウザがページと同時にダウンロードを開始する
         preload(`/api/openapi/${id}`, { as: 'fetch', crossOrigin: 'anonymous' });
         const { openapi } = await import('@/lib/openapi');
         return (await openapi.getSchema(id)).bundled;
@@ -104,7 +104,7 @@ export const openapi = createOpenAPI({
 </show>
 
 <show when={props.framework !== 'tanstack-start'}>
-  ルートを用意して、ドキュメントをブラウザに配信します:
+  ルートを用意して、ドキュメントをブラウザに配信します。
 </show>
 
 <show when={props.framework === 'next'}>
@@ -172,14 +172,14 @@ export const openapi = createOpenAPI({
 </show>
 
 <show when={props.framework === 'tanstack-start'}>
-  TanStack Start のルートローダーはサーバーとブラウザの両方で実行されるため、docs ルートでは `loadDocument` を使わずにドキュメントを読み込めます。server function は、ブラウザにまだドキュメントがない場合にのみ呼び出してください。
+  TanStack Start のルートローダーはサーバーとブラウザの両方で実行されるため、docs ルートでは `loadDocument` を使わずにドキュメントを読み込めます。ブラウザがまだドキュメントを持っていない場合にのみ、サーバー関数を呼び出してください。
 
   ```tsx title="src/routes/docs/$.tsx"
   import { createServerFn } from '@tanstack/react-start';
   import type { Document } from 'fumadocs-openapi';
   import { openapi } from '@/lib/openapi';
 
-  // ブラウザで読み込み済みのドキュメント
+  // ブラウザが読み込み済みのドキュメント
   const documents = new Map<string, Document>();
 
   const getDocument = createServerFn({ method: 'GET' })
@@ -211,34 +211,34 @@ export const openapi = createOpenAPI({
 <show when={props.framework !== 'tanstack-start'}>
   * `loadDocument` は生成された MDX ファイルでも使用できます。
   * [Fumadocs CLI でインストールした UI](/docs/integrations/openapi/api-page#full-ui) では、`loadDocument` を `createOpenAPIRenderer()` に渡してください。
-  * ブラウザは各ドキュメントをリロードまで保持します。`disableCache` を使用する場合は、`includeDocument` を有効にしたままにしてください。
+  * ブラウザは各ドキュメントをリロードまで保持します。`disableCache` を使用する場合は、`includeDocument` を有効のままにしてください。
 </show>
 
 <show when={props.framework === 'tanstack-start'}>
   * 生成された MDX ファイルを使用する場合は、代わりにドキュメントを `preloaded.docs` に配置してください。
-  * ブラウザは各ドキュメントをリロードまで保持します。`disableCache` を使用する場合は、`includeDocument` を有効にしたままにしてください。
+  * ブラウザは各ドキュメントをリロードまで保持します。`disableCache` を使用する場合は、`includeDocument` を有効のままにしてください。
 </show>
 
 ## プロキシの作成 [#creating-proxy]
 
-プロキシサーバーは、ブラウザの CORS 制限を受けずに HTTP リクエストを送信します。API プレイグラウンドでは、次の用途でプロキシを使用します。
+プロキシサーバーを使うと、ブラウザの CORS 制限を受けずに HTTP リクエストを送信できます。API プレイグラウンドでは、次の用途でプロキシを使用します。
 
-* CORS で自分のオリジンが許可されていない API エンドポイントへのリクエスト。
-* コンフィデンシャルクライアント (クライアントシークレットを使用) の OAuth リクエストおよびデバイスフロー。
+* CORS でオリジンが許可されていない API エンドポイントへのリクエスト
+* コンフィデンシャルクライアント(クライアントシークレットを持つクライアント)による OAuth リクエストおよびデバイスフロー
 
 <Callout type="warn">
-  プロキシは認証なしで公開されます。`Authorization` を含め、リクエストのヘッダーとボディはそのまま転送されます。[`allowedOrigins`](#allowed-origins) と `filterRequest` でアクセスを制限してください。
+  プロキシは認証なしで公開されます。リクエストのヘッダーとボディは、`Authorization` を含めてそのまま転送されます。[`allowedOrigins`](#allowed-origins) と `filterRequest` でアクセスを制限してください。
 </Callout>
 
 ### セットアップ [#setup]
 
-プロキシ用のルートハンドラーを作成します。
+プレイグラウンドは、オペレーションのメソッドを URL に含めたうえで、リクエストを `POST` としてプロキシに送信します。このためのルートハンドラーを作成してください。
 
 <show when={props.framework === 'next'}>
   ```ts title="app/api/proxy/route.ts"
   import { openapi } from '@/lib/openapi';
 
-  export const { GET, HEAD, PUT, POST, PATCH, DELETE } = openapi.createProxy();
+  export const { POST } = openapi.createProxy();
   ```
 </show>
 
@@ -249,7 +249,6 @@ export const openapi = createOpenAPI({
 
   const proxy = openapi.createProxy();
 
-  export const loader = ({ request }: Route.LoaderArgs) => proxy.handle(request);
   export const action = ({ request }: Route.ActionArgs) => proxy.handle(request);
   ```
 
@@ -274,10 +273,7 @@ export const openapi = createOpenAPI({
   export const Route = createFileRoute('/api/proxy')({
     server: {
       handlers: {
-        // デフォルトではすべてのメソッドを処理します（GET、POST など個別のメソッドを指定することも可能）
-        ANY: async ({ request }) => {
-          return proxy.handle(request);
-        },
+        POST: ({ request }) => proxy.handle(request),
       },
     },
   });
@@ -288,7 +284,7 @@ export const openapi = createOpenAPI({
   ```ts title="src/pages/_api/api/proxy.ts"
   import { openapi } from '@/lib/openapi';
 
-  export const { GET, HEAD, PUT, POST, PATCH, DELETE } = openapi.createProxy();
+  export const { POST } = openapi.createProxy();
   ```
 </show>
 
@@ -301,14 +297,13 @@ export const openapi = createOpenAPI({
 
   const proxy = openapi.createProxy();
 
-  // すべてのメソッドを処理します
-  export const ALL: APIRoute = ({ request }) => proxy.handle(request);
+  export const POST: APIRoute = ({ request }) => proxy.handle(request);
   ```
 
-  このルートはオンデマンドで実行されるため、プロジェクトに[アダプター](https://docs.astro.build/en/guides/on-demand-rendering/)を導入する必要があります。
+  このルートはオンデマンドで実行されるため、プロジェクトに[アダプター](https://docs.astro.build/en/guides/on-demand-rendering/)が必要です。
 </show>
 
-次に、`createOpenAPI()` でこのルートの URL を設定します。
+次に、`createOpenAPI()` でこのルートの URL を指定します。
 
 ```ts title="lib/openapi.ts"
 import { createOpenAPI } from 'fumadocs-openapi/server';
@@ -320,8 +315,8 @@ export const openapi = createOpenAPI({
 
 ### 許可するオリジン [#allowed-origins]
 
-デフォルトでは、プロキシはあらゆるパブリックなオリジンを受け付けますが、プライベートネットワーク上のホスト (例: `localhost`) は拒否し、サイトの Cookie も転送しません。
-プロキシの対象を制限したい場合や、プライベートな API をプロキシしたい場合は、プロキシのルートで許可するオリジンを指定してください。
+デフォルトでは、プロキシはすべてのパブリックなオリジンを受け入れますが、プライベートネットワーク上のホスト (例: `localhost`) は拒否し、サイトの Cookie も転送しません。
+プロキシを制限したい場合や、プライベートな API をプロキシしたい場合は、プロキシルートで許可するオリジンを指定してください。
 
 ```ts
 openapi.createProxy({
@@ -333,7 +328,7 @@ openapi.createProxy({
 リダイレクト先も同じルールでチェックされます。
 
 <Callout type="warn">
-  プライベートネットワークの拒否には Node.js または Deno が必要です。Bun などの他のランタイムでは、
+  プライベートネットワークへのリクエストの拒否には、Node.js または Deno が必要です。Bun などのその他のランタイムでは、
   `allowedOrigins` を指定してください。
 </Callout>
 
@@ -341,7 +336,7 @@ openapi.createProxy({
 
 ```ts
 openapi.createProxy({
-  // false を返したリクエストはプロキシされずに拒否されます
+  // false が返されたプロキシ対象のリクエストは拒否されます
   filterRequest: (request) => request.method === 'GET',
 });
 ```
@@ -349,7 +344,7 @@ openapi.createProxy({
 ## OAuth リダイレクト [#oauth-redirect]
 
 OAuth プロバイダーは登録済みのリダイレクト URI しか受け付けませんが、API プレイグラウンドはデフォルトで現在のページにリダイレクトします。
-そこで、全ページ共通のリダイレクト URI となるルートハンドラーを作成してください。このハンドラーは、フローを開始したページへユーザーを戻します。
+すべてのページで共通のリダイレクト URI として使うルートハンドラーを作成してください。このハンドラーが、フローを開始したページへユーザーを戻します。
 
 <show when={props.framework === 'next'}>
   ```ts title="app/api/oauth/route.ts"
@@ -428,13 +423,13 @@ export const OpenAPIPage = createOpenAPIPage({
 });
 ```
 
-<Callout title="Content Security Policy">
-  ハンドラーは、自身のルートから配信されるスクリプトを使ってユーザーを元のページに戻します。このルートに Content Security Policy が適用される場合は、`'self'` のスクリプトを許可する必要があります。`'strict-dynamic'` を含むポリシーでは `'self'` が無視されるため、代わりにこのルートをポリシーの対象から除外してください。
+<Callout title="Content Security Policy（CSP）">
+  ハンドラーは、自身のルートから配信されるスクリプトを使ってユーザーを元のページに戻します。そのルートに Content Security Policy が適用される場合は、`'self'` のスクリプトを許可する必要があります。`'strict-dynamic'` を含むポリシーでは `'self'` が無視されるため、その場合はルートをポリシーの対象から除外してください。
 </Callout>
 
 ### 静的サイト [#static-sites]
 
-静的サイトでは、ルートはファイルとしてプリレンダリングされます。`inline: true` を渡してスクリプトをページ内に埋め込み、静的ホストがファイルを HTML として配信できるよう、パスの末尾を `.html` にしてください。
+静的サイトでは、ルートはファイルとして事前レンダリングされます。`inline: true` を渡してスクリプトをページ内に埋め込み、静的ホストがファイルを HTML として配信できるよう、パスの末尾を `.html` にしてください。
 
 <show when={props.framework === 'next'}>
   ```ts title="app/api/oauth.html/route.ts"
@@ -502,7 +497,7 @@ export const OpenAPIPage = createOpenAPIPage({
     plugins: [
       tanstackStart({
         prerender: { enabled: true },
-        // このルートにリンクしているページがないため、デフォルトのクロール開始点と併せて指定します
+        // このルートにリンクするページはないため、デフォルトのクロール開始地点と一緒に指定します
         pages: [{ path: '/' }, { path: '/api/oauth.html' }], // [!code ++]
       }),
       // ...
@@ -533,7 +528,7 @@ export const OpenAPIPage = createOpenAPIPage({
   export const GET: APIRoute = ({ request }) => handler(request);
   ```
 
-  静的ビルドでは、アダプターがなくてもルートがプリレンダリングされます。
+  静的ビルドでは、アダプターがなくてもルートが事前レンダリングされます。
 </show>
 
-`oauthRedirectUrl: '/api/oauth.html'` のように、`.html` の URL をリダイレクト URI として指定してください。スクリプトがページ内に埋め込まれるため、このルートに適用される Content Security Policy でインラインスクリプトを許可する必要があります。
+リダイレクト URI には、`oauthRedirectUrl: '/api/oauth.html'` のように `.html` の URL を指定してください。スクリプトはページ内に埋め込まれるため、このルートに適用される Content Security Policy でインラインスクリプトを許可する必要があります。
