@@ -1,3 +1,14 @@
+## fumadocs-core@16.19.5
+
+### Clearer error for unknown code languages
+
+- Rehype Code names the unknown language of a code block and suggests `fallbackLanguage`.
+- Sätteri accepts `rehypeCodeOptions` without `themes`, the defaults fill in the rest.
+
+### Fix `baseDir` with the `dir` parser
+
+- A source with `baseDir` keeps its languages with `parser: 'dir'`.
+
 ## fumadocs-core@16.19.4
 
 ### Fix authored code in outputs rendered at runtime
