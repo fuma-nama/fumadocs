@@ -25,6 +25,28 @@ describe('Generate documents', () => {
     await expect(stringifyOutput(out)).toMatchFileSnapshot('./out/petstore-per-operation.md');
   });
 
+  test('OpenAPI 3.2 QUERY operations', async () => {
+    const out = await generateFilesOnly({
+      input: createOpenAPI({
+        input: {
+          query: {
+            openapi: '3.2.0',
+            info: { title: 'Search', version: '1.0.0' },
+            paths: {
+              '/search': {
+                query: { operationId: 'search', responses: { '200': { description: 'OK' } } },
+              },
+            },
+          },
+        },
+      }),
+      per: 'operation',
+    });
+
+    expect(out.map((file) => file.path)).toEqual(['search.mdx']);
+    expect(out[0].content).toContain(`"method":"query"`);
+  });
+
   test('Museum (Per Tag)', async () => {
     const out = await generateFilesOnly({
       input: createOpenAPI({

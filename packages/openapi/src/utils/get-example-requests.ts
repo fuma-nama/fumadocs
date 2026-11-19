@@ -144,8 +144,8 @@ function getRequestData({
       result.body = getRaw(bodyOfType.example);
     } else {
       result.body = sample(bodyOfType?.schema ?? {}, {
-        skipReadOnly: method !== 'get',
-        skipWriteOnly: method === 'get',
+        // read-only properties are only in responses
+        skipReadOnly: true,
         skipNonRequired: true,
       });
     }

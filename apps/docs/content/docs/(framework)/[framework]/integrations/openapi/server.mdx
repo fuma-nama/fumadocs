@@ -258,14 +258,14 @@ The proxy is public without authentication. It forwards the headers and body of 
 
 ### Setup
 
-Create a route handler for the proxy:
+The playground sends its requests to the proxy as `POST`, with the method of the operation in the URL. Create a route handler for it:
 
 <show when={props.framework === 'next'}>
 
 ```ts title="app/api/proxy/route.ts"
 import { openapi } from '@/lib/openapi';
 
-export const { GET, HEAD, PUT, POST, PATCH, DELETE } = openapi.createProxy();
+export const { POST } = openapi.createProxy();
 ```
 
 </show>
@@ -278,7 +278,6 @@ import { openapi } from '@/lib/openapi';
 
 const proxy = openapi.createProxy();
 
-export const loader = ({ request }: Route.LoaderArgs) => proxy.handle(request);
 export const action = ({ request }: Route.ActionArgs) => proxy.handle(request);
 ```
 
@@ -305,10 +304,7 @@ const proxy = openapi.createProxy();
 export const Route = createFileRoute('/api/proxy')({
   server: {
     handlers: {
-      // Handles all methods by default, or specify individual methods (GET, POST, etc.)
-      ANY: async ({ request }) => {
-        return proxy.handle(request);
-      },
+      POST: ({ request }) => proxy.handle(request),
     },
   },
 });
@@ -321,7 +317,7 @@ export const Route = createFileRoute('/api/proxy')({
 ```ts title="src/pages/_api/api/proxy.ts"
 import { openapi } from '@/lib/openapi';
 
-export const { GET, HEAD, PUT, POST, PATCH, DELETE } = openapi.createProxy();
+export const { POST } = openapi.createProxy();
 ```
 
 </show>
@@ -336,8 +332,7 @@ export const prerender = false;
 
 const proxy = openapi.createProxy();
 
-// handles all methods
-export const ALL: APIRoute = ({ request }) => proxy.handle(request);
+export const POST: APIRoute = ({ request }) => proxy.handle(request);
 ```
 
 The route runs on demand, so your project needs an [adapter](https://docs.astro.build/en/guides/on-demand-rendering/).

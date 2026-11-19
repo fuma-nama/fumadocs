@@ -1,5 +1,4 @@
 const methods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD'] as const;
-const methodsWithBody = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
 
 // https://fetch.spec.whatwg.org/#redirect-status
 const redirectStatus = new Set([301, 302, 303, 307, 308]);
@@ -89,15 +88,14 @@ export function createProxy(options: CreateProxyOptions = {}): Proxy {
       });
     }
 
-    const proxied = await rewriteRequest(req, targetUrl, searchParams.get('cookie'));
-
-    if (filterRequest && !filterRequest(proxied)) {
-      return Response.json('[Proxy] The proxied request is not allowed', {
-        status: 403,
-      });
-    }
-
     try {
+      const proxied = await rewriteRequest(req, targetUrl, searchParams);
+      if (filterRequest && !filterRequest(proxied)) {
+        return Response.json('[Proxy] The proxied request is not allowed', {
+          status: 403,
+        });
+      }
+
       return await proxyFetch(proxied);
     } catch (e) {
       // `fetch()` wraps connection errors
@@ -123,10 +121,7 @@ export function createProxy(options: CreateProxyOptions = {}): Proxy {
     const headers = new Headers(initial.headers);
     // set by `fetch()` from the body, Node.js appends it to a forwarded one (e.g. "5, 5")
     headers.delete('content-length');
-    let body: ArrayBuffer | undefined =
-      initial.body && methodsWithBody.has(method.toUpperCase())
-        ? await initial.arrayBuffer()
-        : undefined;
+    let body = initial.body ? await initial.arrayBuffer() : undefined;
 
     for (let redirects = 0; redirects <= maxRedirects; redirects++) {
       const response = await send(url, {
@@ -154,13 +149,13 @@ export function createProxy(options: CreateProxyOptions = {}): Proxy {
         headers.delete('cookie');
       }
 
-      // Match browser semantics: 303 (and 301/302 for non-idempotent methods)
-      // turn the follow-up request into a bodyless GET.
+      // like `fetch()`, 301/302 turn a POST into a bodyless GET, 303 anything but GET/HEAD
       switch (response.status) {
         case 301:
         case 302:
-          if (method === 'GET' || method === 'HEAD') break;
+          if (method !== 'POST') break;
         case 303:
+          if (method === 'GET' || method === 'HEAD') break;
           method = 'GET';
           body = undefined;
           headers.delete('content-type');
@@ -176,27 +171,32 @@ export function createProxy(options: CreateProxyOptions = {}): Proxy {
   async function rewriteRequest(
     request: Request,
     url: URL,
-    cookie: string | null,
+    searchParams: URLSearchParams,
   ): Promise<Request> {
     const headers = new Headers(request.headers);
     headers.delete('origin');
     // cookies of your site, only listed origins are trusted with them
     if (!allowedOrigins) headers.delete('cookie');
-    if (cookie) {
-      headers.set('Cookie', cookie);
-    }
+    const cookie = searchParams.get('cookie');
+    if (cookie) headers.set('Cookie', cookie);
+    // the playground sends a POST with the method in `method`
+    const method = searchParams.get('method') ?? request.method;
+    const body = await request.arrayBuffer();
 
-    const proxied = new Request(url, {
-      method: request.method,
-      cache: 'no-cache',
-      headers,
-      // a stream, read once by `proxyFetch()`
-      body: methodsWithBody.has(request.method.toUpperCase()) ? request.body : null,
-      // stops the upstream request when the client disconnects
-      signal: request.signal,
-      // required for stream bodies, missing in the DOM types
-      duplex: 'half',
-    } as RequestInit);
+    let proxied: Request;
+    try {
+      proxied = new Request(url, {
+        method,
+        cache: 'no-cache',
+        headers,
+        body: body.byteLength > 0 ? body : null,
+        // stops the upstream request when the client disconnects
+        signal: request.signal,
+      });
+    } catch (e) {
+      // like a body with GET, or the methods `fetch()` forbids
+      throw new ProxyError(e instanceof Error ? e.message : String(e));
+    }
 
     return overrides?.request ? overrides.request(proxied) : proxied;
   }

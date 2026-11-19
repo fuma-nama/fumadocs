@@ -61,4 +61,34 @@ describe('getExampleRequests', () => {
       ['constructor', '/pets/tom'],
     ]);
   });
+
+  test('request bodies leave out read-only properties for every method', () => {
+    for (const method of ['get', 'query', 'post'] as const) {
+      const [item] = getExampleRequests({
+        path: '/search',
+        method,
+        operation: {
+          requestBody: {
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  required: ['id', 'q', 'secret'],
+                  properties: {
+                    id: { type: 'string', readOnly: true },
+                    q: { type: 'string' },
+                    secret: { type: 'string', writeOnly: true },
+                  },
+                },
+              },
+            },
+          },
+          responses: {},
+        },
+        parameters: [],
+        mediaAdapters: defaultAdapters,
+      });
+      expect(Object.keys(item.data.body as object)).toEqual(['q', 'secret']);
+    }
+  });
 });

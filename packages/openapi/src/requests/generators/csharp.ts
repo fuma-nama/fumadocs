@@ -1,6 +1,6 @@
 import type { CodeUsageGenerator } from '@/requests/generators';
 import { generateBodyExample } from '@/requests/media/adapter';
-import { cookieString, doubleQuote } from '@/requests/string-utils';
+import { cookieString, doubleQuote, standardMethods } from '@/requests/string-utils';
 
 export const csharp: CodeUsageGenerator = {
   label: 'C#',
@@ -25,10 +25,12 @@ export const csharp: CodeUsageGenerator = {
     const cookie = cookieString(data.cookie);
     if (cookie) s.push(`client.DefaultRequestHeaders.Add("cookie", ${doubleQuote(cookie)});`);
 
-    const method = data.method[0].toUpperCase() + data.method.slice(1).toLowerCase();
+    const method = standardMethods.has(data.method)
+      ? `HttpMethod.${data.method[0].toUpperCase()}${data.method.slice(1)}`
+      : `new HttpMethod(${doubleQuote(data.method.toUpperCase())})`;
     const content = body ? ' { Content = body }' : '';
     s.push(
-      `var request = new HttpRequestMessage(HttpMethod.${method}, ${doubleQuote(data.url)})${content};`,
+      `var request = new HttpRequestMessage(${method}, ${doubleQuote(data.url)})${content};`,
       'var response = await client.SendAsync(request);',
       'var responseBody = await response.Content.ReadAsStringAsync();',
     );

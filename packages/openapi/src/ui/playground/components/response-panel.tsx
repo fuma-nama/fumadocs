@@ -107,10 +107,10 @@ function ResponseExamples() {
       <SegmentedPanel
         key={tab.code}
         value={tab.code}
-        className="flex min-h-0 flex-1 flex-col overflow-auto border-t"
+        className="flex min-h-0 flex-1 flex-col overflow-auto"
       >
         {example ? (
-          <div className="min-h-0 flex-1">
+          <div className="min-h-0 flex-1 border-t">
             <ClientCodeBlock
               lang="json"
               code={JSON.stringify(example.sample, null, 2)}
@@ -118,7 +118,12 @@ function ResponseExamples() {
             />
           </div>
         ) : (
-          <p className="p-4 text-sm text-fd-muted-foreground">{t('No example available.')}</p>
+          // the description already says what the response is
+          !tab.response.description && (
+            <p className="border-t p-4 text-sm text-fd-muted-foreground">
+              {t('No example available.')}
+            </p>
+          )
         )}
       </SegmentedPanel>
     </Segmented>
