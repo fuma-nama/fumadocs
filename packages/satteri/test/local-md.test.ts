@@ -168,13 +168,12 @@ describe('localMd source', () => {
     expect(toc.map((item) => item.url)).toEqual(['#getting-started', '#install']);
   });
 
-  test('applies baseDir to virtual paths', async () => {
-    const source = await localMd({ dir: contentDir }).staticSource({ baseDir: 'docs' });
-    expect(source.files.map((file) => file.path).sort()).toEqual([
-      path.join('docs', 'guide.md'),
-      path.join('docs', 'index.mdx'),
-      path.join('docs', 'meta.json'),
-    ]);
+  test('applies baseDir to the paths of the loader', async () => {
+    const pages = loader({
+      source: await localMd({ dir: contentDir }).staticSource({ baseDir: 'docs' }),
+      baseUrl: '/',
+    }).getPages();
+    expect(pages.map((page) => page.path).sort()).toEqual(['docs/guide.md', 'docs/index.mdx']);
   });
 
   test('compiles each page at most once', async () => {
