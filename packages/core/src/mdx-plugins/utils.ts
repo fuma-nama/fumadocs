@@ -67,11 +67,15 @@ export function handleTag(value: string, tag: string): string | false {
 const parser = Parser.extend(acornJsx());
 const placeholderRegex = /^_fumadocs(\d+)$/;
 
+export function parse(code: string): Program {
+  return parser.parse(code, { ecmaVersion: 'latest', sourceType: 'module' }) as Program;
+}
+
 /** the code of an ESM block, the identifiers `_fumadocs<index>` are the expressions */
 export function toEsm(code: string, expressions: Expression[] = []): MdxjsEsm {
-  const program = parser.parse(code, { ecmaVersion: 'latest', sourceType: 'module' });
-  if (expressions.length > 0) fill(program, expressions);
-  return { type: 'mdxjsEsm', value: '', data: { estree: program as unknown as Program } };
+  const estree = parse(code);
+  if (expressions.length > 0) fill(estree, expressions);
+  return { type: 'mdxjsEsm', value: '', data: { estree } };
 }
 
 function fill(node: object, expressions: Expression[]) {
@@ -87,7 +91,7 @@ function fill(node: object, expressions: Expression[]) {
 
 /** the value of a JSX attribute from code */
 export function toAttributeValue(code: string) {
-  const estree = parser.parse(code, { ecmaVersion: 'latest', sourceType: 'module' }) as Program;
+  const estree = parse(code);
   return { type: 'mdxJsxAttributeValueExpression' as const, value: code, data: { estree } };
 }
 
@@ -103,7 +107,7 @@ export function createCodeOutput(
       createStringifier(file, options.target, (value, fallback) =>
         expression(`_fumadocs${expressions.push(value) - 1}`, fallback),
       ),
-    parse: (code) => parser.parse(code, { ecmaVersion: 'latest', sourceType: 'module' }),
+    parse,
     // strings skip the parser
     literal: (value) => `_fumadocs${expressions.push({ type: 'Literal', value }) - 1}`,
   });

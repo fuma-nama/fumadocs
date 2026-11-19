@@ -1,3 +1,9 @@
+## @fumadocs/notion@0.3.2
+
+### Fix `baseDir` with the `dir` parser
+
+- A source with `baseDir` keeps its languages with `parser: 'dir'`.
+
 ## @fumadocs/notion@0.3.1
 
 ### Components per page in press plugins

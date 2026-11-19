@@ -1,3 +1,9 @@
+## @fumadocs/story@1.5.4
+
+### Stop TypeScript processes when idle
+
+- Twoslash, type tables and story transforms stop their TypeScript process once they have no pending work, instead of keeping it until the build ends.
+
 ## @fumadocs/story@1.5.3
 
 ### Story panel refinements

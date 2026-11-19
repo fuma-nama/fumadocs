@@ -171,7 +171,7 @@ function Overview({
 
   if (auth.requirements.length === 0 && parameters.length === 0 && !body) {
     return (
-      <p className="p-6 text-center text-sm text-fd-muted-foreground">
+      <p className="flex h-full items-center justify-center p-6 text-center text-sm text-fd-muted-foreground">
         {t('This endpoint has no parameters.')}
       </p>
     );

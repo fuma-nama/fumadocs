@@ -5,7 +5,7 @@ description: コードのシンタックスハイライター
 
 Fumadocs で使用されているシンタックスハイライター [`@shikijs/rehype`](https://shiki.style/packages/rehype) のラッパーです。
 
-未加工の `<pre />` コードブロックを、シンタックスハイライトが適用されたコードブロックに変換します。
+加工前の `<pre />` コードブロックを、ハイライト済みのコードブロックに変換します。
 
 ````md tab="Input"
 ```ts
@@ -63,9 +63,9 @@ export default defineConfig({
 
 ### ハイライター [#highlighter]
 
-このプラグインは Shiki を使用します。`rehypeCodeFromHighlighter` は Shiki の代わりに Highlights などの別の[ハイライター](/docs/headless/utils/shiki)を受け取り、Shiki 固有のオプションを除いた同じオプションを使用します。プラグインのトランスフォーマーを適用してハイライターを作成する関数を渡してください。
+このプラグインは Shiki を使用します。`rehypeCodeFromHighlighter` は、Shiki の代わりに Highlights などの別の[ハイライター](/docs/headless/utils/shiki)を受け取り、Shiki 以外のオプションを指定できます。プラグインのトランスフォーマーを使ってハイライターを作成する関数を渡してください。
 
-デフォルトのプラグインを無効にし、こちらを追加します。
+デフォルトのプラグインを無効にして、こちらを追加します：
 
 ```ts tab="unified" title="source.config.ts"
 import { defineConfig } from 'fumadocs-mdx/config';
@@ -108,7 +108,7 @@ export default defineConfig({
 
 ### Meta [#meta]
 
-メタ文字列から `title` をパースし、`pre` 要素に属性として追加します。
+メタ文字列から `title` を解析し、`pre` 要素に属性として追加します。
 
 ````mdx tab="Input"
 ```js title="Title"
@@ -120,7 +120,7 @@ console.log('Hello');
 <pre title="Title">...</pre>
 ```
 
-`filterMetaString` オプションを使用すると、処理前に meta 文字列をフィルタリングできます。
+`filterMetaString` オプションを使用すると、処理前にメタ文字列をフィルタリングできます。
 
 ### インラインコード [#inline-code]
 
@@ -143,8 +143,8 @@ const rehypeCodeOptions: RehypeCodeOptions = {
 
 ### アイコン [#icon]
 
-このプラグインは、コードブロックの言語指定に応じて `icon` 属性を自動的に追加します。
-値は HTML 文字列なので、React の `dangerouslySetInnerHTML` を使ってレンダリングできます。
+このプラグインは、言語のメタ文字列に応じて `icon` 属性を自動的に追加します。
+この属性は HTML 文字列のため、React の `dangerouslySetInnerHTML` を使ってレンダリングできます。
 
 ````md tab="Input"
 ```ts
@@ -158,6 +158,38 @@ console.log('This should shows the logo of TypeScript');
 
 `icon` オプションで、アイコンを無効化またはカスタマイズできます。
 
+### 未対応の言語 [#unknown-languages]
+
+Shiki がサポートしていない言語のコードブロックがあると、ビルドが失敗します。代わりに別の言語としてハイライトするには、`fallbackLanguage` を設定します。
+
+```ts tab="unified" title="source.config.ts"
+import { defineConfig } from 'fumadocs-mdx/config';
+
+export default defineConfig({
+  mdxOptions: {
+    rehypeCodeOptions: {
+      fallbackLanguage: 'plaintext',
+    },
+  },
+});
+```
+
+```ts tab="Sätteri" title="source.config.ts"
+import { defineConfig, defineDocs } from 'fumadocs-mdx/config';
+
+export const docs = defineDocs({
+  docs: { compiler: 'satteri' },
+});
+
+export default defineConfig({
+  satteriOptions: {
+    rehypeCodeOptions: {
+      fallbackLanguage: 'plaintext',
+    },
+  },
+});
+```
+
 ### その他のオプション [#more-options]
 
-オプションは [Shiki](https://shiki.style) から継承しています。その他のオプションについては Shiki のドキュメントを参照してください。
+オプションは [Shiki](https://shiki.style) から継承されています。そのほかのオプションについては、Shiki のドキュメントを参照してください。

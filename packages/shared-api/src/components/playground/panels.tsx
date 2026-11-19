@@ -151,7 +151,7 @@ export function Panel({
   children: ReactNode;
 }) {
   return (
-    <div className="flex min-h-0 flex-col [grid-area:1/1]">
+    <div className="flex min-h-0 min-w-0 flex-col wrap-break-word [grid-area:1/1]">
       {nav}
       <div
         key={id}

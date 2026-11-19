@@ -1,3 +1,9 @@
+## @fumadocs/local-content@0.3.2
+
+### Fix `baseDir` with the `dir` parser
+
+- A source with `baseDir` keeps its languages with `parser: 'dir'`.
+
 ## @fumadocs/local-content@0.3.1
 
 ### Frontmatter and Meta Files in Code

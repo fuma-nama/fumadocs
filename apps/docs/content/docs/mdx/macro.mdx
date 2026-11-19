@@ -47,6 +47,31 @@ Collection options are largely the same as the [config API](/docs/mdx/collection
 
 You can still keep a `source.config.ts` for [global options](/docs/mdx/global) and plugins while defining collections with macros.
 
+### Monorepos
+
+To share collections between apps, declare them in a workspace package. `dir` is relative to the app that imports the collection, so each app loads its own content.
+
+```ts tab="packages/content/index.ts"
+import { defineCollections } from 'fumadocs-mdx/macro';
+import { pageSchema } from 'fumadocs-core/source/schema';
+
+export const blog = defineCollections({
+  type: 'doc',
+  dir: 'content/blog',
+  schema: pageSchema,
+});
+```
+
+```ts tab="apps/web/lib/source.ts"
+import { loader } from 'fumadocs-core/source';
+import { blog } from '@acme/content';
+
+export const blogSource = loader({
+  baseUrl: '/blog',
+  source: blog.toFumadocsSource(),
+});
+```
+
 ### Browser
 
 Macro collections work in the browser too. Import the collection in a client component and render an entry with `body`, no [client loader](/docs/mdx/entry/browser) needed.

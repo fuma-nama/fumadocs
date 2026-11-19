@@ -110,7 +110,18 @@ function buildPrimitiveCollection(
       const relativePath = path.relative(this.dir, filePath);
       if (relativePath.startsWith(`..${path.sep}`)) return false;
 
-      return (matcher ??= picomatch(patterns))(relativePath);
+      if (!matcher) {
+        // like the glob of collections, `!` patterns exclude files
+        const include: string[] = [];
+        const ignore: string[] = [];
+        for (const pattern of patterns) {
+          if (pattern.startsWith('!')) ignore.push(pattern.slice(1));
+          else include.push(pattern);
+        }
+        matcher = picomatch(include, { ignore });
+      }
+
+      return matcher(relativePath);
     },
   };
 }

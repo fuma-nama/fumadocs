@@ -158,6 +158,38 @@ console.log('This should shows the logo of TypeScript');
 
 Disable or customize icons with the `icon` option.
 
+### Unknown Languages
+
+A code block with a language that Shiki doesn't support fails the build. To highlight it as another language instead, set `fallbackLanguage`:
+
+```ts tab="unified" title="source.config.ts"
+import { defineConfig } from 'fumadocs-mdx/config';
+
+export default defineConfig({
+  mdxOptions: {
+    rehypeCodeOptions: {
+      fallbackLanguage: 'plaintext',
+    },
+  },
+});
+```
+
+```ts tab="Sätteri" title="source.config.ts"
+import { defineConfig, defineDocs } from 'fumadocs-mdx/config';
+
+export const docs = defineDocs({
+  docs: { compiler: 'satteri' },
+});
+
+export default defineConfig({
+  satteriOptions: {
+    rehypeCodeOptions: {
+      fallbackLanguage: 'plaintext',
+    },
+  },
+});
+```
+
 ### More Options
 
 The options are inherited from [Shiki](https://shiki.style), see their docs for other options.

@@ -14,12 +14,14 @@ const server = createServer(async (req, res) => {
   if (req.url === '/never') return;
   if (req.url === '/999') res.writeHead(999);
   if (req.url === '/same') res.writeHead(302, { location: '/' });
+  if (req.url === '/moved') res.writeHead(302, { location: '/' });
   if (req.url === '/cross') res.writeHead(302, { location: `http://127.0.0.1:${port}/` });
 
   let body = '';
   for await (const chunk of req) body += chunk;
   res.end(
     JSON.stringify({
+      method: req.method === 'GET' ? undefined : req.method,
       authorization: req.headers.authorization,
       cookie: req.headers.cookie,
       body: body || undefined,
@@ -33,10 +35,11 @@ afterAll(() => {
   server.close();
 });
 
-function request(proxy: Proxy, url: string, init?: RequestInit) {
-  return proxy.handle(
-    new Request(`https://docs.example.com/api/proxy?url=${encodeURIComponent(url)}`, init),
-  );
+function request(proxy: Proxy, url: string, init?: RequestInit, method?: string) {
+  const proxyUrl = new URL('https://docs.example.com/api/proxy');
+  proxyUrl.searchParams.set('url', url);
+  if (method) proxyUrl.searchParams.set('method', method);
+  return proxy.handle(new Request(proxyUrl, init));
 }
 
 test('refuses private networks by default', async () => {
@@ -100,8 +103,47 @@ test('forwards request bodies', async () => {
       headers,
       body: 'hello',
     });
-    expect(await res.json()).toEqual({ body: 'hello' });
+    expect(await res.json()).toEqual({ method: 'POST', body: 'hello' });
   }
+});
+
+test('sends the method of `method`, keeping it across redirects', async () => {
+  const proxy = createProxy({ allowedOrigins: [`http://localhost:${port}`] });
+  const res = await request(
+    proxy,
+    `http://localhost:${port}/moved`,
+    {
+      method: 'POST',
+      body: 'hello',
+    },
+    'QUERY',
+  );
+  expect(await res.json()).toEqual({ method: 'QUERY', body: 'hello' });
+
+  const get = await request(proxy, `http://localhost:${port}`, { method: 'POST' }, 'GET');
+  expect(await get.json()).toEqual({});
+});
+
+test('refuses requests `fetch()` cannot send', async () => {
+  const proxy = createProxy({ allowedOrigins: [`http://localhost:${port}`] });
+  const trace = await request(proxy, `http://localhost:${port}`, { method: 'POST' }, 'TRACE');
+  expect(trace.status).toBe(400);
+  const get = await request(
+    proxy,
+    `http://localhost:${port}`,
+    { method: 'POST', body: 'hello' },
+    'GET',
+  );
+  expect(get.status).toBe(400);
+});
+
+test('turns a POST into a GET on 302', async () => {
+  const proxy = createProxy({ allowedOrigins: [`http://localhost:${port}`] });
+  const res = await request(proxy, `http://localhost:${port}/moved`, {
+    method: 'POST',
+    body: 'hello',
+  });
+  expect(await res.json()).toEqual({});
 });
 
 test('keeps the dispatcher of `fetch()`', async () => {
@@ -113,7 +155,7 @@ test('keeps the dispatcher of `fetch()`', async () => {
     headers: { 'content-length': '5' },
     body: 'hello',
   });
-  expect(await res.json()).toEqual({ body: 'hello' });
+  expect(await res.json()).toEqual({ method: 'POST', body: 'hello' });
 });
 
 test('aborts when the client disconnects', async () => {
@@ -153,5 +195,5 @@ test('works with the global dispatcher of undici', async () => {
     body: 'hello',
   });
 
-  expect(await res.json()).toEqual({ body: 'hello' });
+  expect(await res.json()).toEqual({ method: 'POST', body: 'hello' });
 });

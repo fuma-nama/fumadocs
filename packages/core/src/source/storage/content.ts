@@ -149,8 +149,12 @@ export function createContentStorageBuilder(loaderConfig: ResolvedLoaderConfig) 
         if (inputFile.dataAt) metaDataAt.set(file, inputFile.dataAt);
       }
 
-      const [storageKey, locale = i18n ? i18n.defaultLanguage : EmptyLang] =
-        i18n && inputFile.locale ? [path, inputFile.locale] : parser(path);
+      // the locale is in the file's own path: `baseDir` comes before the folder of the `dir` parser
+      const [key, locale = i18n ? i18n.defaultLanguage : EmptyLang] =
+        i18n && inputFile.locale
+          ? [inputFile.path, inputFile.locale]
+          : parser(normalize(inputFile.path));
+      const storageKey = normalize(source.baseDir ? `${source.baseDir}/${key}` : key);
       if (files) for (const item of files) add(storageKey, locale, item);
       else add(storageKey, locale, file);
     }

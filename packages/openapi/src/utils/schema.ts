@@ -1,9 +1,20 @@
-import type { ExampleObject, MediaTypeObject, TagObject } from '@/types';
+import type { ExampleObject, HttpMethods, MediaTypeObject, TagObject } from '@/types';
 import { idToTitle } from 'shared-api/utils/id-to-title';
 import { dereference } from '@fumadocs/json-schema';
 import { getRaw } from '@scalar/json-magic/magic-proxy';
 
-export const methodKeys = ['get', 'post', 'patch', 'delete', 'head', 'put'] as const;
+/** the operation fields of a Path Item, in the order of pages */
+export const methodKeys = [
+  'get',
+  'query',
+  'post',
+  'patch',
+  'delete',
+  'head',
+  'put',
+  'options',
+  'trace',
+] as const satisfies readonly HttpMethods[];
 
 export function getPreferredType(body: Record<string, unknown>): string | undefined {
   if ('application/json' in body) return 'application/json';

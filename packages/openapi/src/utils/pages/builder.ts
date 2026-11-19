@@ -139,32 +139,19 @@ export function fromSchema(
     extract() {
       const result: ExtractedInfo = { webhooks: [], operations: [] };
 
-      for (const [path, pathItem] of Object.entries(document.paths ?? {})) {
-        if (!pathItem) continue;
-
-        for (const methodKey of methodKeys) {
-          if (!pathItem[methodKey]) continue;
-
-          result.operations.push({
-            method: methodKey,
-            path,
-            tags: pathItem[methodKey]?.tags,
-          });
+      for (const [path, item] of Object.entries(document.paths ?? {})) {
+        const pathItem = dereference(item);
+        for (const method of methodKeys) {
+          const operation = pathItem?.[method];
+          if (operation) result.operations.push({ method, path, tags: operation.tags });
         }
       }
 
-      for (const [name, _pathItem] of Object.entries(document.webhooks ?? {})) {
-        const pathItem = dereference(_pathItem);
-        if (!pathItem) continue;
-
-        for (const methodKey of methodKeys) {
-          if (!pathItem[methodKey]) continue;
-
-          result.webhooks.push({
-            method: methodKey,
-            name,
-            tags: pathItem[methodKey]?.tags,
-          });
+      for (const [name, item] of Object.entries(document.webhooks ?? {})) {
+        const pathItem = dereference(item);
+        for (const method of methodKeys) {
+          const operation = pathItem?.[method];
+          if (operation) result.webhooks.push({ method, name, tags: operation.tags });
         }
       }
 

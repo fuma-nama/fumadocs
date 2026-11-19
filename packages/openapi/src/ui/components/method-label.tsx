@@ -1,20 +1,16 @@
 import type { HTMLAttributes } from 'react';
 import { Badge, type BadgeColor } from 'shared-api/components/badge';
 
-function getMethodColor(method: string): BadgeColor {
-  switch (method.toUpperCase()) {
-    case 'PUT':
-      return 'yellow';
-    case 'PATCH':
-      return 'orange';
-    case 'POST':
-      return 'blue';
-    case 'DELETE':
-      return 'red';
-    default:
-      return 'green';
-  }
-}
+// reads are green, QUERY is a read with a body between GET and POST, others are gray
+const colors: Record<string, BadgeColor> = {
+  GET: 'green',
+  HEAD: 'green',
+  QUERY: 'cyan',
+  POST: 'blue',
+  PUT: 'yellow',
+  PATCH: 'orange',
+  DELETE: 'red',
+};
 
 export function MethodLabel({
   children,
@@ -22,9 +18,11 @@ export function MethodLabel({
 }: Omit<HTMLAttributes<HTMLSpanElement>, 'children'> & {
   children: string;
 }) {
+  const method = children.toUpperCase();
+
   return (
-    <Badge {...props} color={getMethodColor(children)}>
-      {children.toUpperCase()}
+    <Badge {...props} color={colors[method] ?? 'gray'}>
+      {method}
     </Badge>
   );
 }

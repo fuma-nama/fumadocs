@@ -9,6 +9,7 @@ export const badgeVariants = cva('font-mono font-medium', {
       yellow: 'text-yellow-600 dark:text-yellow-400',
       red: 'text-red-600 dark:text-red-400',
       blue: 'text-blue-600 dark:text-blue-400',
+      cyan: 'text-cyan-600 dark:text-cyan-400',
       orange: 'text-orange-600 dark:text-orange-400',
       gray: 'text-fd-muted-foreground',
     },

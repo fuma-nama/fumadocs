@@ -5,6 +5,7 @@ import { expect, test, vi } from 'vitest';
 import { loadDocument } from '@/utils/document/load';
 import { createOpenAPIRenderer } from '@/index.browser';
 import type { PageOperationProps } from '@/operation';
+import { Operation } from '@/ui/operation';
 import {
   type ExampleRequest,
   type OperationInfo,
@@ -411,4 +412,33 @@ test('encodes auth fields with their providers', async () => {
     { header: { Authorization: `Basic ${btoa('a:b')}` } },
     { header: { 'X-Token': 'token' } },
   ]);
+});
+
+test('operations of methods `fetch()` forbids have no playground', () => {
+  const OpenAPIPage = createOpenAPIRenderer({
+    components: { ...components, Operation },
+    playground: { render: ({ method }) => <i>{`playground ${method}`}</i> },
+  });
+  const bundled: Document = {
+    openapi: '3.2.0',
+    info: { title: 'Trace', version: '1.0.0' },
+    paths: {
+      '/products': {
+        query: { responses: {} },
+        trace: { responses: {} },
+      },
+    },
+  };
+  const html = renderToString(
+    <OpenAPIPage
+      payload={{ bundled }}
+      operations={[
+        { path: '/products', method: 'query' },
+        { path: '/products', method: 'trace' },
+      ]}
+    />,
+  );
+
+  expect(html).toContain('playground query');
+  expect(html).not.toContain('playground trace');
 });

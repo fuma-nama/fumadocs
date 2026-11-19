@@ -1,4 +1,4 @@
-import { cookieString, doubleQuote, indent } from '@/requests/string-utils';
+import { cookieString, doubleQuote, indent, standardMethods } from '@/requests/string-utils';
 import type { CodeUsageGenerator } from '@/requests/generators';
 import { generateBodyExample } from '@/requests/media/adapter';
 
@@ -8,7 +8,10 @@ export const rust: CodeUsageGenerator = {
   generate(data, { mediaAdapters }) {
     const body = generateBodyExample(data, mediaAdapters, { lang: 'rust' });
     const multipart = data.bodyMediaType === 'multipart/form-data';
-    const request = [`.request(Method::${data.method.toUpperCase()}, url)`];
+    const method = standardMethods.has(data.method)
+      ? `Method::${data.method.toUpperCase()}`
+      : `Method::from_bytes(b${doubleQuote(data.method.toUpperCase())}).unwrap()`;
+    const request = [`.request(${method}, url)`];
 
     for (const k in data.header) {
       request.push(`.header(${doubleQuote(k)}, ${doubleQuote(data.header[k].value)})`);

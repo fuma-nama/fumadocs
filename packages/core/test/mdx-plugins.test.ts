@@ -937,7 +937,9 @@ After the branch.
 ## Setup
 </show>
 
-## Notes {/* draft */}
+{/* by <author@example.com> */}
+
+## Notes {/* draft <Badge> */}
 
 ## Mode <show when={props.framework === "waku"}>Waku</show>`;
 
@@ -1007,6 +1009,8 @@ After the branch.
   expect(astro.markdown).toContain('Astro only.');
   expect(waku.markdown).not.toContain('Astro only.');
   expect(waku.markdown).not.toMatch(/\n{3,}/);
+  // an expression of comments renders nothing
+  expect(waku.markdown).not.toContain('author@example.com');
   // a branch in a list item keeps its prefixes, the whitespace after a branch goes with it
   expect(waku.markdown).toContain('2. Waku, on two\n   lines.');
   expect(astro.markdown).toContain('2. Astro.');
@@ -1016,6 +1020,64 @@ After the branch.
   expect(waku.html).toContain('<p>A  B </p>');
   expect(astro.html).not.toContain('With pnpm');
   expect(pnpm.html).toContain('With pnpm');
+});
+
+test('Runtime outputs: the components of authored code are MDX components', async () => {
+  const { compile, run } = await import('@mdx-js/mdx');
+  const runtime = await import('react/jsx-runtime');
+  const { renderToStaticMarkup } = await import('react-dom/server');
+  const server = await import('@/server');
+  const code = await compile(
+    {
+      value: `## Use {<Badge>new</Badge>} <Badge style={{ color: "red" }}>beta</Badge> {{ a: "v" }.a}
+
+Text {<kit.Tag>x</kit.Tag>} <Kept icon={<Icon />} {...{ extra: <Extra /> }} />
+`,
+      data: { unstable_runtimeOutputs: true },
+    },
+    {
+      outputFormat: 'function-body',
+      baseUrl: import.meta.url,
+      remarkPlugins: [remarkHeading, [remarkStructure, { exportAs: true }], remarkLLMs],
+      rehypePlugins: [rehypeToc, rehypeHeading],
+    },
+  );
+  const body = String(code).replace(
+    /await import\([^)]*"fumadocs-core\/server"\)\)?/g,
+    'arguments[0]._server',
+  );
+  const mod = await run(body, { ...runtime, _server: server } as never);
+  const page = mod as unknown as {
+    toc: (props: object) => { url: string; title: ReactNode }[];
+    structuredData: StructuredRecords;
+    _markdown: (props: object) => unknown;
+  };
+  const tag = (props: { children?: ReactNode }) => runtime.jsx('b', { children: props.children });
+  const props = {
+    components: { Badge: tag, kit: { Tag: tag }, Kept: tag, Icon: tag, Extra: tag },
+  };
+
+  expect(renderToStaticMarkup(runtime.jsx(mod.default, props))).toBe(
+    '<h2 id="use--beta-v">Use <b>new</b> <b>beta</b> v</h2>\n<p>Text <b>x</b> <b></b></p>',
+  );
+  const titles = (props: object) =>
+    page.toc(props).map((item) => [item.url, renderToStaticMarkup(item.title)]);
+  expect(titles(props)).toEqual([['#use--beta-v', 'Use <b>new</b> <b>beta</b> v']]);
+  // without the MDX components, a component of a title is its content
+  expect(titles({})).toEqual([['#use--beta-v', 'Use new beta v']]);
+  // a member tag reads its component from its object, in the MDX components or not
+  for (const components of [props.components, undefined]) {
+    expect(await renderStructuredData(page.structuredData, { components })).toEqual({
+      headings: [{ id: 'use--beta-v', content: 'Use <Badge>new</Badge> <Badge>beta</Badge> v' }],
+      contents: [{ heading: 'use--beta-v', content: 'Text <kit.Tag>x</kit.Tag> <Kept />' }],
+    });
+  }
+  expect(readStructuredData(page.structuredData, {}).contents[0].content).toBe(
+    'Text <kit.Tag>x</kit.Tag> <Kept />',
+  );
+  await expect(server.renderToMarkdown(runtime.jsx(page._markdown as never, props))).resolves.toBe(
+    '## Use <Badge>new</Badge> <Badge>beta</Badge> v [#use--beta-v]\n\nText <kit.Tag>x</kit.Tag> <Kept />',
+  );
 });
 
 test('Remark Heading: headings with IDs from code stay headings for other plugins', async () => {

@@ -5,9 +5,9 @@ description: fumadocs-mdx/macro を使って、アプリ内でコレクション
 
 ## 概要 [#overview]
 
-`fumadocs-mdx/macro` を使用すると、アプリケーションのモジュール内でコレクションを直接宣言できます。
+`fumadocs-mdx/macro` を使うと、アプリケーションのモジュール内でコレクションを直接宣言できます。
 
-バンドラー(またはランタイムのローダー)が、`defineDocs` / `defineCollections` をコンテンツファイルのインポートにコンパイルします。
+バンドラー (またはランタイムローダー) が、`defineDocs` / `defineCollections` をコンテンツファイルのインポートにコンパイルします。
 
 * コード生成は不要です。
 * `source.config.ts` も不要です。
@@ -45,11 +45,36 @@ export const blogSource = loader({
 
 コレクションのオプションは、[config API](/docs/mdx/collections) とほぼ同じです。
 
-Macro でコレクションを定義する場合でも、[グローバルオプション](/docs/mdx/global)やプラグインの設定用に `source.config.ts` を残しておくことができます。
+Macro でコレクションを定義する場合でも、[グローバルオプション](/docs/mdx/global)やプラグインの設定用に `source.config.ts` を引き続き使用できます。
+
+### モノレポ [#monorepos]
+
+複数のアプリ間でコレクションを共有するには、ワークスペースパッケージでコレクションを宣言します。`dir` はコレクションをインポートする側のアプリを基準とした相対パスになるため、各アプリはそれぞれ自身のコンテンツを読み込みます。
+
+```ts tab="packages/content/index.ts"
+import { defineCollections } from 'fumadocs-mdx/macro';
+import { pageSchema } from 'fumadocs-core/source/schema';
+
+export const blog = defineCollections({
+  type: 'doc',
+  dir: 'content/blog',
+  schema: pageSchema,
+});
+```
+
+```ts tab="apps/web/lib/source.ts"
+import { loader } from 'fumadocs-core/source';
+import { blog } from '@acme/content';
+
+export const blogSource = loader({
+  baseUrl: '/blog',
+  source: blog.toFumadocsSource(),
+});
+```
 
 ### ブラウザ [#browser]
 
-Macro コレクションはブラウザでも動作します。クライアントコンポーネントでコレクションをインポートし、`body` でエントリーをレンダリングするだけで、[クライアントローダー](/docs/mdx/entry/browser)は必要ありません。
+Macro コレクションはブラウザでも動作します。クライアントコンポーネントでコレクションをインポートし、`body` でエントリをレンダリングできます。[クライアントローダー](/docs/mdx/entry/browser)は必要ありません。
 
 ```tsx
 import { docs } from '@/lib/source';
@@ -69,28 +94,28 @@ export default function Page({ path }: { path: string }) {
 }
 ```
 
-[パスパラメータ](/docs/page-conventions#path-params)を持つページでは、ローダーから取得した params を渡してください:`docs.getPage(page.path, page.params)`。
+[パスパラメータ](/docs/page-conventions#path-params)を持つページでは、ローダーから params を渡します：`docs.getPage(page.path, page.params)`。
 
 <Callout type="warn">
-  `docs` のインポート元のモジュールは、ブラウザ上ですべて実行されます。`loader()` に `openapi.staticSource()` のような
-  サーバー専用のソースが含まれる場合は、コレクションを別のモジュール(例:
-  `lib/collections.ts`)で定義し、そこからインポートしてください。
+  ブラウザは、`docs` のインポート元のモジュール全体を実行します。`loader()` に `openapi.staticSource()` のようなサーバー専用の
+  ソースが含まれる場合は、コレクションを別のモジュール (例：
+  `lib/collections.ts`) で定義し、そこからインポートしてください。
 </Callout>
 
 #### 非同期コレクション [#async-collections]
 
-[`async`](/docs/mdx/async) を有効にすると、事前にバンドルされるのはフロントマターのみで、コンテンツはオンデマンドで取得されます。
+[`async`](/docs/mdx/async) を有効にすると、事前にバンドルされるのはフロントマターのみとなり、コンテンツはオンデマンドで取得されます。
 
-`body` も同様に動作しますが、コンテンツが利用可能になるまでサスペンドする点が異なります。この挙動は、次の2つの追加メソッドで制御できます。
+`body` も同じように使えますが、コンテンツが利用可能になるまでサスペンドする点が異なります。この挙動は、次の 2 つの追加メソッドで制御できます。
 
-* `preload()` はレンダリング前にコンテンツを読み込むため、`body` はサスペンドせずにレンダリングされます。ルートローダー内で呼び出してください。
-* `load()` は `toc` など、読み込まれたコンテンツを返します。返される Promise はキャッシュされるため、レンダリング中に呼び出しても問題ありません。
+* `preload()` はレンダリングの前にコンテンツを読み込むため、`body` はサスペンドせずにレンダリングされます。ルートローダー内で呼び出してください。
+* `load()` は `toc` など、読み込まれたコンテンツを返します。Promise はキャッシュされるため、レンダリング中に呼び出しても問題ありません。
 
 ```tsx
 import { use } from 'react';
 import { docs } from '@/lib/source';
 
-// ルートローダー内で実行(React Router、TanStack Start)
+// ルートローダー内（React Router、TanStack Start）
 export async function loader({ path }: { path: string }) {
   await docs.getPage(path)?.preload();
   return { path };
@@ -116,7 +141,7 @@ export default function Page({ path }: { path: string }) {
 
 ## 設定 [#configuration]
 
-Macro API はデフォルトで有効です。`macro` を渡すと Macro API を使用できるモジュールを制限でき、`false` を渡すと無効にできます。React Router と TanStack Start では、Vite プラグインに渡してください。
+Macro API はデフォルトで有効になっています。使用できるモジュールを制限するには `macro` を、無効にするには `false` を渡してください。React Router と TanStack Start では、Vite プラグインに渡してください。
 
 ```js tab="Next.js" title="next.config.mjs"
 import { createMDX } from 'fumadocs-mdx/next';
@@ -126,7 +151,7 @@ const withMDX = createMDX({
     // プロジェクトルートからの相対 glob パターン
     include: ['lib/**/*.ts', 'lib/**/*.tsx'],
   },
-  // または、完全に無効化する場合:
+  // または完全に無効化する場合：
   // macro: false,
 });
 ```
@@ -178,7 +203,7 @@ register({
 
 Macro の呼び出しは静的にコンパイルされます。以下のルールに注意してください。
 
-* 各呼び出しはトップレベルの `const` に代入してください (変数名によってコレクションが識別されます) 。
+* 各呼び出しはトップレベルの `const` に代入してください(変数名によってコレクションが識別されます):
 
   ```ts
   // ✓
@@ -190,7 +215,7 @@ Macro の呼び出しは静的にコンパイルされます。以下のルー�
   }
   ```
 
-* コンテンツのバンドル方法を決めるオプション (`dir`、`files`、`async`) は、静的に解析できる値 (文字列 / 真偽値のリテラル) にする必要があります。動的なロジックは、`schema` や `mdxOptions` などのオプション側に記述してください。
+* コンテンツのバンドル方法に関わるオプション(`dir`、`files`、`async`)は、静的に解析できる値(文字列または真偽値のリテラル)にする必要があります。動的なロジックは、`schema` や `mdxOptions` などのオプション側に記述してください。
 
 * [`dynamic`](/docs/mdx/async#dynamic-mode) コレクションは、Macro API ではまだサポートされていません。遅延読み込みには [`async`](/docs/mdx/async) の使用をおすすめします。
 

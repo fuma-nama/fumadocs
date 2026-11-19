@@ -2,7 +2,6 @@ import { createCore } from '@/core';
 import type { NodeLoaderOptions } from '.';
 import type { InitializeHook, LoadFnOutput, LoadHook, LoadHookContext } from 'node:module';
 import { fileURLToPath } from 'node:url';
-import path from 'node:path';
 import { createStandaloneConfigLoader } from '@/loaders/config';
 import { toNode } from '@/loaders/adapter';
 import { createMdxLoader } from '@/loaders/mdx';
@@ -15,19 +14,17 @@ import {
   resolveMacroOptions,
   type ResolvedMacroOptions,
 } from '@/macro/options';
-import { slash } from '@/utils/codegen';
 
 let cachedLoaders: LoadHook[] | undefined;
 
 function toNodeMacro(options: ResolvedMacroOptions, root: string): LoadHook {
-  const matcher = createMacroMatcher(options);
+  const matcher = createMacroMatcher(root, options);
 
   return async (url, context, nextLoad) => {
     if (!url.startsWith('file:///')) return nextLoad(url, context);
 
     const file = fileURLToPath(new URL(url));
-    const rel = slash(path.relative(root, file));
-    if (rel.startsWith('..') || !matcher(rel)) return nextLoad(url, context);
+    if (!matcher(file)) return nextLoad(url, context);
 
     const loaded = await nextLoad(url, context);
     const code = loaded.source?.toString();

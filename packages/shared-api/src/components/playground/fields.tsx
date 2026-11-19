@@ -361,7 +361,7 @@ export function Row({
             </Popover.Trigger>
             <Popover.Portal>
               <Popover.Positioner side="bottom" align="start" sideOffset={6} className="z-50">
-                <Popover.Popup className="w-72 max-w-[calc(100vw-2rem)] origin-(--transform-origin) rounded-xl border bg-fd-popover p-3 text-fd-popover-foreground shadow-lg outline-none transition-[opacity,scale] duration-150 ease-out data-ending-style:scale-95 data-ending-style:opacity-0 data-starting-style:scale-95 data-starting-style:opacity-0 motion-reduce:transition-none">
+                <Popover.Popup className="w-72 max-w-[calc(100vw-2rem)] origin-(--transform-origin) wrap-break-word rounded-xl border bg-fd-popover p-3 text-fd-popover-foreground shadow-lg outline-none transition-[opacity,scale] duration-150 ease-out data-ending-style:scale-95 data-ending-style:opacity-0 data-starting-style:scale-95 data-starting-style:opacity-0 motion-reduce:transition-none">
                   {info}
                 </Popover.Popup>
               </Popover.Positioner>

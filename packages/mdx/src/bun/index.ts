@@ -2,10 +2,8 @@ import type { BunPlugin } from 'bun';
 import { createMdxLoader } from '@/loaders/mdx';
 import { buildConfig } from '@/config/build';
 import { pathToFileURL } from 'node:url';
-import path from 'node:path';
 import fs from 'node:fs/promises';
 import { randomUUID } from 'node:crypto';
-import picomatch from 'picomatch';
 import { type CoreOptions, createCore } from '@/core';
 import { createIntegratedConfigLoader } from '@/loaders/config';
 import { createMetaLoader } from '@/loaders/meta';
@@ -13,12 +11,12 @@ import { toBun } from '@/loaders/adapter';
 import { mdxLoaderGlob, metaLoaderGlob } from '@/loaders';
 import type { MacroEvaluatorOptions } from '@/macro/eval';
 import {
+  createMacroMatcher,
   MacroModuleId,
+  NodeModulesRegex,
   resolveMacroOptions,
   type MacroPluginOption,
-  type ResolvedMacroOptions,
 } from '@/macro/options';
-import { slash } from '@/utils/codegen';
 
 export interface MdxPluginOptions extends Pick<CoreOptions, 'configPath' | 'outDir' | 'plugins'> {
   /**
@@ -35,21 +33,13 @@ export interface MdxPluginOptions extends Pick<CoreOptions, 'configPath' | 'outD
 const EvalQueryKey = 'fd-macro-eval';
 
 /**
+ * JS/TS modules outside of `node_modules`, with an optional import query.
+ *
  * @internal
  */
-export function macroFilter(root: string, { include, exclude }: ResolvedMacroOptions): RegExp {
-  const toSource = (pattern: string) =>
-    picomatch.makeRe(slash(path.resolve(root, pattern)), { dot: true }).source;
-
-  // tolerate an import query (`?foo=bar`) after the path
-  const included = include
-    .map((pattern) => `(?:${toSource(pattern).replace(/\$$/, String.raw`(?:\?.*)?$`)})`)
-    .join('|');
-  const excluded = exclude.map((pattern) => `(?:${toSource(pattern)})`).join('|');
-
-  // the lookahead is zero-width, so the anchors of the included sources still apply at index 0
-  return new RegExp(`^(?!${excluded})(?:${included})`);
-}
+export const macroFilter = new RegExp(
+  String.raw`^(?!.*${NodeModulesRegex.source}).*\.(?:[cm]?[jt]s|[jt]sx)(?:\?.*)?$`,
+);
 
 function bunLoader(file: string) {
   if (file.endsWith('.tsx')) return 'tsx' as const;
@@ -106,13 +96,15 @@ export function createMdxPlugin(options: MdxPluginOptions = {}): BunPlugin {
           },
         });
 
-        const filter = macroFilter(root, macroOptions);
+        const matcher = createMacroMatcher(root, macroOptions);
 
-        build.onLoad({ filter }, async (args) => {
+        build.onLoad({ filter: macroFilter }, async (args) => {
           const [file, query = ''] = args.path.split('?', 2);
           const loader = bunLoader(file);
           const source = await Bun.file(file).text();
-          if (!source.includes(MacroModuleId)) return { contents: source, loader };
+          // runtime plugins of Bun cannot fall through, they must return the contents
+          if (!matcher(file) || !source.includes(MacroModuleId))
+            return { contents: source, loader };
 
           const token = new URLSearchParams(query).get(EvalQueryKey);
           const transform = token ? pendingEvals.get(token) : undefined;

@@ -1,16 +1,18 @@
 import { rubyString } from 'shared-api/codegen';
 import type { CodeUsageGenerator } from '@/requests/generators';
 import { generateBodyExample } from '@/requests/media/adapter';
-import { cookieString, toSearchParams } from '@/requests/string-utils';
+import { cookieString, standardMethods, toSearchParams } from '@/requests/string-utils';
 
 export const ruby: CodeUsageGenerator = {
   label: 'Ruby',
   lang: 'ruby',
   generate(data, { mediaAdapters }) {
-    // Net::HTTP has a request class per method, like `Net::HTTP::Post`
-    const method = data.method[0].toUpperCase() + data.method.slice(1).toLowerCase();
     const s = [`uri = URI(${rubyString(data.url)})`];
-    const request = [`request = Net::HTTP::${method}.new(uri)`];
+    const request = [
+      standardMethods.has(data.method)
+        ? `request = Net::HTTP::${data.method[0].toUpperCase()}${data.method.slice(1)}.new(uri)`
+        : `request = Net::HTTPGenericRequest.new(${rubyString(data.method.toUpperCase())}, true, true, uri)`,
+    ];
 
     for (const k in data.header) {
       request.push(`request[${rubyString(k)}] = ${rubyString(data.header[k].value)}`);

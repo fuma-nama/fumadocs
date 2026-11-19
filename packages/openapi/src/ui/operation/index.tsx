@@ -231,7 +231,7 @@ function OperationContent({
     const playground = ctx.playground;
     const endpoint = <EndpointBar method={method} route={path} deprecated={operation.deprecated} />;
     let apiPlayground: ReactNode = endpoint;
-    if (playground?.enabled ?? true) {
+    if ((playground?.enabled ?? true) && canFetch(method)) {
       const { enabled: _, render, ...options } = playground ?? {};
       apiPlayground = render ? (
         render({ path, method, operation, pathItem })
@@ -491,7 +491,7 @@ function AuthScheme({ scheme, scopes }: { scheme: SecuritySchemeObject; scopes: 
         )}
       </div>
       {(scheme.description || scopes.length > 0 || configUrl) && (
-        <div className="mt-1 prose-no-margin text-fd-muted-foreground">
+        <div className="mt-1 wrap-break-word prose-no-margin text-fd-muted-foreground">
           {scheme.description && <Markdown md={scheme.description} />}
           {configUrl && (
             <p>
@@ -570,4 +570,14 @@ function Callback({
       </DialogPopup>
     </Dialog.Root>
   );
+}
+
+/** browsers can't send the methods `fetch()` forbids, like TRACE */
+function canFetch(method: string): boolean {
+  try {
+    new Request('http://localhost', { method });
+    return true;
+  } catch {
+    return false;
+  }
 }

@@ -95,6 +95,29 @@ export async function renderRoute(element: ReactElement): Promise<string | undef
  */
 const tagged = new WeakMap<WeakKey, { tag: string; type: unknown }>();
 
+/** a missing component. Declared for its prototype: React reads it, and a proxy below would answer as a member tag */
+function Missing() {
+  return null;
+}
+
+/**
+ * The element types of the tags under `prefix`, read from `target`: the type of a tag has the ones of its member tags,
+ * like `<Tabs.Tab>`.
+ */
+function tagTypes<T extends object>(target: T, components: unknown, prefix = ''): T {
+  return new Proxy(target, {
+    get(target, key, receiver) {
+      if (typeof key !== 'string' || key in target) return Reflect.get(target, key, receiver);
+
+      const type = (components as Record<string, unknown> | undefined)?.[key] ?? Missing;
+      if (typeof type === 'string') return type;
+      const element = tagTypes(Missing, type, `${prefix}${key}.`);
+      tagged.set(element, { tag: prefix + key, type });
+      return element;
+    },
+  });
+}
+
 /**
  * Resolve the MDX components of a generated Markdown component (`remarkLLMs` with `output: 'function'`):
  * a missing component is serialized as JSX syntax by `renderToMarkdown`.
@@ -103,17 +126,7 @@ export function jsxComponents(
   components: Record<string, ElementType> | undefined,
 ): Record<string, ElementType> {
   // a target of its own: a proxy can't return another value for a frozen property of its target
-  return new Proxy({} as Record<string, ElementType>, {
-    get(_, key) {
-      if (typeof key !== 'string') return;
-
-      const type: unknown = components?.[key] ?? (() => null);
-      if (typeof type === 'string') return type;
-      const element = () => null;
-      tagged.set(element, { tag: key, type });
-      return element;
-    },
-  });
+  return tagTypes({}, components);
 }
 
 export type MarkdownTag = (

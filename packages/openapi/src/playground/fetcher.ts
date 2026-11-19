@@ -131,6 +131,11 @@ export function createBrowserFetcher(
       }
 
       if (onRequestInit) requestInit = await onRequestInit(requestInit);
+      // frameworks route a fixed set of methods, the proxy reads the method from `method`
+      if (proxyUrl) {
+        requestUrl.searchParams.set('method', requestInit.method ?? 'GET');
+        requestInit.method = 'POST';
+      }
 
       const start = performance.now();
       return fetch(requestUrl, requestInit)

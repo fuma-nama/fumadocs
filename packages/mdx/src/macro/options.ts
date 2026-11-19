@@ -1,4 +1,6 @@
+import path from 'node:path';
 import picomatch from 'picomatch';
+import { slash } from '@/utils/codegen';
 
 export interface MacroOptions {
   /**
@@ -19,8 +21,12 @@ export const MacroModuleId = 'fumadocs-mdx/macro';
 
 export interface ResolvedMacroOptions {
   include: string[];
-  exclude: string[];
 }
+
+/**
+ * Modules in `node_modules` never use the macro API.
+ */
+export const NodeModulesRegex = /[\\/]node_modules[\\/]/;
 
 /**
  * One pattern per extension: brace expansion (`*.{js,ts}`) isn't understood by every glob engine
@@ -28,16 +34,18 @@ export interface ResolvedMacroOptions {
  */
 const DefaultInclude = ['**/*.js', '**/*.jsx', '**/*.mjs', '**/*.ts', '**/*.tsx', '**/*.mts'];
 
-const DefaultExclude = ['**/node_modules/**'];
-
-export function createMacroMatcher({
-  include,
-  exclude,
-}: ResolvedMacroOptions): (path: string) => boolean {
+/**
+ * Match absolute paths of modules, including those outside of root (e.g. workspace packages).
+ *
+ * @param root - project root, `include` patterns are relative to it
+ */
+export function createMacroMatcher(
+  root: string,
+  { include }: ResolvedMacroOptions,
+): (file: string) => boolean {
   const isIncluded = picomatch(include, { basename: true, windows: true });
-  const isExcluded = picomatch(exclude, { windows: true });
 
-  return (path) => !isExcluded(path) && isIncluded(path);
+  return (file) => !NodeModulesRegex.test(file) && isIncluded(slash(path.relative(root, file)));
 }
 
 /**
@@ -49,8 +57,5 @@ export function resolveMacroOptions(
   if (option === false) return;
   const { include = DefaultInclude } = option ?? {};
 
-  return {
-    include: typeof include === 'string' ? [include] : include,
-    exclude: DefaultExclude,
-  };
+  return { include: typeof include === 'string' ? [include] : include };
 }

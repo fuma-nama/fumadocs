@@ -6,6 +6,7 @@ import { parseMacroId, transformMacroConfigModule } from './transform';
 import { buildCollection, type CollectionItem } from '@/config/build';
 import { defineDocs, type AnyCollection } from '@/config/define';
 import { slash } from '@/utils/codegen';
+import { NodeModulesRegex } from './options';
 
 export interface MacroEvaluatorOptions {
   /**
@@ -64,6 +65,8 @@ export interface ResolvedMacroCollection {
   inputs: string[];
 }
 
+const Resolving = {};
+
 function esbuildLoader(file: string) {
   if (file.endsWith('.tsx')) return 'tsx' as const;
   if (file.endsWith('.jsx')) return 'jsx' as const;
@@ -92,7 +95,8 @@ export function createNodeEvaluator(env: { root: string; outDir: string }): Macr
       platform: 'node',
       format: 'esm',
       target: 'node22',
-      packages: 'external',
+      // resolve like Node.js, which runs the output
+      conditions: [],
       jsx: 'automatic',
       outfile,
       write: true,
@@ -103,6 +107,23 @@ export function createNodeEvaluator(env: { root: string; outDir: string }): Macr
         {
           name: 'fumadocs-mdx:macro-config',
           setup(b) {
+            // The output runs from `outDir`, where a workspace package can't resolve its own
+            // dependencies: import them by resolved paths, and bundle other modules so the macro
+            // transform runs on them.
+            b.onResolve({ filter: /^[^./]/ }, async (args) => {
+              if (args.pluginData === Resolving) return;
+              const { path: file } = await b.resolve(args.path, {
+                kind: args.kind,
+                importer: args.importer,
+                resolveDir: args.resolveDir,
+                pluginData: Resolving,
+              });
+
+              if (!NodeModulesRegex.test(file)) return;
+
+              return { path: pathToFileURL(file).href, external: true };
+            });
+
             b.onLoad({ filter: /\.(?:[cm]?[jt]s|[jt]sx)$/ }, async (args) => {
               const contents = await transform(await fs.readFile(args.path, 'utf-8'), args.path);
               if (contents === null) return;
@@ -168,12 +189,7 @@ export class MacroCollector {
     }
 
     const { cfg, name } = parsed;
-    const abs = path.resolve(this.root, cfg);
-    if (path.isAbsolute(cfg) || slash(path.relative(this.root, abs)).startsWith('..')) {
-      throw new Error(`[MDX] macro id "${id}" points outside of the project root.`);
-    }
-
-    const mod = await this.load(abs);
+    const mod = await this.load(path.resolve(this.root, cfg));
     const collection = mod.collections.get(id);
     if (!collection) {
       throw new Error(

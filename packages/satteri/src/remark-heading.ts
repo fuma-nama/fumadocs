@@ -9,6 +9,7 @@ import {
 import type { Heading } from 'mdast';
 import { headingIdCode, headingIdRegex } from '../../shared/heading-id';
 import { showConditions } from '../../shared/show';
+import { esmScope, parse } from './utils';
 
 export interface RemarkHeadingOptions {
   slug?: (heading: Heading, text: string) => string;
@@ -28,6 +29,8 @@ export function remarkHeading({
     let resolveSlug = slug;
     const ids = headingIdCode(slugImportSource);
     let fromCode = false;
+    /** the code of the ESM nodes */
+    const esm: string[] = [];
     if (!resolveSlug) {
       const slugger = new Slugger();
       resolveSlug = (_, v) => slugger.slug(v);
@@ -79,8 +82,12 @@ export function remarkHeading({
           depth: node.depth,
         });
       },
+      mdxjsEsm(node) {
+        esm.push(node.value);
+      },
       after(root, ctx) {
-        if (ids.esm) ctx.prependChild(root, { type: 'mdxjsEsm', value: ids.esm });
+        const value = ids.esm(parse, esmScope(esm));
+        if (value) ctx.prependChild(root, { type: 'mdxjsEsm', value });
       },
     });
   };

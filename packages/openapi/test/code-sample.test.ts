@@ -51,6 +51,9 @@ describe('Code Sample Generators', () => {
     bodyMediaType: 'text/plain',
   } satisfies typeof data;
 
+  // OpenAPI 3.2, a safe method with a body
+  const query = { ...data, method: 'query' } satisfies typeof data;
+
   const context = {
     mediaAdapters: defaultAdapters,
     custom: null,
@@ -72,6 +75,9 @@ describe('Code Sample Generators', () => {
     );
     await expect(generator.generate(text, context)).toMatchFileSnapshot(
       `./out/samples/text.${ext}`,
+    );
+    await expect(generator.generate(query, context)).toMatchFileSnapshot(
+      `./out/samples/query.${ext}`,
     );
   });
 

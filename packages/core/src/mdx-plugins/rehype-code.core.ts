@@ -420,7 +420,16 @@ export function createRehypeCode<
           ...shiki,
           codeToHast(code, options) {
             // without a fallback language, unknown languages fail like in Shiki
-            if (!isSpecialLang(options.lang)) highlighter.getLanguage(options.lang);
+            if (!isSpecialLang(options.lang)) {
+              try {
+                highlighter.getLanguage(options.lang);
+              } catch (error) {
+                throw new Error(
+                  `Unknown language "${options.lang}" in a code block. Correct it, or set \`fallbackLanguage: 'plaintext'\` in the Rehype Code options.`,
+                  { cause: error },
+                );
+              }
+            }
             return shiki.codeToHast(code, options);
           },
         };

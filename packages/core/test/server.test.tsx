@@ -9,6 +9,7 @@ import {
   type ReactElement,
   type ReactNode,
 } from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
 import { asMarkdown, jsxComponents, md, renderRoute, renderToMarkdown } from '@/server';
 
 /** mimics Vite RSC: a callable proxy that throws when called on the server */
@@ -435,6 +436,30 @@ describe('jsxComponents', () => {
         </>,
       ),
     ).toBe('<Card title="A" />\n\n<Note>\nhello\n</Note>\n\n<Aside>\nworld\n</Aside>');
+  });
+
+  it('resolves the components of member tags', async () => {
+    function Tabs({ children }: { children?: ReactNode }) {
+      return <div>{children}</div>;
+    }
+    Tabs.Tab = ({ children }: { children?: ReactNode }) =>
+      asMarkdown() ? md`- ${children}` : <div>{children}</div>;
+
+    const { Tabs: T, kit } = jsxComponents({ Tabs }) as Record<string, typeof Tabs>;
+
+    expect(
+      await renderToMarkdown(
+        <>
+          <T>
+            <T.Tab>one</T.Tab>
+          </T>
+          {'\n\n'}
+          <kit.Tab>two</kit.Tab>
+        </>,
+      ),
+    ).toBe('<Tabs>\n- one\n</Tabs>\n\n<kit.Tab>\ntwo\n</kit.Tab>');
+    // React still takes a missing component for a function component
+    expect(renderToStaticMarkup(<kit.Tab />)).toBe('');
   });
 });
 

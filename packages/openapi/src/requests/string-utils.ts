@@ -42,6 +42,18 @@ export function toSearchParams(value: unknown): URLSearchParams {
   return new URLSearchParams(formFields(value));
 }
 
+/** the methods HTTP clients have a constant for: RFC 9110 and PATCH */
+export const standardMethods = new Set<string>([
+  'get',
+  'head',
+  'post',
+  'put',
+  'delete',
+  'options',
+  'trace',
+  'patch',
+]);
+
 /**
  * Returns the value of a `Cookie` header with the given cookies.
  */

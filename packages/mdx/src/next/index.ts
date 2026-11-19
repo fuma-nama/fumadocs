@@ -137,10 +137,10 @@ export function createMDX(options: CreateMDXOptions = {}) {
         const loaderOptions = onLoaderOptions('webpack');
 
         if (macro) {
-          const matcher = createMacroMatcher(macro);
+          const matcher = createMacroMatcher(process.cwd(), macro);
 
           config.module.rules.push({
-            test: (resource) => matcher(path.relative(process.cwd(), resource)),
+            test: matcher,
             enforce: 'pre',
             use: [
               {

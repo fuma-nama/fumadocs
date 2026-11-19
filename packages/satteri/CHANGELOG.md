@@ -1,3 +1,25 @@
+## @fumadocs/satteri@0.8.4
+
+### Clearer error for unknown code languages
+
+- Rehype Code names the unknown language of a code block and suggests `fallbackLanguage`.
+- Sätteri accepts `rehypeCodeOptions` without `themes`, the defaults fill in the rest.
+
+## @fumadocs/satteri@0.8.3
+
+### Fix authored code in outputs rendered at runtime
+
+- MDX comments containing `<`, like `{/* <author@example.com> */}`, no longer fail to compile.
+- A heading with a component in an expression, like `## Use {<Badge>new</Badge>}`, no longer throws when rendering.
+- Member tags in expressions, like `{<Tabs.Tab />}`, render in Markdown and search like other components.
+- Sätteri: a component with an object attribute in a heading, like `<Badge style={{ color: 'red' }}>`, compiles, and an object expression in a heading shows in the TOC title.
+
+## @fumadocs/satteri@0.8.2
+
+### Compile highlighted lines as HTML
+
+- `rehypeCode()` and `rehypeCodeFromHighlighter()` accept `tokens: 'html'`, which compiles the tokens of a highlighted line to HTML instead of an element per token: compiled MDX is about half the size.
+
 ## @fumadocs/satteri@0.8.1
 
 ### Unique heading IDs next to custom IDs

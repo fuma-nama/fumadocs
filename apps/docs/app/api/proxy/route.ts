@@ -1,6 +1,6 @@
 import { openapi } from '@/lib/openapi';
 
-export const { GET, HEAD, PUT, POST, PATCH, DELETE } = openapi.createProxy({
+export const { POST } = openapi.createProxy({
   // origins of the `servers` defined in `scalar.yaml`
   allowedOrigins: [
     'https://galaxy.scalar.com',
