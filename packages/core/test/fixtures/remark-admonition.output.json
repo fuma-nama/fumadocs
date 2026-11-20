@@ -51,18 +51,6 @@
         },
       ],
       "name": "CalloutContainer",
-      "position": {
-        "end": {
-          "column": 4,
-          "line": 5,
-          "offset": 24,
-        },
-        "start": {
-          "column": 1,
-          "line": 1,
-          "offset": 0,
-        },
-      },
       "type": "mdxJsxFlowElement",
     },
     {
@@ -172,18 +160,6 @@
         },
       ],
       "name": "CalloutContainer",
-      "position": {
-        "end": {
-          "column": 4,
-          "line": 11,
-          "offset": 74,
-        },
-        "start": {
-          "column": 1,
-          "line": 7,
-          "offset": 26,
-        },
-      },
       "type": "mdxJsxFlowElement",
     },
   ],

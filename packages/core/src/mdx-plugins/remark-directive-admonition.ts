@@ -1,6 +1,7 @@
 import type { BlockContent, DefinitionContent, Nodes, PhrasingContent, Root } from 'mdast';
 import type { MdxJsxAttribute, MdxJsxFlowElement } from 'mdast-util-mdx';
 import type { Transformer } from 'unified';
+import { replaceSource } from './stringifier';
 import { walk } from './utils';
 
 export interface RemarkDirectiveAdmonitionOptions {
@@ -42,9 +43,13 @@ export function remarkDirectiveAdmonition({
     success: 'success',
   },
 }: RemarkDirectiveAdmonitionOptions = {}): Transformer<Root, Root> {
-  return (tree) => {
-    walk<Nodes>(tree, (node) => {
-      if (node.type !== 'containerDirective' || !(node.name in types)) return;
+  return (tree, file) => {
+    const visitor = (
+      node: Nodes,
+      idx: number | undefined,
+      parent: { children: Nodes[] } | undefined,
+    ): 'skip' | void => {
+      if (node.type !== 'containerDirective' || !(node.name in types) || !parent) return;
 
       const attributes: MdxJsxAttribute[] = [
         {
@@ -93,12 +98,19 @@ export function remarkDirectiveAdmonition({
         });
       }
 
-      Object.assign(node, {
+      const element: MdxJsxFlowElement = {
         type: 'mdxJsxFlowElement',
         attributes,
         name: CalloutContainer,
         children,
-      } satisfies MdxJsxFlowElement);
-    });
+      };
+      // the element is generated, its Markdown is the authored directive
+      replaceSource(file, node, (s) => s.stringify(node));
+      parent.children[idx!] = element;
+      walk<Nodes>(element, visitor);
+      return 'skip';
+    };
+
+    walk<Nodes>(tree, visitor);
   };
 }
