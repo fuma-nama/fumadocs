@@ -20,6 +20,7 @@ import type { JsonSchema } from '@fumadocs/json-schema';
 export function unwrapMagic<T>(value: T): T {
   if (value === null || typeof value !== 'object') return value;
   if (value instanceof Blob) return value;
+  if (value instanceof Date) return value;
   const raw = getRaw(value) as Record<string, unknown>;
   if (Array.isArray(raw)) return raw.map(unwrapMagic) as T;
   const result: Record<string, unknown> = {};

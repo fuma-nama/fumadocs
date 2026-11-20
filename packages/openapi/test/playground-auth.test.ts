@@ -33,6 +33,14 @@ describe('unwrapMagic', () => {
     expect(result.body.file).toBe(file);
   });
 
+  test('keeps Date values intact', () => {
+    const date = new Date('2026-11-20T00:00:00.000Z');
+
+    const result = unwrapMagic({ body: { created_at: date } });
+
+    expect(result.body.created_at).toBe(date);
+  });
+
   test('keeps __proto__ as an own enumerable property', () => {
     const body = createMagicProxy(JSON.parse('{"__proto__":{"x":1},"keep":2}'));
 
