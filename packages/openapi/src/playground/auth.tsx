@@ -13,17 +13,6 @@ import {
 } from 'react';
 import { DataEngine, type FieldKey, type Stf, useListener } from '@fumari/stf';
 import { arrayStartsWith, objectGet } from '@fumari/stf/lib/utils';
-import { getRaw } from '@scalar/json-magic/magic-proxy';
-
-// structuredClone rejects magic proxy nodes produced by dereferencing free-form schemas.
-function unwrapMagic<T>(value: T): T {
-  if (value === null || typeof value !== 'object') return value;
-  const raw = getRaw(value) as Record<string, unknown>;
-  if (Array.isArray(raw)) return raw.map(unwrapMagic) as T;
-  const result: Record<string, unknown> = {};
-  for (const key of Object.keys(raw)) result[key] = unwrapMagic(raw[key]);
-  return result as T;
-}
 import type { JsonSchema } from '@fumadocs/json-schema';
 import type { OAuthFlows, OperationObject, SecuritySchemeObject } from '@/types';
 import type { RawRequestData } from '@/requests/types';
@@ -800,16 +789,14 @@ export function useAuthFields(
     mapValues: useCallback(
       (values, masked) => {
         const auth = page.get(['auth']) ?? {};
-        const cloned = structuredClone(
-          unwrapMagic({
-            ...values,
-            auth: masked
-              ? JSON.parse(JSON.stringify(auth), (_, v) =>
-                  typeof v === 'string' && v ? '********' : v,
-                )
-              : auth,
-          }),
-        );
+        const cloned = structuredClone({
+          ...values,
+          auth: masked
+            ? JSON.parse(JSON.stringify(auth), (_, v) =>
+                typeof v === 'string' && v ? '********' : v,
+              )
+            : auth,
+        });
         const data = cloned as unknown as RawRequestData & { auth?: unknown };
         for (const field of fields)
           field.provider.onRequest!(data, objectGet(data, field.fieldName), field);
