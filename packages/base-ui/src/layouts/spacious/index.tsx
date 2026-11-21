@@ -112,6 +112,7 @@ export function DocsLayout(props: DocsLayoutProps) {
             <SkipToContent />
             <slots.sidebar.main />
             <slots.header />
+            <slots.sidebar.drawer />
             {children}
             {aiChat?.panel && (
               <AIChatPanel
@@ -124,7 +125,6 @@ export function DocsLayout(props: DocsLayoutProps) {
                 {aiChat.panel}
               </AIChatPanel>
             )}
-            <slots.sidebar.drawer />
           </div>
         </slots.sidebar.provider>
       </TreeContextProvider>

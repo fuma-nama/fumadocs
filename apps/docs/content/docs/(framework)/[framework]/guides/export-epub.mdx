@@ -239,20 +239,21 @@ It copies the file from the build output, so run a production build first.
 
 Both `exportEpub` and `createEpubExportAPI` accept these options:
 
-| Option         | Type                 | Description                                                                     |
-| -------------- | -------------------- | ------------------------------------------------------------------------------- |
-| `title`        | `string`             | **Required.** Book title                                                        |
-| `author`       | `string \| string[]` | Author name(s). Default: `'anonymous'`                                          |
-| `description`  | `string`             | Book description                                                                |
-| `language`     | `string`             | Language code (e.g. `'en'`). Default: `'en'`                                    |
-| `publisher`    | `string`             | Publisher name. Default: `'anonymous'`                                          |
-| `isbn`         | `string`             | ISBN                                                                            |
-| `cover`        | `string`             | Cover image. Supports `file://`, `http(s)://`, `/public/...`, or relative paths |
-| `outputPath`   | `string`             | If set, writes the EPUB to file in addition to returning the buffer             |
-| `includePages` | `(page) => boolean`  | Filter: include only pages where this returns `true`                            |
-| `excludePages` | `(page) => boolean`  | Filter: exclude pages where this returns `true`                                 |
-| `css`          | `string`             | Custom CSS for the EPUB. Uses `defaultEpubStyles` if omitted                    |
-| `publicDir`    | `string`             | Public directory for resolving `/public/...` image paths. Default: `./public`   |
+| Option         | Type                                          | Description                                                                                 |
+| -------------- | --------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `source`       | `LoaderOutput \| () => Promise<LoaderOutput>` | **Required.** The source from `loader()`, or a function resolving one                       |
+| `title`        | `string`                                      | **Required.** Book title                                                                    |
+| `author`       | `string \| string[]`                          | Author name(s). Default: `'anonymous'`                                                      |
+| `description`  | `string`                                      | Book description                                                                            |
+| `language`     | `string`                                      | Language code (e.g. `'en'`). Default: `'en'`                                                |
+| `publisher`    | `string`                                      | Publisher name. Default: `'anonymous'`                                                      |
+| `cover`        | `string`                                      | Cover image. Supports `file://`, `http(s)://`, `/public/...`, or relative paths             |
+| `outputPath`   | `string`                                      | If set, writes the EPUB to file in addition to returning the buffer                         |
+| `includePages` | `(page) => boolean`                           | Filter: include only pages where this returns `true`                                        |
+| `excludePages` | `(page) => boolean`                           | Filter: exclude pages where this returns `true`                                             |
+| `getMarkdown`  | `(page) => string \| undefined`               | The Markdown of a page, skipped when `undefined`. Default: `page.data.getText('processed')` |
+| `css`          | `string`                                      | Custom CSS for the EPUB. Uses `defaultEpubStyles` if omitted                                |
+| `publicDir`    | `string`                                      | Public directory for resolving `/public/...` image paths. Default: `./public`               |
 
 `createEpubExportAPI` adds two more: `secret` (required, guards the route) and `filename` (the downloaded file name, default `docs.epub`).
 

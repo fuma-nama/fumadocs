@@ -5,7 +5,7 @@ import { useResolvedSchema } from './schema';
 import { cn } from '@/utils/cn';
 
 const className =
-  'mx-px rounded-md bg-fd-primary/10 px-1.5 py-0.5 text-fd-primary outline-none transition-colors placeholder:text-fd-primary/50 hover:bg-fd-primary/15 focus-visible:bg-fd-primary/15 focus-visible:ring-2 focus-visible:ring-fd-primary/30';
+  'mx-px rounded-md bg-fd-primary/10 px-1.5 py-0.5 text-fd-primary outline-hidden transition-colors placeholder:text-fd-primary/50 hover:bg-fd-primary/15 focus-visible:bg-fd-primary/15 focus-visible:ring-2 focus-visible:ring-fd-primary/30';
 
 /** a parameter of a URL edited in place, like `{id}` of `/users/{id}` */
 export function ParamInput({

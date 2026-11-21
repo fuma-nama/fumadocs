@@ -62,7 +62,7 @@ export interface MediaAdapter {
    * @param lang - name of programming language.
    * @param ctx - context passed from the generator of programming language.
    *
-   * @returns code that inits a `body` variable, or undefined if not supported (skip example for that language).
+   * @returns code that inits a `body` variable, or `undefined` to leave the body out of the example for that language.
    */
   generateExample: (data: { body: unknown }, ctx: MediaContext) => string | undefined;
 }

@@ -12,6 +12,13 @@ export interface SharedDocument {
   table?: string;
 }
 
+/**
+ * The id of a page's n-th record after its own. Page URLs never contain a raw `#`, so it can't be another page's id.
+ */
+export function recordId(pageId: string, n: number): string {
+  return `${pageId}#${n}`;
+}
+
 export function buildDocuments(indexes: SharedIndex[]) {
   const docs: SharedDocument[] = [];
 
@@ -32,7 +39,7 @@ export function buildDocuments(indexes: SharedIndex[]) {
       locale: page.locale,
     });
 
-    const nextId = () => `${page.id}-${id++}`;
+    const nextId = () => recordId(page.id, id++);
 
     if (page.description && !data.contents.some((item) => item.content === page.description)) {
       docs.push({

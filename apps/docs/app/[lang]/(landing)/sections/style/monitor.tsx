@@ -80,7 +80,7 @@ export function Monitor({
         tabIndex={on ? 0 : -1}
         onClick={() => onTab(id)}
         className={cn(
-          'cursor-pointer border-e border-lp-line-strong px-2 text-xs leading-4 font-medium outline-none focus-visible:outline focus-visible:-outline-offset-4 focus-visible:outline-current sm:px-3',
+          'cursor-pointer border-e border-lp-line-strong px-2 text-xs leading-4 font-medium outline-hidden focus-visible:outline focus-visible:-outline-offset-4 focus-visible:outline-current sm:px-3',
           on ? 'bg-lp-yellow text-lp-on-yellow' : 'hover:bg-lp-ink hover:text-lp-paper',
         )}
       >

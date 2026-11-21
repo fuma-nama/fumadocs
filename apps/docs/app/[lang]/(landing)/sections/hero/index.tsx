@@ -9,7 +9,7 @@ import { Glitch } from './glitch';
 import { Stage } from './stage';
 
 const invert =
-  'transition-none hover:bg-lp-ink hover:text-lp-paper focus-visible:bg-lp-ink focus-visible:text-lp-paper focus-visible:outline-none';
+  'transition-none hover:bg-lp-ink hover:text-lp-paper focus-visible:bg-lp-ink focus-visible:text-lp-paper focus-visible:outline-hidden';
 
 /** a screen below the menu: the text and the sky over the horizon, the sky beside the text on
  * desktop and under it on phones */

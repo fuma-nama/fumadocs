@@ -144,7 +144,7 @@ export function TabsContent({
     <Unstyled.TabsContent
       value={value}
       className={cn(
-        'p-4 text-[0.9375rem] bg-fd-background rounded-xl outline-none prose-no-margin data-[state=inactive]:hidden [&>figure:only-child]:-m-4 [&>figure:only-child]:border-none',
+        'p-4 text-[0.9375rem] bg-fd-background rounded-xl outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-fd-ring prose-no-margin data-[state=inactive]:hidden [&>figure:only-child]:-m-4 [&>figure:only-child]:border-none',
         className,
       )}
       {...props}

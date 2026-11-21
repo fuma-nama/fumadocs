@@ -151,7 +151,7 @@ export function generateGraphQLSchemaUI(
             target="_blank"
             rel="noreferrer noopener"
             title={named.specifiedByURL}
-            className="not-prose group/spec inline-flex items-center gap-1.5 rounded-md border bg-fd-secondary px-1.5 py-0.5 text-xs text-fd-muted-foreground transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fd-ring"
+            className="not-prose group/spec inline-flex items-center gap-1.5 rounded-md border bg-fd-secondary px-1.5 py-0.5 text-xs text-fd-muted-foreground transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-fd-ring"
           >
             {t('Specification')}
             <ArrowUpRightIcon className="size-3 transition-transform duration-200 group-hover/spec:-translate-y-px group-hover/spec:translate-x-px motion-reduce:transition-none" />

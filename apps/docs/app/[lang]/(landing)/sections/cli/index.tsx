@@ -346,7 +346,7 @@ export function Cli() {
               type="button"
               data-replay
               aria-label="Run again"
-              className="flex w-11 shrink-0 items-center justify-center border-s border-lp-line-strong transition-none hover:bg-lp-ink hover:text-lp-paper focus-visible:bg-lp-ink focus-visible:text-lp-paper focus-visible:outline-none motion-reduce:hidden in-data-static:hidden noscript:hidden"
+              className="flex w-11 shrink-0 items-center justify-center border-s border-lp-line-strong transition-none hover:bg-lp-ink hover:text-lp-paper focus-visible:bg-lp-ink focus-visible:text-lp-paper focus-visible:outline-hidden motion-reduce:hidden in-data-static:hidden noscript:hidden"
             >
               <RotateCcw aria-hidden className="size-4" />
             </button>

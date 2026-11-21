@@ -2,7 +2,7 @@
 
 @theme {
   --color-fd-background: hsl(256, 100%, 96%);
-  --color-fd-primary: hsl(270, 100%, 52%);
+  --color-fd-primary: hsl(270, 100%, 46.5%);
   --color-fd-border: hsla(270, 40%, 80%, 0.5);
   --color-fd-accent: hsl(270, 40%, 88%);
   --color-fd-accent-foreground: hsl(270, 100%, 20%);
@@ -15,8 +15,8 @@
   --color-fd-card-foreground: hsl(256, 100%, 20%);
   --color-fd-popover-foreground: hsl(256, 100%, 20%);
   --color-fd-popover: hsl(256, 60%, 96%);
-  --color-fd-primary-foreground: hsl(270, 100%, 20%);
-  --color-fd-ring: hsl(270, 100%, 52%);
+  --color-fd-primary-foreground: hsl(256, 100%, 96%);
+  --color-fd-ring: hsl(270, 100%, 46.5%);
 }
 
 .dark {

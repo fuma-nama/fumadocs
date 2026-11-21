@@ -32,7 +32,7 @@ export function SegmentedList({
         <Tabs.Tab
           key={item.value}
           value={item.value}
-          className="inline-flex h-6 items-center gap-1.5 rounded-md px-2 text-fd-muted-foreground transition-colors hover:text-fd-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fd-ring data-active:text-fd-foreground"
+          className="inline-flex h-6 items-center gap-1.5 rounded-md px-2 text-fd-muted-foreground transition-colors hover:text-fd-accent-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-fd-ring data-active:text-fd-foreground"
         >
           {item.label}
         </Tabs.Tab>

@@ -1,6 +1,6 @@
 import { encodeRequestData } from '@/requests/media/encode';
 import type { RawRequestData, RequestData } from '@/requests/types';
-import type { HttpMethods, OperationObject, ParameterObject, RequestBodyObject } from '@/types';
+import type { HttpMethods, ParameterObject, RequestBodyObject } from '@/types';
 import type { MediaAdapter } from '@/requests/media/adapter';
 import { getExampleValue, getPreferredType, pickExample } from '@/utils/schema';
 import type { JsonSchema } from '@fumadocs/json-schema';
@@ -20,17 +20,17 @@ export function getExampleRequests({
   path,
   method,
   mediaAdapters,
-  operation,
+  requestBody,
   parameters,
 }: {
   path: string;
   method: HttpMethods;
-  operation: OperationObject;
+  /** resolved request body of the operation */
+  requestBody?: RequestBodyObject;
   /** resolved parameters of the operation */
   parameters: ParameterObject[];
   mediaAdapters: Record<string, MediaAdapter>;
 }): ExampleRequestItem[] {
-  const requestBody = dereference(operation.requestBody);
   const media = requestBody?.content ? getPreferredType(requestBody.content) : null;
   const bodyOfType = media ? dereference(requestBody!.content![media]) : null;
 

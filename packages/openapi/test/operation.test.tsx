@@ -20,7 +20,13 @@ import { DataEngine } from '@fumari/stf';
 import { useAuthFields, usePlaygroundAuth } from '@/playground/auth';
 import { createCodeUsageGeneratorRegistry } from '@/requests/generators';
 import { registerDefault } from '@/requests/generators/all';
-import type { Document, HttpMethods, OperationObject, PathItemObject } from '@/types';
+import type {
+  Document,
+  HttpMethods,
+  MediaTypeObject,
+  OperationObject,
+  PathItemObject,
+} from '@/types';
 
 const museum = fileURLToPath(new URL('./fixtures/museum.yaml', import.meta.url));
 const components = {
@@ -249,6 +255,46 @@ test('generated response examples leave out writeOnly properties, like the respo
   );
 
   expect(Object.keys(tabs[0].examples?.[0].sample as object)).toEqual(['id', 'email']);
+});
+
+test('the content of a media type with only `itemSchema` is the array of its items', async () => {
+  const itemSchema: MediaTypeObject['itemSchema'] = {
+    type: 'object',
+    required: ['event', 'data'],
+    properties: { event: { const: 'tick' }, data: { type: 'string' } },
+  };
+  let info: OperationInfo;
+  let tabs: ResponseTab[] = [];
+  let curl: string | undefined;
+
+  await render(
+    '/special-events',
+    'post',
+    function Harness() {
+      info = useOperation();
+      tabs = useResponseExamples();
+      curl = useCodeUsage('curl');
+      return null;
+    },
+    ({ operation, pathItem }) => ({
+      operation: {
+        ...operation,
+        requestBody: { content: { 'application/x-ndjson': { itemSchema } } },
+        responses: {
+          '200': { description: 'ok', content: { 'text/event-stream': { itemSchema } } },
+        },
+      },
+      pathItem,
+    }),
+  );
+
+  expect(info!.requestBody!.content['application/x-ndjson'].schema).toEqual({
+    type: 'array',
+    items: itemSchema,
+  });
+  expect(tabs[0].examples?.[0].sample).toEqual([{ event: 'tick', data: 'string' }]);
+  // NDJSON bodies send one item per line
+  expect(curl).toContain('{"event":"tick","data":"string"}');
 });
 
 test('renders request bodies of unsupported media types', async () => {

@@ -3,6 +3,7 @@ import type { StructuredData } from '@/mdx-plugins/remark-structure';
 import type { LoaderConfig, LoaderOutput } from '@/source/loader';
 import type { Awaitable } from '@/types';
 import { buildDocuments } from './server/build-index';
+import { recordId } from './server/build-doc';
 
 export interface DocumentRecord {
   /**
@@ -108,7 +109,7 @@ function toIndex(page: DocumentRecord): BaseIndex[] {
     table?: string,
   ): BaseIndex {
     return {
-      objectID: `${page._id}-${(id++).toString()}`,
+      objectID: recordId(page._id, id++),
       breadcrumbs: page.breadcrumbs,
       title: page.title,
       url: page.url,

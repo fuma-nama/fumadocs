@@ -19,7 +19,6 @@ const translations = {
   'Ask AI(AI chat button)': '询问 AI',
   'Back to Home(404 not found page)': '返回首页',
   'Choose a language(language switcher)': '选择语言',
-  'Choose a language(language switcher)(aria-label)': '选择语言',
   'Close Banner(banner)(aria-label)': '关闭横幅',
   'Close Search(search dialog)(aria-label)': '关闭搜索',
   'Close Sidebar(aria-label)': '关闭侧边栏',

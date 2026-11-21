@@ -152,7 +152,7 @@ export function DataEntry({
         aria-expanded={open}
         disabled={disabled}
         onClick={() => setOpen(!open)}
-        className="flex w-full items-center gap-2 px-4 py-2 text-start text-xs transition-colors hover:bg-fd-accent/40 focus-visible:bg-fd-accent/40 focus-visible:outline-none"
+        className="flex w-full items-center gap-2 px-4 py-2 text-start text-xs transition-colors hover:bg-fd-accent/40 focus-visible:bg-fd-accent/40 focus-visible:outline-hidden"
       >
         {summary}
       </button>

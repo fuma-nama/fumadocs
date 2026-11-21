@@ -25,7 +25,7 @@ export function NotionTabs({ id, tabs }: { id: string; tabs: NotionTabItem[] }) 
         {tabs.map((tab) => (
           <Tabs.Tab
             key={tab.id}
-            className="inline-flex min-h-11 min-w-max items-center gap-1.5 rounded-lg px-3 text-sm font-medium text-fd-muted-foreground outline-none transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground focus-visible:ring-2 focus-visible:ring-fd-ring data-active:bg-fd-background data-active:text-fd-foreground"
+            className="inline-flex min-h-11 min-w-max items-center gap-1.5 rounded-lg px-3 text-sm font-medium text-fd-muted-foreground outline-hidden transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground focus-visible:ring-2 focus-visible:ring-fd-ring data-active:bg-fd-background data-active:text-fd-foreground"
             value={tab.id}
           >
             {tab.icon}
@@ -36,7 +36,7 @@ export function NotionTabs({ id, tabs }: { id: string; tabs: NotionTabItem[] }) 
       {tabs.map((tab) => (
         <Tabs.Panel
           key={tab.id}
-          className="rounded-b-xl bg-fd-background p-4 text-[0.9375rem] text-fd-foreground outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-fd-ring"
+          className="rounded-b-xl bg-fd-background p-4 text-[0.9375rem] text-fd-foreground outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-fd-ring"
           keepMounted
           value={tab.id}
         >

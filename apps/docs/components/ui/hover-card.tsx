@@ -23,7 +23,7 @@ function HoverCardContent({
       <PreviewCardPrimitive.Positioner align={align} sideOffset={sideOffset} className="z-50">
         <PreviewCardPrimitive.Popup
           className={cn(
-            'w-72 rounded-lg border bg-fd-popover p-4 text-popover-fd-foreground shadow-md outline-none origin-(--transform-origin) data-open:animate-fd-popover-in data-closed:animate-fd-popover-out',
+            'w-72 rounded-lg border bg-fd-popover p-4 text-popover-fd-foreground shadow-md outline-hidden origin-(--transform-origin) data-open:animate-fd-popover-in data-closed:animate-fd-popover-out',
             className,
           )}
           {...props}

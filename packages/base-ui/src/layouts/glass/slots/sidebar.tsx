@@ -11,9 +11,11 @@ import {
   createContext,
   type ReactNode,
   use,
+  useId,
   useMemo,
   useState,
 } from 'react';
+import { flushSync } from 'react-dom';
 import { cva } from 'class-variance-authority';
 import {
   ChevronDown,
@@ -36,7 +38,7 @@ import { LayoutTabsDropdown } from '../layout-tabs';
 export const drawerHandle = Drawer.createHandle();
 
 const itemTriggerVariants = cva(
-  'inline-flex items-center gap-2 rounded-lg px-2.5 py-2 md:py-1.5 [&_svg]:size-4 outline-none focus-visible:ring-2 focus-visible:ring-fd-ring',
+  'inline-flex items-center gap-2 rounded-lg px-2.5 py-2 md:py-1.5 [&_svg]:size-4 outline-hidden focus-visible:ring-2 focus-visible:ring-fd-ring',
   {
     variants: {
       active: {
@@ -66,18 +68,33 @@ export function SidebarProvider({ children, collapsible = true }: SidebarProvide
     (e) => {
       if (!(e.metaKey || e.ctrlKey) || e.shiftKey || e.altKey || e.key !== 'b') return;
       e.preventDefault();
-      setCollapsed((prev) => !prev);
+      collapseWithFocus(() => setCollapsed((prev) => !prev));
     },
     { enabled: collapsible, ignoreTyping: true },
   );
 
   return (
     <Context
-      value={useMemo(() => ({ collapsible, collapsed, setCollapsed }), [collapsible, collapsed])}
+      value={useMemo(
+        () => ({
+          collapsible,
+          collapsed,
+          setCollapsed: (value: boolean) => collapseWithFocus(() => setCollapsed(value)),
+        }),
+        [collapsible, collapsed],
+      )}
     >
       {children}
     </Context>
   );
+}
+
+/** applies a collapse change, the focus moves to the visible sidebar trigger when the change hid the focused element */
+function collapseWithFocus(update: () => void) {
+  const active = document.activeElement;
+  flushSync(update);
+  if (active && (!active.isConnected || active.matches('[inert] *')))
+    document.querySelector<HTMLElement>('[aria-controls="nd-sidebar"]:not([inert] *)')?.focus();
 }
 
 export function useSidebar() {
@@ -107,7 +124,7 @@ export function SidebarDrawer({ contentProps }: SidebarDrawerProps) {
           <Drawer.Popup
             id="nd-mobile-sidebar"
             className={cn(
-              'relative [--bleed:3rem] supports-[-webkit-touch-callout:none]:[--bleed:0px] w-[360px] h-full max-w-[calc(100vw-3rem+var(--bleed))] pr-(--bleed) -mr-(--bleed) border-l bg-fd-background text-fd-foreground text-[0.9375rem] outline-none shadow-md touch-auto [transform:translateX(var(--drawer-swipe-movement-x))] transition-transform duration-450 ease-[cubic-bezier(0.32,0.72,0,1)] data-swiping:select-none data-ending-style:[transform:translateX(calc(100%-var(--bleed)+var(--viewport-padding)+2px))] data-starting-style:[transform:translateX(calc(100%-var(--bleed)+var(--viewport-padding)+2px))] supports-[-webkit-touch-callout:none]:border supports-[-webkit-touch-callout:none]:rounded-xl',
+              'relative [--bleed:3rem] supports-[-webkit-touch-callout:none]:[--bleed:0px] w-[360px] h-full max-w-[calc(100vw-3rem+var(--bleed))] pr-(--bleed) -mr-(--bleed) border-l bg-fd-background text-fd-foreground text-[0.9375rem] outline-hidden shadow-md touch-auto [transform:translateX(var(--drawer-swipe-movement-x))] transition-transform duration-450 ease-[cubic-bezier(0.32,0.72,0,1)] data-swiping:select-none data-ending-style:[transform:translateX(calc(100%-var(--bleed)+var(--viewport-padding)+2px))] data-starting-style:[transform:translateX(calc(100%-var(--bleed)+var(--viewport-padding)+2px))] supports-[-webkit-touch-callout:none]:border supports-[-webkit-touch-callout:none]:rounded-xl',
 
               // this could be a bug or deliberate, but scrolling in drawer content will somehow get interrupted on IOS, the reason is unknown but this is the simplest workaround
               // scrollbar-width should be zero because the scrollbar is in fact behind the viewport: | content | bleed | scroll bar |, it will push the content to left if not
@@ -196,6 +213,7 @@ export function Sidebar({ className, children, ...props }: SidebarProps) {
   return (
     <aside
       id="nd-sidebar"
+      inert={collapsed}
       className={cn(
         'sticky flex flex-col transition-transform [grid-area:left] my-2 ms-2 z-30 top-2 border rounded-2xl bg-fd-popover/80 text-fd-popover-foreground text-sm backdrop-blur-sm shadow-sm h-[calc(100dvh---spacing(4))] max-md:hidden md:layout:[--fd-left-width:280px]',
         collapsed &&
@@ -212,12 +230,14 @@ export function Sidebar({ className, children, ...props }: SidebarProps) {
           )}
           {collapsible && (
             <button
-              aria-label={collapsed ? t('Show Sidebar') : t('Hide Sidebar')}
+              aria-label={t('Hide Sidebar')}
+              aria-controls="nd-sidebar"
+              aria-expanded
               className={cn(
                 buttonVariants({ variant: 'ghost', size: 'icon-sm' }),
                 'text-fd-muted-foreground',
               )}
-              onClick={() => setCollapsed(!collapsed)}
+              onClick={() => setCollapsed(true)}
             >
               <SidebarIcon />
             </button>
@@ -282,6 +302,7 @@ function SidebarLinkItem({
 }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(true);
+  const linkId = useId();
 
   switch (item.type) {
     case 'custom':
@@ -305,6 +326,7 @@ function SidebarLinkItem({
           {item.url ? (
             <div className="flex w-full px-2.5 py-1.5 font-medium">
               <Link
+                id={linkId}
                 href={item.url}
                 external={item.external}
                 aria-current={isLinkItemActive(item, pathname) ? 'page' : undefined}
@@ -321,7 +343,9 @@ function SidebarLinkItem({
                 {item.icon}
                 {item.text}
               </Link>
-              <CollapsibleTrigger className="flex-1">{rightIcon}</CollapsibleTrigger>
+              <CollapsibleTrigger aria-labelledby={linkId} className="flex-1">
+                {rightIcon}
+              </CollapsibleTrigger>
             </div>
           ) : (
             <CollapsibleTrigger className="w-full px-2.5 py-1.5 font-medium inline-flex items-center gap-2 [&_svg]:size-4">
@@ -402,6 +426,7 @@ function SidebarFolder({ folder }: { folder: PageTree.Folder }) {
   const shouldOpen = (folder.defaultOpen ?? true) || isNodeInPath(folder, path);
   const [open, setOpen] = useState(shouldOpen);
   const indexActive = folder.index ? isNodeInPath(folder.index, path) : false;
+  const linkId = useId();
 
   useOnChange(shouldOpen, () => shouldOpen && setOpen(true));
   if (folder.collapsible === false) {
@@ -450,6 +475,7 @@ function SidebarFolder({ folder }: { folder: PageTree.Folder }) {
       {folder.index ? (
         <div className="flex w-full px-2.5 py-1.5 font-medium">
           <Link
+            id={linkId}
             href={folder.index.url}
             external={folder.index.external}
             aria-current={indexActive ? 'page' : undefined}
@@ -466,7 +492,9 @@ function SidebarFolder({ folder }: { folder: PageTree.Folder }) {
             {folder.icon}
             {folder.name}
           </Link>
-          <CollapsibleTrigger className="flex-1">{rightIcon}</CollapsibleTrigger>
+          <CollapsibleTrigger aria-labelledby={linkId} className="flex-1">
+            {rightIcon}
+          </CollapsibleTrigger>
         </div>
       ) : (
         <CollapsibleTrigger className="w-full px-2.5 py-1.5 font-medium inline-flex items-center gap-2 [&_svg]:size-4">

@@ -238,7 +238,7 @@ export const Desk = memo(function Desk({
         data-slot={slot.id}
         tabIndex={active ? 0 : -1}
         onClick={() => onSelect(slot.id)}
-        className="group/window absolute isolate origin-top-left cursor-pointer text-start outline-none"
+        className="group/window absolute isolate origin-top-left cursor-pointer text-start outline-hidden"
         style={{
           ...percent(slot.x, slot.y, WINDOW.w, WINDOW.h),
           transform: windowTransform(slot, w[i * 3], w[i * 3 + 1], lift),

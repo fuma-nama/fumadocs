@@ -39,20 +39,20 @@ function Header(props: ComponentProps<'header'>) {
       <slots.navTitle className="inline-flex items-center font-semibold [&>span]:sr-only" />
       {group && selected && (
         <Menu.Root>
-          <Menu.Trigger className="flex min-w-0 h-8 items-center gap-2 ps-2 pe-1.5 rounded-lg border bg-fd-secondary/50 text-sm font-medium outline-none transition-colors hover:bg-fd-accent focus-visible:ring-2 focus-visible:ring-fd-ring data-popup-open:bg-fd-accent [&_svg]:size-4 [&_svg]:shrink-0">
+          <Menu.Trigger className="flex min-w-0 h-8 items-center gap-2 ps-2 pe-1.5 rounded-lg border bg-fd-secondary/50 text-sm font-medium outline-hidden transition-colors hover:bg-fd-accent focus-visible:ring-2 focus-visible:ring-fd-ring data-popup-open:bg-fd-accent [&_svg]:size-4 [&_svg]:shrink-0">
             {selected.icon}
             <span className="truncate">{selected.title}</span>
             <ChevronsUpDownIcon className="size-3.5! text-fd-muted-foreground" />
           </Menu.Trigger>
           <Menu.Portal>
             <Menu.Positioner align="start" sideOffset={8} alignOffset={-4} className="z-50">
-              <Menu.Popup className="flex flex-col min-w-56 p-1 rounded-2xl border bg-fd-popover text-sm text-fd-popover-foreground shadow-lg outline-none origin-(--transform-origin) transition-[opacity,scale] duration-150 ease-[cubic-bezier(0.22,1,0.36,1)] data-starting-style:opacity-0 data-starting-style:scale-95 data-ending-style:opacity-0 data-ending-style:scale-97 data-ending-style:duration-100 motion-reduce:transition-none">
+              <Menu.Popup className="flex flex-col min-w-56 p-1 rounded-2xl border bg-fd-popover text-sm text-fd-popover-foreground shadow-lg outline-hidden origin-(--transform-origin) transition-[opacity,scale] duration-150 ease-[cubic-bezier(0.22,1,0.36,1)] data-starting-style:opacity-0 data-starting-style:scale-95 data-ending-style:opacity-0 data-ending-style:scale-97 data-ending-style:duration-100 motion-reduce:transition-none">
                 {group.options.map((tab) => (
                   <Menu.LinkItem
                     key={tab.url}
                     closeOnClick
                     render={<Link href={tab.url} />}
-                    className="flex items-center gap-3 rounded-lg px-[calc(--spacing(2.5)-1px)] py-2 font-medium outline-none transition-colors duration-100 data-highlighted:bg-fd-accent data-highlighted:text-fd-accent-foreground [&_svg]:size-4 [&_svg]:shrink-0"
+                    className="flex items-center gap-3 rounded-lg px-[calc(--spacing(2.5)-1px)] py-2 font-medium outline-hidden transition-colors duration-100 data-highlighted:bg-fd-accent data-highlighted:text-fd-accent-foreground [&_svg]:size-4 [&_svg]:shrink-0"
                   >
                     {tab.icon}
                     <span className="flex-1">{tab.title}</span>

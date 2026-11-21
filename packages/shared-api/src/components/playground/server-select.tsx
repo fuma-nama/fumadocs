@@ -42,7 +42,7 @@ export function ServerPopover({
     <Popover.Root open={open} onOpenChange={setOpen}>
       <Popover.Trigger
         className={cn(
-          'group flex min-w-0 shrink items-center gap-1.5 rounded-lg px-1.5 py-1 text-fd-muted-foreground transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fd-ring data-popup-open:bg-fd-accent data-popup-open:text-fd-accent-foreground',
+          'group flex min-w-0 shrink items-center gap-1.5 rounded-lg px-1.5 py-1 text-fd-muted-foreground transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-fd-ring data-popup-open:bg-fd-accent data-popup-open:text-fd-accent-foreground',
           className,
         )}
       >
@@ -51,7 +51,7 @@ export function ServerPopover({
       </Popover.Trigger>
       <Popover.Portal>
         <Popover.Positioner side="bottom" align="start" sideOffset={8} className="z-50">
-          <Popover.Popup className="flex max-h-(--available-height) w-[min(26rem,calc(100vw-2rem))] origin-(--transform-origin) flex-col overflow-y-auto rounded-xl border bg-fd-popover p-1 text-sm text-fd-popover-foreground shadow-lg transition-[opacity,scale] duration-150 ease-out outline-none data-ending-style:scale-95 data-ending-style:opacity-0 data-starting-style:scale-95 data-starting-style:opacity-0">
+          <Popover.Popup className="flex max-h-(--available-height) w-[min(26rem,calc(100vw-2rem))] origin-(--transform-origin) flex-col overflow-y-auto rounded-xl border bg-fd-popover p-1 text-sm text-fd-popover-foreground shadow-lg transition-[opacity,scale] duration-150 ease-out outline-hidden data-ending-style:scale-95 data-ending-style:opacity-0 data-starting-style:scale-95 data-starting-style:opacity-0">
             <p className="px-2.5 pt-1.5 pb-1 text-xs font-medium text-fd-muted-foreground">
               {title}
             </p>
@@ -68,7 +68,7 @@ export function ServerPopover({
                     if (!option.hasVariables) setOpen(false);
                   }}
                   className={cn(
-                    'flex w-full items-start gap-2 rounded-lg px-2.5 py-2 text-start focus-visible:ring-2 focus-visible:ring-fd-ring focus-visible:outline-none focus-visible:ring-inset',
+                    'flex w-full items-start gap-2 rounded-lg px-2.5 py-2 text-start focus-visible:ring-2 focus-visible:ring-fd-ring focus-visible:outline-hidden focus-visible:ring-inset',
                     selected
                       ? 'bg-fd-accent text-fd-accent-foreground'
                       : 'hover:bg-fd-accent/50 hover:text-fd-accent-foreground',
@@ -182,7 +182,7 @@ function VariableInput({ fieldName, variable }: { fieldName: string; variable: S
       onChange={(e) => setValue(e.target.value)}
       placeholder={example ?? t('Enter Value')}
       className={cn(
-        'h-8 w-full rounded-md border bg-fd-secondary px-2 font-mono text-[0.8125rem] text-fd-secondary-foreground outline-none placeholder:text-fd-muted-foreground focus-visible:ring-2 focus-visible:ring-fd-ring',
+        'h-8 w-full rounded-md border bg-fd-secondary px-2 font-mono text-[0.8125rem] text-fd-secondary-foreground outline-hidden placeholder:text-fd-muted-foreground focus-visible:ring-2 focus-visible:ring-fd-ring',
         example === undefined && 'placeholder:font-sans',
       )}
     />

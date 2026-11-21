@@ -145,6 +145,20 @@ describe('Generate AsyncAPI documents', () => {
     expect(stringifyOutput(out)).toMatchSnapshot();
   });
 
+  test('includeDescription writes the description of tag and file pages to the body', async () => {
+    const input = createAsyncAPI({
+      input: { streetlights: path.join(cwd, './fixtures/streetlights.yaml') },
+    });
+
+    for (const [per, description] of [
+      ['tag', 'Operations related to streetlights'],
+      ['file', 'The Smartylighting Streetlights API allows you to manage streetlights.'],
+    ] as const) {
+      const [file] = await generateFilesOnly({ input, per, includeDescription: true });
+      expect(file.content).toContain(`${description}\n\n<AsyncAPIPage`);
+    }
+  });
+
   test('Streetlights (with imports)', async () => {
     const out = await generateFilesOnly({
       input: createAsyncAPI({

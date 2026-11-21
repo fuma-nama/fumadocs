@@ -96,7 +96,7 @@ export function GithubInfo({
       target="_blank"
       {...props}
       className={cn(
-        'flex flex-col gap-1.5 p-2 rounded-lg text-sm text-fd-foreground/80 transition-colors hover:text-fd-accent-foreground hover:bg-fd-accent',
+        'flex flex-col gap-1.5 p-2 rounded-lg text-sm text-fd-muted-foreground transition-colors hover:text-fd-accent-foreground hover:bg-fd-accent',
         props.className,
       )}
     >

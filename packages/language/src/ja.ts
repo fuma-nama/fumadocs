@@ -19,7 +19,6 @@ const translations = {
   'Ask AI(AI chat button)': 'AI に質問',
   'Back to Home(404 not found page)': 'ホームに戻る',
   'Choose a language(language switcher)': '言語を選択',
-  'Choose a language(language switcher)(aria-label)': '言語を選択',
   'Close Banner(banner)(aria-label)': 'バナーを閉じる',
   'Close Search(search dialog)(aria-label)': '検索を閉じる',
   'Close Sidebar(aria-label)': 'サイドバーを閉じる',

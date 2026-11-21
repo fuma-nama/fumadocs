@@ -282,7 +282,7 @@ const Composer = memo(function Composer({
         }}
         spellCheck={false}
         placeholder={t('Write a message to send')}
-        className="block max-h-60 min-h-24 w-full resize-none bg-transparent px-4 pt-3 pb-1 font-mono text-[0.8125rem] leading-relaxed outline-none field-sizing-content placeholder:text-fd-muted-foreground"
+        className="block max-h-60 min-h-24 w-full resize-none bg-transparent px-4 pt-3 pb-1 font-mono text-[0.8125rem] leading-relaxed outline-hidden field-sizing-content placeholder:text-fd-muted-foreground"
       />
       <div className="flex items-center gap-2 p-2 ps-4">
         <p

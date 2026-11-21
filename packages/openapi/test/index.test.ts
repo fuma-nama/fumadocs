@@ -47,6 +47,36 @@ describe('Generate documents', () => {
     expect(out[0].content).toContain(`"method":"query"`);
   });
 
+  test('includeDescription writes the description of tag and file pages to the body', async () => {
+    const input = createOpenAPI({
+      input: {
+        main: {
+          openapi: '3.2.0',
+          info: { title: 'Pets', version: '1', description: 'The document description.' },
+          tags: [{ name: 'pets', description: 'The tag description.' }],
+          paths: {
+            '/pets': {
+              get: {
+                tags: ['pets'],
+                operationId: 'listPets',
+                responses: { '200': { description: 'OK' } },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    for (const [per, description] of [
+      ['tag', 'The tag description.'],
+      ['file', 'The document description.'],
+    ] as const) {
+      const [file] = await generateFilesOnly({ input, per, includeDescription: true });
+      const body = file.content.slice(file.content.indexOf('\n---', 3));
+      expect(body).toContain(`${description}\n\nexport default function Layout`);
+    }
+  });
+
   test('Museum (Per Tag)', async () => {
     const out = await generateFilesOnly({
       input: createOpenAPI({

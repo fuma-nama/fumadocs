@@ -131,7 +131,7 @@ export function TOCPopover({
         <CollapsibleTrigger
           {...trigger}
           className={cn(
-            'flex w-full h-10 items-center gap-2.5 px-4 text-start text-sm text-fd-muted-foreground focus-visible:outline-none',
+            'flex w-full h-10 items-center gap-2.5 px-4 text-start text-sm text-fd-muted-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-fd-ring',
             trigger?.className,
           )}
         >
@@ -184,7 +184,7 @@ export function TOCDropdown({ trigger, content, header, footer, ...props }: TOCD
           <Popover.Popup
             {...content}
             className={cn(
-              'flex flex-col w-88 max-w-(--available-width) max-h-[min(28rem,var(--available-height))] p-3 rounded-2xl border bg-fd-popover text-fd-popover-foreground shadow-xl outline-none origin-(--transform-origin) transition-[opacity,scale] duration-150 ease-[cubic-bezier(0.22,1,0.36,1)] data-starting-style:opacity-0 data-starting-style:scale-95 data-ending-style:opacity-0 data-ending-style:scale-95 motion-reduce:transition-none',
+              'flex flex-col w-88 max-w-(--available-width) max-h-[min(28rem,var(--available-height))] p-3 rounded-2xl border bg-fd-popover text-fd-popover-foreground shadow-xl outline-hidden origin-(--transform-origin) transition-[opacity,scale] duration-150 ease-[cubic-bezier(0.22,1,0.36,1)] data-starting-style:opacity-0 data-starting-style:scale-95 data-ending-style:opacity-0 data-ending-style:scale-95 motion-reduce:transition-none',
               content?.className,
             )}
           >

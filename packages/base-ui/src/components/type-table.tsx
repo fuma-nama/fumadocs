@@ -126,7 +126,7 @@ function Item({
         <code
           className={cn(
             'text-fd-primary min-w-fit w-1/4 font-mono font-medium pe-2',
-            deprecated && 'line-through text-fd-primary/50',
+            deprecated && 'line-through text-fd-muted-foreground',
           )}
         >
           {name}

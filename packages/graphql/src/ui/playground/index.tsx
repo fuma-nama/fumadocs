@@ -174,7 +174,7 @@ function EndpointBar({ playground }: { playground: Playground }) {
             aria-label={t('GraphQL endpoint')}
             autoComplete="off"
             spellCheck={false}
-            className="h-full min-w-0 flex-1 bg-transparent px-1.5 font-mono text-fd-foreground outline-none placeholder:text-fd-muted-foreground/70"
+            className="h-full min-w-0 flex-1 bg-transparent px-1.5 font-mono text-fd-foreground outline-hidden placeholder:text-fd-muted-foreground/70"
           />
         ) : (
           <span className="min-w-0 flex-1 truncate px-1.5 font-mono">{url}</span>

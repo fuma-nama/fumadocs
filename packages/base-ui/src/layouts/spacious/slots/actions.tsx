@@ -25,10 +25,10 @@ import { cn } from '@/utils/cn';
 import { useSpaciousLayout } from '..';
 
 const popupClass =
-  'flex flex-col max-h-(--available-height) overflow-y-auto rounded-2xl border bg-fd-popover text-sm text-fd-popover-foreground shadow-lg outline-none origin-(--transform-origin) transition-[opacity,scale] duration-150 ease-[cubic-bezier(0.22,1,0.36,1)] data-starting-style:opacity-0 data-starting-style:scale-95 data-ending-style:opacity-0 data-ending-style:scale-97 data-ending-style:duration-100 motion-reduce:transition-none';
+  'flex flex-col max-h-(--available-height) overflow-y-auto rounded-2xl border bg-fd-popover text-sm text-fd-popover-foreground shadow-lg outline-hidden origin-(--transform-origin) transition-[opacity,scale] duration-150 ease-[cubic-bezier(0.22,1,0.36,1)] data-starting-style:opacity-0 data-starting-style:scale-95 data-ending-style:opacity-0 data-ending-style:scale-97 data-ending-style:duration-100 motion-reduce:transition-none';
 
 const itemClass =
-  'flex w-full min-h-9 items-center gap-3 rounded-lg px-2.5 py-1.5 text-start outline-none transition-colors duration-100 data-highlighted:bg-fd-accent data-highlighted:text-fd-accent-foreground [&_svg]:size-4 [&_svg]:shrink-0';
+  'flex w-full min-h-9 items-center gap-3 rounded-lg px-2.5 py-1.5 text-start outline-hidden transition-colors duration-100 data-highlighted:bg-fd-accent data-highlighted:text-fd-accent-foreground [&_svg]:size-4 [&_svg]:shrink-0';
 
 function IconLinks({ className }: { className?: string }) {
   const { menuItems } = useSpaciousLayout();
@@ -250,7 +250,7 @@ function ThemeSegments() {
           value={key}
           aria-label={labels[key]}
           className={cn(
-            'relative flex items-center justify-center size-7 rounded-full outline-none transition-colors duration-150 hover:text-fd-foreground focus-visible:ring-2 focus-visible:ring-fd-ring data-highlighted:text-fd-foreground [&_svg]:size-3.5',
+            'relative flex items-center justify-center size-7 rounded-full outline-hidden transition-colors duration-150 hover:text-fd-foreground focus-visible:ring-2 focus-visible:ring-fd-ring data-highlighted:text-fd-foreground [&_svg]:size-3.5',
             key === theme
               ? 'text-fd-foreground'
               : 'text-fd-muted-foreground data-highlighted:bg-fd-accent',

@@ -82,7 +82,7 @@ export function VercelLinks() {
           href={item.url}
           target="_blank"
           rel="noreferrer noopener"
-          className="group flex min-h-9 flex-1 items-center px-3 text-xs font-medium transition-none hover:bg-lp-ink hover:text-lp-paper focus-visible:bg-lp-ink focus-visible:text-lp-paper focus-visible:outline-none"
+          className="group flex min-h-9 flex-1 items-center px-3 text-xs font-medium transition-none hover:bg-lp-ink hover:text-lp-paper focus-visible:bg-lp-ink focus-visible:text-lp-paper focus-visible:outline-hidden"
         >
           <span className="flex flex-1 items-baseline gap-2">
             <span className="text-[15px]">{item.name}</span>

@@ -360,7 +360,7 @@ function MobileNavigationMenuLinkItem({
       item={item}
       className={cn(
         {
-          main: 'inline-flex items-center gap-2 py-1.5 transition-colors hover:text-fd-popover-foreground/50 data-[active=true]:font-medium data-[active=true]:text-fd-primary [&_svg]:size-4',
+          main: 'inline-flex items-center gap-2 py-1.5 transition-colors hover:text-fd-muted-foreground data-[active=true]:font-medium data-[active=true]:text-fd-primary [&_svg]:size-4',
           icon: buttonVariants({
             size: 'icon',
             variant: 'ghost',

@@ -55,7 +55,7 @@ export function AccordionTrigger({
   return (
     <Primitive.Trigger
       className={cn(
-        'group flex flex-1 items-center gap-2 px-3 py-2.5 text-start focus-visible:outline-none',
+        'group flex flex-1 items-center gap-2 px-3 py-2.5 text-start focus-visible:outline-hidden',
         className,
       )}
       {...props}

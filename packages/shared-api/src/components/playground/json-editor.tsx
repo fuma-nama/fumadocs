@@ -24,7 +24,7 @@ export function JsonEditor({ fieldName }: { fieldName: FieldKey }) {
             setDraft({ ...draft, text, error: err instanceof Error ? err.message : '' });
           }
         }}
-        className="min-h-60 w-full resize-none bg-transparent px-4 py-3 font-mono text-[0.8125rem] leading-relaxed outline-none field-sizing-content"
+        className="min-h-60 w-full resize-none bg-transparent px-4 py-3 font-mono text-[0.8125rem] leading-relaxed outline-hidden field-sizing-content"
       />
       {draft.error && (
         <p className="border-t px-4 py-2 font-mono text-xs text-red-400">{draft.error}</p>

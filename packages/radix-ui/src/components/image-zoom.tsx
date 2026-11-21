@@ -93,7 +93,7 @@ export function ImageZoom({ zoomInProps, children, rmiz, caption, ...props }: Im
           e.preventDefault();
           lightbox.open(e.currentTarget);
         }}
-        className="block outline-none [&_img]:cursor-zoom-in [&:focus-visible_img]:ring-2 [&:focus-visible_img]:ring-fd-ring"
+        className="block outline-hidden [&_img]:cursor-zoom-in [&:focus-visible_img]:ring-2 [&:focus-visible_img]:ring-fd-ring"
       >
         {image}
       </span>
@@ -188,7 +188,7 @@ export function Lightbox({ children }: { children: ReactNode }) {
               const rtl = getComputedStyle(e.currentTarget).direction === 'rtl';
               navigate((e.key === 'ArrowRight') !== rtl ? 1 : -1);
             }}
-            className="m-0 size-full max-h-none max-w-none overflow-hidden border-none bg-fd-background p-0 text-fd-foreground outline-none"
+            className="m-0 size-full max-h-none max-w-none overflow-hidden border-none bg-fd-background p-0 text-fd-foreground outline-hidden"
           >
             <button
               type="button"

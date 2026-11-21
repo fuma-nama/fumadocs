@@ -5,6 +5,7 @@ import { basename, extname } from '@/source/path';
 import type * as PageTree from '@/page-tree';
 
 export interface SharedIndex {
+  /** unique among pages, without `#` */
   id: string;
   title: string;
   description?: string;
