@@ -1,108 +1,140 @@
 core:changelogs:
-  - content: "---\npackages:\n  fumadocs-core:\n    type: patch\n  \"@fumadocs/satteri\":\n    type: patch\n---\n\n### Clearer error for unknown code languages\n\n- Rehype Code names the unknown language of a code block and suggests `fallbackLanguage`.\n- Sätteri accepts `rehypeCodeOptions` without `themes`, the defaults fill in the rest.\n"
-    filename: 2026-11-17-rehype-code-unknown-language.md
+  - content: "---\npackages:\n  fumadocs-ui:\n    type: patch\n  \"@fumadocs/base-ui\":\n    type: patch\n  fumadocs-openapi:\n    type: patch\n  \"@fumadocs/asyncapi\":\n    type: patch\n  \"@fumadocs/graphql\":\n    type: patch\n  \"@fumadocs/ai-chat\":\n    type: patch\n  \"@fumadocs/notion\":\n    type: patch\n  \"@fumadocs/story\":\n    type: patch\n---\n\n### Focus indicators in forced colors mode\n\n- Focus indicators stay visible in Windows High Contrast and other forced colors modes.\n"
+    filename: 2026-11-21-forced-colors-focus.md
     v: 0.0.0
-  - content: "---\npackages:\n  fumadocs-core:\n    type: patch\n---\n\n### Fix `baseDir` with the `dir` parser\n\n- A source with `baseDir` keeps its languages with `parser: 'dir'`.\n"
-    filename: 2026-11-18-base-dir-dir-parser.md
+  - content: "---\npackages:\n  fumadocs-openapi:\n    type: patch\n  \"@fumadocs/asyncapi\":\n    type: patch\n  \"@fumadocs/graphql\":\n    type: patch\n---\n\n### API docs fixes\n\n- Titles generated from ids keep acronyms and mixed-case names whole, like `HTTPServer` to \"HTTP Server\" and `KSeF`.\n- With `includeDescription`, pages of a tag or a file keep the tag's or the document's description in their body.\n- OpenAPI: request bodies and responses of sequential media types with only an `itemSchema` (OpenAPI 3.2), like JSON Lines and Server-Sent Events, show their items' schema, examples and playground.\n- OpenAPI: the Scalar modal of `withScalar()` follows the site's light or dark mode.\n- OpenAPI: no more undici warning about the `patch` method on the server.\n"
+    filename: 2026-11-21-api-docs-fixes.md
     v: 0.0.0
-  - content: "---\npackages:\n  fumadocs-mdx:\n    type: patch\n  \"@fumadocs/local-content\":\n    type: patch\n  \"@fumadocs/sanity\":\n    type: patch\n  \"@fumadocs/notion\":\n    type: patch\n---\n\n### Fix `baseDir` with the `dir` parser\n\n- A source with `baseDir` keeps its languages with `parser: 'dir'`.\n"
-    filename: 2026-11-18-sources-base-dir.md
+  - content: "---\npackages:\n  \"@fumadocs/base-ui\":\n    type: patch\n  fumadocs-openapi:\n    type: patch\n  \"@fumadocs/asyncapi\":\n    type: patch\n  \"@fumadocs/graphql\":\n    type: patch\n  \"@fumadocs/story\":\n    type: patch\n---\n\n### Fix borders next to Base UI triggers\n\n- Opening a sidebar tab menu in the Spacious layout no longer shifts its trigger content.\n- The \"Show Property\" row of playground and story fields no longer draws an extra bottom border.\n"
+    filename: 2026-11-21-spacious-tabs-menu-shift.md
     v: 0.0.0
-  - content: "---\npackages:\n  fumadocs-mdx:\n    type: patch\n---\n\n### Macro collections in workspace packages\n\n- Declare macro collections in a workspace package and import them from several apps, each loading its own content.\n- Fix `!` patterns in the `files` option of collections not excluding files on Vite.\n- Accept `rehypeCodeOptions` without `themes`, the defaults fill in the rest.\n"
-    filename: 2026-11-17-macro-workspace-packages.md
+  - content: "---\npackages:\n  fumadocs-ui:\n    type: patch\n  \"@fumadocs/base-ui\":\n    type: patch\n---\n\n### Accessibility fixes\n\n- The footer of the default and Algolia search dialogs renders inside the dialog, and no longer in the page while the dialog is closed.\n- Text meets WCAG AA contrast in every color preset, in light and dark mode, including muted text, active items and search results.\n- Collapsed sidebars of the notebook, glass and flux layouts leave the tab order, and the flux sidebar and the spacious drawer follow their triggers in it.\n- The skip-to-content link shows when focused, the glass layout's table of contents opens on keyboard focus, and tabs and table-of-contents and menu triggers show a focus ring.\n- The glass sidebar's folder toggles are named after their folders, and the language select keeps the visible language in its name and marks options with `lang`.\n"
+    filename: 2026-11-21-ui-accessibility.md
     v: 0.0.0
-  - content: "---\npackages:\n  fumadocs-openapi:\n    type: patch\n---\n\n### Support the HTTP QUERY method\n\n- Generate pages and code samples for `query`, `options` and `trace` operations, with a playground for the methods browsers can send.\n- Show QUERY in its own color, and OPTIONS, TRACE and unknown methods in gray.\n- The playground sends its requests to the proxy as `POST`, so the proxy route only needs a `POST` handler and supports every method.\n- The proxy keeps the method of non-POST requests on 301/302 redirects, like `fetch()`.\n- Example request bodies leave out read-only properties for every method.\n- The playground centers its empty parameters message, and response descriptions replace \"No example available.\".\n"
-    filename: 2026-11-19-openapi-query-method.md
+  - content: "---\npackages:\n  fumadocs-core:\n    type: patch\n---\n\n### Directive admonitions in processed Markdown\n\n- `remarkDirectiveAdmonition` keeps the authored directive in processed Markdown of the `function` output.\n"
+    filename: 2026-11-20-directive-admonition-markdown.md
+    v: 0.0.0
+  - content: "---\npackages:\n  fumadocs-core:\n    type: patch\n---\n\n### Unique search record ids\n\n- The records of a page take the ids `<page id>#<n>`, so they no longer collide with another page's id, like `/blog/v3` and `/blog/v3-2`. Re-sync Algolia and Orama Cloud indexes to pick up the new ids.\n- `sync()` and `syncI18n()` of Orama Cloud return their transactions, so you can commit or roll back an index synced with `autoDeploy: false`.\n"
+    filename: 2026-11-21-search-record-ids.md
+    v: 0.0.0
+  - content: "---\npackages:\n  fumadocs-epub:\n    type: patch\n---\n\n### Processed Markdown in EPUB chapters\n\n- Chapters read the processed Markdown of pages by default, instead of the raw MDX with its frontmatter, imports and JSX.\n"
+    filename: 2026-11-21-epub-processed-markdown.md
+    v: 0.0.0
+  - content: "---\npackages:\n  \"@fumadocs/json-schema\":\n    type: patch\n  fumadocs-openapi:\n    type: patch\n---\n\n### Fix playground crash on free-form JSON request bodies\n\n- The playground no longer crashes with free-form JSON request bodies.\n"
+    filename: 2026-11-20-fix-playground-magic-proxy-clone.md
+    v: 0.0.0
+  - content: "---\npackages:\n  fumadocs-preview:\n    type: patch\n---\n\n### Current default AI model\n\n- The AI chat defaults to `anthropic/claude-sonnet-5.5` on OpenRouter, replacing the retired Claude 3.5 Sonnet.\n"
+    filename: 2026-11-21-preview-ai-model.md
     v: 0.0.0
 core:packages:
-  - id: npm:@fumadocs/ai-chat
-    updated: false
+  - changelogIds:
+      - 2026-11-21-forced-colors-focus.md
+    id: npm:@fumadocs/ai-chat
+    updated: true
   - id: npm:@fumadocs/astro
     updated: false
-  - id: npm:@fumadocs/asyncapi
-    updated: false
+  - changelogIds:
+      - 2026-11-21-api-docs-fixes.md
+      - 2026-11-21-forced-colors-focus.md
+      - 2026-11-21-spacious-tabs-menu-shift.md
+    id: npm:@fumadocs/asyncapi
+    updated: true
+  - changelogIds:
+      - 2026-11-21-forced-colors-focus.md
+      - 2026-11-21-spacious-tabs-menu-shift.md
+      - 2026-11-21-ui-accessibility.md
+    id: npm:@fumadocs/base-ui
+    updated: true
   - id: npm:@fumadocs/basehub
     updated: false
-  - id: npm:@fumadocs/base-ui
-    updated: true
   - id: npm:@fumadocs/changelog
     updated: false
   - id: npm:@fumadocs/cli
     updated: false
-  - changelogIds:
-      - 2026-11-17-rehype-code-unknown-language.md
-      - 2026-11-18-base-dir-dir-parser.md
-    id: npm:fumadocs-core
-    updated: true
   - id: npm:@fumadocs/content
     updated: false
   - id: npm:@fumadocs/content-collections
     updated: false
+  - changelogIds:
+      - 2026-11-20-directive-admonition-markdown.md
+      - 2026-11-21-search-record-ids.md
+    id: npm:fumadocs-core
+    updated: true
   - id: npm:create-fumadocs-app
+    updated: true
+  - id: npm:create-fumadocs-versions
     updated: true
   - id: npm:fumadocs-docgen
     updated: false
-  - id: npm:@fumadocs/graphql
-    updated: false
-  - id: npm:fumadocs-epub
-    updated: false
-  - id: npm:create-fumadocs-versions
+  - changelogIds:
+      - 2026-11-21-epub-processed-markdown.md
+    id: npm:fumadocs-epub
     updated: true
   - id: npm:@fumari/image-size
     updated: false
-  - id: npm:@fumadocs/json-schema
-    updated: false
   - changelogIds:
-      - 2026-11-18-sources-base-dir.md
-    id: npm:@fumadocs/local-content
+      - 2026-11-20-fix-playground-magic-proxy-clone.md
+    id: npm:@fumadocs/json-schema
     updated: true
-  - id: npm:@fumadocs/local-html
+  - changelogIds:
+      - 2026-11-21-api-docs-fixes.md
+      - 2026-11-21-forced-colors-focus.md
+      - 2026-11-21-spacious-tabs-menu-shift.md
+    id: npm:@fumadocs/graphql
     updated: true
   - id: npm:@fumadocs/language
     updated: false
+  - id: npm:@fumadocs/local-html
+    updated: false
+  - id: npm:@fumadocs/local-content
+    updated: false
   - id: npm:@fumadocs/local-md
-    updated: true
-  - changelogIds:
-      - 2026-11-17-macro-workspace-packages.md
-      - 2026-11-18-sources-base-dir.md
-    id: npm:fumadocs-mdx
-    updated: true
+    updated: false
+  - id: npm:fumadocs-mdx
+    updated: false
   - id: npm:@fumadocs/mdx-remote
     updated: false
   - changelogIds:
-      - 2026-11-18-sources-base-dir.md
+      - 2026-11-21-forced-colors-focus.md
     id: npm:@fumadocs/notion
     updated: true
   - id: npm:fumadocs-obsidian
-    updated: true
+    updated: false
   - changelogIds:
-      - 2026-11-19-openapi-query-method.md
+      - 2026-11-20-fix-playground-magic-proxy-clone.md
+      - 2026-11-21-api-docs-fixes.md
+      - 2026-11-21-forced-colors-focus.md
+      - 2026-11-21-spacious-tabs-menu-shift.md
     id: npm:fumadocs-openapi
     updated: true
   - id: npm:@fumadocs/openapi-standalone
     updated: false
-  - id: npm:fumadocs-preview
-    updated: false
+  - changelogIds:
+      - 2026-11-21-preview-ai-model.md
+    id: npm:fumadocs-preview
+    updated: true
   - id: npm:fumadocs-python
     updated: false
   - changelogIds:
-      - 2026-11-18-sources-base-dir.md
-    id: npm:@fumadocs/sanity
+      - 2026-11-21-forced-colors-focus.md
+      - 2026-11-21-ui-accessibility.md
+    id: npm:fumadocs-ui
     updated: true
-  - id: npm:fumadocs-ui
-    updated: true
-  - changelogIds:
-      - 2026-11-17-rehype-code-unknown-language.md
-    id: npm:@fumadocs/satteri
-    updated: true
+  - id: npm:@fumadocs/sanity
+    updated: false
+  - id: npm:@fumadocs/satteri
+    updated: false
   - id: npm:@fumadocs/shadcn
     updated: false
   - id: npm:shared-api
-    updated: false
-  - id: npm:@fumadocs/story
-    updated: false
+    updated: true
   - id: npm:@fumari/stf
     updated: false
+  - changelogIds:
+      - 2026-11-21-forced-colors-focus.md
+      - 2026-11-21-spacious-tabs-menu-shift.md
+    id: npm:@fumadocs/story
+    updated: true
   - id: npm:@fumadocs/tailwind
     updated: false
   - id: npm:fumadocs-twoslash
@@ -115,23 +147,23 @@ npm:packages:
   - id: npm:@fumadocs/ai-chat
   - id: npm:@fumadocs/astro
   - id: npm:@fumadocs/asyncapi
-  - id: npm:@fumadocs/basehub
   - id: npm:@fumadocs/base-ui
+  - id: npm:@fumadocs/basehub
   - id: npm:@fumadocs/changelog
   - id: npm:@fumadocs/cli
-  - id: npm:fumadocs-core
   - id: npm:@fumadocs/content
   - id: npm:@fumadocs/content-collections
+  - id: npm:fumadocs-core
   - id: npm:create-fumadocs-app
-  - id: npm:fumadocs-docgen
-  - id: npm:@fumadocs/graphql
-  - id: npm:fumadocs-epub
   - id: npm:create-fumadocs-versions
+  - id: npm:fumadocs-docgen
+  - id: npm:fumadocs-epub
   - id: npm:@fumari/image-size
   - id: npm:@fumadocs/json-schema
-  - id: npm:@fumadocs/local-content
-  - id: npm:@fumadocs/local-html
+  - id: npm:@fumadocs/graphql
   - id: npm:@fumadocs/language
+  - id: npm:@fumadocs/local-html
+  - id: npm:@fumadocs/local-content
   - id: npm:@fumadocs/local-md
   - id: npm:fumadocs-mdx
   - id: npm:@fumadocs/mdx-remote
@@ -141,47 +173,47 @@ npm:packages:
   - id: npm:@fumadocs/openapi-standalone
   - id: npm:fumadocs-preview
   - id: npm:fumadocs-python
-  - id: npm:@fumadocs/sanity
   - id: npm:fumadocs-ui
+  - id: npm:@fumadocs/sanity
   - id: npm:@fumadocs/satteri
   - id: npm:@fumadocs/shadcn
   - id: npm:shared-api
-  - id: npm:@fumadocs/story
   - id: npm:@fumari/stf
+  - id: npm:@fumadocs/story
   - id: npm:@fumadocs/tailwind
   - id: npm:fumadocs-twoslash
   - id: npm:fumadocs-typescript
   - id: npm:@fumadocs/vite
   - id: npm:docs
+  - id: npm:example-astro
+  - id: npm:example-astro-i18n
+  - id: npm:example-astro-min
   - id: npm:example-asyncapi
-  - id: npm:example-graphql
   - id: npm:example-base-ui
+  - id: npm:example-content-collections
+  - id: npm:example-graphql
   - id: npm:example-i18n
+  - id: npm:example-marble-cms
   - id: npm:example-next
+  - id: npm:example-next-local-html
+  - id: npm:example-next-local-md
   - id: npm:example-next-min
   - id: npm:example-next-shadcn
+  - id: npm:example-obsidian
   - id: npm:example-next-static
   - id: npm:example-openapi
+  - id: npm:example-python
   - id: npm:example-react-router
   - id: npm:example-react-router-i18n
   - id: npm:example-react-router-min
-  - id: npm:example-react-router-spa
   - id: npm:example-react-router-rsc
+  - id: npm:example-react-router-spa
   - id: npm:example-tanstack-start
   - id: npm:example-tanstack-start-i18n
+  - id: npm:example-tanstack-start-local-md
   - id: npm:example-tanstack-start-min
   - id: npm:example-tanstack-start-openapi
   - id: npm:example-tanstack-start-spa
   - id: npm:example-tanstack-start-story
   - id: npm:example-waku
   - id: npm:example-waku-i18n
-  - id: npm:example-astro
-  - id: npm:example-astro-min
-  - id: npm:example-astro-i18n
-  - id: npm:example-content-collections
-  - id: npm:example-marble-cms
-  - id: npm:example-next-local-html
-  - id: npm:example-next-local-md
-  - id: npm:example-obsidian
-  - id: npm:example-python
-  - id: npm:example-tanstack-start-local-md

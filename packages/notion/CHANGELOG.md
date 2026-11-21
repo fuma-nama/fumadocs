@@ -1,3 +1,9 @@
+## @fumadocs/notion@0.3.3
+
+### Focus indicators in forced colors mode
+
+- Focus indicators stay visible in Windows High Contrast and other forced colors modes.
+
 ## @fumadocs/notion@0.3.2
 
 ### Fix `baseDir` with the `dir` parser

@@ -1,3 +1,14 @@
+## fumadocs-core@16.19.6
+
+### Directive admonitions in processed Markdown
+
+- `remarkDirectiveAdmonition` keeps the authored directive in processed Markdown of the `function` output.
+
+### Unique search record ids
+
+- The records of a page take the ids `<page id>#<n>`, so they no longer collide with another page's id, like `/blog/v3` and `/blog/v3-2`. Re-sync Algolia and Orama Cloud indexes to pick up the new ids.
+- `sync()` and `syncI18n()` of Orama Cloud return their transactions, so you can commit or roll back an index synced with `autoDeploy: false`.
+
 ## fumadocs-core@16.19.5
 
 ### Clearer error for unknown code languages
