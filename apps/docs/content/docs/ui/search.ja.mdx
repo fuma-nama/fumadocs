@@ -33,7 +33,7 @@ export default function Layout({ children }: { children: ReactNode }) {
 
 ### ホットキー [#hot-keys]
 
-検索ダイアログを開くホットキーはカスタマイズできます。デフォルトは <kbd>⌘</kbd> <kbd>K</kbd> または <kbd>Ctrl</kbd> <kbd>K</kbd> です。
+検索ダイアログを開くホットキーをカスタマイズできます。デフォルトは <kbd>⌘</kbd> <kbd>K</kbd> または <kbd>Ctrl</kbd> <kbd>K</kbd> です。
 
 ```tsx
 import { RootProvider } from 'fumadocs-ui/provider/<framework>';
@@ -58,9 +58,9 @@ import { RootProvider } from 'fumadocs-ui/provider/<framework>';
 
 <auto-type-table cwd path="content/docs/ui/props.ts" name="SearchProps" />
 
-## カスタム UI [#custom-ui]
+## カスタムUI [#custom-ui]
 
-Fumadocs UI は、高度な用途向けに低レベルの `<SearchDialog />` コンポーネントも提供しています。これを使って独自の検索ダイアログを作成し、デフォルトの検索ダイアログと置き換えることができます。
+Fumadocs UI は、高度な用途向けに低レベルな `<SearchDialog />` コンポーネントも公開しています。これを使えば、独自の検索ダイアログを作成してデフォルトの検索ダイアログと置き換えられます。
 
 ```tsx twoslash
 'use client';
@@ -81,7 +81,7 @@ import {
 import { useI18n } from 'fumadocs-ui/contexts/i18n';
 
 export default function DefaultSearchDialog(props: SharedProps) {
-  const { locale } = useI18n(); // (任意) i18n 対応用
+  const { locale } = useI18n(); // (任意)i18n 用
   const search = useFetchSearch({
     locale,
   });
@@ -96,8 +96,8 @@ export default function DefaultSearchDialog(props: SharedProps) {
           <SearchDialogClose />
         </SearchDialogHeader>
         <SearchDialogList />
+        <SearchDialogFooter>{/* フッターの項目 */}</SearchDialogFooter>
       </SearchDialogContent>
-      <SearchDialogFooter>{/* フッターの要素 */}</SearchDialogFooter>
     </SearchDialog>
   );
 }
@@ -123,11 +123,11 @@ export default function DefaultSearchDialog(props: SharedProps) {
 
 ### テーブル [#tables]
 
-結果に含まれるテーブルのレンダリング方法をカスタマイズできます。カスタムの `Table` は、行を自前でレンダリングします。
+結果に含まれるテーブルのレンダリング方法をカスタマイズできます。カスタムの `Table` を使うと、行のレンダリングを独自に行えます。
 
 ```tsx title="components/search.tsx"
 <SearchDialogList
-  // カードを使わずに行を表示
+  // カードを使わずに行を表示する
   Table={({ table, Item, onSelect }) =>
     table.rows.map((row) => (
       <Fragment key={row.id}>{Item({ item: row, onClick: () => onSelect(row) })}</Fragment>
@@ -147,9 +147,9 @@ export default function DefaultSearchDialog(props: SharedProps) {
 }
 ```
 
-`<SearchDialogList />` は、`<SearchDialog />` の `data` に含まれるクエリをハイライトします。`data` がない場合は、検索入力の内容をハイライトします。
+`<SearchDialogList />` は、`<SearchDialog />` から渡された `data` のクエリをハイライトします。`data` がない場合は、検索入力の内容をハイライトします。
 
-検索結果を独自にレンダリングする場合は、`useHighlightQuery()` を使用してハイライトしてください。
+結果を独自にレンダリングする場合は、`useHighlightQuery()` を使ってハイライトしてください。
 
 ```tsx title="components/search-result.tsx"
 'use client';
@@ -163,4 +163,4 @@ export function SearchResult({ query, children }: { query: string; children: Rea
 }
 ```
 
-`data-highlight-ignore` が指定された要素(コンポーネントのバッジなど)内のテキストはハイライトされません。
+コンポーネントのバッジのように、`data-highlight-ignore` を持つ要素内のテキストはハイライトされません。
