@@ -1,23 +1,23 @@
 ---
 title: 匯出 EPUB
-description: 將您的文件匯出為 EPUB 格式，供電子閱讀器閱讀
+description: 將您的文件匯出為 EPUB 格式，供電子書閱讀器使用
 ---
 
 ## 簡介 [#introduction]
 
-EPUB 整合可讓您將 Fumadocs 文件匯出為 EPUB 檔案，方便讀者下載您的文件，並在電子閱讀器、平板電腦或任何支援 EPUB 的應用程式上閱讀。
+EPUB 整合可讓您將 Fumadocs 文件匯出為 EPUB 檔案，方便讀者下載，並在電子閱讀器、平板電腦或任何支援 EPUB 的應用程式上閱讀您的文件。
 
-此整合會將您的 MDX 內容轉換為 HTML、解析圖片，並產生符合標準且附有目錄的 EPUB 檔案。
+它會將您的 MDX 內容轉換為 HTML、處理圖片路徑，並產生符合標準且附有目錄的 EPUB 檔案。
 
 ## 設定 [#setup]
 
-Fumadocs CLI 可以自動幫您完成設定。它會建立一個受 `EXPORT_SECRET` 保護的匯出路由，並啟用 `includeProcessedMarkdown`：
+Fumadocs CLI 可以幫您完成設定。它會建立受 `EXPORT_SECRET` 保護的匯出路由，並啟用 `includeProcessedMarkdown`：
 
 ```package-install
 npx @fumadocs/cli feature epub
 ```
 
-或手動設定：
+或是手動設定：
 
 ### 安裝 [#installation]
 
@@ -28,7 +28,7 @@ npm install fumadocs-epub
 ### 啟用處理後的 Markdown [#enable-processed-markdown]
 
 <show when={props.framework !== 'astro'}>
-  若要匯出 EPUB，必須在 docs 集合的設定中啟用 `includeProcessedMarkdown`：
+  匯出 EPUB 時，需要在 docs 集合設定中啟用 `includeProcessedMarkdown`：
 
   ```ts title="source.config.ts"
   import { defineDocs } from 'fumadocs-mdx/config';
@@ -45,7 +45,7 @@ npm install fumadocs-epub
 </show>
 
 <show when={props.framework === 'astro'}>
-  若要匯出 EPUB，必須在整合選項中啟用 `includeProcessedMarkdown`：
+  匯出 EPUB 時，需要在整合選項中啟用 `includeProcessedMarkdown`：
 
   ```js title="astro.config.mjs"
   import { defineConfig } from 'astro/config';
@@ -63,7 +63,7 @@ npm install fumadocs-epub
 
 ### 建立匯出路由 [#create-export-route]
 
-`createEpubExportAPI` 會建立路由處理常式，並以 `secret` 加以保護：若請求未帶有相符的 `Authorization: Bearer <secret>` 標頭，就會遭到拒絕；若未設定密鑰，路由則會回應 `503`。
+`createEpubExportAPI` 會建立路由處理常式，並以 `secret` 加以保護：若請求未帶有相符的 `Authorization: Bearer <secret>` 標頭，就會遭到拒絕；若密鑰本身未設定，路由則會回應 `503`。
 
 <show when={props.framework === 'next'}>
   ```ts title="app/export/epub/route.ts"
@@ -176,7 +176,7 @@ npm install fumadocs-epub
   fumadocs export epub --framework next
   ```
 
-  此指令會從執行於連接埠 `3000` (或 `PORT`) 的伺服器取得檔案，並以 `EXPORT_SECRET` 環境變數作為密鑰。
+  此指令會從您在連接埠 `3000` (或 `PORT`) 上執行中的伺服器擷取檔案，並以 `EXPORT_SECRET` 環境變數作為密鑰。
 </show>
 
 <show when={props.framework === 'astro'}>
@@ -184,7 +184,7 @@ npm install fumadocs-epub
   fumadocs export epub --framework astro
   ```
 
-  此指令會從執行於連接埠 `4321` (或 `PORT`) 的伺服器取得檔案，並以 `EXPORT_SECRET` 環境變數作為密鑰。
+  此指令會從您在連接埠 `4321` (或 `PORT`) 上執行中的伺服器擷取檔案，並以 `EXPORT_SECRET` 環境變數作為密鑰。
 </show>
 
 <show when={props.framework === 'react-router'}>
@@ -206,29 +206,30 @@ npm install fumadocs-epub
 </show>
 
 <show when={props.framework === 'react-router' || props.framework === 'tanstack-start' || props.framework === 'waku'}>
-  此指令會從建置輸出複製檔案，因此請先執行正式版建置。
+  此指令會從建置輸出中複製檔案，因此請先執行正式版建置。
 </show>
 
 ## 選項 [#options]
 
-`exportEpub` 與 `createEpubExportAPI` 皆接受下列選項：
+`exportEpub` 與 `createEpubExportAPI` 皆接受以下選項：
 
-| 選項             | 型別                   | 說明                                                 |
-| -------------- | -------------------- | -------------------------------------------------- |
-| `title`        | `string`             | **必填。** 書名                                         |
-| `author`       | `string \| string[]` | 作者名稱 (可為多位) 。預設：`'anonymous'`                      |
-| `description`  | `string`             | 書籍說明                                               |
-| `language`     | `string`             | 語言代碼 (例如 `'en'`) 。預設：`'en'`                        |
-| `publisher`    | `string`             | 出版者名稱。預設：`'anonymous'`                             |
-| `isbn`         | `string`             | ISBN                                               |
-| `cover`        | `string`             | 封面圖片。支援 `file://`、`http(s)://`、`/public/...` 或相對路徑 |
-| `outputPath`   | `string`             | 若有設定，除了回傳緩衝區外，也會將 EPUB 寫入檔案                        |
-| `includePages` | `(page) => boolean`  | 篩選：只納入此函式回傳 `true` 的頁面                             |
-| `excludePages` | `(page) => boolean`  | 篩選：排除此函式回傳 `true` 的頁面                              |
-| `css`          | `string`             | EPUB 的自訂 CSS。若省略則使用 `defaultEpubStyles`            |
-| `publicDir`    | `string`             | 用於解析 `/public/...` 圖片路徑的 public 目錄。預設：`./public`   |
+| 選項             | 型別                                            | 說明                                                                      |
+| -------------- | --------------------------------------------- | ----------------------------------------------------------------------- |
+| `source`       | `LoaderOutput \| () => Promise<LoaderOutput>` | **必填。** 來自 `loader()` 的來源，或可解析出來源的函式                                    |
+| `title`        | `string`                                      | **必填。** 書名                                                              |
+| `author`       | `string \| string[]`                          | 作者名稱 (可多位) 。預設：`'anonymous'`                                            |
+| `description`  | `string`                                      | 書籍說明                                                                    |
+| `language`     | `string`                                      | 語言代碼 (例如 `'en'`) 。預設：`'en'`                                             |
+| `publisher`    | `string`                                      | 出版者名稱。預設：`'anonymous'`                                                  |
+| `cover`        | `string`                                      | 封面圖片。支援 `file://`、`http(s)://`、`/public/...` 或相對路徑                      |
+| `outputPath`   | `string`                                      | 若有設定，除了回傳緩衝區外，也會將 EPUB 寫入檔案                                             |
+| `includePages` | `(page) => boolean`                           | 篩選：僅納入此函式回傳 `true` 的頁面                                                  |
+| `excludePages` | `(page) => boolean`                           | 篩選：排除此函式回傳 `true` 的頁面                                                   |
+| `getMarkdown`  | `(page) => string \| undefined`               | 取得頁面的 Markdown，回傳 `undefined` 時略過該頁。預設：`page.data.getText('processed')` |
+| `css`          | `string`                                      | EPUB 的自訂 CSS。省略時使用 `defaultEpubStyles`                                  |
+| `publicDir`    | `string`                                      | 用於解析 `/public/...` 圖片路徑的 public 目錄。預設：`./public`                        |
 
-`createEpubExportAPI` 另外多了兩個選項：`secret` (必填，用於保護路由) 與 `filename` (下載的檔案名稱，預設為 `docs.epub`) 。
+`createEpubExportAPI` 另外提供兩個選項：`secret` (必填，用於保護路由) 與 `filename` (下載的檔案名稱，預設為 `docs.epub`) 。
 
 ### 自訂 CSS [#custom-css]
 
@@ -242,7 +243,7 @@ const buffer = await exportEpub({
   title: 'My Docs',
   author: 'Me',
   css: `${defaultEpubStyles}
-/* 自訂覆寫樣式 */
+/* 自訂覆寫 */
 body { font-size: 1.1em; }
 `,
 });
@@ -270,4 +271,4 @@ MDX 中的圖片會自動解析：
 
 * **相對路徑** (例如 `./image.png`) ：以頁面檔案所在位置為基準解析
 * **公開路徑** (例如 `/og.png`) ：從 `public` 目錄解析
-* **遠端 URL** (例如 `https://...`) ：原樣嵌入
+* **遠端 URL** (例如 `https://...`) ：直接原樣嵌入

@@ -1,23 +1,23 @@
 ---
-title: EPUB エクスポート
-description: 電子書籍リーダーで読めるよう、ドキュメントを EPUB 形式でエクスポートします
+title: EPUB のエクスポート
+description: ドキュメントを電子書籍リーダー向けの EPUB 形式でエクスポートします
 ---
 
 ## はじめに [#introduction]
 
-EPUB 連携を使うと、Fumadocs のドキュメントを EPUB ファイルとしてエクスポートできます。読者はドキュメントをダウンロードして、電子書籍リーダーやタブレット、各種 EPUB 対応アプリで手軽に読めるようになります。
+EPUB インテグレーションを使うと、Fumadocs のドキュメントを EPUB ファイルとしてエクスポートできます。読者は電子書籍リーダーやタブレット、各種 EPUB 対応アプリでドキュメントを手軽にダウンロードして読めるようになります。
 
 MDX コンテンツを HTML に変換し、画像を解決したうえで、目次付きの標準規格に準拠した EPUB を生成します。
 
 ## セットアップ [#setup]
 
-Fumadocs CLI を使うと、自動でセットアップできます。CLI は `EXPORT_SECRET` で保護されたエクスポートルートを作成し、`includeProcessedMarkdown` を有効にします。
+Fumadocs CLI を使うと、セットアップを自動で行えます。`EXPORT_SECRET` で保護されたエクスポート用のルートが作成され、`includeProcessedMarkdown` が有効になります。
 
 ```package-install
 npx @fumadocs/cli feature epub
 ```
 
-または、手動でインストールする場合：
+または、手動で設定する場合:
 
 ### インストール [#installation]
 
@@ -28,7 +28,7 @@ npm install fumadocs-epub
 ### 処理済み Markdown を有効にする [#enable-processed-markdown]
 
 <show when={props.framework !== 'astro'}>
-  EPUB エクスポートを使うには、docs コレクションの設定で `includeProcessedMarkdown` を有効にする必要があります。
+  EPUB エクスポートを利用するには、docs コレクションの設定で `includeProcessedMarkdown` を有効にする必要があります。
 
   ```ts title="source.config.ts"
   import { defineDocs } from 'fumadocs-mdx/config';
@@ -45,7 +45,7 @@ npm install fumadocs-epub
 </show>
 
 <show when={props.framework === 'astro'}>
-  EPUB エクスポートを使うには、インテグレーションのオプションで `includeProcessedMarkdown` を有効にする必要があります。
+  EPUB エクスポートを利用するには、インテグレーションのオプションで `includeProcessedMarkdown` を有効にする必要があります。
 
   ```js title="astro.config.mjs"
   import { defineConfig } from 'astro/config';
@@ -63,7 +63,7 @@ npm install fumadocs-epub
 
 ### エクスポートルートを作成する [#create-export-route]
 
-`createEpubExportAPI` はルートハンドラーを構築します。このルートは `secret` で保護されており、一致する `Authorization: Bearer <secret>` ヘッダーがないリクエストは拒否されます。また、シークレット自体が設定されていない場合、ルートは `503` を返します。
+`createEpubExportAPI` はルートハンドラーを作成します。このルートは `secret` で保護されており、`Authorization: Bearer <secret>` ヘッダーが一致しないリクエストは拒否されます。また、シークレット自体が設定されていない場合、ルートは `503` を返します。
 
 <show when={props.framework === 'next'}>
   ```ts title="app/export/epub/route.ts"
@@ -165,7 +165,7 @@ npm install fumadocs-epub
   ```
 </show>
 
-エンドポイントを公開する場合や、スクリプト内などでファイルを自前で生成する場合は、`exportEpub()` を直接呼び出してバッファーを返してください。
+公開エンドポイントにする場合や、(スクリプト内などで)ファイルを自前で生成する場合は、`exportEpub()` を直接呼び出してバッファーを返してください。
 
 ### CLI を使用する [#using-the-cli]
 
@@ -176,7 +176,7 @@ Fumadocs CLI を使って EPUB をエクスポートすることもできます�
   fumadocs export epub --framework next
   ```
 
-  ポート `3000`(または `PORT`)で稼働中のサーバーからファイルを取得します。その際、`EXPORT_SECRET` 環境変数の値がシークレットとして使用されます。
+  ポート `3000`(または `PORT`)で実行中のサーバーからファイルを取得します。その際、環境変数 `EXPORT_SECRET` の値がシークレットとして使用されます。
 </show>
 
 <show when={props.framework === 'astro'}>
@@ -184,7 +184,7 @@ Fumadocs CLI を使って EPUB をエクスポートすることもできます�
   fumadocs export epub --framework astro
   ```
 
-  ポート `4321`(または `PORT`)で稼働中のサーバーからファイルを取得します。その際、`EXPORT_SECRET` 環境変数の値がシークレットとして使用されます。
+  ポート `4321`(または `PORT`)で実行中のサーバーからファイルを取得します。その際、環境変数 `EXPORT_SECRET` の値がシークレットとして使用されます。
 </show>
 
 <show when={props.framework === 'react-router'}>
@@ -206,33 +206,34 @@ Fumadocs CLI を使って EPUB をエクスポートすることもできます�
 </show>
 
 <show when={props.framework === 'react-router' || props.framework === 'tanstack-start' || props.framework === 'waku'}>
-  ファイルはビルド出力からコピーされるため、事前にプロダクションビルドを実行してください。
+  ビルド出力からファイルをコピーするため、事前にプロダクションビルドを実行してください。
 </show>
 
 ## オプション [#options]
 
 `exportEpub` と `createEpubExportAPI` はどちらも次のオプションを受け付けます。
 
-| オプション          | 型                    | 説明                                                          |
-| -------------- | -------------------- | ----------------------------------------------------------- |
-| `title`        | `string`             | **必須。** 書籍のタイトル                                             |
-| `author`       | `string \| string[]` | 著者名 (複数可) 。デフォルト: `'anonymous'`                             |
-| `description`  | `string`             | 書籍の説明                                                       |
-| `language`     | `string`             | 言語コード (例: `'en'`) 。デフォルト: `'en'`                            |
-| `publisher`    | `string`             | 出版社名。デフォルト: `'anonymous'`                                   |
-| `isbn`         | `string`             | ISBN                                                        |
-| `cover`        | `string`             | 表紙画像。`file://`、`http(s)://`、`/public/...`、または相対パスに対応しています   |
-| `outputPath`   | `string`             | 指定すると、バッファを返すだけでなく EPUB をファイルにも書き出します                       |
-| `includePages` | `(page) => boolean`  | フィルター: この関数が `true` を返すページのみを含めます                           |
-| `excludePages` | `(page) => boolean`  | フィルター: この関数が `true` を返すページを除外します                            |
-| `css`          | `string`             | EPUB 用のカスタム CSS。省略した場合は `defaultEpubStyles` が使用されます         |
-| `publicDir`    | `string`             | `/public/...` の画像パスを解決するための public ディレクトリ。デフォルト: `./public` |
+| オプション          | 型                                             | 説明                                                                             |
+| -------------- | --------------------------------------------- | ------------------------------------------------------------------------------ |
+| `source`       | `LoaderOutput \| () => Promise<LoaderOutput>` | **必須。** `loader()` から得たソース、またはソースを返す関数                                         |
+| `title`        | `string`                                      | **必須。** 書籍のタイトル                                                                |
+| `author`       | `string \| string[]`                          | 著者名(複数指定可)。デフォルト: `'anonymous'`                                                |
+| `description`  | `string`                                      | 書籍の説明                                                                          |
+| `language`     | `string`                                      | 言語コード(例: `'en'`)。デフォルト: `'en'`                                                 |
+| `publisher`    | `string`                                      | 出版社名。デフォルト: `'anonymous'`                                                      |
+| `cover`        | `string`                                      | 表紙画像。`file://`、`http(s)://`、`/public/...`、または相対パスを指定できます                       |
+| `outputPath`   | `string`                                      | 指定すると、バッファを返すだけでなく EPUB をファイルにも書き出します                                          |
+| `includePages` | `(page) => boolean`                           | フィルター: この関数が `true` を返すページのみを含めます                                              |
+| `excludePages` | `(page) => boolean`                           | フィルター: この関数が `true` を返すページを除外します                                               |
+| `getMarkdown`  | `(page) => string \| undefined`               | ページの Markdown。`undefined` の場合はスキップされます。デフォルト: `page.data.getText('processed')` |
+| `css`          | `string`                                      | EPUB 用のカスタム CSS。省略した場合は `defaultEpubStyles` が使用されます                            |
+| `publicDir`    | `string`                                      | `/public/...` の画像パスを解決するための public ディレクトリ。デフォルト: `./public`                    |
 
-`createEpubExportAPI` では、さらに 2 つのオプションを指定できます。`secret` (必須。ルートを保護します) と `filename` (ダウンロード時のファイル名。デフォルトは `docs.epub`) です。
+`createEpubExportAPI` では、さらに 2 つのオプションを指定できます。`secret`(必須。ルートを保護します)と `filename`(ダウンロード時のファイル名。デフォルトは `docs.epub`)です。
 
 ### カスタム CSS [#custom-css]
 
-デフォルトの EPUB スタイルを上書きできます。
+デフォルトの EPUB スタイルは、次のように上書きできます。
 
 ```ts
 import { exportEpub, defaultEpubStyles } from 'fumadocs-epub';
@@ -242,7 +243,7 @@ const buffer = await exportEpub({
   title: 'My Docs',
   author: 'Me',
   css: `${defaultEpubStyles}
-/* 独自のスタイルで上書き */
+/* カスタムスタイルによる上書き */
 body { font-size: 1.1em; }
 `,
 });
@@ -250,7 +251,7 @@ body { font-size: 1.1em; }
 
 ### ページのフィルタリング [#filtering-pages]
 
-`includePages` と `excludePages` を使うと、エクスポートするドキュメントを指定できます。
+`includePages` と `excludePages` を使用すると、エクスポートするドキュメントを指定できます。
 
 ```ts
 const buffer = await exportEpub({
