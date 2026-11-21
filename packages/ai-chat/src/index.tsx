@@ -317,7 +317,7 @@ export function AIChatInput({ className }: { className?: string }) {
           placeholder={chat.messages.length > 0 ? t('Ask a follow-up') : t('Ask a question')}
           className={cn(
             field,
-            'resize-none bg-transparent placeholder:text-fd-muted-foreground focus-visible:outline-none',
+            'resize-none bg-transparent placeholder:text-fd-muted-foreground focus-visible:outline-hidden',
           )}
           onChange={(e) => update(e.target.value)}
           onKeyDown={(e) => {
@@ -343,7 +343,7 @@ export function AIChatInput({ className }: { className?: string }) {
         type={busy ? 'button' : 'submit'}
         aria-label={busy ? t('Stop', { note: 'aria-label' }) : t('Send', { note: 'aria-label' })}
         disabled={!busy && !text}
-        className="flex size-7 shrink-0 items-center justify-center rounded-md bg-fd-primary text-fd-primary-foreground transition-[background-color,color,scale] duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fd-ring active:scale-90 disabled:bg-fd-accent disabled:text-fd-muted-foreground motion-reduce:transition-none"
+        className="flex size-7 shrink-0 items-center justify-center rounded-md bg-fd-primary text-fd-primary-foreground transition-[background-color,color,scale] duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)] focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-fd-ring active:scale-90 disabled:bg-fd-accent disabled:text-fd-muted-foreground motion-reduce:transition-none"
         onClick={
           busy
             ? () => {
@@ -452,7 +452,7 @@ export function AIChatSearch({
 
   return (
     <Collapsible.Root disabled={links.length === 0} className="motion-safe:animate-fd-fade-in">
-      <Collapsible.Trigger className="group/trigger -ms-1 flex max-w-full items-center gap-2 rounded-md py-0.5 ps-1 pe-1.5 text-start text-sm text-fd-muted-foreground transition-colors not-data-disabled:hover:text-fd-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fd-ring">
+      <Collapsible.Trigger className="group/trigger -ms-1 flex max-w-full items-center gap-2 rounded-md py-0.5 ps-1 pe-1.5 text-start text-sm text-fd-muted-foreground transition-colors not-data-disabled:hover:text-fd-accent-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-fd-ring">
         <span className="flex w-4 shrink-0 justify-center [&_svg]:size-3.5">
           {running ? <Spinner /> : <SearchIcon />}
         </span>

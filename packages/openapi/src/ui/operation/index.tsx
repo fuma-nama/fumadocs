@@ -525,7 +525,7 @@ function Callback({
 
   return (
     <Dialog.Root open={open} onOpenChange={setOpen}>
-      <Dialog.Trigger className="group grid w-full grid-cols-[auto_minmax(0,1fr)_auto] items-baseline gap-x-2 gap-y-1 border-t px-4 py-3 text-start transition-colors first:border-t-0 hover:bg-fd-accent/40 focus-visible:bg-fd-accent/40 focus-visible:outline-none">
+      <Dialog.Trigger className="group grid w-full grid-cols-[auto_minmax(0,1fr)_auto] items-baseline gap-x-2 gap-y-1 border-t px-4 py-3 text-start transition-colors first:border-t-0 hover:bg-fd-accent/40 focus-visible:bg-fd-accent/40 focus-visible:outline-hidden">
         <span className="col-span-2 font-mono text-[0.8125rem] font-medium">{item.name}</span>
         <ChevronRight className="row-span-2 ms-1 size-4 self-center text-fd-muted-foreground transition-transform group-hover:translate-x-0.5 motion-reduce:transition-none" />
         <MethodLabel className="text-xs">{item.method}</MethodLabel>
@@ -575,7 +575,8 @@ function Callback({
 /** browsers can't send the methods `fetch()` forbids, like TRACE */
 function canFetch(method: string): boolean {
   try {
-    new Request('http://localhost', { method });
+    // upper case like the fetcher sends it, undici warns about a lowercase `patch`
+    new Request('http://localhost', { method: method.toUpperCase() });
     return true;
   } catch {
     return false;

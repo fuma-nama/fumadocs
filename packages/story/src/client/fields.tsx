@@ -49,10 +49,10 @@ const slotClassName =
   'flex w-7 shrink-0 items-center justify-center @max-sm:pe-2 @max-sm:empty:w-2';
 
 const inputClassName =
-  'min-w-0 flex-1 bg-transparent px-3 text-fd-foreground outline-none placeholder:text-fd-muted-foreground/70';
+  'min-w-0 flex-1 bg-transparent px-3 text-fd-foreground outline-hidden placeholder:text-fd-muted-foreground/70';
 
 const rowButtonClassName =
-  'flex h-10 w-full items-center gap-2 px-4 last:h-11 last:pb-1 text-[0.8125rem] text-fd-muted-foreground transition-colors hover:bg-fd-accent/40 hover:text-fd-accent-foreground focus-visible:bg-fd-secondary focus-visible:text-fd-accent-foreground focus-visible:outline-none';
+  'flex h-10 w-full items-center gap-2 px-4 last:h-11 last:pb-1 text-[0.8125rem] text-fd-muted-foreground transition-colors hover:bg-fd-accent/40 hover:text-fd-accent-foreground focus-visible:bg-fd-secondary focus-visible:text-fd-accent-foreground focus-visible:outline-hidden';
 
 /** the type a field is edited as, unions resolve to the member matching its value */
 export function resolveNode(node: TypeNode, value: unknown): TypeNode {
@@ -154,7 +154,7 @@ function TypeSelect({
     <Select items={items} value={value} onValueChange={(v) => v !== null && onChange(v)}>
       <SelectPrimitive.Trigger
         aria-label={t('Type')}
-        className="flex h-5 max-w-40 min-w-0 cursor-pointer items-center gap-0.5 rounded-md border bg-fd-secondary ps-1.5 pe-1 font-mono text-xs text-fd-muted-foreground transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fd-ring/50 data-popup-open:bg-fd-accent data-popup-open:text-fd-accent-foreground"
+        className="flex h-5 max-w-40 min-w-0 cursor-pointer items-center gap-0.5 rounded-md border bg-fd-secondary ps-1.5 pe-1 font-mono text-xs text-fd-muted-foreground transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-fd-ring/50 data-popup-open:bg-fd-accent data-popup-open:text-fd-accent-foreground"
       >
         <SelectValue className="truncate" />
         <SelectPrimitive.Icon className="shrink-0">
@@ -228,7 +228,7 @@ function SlotButton({
       aria-label={label}
       title={label}
       onClick={onClick}
-      className="inline-flex size-5 items-center justify-center rounded text-fd-muted-foreground transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fd-ring [&_svg]:size-3"
+      className="inline-flex size-5 items-center justify-center rounded text-fd-muted-foreground transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-fd-ring [&_svg]:size-3"
     >
       {children}
     </button>
@@ -335,7 +335,7 @@ function FieldInput({
       >
         <SelectTrigger
           id={id}
-          className="h-auto min-w-0 flex-1 rounded-none border-0 bg-transparent py-0 ps-3 pe-1 font-mono text-[0.8125rem] hover:bg-transparent focus:ring-0 focus-visible:outline-none"
+          className="h-auto min-w-0 flex-1 rounded-none border-0 bg-transparent py-0 ps-3 pe-1 font-mono text-[0.8125rem] hover:bg-transparent focus:ring-0 focus-visible:outline-hidden"
         >
           <SelectValue className="truncate" placeholder={t('Select')} />
         </SelectTrigger>
@@ -359,7 +359,7 @@ function FieldInput({
             type="button"
             aria-pressed={value === option}
             onClick={() => onChange(option)}
-            className="h-6 rounded px-2 font-mono text-xs text-fd-muted-foreground transition-colors hover:text-fd-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fd-ring aria-pressed:bg-fd-background aria-pressed:text-fd-foreground aria-pressed:shadow-sm aria-pressed:ring-1 aria-pressed:ring-fd-border dark:aria-pressed:bg-fd-accent"
+            className="h-6 rounded px-2 font-mono text-xs text-fd-muted-foreground transition-colors hover:text-fd-accent-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-fd-ring aria-pressed:bg-fd-background aria-pressed:text-fd-foreground aria-pressed:shadow-sm aria-pressed:ring-1 aria-pressed:ring-fd-border dark:aria-pressed:bg-fd-accent"
           >
             {String(option)}
           </button>
@@ -454,7 +454,7 @@ function NavRow({
         id={id}
         type="button"
         onClick={onNavigate}
-        className="group/nav flex min-w-0 flex-1 items-center ps-3 text-start outline-none"
+        className="group/nav flex min-w-0 flex-1 items-center ps-3 text-start outline-hidden"
       >
         <span
           className={cn(
@@ -561,7 +561,7 @@ function ObjectRows({
           <SelectTrigger
             className={cn(
               rowButtonClassName,
-              'rounded-none border-0 border-b bg-transparent p-0 ps-4 pe-1.75 last:border-b-0 focus:ring-0',
+              'rounded-none border-0 bg-transparent p-0 ps-4 pe-1.75 focus:ring-0',
             )}
           >
             <Plus className="size-3.5" />

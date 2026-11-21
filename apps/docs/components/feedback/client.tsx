@@ -168,7 +168,7 @@ export function Feedback({
               required
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              className="border rounded-lg bg-fd-secondary text-fd-secondary-foreground p-3 resize-none focus-visible:outline-none placeholder:text-fd-muted-foreground"
+              className="border rounded-lg bg-fd-secondary text-fd-secondary-foreground p-3 resize-none focus-visible:outline-hidden placeholder:text-fd-muted-foreground"
               placeholder="Leave your feedback..."
               onKeyDown={(e) => {
                 // keyCode 229: Safari fires `compositionend` before this keydown, `isComposing` is already false
@@ -463,7 +463,7 @@ function FeedbackTextForm({
         required
         value={message}
         onChange={(e) => setMessage(e.target.value)}
-        className="border rounded-lg bg-fd-secondary text-fd-secondary-foreground p-3 resize-none focus-visible:outline-none placeholder:text-fd-muted-foreground"
+        className="border rounded-lg bg-fd-secondary text-fd-secondary-foreground p-3 resize-none focus-visible:outline-hidden placeholder:text-fd-muted-foreground"
         placeholder="Leave your feedback..."
         onKeyDown={(e) => {
           // keyCode 229: Safari fires `compositionend` before this keydown, `isComposing` is already false

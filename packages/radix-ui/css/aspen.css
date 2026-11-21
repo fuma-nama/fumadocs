@@ -3,14 +3,14 @@
 @theme {
   --color-fd-background: hsl(75, 45%, 96%);
   --color-fd-foreground: hsl(75, 35%, 18%);
-  --color-fd-primary: hsl(80, 60%, 40%);
-  --color-fd-primary-foreground: hsl(80, 100%, 16%);
+  --color-fd-primary: hsl(80, 90%, 23%);
+  --color-fd-primary-foreground: hsl(75, 45%, 96%);
   --color-fd-border: hsla(80, 35%, 70%, 0.5);
-  --color-fd-ring: hsl(80, 60%, 40%);
+  --color-fd-ring: hsl(80, 90%, 23%);
   --color-fd-accent: hsl(75, 50%, 90%);
-  --color-fd-accent-foreground: hsl(80, 60%, 22%);
+  --color-fd-accent-foreground: hsl(80, 60%, 20.5%);
   --color-fd-muted: hsl(75, 40%, 92%);
-  --color-fd-muted-foreground: hsl(75, 25%, 45%);
+  --color-fd-muted-foreground: hsl(75, 25%, 34.5%);
   --color-fd-secondary: hsl(80, 45%, 88%);
   --color-fd-secondary-foreground: hsl(80, 50%, 18%);
   --color-fd-card: hsl(75, 45%, 94%);

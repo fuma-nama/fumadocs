@@ -81,7 +81,7 @@ export const handler = $routeHandler(
   },
   async (req) => {
     const reqJson = await req.json();
-    const modelId = process.env.LLM_GATEWAY_MODEL ?? 'anthropic/claude-3.5-sonnet';
+    const modelId = process.env.LLM_GATEWAY_MODEL ?? 'anthropic/claude-sonnet-5-5';
 
     const result = streamText({
       model: llmgateway.chat(modelId as never),

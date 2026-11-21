@@ -2,17 +2,17 @@
 
 @theme {
   --color-fd-popover: hsl(220, 22%, 92%);
-  --color-fd-popover-foreground: hsl(234, 16%, 35%);
+  --color-fd-popover-foreground: hsl(234, 16%, 29%);
   --color-fd-secondary-foreground: hsl(234, 16%, 35%);
   --color-fd-border: hsl(223, 16%, 83%);
-  --color-fd-primary: hsl(266, 85%, 58%);
+  --color-fd-primary: hsl(266, 85%, 53%);
   --color-fd-primary-foreground: hsl(220, 22%, 92%);
   --color-fd-muted: hsl(220, 22%, 92%);
   --color-fd-card: hsl(220, 22%, 92%);
-  --color-fd-accent: hsl(223, 16%, 83%);
-  --color-fd-accent-foreground: hsl(234, 16%, 35%);
+  --color-fd-accent: hsla(223, 16%, 83%, 0.5);
+  --color-fd-accent-foreground: hsl(234, 16%, 29%);
   --color-fd-card-foreground: hsl(234, 16%, 35%);
-  --color-fd-muted-foreground: hsl(233, 10%, 47%);
+  --color-fd-muted-foreground: hsl(233, 13%, 41%);
   --color-fd-foreground: hsl(234, 16%, 35%);
   --color-fd-secondary: hsl(220, 22%, 92%);
   --color-fd-background: hsl(220, 23%, 95%);
@@ -40,10 +40,14 @@
 
 #nd-sidebar {
   --color-fd-secondary: hsl(223, 16%, 83%);
-  --color-fd-muted: hsl(223, 16%, 83%);
+  --color-fd-muted: hsla(223, 16%, 83%, 0.5);
 }
 
 .dark #nd-sidebar {
   --color-fd-secondary: hsl(237, 16%, 23%);
   --color-fd-muted: hsl(237, 16%, 23%);
+}
+
+.prose {
+  --tw-prose-body: var(--color-fd-foreground);
 }

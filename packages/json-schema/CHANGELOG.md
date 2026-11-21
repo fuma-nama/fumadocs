@@ -1,3 +1,9 @@
+## @fumadocs/json-schema@0.3.6
+
+### Fix playground crash on free-form JSON request bodies
+
+- The playground no longer crashes with free-form JSON request bodies.
+
 ## @fumadocs/json-schema@0.3.5
 
 ### Schema UI links through unions

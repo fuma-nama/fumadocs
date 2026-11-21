@@ -140,6 +140,7 @@ function SidebarContent({ ref: refProp, className, children, ...props }: Compone
           'fixed inset-0 py-10 z-30 backdrop-blur-md bg-fd-background/60',
           !open && 'pointer-events-none',
         )}
+        inert={!open}
         initial="hide"
         variants={{
           show: {

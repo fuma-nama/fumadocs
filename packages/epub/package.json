@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-epub",
-  "version": "1.2.4",
+  "version": "1.2.5",
   "description": "EPUB export for Fumadocs documentation",
   "keywords": [
     "documentation",

@@ -102,7 +102,7 @@ export function AccordionTrigger(props: ComponentProps<typeof Primitive.Trigger>
     <Primitive.Trigger
       {...props}
       className={cn(
-        'flex flex-1 items-center gap-1 text-start group/accordion py-2 focus-visible:outline-none',
+        'flex flex-1 items-center gap-1 text-start group/accordion py-2 focus-visible:outline-hidden',
         props.className,
       )}
     >

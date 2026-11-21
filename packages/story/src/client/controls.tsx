@@ -37,7 +37,7 @@ const easing = 'motion-safe:duration-300 motion-safe:ease-[cubic-bezier(0.16,1,0
 const transitionClassName = cn('motion-safe:transition-[opacity,translate]', easing);
 
 const crumbClassName =
-  'truncate rounded-md px-1.5 py-1 text-fd-muted-foreground transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fd-ring';
+  'truncate rounded-md px-1.5 py-1 text-fd-muted-foreground transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-fd-ring';
 
 /** the arguments of a story, nested fields open in a panel over them */
 export function Controls({ node, onReset }: { node: TypeNode; onReset: () => void }) {

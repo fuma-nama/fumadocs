@@ -55,10 +55,11 @@ export function TOC({ container, header, footer }: TOCProps) {
   } = useGlassLayout();
   const [hover, setHover] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [focused, setFocused] = useState(false);
   const [inAnimation, setInAnimation] = useState(false);
   const exitTimerRef = useRef<number>(null);
   const transitionTimerRef = useRef<number>(null);
-  const open = hover || mobileOpen;
+  const open = hover || mobileOpen || focused;
 
   useOnChange(open, () => {
     setInAnimation(true);
@@ -105,6 +106,12 @@ export function TOC({ container, header, footer }: TOCProps) {
             : 'max-md:w-4 max-md:ps-[calc(--spacing(1.5)-1px)] max-xl:w-6 max-xl:ps-[calc(--spacing(2.5)-1px)] max-xl:overflow-clip',
           container?.className,
         )}
+        onFocus={(e) => {
+          if (e.target.matches(':focus-visible')) setFocused(true);
+        }}
+        onBlur={(e) => {
+          if (!e.currentTarget.contains(e.relatedTarget)) setFocused(false);
+        }}
         onPointerDown={(e) => {
           if (!mobileOpen && (e.pointerType === 'touch' || e.pointerType === 'pen')) {
             setMobileOpen(true);

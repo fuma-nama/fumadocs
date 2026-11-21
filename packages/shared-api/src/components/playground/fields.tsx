@@ -65,7 +65,7 @@ export type NavigateFn = (entry: FieldEntry, siblings: FieldEntry[]) => void;
 
 /** a segment of the type pill, the type or an action on the field */
 const segmentClassName =
-  'flex items-center transition-colors not-first:border-s hover:bg-fd-accent hover:text-fd-accent-foreground focus-visible:bg-fd-accent focus-visible:outline-none data-popup-open:bg-fd-accent data-popup-open:text-fd-accent-foreground';
+  'flex items-center transition-colors not-first:border-s hover:bg-fd-accent hover:text-fd-accent-foreground focus-visible:bg-fd-accent focus-visible:outline-hidden data-popup-open:bg-fd-accent data-popup-open:text-fd-accent-foreground';
 
 /** the type of a field and the actions on it, like changing its type or unsetting it */
 function TypePill({
@@ -97,7 +97,7 @@ function TypePill({
 }
 
 const rowButtonClassName =
-  'flex h-10 w-full items-center gap-2 px-4 text-[0.8125rem] text-fd-muted-foreground transition-colors hover:bg-fd-accent/40 hover:text-fd-accent-foreground focus-visible:bg-fd-secondary focus-visible:text-fd-accent-foreground focus-visible:outline-none';
+  'flex h-10 w-full items-center gap-2 px-4 text-[0.8125rem] text-fd-muted-foreground transition-colors hover:bg-fd-accent/40 hover:text-fd-accent-foreground focus-visible:bg-fd-secondary focus-visible:text-fd-accent-foreground focus-visible:outline-hidden';
 
 function getType(field: Schema): string | undefined {
   if (typeof field.type === 'string') return field.type;
@@ -354,14 +354,14 @@ export function Row({
               title={name}
               className={cn(
                 nameClassName,
-                'cursor-help rounded-sm decoration-dotted underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fd-ring data-popup-open:underline',
+                'cursor-help rounded-sm decoration-dotted underline-offset-4 hover:underline focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-fd-ring data-popup-open:underline',
               )}
             >
               {name}
             </Popover.Trigger>
             <Popover.Portal>
               <Popover.Positioner side="bottom" align="start" sideOffset={6} className="z-50">
-                <Popover.Popup className="w-72 max-w-[calc(100vw-2rem)] origin-(--transform-origin) wrap-break-word rounded-xl border bg-fd-popover p-3 text-fd-popover-foreground shadow-lg outline-none transition-[opacity,scale] duration-150 ease-out data-ending-style:scale-95 data-ending-style:opacity-0 data-starting-style:scale-95 data-starting-style:opacity-0 motion-reduce:transition-none">
+                <Popover.Popup className="w-72 max-w-[calc(100vw-2rem)] origin-(--transform-origin) wrap-break-word rounded-xl border bg-fd-popover p-3 text-fd-popover-foreground shadow-lg outline-hidden transition-[opacity,scale] duration-150 ease-out data-ending-style:scale-95 data-ending-style:opacity-0 data-starting-style:scale-95 data-starting-style:opacity-0 motion-reduce:transition-none">
                   {info}
                 </Popover.Popup>
               </Popover.Positioner>
@@ -620,7 +620,7 @@ function FieldValue({ id, fieldName, field }: { id: string; fieldName: FieldKey;
         if (!isNumber) setValue(e.target.value);
         else setValue(Number.isNaN(e.target.valueAsNumber) ? undefined : e.target.valueAsNumber);
       }}
-      className="min-w-0 flex-1 bg-transparent px-3 text-fd-foreground outline-none placeholder:text-fd-muted-foreground/70"
+      className="min-w-0 flex-1 bg-transparent px-3 text-fd-foreground outline-hidden placeholder:text-fd-muted-foreground/70"
     />
   );
 }
@@ -666,7 +666,7 @@ function NavRow({
         id={id}
         type="button"
         onClick={onNavigate}
-        className="flex min-w-0 flex-1 items-center px-3 text-start outline-none"
+        className="flex min-w-0 flex-1 items-center px-3 text-start outline-hidden"
       >
         {preview !== null ? (
           <span className="truncate font-mono text-xs">{preview}</span>
@@ -704,7 +704,7 @@ export function CellSelect({
       {/* the whole cell opens it */}
       <SelectPrimitive.Trigger
         id={id}
-        className="flex min-w-0 flex-1 cursor-pointer items-center px-3 text-start text-fd-foreground outline-none data-placeholder:text-fd-muted-foreground"
+        className="flex min-w-0 flex-1 cursor-pointer items-center px-3 text-start text-fd-foreground outline-hidden data-placeholder:text-fd-muted-foreground"
       >
         {/* the arrow ends the cell, so arrows line up across rows */}
         <span className="flex min-w-0 flex-1 items-center justify-between gap-2 font-mono text-xs">
@@ -768,7 +768,7 @@ function CellAutocomplete({
           id={id}
           spellCheck={false}
           placeholder={placeholder}
-          className="min-w-0 flex-1 self-stretch bg-transparent px-3 text-fd-foreground outline-none placeholder:text-fd-muted-foreground/70"
+          className="min-w-0 flex-1 self-stretch bg-transparent px-3 text-fd-foreground outline-hidden placeholder:text-fd-muted-foreground/70"
         />
       </Autocomplete.InputGroup>
       <Autocomplete.Portal>
@@ -779,7 +779,7 @@ function CellAutocomplete({
                 <Autocomplete.Item
                   key={item.value}
                   value={item}
-                  className="flex select-none items-center gap-2 rounded-md px-2 py-1.5 text-[0.8125rem] outline-none data-highlighted:bg-fd-accent data-highlighted:text-fd-accent-foreground"
+                  className="flex select-none items-center gap-2 rounded-md px-2 py-1.5 text-[0.8125rem] outline-hidden data-highlighted:bg-fd-accent data-highlighted:text-fd-accent-foreground"
                 >
                   {item.label}
                   {item.value === value && (
@@ -896,7 +896,7 @@ export function CheckRow({
         role="checkbox"
         aria-checked={checked}
         onClick={() => onCheckedChange(!checked)}
-        className="flex min-w-0 flex-1 items-center gap-2 px-3 text-start outline-none"
+        className="flex min-w-0 flex-1 items-center gap-2 px-3 text-start outline-hidden"
       >
         <span className="min-w-0 flex-1 truncate text-fd-muted-foreground">{children}</span>
         <span className="flex shrink-0">
@@ -983,7 +983,7 @@ function QuietRow({
         type="button"
         aria-label={label}
         onClick={edit}
-        className="flex min-w-0 flex-1 items-center px-3 text-start text-fd-muted-foreground/70 outline-none"
+        className="flex min-w-0 flex-1 items-center px-3 text-start text-fd-muted-foreground/70 outline-hidden"
       >
         {/* what adding it gives */}
         {hint !== undefined && (
@@ -1129,7 +1129,7 @@ function ObjectRows({
       {hiddenKeys.length > 0 && (
         <Select value={null} onValueChange={(v) => v !== null && onAppend(v)}>
           <SelectPrimitive.Trigger
-            className={cn(rowButtonClassName, 'cursor-pointer border-b last:border-b-0')}
+            className={cn(rowButtonClassName, 'cursor-pointer', isDynamic && 'border-b')}
           >
             <Plus className="size-3.5 shrink-0" />
             <span className="flex min-w-0 items-center gap-1.5">
@@ -1174,7 +1174,7 @@ function NewPropertyRow({ onAppend }: { onAppend: (name: string) => void }) {
           e.preventDefault();
           add();
         }}
-        className="h-10 min-w-0 flex-1 bg-transparent font-mono text-[0.8125rem] outline-none placeholder:text-fd-muted-foreground/70"
+        className="h-10 min-w-0 flex-1 bg-transparent font-mono text-[0.8125rem] outline-hidden placeholder:text-fd-muted-foreground/70"
       />
       <button
         type="button"

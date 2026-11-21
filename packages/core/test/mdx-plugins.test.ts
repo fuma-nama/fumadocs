@@ -247,6 +247,19 @@ test('Remark Admonition', async () => {
   );
 });
 
+test('Remark Directive Admonition: authored directive in Markdown output', async () => {
+  const value = ':::tip[A `title`]\n\nHello World\n\n:::\n';
+  const file = new VFile({ value, data: { unstable_runtimeOutputs: true } });
+  const processor = remark()
+    .use(remarkMdx)
+    .use(remarkDirective)
+    .use(remarkDirectiveAdmonition)
+    .use(remarkLLMs, { _data: true });
+  await processor.run(processor.parse(file), file);
+
+  expect(file.data.markdown).toBe(value);
+});
+
 test('Remark Steps', async () => {
   const content = await fs.readFile(path.resolve(cwd, './fixtures/remark-steps.md'));
   const processor = remark().use(remarkSteps).use(remarkMdx);

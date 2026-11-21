@@ -13,7 +13,7 @@ export default function Example() {
         <select
           value={lang}
           onChange={(e) => setLang(e.target.value)}
-          className="w-fit bg-transparent px-4 py-2 text-sm focus-visible:outline-none"
+          className="w-fit bg-transparent px-4 py-2 text-sm focus-visible:outline-hidden"
         >
           {Object.keys(bundledLanguages).map((lang) => (
             <option value={lang} key={lang} className="bg-fd-card text-fd-card-foreground">
@@ -24,7 +24,7 @@ export default function Example() {
         <textarea
           value={code}
           onChange={(e) => setCode(e.target.value)}
-          className="bg-transparent px-4 py-2 text-sm focus-visible:outline-none"
+          className="bg-transparent px-4 py-2 text-sm focus-visible:outline-hidden"
         />
       </div>
       <DynamicCodeBlock

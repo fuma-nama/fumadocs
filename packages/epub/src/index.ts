@@ -119,7 +119,9 @@ export async function exportEpub<C extends LoaderConfig>(
     source: input,
     getMarkdown = async (page) => {
       try {
-        return await (page.data as { getText: (type: string) => Promise<string> }).getText('raw');
+        return await (page.data as { getText: (type: string) => Promise<string> }).getText(
+          'processed',
+        );
       } catch {
         console.warn(
           `Failed to get processed markdown for page "${page.absolutePath ?? page.path}", please specify the "getMarkdown" option.`,

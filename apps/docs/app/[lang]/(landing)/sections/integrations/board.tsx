@@ -43,7 +43,7 @@ export function Board({
   }
 
   const title =
-    '-ms-0.75 px-0.75 text-[28px] leading-none tracking-[-0.02em] group-hover:bg-lp-yellow group-hover:text-lp-on-yellow group-data-focus:bg-lp-yellow group-data-focus:text-lp-on-yellow focus-visible:outline-none';
+    '-ms-0.75 px-0.75 text-[28px] leading-none tracking-[-0.02em] group-hover:bg-lp-yellow group-hover:text-lp-on-yellow group-data-focus:bg-lp-yellow group-data-focus:text-lp-on-yellow focus-visible:outline-hidden';
   const commands: string[] = [];
   const cells = [];
   for (let i = 0; i < modules.length; i++) {
@@ -219,7 +219,7 @@ function Install({ commands, command }: { commands: string[]; command: string })
           type="button"
           onClick={onCopy}
           aria-label={copied ? 'Copied' : `Copy "${command}"`}
-          className="flex size-6 shrink-0 items-center justify-center border border-lp-line-strong transition-none hover:bg-lp-ink hover:text-lp-paper focus-visible:bg-lp-ink focus-visible:text-lp-paper focus-visible:outline-none"
+          className="flex size-6 shrink-0 items-center justify-center border border-lp-line-strong transition-none hover:bg-lp-ink hover:text-lp-paper focus-visible:bg-lp-ink focus-visible:text-lp-paper focus-visible:outline-hidden"
         >
           {copied ? <Check className="size-3.5" /> : <Clipboard className="size-3.5" />}
         </button>

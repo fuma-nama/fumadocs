@@ -73,7 +73,7 @@ export function LayoutTabsDropdown({
               <p
                 className={cn(
                   'mt-1 text-xs text-fd-muted-foreground empty:hidden',
-                  selected === t && 'text-fd-primary/80',
+                  selected === t && 'text-fd-primary',
                 )}
               >
                 {t.description}

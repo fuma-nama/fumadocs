@@ -1,5 +1,6 @@
 import type { CloudManager } from '@oramacloud/client';
 import type { StructuredData } from '@/mdx-plugins';
+import { recordId } from './server/build-doc';
 
 export interface SyncOptions {
   /**
@@ -123,7 +124,7 @@ function toIndex(page: OramaDocument): OramaIndex[] {
     table?: string,
   ): OramaIndex {
     return {
-      id: `${page.id}-${(id++).toString()}`,
+      id: recordId(page.id, id++),
       title: page.title,
       url: page.url,
       page_id: page.id,

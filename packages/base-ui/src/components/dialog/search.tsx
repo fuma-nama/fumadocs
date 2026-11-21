@@ -274,7 +274,7 @@ export function SearchDialogInput(props: ComponentProps<'input'>) {
       placeholder={t('Search')}
       {...props}
       className={cn(
-        'w-0 flex-1 bg-transparent text-lg placeholder:text-fd-muted-foreground focus-visible:outline-none',
+        'w-0 flex-1 bg-transparent text-lg placeholder:text-fd-muted-foreground focus-visible:outline-hidden',
         props.className,
       )}
     />
@@ -357,15 +357,16 @@ export function SearchDialogContent({
         }}
         className={(s) =>
           cn(
-            'fixed left-1/2 top-4 md:top-[calc(50%-250px)] z-50 w-[calc(100%-1rem)] max-w-screen-sm -translate-x-1/2 rounded-xl border bg-fd-popover text-fd-popover-foreground shadow-2xl overflow-hidden data-closed:animate-fd-dialog-out data-open:animate-fd-dialog-in focus-visible:outline-none',
-            '*:border-b *:has-[+:last-child[data-empty=true]]:border-b-0 *:data-[empty=true]:border-b-0 *:last:border-b-0',
+            'fixed left-1/2 top-4 md:top-[calc(50%-250px)] z-50 w-[calc(100%-1rem)] max-w-screen-sm -translate-x-1/2 rounded-xl border bg-fd-popover text-fd-popover-foreground shadow-2xl overflow-hidden data-closed:animate-fd-dialog-out data-open:animate-fd-dialog-in focus-visible:outline-hidden',
+            // lines above children, so an empty list or an empty (hidden) footer draws none
+            '*:not-first:border-t *:data-[empty=true]:border-t-0',
             typeof className === 'function' ? className(s) : className,
           )
         }
         {...props}
       >
-        <Dialog.Title className="hidden">{t('Search')}</Dialog.Title>
         {children}
+        <Dialog.Title className="hidden">{t('Search')}</Dialog.Title>
       </Dialog.Popup>
     </Dialog.Portal>
   );

@@ -1,8 +1,9 @@
 import type { StructuredData } from '@/mdx-plugins';
-import type { AnyObject, OramaCloud } from '@orama/core';
+import type { AnyObject, OramaCloud, Transaction } from '@orama/core';
 import type { LoaderConfig, LoaderOutput } from '@/source/loader';
 import type { Awaitable } from '@/types';
 import { buildDocuments } from './server/build-index';
+import { recordId } from './server/build-doc';
 
 export interface SyncOptions {
   /**
@@ -13,7 +14,7 @@ export interface SyncOptions {
   documents: OramaDocument[];
 
   /**
-   * Deploy changes
+   * Commit the transaction, which replaces the live index. When `false`, commit or roll back the transaction that `sync()` returns.
    *
    * @defaultValue true
    */
@@ -110,33 +111,41 @@ export function toDocuments<C extends LoaderConfig>(
   }));
 }
 
-export async function sync(orama: OramaCloud, options: SyncOptions): Promise<void> {
+/**
+ * Replace the documents of an index in a transaction.
+ *
+ * @returns the transaction, commit it to deploy the documents when `autoDeploy` is `false`
+ */
+export async function sync(orama: OramaCloud, options: SyncOptions): Promise<Transaction> {
   const { autoDeploy = true } = options;
-  const index = orama.index.set(options.index);
-  await index.transaction.open();
+  const { transaction } = orama.index.set(options.index);
+  await transaction.open();
+  await transaction.insertDocuments(options.documents.flatMap(toIndex) as unknown as AnyObject[]);
 
-  await index.transaction.insertDocuments(
-    options.documents.flatMap(toIndex) as unknown as AnyObject[],
-  );
-
-  if (autoDeploy) await index.transaction.commit();
+  if (autoDeploy) await transaction.commit();
+  return transaction;
 }
 
-export async function syncI18n(orama: OramaCloud, options: I18nSyncOptions): Promise<void> {
-  const { autoDeploy = true, indexes } = options;
-
-  const tasks = options.documents.map(async (document) => {
-    const index = orama.index.set(indexes[document.locale]);
-    await index.transaction.open();
-
-    await index.transaction.insertDocuments(
-      document.items.flatMap(toIndex) as unknown as AnyObject[],
-    );
-
-    if (autoDeploy) await index.transaction.commit();
-  });
-
-  await Promise.all(tasks);
+/**
+ * Like `sync()`, for the index of each locale.
+ *
+ * @returns the transaction of each locale
+ */
+export async function syncI18n(
+  orama: OramaCloud,
+  { indexes, documents, ...options }: I18nSyncOptions,
+): Promise<Record<string, Transaction>> {
+  const transactions: Record<string, Transaction> = {};
+  await Promise.all(
+    documents.map(async ({ locale, items }) => {
+      transactions[locale] = await sync(orama, {
+        ...options,
+        index: indexes[locale],
+        documents: items,
+      });
+    }),
+  );
+  return transactions;
 }
 
 function toIndex(page: OramaDocument): OramaIndex[] {
@@ -151,7 +160,7 @@ function toIndex(page: OramaDocument): OramaIndex[] {
     table?: string,
   ): OramaIndex {
     return {
-      id: `${page.id}-${(id++).toString()}`,
+      id: recordId(page.id, id++),
       title: page.title,
       url: page.url,
       page_id: page.id,

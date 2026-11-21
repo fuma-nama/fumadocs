@@ -26,19 +26,20 @@ export function LanguageSelect({
   return (
     <Popover>
       <PopoverTrigger
-        aria-label={t('Choose a language', { note: 'aria-label' })}
         className={(s) =>
           cn(buttonVariants({ variant }), 'gap-1.5 p-1.5', s.open && 'bg-fd-accent', className)
         }
         {...rest}
       >
         {children}
+        <span className="sr-only">{chooseLanguage}</span>
       </PopoverTrigger>
       <PopoverContent className="flex flex-col gap-0.5 p-1">
         <p className="p-2 text-xs font-medium text-fd-muted-foreground">{chooseLanguage}</p>
         {context.locales.map((item) => (
           <PopoverClose
             key={item.locale}
+            lang={item.locale}
             className={cn(
               'px-2 py-1.5 text-start text-sm rounded-lg transition-colors',
               item.locale === context.locale
@@ -63,5 +64,9 @@ export function LanguageSelectText(props: LanguageSelectTextProps) {
   const { locales, locale } = useI18n();
   const text = locales?.find((item) => item.locale === locale)?.name;
 
-  return <span {...props}>{text}</span>;
+  return (
+    <span lang={locale} {...props}>
+      {text}
+    </span>
+  );
 }

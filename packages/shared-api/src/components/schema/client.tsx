@@ -39,7 +39,7 @@ const TypeContext = createContext<{
 const typeClassName = 'font-mono text-xs text-fd-muted-foreground';
 
 const crumbClassName =
-  'truncate rounded-md px-1.5 py-1 text-fd-muted-foreground transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-fd-ring data-popup-open:bg-fd-accent';
+  'truncate rounded-md px-1.5 py-1 text-fd-muted-foreground transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-fd-ring data-popup-open:bg-fd-accent';
 
 const chevronClassName = 'size-3.5 shrink-0 text-fd-muted-foreground/60';
 
@@ -253,7 +253,7 @@ function SchemaCard({
                   onChange={(e) => setFilter({ key: panelKey, value: e.target.value })}
                   aria-label={t('Filter Properties')}
                   placeholder={t('Filter Properties')}
-                  className="min-w-0 flex-1 bg-transparent text-[0.8125rem] text-fd-foreground outline-none placeholder:text-fd-muted-foreground"
+                  className="min-w-0 flex-1 bg-transparent text-[0.8125rem] text-fd-foreground outline-hidden placeholder:text-fd-muted-foreground"
                 />
               </label>
             )}
@@ -330,7 +330,7 @@ function Breadcrumbs({
         <Menu.Item
           key={i}
           onClick={() => onBack(i)}
-          className="truncate rounded-md px-2 py-1.5 outline-none data-highlighted:bg-fd-accent data-highlighted:text-fd-accent-foreground"
+          className="truncate rounded-md px-2 py-1.5 outline-hidden data-highlighted:bg-fd-accent data-highlighted:text-fd-accent-foreground"
         >
           {name}
         </Menu.Item>,
@@ -375,7 +375,7 @@ function Breadcrumbs({
           </Menu.Trigger>
           <Menu.Portal>
             <Menu.Positioner align="start" sideOffset={4} className="z-50">
-              <Menu.Popup className="flex max-h-(--available-height) max-w-72 min-w-40 origin-(--transform-origin) flex-col overflow-y-auto rounded-xl border bg-fd-popover p-1 font-mono text-[0.8125rem] text-fd-popover-foreground shadow-lg outline-none transition-[opacity,scale] duration-150 ease-[cubic-bezier(0.22,1,0.36,1)] data-ending-style:scale-[0.97] data-ending-style:opacity-0 data-starting-style:scale-95 data-starting-style:opacity-0 motion-reduce:transition-none">
+              <Menu.Popup className="flex max-h-(--available-height) max-w-72 min-w-40 origin-(--transform-origin) flex-col overflow-y-auto rounded-xl border bg-fd-popover p-1 font-mono text-[0.8125rem] text-fd-popover-foreground shadow-lg outline-hidden transition-[opacity,scale] duration-150 ease-[cubic-bezier(0.22,1,0.36,1)] data-ending-style:scale-[0.97] data-ending-style:opacity-0 data-starting-style:scale-95 data-starting-style:opacity-0 motion-reduce:transition-none">
                 {menuItems}
               </Menu.Popup>
             </Menu.Positioner>
@@ -682,7 +682,7 @@ function OpenTag({
       onClick={() => open(name, $ref)}
       className={cn(
         tagClassName,
-        'group/open inline-flex max-w-full items-center gap-1.5 text-start transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fd-ring aria-expanded:bg-fd-accent',
+        'group/open inline-flex max-w-full items-center gap-1.5 text-start transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-fd-ring aria-expanded:bg-fd-accent',
       )}
     >
       <span className="not-prose shrink-0 text-fd-muted-foreground">{label}</span>

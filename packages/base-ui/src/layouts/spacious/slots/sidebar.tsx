@@ -27,7 +27,7 @@ export type SidebarProps = ComponentProps<'aside'>;
 
 /** the hover fill comes from the gliding block of `SidebarItems` */
 const itemVariants = cva(
-  'relative flex w-full items-center gap-3 rounded-lg px-2.5 py-2 text-start wrap-anywhere outline-none transition-colors focus-visible:ring-2 focus-visible:ring-fd-ring [&_svg]:size-4 [&_svg]:shrink-0',
+  'relative flex w-full items-center gap-3 rounded-lg px-2.5 py-2 text-start wrap-anywhere outline-hidden transition-colors focus-visible:ring-2 focus-visible:ring-fd-ring [&_svg]:size-4 [&_svg]:shrink-0',
   {
     variants: {
       active: {
@@ -177,13 +177,22 @@ function TabsMenus() {
   if (start >= groups.length) return;
 
   return (
-    <div className="flex flex-col rounded-xl border bg-fd-secondary/50 divide-y overflow-clip">
-      {groups.map((group, i) => i >= start && <TabsMenu key={i} options={group.options} />)}
+    <div className="flex flex-col rounded-xl border bg-fd-secondary/50 overflow-clip">
+      {groups.map(
+        (group, i) =>
+          i >= start && (
+            <TabsMenu
+              key={i}
+              options={group.options}
+              className={i > start ? 'border-t' : undefined}
+            />
+          ),
+      )}
     </div>
   );
 }
 
-function TabsMenu({ options }: { options: LayoutTab[] }) {
+function TabsMenu({ options, className }: { options: LayoutTab[]; className?: string }) {
   const t = useTranslations();
   const pathname = usePathname();
   const path = useTreePath();
@@ -191,7 +200,12 @@ function TabsMenu({ options }: { options: LayoutTab[] }) {
 
   return (
     <Menu.Root>
-      <Menu.Trigger className="flex w-full h-10 items-center gap-3 ps-[calc(--spacing(2.5)-1px)] pe-2.5 text-start font-medium outline-none transition-colors hover:bg-fd-accent focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-fd-ring data-popup-open:bg-fd-accent [&_svg]:size-4 [&_svg]:shrink-0">
+      <Menu.Trigger
+        className={cn(
+          'flex w-full h-10 items-center gap-3 ps-[calc(--spacing(2.5)-1px)] pe-2.5 text-start font-medium outline-hidden transition-colors hover:bg-fd-accent focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-fd-ring data-popup-open:bg-fd-accent [&_svg]:size-4 [&_svg]:shrink-0',
+          className,
+        )}
+      >
         {selected && <TabIcon tab={selected} />}
         <span className={cn('flex-1 truncate', !selected && 'text-fd-muted-foreground')}>
           {selected ? selected.title : t('Layout Tab', { note: 'layout tab trigger' })}
@@ -206,7 +220,7 @@ function TabsMenu({ options }: { options: LayoutTab[] }) {
           positionMethod="fixed"
           className="z-50"
         >
-          <Menu.Popup className="flex flex-col w-[calc(var(--anchor-width)+--spacing(2))] max-h-(--available-height) overflow-y-auto p-1 rounded-2xl border bg-fd-popover text-sm text-fd-popover-foreground shadow-lg outline-none origin-(--transform-origin) transition-[opacity,scale] duration-150 ease-[cubic-bezier(0.22,1,0.36,1)] data-starting-style:opacity-0 data-starting-style:scale-95 data-ending-style:opacity-0 data-ending-style:scale-97 data-ending-style:duration-100 motion-reduce:transition-none">
+          <Menu.Popup className="flex flex-col w-[calc(var(--anchor-width)+--spacing(2))] max-h-(--available-height) overflow-y-auto p-1 rounded-2xl border bg-fd-popover text-sm text-fd-popover-foreground shadow-lg outline-hidden origin-(--transform-origin) transition-[opacity,scale] duration-150 ease-[cubic-bezier(0.22,1,0.36,1)] data-starting-style:opacity-0 data-starting-style:scale-95 data-ending-style:opacity-0 data-ending-style:scale-97 data-ending-style:duration-100 motion-reduce:transition-none">
             {options.map((tab, i) => {
               if (tab.unlisted && tab !== selected) return;
 
@@ -216,7 +230,7 @@ function TabsMenu({ options }: { options: LayoutTab[] }) {
                   closeOnClick
                   render={<Link href={tab.url} {...tab.props} />}
                   className={cn(
-                    'flex w-full min-h-9 items-start gap-3 rounded-lg px-[calc(--spacing(2.5)-1px)] py-2 text-start outline-none transition-colors duration-100 data-highlighted:bg-fd-accent data-highlighted:text-fd-accent-foreground [&_svg]:size-4 [&_svg]:shrink-0',
+                    'flex w-full min-h-9 items-start gap-3 rounded-lg px-[calc(--spacing(2.5)-1px)] py-2 text-start outline-hidden transition-colors duration-100 data-highlighted:bg-fd-accent data-highlighted:text-fd-accent-foreground [&_svg]:size-4 [&_svg]:shrink-0',
                     tab.props?.className,
                   )}
                 >

@@ -1,4 +1,6 @@
 import { createI18nSearchAPI, createSearchAPI, type ExportedData } from '@/search/server';
+import type { OramaCloud } from '@orama/core';
+import { sync as syncOramaCloud } from '@/search/orama-cloud';
 import { expect, test, vi } from 'vitest';
 import type { Meilisearch, SearchParams } from 'meilisearch';
 import { structure } from '@/mdx-plugins';
@@ -75,7 +77,7 @@ something`,
       {
         "breadcrumbs": undefined,
         "content": "Hello World",
-        "id": "1-0",
+        "id": "1#0",
         "table": undefined,
         "type": "heading",
         "url": "/#hello-world",
@@ -151,13 +153,39 @@ test('Flexsearch: static export matches server search', async () => {
 
   expect((await api.search('layout')).map((item) => item.id)).toEqual([
     '/docs',
-    '/docs-1',
-    '/docs-3',
-    '/docs-0',
+    '/docs#1',
+    '/docs#3',
+    '/docs#0',
     '/docs/layout',
-    '/docs/layout-1',
+    '/docs/layout#1',
   ]);
   vi.unstubAllGlobals();
+});
+
+test('Search API: record ids stay unique across pages', async () => {
+  // `/blog/v3` has records after its own, which must not take the id of the page `/blog/v3-2`
+  const indexes = [
+    {
+      id: '/blog/v3',
+      title: 'Version 3',
+      structuredData: structure('## Alpha\n\n## Beta\n\n## Gamma'),
+      url: '/blog/v3',
+    },
+    {
+      id: '/blog/v3-2',
+      title: 'Version 3.2',
+      structuredData: structure('Notes of version 3.2'),
+      url: '/blog/v3-2',
+    },
+  ];
+  const ids = buildDocuments(indexes).map((doc) => doc.id);
+  expect(new Set(ids).size).toBe(ids.length);
+
+  for (const api of [createSearchAPI('advanced', { indexes }), flexsearch({ indexes })]) {
+    const results = (await api.search('Version')).map((item) => item.id);
+    expect(results).toContain('/blog/v3-2');
+    expect(new Set(results).size).toBe(results.length);
+  }
 });
 
 test('buildDocuments: page description duplicated in contents is indexed once', () => {
@@ -697,4 +725,33 @@ test('Mixedbread: sync', async () => {
   options.documents[0].tag = 'core';
   await syncMixedbread(client, options);
   expect(uploads).toHaveLength(3);
+});
+
+test('Orama Cloud: sync without autoDeploy hands back the open transaction', async () => {
+  const calls: string[] = [];
+  const orama = {
+    index: {
+      set: (id: string) => ({
+        transaction: {
+          open: async () => void calls.push(`open ${id}`),
+          insertDocuments: async (docs: unknown[]) => void calls.push(`insert ${docs.length}`),
+          commit: async () => void calls.push(`commit ${id}`),
+        },
+      }),
+    },
+  } as unknown as OramaCloud;
+  const documents = [
+    {
+      id: '/a',
+      title: 'A',
+      description: 'About A',
+      url: '/a',
+      structured: { headings: [], contents: [] },
+    },
+  ];
+
+  const transaction = await syncOramaCloud(orama, { index: 'docs', documents, autoDeploy: false });
+  expect(calls).toEqual(['open docs', 'insert 1']);
+  await transaction.commit();
+  expect(calls).toEqual(['open docs', 'insert 1', 'commit docs']);
 });

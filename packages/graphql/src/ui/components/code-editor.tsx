@@ -66,7 +66,7 @@ export function CodeEditor({
         autoCorrect="off"
         className={cn(
           sharedClass,
-          'absolute inset-0 size-full resize-none overflow-hidden bg-transparent text-transparent caret-fd-foreground outline-none selection:bg-fd-primary/20',
+          'absolute inset-0 size-full resize-none overflow-hidden bg-transparent text-transparent caret-fd-foreground outline-hidden selection:bg-fd-primary/20',
         )}
         {...props}
       />

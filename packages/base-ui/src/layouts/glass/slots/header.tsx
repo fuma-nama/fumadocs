@@ -32,6 +32,8 @@ export function Header({ className, ...props }: HeaderProps) {
       {sidebar.collapsible && sidebar.collapsed && (
         <button
           aria-label={t('Show Sidebar', { note: 'sidebar' })}
+          aria-controls="nd-sidebar"
+          aria-expanded={false}
           className={cn(
             buttonVariants({ size: 'icon-sm', variant: 'secondary' }),
             baseVariants,

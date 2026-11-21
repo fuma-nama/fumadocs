@@ -184,7 +184,8 @@ function ResponseTabsDefaultContent({ tabs }: { tabs: ResponseTab[] }) {
   const tab = tabs.find((item) => item.code === code) ?? tabs[0];
   const examples = tab.examples ?? [];
   const example = examples.at(index);
-  const schema = tab.mediaType ? resolve(tab.response.content?.[tab.mediaType])?.schema : undefined;
+  const media = tab.mediaType ? resolve(tab.response.content?.[tab.mediaType]) : undefined;
+  const schema = media?.schema ?? media?.itemSchema;
   let body: ReactNode;
   let text: string | undefined;
 
@@ -241,7 +242,7 @@ function ResponseTabsDefaultContent({ tabs }: { tabs: ResponseTab[] }) {
             <Switch.Root
               checked={showSchema}
               onCheckedChange={setShowSchema}
-              className="inline-flex h-4 w-7 shrink-0 items-center rounded-full bg-fd-accent p-0.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fd-ring data-checked:bg-fd-primary motion-reduce:transition-none"
+              className="inline-flex h-4 w-7 shrink-0 items-center rounded-full bg-fd-accent p-0.5 transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-fd-ring data-checked:bg-fd-primary motion-reduce:transition-none"
             >
               <Switch.Thumb className="size-3 rounded-full bg-fd-muted-foreground transition-[translate,background-color] duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] data-checked:translate-x-3 data-checked:bg-fd-primary-foreground motion-reduce:transition-none" />
             </Switch.Root>

@@ -165,6 +165,12 @@ interface OperationState {
 const OperationContext = createContext<OperationState | null>(null);
 const parameterLocations = ['path', 'query', 'header', 'cookie'] as const;
 
+/** a sequential media type with only `itemSchema` has the array of its items as its content (OpenAPI 3.2) */
+function resolveMedia(media: MediaTypeObject): MediaTypeObject {
+  if (media.schema || !media.itemSchema) return media;
+  return { ...media, schema: { type: 'array', items: media.itemSchema } };
+}
+
 export function OperationProvider({
   type = 'operation',
   path,
@@ -182,7 +188,7 @@ export function OperationProvider({
     if (body?.content && Object.keys(body.content).length > 0) {
       const content: Record<string, MediaTypeObject> = {};
       for (const [mediaType, item] of Object.entries(body.content)) {
-        content[mediaType] = resolve(item);
+        content[mediaType] = resolveMedia(resolve(item));
       }
       requestBody = { description: body.description, required: body.required, content };
     }
@@ -225,7 +231,7 @@ export function OperationProvider({
       const response = resolve(item);
       const content: Record<string, MediaTypeObject> = {};
       for (const [mediaType, media] of Object.entries(response.content ?? {})) {
-        content[mediaType] = resolve(media);
+        content[mediaType] = resolveMedia(resolve(media));
       }
       responses.push({ status, response, content });
     }
@@ -262,7 +268,7 @@ export function OperationProvider({
     const examples = getExampleRequests({
       path,
       method,
-      operation,
+      requestBody,
       parameters: resolvedParameters,
       mediaAdapters: runtime.mediaAdapters,
     }) as ExampleRequest[];

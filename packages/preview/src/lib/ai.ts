@@ -7,7 +7,7 @@ export async function defaultModel(): Promise<LanguageModel> {
     apiKey: process.env.OPENROUTER_API_KEY,
   });
 
-  return openrouter.chat(process.env.OPENROUTER_MODEL ?? 'anthropic/claude-3.5-sonnet');
+  return openrouter.chat(process.env.OPENROUTER_MODEL ?? 'anthropic/claude-sonnet-5.5');
 }
 
 export async function isAISupported() {

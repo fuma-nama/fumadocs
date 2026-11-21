@@ -89,6 +89,7 @@ function SidebarContent({ ref: refProp, className, children, ...props }: Compone
             ref={mergeRefs(ref, refProp, asideRef)}
             data-collapsed={collapsed}
             data-hovered={collapsed && hovered}
+            inert={collapsed && !hovered}
             className={cn(
               'absolute flex flex-col w-full inset-s-0 inset-y-0 items-end text-sm duration-250 *:w-(--fd-sidebar-width)',
               navMode === 'auto' && 'bg-fd-card border-e',

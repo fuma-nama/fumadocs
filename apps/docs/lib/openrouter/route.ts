@@ -82,7 +82,7 @@ export const handler = $routeHandler(
     const reqJson = await req.json();
 
     const result = streamText({
-      model: openrouter.chat(process.env.OPENROUTER_MODEL ?? 'anthropic/claude-3.5-sonnet'),
+      model: openrouter.chat(process.env.OPENROUTER_MODEL ?? 'anthropic/claude-sonnet-5.5'),
       stopWhen: stepCountIs(5),
       tools: {
         search: searchTool,

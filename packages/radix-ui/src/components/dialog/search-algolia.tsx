@@ -88,22 +88,22 @@ export default function AlgoliaSearchDialog({
           <SearchDialogClose />
         </SearchDialogHeader>
         <SearchDialogList defaultItems={defaultItems} />
+        <SearchDialogFooter>
+          {tags.length > 0 ? (
+            <TagsList tag={tag} onTagChange={setTag} allowClear={allowClear}>
+              {tags.map((tag) => (
+                <TagsListItem key={tag.value} value={tag.value}>
+                  {tag.name}
+                </TagsListItem>
+              ))}
+              {label}
+            </TagsList>
+          ) : (
+            label
+          )}
+          {footer}
+        </SearchDialogFooter>
       </SearchDialogContent>
-      <SearchDialogFooter>
-        {tags.length > 0 ? (
-          <TagsList tag={tag} onTagChange={setTag} allowClear={allowClear}>
-            {tags.map((tag) => (
-              <TagsListItem key={tag.value} value={tag.value}>
-                {tag.name}
-              </TagsListItem>
-            ))}
-            {label}
-          </TagsList>
-        ) : (
-          label
-        )}
-        {footer}
-      </SearchDialogFooter>
     </SearchDialog>
   );
 }

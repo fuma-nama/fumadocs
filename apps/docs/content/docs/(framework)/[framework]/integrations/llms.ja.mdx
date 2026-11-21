@@ -3,15 +3,15 @@ title: AI と LLM
 description: Fumadocs に AI 機能を組み込みます。
 ---
 
-## LLM向けドキュメント [#docs-for-llm]
+## LLM向けのドキュメント [#docs-for-llm]
 
-LLMやAIエージェント向けに、ドキュメントをMarkdown形式で提供します。
+ドキュメントをMarkdown形式でLLMやAIエージェントに提供できます。
 
 ```package-install
 npx @fumadocs/cli feature llms
 ```
 
-これにより、docs コレクションで処理済みの Markdown が有効になり、`lib/source.ts` に `docsLlms` が追加されて、以下の[ファイル](#files)が配信されます。手動でセットアップする場合に備えて、生成されるファイルを以下に記載しています。
+これにより、docs コレクションで処理済みの Markdown が有効になり、`lib/source.ts` に `docsLlms` が追加され、以下の[ファイル](#files)が配信されます。手動でセットアップする場合に備えて、生成されるファイルを以下に示します。
 
 ### `docsLlms` [#docsllms]
 
@@ -22,22 +22,22 @@ npx @fumadocs/cli feature llms
 | メソッド           | 出力                                |
 | -------------- | --------------------------------- |
 | `index(lang?)` | ページツリーから構築される `llms.txt` インデックス   |
-| `page(page)`   | `renderPage` でレンダリングした 1 つのページ    |
+| `page(page)`   | `renderPage` でレンダリングした単一ページ       |
 | `full(lang?)`  | `renderPage` でレンダリングした全ページを結合したもの |
 | `files()`      | [エージェント向けファイル](#files)のパス         |
 | `serve(path)`  | 指定したパスにあるファイルのレスポンス               |
 
 <Callout title="renderPage は必須です">
-  コンテンツソースが Markdown をどのように公開しているかを Fumadocs 側では判断できないため、`page()`、`full()`、`files()`、`serve()` は
-  `renderPage` を渡した場合にのみ利用できます。
+  `page()`、`full()`、`files()`、`serve()` は、`renderPage` を渡した場合にのみ利用できます。
+  コンテンツソースが Markdown をどのように公開しているかを、Fumadocs 側では把握できないためです。
 </Callout>
 
-`renderPage` はページの処理済み Markdown を読み取るため、`includeProcessedMarkdown` を有効にしてください。
+`renderPage` はページの処理済み Markdown を読み込むため、`includeProcessedMarkdown` を有効にしてください。
 
 <show when={props.framework !== 'astro'}>
   <feature title="source.config.ts">llms/source.config.ts</feature>
 
-  MDX コンポーネントは JSX 構文のまま出力されます。これらを [Markdown 形式](/docs/headless/utils/markdown#asmarkdown)にレンダリングするには、[MDX コンポーネント](/docs/headless/mdx/remark-llms#jsx-elements)をページの props として渡してください。
+  MDX コンポーネントは JSX 構文のまま出力されます。これらを [Markdown 形式](/docs/headless/utils/markdown#asmarkdown)にレンダリングするには、[MDX コンポーネントを](/docs/headless/mdx/remark-llms#jsx-elements)ページの props として渡してください。
 </show>
 
 <show when={props.framework === 'astro'}>
@@ -57,7 +57,7 @@ npx @fumadocs/cli feature llms
   MDX コンポーネントは、[Markdown 形式](/docs/headless/utils/markdown#asmarkdown)を定義していない限り、JSX 構文のまま出力されます。
 </show>
 
-[`@fumadocs/local-md`](/docs/integrations/content/local-md) のようなランタイムのコンテンツソースは、リクエスト時に解決されます。その `getSource` を渡すと、CLI が同じファイルを生成します。
+[`@fumadocs/local-md`](/docs/integrations/content/local-md) のようなランタイムのコンテンツソースは、リクエスト時にオンデマンドで解決されます。その `getSource` を渡せば、CLI が同じファイルを生成します。
 
 ```ts
 export const docsLlms = llms(getSource, {
@@ -74,11 +74,11 @@ ${page.data.content}`,
 CLIは、AIエージェント向けに次のファイルを配信します。
 
 * `/llms.txt`: ドキュメントのインデックスです。各ページのMarkdownへのリンクが含まれます。
-* `/llms-full.txt`: 全ページのコンテンツです。
-* `<page>.md`: 各ページのMarkdownです (例: `/docs/ui.md`) 。`/` のページは `/index.md` になります。
-* `<section>/llms-full.txt`: [セクション](#sections)のコンテンツです (例: `/docs/ui/llms-full.txt`) 。
+* `/llms-full.txt`: すべてのページのコンテンツです。
+* `<page>.md`: ページのMarkdownです(例: `/docs/ui.md`)。`/` のページは `/index.md` になります。
+* `<section>/llms-full.txt`: [セクション](#sections)のコンテンツです(例: `/docs/ui/llms-full.txt`)。
 
-下書きなどのページをこれらのファイルから除外するには、`filter` を指定します。除外したページも `llms.txt` には引き続き掲載され、HTMLページへのリンクになります。
+下書きなど、特定のページをこれらのファイルから除外するには `filter` を渡します。除外したページも `llms.txt` には引き続き掲載され、HTMLページへのリンクになります。
 
 ```ts title="lib/source.ts"
 export const docsLlms = llms(source, {
@@ -87,9 +87,9 @@ export const docsLlms = llms(source, {
 });
 ```
 
-これらのファイルでは、`renderUrl` はリンク先のファイルのパス (ページの `.md` ファイルなど) を受け取ります。
+これらのファイルでは、`renderUrl` はリンク先のファイルのパス(ページの `.md` ファイルなど)を受け取ります。
 
-ページの HTML を読み取るエージェントは、`<head>` 内のリンクからそのページの Markdown を見つけます：
+ページの HTML を読み取るエージェントは、次のように `<head>` 内のリンクからそのページの Markdown を見つけます。
 
 ```html
 <link rel="alternate" type="text/markdown" href="/docs/ui.md" />
@@ -99,7 +99,7 @@ export const docsLlms = llms(source, {
 
 セクションとは、独自の `llms-full.txt` を持つページツリー内のフォルダーです。これにより、エージェントは大規模なドキュメントを部分ごとに読み込めます。デフォルトでは、すべてのルートフォルダーがセクションになります。`llms.txt` では、各フォルダーの行がそのセクションの `llms-full.txt` へのリンクになります。
 
-セクションとするフォルダーを指定するには、`section` を渡します。この関数はフォルダーを受け取り、そのフォルダーをセクションとするかどうかを返します。
+どのフォルダーをセクションにするかを指定するには、`section` を渡します。この関数はフォルダーを受け取り、そのフォルダーがセクションかどうかを返します。
 
 ```ts title="lib/source.ts"
 export const docsLlms = llms(source, {
@@ -109,7 +109,7 @@ export const docsLlms = llms(source, {
 });
 ```
 
-大規模なサイトでは、セクションを折りたたむと `llms.txt` を短く保てます。折りたたんだセクションは、`llms.txt` ではそのセクション専用の `<section>/llms.txt` への1つのリンクとして記載され、セクション内のページはそのファイルに一覧表示されます。
+大規模なサイトでは、セクションを折りたたむことで `llms.txt` を短く保てます。折りたたんだセクションは、`llms.txt` ではそのセクション専用の `<section>/llms.txt` への1つのリンクとして掲載され、セクション内のページはそのファイルに一覧表示されます。
 
 ```ts title="lib/source.ts"
 export const docsLlms = llms(source, {
@@ -118,40 +118,40 @@ export const docsLlms = llms(source, {
 });
 ```
 
-セクションのファイルは、そのフォルダーのインデックスページの URL 配下で配信されます。インデックスページがないフォルダーでは、代わりに配下のページの URL ディレクトリが使われます。フォルダーグループのように 2 つのフォルダーが同じ URL を共有する場合は、`asPath` を渡すと、一方を別のパスで配信できます (例：`{ asPath: '/docs/guides' }`) 。
+セクションのファイルは、そのフォルダーのインデックスページの URL で配信されます。インデックスページがないフォルダーでは、代わりに配下のページの URL ディレクトリが使用されます。フォルダーグループのように 2 つのフォルダーが同じ URL を共有する場合は、`{ asPath: '/docs/guides' }` のように `asPath` を渡して、一方を別のパスで配信してください。
 
 ### ルート [#routes]
 
-`files()` はファイルのパスを列挙し、`serve(path)` は指定したパスのファイルをレスポンスとして返します。そのため、各ルートはリクエストパスを `serve()` に渡すだけで済みます。
+`files()` はファイルのパスを一覧で返し、`serve(path)` は指定したパスのファイルをレスポンスとして返します。そのため、各ルートではリクエストパスを `serve()` に渡すだけで済みます。
 
 <show when={props.framework === 'next'}>
-  `/llms.txt` と `/llms-full.txt` はルートハンドラーが配信します。その他のファイルは `app/docs/[[...slug]]` と同じ階層に置かれるため、Next.js の設定でそれらのパスを `/llms.mdx/[...path]` ルートへリライトします：
+  `/llms.txt` と `/llms-full.txt` はルートハンドラーで配信します。その他のファイルは `app/docs/[[...slug]]` と同じ階層に置かれるため、Next.js の設定でそれらのパスを `/llms.mdx/[...path]` ルートへリライトします。
 </show>
 
 <show when={props.framework === 'react-router'}>
-  React Router では、`/docs/ui.md` のようにドキュメントページと同じ階層にあるパスをマッチできません。そのため、リソースルートが `/llms.mdx` 配下でファイルを配信し、`renderUrl` で `llms.txt` 内のリンク先をそちらに向けます。さらに、ルートルートのミドルウェアが、マッチしたルート配下にある `/docs/ui.md` などのファイルも配信します：
+  React Router では、`/docs/ui.md` のようにドキュメントページと同じ階層にあるパスにはマッチさせられません。そのため、リソースルートで `/llms.mdx` 配下のファイルを配信し、`renderUrl` で `llms.txt` 内のリンクをそちらに向けます。また、ルートルートのミドルウェアでも、マッチしたルート配下にある `/docs/ui.md` などのファイルを配信します。
 </show>
 
 <show when={props.framework === 'tanstack-start'}>
-  ドキュメントページ `docs/$` は `/docs` 配下のすべてのパスにマッチするため、ドキュメント配下のファイル用のルートには `docs/{$}.md` のように、より具体的なパスを使用します：
+  ドキュメントページ `docs/$` は `/docs` 配下のすべてのパスにマッチするため、ドキュメント配下のファイルのルートには `docs/{$}.md` のようなより具体的なパスを使用します。
 </show>
 
 <show when={props.framework === 'waku'}>
-  API ルートが `/llms.mdx` 配下でファイルを配信し、`renderUrl` で `llms.txt` 内のリンク先をそちらに向けます。サーバー上では、`src/middleware` 内の [Hono ミドルウェア](https://hono.dev/docs/guides/middleware) が `/docs/ui.md` などのファイルも本来のパスで配信します。型定義を利用するため、`hono` を開発依存関係としてインストールしてください：
+  API ルートで `/llms.mdx` 配下のファイルを配信し、`renderUrl` で `llms.txt` 内のリンクをそちらに向けます。サーバー上では、`src/middleware` 内の [Hono ミドルウェア](https://hono.dev/docs/guides/middleware)でも `/docs/ui.md` などのファイルをそれぞれのパスで配信します。型定義を利用するため、`hono` を開発依存関係としてインストールしてください。
 </show>
 
 <show when={props.framework === 'astro'}>
-  1つのエンドポイントで、すべてのファイルをそれぞれのパスにプリレンダリングします：
+  1つのエンドポイントで、すべてのファイルをそれぞれのパスにプリレンダリングします。
 </show>
 
 <feature>llms/routes</feature>
 
-`serve()` はファイルが存在しないパスに対して `undefined` を返すため、ミドルウェアはリクエストを後続の処理に渡せます。`hideLocale: 'always'` を指定した場合は URL にロケールが含まれないため、言語を `serve()` の第2引数、および `files()` の第1引数として渡してください。
+`serve()` はファイルが存在しないパスに対して `undefined` を返すため、ミドルウェアはリクエストを後続の処理に渡せます。`hideLocale: 'always'` を指定した場合は URL にロケールが含まれないため、言語を `serve()` の第2引数、`files()` の第1引数として渡してください。
 
 #### 静的出力 [#static-output]
 
 <show when={props.framework === 'next'}>
-  `output: 'export'` を使用する場合、Next.js では rewrites を利用できません。`/llms.mdx/[...path]` ルートは `/llms.mdx/docs/ui.md` のようなプレフィックス付きのパスでファイルを配信し、`renderUrl` によって `llms.txt` 内のリンクがそのパスを指すようにします。
+  `output: 'export'` を使用する場合、Next.js ではリライトが使えません。`/llms.mdx/[...path]` ルートが `/llms.mdx/docs/ui.md` のようなプレフィックス付きのパスでファイルを配信し、`renderUrl` で `llms.txt` 内のリンクをそのパスに向けます。
 
   <feature title="lib/source.ts">llms/docs-llms-prefixed.ts</feature>
 </show>
@@ -210,7 +210,7 @@ export const docsLlms = llms(source, {
 </show>
 
 <show when={props.framework === 'waku'}>
-  API ルートはプリレンダリングされるため、静的ファイルとしてデプロイした Waku サイトでも `/llms.mdx` 配下でファイルが配信されます。ただし、ミドルウェアを使うにはサーバーが必要です。
+  API ルートはプリレンダリングされるため、静的ファイルとしてデプロイした Waku サイトでも `/llms.mdx` 配下でファイルが配信されます。ただし、ミドルウェアの利用にはサーバーが必要です。
 </show>
 
 <show when={props.framework === 'astro'}>
@@ -220,11 +220,11 @@ export const docsLlms = llms(source, {
 #### `Accept` [#accept]
 
 <show when={props.framework !== 'astro'}>
-  AIエージェントは、`Accept` ヘッダーを使って Markdown を要求できます。
+  AIエージェントは `Accept` ヘッダーを使って Markdown をリクエストできます。
 </show>
 
 <show when={props.framework === 'next'}>
-  リクエストが Markdown を優先する場合は、ページの Markdown を返すようにします。
+  リクエストが Markdown を優先する場合は、ページの Markdown を返します。
 
   ```ts title="proxy.ts"
   import { NextRequest, NextResponse } from 'next/server';
@@ -234,7 +234,7 @@ export const docsLlms = llms(source, {
 
   export default function proxy(request: NextRequest) {
     const { pathname } = request.nextUrl;
-    // `/docs/ui.md` のようなファイルは Next.js の設定の rewrites で配信されます
+    // `/docs/ui.md` のようなファイルは Next.js 設定の rewrites によって配信されます
     const result =
       isMarkdownPreferred(request) && !/\.(md|txt)$/.test(pathname) && rewriteDocs(pathname);
 
@@ -254,12 +254,12 @@ export const docsLlms = llms(source, {
 
   <Callout>
     プリレンダリングされたページはミドルウェアの実行前に静的ファイルとして配信されるため、常に
-    HTML が返されます。
+    HTML を返します。
   </Callout>
 </show>
 
 <show when={props.framework === 'tanstack-start'}>
-  リクエストが Markdown を優先する場合は、ページの Markdown へリダイレクトするようにします。
+  リクエストが Markdown を優先する場合は、ページの Markdown へリダイレクトします。
 
   ```ts title="src/start.ts"
   import { createMiddleware, createStart } from '@tanstack/react-start';
@@ -269,7 +269,7 @@ export const docsLlms = llms(source, {
   const llmMiddleware = createMiddleware().server(({ next, request }) => {
     const url = new URL(request.url);
 
-    // `/docs/ui.md` のようなパスはファイルのルートで配信されます
+    // `/docs/ui.md` のようなパスはファイルのルートによって配信されます
     if (
       url.pathname.startsWith('/docs') &&
       !/\.(md|txt)$/.test(url.pathname) &&
@@ -289,12 +289,12 @@ export const docsLlms = llms(source, {
 </show>
 
 <show when={props.framework !== 'astro'}>
-  同じ URL に2つの表現が存在することになるため、キャッシュの衝突を防ぐには、レスポンスに `Vary: Accept` を含める必要があります。
+  同じ URL に2種類の表現が存在することになるため、キャッシュの衝突を防ぐには、レスポンスに `Vary: Accept` を含める必要があります。
 </show>
 
 <show when={props.framework === 'next'}>
   <Callout>
-    Next.js は App Router のページレスポンスから `Vary` を削除するため、ドキュメントページの HTML レスポンスにはこのヘッダーを
+    Next.js は App Router のページレスポンスから `Vary` を除去するため、ドキュメントページの HTML レスポンスにはこのヘッダーを
     付与できません。共有キャッシュからドキュメントを配信している場合は、CDN 側で設定してください。
   </Callout>
 </show>
@@ -305,12 +305,12 @@ export const docsLlms = llms(source, {
 
 ### ページアクション [#page-actions]
 
-ページアクションを使うと、読者はページの Markdown をコピーしたり、AI アプリでページを開いたりできます。ページアクションは、ページの [`.md` ファイル](#files)を読み込みます。
+ページアクションを使うと、読者はページの Markdown をコピーしたり、ページを AI アプリで開いたりできます。ページアクションはページの [`.md` ファイル](#files)を読み込みます。
 
 ![AI ページアクション](/docs/ai-page-actions.png)
 
 <show when={props.framework === 'next' || props.framework === 'waku'}>
-  docs ページ内でレンダリングしてください。
+  ドキュメントページでレンダリングします。
 
   ```tsx
   import { MarkdownCopyButton, ViewOptionsPopover } from 'fumadocs-ui/layouts/docs/page';
@@ -328,15 +328,15 @@ export const docsLlms = llms(source, {
 </show>
 
 <show when={props.framework === 'next'}>
-  静的エクスポートを使用する場合は、URL が `` `/llms.mdx${page.url}.md` `` になります。
+  静的エクスポートの場合は、URL が `` `/llms.mdx${page.url}.md` `` になります。
 </show>
 
 <show when={props.framework === 'waku'}>
-  静的デプロイでも配信されるよう、URL には `` `/llms.mdx${page.url}.md` `` を使用してください。
+  静的デプロイでも配信されるように、URL には `` `/llms.mdx${page.url}.md` `` を使用してください。
 </show>
 
 <show when={props.framework === 'react-router'}>
-  docs ページのローダーから Markdown の URL を返し、ページ内でレンダリングしてください。
+  ドキュメントページのローダーから Markdown の URL を返し、ページ内でレンダリングします。
 
   ```tsx
   import { MarkdownCopyButton, ViewOptionsPopover } from 'fumadocs-ui/layouts/docs/page';
@@ -359,7 +359,7 @@ export const docsLlms = llms(source, {
 </show>
 
 <show when={props.framework === 'tanstack-start'}>
-  docs ページのローダーから Markdown の URL を返し、ページ内でレンダリングしてください。
+  ドキュメントページのローダーから Markdown の URL を返し、ページ内でレンダリングします。
 
   ```tsx
   import { MarkdownCopyButton, ViewOptionsPopover } from 'fumadocs-ui/layouts/docs/page';
@@ -382,7 +382,7 @@ export const docsLlms = llms(source, {
 </show>
 
 <show when={props.framework === 'astro'}>
-  docs ページから React アイランドに Markdown の URL を渡し、アイランド内でレンダリングしてください。
+  ドキュメントページから React アイランドに Markdown の URL を渡し、アイランド内でレンダリングします。
 
   ```astro tab="src/pages/docs/[...slug].astro"
   <Docs
@@ -406,15 +406,15 @@ export const docsLlms = llms(source, {
 
 ## MCP サーバー [#mcp-server]
 
-[MCP](https://modelcontextprotocol.io) サーバーを通じてドキュメントをAIエージェントに公開できます。ページの一覧表示・検索・読み取りを行うツールも提供されます。
+[MCP](https://modelcontextprotocol.io) サーバーを介してドキュメントをAIエージェントに公開できます。ページの一覧表示、検索、読み取りを行うツールも備えています。
 
 ```package-install
 npx @fumadocs/cli feature mcp
 ```
 
-上記の [LLM ルート](#docs-for-llm) に加えて、Streamable HTTP トランスポートを使用する `/api/mcp` ルートを作成します。
+上記の [LLM ルート](#docs-for-llm) に加えて、Streamable HTTP トランスポートを使用する `/api/mcp` ルートが作成されます。
 
-ツールは [`fumadocs-core/mcp`](/docs/headless/utils/mcp) によって提供されます。
+ツールは [`fumadocs-core/mcp`](/docs/headless/utils/mcp) から提供されます。
 
 <show when={props.framework === 'next'}>
   <feature title="app/api/mcp/route.ts">mcp/next/app/api/mcp/route.ts</feature>
@@ -435,7 +435,7 @@ npx @fumadocs/cli feature mcp
 <show when={props.framework === 'astro'}>
   <feature title="src/pages/api/mcp.ts">mcp/astro/pages/api/mcp.ts</feature>
 
-  このルートはリクエストごとにレンダリングされるため、プロジェクトに [アダプター](https://docs.astro.build/en/guides/on-demand-rendering/) を導入する必要があります。
+  このルートはリクエストごとにレンダリングされるため、プロジェクトに [アダプター](https://docs.astro.build/en/guides/on-demand-rendering/) が必要です。
 </show>
 
 エージェントを接続するには、次のようにします。
@@ -451,19 +451,19 @@ npx @fumadocs/cli feature mcp
 ## WebMCP [#webmcp]
 
 <Callout type="warn" title="実験的機能">
-  [WebMCP](https://webmachinelearning.github.io/webmcp/) は策定初期段階の Web 標準で、Chrome 149 以降で
-  `#enable-webmcp-testing` フラグを有効にするか、オリジントライアルを通じて利用できます。API は今後
+  [WebMCP](https://webmachinelearning.github.io/webmcp/) は初期段階の Web 標準で、
+  Chrome 149 以降で `#enable-webmcp-testing` フラグを有効にするか、オリジントライアルを通じて利用できます。API は今後
   変更される可能性があります。
 </Callout>
 
-前述の MCP サーバーがサイトに接続してくるエージェント向けであるのに対し、WebMCP は読者が閲覧しているページ上で、ブラウザに組み込まれた AIエージェント
+前述の MCP サーバーがサイトに接続してくるエージェント向けであるのに対し、WebMCP は読者が閲覧中のページ上で、ブラウザに搭載された AIエージェント
 にツールを公開します。
 
 ```package-install
 npx @fumadocs/cli feature webmcp
 ```
 
-[LLM ルート](#docs-for-llm)をベースにした `WebMCP` コンポーネントが作成されます。これを `<RootProvider />` の内側でレンダリングしてください。
+[LLM ルート](#docs-for-llm)をベースに `WebMCP` コンポーネントを作成します。このコンポーネントは `<RootProvider />` の内側でレンダリングしてください。
 
 * `search_docs` は検索 API ルートにクエリを送信します。`fetchClient` は[他のクライアント](/docs/search)に置き換えることもできます。
 * `read_page` は、<show when={props.framework === 'react-router' || props.framework === 'waku'}>`/llms.mdx/docs/page.md`</show><show when={props.framework !== 'react-router' && props.framework !== 'waku'}>`/docs/page.md`</show> からページの Markdown を取得します。
@@ -482,11 +482,11 @@ Fumadocs CLI を使用して、AI チャットダイアログをインストー�
 
     Vercel AI SDK を使用して [OpenRouter](https://openrouter.ai) 向けに自動で設定され、AI 用の `/search` ツールも含まれます。
 
-    `/api/chat` ルートを更新すれば、他のモデルも使用できます。
+    `/api/chat` ルートを更新すると、他のモデルも使用できます。
 
-    > Fumadocs は AI モデルを提供していません。モデルはご自身で用意してください。
+    > Fumadocs は AI モデルを提供しません。使用するモデルはご自身で用意してください。
     >
-    > AI モデルには、上記で生成した `llms-full.txt` ファイルを利用できます。また、サードパーティのソリューションと組み合わせれば、より多様な情報ソースを活用することもできます。
+    > AI モデルには、上記で生成した `llms-full.txt` ファイルを利用できます。また、サードパーティのソリューションと組み合わせれば、より多様な情報源を活用することもできます。
   </Tab>
 
   <Tab>
@@ -504,7 +504,7 @@ Fumadocs CLI を使用して、AI チャットダイアログをインストー�
     LLM_GATEWAY_API_KEY="..."
     ```
 
-    デフォルトでは、ルートは `anthropic/claude-3.5-sonnet` を使用します。LLMGateway がサポートする他のモデルに切り替えるには、`LLM_GATEWAY_MODEL` 環境変数を設定してください。コードを変更する必要はありません。
+    デフォルトでは、ルートは `anthropic/claude-sonnet-5-5` を使用します。LLMGateway がサポートする他のモデルに切り替えるには、`LLM_GATEWAY_MODEL` 環境変数を設定してください。コードを変更する必要はありません。
 
     ```dotenv
     # https://llmgateway.io/models に掲載されている任意のモデル ID

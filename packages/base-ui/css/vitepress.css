@@ -14,7 +14,7 @@
   --color-fd-background: hsl(0, 0%, 100%);
   --color-fd-card: hsl(240, 8%, 97%);
   --color-fd-foreground: hsl(240, 6%, 25%);
-  --color-fd-muted-foreground: hsl(240, 6%, 50%);
+  --color-fd-muted-foreground: #67676c;
   --color-fd-secondary: hsl(240, 6%, 97%);
   --color-fd-accent-foreground: hsl(240, 6%, 25%);
   --color-fd-primary: hsl(226, 55%, 45%);
@@ -36,7 +36,7 @@
   --color-fd-accent: hsl(240, 5.4%, 21%);
   --color-fd-secondary: hsl(240, 5%, 19%);
   --color-fd-accent-foreground: hsl(0, 0%, 100%);
-  --color-fd-muted-foreground: hsl(240, 5%, 58%);
+  --color-fd-muted-foreground: hsl(240, 5%, 62.5%);
 }
 
 .prose {

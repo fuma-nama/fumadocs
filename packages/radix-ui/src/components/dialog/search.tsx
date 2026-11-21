@@ -270,7 +270,7 @@ export function SearchDialogInput(props: ComponentProps<'input'>) {
       value={search}
       onChange={(e) => onSearchChange(e.target.value)}
       placeholder={t('Search')}
-      className="w-0 flex-1 bg-transparent text-lg placeholder:text-fd-muted-foreground focus-visible:outline-none"
+      className="w-0 flex-1 bg-transparent text-lg placeholder:text-fd-muted-foreground focus-visible:outline-hidden"
     />
   );
 }
@@ -328,12 +328,13 @@ export function SearchDialogContent({ children, ...props }: ComponentProps<typeo
       {...props}
       className={cn(
         'fixed left-1/2 top-4 md:top-[calc(50%-250px)] z-50 w-[calc(100%-1rem)] max-w-screen-sm -translate-x-1/2 rounded-xl border bg-fd-popover text-fd-popover-foreground shadow-2xl shadow-black/50 overflow-hidden data-[state=closed]:animate-fd-dialog-out data-[state=open]:animate-fd-dialog-in',
-        '*:border-b *:has-[+:last-child[data-empty=true]]:border-b-0 *:data-[empty=true]:border-b-0 *:last:border-b-0',
+        // lines above children, so an empty list or an empty (hidden) footer draws none
+        '*:not-first:border-t *:data-[empty=true]:border-t-0',
         props.className,
       )}
     >
-      <DialogTitle className="hidden">{t('Search')}</DialogTitle>
       {children}
+      <DialogTitle className="hidden">{t('Search')}</DialogTitle>
     </DialogContent>
   );
 }

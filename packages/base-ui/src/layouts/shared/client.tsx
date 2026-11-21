@@ -192,7 +192,13 @@ export function SkipToContent() {
   const t = useTranslations({ note: 'skip link' });
 
   return (
-    <a href="#nd-page" className="sr-only">
+    <a
+      href="#nd-page"
+      className={cn(
+        buttonVariants({ variant: 'secondary' }),
+        'fixed top-2 start-2 z-50 rounded-lg px-3 shadow-lg not-focus-visible:sr-only',
+      )}
+    >
       {t('Skip to Content')}
     </a>
   );

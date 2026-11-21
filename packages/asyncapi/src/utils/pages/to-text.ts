@@ -59,7 +59,10 @@ export function toText(
         ...(extend?._asyncapi as object | undefined),
       },
     },
-    pageContent(pageProps),
+    // an operation renders its description with `showDescription`, a tag or file page's goes in the body
+    includeDescription && entry.type === 'page' && entry.info.description
+      ? `${entry.info.description}\n\n${pageContent(pageProps)}`
+      : pageContent(pageProps),
     options,
   );
 }

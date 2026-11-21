@@ -44,7 +44,7 @@ export function GraphView(props: GraphViewProps) {
   return (
     <div
       ref={ref}
-      className="relative border h-[600px] [&_canvas]:size-full rounded-xl overflow-hidden bg-fd-background"
+      className="relative border h-[600px] [&_canvas]:size-full rounded-xl overflow-hidden bg-fd-background [--node-color:var(--color-purple-300)]"
     >
       {mount && <ClientOnly {...props} containerRef={ref} />}
     </div>
@@ -98,7 +98,7 @@ function ClientOnly({
 
     ctx.fillStyle = isActive
       ? style.getPropertyValue('--color-fd-primary')
-      : style.getPropertyValue('--color-purple-300');
+      : style.getPropertyValue('--node-color');
     ctx.fill();
 
     // Draw text below the node

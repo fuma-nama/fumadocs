@@ -1,3 +1,9 @@
+## fumadocs-epub@1.2.5
+
+### Processed Markdown in EPUB chapters
+
+- Chapters read the processed Markdown of pages by default, instead of the raw MDX with its frontmatter, imports and JSX.
+
 ## fumadocs-epub@1.2.4
 
 ### Export without a bundler

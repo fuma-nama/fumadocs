@@ -10,8 +10,10 @@ import {
   createContext,
   type ReactNode,
   use,
+  useId,
   useState,
 } from 'react';
+import { flushSync } from 'react-dom';
 import { cva } from 'class-variance-authority';
 import {
   ChevronDown,
@@ -37,7 +39,7 @@ import { useGlassLayout } from '..';
 import { LayoutTabsDropdown } from '../layout-tabs';
 
 const itemTriggerVariants = cva(
-  'inline-flex text-sm items-center gap-2 rounded-lg px-2.5 py-2 md:py-1.5 [&_svg]:size-4 outline-none focus-visible:ring-2 focus-visible:ring-fd-ring',
+  'inline-flex text-sm items-center gap-2 rounded-lg px-2.5 py-2 md:py-1.5 [&_svg]:size-4 outline-hidden focus-visible:ring-2 focus-visible:ring-fd-ring',
   {
     variants: {
       active: {
@@ -66,10 +68,22 @@ export function SidebarProvider({ children, collapsible = true }: SidebarProvide
   );
 }
 
+/** applies a collapse change, the focus moves to the visible sidebar trigger when the change hid the focused element */
+function collapseWithFocus(update: () => void) {
+  const active = document.activeElement;
+  flushSync(update);
+  if (active && (!active.isConnected || active.matches('[inert] *')))
+    document.querySelector<HTMLElement>('[aria-controls="nd-sidebar"]:not([inert] *)')?.focus();
+}
+
 export function useSidebar() {
   const collapsible = use(CollapsibleContext);
   const { collapsed, setCollapsed } = useBaseSidebar();
-  return { collapsible, collapsed, setCollapsed };
+  return {
+    collapsible,
+    collapsed,
+    setCollapsed: (value: boolean) => collapseWithFocus(() => setCollapsed(value)),
+  };
 }
 
 export interface SidebarDrawerProps {
@@ -169,6 +183,7 @@ export function Sidebar({ className, children, ...props }: SidebarProps) {
   return (
     <aside
       id="nd-sidebar"
+      inert={collapsed}
       className={cn(
         'sticky flex flex-col transition-transform [grid-area:left] my-2 ms-2 z-30 top-2 border rounded-2xl bg-fd-popover/80 text-fd-popover-foreground backdrop-blur-sm shadow-sm h-[calc(100dvh---spacing(4))] max-md:hidden md:layout:[--fd-left-width:280px]',
         collapsed &&
@@ -185,12 +200,14 @@ export function Sidebar({ className, children, ...props }: SidebarProps) {
           )}
           {collapsible && (
             <button
-              aria-label={collapsed ? t('Show Sidebar') : t('Hide Sidebar')}
+              aria-label={t('Hide Sidebar')}
+              aria-controls="nd-sidebar"
+              aria-expanded
               className={cn(
                 buttonVariants({ variant: 'ghost', size: 'icon-sm' }),
                 'text-fd-muted-foreground',
               )}
-              onClick={() => setCollapsed(!collapsed)}
+              onClick={() => setCollapsed(true)}
             >
               <SidebarIcon />
             </button>
@@ -246,6 +263,7 @@ function SidebarLinkItem({
 }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(true);
+  const linkId = useId();
 
   switch (item.type) {
     case 'custom':
@@ -269,6 +287,7 @@ function SidebarLinkItem({
           {item.url ? (
             <div className="flex w-full text-sm px-2.5 py-1.5 font-medium">
               <Link
+                id={linkId}
                 href={item.url}
                 external={item.external}
                 aria-current={isLinkItemActive(item, pathname) ? 'page' : undefined}
@@ -282,7 +301,9 @@ function SidebarLinkItem({
                 {item.icon}
                 {item.text}
               </Link>
-              <CollapsibleTrigger className="flex-1">{rightIcon}</CollapsibleTrigger>
+              <CollapsibleTrigger aria-labelledby={linkId} className="flex-1">
+                {rightIcon}
+              </CollapsibleTrigger>
             </div>
           ) : (
             <CollapsibleTrigger className="w-full text-sm px-2.5 py-1.5 font-medium inline-flex items-center gap-2 [&_svg]:size-4">
@@ -357,6 +378,7 @@ function SidebarFolder({ folder }: { folder: PageTree.Folder }) {
   const shouldOpen = (folder.defaultOpen ?? true) || isNodeInPath(folder, path);
   const [open, setOpen] = useState(shouldOpen);
   const indexActive = folder.index ? isNodeInPath(folder.index, path) : false;
+  const linkId = useId();
 
   useOnChange(shouldOpen, () => shouldOpen && setOpen(true));
   if (folder.collapsible === false) {
@@ -402,6 +424,7 @@ function SidebarFolder({ folder }: { folder: PageTree.Folder }) {
       {folder.index ? (
         <div className="flex w-full text-sm px-2.5 py-1.5 font-medium">
           <Link
+            id={linkId}
             href={folder.index.url}
             external={folder.index.external}
             aria-current={indexActive ? 'page' : undefined}
@@ -415,7 +438,9 @@ function SidebarFolder({ folder }: { folder: PageTree.Folder }) {
             {folder.icon}
             {folder.name}
           </Link>
-          <CollapsibleTrigger className="flex-1">{rightIcon}</CollapsibleTrigger>
+          <CollapsibleTrigger aria-labelledby={linkId} className="flex-1">
+            {rightIcon}
+          </CollapsibleTrigger>
         </div>
       ) : (
         <CollapsibleTrigger className="w-full text-sm px-2.5 py-1.5 font-medium inline-flex items-center gap-2 [&_svg]:size-4">

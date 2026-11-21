@@ -135,10 +135,7 @@ export function DocsLayout(props: DocsLayoutProps) {
     >
       <TreeContextProvider tree={tree}>
         <slots.sidebar.provider defaultOpenLevel={defaultOpenLevel} prefetch={prefetch}>
-          <slots.container {...containerProps}>
-            {sidebarEnabled && <slots.sidebar.root {...sidebarProps} />}
-            {children}
-          </slots.container>
+          <slots.container {...containerProps}>{children}</slots.container>
           {renderNavigationPanel({
             head: (
               <>
@@ -190,6 +187,7 @@ export function DocsLayout(props: DocsLayoutProps) {
                 </LinkItem>
               )),
           })}
+          {sidebarEnabled && <slots.sidebar.root {...sidebarProps} />}
         </slots.sidebar.provider>
       </TreeContextProvider>
     </LayoutContext>
