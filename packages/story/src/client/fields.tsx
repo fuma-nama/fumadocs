@@ -561,7 +561,7 @@ function ObjectRows({
           <SelectTrigger
             className={cn(
               rowButtonClassName,
-              'rounded-none border-0 border-b bg-transparent p-0 ps-4 pe-1.75 last:border-b-0 focus:ring-0',
+              'rounded-none border-0 bg-transparent p-0 ps-4 pe-1.75 focus:ring-0',
             )}
           >
             <Plus className="size-3.5" />

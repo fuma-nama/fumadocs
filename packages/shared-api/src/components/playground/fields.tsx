@@ -1129,7 +1129,7 @@ function ObjectRows({
       {hiddenKeys.length > 0 && (
         <Select value={null} onValueChange={(v) => v !== null && onAppend(v)}>
           <SelectPrimitive.Trigger
-            className={cn(rowButtonClassName, 'cursor-pointer border-b last:border-b-0')}
+            className={cn(rowButtonClassName, 'cursor-pointer', isDynamic && 'border-b')}
           >
             <Plus className="size-3.5 shrink-0" />
             <span className="flex min-w-0 items-center gap-1.5">

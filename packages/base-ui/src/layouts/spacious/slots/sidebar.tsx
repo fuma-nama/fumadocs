@@ -177,13 +177,22 @@ function TabsMenus() {
   if (start >= groups.length) return;
 
   return (
-    <div className="flex flex-col rounded-xl border bg-fd-secondary/50 divide-y overflow-clip">
-      {groups.map((group, i) => i >= start && <TabsMenu key={i} options={group.options} />)}
+    <div className="flex flex-col rounded-xl border bg-fd-secondary/50 overflow-clip">
+      {groups.map(
+        (group, i) =>
+          i >= start && (
+            <TabsMenu
+              key={i}
+              options={group.options}
+              className={i > start ? 'border-t' : undefined}
+            />
+          ),
+      )}
     </div>
   );
 }
 
-function TabsMenu({ options }: { options: LayoutTab[] }) {
+function TabsMenu({ options, className }: { options: LayoutTab[]; className?: string }) {
   const t = useTranslations();
   const pathname = usePathname();
   const path = useTreePath();
@@ -191,7 +200,12 @@ function TabsMenu({ options }: { options: LayoutTab[] }) {
 
   return (
     <Menu.Root>
-      <Menu.Trigger className="flex w-full h-10 items-center gap-3 ps-[calc(--spacing(2.5)-1px)] pe-2.5 text-start font-medium outline-hidden transition-colors hover:bg-fd-accent focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-fd-ring data-popup-open:bg-fd-accent [&_svg]:size-4 [&_svg]:shrink-0">
+      <Menu.Trigger
+        className={cn(
+          'flex w-full h-10 items-center gap-3 ps-[calc(--spacing(2.5)-1px)] pe-2.5 text-start font-medium outline-hidden transition-colors hover:bg-fd-accent focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-fd-ring data-popup-open:bg-fd-accent [&_svg]:size-4 [&_svg]:shrink-0',
+          className,
+        )}
+      >
         {selected && <TabIcon tab={selected} />}
         <span className={cn('flex-1 truncate', !selected && 'text-fd-muted-foreground')}>
           {selected ? selected.title : t('Layout Tab', { note: 'layout tab trigger' })}
