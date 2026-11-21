@@ -1,3 +1,9 @@
+## @fumadocs/ai-chat@0.1.4
+
+### Focus indicators in forced colors mode
+
+- Focus indicators stay visible in Windows High Contrast and other forced colors modes.
+
 ## @fumadocs/ai-chat@0.1.3
 
 ### Accessible Ask AI button

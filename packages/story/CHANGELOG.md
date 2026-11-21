@@ -1,3 +1,14 @@
+## @fumadocs/story@1.5.5
+
+### Focus indicators in forced colors mode
+
+- Focus indicators stay visible in Windows High Contrast and other forced colors modes.
+
+### Fix borders next to Base UI triggers
+
+- Opening a sidebar tab menu in the Spacious layout no longer shifts its trigger content.
+- The "Show Property" row of playground and story fields no longer draws an extra bottom border.
+
 ## @fumadocs/story@1.5.4
 
 ### Stop TypeScript processes when idle

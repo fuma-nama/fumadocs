@@ -1,3 +1,26 @@
+## fumadocs-openapi@12.6.7
+
+### Fix playground crash on free-form JSON request bodies
+
+- The playground no longer crashes with free-form JSON request bodies.
+
+### API docs fixes
+
+- Titles generated from ids keep acronyms and mixed-case names whole, like `HTTPServer` to "HTTP Server" and `KSeF`.
+- With `includeDescription`, pages of a tag or a file keep the tag's or the document's description in their body.
+- OpenAPI: request bodies and responses of sequential media types with only an `itemSchema` (OpenAPI 3.2), like JSON Lines and Server-Sent Events, show their items' schema, examples and playground.
+- OpenAPI: the Scalar modal of `withScalar()` follows the site's light or dark mode.
+- OpenAPI: no more undici warning about the `patch` method on the server.
+
+### Focus indicators in forced colors mode
+
+- Focus indicators stay visible in Windows High Contrast and other forced colors modes.
+
+### Fix borders next to Base UI triggers
+
+- Opening a sidebar tab menu in the Spacious layout no longer shifts its trigger content.
+- The "Show Property" row of playground and story fields no longer draws an extra bottom border.
+
 ## fumadocs-openapi@12.6.6
 
 ### Support the HTTP QUERY method
