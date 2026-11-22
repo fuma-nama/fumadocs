@@ -10,7 +10,7 @@ import { useTranslations } from '@fuma-translate/react';
  * the default not found page content, please make your own if you want to customize it.
  */
 export function DefaultNotFound() {
-  const t = useTranslations({ note: '404 page' });
+  const t = useTranslations({ note: '404 not found page' });
 
   return (
     <div className="flex flex-col px-8 justify-center flex-1 text-center items-center gap-4">
