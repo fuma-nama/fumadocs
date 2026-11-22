@@ -57,15 +57,23 @@ export function registerSourceTools<C extends LoaderConfig>(
     async ({ url }) => {
       const loader = typeof source === 'function' ? await source() : source;
       // search results have the hash of a heading
-      const page = loader.getPageByUrl(url.replace(/[?#].*$/, ''));
-      if (!page)
+      const pathname = url.replace(/[?#].*$/, '');
+      const page = loader.getPageByUrl(pathname);
+      // `llms.txt` links the `.md` files of pages
+      const text = page
+        ? await llms.page(page)
+        : pathname.endsWith('.md')
+          ? await (await llms.serve(pathname))?.text()
+          : undefined;
+
+      if (text === undefined)
         return {
           content: [{ type: 'text', text: `page not found: ${url}` }],
           isError: true,
         };
 
       return {
-        content: [{ type: 'text', text: await llms.page(page) }],
+        content: [{ type: 'text', text }],
       };
     },
   );
