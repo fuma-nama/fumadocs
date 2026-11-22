@@ -14,6 +14,9 @@ import { registerSearchTool, registerSourceTools } from 'fumadocs-core/mcp';
 import { createFromSource } from 'fumadocs-core/search/server';
 import { docsLlms, ${ref} } from '@/lib/source';
 
+// shared by requests, the index is built on the first search
+const search = createFromSource(${ref});
+
 const handler = createMcpHandler(() => {
   const mcp = new McpServer(
     {
@@ -25,7 +28,7 @@ const handler = createMcpHandler(() => {
   );
 
   registerSourceTools(mcp, ${ref}, docsLlms);
-  registerSearchTool(mcp, createFromSource(${ref}));
+  registerSearchTool(mcp, search);
 
   return mcp;
 });

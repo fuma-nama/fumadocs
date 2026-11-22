@@ -46,6 +46,9 @@ export default defineConfig({
     exclude: ['search/client/docs-search'],
     customExports: {
       './server': {
+        // server runtimes that also match `browser` (Cloudflare Workers, Vercel Edge) need the real build
+        workerd: './dist/server.js',
+        'edge-light': './dist/server.js',
         browser: './dist/server.browser.js',
         import: './dist/server.js',
       },

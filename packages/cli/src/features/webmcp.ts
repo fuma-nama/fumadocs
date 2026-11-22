@@ -47,7 +47,7 @@ ${i18n ? '  const { locale } = useI18n();\n' : ''}
     const options = { signal: controller.signal };
     const client = ${isStatic ? 'staticClient' : 'fetchClient'}(${i18n ? '{ locale }' : ''});
 
-    void context.registerTool(
+    const tools: ModelContextTool<never>[] = [
       {
         name: 'search_docs',
         description: 'Search the docs, returns matching pages and headings with their URLs',
@@ -60,9 +60,6 @@ ${i18n ? '  const { locale } = useI18n();\n' : ''}
           return client.search(query);
         },
       },
-      options,
-    );
-    void context.registerTool(
       {
         name: 'read_page',
         description: 'Read a docs page as Markdown by its URL',
@@ -72,14 +69,12 @@ ${i18n ? '  const { locale } = useI18n();\n' : ''}
           required: ['url'],
         },
         async execute({ url }: { url: string }) {
-          const res = await fetch(\`${prefix}\${url}.md\`);
+          // search results have the hash of a heading
+          const res = await fetch(\`${prefix}\${url.replace(/[?#].*$/, '')}.md\`);
           if (!res.ok) throw new Error(\`page not found: \${url}\`);
           return res.text();
         },
       },
-      options,
-    );
-    void context.registerTool(
       {
         name: 'open_page',
         description: 'Navigate to a docs page by its URL',
@@ -93,8 +88,14 @@ ${i18n ? '  const { locale } = useI18n();\n' : ''}
           return \`opened \${url}\`;
         },
       },
-      options,
-    );
+    ];
+
+    for (const tool of tools) {
+      context.registerTool(tool, options).catch((error: unknown) => {
+        // the cleanup aborts pending registrations, like in Strict Mode
+        if (error !== controller.signal.reason) console.error(error);
+      });
+    }
 
     return () => controller.abort();
   }, [router${i18n ? ', locale' : ''}]);

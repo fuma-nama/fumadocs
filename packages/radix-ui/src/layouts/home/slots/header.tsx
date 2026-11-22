@@ -47,7 +47,7 @@ export function Header(props: ComponentProps<'header'>) {
     slots,
     props: { nav },
   } = useHomeLayout();
-  const t = useTranslations({ note: 'mobile menu' });
+  const t = useTranslations({ note: 'home layout header' });
   if (nav?.component) return nav.component;
 
   return (

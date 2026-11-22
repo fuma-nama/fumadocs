@@ -119,7 +119,7 @@ function pickTranslations(full: Record<string, string>, keys: Set<string>): Reco
 export function defineI18n<const Languages extends string>(
   config: I18nConfig<Languages>,
 ): I18nAPI<Languages> {
-  return {
+  const api: I18nAPI<Languages> = {
     ...config,
     translations() {
       const translations: Record<string, Record<string, string>> = {};
@@ -161,6 +161,9 @@ export function defineI18n<const Languages extends string>(
       } as TranslationsAPI<string> as never;
     },
   };
+
+  // hidden from RSC serialization: apps pass the config to client components, like the deprecated `i18n` prop of layouts
+  return Object.defineProperty(api, 'translations', { enumerable: false });
 }
 
 /** create translations API without i18n */

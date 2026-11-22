@@ -1,6 +1,6 @@
 {
   "name": "example-openapi",
-  "version": "0.0.78",
+  "version": "0.0.79",
   "private": true,
   "scripts": {
     "build": "next build",
