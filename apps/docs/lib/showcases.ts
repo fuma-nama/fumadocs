@@ -90,6 +90,11 @@ export const showcases: ShowcaseObject[] = [
     url: 'https://hotcodepush.com/docs',
   },
   {
+    image: '/showcases/soarstarter.webp',
+    name: 'SoarStarter',
+    url: 'https://soarstarter.com/docs/next',
+  },
+  {
     image: '/showcases/comfydeploy.png',
     name: 'ComfyDeploy',
     url: 'https://comfydeploy.com',
