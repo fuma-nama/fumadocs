@@ -30,15 +30,21 @@ export function Accordions({
   );
 
   useEffect(() => {
-    const id = getHash();
-    const element = rootRef.current;
-    if (!element || id.length === 0) return;
+    const openFromHash = () => {
+      const id = getHash();
+      const element = rootRef.current;
+      if (!element || id.length === 0) return;
 
-    const selected = document.getElementById(id);
-    if (!selected || !element.contains(selected)) return;
-    const value = selected.getAttribute('data-accordion-value');
+      const selected = document.getElementById(id);
+      if (!selected || !element.contains(selected)) return;
+      const value = selected.getAttribute('data-accordion-value');
 
-    if (value) setValue((prev) => (typeof prev === 'string' ? value : [value, ...prev]));
+      if (value) setValue((prev) => (typeof prev === 'string' ? value : [value]));
+    };
+
+    openFromHash();
+    window.addEventListener('hashchange', openFromHash);
+    return () => window.removeEventListener('hashchange', openFromHash);
   }, []);
 
   return (
