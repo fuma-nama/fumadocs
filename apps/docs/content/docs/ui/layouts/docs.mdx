@@ -7,6 +7,12 @@ import { docs } from './layouts.story';
 
 The layout of documentation pages, it includes a sidebar and **mobile-only** navbar/header.
 
+<Callout title="Mount it on documentation routes only">
+  `DocsLayout` reserves the sidebar column and sizes the page content to the space that is left, so a page that is
+  not part of the docs tree ends up in a narrow column on small screens even when the sidebar is collapsed. Use
+  [Home Layout](/docs/ui/layouts/home-layout) for landing pages and any other non-docs route.
+</Callout>
+
 <docs.WithControl />
 
 <Customization />
