@@ -1,6 +1,6 @@
 ---
 title: 頁面 Slug 與頁面樹
-description: 自訂系統產生的頁面 slug 與頁面樹。
+description: 自訂產生的頁面 slug 與頁面樹。
 ---
 
 > 本指南僅適用於使用 `loader()` API 的內容來源，例如 **Fumadocs MDX**。
@@ -10,7 +10,7 @@ description: 自訂系統產生的頁面 slug 與頁面樹。
 Fumadocs 會透過 [`loader()`](/docs/headless/source-api) 從您的內容目錄產生**頁面 slug** 與**頁面樹** (側邊欄項目) ，
 路由功能則交由您的 React 框架處理。
 
-您可以用類似檔案系統路由的方式定義資料夾與頁面。
+您可以採用類似檔案系統路由的方式來定義資料夾與頁面。
 
 <Files>
   <Folder name="content/docs（內容目錄）" defaultOpen>
@@ -20,7 +20,7 @@ Fumadocs 會透過 [`loader()`](/docs/headless/source-api) 從您的內容目錄
   </Folder>
 </Files>
 
-若要進一步自訂輸出結果，可以使用[載入器外掛](/docs/headless/source-api/plugins)。
+若要進一步自訂輸出結果，您可以使用[載入器外掛](/docs/headless/source-api/plugins)。
 
 ## 檔案 [#file]
 
@@ -36,23 +36,23 @@ icon: House
 ## Learn More
 ```
 
-Fumadocs 會讀取以下屬性來建構頁面樹。
+Fumadocs 會根據下列屬性建構頁面樹。
 
 | 名稱            | 說明                   |
 | ------------- | -------------------- |
 | `title`       | 頁面標題                 |
-| `description` | 頁面說明                 |
+| `description` | 頁面描述                 |
 | `icon`        | 圖示名稱，請參閱[圖示](#icons) |
 
 <Callout title="小提示">
   頁面資訊由內容來源 (例如 **Fumadocs MDX**) 提供。
 
-  在 Fumadocs MDX 中，您可以透過 [`schema`](/docs/mdx/collections#schema-1) 選項自訂 frontmatter schema。
+  在 Fumadocs MDX 中，您可以指定 [`schema`](/docs/mdx/collections#schema-1) 選項來自訂 frontmatter schema。
 </Callout>
 
 ### Slugs [#slugs]
 
-頁面的 slugs 是根據其檔案路徑產生的。
+頁面的 slugs 是依據其檔案路徑產生的。
 
 | 路徑 (相對於內容資料夾)     | slugs             |
 | ----------------- | ----------------- |
@@ -61,12 +61,15 @@ Fumadocs 會讀取以下屬性來建構頁面樹。
 
 ## 資料夾 [#folder]
 
-資料夾用來組織多個頁面，您可以建立 [Meta 檔案](#meta) 來自訂資料夾。
+將多個頁面放在同一個資料夾中即可將它們分組，也可以建立 [meta 檔案](#meta) 來自訂該資料夾。
+
+若資料夾中只有 `index` 一個頁面，且沒有 meta 檔案，該資料夾在頁面樹中會成為一個頁面項目。
+例如，`guide/index.mdx` 在側邊欄中的呈現方式與 `guide.mdx` 相同。
 
 ### 資料夾群組 [#folder-group]
 
 根據預設，將檔案放入資料夾會改變其 slugs。
-若不想影響子檔案的 slugs，可以用括號包住資料夾名稱。
+您可以用括號包住資料夾名稱，避免影響子檔案的 slugs。
 
 | 路徑 (相對於內容資料夾)             | slugs      |
 | ------------------------- | ---------- |
@@ -74,7 +77,7 @@ Fumadocs 會讀取以下屬性來建構頁面樹。
 
 ### 根資料夾 [#root-folder]
 
-將資料夾標記為根資料夾，僅顯示目前開啟的根資料夾中的項目。
+將資料夾標記為根資料夾後，只會顯示目前開啟的根資料夾中的項目。
 
 ```json title="meta.json"
 {
@@ -84,7 +87,7 @@ Fumadocs 會讀取以下屬性來建構頁面樹。
 }
 ```
 
-例如，當您開啟根資料夾 `framework` 時，其他資料夾 (例如 `headless`) 就不會顯示在側邊欄和其他導覽元素中。
+例如，當您開啟根資料夾 `framework` 時，其他資料夾 (例如 `headless`) 不會顯示在側邊欄及其他導覽元素中。
 
 <Files>
   <Folder name="framework" defaultOpen>
@@ -95,7 +98,7 @@ Fumadocs 會讀取以下屬性來建構頁面樹。
     <File name="other-pages.mdx" />
   </Folder>
 
-  <Folder name="headless (hidden)" className="opacity-50" disabled defaultOpen>
+  <Folder name="headless（隱藏）" className="opacity-50" disabled defaultOpen>
     <File name="my-page.mdx" />
   </Folder>
 </Files>
@@ -107,7 +110,7 @@ Fumadocs 會讀取以下屬性來建構頁面樹。
 ### 根類型 [#root-type]
 
 `root` 也可以接受字串，用來指定根資料夾的**類型**：
-在同一個上層範圍內，相同類型的根資料夾可以互相切換，例如同一份文件的不同版本。
+在同一個父層範圍下，類型相同的根資料夾可以互相切換，例如同一份文件的不同版本。
 
 <Files>
   <Folder name="v1" defaultOpen>
@@ -143,15 +146,15 @@ Fumadocs 會讀取以下屬性來建構頁面樹。
 
 `root: true` 其實就是預設類型，會以頁籤形式顯示。
 
-切換到同類型的另一個根資料夾時，頁面會對應到其**結構投影**，也就是相對於根資料夾位於相同路徑的頁面：
+切換到同一類型的另一個根資料夾時，頁面會對應到其**結構投影**，也就是相對於根資料夾位於相同路徑的頁面：
 
-| 頁面                    | 在 `v2` 中的投影                     |
-| --------------------- | ------------------------------- |
-| `v1/guide.mdx`        | `v2/guide.mdx`                  |
-| `v1/python/guide.mdx` | `v2/python/guide.mdx`，巢狀根資料夾會保留 |
+| 頁面                    | 在 `v2` 中的投影                       |
+| --------------------- | --------------------------------- |
+| `v1/guide.mdx`        | `v2/guide.mdx`                    |
+| `v1/python/guide.mdx` | `v2/python/guide.mdx`，巢狀根資料夾會保留下來 |
 
 <Callout title="Fumadocs UI">
-  Fumadocs UI 會為目前頁面路徑上的每個根資料夾算繪一個[下拉選單](/docs/ui/layouts/docs#tabs-groups)，用來在同類型的根資料夾之間切換。完整範例請參閱[版本管理](/docs/navigation#versioning)。
+  Fumadocs UI 會為目前頁面路徑上的每個根資料夾算繪一個[下拉選單](/docs/ui/layouts/docs#tabs-groups)，用來在同類型的根資料夾之間切換。完整範例請參閱[版本控制](/docs/navigation#versioning)。
 </Callout>
 
 ## Meta [#meta]
@@ -176,7 +179,7 @@ export default {
 };
 ```
 
-若您的內容來源支援，也可以用程式碼撰寫 meta 檔案 (`meta.ts` 或 `meta.js`) ，並將資料設為預設匯出 (default export) 。
+若您的內容來源支援，您可以用程式碼撰寫 meta 檔案 (`meta.ts` 或 `meta.js`) ，並以預設匯出 (default export) 提供資料。
 
 | 名稱            | 說明                      |
 | ------------- | ----------------------- |
@@ -184,12 +187,12 @@ export default {
 | `icon`        | 圖示名稱，請參閱[圖示](#icons)    |
 | `defaultOpen` | 預設展開資料夾                 |
 | `collapsible` | 資料夾內容是否可收合 (預設：`true`)  |
-| `pages`       | 資料夾項目 (詳見下文)            |
-| `pagesIndex`  | 索引項目 (詳見下文)             |
+| `pages`       | 資料夾項目 (見下文)             |
+| `pagesIndex`  | 索引項目 (見下文)              |
 
-### 頁面 [#pages]
+### Pages [#pages]
 
-資料夾中的項目預設依字母順序排序，您可以使用 `pages` 新增項目或調整項目順序。
+資料夾中的項目預設會依字母順序排列，您可以透過 `pages` 新增項目或控制項目順序。
 
 ```json title="meta.json"
 {
@@ -197,17 +200,17 @@ export default {
 }
 ```
 
-> 指定此欄位後，只有列在 `pages` 中的項目才會被納入。
+> 指定後，只有列在 `pages` 中的項目才會被納入。
 
-| 類型         | 語法                                                                 | 說明                                               |
-| ---------- | ------------------------------------------------------------------ | ------------------------------------------------ |
-| **路徑**     | `./path/to/page`                                                   | 指向頁面或資料夾的路徑。                                     |
-| **分隔項目**   | `---Label---`<br />`---[Icon]Label---`                             | 兩個區段之間的分隔符 (支援圖示) 。                              |
-| **連結**     | `[Text](url)`<br />`[Icon][Text](url)`<br />`external:[Text](url)` | 插入連結 (支援圖示) <br />加上 `external:` 前綴即可將連結標記為外部連結。 |
-| **其餘項目**   | `...`                                                              | 納入其餘頁面 (依字母順序排序) 。                               |
-| **反向其餘項目** | `z...a`                                                            | 反向排序的**其餘項目**。                                   |
-| **展開**     | `...folder`                                                        | 展開資料夾中的項目。                                       |
-| **排除**     | `!item`                                                            | 從 `...` 或 `z...a` 中排除某個項目。                       |
+| 類型       | 語法                                                                 | 說明                                               |
+| -------- | ------------------------------------------------------------------ | ------------------------------------------------ |
+| **路徑**   | `./path/to/page`                                                   | 指向頁面或資料夾的路徑。                                     |
+| **分隔項目** | `---Label---`<br />`---[Icon]Label---`                             | 兩個區段之間的分隔符 (支援圖示) 。                              |
+| **連結**   | `[Text](url)`<br />`[Icon][Text](url)`<br />`external:[Text](url)` | 插入連結 (支援圖示) <br />加上 `external:` 前綴即可將連結標示為外部連結。 |
+| **其餘**   | `...`                                                              | 納入其餘頁面 (依字母順序排序) 。                               |
+| **反向其餘** | `z...a`                                                            | 反向排序的**其餘**項目。                                   |
+| **展開**   | `...folder`                                                        | 展開資料夾中的項目。                                       |
+| **排除**   | `!item`                                                            | 從 `...` 或 `z...a` 中排除某個項目。                       |
 
 ```json title="meta.json"
 {
@@ -226,20 +229,20 @@ export default {
 
 <Callout type="warn" title="不可有重複的 URL">
   同一個頁面 URL 在整個頁面樹中只能出現一次。
-  基於相同原因，頁面項目也不得重複。
+  基於同樣的理由，也不允許有重複的頁面項目。
 
-  這是刻意的設計，讓 Fumadocs 能夠僅依據目前的 pathname 找出作用中的樹狀項目。
+  這是刻意的設計，讓 Fumadocs 能夠單憑目前的路徑名稱找出作用中的樹狀項目。
 </Callout>
 
 ### 資料夾索引 [#folder-index]
 
-當資料夾擁有索引項目時，該資料夾即可點擊，點擊後會跳轉至索引項目。
+當資料夾擁有索引項目時，該資料夾即可點擊，點擊後會跳轉至該索引項目。
 
-預設情況下，索引項目是各資料夾中的 `index` 檔案。您也可以自行指定資料夾的索引項目，支援 **路徑** 與 **連結** 兩種類型。
+預設情況下，索引項目為各資料夾下的 `index` 檔案。您也可以自行指定資料夾的索引項目，可使用 **路徑** 或 **連結**。
 
 ```json tab="meta.json (Path)"
 {
-  // 假設該資料夾下有 "overview.mdx" 檔案
+  // 假設該資料夾下有一個 "overview.mdx" 檔案
   "pagesIndex": "overview"
 }
 ```
@@ -252,13 +255,13 @@ export default {
 
 ## 圖示 [#icons]
 
-由於 Fumadocs 並未內建圖示函式庫，您必須在執行階段將圖示名稱轉換為 JSX 元素，再以元件的形式算繪。
+由於 Fumadocs 並未內建圖示函式庫，您需要在執行階段將圖示名稱轉換為 JSX 元素，再以元件形式算繪。
 
-您可以為 `loader()` 加入 [`icon` 處理器](/docs/headless/source-api#icons)。
+您可以為 `loader()` 加入 [`icon` 處理函式](/docs/headless/source-api#icons)。
 
 ## i18n 路由 [#i18n-routing]
 
-您可以為 i18n 路由定義不同的風格。
+您可以為 i18n 路由定義不同的路由樣式。
 
 ```ts title="lib/i18n.ts"
 import type { I18nConfig } from 'fumadocs-core/i18n';
@@ -291,7 +294,7 @@ export const i18n: I18nConfig = {
   </Tab>
 
   <Tab>
-    所有內容檔案皆依語言分別放在各自的資料夾中：
+    所有內容檔案皆依語言分組，放在各自的資料夾中：
 
     <Files>
       <Folder name="content/docs" defaultOpen>
@@ -313,7 +316,7 @@ export const i18n: I18nConfig = {
 
 ## 路徑參數 [#path-params]
 
-系統會依參數的每個值，各產生一個名為 `[name]` 的資料夾。請在該資料夾的 meta 檔案中，於 `staticParams` 列出這些值：
+系統會為參數的每個值各產生一個名為 `[name]` 的資料夾。請在該資料夾的 meta 檔案中，於 `staticParams` 列出這些值：
 
 <Files>
   <Folder name="content/docs" defaultOpen>
@@ -336,9 +339,9 @@ export const i18n: I18nConfig = {
 | -------------------------- | ------------------------------------------- |
 | `./[framework]/deploy.mdx` | `['waku', 'deploy']`, `['astro', 'deploy']` |
 
-meta 檔案會套用到每個產生的資料夾。頁面會以 [props](/docs/markdown#props) 的形式接收其參數，也可以透過 `loader()` 回傳的 `page.params` 取得。
+meta 檔案會套用到每個產生的資料夾。頁面會以 [props](/docs/markdown#props) 的形式接收其參數，也可以透過 `loader()` 的 `page.params` 取得。
 
-在 `meta.ts` 中，您也可以改為匯出一個以參數為輸入的函式，並將 `staticParams` 作為具名匯出：
+在 `meta.ts` 中，您也可以改為匯出一個接收參數的函式，並以具名匯出的方式提供 `staticParams`：
 
 ```ts title="[framework]/meta.ts"
 const names = { waku: 'Waku', astro: 'Astro' };
@@ -351,12 +354,12 @@ export default ({ framework }: { framework: keyof typeof names }) => ({
 ```
 
 <Callout title="小提示">
-  若沒有任何地方列出 `[name]` 資料夾的值，它就會維持為一般資料夾。
+  若沒有任何地方列出 `[name]` 資料夾的值，它就只會是一般的資料夾。
 </Callout>
 
 ### 頁面參數 [#page-params]
 
-頁面也可以在 frontmatter 中列出 `staticParams`。若所屬資料夾也有列出，則只會針對兩者共有的值產生該頁面。
+頁面也可以在 frontmatter 中列出 `staticParams`。若所在資料夾也有列出，該頁面只會針對兩者共有的值產生。
 
 ```mdx title="[framework]/fumadocs-mdx.mdx"
 ---
@@ -368,11 +371,11 @@ staticParams:
 
 ### 靜態路徑 [#static-paths]
 
-位於固定路徑的檔案，優先順序高於動態產生的檔案。例如，`astro/deploy.mdx` 會取代 `[framework]/deploy.mdx` 所產生的 `astro` 頁面。meta 檔案也適用相同規則。
+位於固定路徑的檔案，優先順序高於自動產生的檔案。例如，`astro/deploy.mdx` 會取代 `[framework]/deploy.mdx` 所產生的 `astro` 頁面。meta 檔案也適用相同規則。
 
 ### 在地化頁面 [#localized-pages]
 
-啟用 [i18n](#i18n-routing) 時，語系本身的檔案會優先於其備用語系的檔案。以 `/cn/docs/astro/deploy` 為例，會依序採用第一個存在的檔案：
+使用 [i18n](#i18n-routing) 時，語系的檔案會優先於其備用語系的檔案。以 `/cn/docs/astro/deploy` 為例，系統會使用下列順序中第一個存在的檔案：
 
 1. `astro/deploy.cn.mdx`
 2. `[framework]/deploy.cn.mdx`
