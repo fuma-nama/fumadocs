@@ -711,6 +711,35 @@ test('Loader: No duplicate pages when a folder takes a listed page as index', ()
   `);
 });
 
+test('Loader: a folder without meta file holding only its index page is a page', () => {
+  const result = loader({
+    baseUrl: '/',
+    source: {
+      files: [
+        {
+          type: 'meta',
+          path: 'meta.json',
+          data: { pages: ['changelog/index', '...guide', '...'] },
+        },
+        { type: 'page', path: 'intro.mdx', data: { title: 'Intro' } },
+        { type: 'page', path: 'guide/index.mdx', data: { title: 'Guide' } },
+        // listed by the parent, leaving the folder empty
+        { type: 'page', path: 'changelog/index.mdx', data: { title: 'Changelog' } },
+        // a meta file keeps the folder
+        { type: 'meta', path: 'api/meta.json', data: { title: 'API' } },
+        { type: 'page', path: 'api/index.mdx', data: { title: 'API' } },
+      ],
+    },
+  });
+
+  expect(result.pageTree.children).toMatchObject([
+    { type: 'page', url: '/changelog' },
+    { type: 'page', url: '/guide' },
+    { type: 'page', url: '/intro' },
+    { type: 'folder', index: { url: '/api' } },
+  ]);
+});
+
 test('Internationalized Routing: fallback page tree keeps the locale', () => {
   const result = loader({
     baseUrl: '/docs',

@@ -176,9 +176,9 @@ export function createPageTreeBuilder(
     return entry;
   }
 
-  function buildFolder(path: string, isGlobalRoot = false): Entry<PageTree.Folder> | undefined {
+  function buildFolder(path: string, isGlobalRoot = false): Entry | undefined {
     const cached = entries.get(path);
-    if (cached) return cached as Entry<PageTree.Folder>;
+    if (cached) return cached;
     const files = storage.readDir(path);
     if (!files) return;
 
@@ -237,7 +237,8 @@ export function createPageTreeBuilder(
       if (item.startsWith('...')) {
         const folder = buildFolder(joinPath(path, item.slice(3)));
         if (!folder) continue;
-        const { index, children } = folder.node;
+        const { index, children } =
+          folder.node.type === 'folder' ? folder.node : { index: folder.node, children: [] };
         const owned = own(self, folder, 2);
         if (owned) excluded.add(folder.path);
 
@@ -274,6 +275,18 @@ export function createPageTreeBuilder(
       // it may be taken by another folder while building this folder
       const entry = entryOf.get(item);
       if (!entry || entry.owner === self) node.children.push(item);
+    }
+
+    // without a meta file, a folder with only its index page is that page, like `guide.mdx`,
+    // and an empty one isn't shown
+    if (!metaPath && !isGlobalRoot && node.children.length === 0) {
+      entries.delete(path);
+      if (!indexPage || !node.index) return;
+      indexPage.owner = undefined;
+      // so the parent's `...` skips this folder once the page is listed
+      indexPage.path = path;
+      entries.set(path, indexPage);
+      return indexPage;
     }
 
     node.icon = meta.icon ?? node.index?.icon;
@@ -347,7 +360,8 @@ export function createPageTreeBuilder(
   }
 
   function root(id = 'root', path = ''): PageTree.Root {
-    const folder = buildFolder(path, true)?.node;
+    const entry = buildFolder(path, true);
+    const folder = entry?.node.type === 'folder' ? entry.node : undefined;
     if (options.noRef) for (const { node } of entries.values()) delete node.$ref;
 
     let out: PageTree.Root = {

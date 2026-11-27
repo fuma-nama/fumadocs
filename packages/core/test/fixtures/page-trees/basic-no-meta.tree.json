@@ -4,22 +4,16 @@
   "name": "Docs",
   "children": [
     {
+      "$id": "hello/index.mdx",
+      "type": "page",
+      "name": "Hello",
+      "url": "/hello"
+    },
+    {
       "$id": "test.mdx",
       "type": "page",
       "name": "Hello",
       "url": "/test"
-    },
-    {
-      "type": "folder",
-      "name": "Hello",
-      "children": [],
-      "$id": "hello",
-      "index": {
-        "$id": "hello/index.mdx",
-        "type": "page",
-        "name": "Hello",
-        "url": "/hello"
-      }
     }
   ]
 }

@@ -4,6 +4,12 @@
   "name": "Docs",
   "children": [
     {
+      "$id": "hello/index.mdx",
+      "type": "page",
+      "name": "Another hello page",
+      "url": "/hello/index"
+    },
+    {
       "$id": "test.mdx",
       "type": "page",
       "name": "Hello",
@@ -21,18 +27,6 @@
         }
       ],
       "$id": "(nested)"
-    },
-    {
-      "type": "folder",
-      "name": "Another hello page",
-      "children": [],
-      "$id": "hello",
-      "index": {
-        "$id": "hello/index.mdx",
-        "type": "page",
-        "name": "Another hello page",
-        "url": "/hello/index"
-      }
     },
     {
       "type": "folder",
