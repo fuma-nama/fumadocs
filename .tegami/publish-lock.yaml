@@ -1,6 +1,12 @@
 core:changelogs:
-  - content: "---\npackages:\n  fumadocs-core:\n    type: patch\n  \"@fumadocs/cli\":\n    type: patch\n  fumadocs-ui:\n    type: patch\n---\n\n### Agent tools and i18n fixes\n\n- MCP `get_page` accepts the `.md` paths linked by `llms.txt`.\n- `defineI18n()` output can be passed from Server Components to client components again.\n- `zhCN()` and other language presets translate the 404 page and mobile menu label of Radix UI layouts.\n- CLI: the MCP route builds its search index once, not on every search.\n- CLI: the WebMCP `read_page` tool reads search results with a heading hash, and Strict Mode no longer logs unhandled `AbortError`s.\n"
-    filename: 2026-11-22-agent-tools-i18n.md
+  - content: "---\npackages:\n  \"@fumadocs/base-ui\":\n    type: patch\n---\n\n### Fix the Spacious sidebar tab menu radius\n\n- The sidebar tab menu of the Spacious layout now has corners that match its items.\n"
+    filename: 2026-11-23-spacious-tabs-menu-radius.md
+    v: 0.0.0
+  - content: "---\npackages:\n  fumadocs-ui:\n    type: patch\n  \"@fumadocs/base-ui\":\n    type: patch\n---\n\n### Open accordions on hash change\n\n- `Accordions` open the item whose `id` matches the URL hash when the hash changes, not only on page load.\n"
+    filename: 2026-11-25-accordion-hash-change.md
+    v: 0.0.0
+  - content: "---\npackages:\n  fumadocs-core:\n    type: minor\n---\n\n### Folders without a meta file\n\n- Refactored the page tree: a folder without a meta file and with `index` as its only page becomes a page item, sorted with the other pages.\n- A folder without a meta file no longer appears as an empty folder item when other meta files list all of its pages.\n"
+    filename: 2026-11-27-index-only-folders.md
     v: 0.0.0
 core:packages:
   - id: npm:@fumadocs/ai-chat
@@ -9,27 +15,28 @@ core:packages:
     updated: false
   - id: npm:@fumadocs/asyncapi
     updated: false
-  - id: npm:@fumadocs/changelog
-    updated: false
+  - changelogIds:
+      - 2026-11-23-spacious-tabs-menu-radius.md
+      - 2026-11-25-accordion-hash-change.md
+    id: npm:@fumadocs/base-ui
+    updated: true
   - id: npm:@fumadocs/basehub
     updated: false
-  - id: npm:@fumadocs/base-ui
-    updated: true
-  - changelogIds:
-      - 2026-11-22-agent-tools-i18n.md
-    id: npm:@fumadocs/cli
-    updated: true
+  - id: npm:@fumadocs/changelog
+    updated: false
+  - id: npm:@fumadocs/cli
+    updated: false
   - id: npm:@fumadocs/content
     updated: false
   - id: npm:@fumadocs/content-collections
     updated: false
-  - id: npm:create-fumadocs-versions
+  - changelogIds:
+      - 2026-11-27-index-only-folders.md
+    id: npm:fumadocs-core
     updated: true
   - id: npm:create-fumadocs-app
     updated: true
-  - changelogIds:
-      - 2026-11-22-agent-tools-i18n.md
-    id: npm:fumadocs-core
+  - id: npm:create-fumadocs-versions
     updated: true
   - id: npm:fumadocs-docgen
     updated: false
@@ -39,15 +46,15 @@ core:packages:
     updated: false
   - id: npm:@fumari/image-size
     updated: false
-  - id: npm:@fumadocs/language
-    updated: false
   - id: npm:@fumadocs/json-schema
+    updated: false
+  - id: npm:@fumadocs/language
     updated: false
   - id: npm:@fumadocs/local-content
     updated: false
-  - id: npm:@fumadocs/local-md
-    updated: false
   - id: npm:@fumadocs/local-html
+    updated: false
+  - id: npm:@fumadocs/local-md
     updated: false
   - id: npm:fumadocs-mdx
     updated: false
@@ -61,16 +68,16 @@ core:packages:
     updated: false
   - id: npm:@fumadocs/openapi-standalone
     updated: false
-  - id: npm:fumadocs-python
-    updated: false
   - id: npm:fumadocs-preview
     updated: false
-  - id: npm:@fumadocs/sanity
+  - id: npm:fumadocs-python
     updated: false
   - changelogIds:
-      - 2026-11-22-agent-tools-i18n.md
+      - 2026-11-25-accordion-hash-change.md
     id: npm:fumadocs-ui
     updated: true
+  - id: npm:@fumadocs/sanity
+    updated: false
   - id: npm:@fumadocs/satteri
     updated: false
   - id: npm:@fumadocs/shadcn
@@ -83,9 +90,9 @@ core:packages:
     updated: false
   - id: npm:@fumadocs/tailwind
     updated: false
-  - id: npm:fumadocs-twoslash
-    updated: false
   - id: npm:fumadocs-typescript
+    updated: false
+  - id: npm:fumadocs-twoslash
     updated: false
   - id: npm:@fumadocs/vite
     updated: false
@@ -93,42 +100,42 @@ npm:packages:
   - id: npm:@fumadocs/ai-chat
   - id: npm:@fumadocs/astro
   - id: npm:@fumadocs/asyncapi
-  - id: npm:@fumadocs/changelog
-  - id: npm:@fumadocs/basehub
   - id: npm:@fumadocs/base-ui
+  - id: npm:@fumadocs/basehub
+  - id: npm:@fumadocs/changelog
   - id: npm:@fumadocs/cli
   - id: npm:@fumadocs/content
   - id: npm:@fumadocs/content-collections
-  - id: npm:create-fumadocs-versions
-  - id: npm:create-fumadocs-app
   - id: npm:fumadocs-core
+  - id: npm:create-fumadocs-app
+  - id: npm:create-fumadocs-versions
   - id: npm:fumadocs-docgen
   - id: npm:fumadocs-epub
   - id: npm:@fumadocs/graphql
   - id: npm:@fumari/image-size
-  - id: npm:@fumadocs/language
   - id: npm:@fumadocs/json-schema
+  - id: npm:@fumadocs/language
   - id: npm:@fumadocs/local-content
-  - id: npm:@fumadocs/local-md
   - id: npm:@fumadocs/local-html
+  - id: npm:@fumadocs/local-md
   - id: npm:fumadocs-mdx
   - id: npm:@fumadocs/mdx-remote
   - id: npm:@fumadocs/notion
   - id: npm:fumadocs-obsidian
   - id: npm:fumadocs-openapi
   - id: npm:@fumadocs/openapi-standalone
-  - id: npm:fumadocs-python
   - id: npm:fumadocs-preview
-  - id: npm:@fumadocs/sanity
+  - id: npm:fumadocs-python
   - id: npm:fumadocs-ui
+  - id: npm:@fumadocs/sanity
   - id: npm:@fumadocs/satteri
   - id: npm:@fumadocs/shadcn
   - id: npm:shared-api
   - id: npm:@fumari/stf
   - id: npm:@fumadocs/story
   - id: npm:@fumadocs/tailwind
-  - id: npm:fumadocs-twoslash
   - id: npm:fumadocs-typescript
+  - id: npm:fumadocs-twoslash
   - id: npm:@fumadocs/vite
   - id: npm:docs
   - id: npm:example-astro
@@ -141,25 +148,25 @@ npm:packages:
   - id: npm:example-i18n
   - id: npm:example-marble-cms
   - id: npm:example-next
-  - id: npm:example-next-min
   - id: npm:example-next-local-html
   - id: npm:example-next-local-md
+  - id: npm:example-next-min
   - id: npm:example-next-shadcn
-  - id: npm:example-obsidian
   - id: npm:example-next-static
-  - id: npm:example-python
+  - id: npm:example-obsidian
   - id: npm:example-openapi
+  - id: npm:example-python
   - id: npm:example-react-router
   - id: npm:example-react-router-i18n
   - id: npm:example-react-router-min
   - id: npm:example-react-router-rsc
-  - id: npm:example-tanstack-start
   - id: npm:example-react-router-spa
+  - id: npm:example-tanstack-start
   - id: npm:example-tanstack-start-i18n
   - id: npm:example-tanstack-start-local-md
   - id: npm:example-tanstack-start-min
   - id: npm:example-tanstack-start-openapi
+  - id: npm:example-tanstack-start-spa
   - id: npm:example-tanstack-start-story
   - id: npm:example-waku
   - id: npm:example-waku-i18n
-  - id: npm:example-tanstack-start-spa

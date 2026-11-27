@@ -1,3 +1,13 @@
+## @fumadocs/base-ui@16.20.0
+
+### Fix the Spacious sidebar tab menu radius
+
+- The sidebar tab menu of the Spacious layout now has corners that match its items.
+
+### Open accordions on hash change
+
+- `Accordions` open the item whose `id` matches the URL hash when the hash changes, not only on page load.
+
 ## @fumadocs/base-ui@16.19.6
 
 ### Focus indicators in forced colors mode
