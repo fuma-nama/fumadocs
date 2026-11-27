@@ -1,3 +1,9 @@
+## fumadocs-ui@16.20.0
+
+### Open accordions on hash change
+
+- `Accordions` open the item whose `id` matches the URL hash when the hash changes, not only on page load.
+
 ## fumadocs-ui@16.19.7
 
 ### Agent tools and i18n fixes
